@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include "adlib.h"
 
+#if 0
 #undef inportb
 
 WORD AdlibPort = ADLIBPORT;
@@ -394,3 +395,7 @@ int DetectBlaster(WORD *port, BYTE *irq, BYTE *dma, BYTE *type)
     }
     return 1;
 }
+#endif
+
+void DeinitAdlib(void) {}
+

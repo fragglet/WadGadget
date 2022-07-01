@@ -53,6 +53,12 @@ extern unsigned char InstrSindDa;
 #include "adlib.h"
 #include "musplay.h"
 
+BYTE   *score;
+BYTE   *instruments;
+volatile BYTE  *MUSdata;
+
+#if 0
+
 /*
 #define VERSION	   "1.50"
 #define COPYRIGHT  "MUS File Player  Version "VERSION"  (c) 1994 QA-Software"
@@ -115,14 +121,10 @@ WORD far *timerstack = NULL;
 WORD far *timerstackend = NULL;
 volatile WORD far *timersavestack = NULL;
 volatile DWORD	MUStime;
-volatile BYTE  *MUSdata;
 volatile DWORD	MUSticks;
 volatile WORD	playingAtOnce = 0;
 volatile WORD	playingPeak = 0;
 volatile WORD	playingChannels = 0;
-
-BYTE   *score;
-BYTE   *instruments;
 
 /* Command-line parameters */
 char   *musname = NULL;
@@ -730,3 +732,10 @@ int PlayMUSFile(void)
     }
     return 0;
 }
+
+#endif
+
+int PlayMUSFile(void) { return 0; }
+int ShutdownTimer(void) { return 0; }
+int readINS(FILE *fm) { return 0; }
+

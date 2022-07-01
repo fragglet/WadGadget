@@ -14,6 +14,7 @@
 unsigned int BASE=0x220;        /* I/O-Basisadresse                              */
 
 
+#if 0
 byte far *zgr;
 unsigned int counter,fehler=0;
 
@@ -116,4 +117,11 @@ int direkt_soundausgabe(void far *anf_adr,unsigned int Laenge,unsigned int freq)
    schreib_dsp(0x0D3);                   /* Speaker aus                 */
    if (fehler) { return(fehler); }
    return 0;
+}
+
+#endif
+
+int direkt_soundausgabe(void /*far*/ *anf_adr,unsigned int Laenge,
+                        unsigned int freq) {
+	return 0;
 }
