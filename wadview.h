@@ -14,8 +14,8 @@
 
 
 typedef struct {
-  unsigned long RStart;
-  unsigned long RLength;
+  unsigned int RStart;
+  unsigned int RLength;
   char RName[9];
   unsigned char Mark;
 } Entr;
@@ -111,13 +111,13 @@ extern int PEntries;
 
 extern Entr *E,*Entry,*PEntry,*PE;
 
-extern unsigned long Entries;
-extern unsigned long PDirPos;
+extern unsigned int Entries;
+extern unsigned int PDirPos;
 
 extern FILE *f,*fa,*fb, *fc, *ff;
 
 extern char *Puffer;
-extern unsigned long DirPos;
+extern unsigned int DirPos;
 
 
 extern char DatName1[13];

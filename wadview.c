@@ -47,9 +47,9 @@ pcxheader Pcxkopf;
 char DatName1[13];
 
 char id[5]={32,32,32,32,0};
-unsigned long Entries;
-unsigned long DirPos;
-unsigned long PDirPos;
+unsigned int Entries;
+unsigned int DirPos;
+unsigned int PDirPos;
 unsigned int PNames=0;
 
 
@@ -248,17 +248,11 @@ unsigned int CTRL=4,ALT=8;
 
 int main(int argc,char *argv[])
 {
-  int i=0,i2;
+  int i, i2;
   long l;
 /*  long l1; */
 /*  unsigned char Taste,a,b,c,ro,gr,bl; */
   unsigned int Seg,Off;
-
-  f=fopen(argv[0],"rb"); if (f==0) i=1;
-  if (!i) {
-    l=filelength(fileno(f)); fclose(f);
-	 if (l!=63489) i=1;
-  }
 
   E=(Entr *)calloc(3500,sizeof(Entr));
   if (E==NULL) Ende(3);
@@ -272,11 +266,6 @@ int main(int argc,char *argv[])
   if (OldScr==NULL) { free(PE); free(E); Ende(3); }
   OS=OldScr;
 
-  if (!i) {
-    printf("ð Ahrrg! EXE changed! Program terminated.\n");
-    free(Datai); free(OldScr); free(PE); free(E); Ende(4);
-  }
-
   memset(ClearPal,0,768);
   TexOutFile[0]=0;
   PWadName[0]=0;
@@ -286,12 +275,18 @@ int main(int argc,char *argv[])
   if (fa==0) {
     Setuppen=1;
   } else {
-    _read(fileno(fa),&GExport,1); _read(fileno(fa),&SExport,1);
-    _read(fileno(fa),&TExport,1); _read(fileno(fa),&SB,1);
-    _read(fileno(fa),&SP,1); _read(fileno(fa),&WinPal,1);
-    _read(fileno(fa),&PutIn1,1); _read(fileno(fa),&Sort,1);
-    _read(fileno(fa),&HGR,1); _read(fileno(fa),&SBAdr,1);
-    _read(fileno(fa),&WhichPal,1); fclose(fa);
+    fread(&GExport, 1, 1, fa);
+    fread(&SExport, 1, 1, fa);
+    fread(&TExport, 1, 1, fa);
+    fread(&SB, 1, 1, fa);
+    fread(&SP, 1, 1, fa);
+    fread(&WinPal, 1, 1, fa);
+    fread(&PutIn1, 1, 1, fa);
+    fread(&Sort, 1, 1, fa);
+    fread(&HGR, 1, 1, fa);
+    fread(&SBAdr, 1, 1, fa);
+    fread(&WhichPal, 1, 1, fa);
+    fclose(fa);
     if (!SBAdr) BASE=0x220; else BASE=0x240;
   }
   if (WinPal==1) {
@@ -426,8 +421,8 @@ int main(int argc,char *argv[])
 		if (strcmp("-file",argv[i])==0) { /* LOAD ALTERNATE WAD */
 	if (strlen(argv[i+1])>4) {
 	  i=OpenFile(argv[i+1]); if (i==0) { printf("ð Error reading input file.\n"); Ende(0); }
-	  if (strnicmp(argv[i+1],"DOOM1",5)==0) ShareDoom=1;
-	  if (strnicmp(argv[i+1],"HERETIC1",8)==0) ShareDoom=1;
+	  if (strncasecmp(argv[i+1],"DOOM1",5)==0) ShareDoom=1;
+	  if (strncasecmp(argv[i+1],"HERETIC1",8)==0) ShareDoom=1;
 	  Alternate=1; ReadPNames=1; OpenWADFile(); Batch=0;
 	  break;
 	} else printf("ð Invalid input file.\n");
@@ -445,8 +440,6 @@ int main(int argc,char *argv[])
     printf(" e-mail: denis@doomsday.shnet.org\n");
     Ende(0);
   }
-
-  Restore=1; memcpy(OldScr,MK_FP(0xb800,0),4000);
 
   if (!Alternate) {
     i=OpenFile("DOOM2.WAD");
@@ -541,11 +534,11 @@ void MainSchleife(void)
     if (Taste==71) { Pos=0; CPos=2; Display(); }
     if (Taste==13) {
       if (!EdPName) {
-	if (strnicmp(Entry->RName,"TEXT",4)==0) {
+	if (strncasecmp(Entry->RName,"TEXT",4)==0) {
 	  Ente=1; strcpy(TexRName,Entry->RName);
 	  AltPos=Pos; AltCPos=CPos; SuchStr[0]=0; SPos=0; Patches(); Pos=AltPos; CPos=AltCPos;
 	}
-	if (strnicmp(Entry->RName,"PNAMES",6)==0) {
+	if (strncasecmp(Entry->RName,"PNAMES",6)==0) {
 	  Ente=1; AltPos=Pos; AltCPos=CPos; SuchStr[0]=0; SPos=0; EditPNames(); Pos=AltPos; CPos=AltCPos;
 	}
       }
@@ -596,7 +589,7 @@ void MainSchleife(void)
 	 if ( (Taste==20 || Taste==116 || Taste==84) && Bios&ALT) {  /* Alt-T - Textures */
       AltPos=Pos; AltCPos=CPos; Entry=E;
       for (Ente=0,i=0;i<Entries;i++) {
-	if (strnicmp(Entry->RName,"TEXT",4)==0) { Ente=1; break; }
+	if (strncasecmp(Entry->RName,"TEXT",4)==0) { Ente=1; break; }
 	Entry++;
       }
       if (!Ente) {
@@ -611,7 +604,7 @@ void MainSchleife(void)
 	 if ( (Taste==25 || Taste==112 || Taste==80) && Bios&ALT) {  /* Alt-P - PNames */
       AltPos=Pos; AltCPos=CPos; Entry=E;
       for (Ente=0,i=0;i<Entries;i++) {
-	if (strnicmp(Entry->RName,"PNAMES",6)==0) { Ente=1; break; }
+	if (strncasecmp(Entry->RName,"PNAMES",6)==0) { Ente=1; break; }
 	Entry++;
       }
       if (!Ente) {
@@ -757,8 +750,10 @@ void EditResource(void)
   Print(30,12,5,15,"X-Offset:             Y-Offset:");
 
   l=Entry->RStart; fseek(f,l,0);
-  _read(fileno(f),&Rx,2); _read(fileno(f),&Ry,2); /* Breite, Laenge */
-  _read(fileno(f),&Ox,2); _read(fileno(f),&Oy,2); /* Offset x,y */
+  fread(&Rx, 2, 1, f);
+  fread(&Ry, 2, 1, f); /* Breite, Laenge */
+  fread(&Ox, 2, 1, f);
+  fread(&Oy, 2, 1, f); /* Offset x,y */
 
   NewX=Rx; NewY=Ry; NOx=Ox; NOy=Oy;
 
@@ -776,8 +771,10 @@ void EditResource(void)
   itoa(NOy,DateiName1,10); i=Eingabe1(61,12,5,0); if (i<0) goto AusAus;
   NOy=atoi(DateiName1);
   l=Entry->RStart; fseek(f,l,0);
-  _write(fileno(f),&NewX,2); _write(fileno(f),&NewY,2); /* Breite, Laenge */
-  _write(fileno(f),&NOx,2); _write(fileno(f),&NOy,2); /* Offset x,y */
+  fwrite(&NewX, 2, 1, f);
+  fwrite(&NewY, 2, 1, f); /* Breite, Laenge */
+  fwrite(&NOx, 2, 1, f);
+  fwrite(&NOy, 2, 1, f); /* Offset x,y */
 AusAus:
   CWeg();
   if ( (NewX<=0 || NewY<=0) && i>=0 ) Error(20);
@@ -798,7 +795,7 @@ void InsertResource(void)
   i=Eingabe1(39,11,5,0); CWeg(); if (i<0) { ScreenAufbau(); Display(); return; }
   Entry=E;
   for (i=0;i<Entries;i++) {
-	 if (stricmp(DateiName1,Entry->RName)==0) { i=9999; break; }
+	 if (strcasecmp(DateiName1,Entry->RName)==0) { i=9999; break; }
     Entry++;
   }
   if (i==9999) Error(17);             /* Warning - name already exists */
@@ -823,15 +820,15 @@ void InsertResource(void)
     Box(2);
     Print(35,11,5,15,"Directory is not the last entry.");
     Print(38,12,0,15,"Correcting, please wait...");
-    DirPos=l2; fseek(f,8,0); _write(fileno(f),&DirPos,4);
+    DirPos=l2; fseek(f,8,0); fwrite(&DirPos, 4, 1, f);
   }
   Entries++;
-  fseek(f,4,0); _write(fileno(f),&Entries,4); fseek(f,DirPos,0);
+  fseek(f,4,0); fwrite(&Entries, 4, 1, f); fseek(f,DirPos,0);
   Entry=E;
   for (i=0;i<Entries;i++) {
-    ll=Entry->RStart; _write(fileno(f),&ll,4);
-    ll=Entry->RLength; _write(fileno(f),&ll,4);
-    _write(fileno(f),Entry->RName,8);
+    ll=Entry->RStart; fwrite(&ll, 4, 1, f);
+    ll=Entry->RLength; fwrite(&ll, 4, 1, f);
+    fwrite(Entry->RName, 1, 8, f);
     Entry++;
   }
   fflush(f);
@@ -852,7 +849,7 @@ void RenameResource(void)
   i=Eingabe1(39,11,5,0); CWeg(); if (i<0) { ScreenAufbau(); Display(); return; }
   Entry=E;
   for (i=0;i<Entries;i++) {
-	 if (stricmp(DateiName1,Entry->RName)==0) { i=9999; break; }
+	 if (strcasecmp(DateiName1,Entry->RName)==0) { i=9999; break; }
     Entry++;
   }
   if (i==9999) Error(17);
@@ -861,9 +858,9 @@ void RenameResource(void)
   fseek(f,DirPos,0);
   Entry=E;
   for (i=0;i<Entries;i++) {
-    ll=Entry->RStart; _write(fileno(f),&ll,4);
-    ll=Entry->RLength; _write(fileno(f),&ll,4);
-    _write(fileno(f),Entry->RName,8);
+    ll=Entry->RStart; fwrite(&ll, 1, 4, f);
+    ll=Entry->RLength; fwrite(&ll, 1, 4, f);
+    fwrite(Entry->RName, 1, 8, f);
     Entry++;
   }
   fflush(f);
@@ -878,7 +875,7 @@ void CheckForShare(void)
   if ( (l>=4207819 && l<=4274218) || (l>=5100000 && l<=5200000) ) {
 	 Entry=E;
 	 for (i=0;i<Entries;i++) {
-		if (strnicmp("E2M1",Entry->RName,4)==0) { i=9999; break; }
+		if (strncasecmp("E2M1",Entry->RName,4)==0) { i=9999; break; }
 		Entry++;
 	 }
   }
@@ -887,51 +884,56 @@ void CheckForShare(void)
 
 void OpenWADFile(void)
 {
-  int i,k;
-  long l,ll;
+  int i;
+  unsigned short k;
+  unsigned int l,ll;
 
   getftime(fileno(f),&FDatum);
-  _read(fileno(f),&id,4);
-  _read(fileno(f),&Entries,4);
-  _read(fileno(f),&DirPos,4);
+  fread(&id, 4, 1, f);
+  fread(&Entries, 4, 1, f);
+  fread(&DirPos, 4, 1, f);
 
   if (!LoadIntern) printf("ð Reading %ld entries...\n",Entries);
 
   fseek(f,DirPos,0); Entry=E; Marked=0; NWTisda=0;
+  Entry = E;
   for (l=0;l<Entries;l++) {
-    _read(fileno(f),&ll,4); Entry->RStart=ll;
-    _read(fileno(f),&ll,4); Entry->RLength=ll;
-    _read(fileno(f),Entry->RName,8);
+    fread(&ll,4, 1, f); Entry->RStart=ll;
+    fread(&ll,4, 1, f); Entry->RLength=ll;
+    fread(Entry->RName, 1, 8, f);
     Entry->RName[8]=0; Entry->Mark=0;
+printf("%8s\t%d\t%x\n", Entry->RName, Entry->RLength, Entry->RStart);
     Entry++;
   }
   if (ReadPNames) {
     Entry=E;
     for (i=0,l=0;l<Entries;l++) {
-      if (strnicmp("PNAMES",Entry->RName,6)==0) { i=1; break; }
+      if (strncasecmp("PNAMES",Entry->RName,6)==0) { i=1; break; }
       Entry++;
     }
   }
   if (!i) ReadPNames=0;
   if (ReadPNames) {
     l=Entry->RStart; fseek(f,l,0);
-    _read(fileno(f),&k,2); PNames=k; _read(fileno(f),&i,2);
+    fread(&k, 2, 1, f);
+    PNames=k;
+    fread(&k, 2, 1, f);
     if (!LoadIntern) printf("ð Reading %d pnames...\n",PNames);
     for (i=0;i<k;i++) {
-      _read(fileno(f),&PName[i].Name,8);
+      fread(&PName[i].Name, 1, 8, f);
       PName[i].Name[8]=0;
     }
     for (i=0;i<PNames;i++) {
       Entry=E+Entries-1;
       for (l=Entries-1,k=Entries-1;l>=0;l--,k--) {
-	if (stricmp(PName[i].Name,Entry->RName)==0) { PName[i].Num=k; break; }
+	if (strcasecmp(PName[i].Name,Entry->RName)==0) { PName[i].Num=k; break; }
 	Entry--;
       }
     }
   }
   Entry=E+Entries-1;
   for (l=Entries-1;l>=0;l--) {
-    if (strnicmp(Entry->RName,"NWT",3)==0) { NWTisda=1; break; }
+    if (strncasecmp(Entry->RName,"NWT",3)==0) { NWTisda=1; break; }
     Entry--;
   }
   CheckForShare();
@@ -996,9 +998,9 @@ void DeleteResource(void)
   Entry=E; k=(int)Entries;
   for (i=0;i<k;i++) {
     if (Entry->Mark==0) {
-      ll=Entry->RStart; _write(fileno(f),&ll,4);
-      ll=Entry->RLength; _write(fileno(f),&ll,4);
-      _write(fileno(f),Entry->RName,8);
+      ll=Entry->RStart; fwrite(&ll,4, 1, f);
+      ll=Entry->RLength; fwrite(&ll,4, 1, f);
+      fwrite(Entry->RName, 1, 8, f);
     } else {
       Entries--; i2++;
     }
@@ -1394,7 +1396,7 @@ void DisplayInfo(void)
     }
     ViewAble=1;
     for (i=2;i<31;i++) {
-      if (strnicmp(Sigs[i],Entry->RName,strlen(Sigs[i]))==0) {
+      if (strncasecmp(Sigs[i],Entry->RName,strlen(Sigs[i]))==0) {
         if (i==10 && l>60000) break;
 	Print(55,8,0,7,SigNames[i]);
 	break;
@@ -1403,11 +1405,11 @@ void DisplayInfo(void)
 	 return;
   }
   for (i=0;i<2;i++) {
-	 if (strnicmp(Sigs[i],Entry->RName,2)==0 && Rx==0 && Ry==l-4) {
+	 if (strncasecmp(Sigs[i],Entry->RName,2)==0 && Rx==0 && Ry==l-4) {
       Print(27,8,0,7,"Speaker Sound Resource         ");
 		return;
     }
-	 if (strnicmp(Sigs[i],Entry->RName,2)==0) {
+	 if (strncasecmp(Sigs[i],Entry->RName,2)==0) {
 		Print(27,8,0,7,"Sound Resource                 ");
 		PlayAble=1; return;
     }
@@ -1416,12 +1418,12 @@ void DisplayInfo(void)
     Print(27,8,0,7,"Sound Resource                 ");
 	 PlayAble=1; return;
   }
-  if (strnicmp("D_",Entry->RName,2)==0 ||
-      strnicmp("MUS",Entry->RName,3)==0) {
+  if (strncasecmp("D_",Entry->RName,2)==0 ||
+      strncasecmp("MUS",Entry->RName,3)==0) {
     Print(27,8,0,7,"Music Resource (MUS)           ");
 	 MUSFile=1; return;
   }
-  if (strnicmp("DEMO",Entry->RName,4)==0) {
+  if (strncasecmp("DEMO",Entry->RName,4)==0) {
     l=Entry->RStart; fseek(f,l,0);
 	 _read(fileno(f),&a,1); a=(unsigned char)a-100; if (a<0) a=0;  /* version */
     if (a>10) { a=4; l=ftell(f); l--; fseek(f,l,0); }
@@ -1436,8 +1438,8 @@ void DisplayInfo(void)
     gotoxy(40,9); printf("%d Skill %d, E%dM%d, Time: %d:%d,%dm",(int)a,(int)b,(int)c,(int)d,(int)min,(int)sec,(int)hsec);
 	 gotoxy(2,2); return;
   }
-  if (strnicmp("END",Entry->RName,3)==0 ||
-      strnicmp("LOADING",Entry->RName,6)==0) {
+  if (strncasecmp("END",Entry->RName,3)==0 ||
+      strncasecmp("LOADING",Entry->RName,6)==0) {
     Print(27,8,0,7,"Text mode screen");
 	 IsEndoom=1; return;
   }
@@ -1450,7 +1452,7 @@ void Suchen(void)
   int i;
   Entry=E;
   for (i=0;i<Entries;i++) {
-    if (strnicmp(SuchStr,Entry->RName,SPos)==0) {
+    if (strncasecmp(SuchStr,Entry->RName,SPos)==0) {
       Pos=i-10; CPos=12; if (Pos<0 || Entries<22) { CPos=i+2; Pos=0; break; }
 		if (Pos>Entries-22) { Pos=Entries-22; CPos=Entries-i; CPos=24-CPos; }
       break;
@@ -1464,7 +1466,7 @@ void PNameSuchen(void)
 {
   int i;
   for (i=0;i<PNames;i++) {
-	 if (strnicmp(SuchStr,PName[i].Name,SPos)==0) {
+	 if (strncasecmp(SuchStr,PName[i].Name,SPos)==0) {
 		Pos=i-10; CPos=12; if (Pos<0) { CPos=i+2; Pos=0; }
 		if (Pos>PNames-22) { Pos=PNames-22; CPos=24-(PNames-i); }
 		break;
