@@ -12,7 +12,6 @@
 
 
 #include "addclean.h"
-#include "dsp_rout.h"
 #include "impexp.h"
 #include "patches.h"
 #include "pnames.h"
@@ -212,12 +211,12 @@ char Endung[7][5]={".GIF",".PCX",".WAV",".VOC",".WAD",".RAW",".TXT"};
 
 char Setups[10][60]={
 " ³ Primary graphic format: [ ] GIF  [ ] PCX           ³ "," ³ Primary sound format:   [ ] WAV  [ ] VOC           ³ "," ³ Primary texture format: [ ] WAD  [ ] RAW  [ ] TXT  ³ ",
-" ³ Sound output device:    [ ] SB   [ ] SP   [ ] None ³ "," ³ Window & real palette:  [ ] NO   [ ] YES           ³ "," ³ Put marked to ONE PWad: [ ] NO   [ ] YES           ³ ",
-" ³ Directory sort:         [ ] NAME [ ] DATE          ³ "," ³ Marking color:          [ ] BLUE [ ] RED           ³ "," ³ SB Base Adress:         [ ] 220h [ ] 240h          ³ ",
+" ³ Window & real palette:  [ ] NO   [ ] YES           ³ "," ³ Put marked to ONE PWad: [ ] NO   [ ] YES           ³ ",
+" ³ Directory sort:         [ ] NAME [ ] DATE          ³ "," ³ Marking color:          [ ] BLUE [ ] RED           ³ ",
 " ³ Palette choice:         [ ] DOOM [ ] HERETIC       ³ "};
 
-char GExport=1,SExport=2,TExport=1,Setuppen=0,SB=0,SP=0,WinPal=1,PutIn1=2;
-char Sort=1,SBAdr=0,InstrSindDa=1,WhichPal=0;
+char GExport=1,SExport=2,TExport=1,Setuppen=0,WinPal=1,PutIn1=2;
+char Sort=1,InstrSindDa=1,WhichPal=0;
 char Restore=0,Batch=0,ReadPNames=1,LoadIntern=0,Alternate=0,LevelData=0;
 
 FILE *f,*g,*fa,*fb,*fc;
@@ -268,19 +267,19 @@ int main(int argc,char *argv[])
   if (fa==0) {
     Setuppen=1;
   } else {
+    char x;
     fread(&GExport, 1, 1, fa);
     fread(&SExport, 1, 1, fa);
     fread(&TExport, 1, 1, fa);
-    fread(&SB, 1, 1, fa);
-    fread(&SP, 1, 1, fa);
+    fread(&x, 1, 1, fa);
+    fread(&x, 1, 1, fa);
     fread(&WinPal, 1, 1, fa);
     fread(&PutIn1, 1, 1, fa);
     fread(&Sort, 1, 1, fa);
     fread(&HGR, 1, 1, fa);
-    fread(&SBAdr, 1, 1, fa);
+    fread(&x, 1, 1, fa);
     fread(&WhichPal, 1, 1, fa);
     fclose(fa);
-    if (!SBAdr) BASE=0x220; else BASE=0x240;
   }
   if (WinPal==1) {
     DoomPal[741]=0; DoomPal[742]=0; DoomPal[743]=0;
@@ -521,7 +520,6 @@ void MainSchleife(void)
       if (!Ente) {
 	if (!ViewAble && !PlayAble && !MUSFile && !IsEndoom) Error(1);
 	if (ViewAble) GetPic();
-	if (PlayAble && (SB || SP)) PlayResource();
 	if (IsEndoom) DisplayEndoom();
       }
       Display(); Ente=0;
@@ -1047,41 +1045,30 @@ void Setup(void)
 		if (i==6) if (PutIn1==1) PutIn1=2; else PutIn1=1;
 		if (i==7) if (Sort==1) Sort=2; else Sort=1;
 		if (i==8) if (HGR==1) HGR=4; else HGR=1;
-      if (i==9) if (SBAdr==0) SBAdr=1; else SBAdr=0;
       if (i==10) if (WhichPal==0) WhichPal=1; else WhichPal=0;
     }
     if (Taste==75 && i>=3 && i<=4 && k>1) k--;
     if (Taste==77 && i>=3 && i<=4 && k<3) k++;
-    if ( (Taste==75 || Taste==77) && i==4) {
-      SB=0; SP=0;
-      if (k==1) SB=1;
-      if (k==2) SP=1;
-    }
     if ( (Taste==75 || Taste==77) && i==3) TExport=k;
     if (Taste==72 && i>1) {
       i--; k=0;
       if (i==3) k=TExport;
-      if (i==4 && SB==1) k=1;
-      if (i==4 && SP==1) k=2;
-      if (i==4 && !SB && !SP) k=3;
     }
     if (Taste==80 && i<10) {
       i++; k=0;
       if (i==3) k=TExport;
-      if (i==4 && SB==1) k=1;
-      if (i==4 && SP==1) k=2;
-      if (i==4 && !SB && !SP) k=3;
     }
     if (Taste==13) {
       fa=fopen("NWT.CFG","wb+");
       if (fa==0) {
 	Error(3);
       } else {
+        char x = 0;
 	_write(fileno(fa),&GExport,1); _write(fileno(fa),&SExport,1);
-	_write(fileno(fa),&TExport,1); _write(fileno(fa),&SB,1);
-	_write(fileno(fa),&SP,1); _write(fileno(fa),&WinPal,1);
+	_write(fileno(fa),&TExport,1); _write(fileno(fa),&x,1);
+	_write(fileno(fa),&x,1); _write(fileno(fa),&WinPal,1);
 	_write(fileno(fa),&PutIn1,1); _write(fileno(fa),&Sort,1);
-	_write(fileno(fa),&HGR,1); _write(fileno(fa),&SBAdr,1);
+	_write(fileno(fa),&HGR,1); _write(fileno(fa),&x,1);
 	_write(fileno(fa),&WhichPal,1); fclose(fa);
       }
       break;
@@ -1105,11 +1092,6 @@ void DisplaySetup(int i)
   if (TExport==1) Print(41,12,5,0,"X");
   if (TExport==2) Print(50,12,5,0,"X");
   if (TExport==3) Print(59,12,5,0,"X");
-  if (SB) Print(41,13,5,0,"X");
-  if (SP) Print(50,13,5,0,"X");
-  if (!SB && !SP) Print(59,13,5,0,"X");
-  if (!SBAdr) Print(41,18,5,0,"X");
-  if (SBAdr) Print(50,18,5,0,"X");
   if (i==1) Print(16,10,5,0,"Primary graphic format:");
   if (i==2) Print(16,11,5,0,"Primary sound format:");
   if (i==3) Print(16,12,5,0,"Primary texture format:");
@@ -1118,9 +1100,7 @@ void DisplaySetup(int i)
   if (i==6) Print(16,15,5,0,"Put marked to ONE PWad:");
   if (i==7) Print(16,16,5,0,"Directory sort:");
   if (i==8) Print(16,17,5,0,"Marking color:");
-  if (i==9) Print(16,18,5,0,"SB Base Adress:");
   if (i==10) Print(16,19,5,0,"Palette choice:");
-  if (!SBAdr) BASE=0x220; else BASE=0x240;
   if (WinPal==1) {
     DoomPal[741]=0; DoomPal[742]=0; DoomPal[743]=0;
     HereticPal[741]=0; HereticPal[742]=0; HereticPal[743]=0;
@@ -1128,30 +1108,6 @@ void DisplaySetup(int i)
 	 DoomPal[741]=0; DoomPal[742]=63; DoomPal[743]=63;
 	 HereticPal[741]=0; HereticPal[742]=63; HereticPal[743]=63;
   }
-}
-
-void PlayResource(void)
-{
-  int i,freq;
-/*  unsigned int samples,k,sam; */
-  unsigned int samples,k;
-  long l,l3;
-
-  Box(2);
-  Print(39,11,5,15,"Playing sound resource...");
-  Print(41,12,5,0,"Hit a key to abort...");
-  l=Entry->RStart;
-  fseek(f,l,0); _read(fileno(f),&i,2);
-  _read(fileno(f),&freq,2); _read(fileno(f),&samples,2);
-  _read(fileno(f),&i,2); freq=(int)(200-1000000/freq);
-  if (SB) {
-    for (l3=0,k=0;k<samples;l3++,k++) { i=fgetc(f); pokeb(B1Seg,B1Off+k,i); }
-    for (i=0;i<100;i++,k++) pokeb(B1Seg,B1Off+k,127);
-    i=direkt_soundausgabe(MK_FP(B1Seg,B1Off),samples,freq);
-    if (i==1) Error(5);
-    if (i==2) Error(6);
-  }
-  ScreenAufbau(); Display();
 }
 
 void Choose64(void)

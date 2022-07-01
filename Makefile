@@ -1,8 +1,7 @@
 CFLAGS = -Wall -Wno-unused-function -Itmpincl -g
 
 OBJS = wadview.o prints.o impexp.o setpal.o gifpcx.o pnames.o \
-       addclean.o filepart.o texture.o patch.o sg.o \
-       dsp_rout.o
+       addclean.o filepart.o texture.o patch.o sg.o
 
 all: rwt
 
