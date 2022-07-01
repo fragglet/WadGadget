@@ -56,9 +56,9 @@ static int  startbits,          /* Starting code size - 1               */
             dcolors,            /* Number of colors in global color map */
             codebits;           /* Current LZW code size                */
 
-static int  log2(register U16);
+static int  my_log2(U16);
 static void init_bitstream(void);
-static void encode_a_value(register U16);
+static void encode_a_value(U16);
 static void init_tables(void);
 
 static U16 masks[] = {
@@ -96,7 +96,7 @@ int create_gif( int swidth,     /* Global screen width                  */
     if (gcolors > 0) header[10] = 0x80; /* Global color map flag        */
     else header[10] = 0x00;
 
-    gcmapbits = log2(gcolors);
+    gcmapbits = my_log2(gcolors);
     dcolors = 1 << gcmapbits;
     if (gcolors <= 2) ++gcmapbits;
     header[10] |= (gcmapbits - 1);      /* Color table size             */
@@ -115,7 +115,7 @@ int create_gif( int swidth,     /* Global screen width                  */
                 v = (v & 0x7FFF) << 1;
             } while (v);
         }
-        crez = log2(nbits);
+        crez = my_log2(nbits);
     }
     header[10] |= ((crez - 1) << 4);
 
@@ -148,7 +148,7 @@ int put_image(  int iwidth,     /* Image width                          */
                 U8 *lcmap )     /* "     "     "   entries              */
 {
     int rval, intpass;
-    register int hashentry;
+    unsigned int hashentry;
     U16 i, y, ydot, xdot, color, colors;
     U8 header[11], cmask;
     static U16 hashcode;
@@ -179,7 +179,7 @@ int put_image(  int iwidth,     /* Image width                          */
         colors = dcolors;
     } else {
         header[9] |= 0x80;
-        startbits = log2(lcolors);
+        startbits = my_log2(lcolors);
         colors = 1 << startbits;
         if (lcolors <= 2) ++startbits;
     }
@@ -270,7 +270,6 @@ writeerr:               /* This monstrosity assures that all pointers   */
     rval = -3;          /* allocated at the start of the function are   */
 nowriteerr:             /* freed in the proper order, even if an error  */
                         /* occurs at some point.                        */
-memerr1:
     free(strlocn);
 memerr2:
     free(strings);
@@ -288,7 +287,7 @@ int close_gif(void)
     return gifopen = 0;
 }
 
-static int log2(register U16 val)
+static int my_log2(U16 val)
 {
     if (--val & 0x80) return 8;
     if (val & 0x40) return 7;
@@ -321,9 +320,9 @@ static void init_tables(void)
     return;
 }
 
-static void encode_a_value(register U16 code)
+static void encode_a_value(U16 code)
 {
-    register U16 icode;
+    U16 icode;
     U8 *bp;
     U16 i;
 

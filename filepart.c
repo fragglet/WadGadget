@@ -11,7 +11,7 @@ extern int Dateien,AltPos,Pos,AltCPos,CPos,SPos;
 extern char WildCard[],DatName1[],SuchStr[],Sort;
 
 
-int SortIt(const void *D1, const void *D2)
+int SortIt(Datdings *D1, Datdings *D2)
 {
   if (Sort==1)
 	 return(strcmp(((Datdings *)D1)->FileName,((Datdings *)D2)->FileName));

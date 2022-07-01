@@ -3,6 +3,7 @@
 #include <io.h>
 #include <stdio.h>
 #include <string.h>
+#include <dos.h>
 
 #include "pnames.h"
 #include "prints.h"

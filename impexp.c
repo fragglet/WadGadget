@@ -1,6 +1,7 @@
 /* IMPEXP.C */
 
 #include <io.h>
+#include <conio.h>
 #include <dos.h>
 #include <stdio.h>
 #include <stdlib.h>
