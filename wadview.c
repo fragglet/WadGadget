@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <bios.h>
 #include <time.h>
-#include <sys\stat.h>
+#include <sys/stat.h>
 
 
 #include "addclean.h"
