@@ -1,4 +1,8 @@
 
+struct ftime {};
+#define S_IREAD 0
+#define S_IWRITE 0
+
 static int  _read(int h, void *b, unsigned l) { return 0; }
 static int  _write(int h, const void *b, unsigned l) { return 0; }
 static int  chmod(const char *p, int m) { return 0; }

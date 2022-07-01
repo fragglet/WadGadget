@@ -19,8 +19,8 @@ BYTE highbyte(WORD adresse);
 BYTE lies_dsp(void);
 void schreib_dsp(BYTE wert);
 void init_dsp(void);
-void interrupt neu_int8(__CPPARGS);
-int direkt_soundausgabe(void far *anf_adr,unsigned int Laenge,unsigned int freq);
+//void interrupt neu_int8(__CPPARGS);
+int direkt_soundausgabe(void /*far*/ *anf_adr,unsigned int Laenge,unsigned int freq);
 
 
 #endif

@@ -10,7 +10,6 @@
 #define WRITE_ERROR -2
 #define OPEN_ERROR -3
 #define CREATE_ERROR -4
-#define NULL   0L
 #define MAX_CODES   4095
 
 
@@ -63,7 +62,7 @@ typedef struct _PcxKopf {
   int l,t,r,b,x,y;
   char p[48],d,a;
   int e;
-};
+} _PcxKopf;
 
 typedef struct {
   char id[6];

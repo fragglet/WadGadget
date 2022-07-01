@@ -20,7 +20,7 @@ BYTE *delayTicks(BYTE *data, DWORD *delaytime);
 void playMusic(void);
 void CMOSwrite(BYTE reg, BYTE value);
 int CMOSread(BYTE reg);
-void interrupt newint70h_handler(void);
+//void interrupt newint70h_handler(void);
 int SetupTimer(void);
 int ShutdownTimer(void);
 void playMUS(void);
