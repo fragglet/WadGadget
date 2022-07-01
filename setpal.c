@@ -17,14 +17,17 @@ extern char DateiName1[],DatName1[], DateiName2[];
 
 void CWeg(void)
 {
+/*
   asm mov ah,2
   asm mov dh,1
   asm mov dl,1
   asm int 10h
+*/
 }
 
 void SetPal(unsigned int _Seg,unsigned int _Off)
 {
+/*
   asm mov ax,_Seg
   asm mov es,ax
 
@@ -35,6 +38,7 @@ void SetPal(unsigned int _Seg,unsigned int _Off)
 
   asm mov dx,_Off
   asm int 10h
+*/
 }
 
 void TextAusgabe(int x,int y,unsigned char _f, char *str)
@@ -44,23 +48,28 @@ void TextAusgabe(int x,int y,unsigned char _f, char *str)
   gotoxy(x,y);
   for (i=0;i<strlen(str);i++) {
 	 k=str[i];
+/*
     asm mov ah,14
     asm mov al,k
     asm mov bl,_f
     asm int 10h
+*/
   }
 }
 
 void Mode3(void)
 {
+/*
   asm mov ah,0
   asm mov al,3
   asm int 10h
+*/
 }
 
 void SwitchMode(int i)
 {
 /*  unsigned int _Seg,_Off,k; */
+/*
   unsigned int _Seg,_Off;
 
   if (i==1) {
@@ -94,6 +103,7 @@ void SwitchMode(int i)
     asm mov dx,_Off
     asm int 10h
   }
+*/
 }
 
 void DoomPalette(void)
@@ -107,6 +117,7 @@ void DoomPalette(void)
     _Off=FP_OFF(HereticPal);
   }
 
+/*
   asm mov ah,10h
   asm mov al,12h
   asm mov bx,0
@@ -114,10 +125,12 @@ void DoomPalette(void)
   asm mov es,_Seg
   asm mov dx,_Off
   asm int 10h
+*/
 }
 
 void Move(unsigned int _Seg1,unsigned int _Off1,unsigned int _Seg2,unsigned int _Off2,unsigned int Laenge)
 {
+/*
   asm   push cx
   asm   push ds
   asm   push es
@@ -143,6 +156,7 @@ void Move(unsigned int _Seg1,unsigned int _Off1,unsigned int _Seg2,unsigned int 
   asm   pop es
   asm   pop ds
   asm   pop cx
+*/
 }
 
 int Eingabe1(int x,int y,int h,int v)
