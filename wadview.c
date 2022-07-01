@@ -12,10 +12,8 @@
 
 
 #include "addclean.h"
-#include "adlib.h"
 #include "dsp_rout.h"
 #include "impexp.h"
-#include "musplay.h"
 #include "patches.h"
 #include "pnames.h"
 #include "prints.h"
@@ -24,11 +22,6 @@
 #include "wadview.h"
 
 
-
-extern volatile unsigned char *MUSdata;
-extern volatile unsigned long MUStime;
-extern unsigned char *score;
-extern unsigned char *instruments;
 
 int bad_code_count;
 
@@ -300,14 +293,6 @@ int main(int argc,char *argv[])
   printf("ð NWT v1.3 (c) by TiC 1/95 ð NewWadTool for Doom, Doom II & Heretic ð\n");
   Oldx=wherex(); Oldy=wherey();
 
-  fa = fopen("GENMIDI.OP2", "rb");
-  if (fa==NULL) InstrSindDa=0;  else {
-    if (readINS(fa)) {
-      fclose(fa); InstrSindDa=0;
-    }
-    fclose(fa);
-  }
-
   if (argc>1) {
     ReadPNames=0; Batch=1;
     for (i=1;i<argc;i++) {
@@ -505,15 +490,6 @@ void MainSchleife(void)
   if (!EdPName) GetSpeicher();
   for(;;) {
     if (Entries==0) break;
-    if (MUSisPlaying) {
-      Print(77,1,1,15+128,"\x0d");
-      if (!MUSdata) {
-	ShutdownTimer();
-	DeinitAdlib();
-	MUSisPlaying=0; Print(77,1,1,15," ");
-	free(score); /* free(instruments); */
-      }
-    }
     Taste=0; Bios=0;
     Taste=getch(); Bios=bioskey(2);
 /*    gotoxy(1,1); printf("Taste:%d Bios:%3d ",Taste,Bios); */
@@ -546,7 +522,6 @@ void MainSchleife(void)
 	if (!ViewAble && !PlayAble && !MUSFile && !IsEndoom) Error(1);
 	if (ViewAble) GetPic();
 	if (PlayAble && (SB || SP)) PlayResource();
-	if (MUSFile) PlayMUS();
 	if (IsEndoom) DisplayEndoom();
       }
       Display(); Ente=0;
@@ -951,39 +926,6 @@ void DosShell(void)
   Mode3(); Print(0,0,0,15,"ð NWT v1.3 DOS Shell, type EXIT to return..."); printf("\n\n");
   system("");
   GetSpeicher(); SwitchMode(0); ScreenAufbau(); Display();
-}
-
-void PlayMUS(void)
-{
-  int i;
-  long l,l2,l3;
-
-  if (MUSisPlaying) {
-    ShutdownTimer();
-    DeinitAdlib();
-    MUSisPlaying=0;
-    free(score); /* free(instruments); */
-  }
-
-  l=Entry->RStart; l2=Entry->RLength;
-  fa=fopen("NWT.TMP","wb+"); if (fa==NULL) { Error(3); return; }
-  fseek(f,l,0);
-  for (l3=l2;;) {
-    if (l3>=32000) {
-      _read(fileno(f),Puffer,32000); _write(fileno(fa),Puffer,32000); l3-=32000;
-    } else {
-      _read(fileno(f),Puffer,(int)l3); _write(fileno(fa),Puffer,(int)l3); break;
-    }
-  }
-  fflush(fa); fclose(fa);
-  Box(2);
-  Print(36,11,5,15,"Now playing MUS-sound-resource.");
-  Print(30,12,5,15,"SPACE = background playing       ESC = stop");
-  i=PlayMUSFile();
-  if (i==4) { Error(14); return; }
-  if (i==5 || i==6) { Error(15); return; }
-  if (i==7 || i==8) { Error(16); return; }
-  ScreenAufbau(); Display();
 }
 
 void DeleteResource(void)
@@ -1486,13 +1428,6 @@ void Ende(int code)
   if (code!=3 && code!=4) { free(Puffer); free(Datai); free(OldScr); free(E); free(PE); free(Bild); free(Bild2); }
   if (code!=0 && code!=4) printf("ð Abnormal termination. Error #%d!\n",code);
   chdir(CurDir); setftime(fileno(f),&FDatum); fclose(f);
-  if (MUSisPlaying) {
-    ShutdownTimer();
-    DeinitAdlib();
-    MUSisPlaying=0;
-    free(score);
-  }
-  if (InstrSindDa) free(instruments);
   if (LoadIntern && ShareDoom) printf("\x07ð Don't try to use NWT with Shareware versions of Doom or Heretic.\nð Buy it first.\x07\n");
   exit(0);
 }
