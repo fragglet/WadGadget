@@ -105,3 +105,20 @@ Load WAD
 DOS Shell
  - Needed? Under DOS I guess
 
+==
+
+Generic decode for different lump types:
+
+* All level lump types
+* MIDI / MUS
+* Graphic
+* TEXTURE
+* PNAMES
+* Sound effect
+* PC speaker effect
+* PLAYPAL
+* COLORMAP
+* DEMO
+
+Convert to Yocton format and back again, with basic editor in program
+
