@@ -32,7 +32,7 @@ void show_header()
 	header = newwin(1, 78, 0, 0);
 	wbkgdset(header, COLOR_PAIR(PAIR_HIGHLIGHT));
 	werase(header);
-	mvwaddstr(header, 0, 1, "= NuWadUtil for Doom, Heretic, Hexen, "
+	mvwaddstr(header, 0, 1, "= WadGadget for Doom, Heretic, Hexen, "
 	                "Strife, Chex Quest and the rest =");
 	wrefresh(header);
 }
