@@ -35,6 +35,7 @@ void UI_DrawWadPane(struct wad_pane *p)
 	wattron(p->pane, A_REVERSE);
 	mvwaddstr(p->pane, 0, 3, " foobar.wad ");
 	wattroff(p->pane, A_REVERSE);
+	wattroff(p->pane, COLOR_PAIR(PAIR_PANE_COLOR));
 
 	directory = W_GetDirectory(p->f);
 	for (y = 0; y < 20; y++) {
@@ -43,11 +44,13 @@ void UI_DrawWadPane(struct wad_pane *p)
 		if (idx >= W_NumLumps(p->f)) {
 			continue;
 		}
-		snprintf(buf, sizeof(buf), "%8s", directory[idx].name);
+		snprintf(buf, sizeof(buf), "%-8s", directory[idx].name);
 		if (idx == p->selected) {
 			wattron(p->pane, A_REVERSE);
 		}
-		mvwaddstr(p->pane, 1 + idx, 2, buf);
+		mvwaddstr(p->pane, 1 + idx, 1, " ");
+		waddstr(p->pane, buf);
+		waddstr(p->pane, "  ");
 		wattroff(p->pane, A_REVERSE);
 	}
 
