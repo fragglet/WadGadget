@@ -5,55 +5,36 @@
 #include <assert.h>
 
 #include "ui.h"
+#include "list_pane.h"
 #include "wad_pane.h"
 
 struct wad_pane {
-	WINDOW *pane;
+	struct list_pane pane;
 	struct wad_file *f;
-	unsigned int window_offset, selected;
 };
+
+static const char *GetEntry(struct list_pane *l, unsigned int idx)
+{
+	static char buf[9];
+	struct wad_pane *p = (struct wad_pane *) l;
+	const struct wad_file_entry *directory = W_GetDirectory(p->f);
+	snprintf(buf, sizeof(buf), "%-8s", directory[idx].name);
+	return buf;
+}
 
 struct wad_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
 {
 	struct wad_pane *p;
 	p = calloc(1, sizeof(struct wad_pane));
-	p->pane = pane;
+	p->pane.pane = pane;
+	p->pane.title = " foobar.wad ";
+	p->pane.get_entry_str = GetEntry;
 	p->f = f;
-	p->window_offset = 0;
-	p->selected = 0;
 	return p;
 }
 
 void UI_DrawWadPane(struct wad_pane *p)
 {
-	const struct wad_file_entry *directory;
-	unsigned int idx, y;
-
-	werase(p->pane);
-	wattron(p->pane, COLOR_PAIR(PAIR_PANE_COLOR));
-	box(p->pane, 0, 0);
-	wattron(p->pane, A_REVERSE);
-	mvwaddstr(p->pane, 0, 3, " foobar.wad ");
-	wattroff(p->pane, A_REVERSE);
-	wattroff(p->pane, COLOR_PAIR(PAIR_PANE_COLOR));
-
-	directory = W_GetDirectory(p->f);
-	for (y = 0; y < 20; y++) {
-		char buf[9];
-		idx = p->window_offset + y;
-		if (idx >= W_NumLumps(p->f)) {
-			continue;
-		}
-		snprintf(buf, sizeof(buf), "%-8s", directory[idx].name);
-		if (idx == p->selected) {
-			wattron(p->pane, A_REVERSE);
-		}
-		mvwaddstr(p->pane, 1 + idx, 1, " ");
-		waddstr(p->pane, buf);
-		waddstr(p->pane, "  ");
-		wattroff(p->pane, A_REVERSE);
-	}
-
-	wrefresh(p->pane);
+	UI_DrawListPane(&p->pane);
 }
 
