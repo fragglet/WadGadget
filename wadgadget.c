@@ -1,6 +1,8 @@
 #include <curses.h>
 #include <string.h>
 
+#include "wad_pane.h"
+
 #define PAIR_PANE_COLOR 1
 #define PAIR_HIGHLIGHT  2
 
@@ -109,6 +111,7 @@ void show_accelerators()
 
 int main(int argc, char *argv[])
 {
+	struct wad_pane *wad_pane;
 	WINDOW *pane;
 
 	initscr();
@@ -125,15 +128,10 @@ int main(int argc, char *argv[])
 	refresh();
 	show_header();
 
-	pane = newwin(23, FILE_PANE_WIDTH, 1, 0);
-	//wbkgdset(pane, COLOR_PAIR(PAIR_PANE_COLOR));
-	werase(pane);
-	wattron(pane, COLOR_PAIR(PAIR_PANE_COLOR));
-	box(pane, 0, 0);
-	wattron(pane, A_REVERSE);
-	mvwaddstr(pane, 0, 3, " doom2.wad ");
-	wattroff(pane, A_REVERSE);
-	wrefresh(pane);
+	wad_pane = UI_NewWadPane(
+		newwin(23, FILE_PANE_WIDTH, 1, 0),
+		W_OpenFile("doom2.wad"));
+	UI_DrawWadPane(wad_pane);
 
 	pane = newwin(23, FILE_PANE_WIDTH, 1, 80 - FILE_PANE_WIDTH);
 	//wbkgdset(pane, COLOR_PAIR(PAIR_PANE_COLOR));
