@@ -1,19 +1,27 @@
 #include <curses.h>
+#include <string.h>
 
 #define PAIR_PANE_COLOR 1
 #define PAIR_HIGHLIGHT  2
+
+#define FILE_PANE_WIDTH 27
 
 struct {
 	char *key;
 	char *desc;
 } hotkeys[] = {
-	{"F2", "Right"},
+	{"F1", "Hexdump"},
 	{"F3", "Open"},
 	{"F4", "Edit"},
 	{"F5", "Export >>>"},
 	{"F6", "Rename"},
 	{"F8", "Delete"},
 	{"F9", "New lump"},
+	{"Space", "Mark/unmark"},
+	{"F10", "Unmark all"},
+	{"", ""},
+	{"Tab", "Other pane"},
+	{"ESC", "Quit"},
 	{NULL, NULL},
 };
 
@@ -24,9 +32,64 @@ void show_header()
 	header = newwin(1, 78, 0, 0);
 	wbkgdset(header, COLOR_PAIR(PAIR_HIGHLIGHT));
 	werase(header);
-	mvwaddstr(header, 0, 1, "= BlueWadTool for Doom, Heretic, Hexen, "
+	mvwaddstr(header, 0, 1, "= NuWadUtil for Doom, Heretic, Hexen, "
 	                "Strife, Chex Quest and the rest =");
 	wrefresh(header);
+}
+
+void show_info_box()
+{
+	WINDOW *win;
+
+	win = newwin(5, 78 - (FILE_PANE_WIDTH * 2),
+	             1, FILE_PANE_WIDTH);
+	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
+	werase(win);
+	box(win, 0, 0);
+	mvwaddstr(win, 0, 2, " Info ");
+
+	mvwaddstr(win, 1, 2, "TITLEPIC  123 bytes");
+	mvwaddstr(win, 2, 2, "Dimensions: 320x200");
+	wrefresh(win);
+}
+
+void show_middle_accelerators()
+{
+	WINDOW *win;
+	int i;
+
+	win = newwin(14, 78 - (FILE_PANE_WIDTH * 2),
+	             6, FILE_PANE_WIDTH);
+	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
+	werase(win);
+	box(win, 0, 0);
+	mvwaddstr(win, 0, 2, " Actions ");
+
+	for (i = 0; hotkeys[i].key != NULL; i++) {
+		if (strlen(hotkeys[i].key) == 0) {
+			continue;
+		}
+		wattron(win, A_BOLD);
+		mvwaddstr(win, 1+i, 2, hotkeys[i].key);
+		wattroff(win, A_BOLD);
+		waddstr(win, " - ");
+		waddstr(win, hotkeys[i].desc);
+	}
+	wrefresh(win);
+}
+
+void show_search_box()
+{
+	WINDOW *win;
+
+	win = newwin(4, 78 - (FILE_PANE_WIDTH * 2),
+	             20, FILE_PANE_WIDTH);
+	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
+	werase(win);
+	box(win, 0, 0);
+	mvwaddstr(win, 1, 2, "Search: ");
+	mvwaddstr(win, 2, 2, "");
+	wrefresh(win);
 }
 
 void show_accelerators()
@@ -42,7 +105,6 @@ void show_accelerators()
 		addstr(hotkeys[i].desc);
 		attroff(COLOR_PAIR(PAIR_HIGHLIGHT));
 	}
-	mvaddstr(41, 0, "Search: ");
 }
 
 int main(int argc, char *argv[])
@@ -63,24 +125,27 @@ int main(int argc, char *argv[])
 	refresh();
 	show_header();
 
-	pane = newwin(40, 39, 1, 0);
-	wbkgdset(pane, COLOR_PAIR(PAIR_PANE_COLOR));
-	wattron(pane, COLOR_PAIR(PAIR_PANE_COLOR));
+	pane = newwin(23, FILE_PANE_WIDTH, 1, 0);
+	//wbkgdset(pane, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(pane);
+	wattron(pane, COLOR_PAIR(PAIR_PANE_COLOR));
 	box(pane, 0, 0);
+	wattron(pane, A_REVERSE);
 	mvwaddstr(pane, 0, 3, " doom2.wad ");
+	wattroff(pane, A_REVERSE);
 	wrefresh(pane);
 
-	pane = newwin(40, 39, 1, 39);
-	wbkgdset(pane, COLOR_PAIR(PAIR_PANE_COLOR));
+	pane = newwin(23, FILE_PANE_WIDTH, 1, 78 - FILE_PANE_WIDTH);
+	//wbkgdset(pane, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(pane);
+	wattron(pane, COLOR_PAIR(PAIR_PANE_COLOR));
 	box(pane, 0, 0);
-	wattron(pane, COLOR_PAIR(PAIR_HIGHLIGHT));
 	mvwaddstr(pane, 0, 3, " /home/fraggle ");
 	wrefresh(pane);
-	show_accelerators();
+
+	show_info_box();
+	show_middle_accelerators();
+	show_search_box();
 	getch();
-
-
 	endwin();
 }
