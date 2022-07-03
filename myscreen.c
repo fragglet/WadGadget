@@ -29,7 +29,7 @@ void show_header()
 {
 	WINDOW *header;
 
-	header = newwin(1, 78, 0, 0);
+	header = newwin(1, 80, 0, 0);
 	wbkgdset(header, COLOR_PAIR(PAIR_HIGHLIGHT));
 	werase(header);
 	mvwaddstr(header, 0, 1, "= WadGadget for Doom, Heretic, Hexen, "
@@ -41,7 +41,7 @@ void show_info_box()
 {
 	WINDOW *win;
 
-	win = newwin(5, 78 - (FILE_PANE_WIDTH * 2),
+	win = newwin(5, 80 - (FILE_PANE_WIDTH * 2),
 	             1, FILE_PANE_WIDTH);
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);
@@ -58,7 +58,7 @@ void show_middle_accelerators()
 	WINDOW *win;
 	int i;
 
-	win = newwin(14, 78 - (FILE_PANE_WIDTH * 2),
+	win = newwin(14, 80 - (FILE_PANE_WIDTH * 2),
 	             6, FILE_PANE_WIDTH);
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);
@@ -82,7 +82,7 @@ void show_search_box()
 {
 	WINDOW *win;
 
-	win = newwin(4, 78 - (FILE_PANE_WIDTH * 2),
+	win = newwin(4, 80 - (FILE_PANE_WIDTH * 2),
 	             20, FILE_PANE_WIDTH);
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 	wattroff(pane, A_REVERSE);
 	wrefresh(pane);
 
-	pane = newwin(23, FILE_PANE_WIDTH, 1, 78 - FILE_PANE_WIDTH);
+	pane = newwin(23, FILE_PANE_WIDTH, 1, 80 - FILE_PANE_WIDTH);
 	//wbkgdset(pane, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(pane);
 	wattron(pane, COLOR_PAIR(PAIR_PANE_COLOR));
