@@ -12,7 +12,7 @@
 static WINDOW *pane_windows[2];
 static struct list_pane *panes[2];
 static unsigned int active_pane = 0;
-static WINDOW *actions_win, *info_win, *search_win;
+static WINDOW *actions_win, *info_win, *search_win, *header_win;
 
 struct list_pane_action common_actions[] =
 {
@@ -38,16 +38,13 @@ static unsigned int ScreenLines(void)
 	return y;
 }
 
-void show_header()
+static void ShowHeader()
 {
-	WINDOW *header;
-
-	header = newwin(1, 80, 0, 0);
-	wbkgdset(header, COLOR_PAIR(PAIR_HIGHLIGHT));
-	werase(header);
-	mvwaddstr(header, 0, 1, "= WadGadget for Doom, Heretic, Hexen, "
+	wbkgdset(header_win, COLOR_PAIR(PAIR_HIGHLIGHT));
+	werase(header_win);
+	mvwaddstr(header_win, 0, 1, "= WadGadget for Doom, Heretic, Hexen, "
 	                "Strife, Chex Quest and the rest =");
-	wrefresh(header);
+	wrefresh(header_win);
 }
 
 static void ShowInfoWindow()
@@ -131,6 +128,7 @@ static void SetWindowSizes(void)
 	int lines = ScreenLines(), columns = ScreenColumns();
 	int pane_width = (columns > 80) ? (FILE_PANE_WIDTH * columns) / 80
 	                              : FILE_PANE_WIDTH;
+	wresize(header_win, 1, columns);
 	wresize(info_win, 5, columns - pane_width * 2);
 	mvwin(info_win, 1, pane_width);
 	wresize(search_win, 4, columns - (pane_width * 2));
@@ -142,6 +140,9 @@ static void SetWindowSizes(void)
 	mvwin(pane_windows[0], 1, 0);
 	wresize(pane_windows[1], lines - 1, pane_width);
 	mvwin(pane_windows[1], 1, columns - pane_width);
+
+	erase();
+	refresh();
 }
 
 int main(int argc, char *argv[])
@@ -160,8 +161,9 @@ int main(int argc, char *argv[])
 	init_pair(PAIR_HIGHLIGHT, COLOR_BLACK, COLOR_CYAN);
 
 	refresh();
-	show_header();
 
+	WINDOW *header;
+	header_win = newwin(1, 80, 0, 0);
 	info_win = newwin(5, 80 - (FILE_PANE_WIDTH * 2),
 	                  1, FILE_PANE_WIDTH);
 	search_win = newwin(4, 80 - (FILE_PANE_WIDTH * 2),
@@ -181,6 +183,7 @@ int main(int argc, char *argv[])
 	for (;;) {
 		int key;
 
+		ShowHeader();
 		UI_DrawListPane(panes[0]);
 		UI_DrawListPane(panes[1]);
 		ShowInfoWindow();
