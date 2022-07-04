@@ -1,6 +1,7 @@
 #include <curses.h>
 #include <string.h>
 
+#include "dir_pane.h"
 #include "wad_pane.h"
 
 #define PAIR_PANE_COLOR 1
@@ -112,6 +113,7 @@ void show_accelerators()
 int main(int argc, char *argv[])
 {
 	struct wad_pane *wad_pane;
+	struct directory_pane *dir_pane;
 	WINDOW *pane;
 
 	initscr();
@@ -133,13 +135,10 @@ int main(int argc, char *argv[])
 		W_OpenFile("doom2.wad"));
 	UI_DrawWadPane(wad_pane);
 
-	pane = newwin(23, FILE_PANE_WIDTH, 1, 80 - FILE_PANE_WIDTH);
-	//wbkgdset(pane, COLOR_PAIR(PAIR_PANE_COLOR));
-	werase(pane);
-	wattron(pane, COLOR_PAIR(PAIR_PANE_COLOR));
-	box(pane, 0, 0);
-	mvwaddstr(pane, 0, 3, " /home/fraggle ");
-	wrefresh(pane);
+	dir_pane = UI_NewDirectoryPane(
+		newwin(23, FILE_PANE_WIDTH, 1, 80 - FILE_PANE_WIDTH),
+		"/");
+	UI_DrawDirectoryPane(dir_pane);
 
 	show_info_box();
 	show_middle_accelerators();

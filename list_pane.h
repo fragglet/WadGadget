@@ -1,3 +1,6 @@
+#ifndef INCLUDE_LIST_PANE_H
+#define INCLUDE_LIST_PANE_H
+
 #include <curses.h>
 
 struct list_pane {
@@ -8,4 +11,6 @@ struct list_pane {
 };
 
 void UI_DrawListPane(struct list_pane *pane);
+
+#endif /* #ifndef INCLUDE_LIST_PANE_H */
 
