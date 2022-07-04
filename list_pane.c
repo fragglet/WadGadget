@@ -54,12 +54,16 @@ void UI_ListPaneInput(struct list_pane *p, int key)
 		if (p->selected < p->window_offset) {
 			p->window_offset = p->selected;
 		}
-		break;
+		return;
 	case KEY_PPAGE:
 		for (i = 0; i < 20; i++) {
 			UI_ListPaneInput(p, KEY_UP);
 		}
-		break;
+		return;
+	case KEY_HOME:
+		p->selected = 0;
+		p->window_offset = 0;
+		return;
 	case KEY_DOWN:
 		if (p->get_entry_str(p, p->selected + 1) != NULL) {
 			++p->selected;
@@ -67,12 +71,18 @@ void UI_ListPaneInput(struct list_pane *p, int key)
 		if (p->selected > p->window_offset + 20 - 1) {
 			++p->window_offset;
 		}
-		break;
+		return;
 	case KEY_NPAGE:
 		for (i = 0; i < 20; i++) {
 			UI_ListPaneInput(p, KEY_DOWN);
 		}
-		break;
+		return;
+	case KEY_END:
+		while (p->get_entry_str(p, p->selected + 1) != NULL) {
+			++p->selected;
+		}
+		p->window_offset = p->selected - 20 + 1;
+		return;
 	}
 }
 
