@@ -7,6 +7,13 @@
 #include "ui.h"
 #include "list_pane.h"
 
+static unsigned int Lines(struct list_pane *p)
+{
+	int x, y;
+	getmaxyx(p->pane, y, x);
+	return y - 2;
+}
+
 void UI_DrawListPane(struct list_pane *p)
 {
 	const char *str;
@@ -24,7 +31,7 @@ void UI_DrawListPane(struct list_pane *p)
 	wattroff(p->pane, A_REVERSE);
 	wattroff(p->pane, COLOR_PAIR(PAIR_PANE_COLOR));
 
-	for (y = 0; y < 20; y++) {
+	for (y = 0; y < Lines(p); y++) {
 		char buf[20];
 		idx = p->window_offset + y;
 		str = p->get_entry_str(p, idx);
@@ -58,7 +65,7 @@ void UI_ListPaneInput(struct list_pane *p, int key)
 		}
 		return;
 	case KEY_PPAGE:
-		for (i = 0; i < 20; i++) {
+		for (i = 0; i < Lines(p); i++) {
 			UI_ListPaneInput(p, KEY_UP);
 		}
 		return;
@@ -70,12 +77,12 @@ void UI_ListPaneInput(struct list_pane *p, int key)
 		if (p->get_entry_str(p, p->selected + 1) != NULL) {
 			++p->selected;
 		}
-		if (p->selected > p->window_offset + 20 - 1) {
+		if (p->selected > p->window_offset + Lines(p) - 1) {
 			++p->window_offset;
 		}
 		return;
 	case KEY_NPAGE:
-		for (i = 0; i < 20; i++) {
+		for (i = 0; i < Lines(p); i++) {
 			UI_ListPaneInput(p, KEY_DOWN);
 		}
 		return;
@@ -83,7 +90,7 @@ void UI_ListPaneInput(struct list_pane *p, int key)
 		while (p->get_entry_str(p, p->selected + 1) != NULL) {
 			++p->selected;
 		}
-		p->window_offset = p->selected - 20 + 1;
+		p->window_offset = p->selected - Lines(p) + 1;
 		return;
 	}
 }

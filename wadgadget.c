@@ -110,6 +110,13 @@ void show_accelerators()
 	}
 }
 
+static unsigned int ScreenLines(void)
+{
+        int x, y;
+        getmaxyx(stdscr, y, x);
+        return y;
+}
+
 int main(int argc, char *argv[])
 {
 	struct list_pane *panes[2];
@@ -131,10 +138,11 @@ int main(int argc, char *argv[])
 	show_header();
 
 	panes[0] = UI_NewWadPane(
-		newwin(23, FILE_PANE_WIDTH, 1, 0),
+		newwin(ScreenLines() - 1, FILE_PANE_WIDTH, 1, 0),
 		W_OpenFile("doom2.wad"));
 	panes[1] = UI_NewDirectoryPane(
-		newwin(23, FILE_PANE_WIDTH, 1, 80 - FILE_PANE_WIDTH),
+		newwin(ScreenLines() - 1, FILE_PANE_WIDTH, 1,
+		       80 - FILE_PANE_WIDTH),
 		"/home/fraggle");
 	UI_ListPaneActive(panes[active], 1);
 
