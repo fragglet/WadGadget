@@ -11,6 +11,7 @@ struct list_pane {
 };
 
 void UI_DrawListPane(struct list_pane *pane);
+void UI_ListPaneInput(struct list_pane *p, int key);
 
 #endif /* #ifndef INCLUDE_LIST_PANE_H */
 

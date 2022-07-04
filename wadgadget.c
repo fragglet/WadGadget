@@ -112,8 +112,7 @@ void show_accelerators()
 
 int main(int argc, char *argv[])
 {
-	struct wad_pane *wad_pane;
-	struct directory_pane *dir_pane;
+	struct list_pane *pane1, *pane2;
 	WINDOW *pane;
 
 	initscr();
@@ -130,19 +129,25 @@ int main(int argc, char *argv[])
 	refresh();
 	show_header();
 
-	wad_pane = UI_NewWadPane(
+	pane1 = UI_NewWadPane(
 		newwin(23, FILE_PANE_WIDTH, 1, 0),
 		W_OpenFile("doom2.wad"));
-	UI_DrawWadPane(wad_pane);
+	UI_DrawListPane(pane1);
 
-	dir_pane = UI_NewDirectoryPane(
+	pane2 = UI_NewDirectoryPane(
 		newwin(23, FILE_PANE_WIDTH, 1, 80 - FILE_PANE_WIDTH),
-		"/");
-	UI_DrawDirectoryPane(dir_pane);
+		"/home/fraggle");
+	UI_DrawListPane(pane2);
 
 	show_info_box();
 	show_middle_accelerators();
 	show_search_box();
-	getch();
+
+	for (;;) {
+		int key = getch();
+		UI_ListPaneInput(pane1, key);
+		UI_DrawListPane(pane1);
+		UI_DrawListPane(pane2);
+	}
 	endwin();
 }

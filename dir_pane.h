@@ -1,5 +1,4 @@
 
-struct directory_pane;
+#include "list_pane.h"
 
-struct directory_pane *UI_NewDirectoryPane(WINDOW *pane, const char *path);
-void UI_DrawDirectoryPane(struct directory_pane *p);
+struct list_pane *UI_NewDirectoryPane(WINDOW *pane, const char *path);

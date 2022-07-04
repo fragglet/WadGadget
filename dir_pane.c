@@ -7,9 +7,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+#include "dir_pane.h"
 #include "ui.h"
-#include "list_pane.h"
-#include "wad_pane.h"
 
 struct directory_pane {
 	struct list_pane pane;
@@ -26,7 +25,7 @@ static const char *GetEntry(struct list_pane *l, unsigned int idx)
 	return p->files[idx];
 }
 
-struct directory_pane *UI_NewDirectoryPane(WINDOW *pane, const char *path)
+struct list_pane *UI_NewDirectoryPane(WINDOW *pane, const char *path)
 {
 	struct directory_pane *p;
 	DIR *dir;
@@ -61,11 +60,6 @@ struct directory_pane *UI_NewDirectoryPane(WINDOW *pane, const char *path)
 		++p->num_files;
 	}
 
-	return p;
-}
-
-void UI_DrawDirectoryPane(struct directory_pane *p)
-{
-	UI_DrawListPane(&p->pane);
+	return &p->pane;
 }
 

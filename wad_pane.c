@@ -22,7 +22,7 @@ static const char *GetEntry(struct list_pane *l, unsigned int idx)
 	return buf;
 }
 
-struct wad_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
+struct list_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
 {
 	struct wad_pane *p;
 	p = calloc(1, sizeof(struct wad_pane));
@@ -30,11 +30,6 @@ struct wad_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
 	p->pane.title = "foobar.wad";
 	p->pane.get_entry_str = GetEntry;
 	p->f = f;
-	return p;
-}
-
-void UI_DrawWadPane(struct wad_pane *p)
-{
-	UI_DrawListPane(&p->pane);
+	return &p->pane;
 }
 
