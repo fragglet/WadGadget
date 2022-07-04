@@ -85,7 +85,8 @@ struct list_pane *UI_NewDirectoryPane(WINDOW *pane, const char *path)
 		if (dirent == NULL) {
 			break;
 		}
-		if (!strcmp(dirent->d_name, ".")) {
+		if (dirent->d_name[0] == '.'
+		 && strcmp(dirent->d_name, "..") != 0) {
 			continue;
 		}
 		path = strdup(dirent->d_name);
