@@ -18,6 +18,9 @@ static const char *GetEntry(struct list_pane *l, unsigned int idx)
 	static char buf[9];
 	struct wad_pane *p = (struct wad_pane *) l;
 	const struct wad_file_entry *directory = W_GetDirectory(p->f);
+	if (idx >= W_NumLumps(p->f)) {
+		return NULL;
+	}
 	snprintf(buf, sizeof(buf), "%-8s", directory[idx].name);
 	return buf;
 }
