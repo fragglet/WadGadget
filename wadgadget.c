@@ -53,6 +53,8 @@ void show_info_box()
 
 static void ShowAction(int y, const struct list_pane_action *action)
 {
+	char *desc;
+
 	if (strlen(action->key) == 0) {
 		return;
 	}
@@ -60,7 +62,23 @@ static void ShowAction(int y, const struct list_pane_action *action)
 	mvwaddstr(actions_win, y, 2, action->key);
 	wattroff(actions_win, A_BOLD);
 	waddstr(actions_win, " - ");
-	waddstr(actions_win, action->description);
+	desc = action->description;
+	if (action->description[0] == '>') {
+		if (active_pane == 1) {
+			wattron(actions_win, A_BOLD);
+			waddstr(actions_win, "<<< ");
+			wattroff(actions_win, A_BOLD);
+		}
+		desc += 2;
+	}
+	waddstr(actions_win, desc);
+	if (action->description[0] == '>') {
+		if (active_pane == 0) {
+			wattron(actions_win, A_BOLD);
+			waddstr(actions_win, " >>>");
+			wattroff(actions_win, A_BOLD);
+		}
+	}
 }
 
 static void ShowActions(void)
