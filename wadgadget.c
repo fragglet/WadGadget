@@ -9,17 +9,12 @@
 
 #define FILE_PANE_WIDTH 27
 
-struct {
-	char *key;
-	char *desc;
-} hotkeys[] = {
-	{"F1", "Hexdump"},
-	{"F3", "Open"},
-	{"F4", "Edit"},
-	{"F5", "Export >>>"},
-	{"F6", "Rename"},
-	{"F8", "Delete"},
-	{"F9", "New lump"},
+static struct list_pane *panes[2];
+static unsigned int active_pane = 0;
+static WINDOW *actions_win;
+
+struct list_pane_action common_actions[] =
+{
 	{"Space", "Mark/unmark"},
 	{"F10", "Unmark all"},
 	{"", ""},
@@ -56,29 +51,40 @@ void show_info_box()
 	wrefresh(win);
 }
 
-void show_middle_accelerators()
+static void ShowAction(int y, const struct list_pane_action *action)
 {
-	WINDOW *win;
-	int i;
-
-	win = newwin(14, 80 - (FILE_PANE_WIDTH * 2),
-	             6, FILE_PANE_WIDTH);
-	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
-	werase(win);
-	box(win, 0, 0);
-	mvwaddstr(win, 0, 2, " Actions ");
-
-	for (i = 0; hotkeys[i].key != NULL; i++) {
-		if (strlen(hotkeys[i].key) == 0) {
-			continue;
-		}
-		wattron(win, A_BOLD);
-		mvwaddstr(win, 1+i, 2, hotkeys[i].key);
-		wattroff(win, A_BOLD);
-		waddstr(win, " - ");
-		waddstr(win, hotkeys[i].desc);
+	if (strlen(action->key) == 0) {
+		return;
 	}
-	wrefresh(win);
+	wattron(actions_win, A_BOLD);
+	mvwaddstr(actions_win, y, 2, action->key);
+	wattroff(actions_win, A_BOLD);
+	waddstr(actions_win, " - ");
+	waddstr(actions_win, action->description);
+}
+
+static void ShowActions(void)
+{
+	const struct list_pane_action *actions;
+	int i, y;
+
+	wbkgdset(actions_win, COLOR_PAIR(PAIR_PANE_COLOR));
+	werase(actions_win);
+	box(actions_win, 0, 0);
+	mvwaddstr(actions_win, 0, 2, " Actions ");
+
+	actions = UI_ListPaneActions(panes[active_pane], panes[!active_pane]);
+
+	y = 1;
+	for (i = 0; actions != NULL && actions[i].key != NULL; i++) {
+		ShowAction(y, &actions[i]);
+		y++;
+	}
+	for (i = 0; common_actions[i].key != NULL; i++) {
+		ShowAction(y, &common_actions[i]);
+		y++;
+	}
+	wrefresh(actions_win);
 }
 
 void show_search_box()
@@ -95,21 +101,6 @@ void show_search_box()
 	wrefresh(win);
 }
 
-void show_accelerators()
-{
-	int i;
-	mvaddstr(42, 0, "");
-	for (i = 0; hotkeys[i].key != NULL; i++) {
-		addstr(" ");
-		attron(A_BOLD);
-		addstr(hotkeys[i].key);
-		attroff(A_BOLD);
-		attron(COLOR_PAIR(PAIR_HIGHLIGHT));
-		addstr(hotkeys[i].desc);
-		attroff(COLOR_PAIR(PAIR_HIGHLIGHT));
-	}
-}
-
 static unsigned int ScreenLines(void)
 {
         int x, y;
@@ -119,8 +110,6 @@ static unsigned int ScreenLines(void)
 
 int main(int argc, char *argv[])
 {
-	struct list_pane *panes[2];
-	unsigned int active = 0;
 	WINDOW *pane;
 
 	initscr();
@@ -137,6 +126,8 @@ int main(int argc, char *argv[])
 	refresh();
 	show_header();
 
+	actions_win = newwin(14, 80 - (FILE_PANE_WIDTH * 2),
+	                     6, FILE_PANE_WIDTH);
 	panes[0] = UI_NewWadPane(
 		newwin(ScreenLines() - 1, FILE_PANE_WIDTH, 1, 0),
 		W_OpenFile("doom2.wad"));
@@ -144,35 +135,35 @@ int main(int argc, char *argv[])
 		newwin(ScreenLines() - 1, FILE_PANE_WIDTH, 1,
 		       80 - FILE_PANE_WIDTH),
 		"/home/fraggle");
-	UI_ListPaneActive(panes[active], 1);
+	UI_ListPaneActive(panes[active_pane], 1);
 
 	show_info_box();
-	show_middle_accelerators();
 	show_search_box();
 
 	for (;;) {
 		int key;
 		UI_DrawListPane(panes[0]);
 		UI_DrawListPane(panes[1]);
+		ShowActions();
 		key = getch();
 		switch (key) {
 		case KEY_LEFT:
-			active = 0;
+			active_pane = 0;
 			UI_ListPaneActive(panes[0], 1);
 			UI_ListPaneActive(panes[1], 0);
 			break;
 		case KEY_RIGHT:
-			active = 1;
+			active_pane = 1;
 			UI_ListPaneActive(panes[0], 0);
 			UI_ListPaneActive(panes[1], 1);
 			break;
 		case '\t':
-			UI_ListPaneActive(panes[active], 0);
-			active = !active;
-			UI_ListPaneActive(panes[active], 1);
+			UI_ListPaneActive(panes[active_pane], 0);
+			active_pane = !active_pane;
+			UI_ListPaneActive(panes[active_pane], 1);
 			break;
 		default:
-			UI_ListPaneInput(panes[active], key);
+			UI_ListPaneInput(panes[active_pane], key);
 			break;
 		}
 	}

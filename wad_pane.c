@@ -13,6 +13,40 @@ struct wad_pane {
 	struct wad_file *f;
 };
 
+static const struct list_pane_action wad_to_wad[] = {
+	{"F3", "View"},
+	{"F4", "Edit"},
+	{"F5", "> Copy"},
+	{"F6", "Rename"},
+	{"F8", "Delete"},
+	{"F9", "New lump"},
+	{NULL, NULL},
+};
+
+static const struct list_pane_action wad_to_dir[] = {
+	{"F3", "View"},
+	{"F4", "Edit"},
+	{"F5", "> Export"},
+	{"F6", "Rename"},
+	{"F8", "Delete"},
+	{"F9", "New lump"},
+	{NULL, NULL},
+};
+
+static const struct list_pane_action *GetActions(struct list_pane *other)
+{
+	switch (other->type) {
+		case PANE_TYPE_NONE:
+			return NULL;
+
+		case PANE_TYPE_DIR:
+			return wad_to_dir;
+
+		case PANE_TYPE_WAD:
+			return wad_to_wad;
+	}
+}
+
 static const char *GetEntry(struct list_pane *l, unsigned int idx)
 {
 	static char buf[9];
@@ -30,8 +64,10 @@ struct list_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
 	struct wad_pane *p;
 	p = calloc(1, sizeof(struct wad_pane));
 	p->pane.pane = pane;
+	p->pane.type = PANE_TYPE_WAD;
 	p->pane.title = "foobar.wad";
 	p->pane.get_entry_str = GetEntry;
+	p->pane.get_actions = GetActions;
 	p->f = f;
 	return &p->pane;
 }

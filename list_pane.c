@@ -100,3 +100,9 @@ void UI_ListPaneActive(struct list_pane *p, int active)
 	p->active = active;
 }
 
+const struct list_pane_action *UI_ListPaneActions(
+	struct list_pane *p, struct list_pane *other)
+{
+	return p->get_actions(other);
+}
+

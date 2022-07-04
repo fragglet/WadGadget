@@ -16,6 +16,42 @@ struct directory_pane {
 	unsigned int num_files;
 };
 
+static const struct list_pane_action dir_to_wad[] = {
+	{"F3", "View"},
+	{"F4", "Edit"},
+	{"F5", "> Import"},
+	{"F6", "Rename"},
+	{"F7", "Mkdir"},
+	{"F8", "Delete"},
+	{"F9", "New WAD"},
+	{NULL, NULL},
+};
+
+static const struct list_pane_action dir_to_dir[] = {
+	{"F3", "View"},
+	{"F4", "Edit"},
+	{"F5", "> Copy"},
+	{"F6", "Rename"},
+	{"F7", "Mkdir"},
+	{"F8", "Delete"},
+	{"F9", "New WAD"},
+	{NULL, NULL},
+};
+
+static const struct list_pane_action *GetActions(struct list_pane *other)
+{
+	switch (other->type) {
+		case PANE_TYPE_NONE:
+			return NULL;
+
+		case PANE_TYPE_DIR:
+			return dir_to_dir;
+
+		case PANE_TYPE_WAD:
+			return dir_to_wad;
+	}
+}
+
 static const char *GetEntry(struct list_pane *l, unsigned int idx)
 {
 	struct directory_pane *p = (struct directory_pane *) l;
@@ -34,6 +70,8 @@ struct list_pane *UI_NewDirectoryPane(WINDOW *pane, const char *path)
 	p = calloc(1, sizeof(struct directory_pane));
 	p->pane.pane = pane;
 	p->pane.title = strdup(path);
+	p->pane.type = PANE_TYPE_DIR;
+	p->pane.get_actions = GetActions;
 	p->pane.get_entry_str = GetEntry;
 
 	dir = opendir(path);
