@@ -9,9 +9,10 @@
 
 #define FILE_PANE_WIDTH 27
 
+static WINDOW *pane_windows[2];
 static struct list_pane *panes[2];
 static unsigned int active_pane = 0;
-static WINDOW *actions_win;
+static WINDOW *actions_win, *info_win, *search_win;
 
 struct list_pane_action common_actions[] =
 {
@@ -22,6 +23,20 @@ struct list_pane_action common_actions[] =
 	{"ESC", "Quit"},
 	{NULL, NULL},
 };
+
+static unsigned int ScreenColumns(void)
+{
+	int x, y;
+	getmaxyx(stdscr, y, x);
+	return x;
+}
+
+static unsigned int ScreenLines(void)
+{
+	int x, y;
+	getmaxyx(stdscr, y, x);
+	return y;
+}
 
 void show_header()
 {
@@ -35,20 +50,16 @@ void show_header()
 	wrefresh(header);
 }
 
-void show_info_box()
+static void ShowInfoWindow()
 {
-	WINDOW *win;
+	wbkgdset(info_win, COLOR_PAIR(PAIR_PANE_COLOR));
+	werase(info_win);
+	box(info_win, 0, 0);
+	mvwaddstr(info_win, 0, 2, " Info ");
 
-	win = newwin(5, 80 - (FILE_PANE_WIDTH * 2),
-	             1, FILE_PANE_WIDTH);
-	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
-	werase(win);
-	box(win, 0, 0);
-	mvwaddstr(win, 0, 2, " Info ");
-
-	mvwaddstr(win, 1, 2, "TITLEPIC  123 bytes");
-	mvwaddstr(win, 2, 2, "Dimensions: 320x200");
-	wrefresh(win);
+	mvwaddstr(info_win, 1, 2, "TITLEPIC  123 bytes");
+	mvwaddstr(info_win, 2, 2, "Dimensions: 320x200");
+	wrefresh(info_win);
 }
 
 static void ShowAction(int y, const struct list_pane_action *action)
@@ -105,25 +116,32 @@ static void ShowActions(void)
 	wrefresh(actions_win);
 }
 
-void show_search_box()
+static void ShowSearchWindow(void)
 {
-	WINDOW *win;
-
-	win = newwin(4, 80 - (FILE_PANE_WIDTH * 2),
-	             20, FILE_PANE_WIDTH);
-	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
-	werase(win);
-	box(win, 0, 0);
-	mvwaddstr(win, 1, 2, "Search: ");
-	mvwaddstr(win, 2, 2, "");
-	wrefresh(win);
+	wbkgdset(search_win, COLOR_PAIR(PAIR_PANE_COLOR));
+	werase(search_win);
+	box(search_win, 0, 0);
+	mvwaddstr(search_win, 1, 2, "Search: ");
+	mvwaddstr(search_win, 2, 2, "");
+	wrefresh(search_win);
 }
 
-static unsigned int ScreenLines(void)
+static void SetWindowSizes(void)
 {
-        int x, y;
-        getmaxyx(stdscr, y, x);
-        return y;
+	int lines = ScreenLines(), columns = ScreenColumns();
+	int pane_width = (columns > 80) ? (FILE_PANE_WIDTH * columns) / 80
+	                              : FILE_PANE_WIDTH;
+	wresize(info_win, 5, columns - pane_width * 2);
+	mvwin(info_win, 1, pane_width);
+	wresize(search_win, 4, columns - (pane_width * 2));
+	mvwin(search_win, lines - 4, pane_width);
+	
+	wresize(actions_win, 14, columns - pane_width * 2);
+	mvwin(actions_win, 6, pane_width);
+	wresize(pane_windows[0], lines - 1, pane_width);
+	mvwin(pane_windows[0], 1, 0);
+	wresize(pane_windows[1], lines - 1, pane_width);
+	mvwin(pane_windows[1], 1, columns - pane_width);
 }
 
 int main(int argc, char *argv[])
@@ -144,25 +162,31 @@ int main(int argc, char *argv[])
 	refresh();
 	show_header();
 
+	info_win = newwin(5, 80 - (FILE_PANE_WIDTH * 2),
+	                  1, FILE_PANE_WIDTH);
+	search_win = newwin(4, 80 - (FILE_PANE_WIDTH * 2),
+	                    20, FILE_PANE_WIDTH);
 	actions_win = newwin(14, 80 - (FILE_PANE_WIDTH * 2),
 	                     6, FILE_PANE_WIDTH);
-	panes[0] = UI_NewWadPane(
-		newwin(ScreenLines() - 1, FILE_PANE_WIDTH, 1, 0),
-		W_OpenFile("doom2.wad"));
-	panes[1] = UI_NewDirectoryPane(
-		newwin(ScreenLines() - 1, FILE_PANE_WIDTH, 1,
-		       80 - FILE_PANE_WIDTH),
-		"/home/fraggle");
+	pane_windows[0] = newwin(
+		ScreenLines() - 1, FILE_PANE_WIDTH, 1, 0);
+	panes[0] = UI_NewWadPane(pane_windows[0], W_OpenFile("doom2.wad"));
+	pane_windows[1] = newwin(ScreenLines() - 1, FILE_PANE_WIDTH,
+		1, 80 - FILE_PANE_WIDTH);
+	panes[1] = UI_NewDirectoryPane(pane_windows[1], "/home/fraggle");
 	UI_ListPaneActive(panes[active_pane], 1);
 
-	show_info_box();
-	show_search_box();
+	SetWindowSizes();
 
 	for (;;) {
 		int key;
+
 		UI_DrawListPane(panes[0]);
 		UI_DrawListPane(panes[1]);
+		ShowInfoWindow();
 		ShowActions();
+		ShowSearchWindow();
+
 		key = getch();
 		switch (key) {
 		case KEY_LEFT:
@@ -174,6 +198,9 @@ int main(int argc, char *argv[])
 			active_pane = 1;
 			UI_ListPaneActive(panes[0], 0);
 			UI_ListPaneActive(panes[1], 1);
+			break;
+		case KEY_RESIZE:
+			SetWindowSizes();
 			break;
 		case '\t':
 			UI_ListPaneActive(panes[active_pane], 0);

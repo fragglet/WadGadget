@@ -2,5 +2,6 @@
 #define PAIR_PANE_COLOR 1
 #define PAIR_HIGHLIGHT  2
 
-#define FILE_PANE_WIDTH 27
+#define FILE_PANE_WIDTH  27
+#define FILE_PANE_HEIGHT 24
 
