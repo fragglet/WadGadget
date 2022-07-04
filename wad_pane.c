@@ -27,7 +27,7 @@ struct wad_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
 	struct wad_pane *p;
 	p = calloc(1, sizeof(struct wad_pane));
 	p->pane.pane = pane;
-	p->pane.title = " foobar.wad ";
+	p->pane.title = "foobar.wad";
 	p->pane.get_entry_str = GetEntry;
 	p->f = f;
 	return p;
