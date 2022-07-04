@@ -15,7 +15,9 @@ void UI_DrawListPane(struct list_pane *p)
 	werase(p->pane);
 	wattron(p->pane, COLOR_PAIR(PAIR_PANE_COLOR));
 	box(p->pane, 0, 0);
-	wattron(p->pane, A_REVERSE);
+	if (p->active) {
+		wattron(p->pane, A_REVERSE);
+	}
 	mvwaddstr(p->pane, 0, 3, " ");
 	waddstr(p->pane, p->title);
 	waddstr(p->pane, " ");
@@ -30,7 +32,7 @@ void UI_DrawListPane(struct list_pane *p)
 			continue;
 		}
 		snprintf(buf, sizeof(buf), "%-20s", str);
-		if (idx == p->selected) {
+		if (p->active && idx == p->selected) {
 			wattron(p->pane, A_REVERSE);
 		}
 		mvwaddstr(p->pane, 1 + y, 1, " ");
@@ -84,5 +86,10 @@ void UI_ListPaneInput(struct list_pane *p, int key)
 		p->window_offset = p->selected - 20 + 1;
 		return;
 	}
+}
+
+void UI_ListPaneActive(struct list_pane *p, int active)
+{
+	p->active = active;
 }
 

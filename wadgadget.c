@@ -112,7 +112,8 @@ void show_accelerators()
 
 int main(int argc, char *argv[])
 {
-	struct list_pane *pane1, *pane2;
+	struct list_pane *panes[2];
+	unsigned int active = 0;
 	WINDOW *pane;
 
 	initscr();
@@ -129,25 +130,43 @@ int main(int argc, char *argv[])
 	refresh();
 	show_header();
 
-	pane1 = UI_NewWadPane(
+	panes[0] = UI_NewWadPane(
 		newwin(23, FILE_PANE_WIDTH, 1, 0),
 		W_OpenFile("doom2.wad"));
-	UI_DrawListPane(pane1);
-
-	pane2 = UI_NewDirectoryPane(
+	panes[1] = UI_NewDirectoryPane(
 		newwin(23, FILE_PANE_WIDTH, 1, 80 - FILE_PANE_WIDTH),
 		"/home/fraggle");
-	UI_DrawListPane(pane2);
+	UI_ListPaneActive(panes[active], 1);
 
 	show_info_box();
 	show_middle_accelerators();
 	show_search_box();
 
 	for (;;) {
-		int key = getch();
-		UI_ListPaneInput(pane1, key);
-		UI_DrawListPane(pane1);
-		UI_DrawListPane(pane2);
+		int key;
+		UI_DrawListPane(panes[0]);
+		UI_DrawListPane(panes[1]);
+		key = getch();
+		switch (key) {
+		case KEY_LEFT:
+			active = 0;
+			UI_ListPaneActive(panes[0], 1);
+			UI_ListPaneActive(panes[1], 0);
+			break;
+		case KEY_RIGHT:
+			active = 1;
+			UI_ListPaneActive(panes[0], 0);
+			UI_ListPaneActive(panes[1], 1);
+			break;
+		case '\t':
+			UI_ListPaneActive(panes[active], 0);
+			active = !active;
+			UI_ListPaneActive(panes[active], 1);
+			break;
+		default:
+			UI_ListPaneInput(panes[active], key);
+			break;
+		}
 	}
 	endwin();
 }
