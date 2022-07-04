@@ -48,6 +48,9 @@ struct directory_pane *UI_NewDirectoryPane(WINDOW *pane, const char *path)
 		if (dirent == NULL) {
 			break;
 		}
+		if (!strcmp(dirent->d_name, ".")) {
+			continue;
+		}
 		path = strdup(dirent->d_name);
 		assert(path != NULL);
 
