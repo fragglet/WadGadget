@@ -17,6 +17,7 @@ struct vfile_functions {
 };
 
 VFILE *vfopen(void *handle, struct vfile_functions *funcs);
+VFILE *vfrestrict(VFILE *inner, long start, long end, int ro);
 VFILE *vfwrapfile(FILE *stream);
 
 size_t vfread(void *ptr, size_t size, size_t nitems, VFILE *stream);
