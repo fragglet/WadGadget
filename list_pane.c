@@ -18,17 +18,25 @@ static void DrawEntry(struct list_pane *p, unsigned int idx,
                       unsigned int y)
 {
 	const char *str;
-	char buf[20];
+	static char buf[128];
+	unsigned int w, h;
+
+	getmaxyx(p->pane, h, w);
+	w -= 2;
+	if (w > sizeof(buf)) {
+		w = sizeof(buf);
+	}
 
 	if (idx == 0) {
-		snprintf(buf, sizeof(buf), "<- %s", p->parent_dir);
+		snprintf(buf, w, "^- %s",
+		         p->parent_dir != NULL ? p->parent_dir : "");
 		wattron(p->pane, COLOR_PAIR(PAIR_SPECIAL));
 	} else {
 		str = p->get_entry_str(p, idx - 1);
 		if (str == NULL) {
 			return;
 		}
-		snprintf(buf, sizeof(buf), " %-20s", str);
+		snprintf(buf, w, " %-200s", str);
 	}
 	if (p->active && idx == p->selected) {
 		wattron(p->pane, A_REVERSE);
