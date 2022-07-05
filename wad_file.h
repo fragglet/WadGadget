@@ -1,4 +1,5 @@
 
+#include "blob_list.h"
 #include "vfile.h"
 
 struct wad_file;

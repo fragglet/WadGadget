@@ -8,6 +8,7 @@
 #include "wad_file.h"
 
 struct wad_file {
+	struct blob_list bl;
 	VFILE *vfs;
 	struct wad_file_entry *directory;
 	int num_lumps;
@@ -17,14 +18,14 @@ struct wad_file {
 	unsigned int current_lump_index;
 };
 
-struct wad_file *W_OpenFile(const char *file)
+struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;
 	struct wad_file_header hdr;
 	FILE *fs;
 	VFILE *vfs;
 
-	fs = fopen(file, "r");
+	fs = fopen(filename, "r");
 	if (fs == NULL) {
 		return NULL;
 	}
@@ -44,6 +45,7 @@ struct wad_file *W_OpenFile(const char *file)
 	assert(result->directory != NULL);
 	assert(vfread(result->directory, sizeof(struct wad_file_entry),
 	              hdr.num_lumps, vfs) == hdr.num_lumps);
+	BL_SetPathFields(&result->bl, filename);
 
 	return result;
 }
@@ -61,6 +63,9 @@ unsigned int W_NumLumps(struct wad_file *f)
 void W_CloseFile(struct wad_file *f)
 {
 	vfclose(f->vfs);
+	free(f->directory);
+	free(f->bl.parent_dir);
+	free(f->bl.name);
 	free(f);
 }
 

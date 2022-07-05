@@ -67,7 +67,7 @@ struct list_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
 	p = calloc(1, sizeof(struct wad_pane));
 	p->pane.pane = pane;
 	p->pane.type = PANE_TYPE_WAD;
-	p->pane.title = "foobar.wad";
+	p->pane.title = ((struct blob_list *) f)->name;
 	p->pane.get_entry_str = GetEntry;
 	p->pane.get_actions = GetActions;
 	p->f = f;

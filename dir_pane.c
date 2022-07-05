@@ -69,7 +69,7 @@ struct list_pane *UI_NewDirectoryPane(
 
 	p = calloc(1, sizeof(struct directory_pane));
 	p->pane.pane = pane;
-	p->pane.title = "/fake";
+	p->pane.title = ((struct blob_list *) dir)->name;
 	p->pane.type = PANE_TYPE_DIR;
 	p->pane.get_actions = GetActions;
 	p->pane.get_entry_str = GetEntry;

@@ -11,6 +11,9 @@
 #include "ui.h"
 
 struct directory_listing {
+	struct blob_list bl;
+	char *parent_dir;
+	char *filename;
 	struct directory_entry *files;
 	unsigned int num_files;
 };
@@ -25,6 +28,7 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 	dir = opendir(path);
 	assert(dir != NULL);
 
+	BL_SetPathFields(&d->bl, path);
 	d->files = NULL;
 	d->num_files = 0;
 	for (;;)
