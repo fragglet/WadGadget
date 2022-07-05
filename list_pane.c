@@ -34,6 +34,10 @@ static void DrawEntry(struct list_pane *p, unsigned int idx,
 		             p->blob_list->parent_dir : "");
 		wattron(p->pane, COLOR_PAIR(PAIR_SPECIAL));
 	} else {
+		if (UI_ListPaneEntryType(p, idx) == BLOB_TYPE_DIR) {
+			wattron(p->pane, COLOR_PAIR(PAIR_SPECIAL));
+			wattron(p->pane, A_BOLD);
+		}
 		str = p->blob_list->get_entry_str(p->blob_list, idx - 1);
 		if (str == NULL) {
 			return;
@@ -46,6 +50,7 @@ static void DrawEntry(struct list_pane *p, unsigned int idx,
 	mvwaddstr(p->pane, 1 + y, 1, buf);
 	waddstr(p->pane, " ");
 	wattroff(p->pane, A_REVERSE);
+	wattroff(p->pane, A_BOLD);
 	wattroff(p->pane, COLOR_PAIR(PAIR_SPECIAL));
 }
 
