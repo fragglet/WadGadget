@@ -145,3 +145,8 @@ const char *UI_ListPaneEntryPath(struct list_pane *p, unsigned int idx)
 	return p->blob_list->get_entry_path(p->blob_list, idx - 1);
 }
 
+void UI_ListPaneFree(struct list_pane *p)
+{
+	free(p);
+}
+

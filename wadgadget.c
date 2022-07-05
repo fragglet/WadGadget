@@ -9,6 +9,7 @@
 
 static WINDOW *pane_windows[2];
 static struct list_pane *panes[2];
+static void *pane_data[2];
 static unsigned int active_pane = 0;
 static WINDOW *actions_win, *info_win, *search_win, *header_win;
 static int main_loop_exited = 0;
@@ -149,23 +150,24 @@ static void SetWindowSizes(void)
 
 static void NavigateNew(void)
 {
-	enum blob_type bt;
 	struct list_pane *pane = panes[active_pane];
+	struct list_pane *new_pane = NULL;
+	void *new_data;
+	enum blob_type bt;
 	const char *path;
 	bt = UI_ListPaneEntryType(pane, pane->selected);
 	path = UI_ListPaneEntryPath(pane, pane->selected);
 
-	// TODO: Memory management: we must discard the old pane and directory
-	// data when navigating to a new place.
 	switch (bt) {
 	case BLOB_TYPE_DIR:
-		panes[active_pane] = UI_NewDirectoryPane(
-			pane_windows[active_pane], DIR_ReadDirectory(path));
+		new_data = DIR_ReadDirectory(path);
+		new_pane = UI_NewDirectoryPane(
+			pane_windows[active_pane], new_data);
 		break;
 
 	case BLOB_TYPE_WAD:
-		panes[active_pane] = UI_NewWadPane(pane_windows[active_pane],
-			W_OpenFile(path));
+		new_data = W_OpenFile(path);
+		new_pane = UI_NewWadPane(pane_windows[active_pane], new_data);
 		break;
 
 	default:
@@ -173,7 +175,13 @@ static void NavigateNew(void)
 		break;
 	}
 
-	UI_ListPaneActive(panes[active_pane], 1);
+	if (new_pane != NULL) {
+		BL_FreeList(pane_data[active_pane]);
+		UI_ListPaneFree(pane);
+		panes[active_pane] = new_pane;
+		pane_data[active_pane] = new_data;
+		UI_ListPaneActive(panes[active_pane], 1);
+	}
 }
 
 static void HandleKeypress(int key)
@@ -234,11 +242,12 @@ int main(int argc, char *argv[])
 	                     6, FILE_PANE_WIDTH);
 	pane_windows[0] = newwin(
 		ScreenLines() - 1, FILE_PANE_WIDTH, 1, 0);
-	panes[0] = UI_NewWadPane(pane_windows[0], W_OpenFile("doom2.wad"));
+	pane_data[0] = W_OpenFile("doom2.wad");
+	panes[0] = UI_NewWadPane(pane_windows[0], pane_data[0]);
 	pane_windows[1] = newwin(ScreenLines() - 1, FILE_PANE_WIDTH,
 		1, 80 - FILE_PANE_WIDTH);
-	panes[1] = UI_NewDirectoryPane(pane_windows[1],
-		DIR_ReadDirectory("/home/fraggle"));
+	pane_data[1] = DIR_ReadDirectory("/home/fraggle");
+	panes[1] = UI_NewDirectoryPane(pane_windows[1], pane_data[1]);
 	UI_ListPaneActive(panes[active_pane], 1);
 
 	SetWindowSizes();

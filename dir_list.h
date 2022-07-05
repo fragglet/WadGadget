@@ -5,7 +5,7 @@
 struct directory_listing;
 
 struct directory_entry {
-	const char *filename;
+	char *filename;
 	int is_subdirectory;
 };
 

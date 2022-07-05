@@ -18,9 +18,11 @@ struct blob_list {
 	const char *(*get_entry_str)(struct blob_list *p, unsigned int i);
 	enum blob_type (*get_entry_type)(struct blob_list *l, unsigned int idx);
 	const char *(*get_entry_path)(struct blob_list *l, unsigned int idx);
+	void (*free)(struct blob_list *bl);
 };
 
 void BL_SetPathFields(void *bl, const char *path);
+void BL_FreeList(void *bl);
 
 #endif /* #ifndef INCLUDED_BLOB_LIST_H */
 

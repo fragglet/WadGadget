@@ -34,6 +34,11 @@ static enum blob_type GetEntryType(struct blob_list *l, unsigned int idx)
 	return BLOB_TYPE_LUMP;
 }
 
+static void FreeWadFile(struct blob_list *l)
+{
+	W_CloseFile((struct wad_file *) l);
+}
+
 struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;
@@ -58,6 +63,7 @@ struct wad_file *W_OpenFile(const char *filename)
 	result->vfs = vfs;
 	result->bl.get_entry_str = GetEntry;
 	result->bl.get_entry_type = GetEntryType;
+	result->bl.free = FreeWadFile;
 	result->num_lumps = hdr.num_lumps;
 	result->directory = calloc(hdr.num_lumps, sizeof(struct wad_file_entry));
 	assert(result->directory != NULL);
@@ -80,6 +86,9 @@ unsigned int W_NumLumps(struct wad_file *f)
 
 void W_CloseFile(struct wad_file *f)
 {
+	if (f->current_lump != NULL) {
+		vfclose(f->current_lump);
+	}
 	vfclose(f->vfs);
 	free(f->directory);
 	free(f->bl.path);

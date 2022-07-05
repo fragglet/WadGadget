@@ -12,8 +12,6 @@
 
 struct directory_listing {
 	struct blob_list bl;
-	char *parent_dir;
-	char *filename;
 	struct directory_entry *files;
 	unsigned int num_files;
 };
@@ -63,6 +61,20 @@ static const char *GetEntryPath(struct blob_list *l, unsigned int idx)
 	return result_buf;
 }
 
+static void FreeDirectory(struct blob_list *l)
+{
+	struct directory_listing *dir = (struct directory_listing *) l;
+	int i;
+	free(dir->bl.path);
+	free(dir->bl.parent_dir);
+	free(dir->bl.name);
+	for (i = 0; i < dir->num_files; i++) {
+		free(dir->files[i].filename);
+	}
+	free(dir->files);
+	free(dir);
+}
+
 struct directory_listing *DIR_ReadDirectory(const char *path)
 {
 	struct directory_listing *d;
@@ -72,6 +84,7 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 	d->bl.get_entry_str = GetEntry;
 	d->bl.get_entry_type = GetEntryType;
 	d->bl.get_entry_path = GetEntryPath;
+	d->bl.free = FreeDirectory;
 	dir = opendir(path);
 	assert(dir != NULL);
 

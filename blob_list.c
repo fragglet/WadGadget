@@ -30,3 +30,9 @@ void BL_SetPathFields(void *_bl, const char *path)
 	}
 }
 
+void BL_FreeList(void *ptr)
+{
+	struct blob_list *bl = ptr;
+	bl->free(bl);
+}
+
