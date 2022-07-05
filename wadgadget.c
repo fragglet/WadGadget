@@ -26,6 +26,7 @@ static unsigned int ScreenColumns(void)
 {
 	int x, y;
 	getmaxyx(stdscr, y, x);
+	y = y;
 	return x;
 }
 
@@ -33,6 +34,7 @@ static unsigned int ScreenLines(void)
 {
 	int x, y;
 	getmaxyx(stdscr, y, x);
+	x = x;
 	return y;
 }
 
@@ -187,7 +189,6 @@ int main(int argc, char *argv[])
 
 	refresh();
 
-	WINDOW *header;
 	header_win = newwin(1, 80, 0, 0);
 	info_win = newwin(5, 80 - (FILE_PANE_WIDTH * 2),
 	                  1, FILE_PANE_WIDTH);

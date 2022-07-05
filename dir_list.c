@@ -22,7 +22,6 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 {
 	struct directory_listing *d;
 	DIR *dir;
-	struct dirent *dirent;
 
 	d = calloc(1, sizeof(struct directory_listing));
 	dir = opendir(path);

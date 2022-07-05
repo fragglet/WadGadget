@@ -11,6 +11,7 @@ static unsigned int Lines(struct list_pane *p)
 {
 	int x, y;
 	getmaxyx(p->pane, y, x);
+	x = x;
 	return y - 2;
 }
 
@@ -22,7 +23,7 @@ static void DrawEntry(struct list_pane *p, unsigned int idx,
 	unsigned int w, h;
 
 	getmaxyx(p->pane, h, w);
-	w -= 2;
+	w -= 2; h = h;
 	if (w > sizeof(buf)) {
 		w = sizeof(buf);
 	}

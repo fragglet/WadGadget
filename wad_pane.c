@@ -38,14 +38,14 @@ static const struct list_pane_action wad_to_dir[] = {
 static const struct list_pane_action *GetActions(struct list_pane *other)
 {
 	switch (other->type) {
-		case PANE_TYPE_NONE:
-			return NULL;
-
 		case PANE_TYPE_DIR:
 			return wad_to_dir;
 
 		case PANE_TYPE_WAD:
 			return wad_to_wad;
+
+		default:
+			return NULL;
 	}
 }
 

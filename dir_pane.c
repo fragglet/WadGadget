@@ -40,14 +40,14 @@ static const struct list_pane_action dir_to_dir[] = {
 static const struct list_pane_action *GetActions(struct list_pane *other)
 {
 	switch (other->type) {
-		case PANE_TYPE_NONE:
-			return NULL;
-
 		case PANE_TYPE_DIR:
 			return dir_to_dir;
 
 		case PANE_TYPE_WAD:
 			return dir_to_wad;
+
+		default:
+			return NULL;
 	}
 }
 
@@ -84,7 +84,6 @@ struct list_pane *UI_NewDirectoryPane(
 	WINDOW *pane, struct directory_listing *dir)
 {
 	struct directory_pane *p;
-	struct dirent *dirent;
 
 	p = calloc(1, sizeof(struct directory_pane));
 	p->pane.pane = pane;
