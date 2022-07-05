@@ -75,6 +75,12 @@ static void FreeDirectory(struct blob_list *l)
 	free(dir);
 }
 
+static int OrderByName(const void *x, const void *y)
+{
+	const struct directory_entry *dx = x, *dy = y;
+	return strcasecmp(dx->filename, dy->filename);
+}
+
 struct directory_listing *DIR_ReadDirectory(const char *path)
 {
 	struct directory_listing *d;
@@ -115,6 +121,9 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 	}
 
 	closedir(dir);
+
+	qsort(d->files, d->num_files, sizeof(struct directory_entry),
+	      OrderByName);
 
 	return d;
 }
