@@ -57,6 +57,7 @@ struct list_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
 	p->pane.type = PANE_TYPE_WAD;
 	p->pane.blob_list = (struct blob_list *) f;
 	p->pane.get_actions = GetActions;
+	p->pane.selected = 1;
 	p->f = f;
 	return &p->pane;
 }

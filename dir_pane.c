@@ -61,6 +61,7 @@ struct list_pane *UI_NewDirectoryPane(
 	p->pane.type = PANE_TYPE_DIR;
 	p->pane.blob_list = (struct blob_list *) dir;
 	p->pane.get_actions = GetActions;
+	p->pane.selected = 1;
 	p->dir = dir;
 
 	return &p->pane;
