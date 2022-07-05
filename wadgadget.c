@@ -229,7 +229,8 @@ int main(int argc, char *argv[])
 
 	init_pair(PAIR_PANE_COLOR, COLOR_WHITE, COLOR_BLUE);
 	init_pair(PAIR_HIGHLIGHT, COLOR_BLACK, COLOR_CYAN);
-	init_pair(PAIR_SPECIAL, COLOR_CYAN, COLOR_BLACK);
+	init_pair(PAIR_DIRECTORY, COLOR_CYAN, COLOR_BLACK);
+	init_pair(PAIR_WAD_FILE, COLOR_RED, COLOR_BLACK);
 
 	refresh();
 

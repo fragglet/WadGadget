@@ -32,15 +32,22 @@ static void DrawEntry(struct list_pane *p, unsigned int idx,
 		snprintf(buf, w, "^- %s",
 		         p->blob_list->parent_dir != NULL ?
 		             p->blob_list->parent_dir : "");
-		wattron(p->pane, COLOR_PAIR(PAIR_SPECIAL));
+		wattron(p->pane, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
-		if (UI_ListPaneEntryType(p, idx) == BLOB_TYPE_DIR) {
-			wattron(p->pane, COLOR_PAIR(PAIR_SPECIAL));
-			wattron(p->pane, A_BOLD);
-		}
 		str = p->blob_list->get_entry_str(p->blob_list, idx - 1);
 		if (str == NULL) {
 			return;
+		}
+		switch (UI_ListPaneEntryType(p, idx)) {
+			case BLOB_TYPE_DIR:
+				wattron(p->pane, COLOR_PAIR(PAIR_DIRECTORY));
+				wattron(p->pane, A_BOLD);
+				break;
+			case BLOB_TYPE_WAD:
+				wattron(p->pane, COLOR_PAIR(PAIR_WAD_FILE));
+				break;
+			default:
+				break;
 		}
 		snprintf(buf, w, " %-200s", str);
 	}
@@ -51,7 +58,8 @@ static void DrawEntry(struct list_pane *p, unsigned int idx,
 	waddstr(p->pane, " ");
 	wattroff(p->pane, A_REVERSE);
 	wattroff(p->pane, A_BOLD);
-	wattroff(p->pane, COLOR_PAIR(PAIR_SPECIAL));
+	wattroff(p->pane, COLOR_PAIR(PAIR_DIRECTORY));
+	wattroff(p->pane, COLOR_PAIR(PAIR_WAD_FILE));
 }
 
 void UI_DrawListPane(struct list_pane *p)
