@@ -185,6 +185,7 @@ static struct vfile_functions restricted_io_functions = {
 VFILE *vfrestrict(VFILE *inner, long start, long end, int ro)
 {
 	struct restricted_vfile *restricted;
+	assert(vfseek(inner, start) == 0);
 	restricted = calloc(1, sizeof(struct restricted_vfile));
 	assert(restricted != NULL);
 	restricted->inner = inner;
