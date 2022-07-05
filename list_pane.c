@@ -30,7 +30,8 @@ static void DrawEntry(struct list_pane *p, unsigned int idx,
 
 	if (idx == 0) {
 		snprintf(buf, w, "^- %s",
-		         p->parent_dir != NULL ? p->parent_dir : "");
+		         p->blob_list->parent_dir != NULL ?
+		             p->blob_list->parent_dir : "");
 		wattron(p->pane, COLOR_PAIR(PAIR_SPECIAL));
 	} else {
 		str = p->get_entry_str(p, idx - 1);
@@ -59,7 +60,7 @@ void UI_DrawListPane(struct list_pane *p)
 		wattron(p->pane, A_REVERSE);
 	}
 	mvwaddstr(p->pane, 0, 3, " ");
-	waddstr(p->pane, p->title);
+	waddstr(p->pane, p->blob_list->name);
 	waddstr(p->pane, " ");
 	wattroff(p->pane, A_REVERSE);
 	wattroff(p->pane, COLOR_PAIR(PAIR_PANE_COLOR));

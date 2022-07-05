@@ -6,6 +6,7 @@
 #define INCLUDED_BLOB_LIST_H
 
 struct blob_list {
+	char *path;
 	char *parent_dir, *name;
 };
 

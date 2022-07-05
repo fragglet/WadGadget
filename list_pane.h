@@ -3,6 +3,8 @@
 
 #include <curses.h>
 
+#include "blob_list.h"
+
 enum list_pane_type {
 	PANE_TYPE_NONE,
 	PANE_TYPE_DIR,
@@ -22,11 +24,10 @@ struct list_pane_action {
 
 struct list_pane {
 	WINDOW *pane;
+	struct blob_list *blob_list;
 	enum list_pane_type type;
 	unsigned int window_offset, selected;
 	unsigned int active;
-	const char *parent_dir;
-	const char *title;
 	const char *(*get_entry_str)(struct list_pane *p, unsigned int i);
 	const struct list_pane_action *(*get_actions)(struct list_pane *other);
 	enum list_pane_entry_type (*get_entry_type)(

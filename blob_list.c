@@ -9,6 +9,8 @@ void BL_SetPathFields(void *_bl, const char *path)
 {
 	struct blob_list *bl = _bl;
 	char *s;
+	bl->path = strdup(path);
+	assert(bl->path != NULL);
 	s = strrchr(path, '/');
 	if (s != NULL) {
 		bl->parent_dir = strdup(path);
