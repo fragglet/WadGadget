@@ -34,6 +34,7 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 	for (;;)
 	{
 		struct dirent *dirent = readdir(dir);
+		struct directory_entry *ent;
 		char *path;
 		if (dirent == NULL) {
 			break;
@@ -47,7 +48,9 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 		d->files = realloc(d->files,
 			sizeof(struct directory_entry) * (d->num_files + 1));
 		assert(d->files != NULL);
-		d->files[d->num_files].filename = path;
+		ent = &d->files[d->num_files];
+		ent->filename = path;
+		ent->is_subdirectory = dirent->d_type == DT_DIR;
 		++d->num_files;
 	}
 

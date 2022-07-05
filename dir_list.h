@@ -6,7 +6,7 @@ struct directory_listing;
 
 struct directory_entry {
 	const char *filename;
-	// TODO: Others
+	int is_subdirectory;
 };
 
 struct directory_listing *DIR_ReadDirectory(const char *path);

@@ -61,6 +61,12 @@ static const char *GetEntry(struct list_pane *l, unsigned int idx)
 	return buf;
 }
 
+static enum list_pane_entry_type GetEntryType(
+	struct list_pane *l, unsigned int idx)
+{
+	return PANE_ENTRY_LUMP;
+}
+
 struct list_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
 {
 	struct wad_pane *p;
@@ -71,6 +77,7 @@ struct list_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
 	p->pane.title = ((struct blob_list *) f)->name;
 	p->pane.get_entry_str = GetEntry;
 	p->pane.get_actions = GetActions;
+	p->pane.get_entry_type = GetEntryType;
 	p->f = f;
 	return &p->pane;
 }

@@ -125,3 +125,12 @@ const struct list_pane_action *UI_ListPaneActions(
 	return p->get_actions(other);
 }
 
+enum list_pane_entry_type UI_ListPaneEntryType(
+	struct list_pane *p, unsigned int idx)
+{
+	if (idx == 0) {
+		return PANE_ENTRY_DIR;
+	}
+	return p->get_entry_type(p, idx - 1);
+}
+
