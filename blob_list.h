@@ -1,4 +1,7 @@
 
+// For want of a better name.
+// Things that are in common between WAD files and directory lists.
+
 #ifndef INCLUDED_BLOB_LIST_H
 #define INCLUDED_BLOB_LIST_H
 

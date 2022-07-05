@@ -38,8 +38,7 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 		if (dirent == NULL) {
 			break;
 		}
-		if (dirent->d_name[0] == '.'
-		 && strcmp(dirent->d_name, "..") != 0) {
+		if (dirent->d_name[0] == '.') {
 			continue;
 		}
 		path = strdup(dirent->d_name);

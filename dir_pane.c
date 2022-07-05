@@ -69,6 +69,7 @@ struct list_pane *UI_NewDirectoryPane(
 
 	p = calloc(1, sizeof(struct directory_pane));
 	p->pane.pane = pane;
+	p->pane.parent_dir = ((struct blob_list *) dir)->parent_dir;
 	p->pane.title = ((struct blob_list *) dir)->name;
 	p->pane.type = PANE_TYPE_DIR;
 	p->pane.get_actions = GetActions;

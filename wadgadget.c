@@ -3,9 +3,7 @@
 
 #include "dir_pane.h"
 #include "wad_pane.h"
-
-#define PAIR_PANE_COLOR 1
-#define PAIR_HIGHLIGHT  2
+#include "ui.h"
 
 #define FILE_PANE_WIDTH 27
 
@@ -160,6 +158,7 @@ int main(int argc, char *argv[])
 
 	init_pair(PAIR_PANE_COLOR, COLOR_WHITE, COLOR_BLUE);
 	init_pair(PAIR_HIGHLIGHT, COLOR_BLACK, COLOR_CYAN);
+	init_pair(PAIR_SPECIAL, COLOR_CYAN, COLOR_BLACK);
 
 	refresh();
 

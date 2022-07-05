@@ -14,10 +14,34 @@ static unsigned int Lines(struct list_pane *p)
 	return y - 2;
 }
 
-void UI_DrawListPane(struct list_pane *p)
+static void DrawEntry(struct list_pane *p, unsigned int idx,
+                      unsigned int y)
 {
 	const char *str;
-	unsigned int idx, y;
+	char buf[20];
+
+	if (idx == 0) {
+		snprintf(buf, sizeof(buf), "<- %s", p->parent_dir);
+		wattron(p->pane, COLOR_PAIR(PAIR_SPECIAL));
+	} else {
+		str = p->get_entry_str(p, idx - 1);
+		if (str == NULL) {
+			return;
+		}
+		snprintf(buf, sizeof(buf), " %-20s", str);
+	}
+	if (p->active && idx == p->selected) {
+		wattron(p->pane, A_REVERSE);
+	}
+	mvwaddstr(p->pane, 1 + y, 1, buf);
+	waddstr(p->pane, " ");
+	wattroff(p->pane, A_REVERSE);
+	wattroff(p->pane, COLOR_PAIR(PAIR_SPECIAL));
+}
+
+void UI_DrawListPane(struct list_pane *p)
+{
+	unsigned int y;
 
 	werase(p->pane);
 	wattron(p->pane, COLOR_PAIR(PAIR_PANE_COLOR));
@@ -32,20 +56,7 @@ void UI_DrawListPane(struct list_pane *p)
 	wattroff(p->pane, COLOR_PAIR(PAIR_PANE_COLOR));
 
 	for (y = 0; y < Lines(p); y++) {
-		char buf[20];
-		idx = p->window_offset + y;
-		str = p->get_entry_str(p, idx);
-		if (str == NULL) {
-			continue;
-		}
-		snprintf(buf, sizeof(buf), "%-20s", str);
-		if (p->active && idx == p->selected) {
-			wattron(p->pane, A_REVERSE);
-		}
-		mvwaddstr(p->pane, 1 + y, 1, " ");
-		waddstr(p->pane, buf);
-		waddstr(p->pane, " ");
-		wattroff(p->pane, A_REVERSE);
+		DrawEntry(p, p->window_offset + y, y);
 	}
 
 	wrefresh(p->pane);

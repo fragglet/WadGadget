@@ -19,6 +19,7 @@ struct list_pane {
 	enum list_pane_type type;
 	unsigned int window_offset, selected;
 	unsigned int active;
+	const char *parent_dir;
 	const char *title;
 	const char *(*get_entry_str)(struct list_pane *p, unsigned int i);
 	const struct list_pane_action *(*get_actions)(struct list_pane *other);
