@@ -21,22 +21,25 @@ struct directory_listing {
 static const char *GetEntry(struct blob_list *l, unsigned int idx)
 {
 	struct directory_listing *dir = (struct directory_listing *) l;
-	const struct directory_entry *result = DIR_GetFile(dir, idx);
-	if (result != NULL) {
-		return result->filename;
+	if (idx >= dir->num_files) {
+		return NULL;
 	}
-	return NULL;
+	return dir->files[idx].filename;
 }
 
 static enum blob_type GetEntryType(struct blob_list *l, unsigned int idx)
 {
 	struct directory_listing *dir = (struct directory_listing *) l;
-	const struct directory_entry *ent = DIR_GetFile(dir, idx);
+	const struct directory_entry *ent;
+	if (idx >= dir->num_files) {
+		return BLOB_TYPE_FILE;
+	}
+	ent = &dir->files[idx];
 
 	if (ent->is_subdirectory) {
 		return BLOB_TYPE_DIR;
 	} else {
-		const char *extn = strlen(ent->filename) > 4 ? ""
+		const char *extn = strlen(ent->filename) < 4 ? ""
 		                 : ent->filename + strlen(ent->filename) - 4;
 		if (!strcasecmp(extn, ".wad")) {
 			return BLOB_TYPE_WAD;
@@ -44,6 +47,20 @@ static enum blob_type GetEntryType(struct blob_list *l, unsigned int idx)
 			return BLOB_TYPE_FILE;
 		}
 	}
+}
+
+static const char *GetEntryPath(struct blob_list *l, unsigned int idx)
+{
+	static char result_buf[128];
+	struct directory_listing *dir = (struct directory_listing *) l;
+	const struct directory_entry *ent;
+	if (idx >= dir->num_files) {
+		return NULL;
+	}
+	ent = &dir->files[idx];
+	snprintf(result_buf, sizeof(result_buf),
+	         "%s/%s", dir->bl.path, ent->filename);
+	return result_buf;
 }
 
 struct directory_listing *DIR_ReadDirectory(const char *path)
@@ -54,6 +71,7 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 	d = calloc(1, sizeof(struct directory_listing));
 	d->bl.get_entry_str = GetEntry;
 	d->bl.get_entry_type = GetEntryType;
+	d->bl.get_entry_path = GetEntryPath;
 	dir = opendir(path);
 	assert(dir != NULL);
 
@@ -82,6 +100,8 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 		ent->is_subdirectory = dirent->d_type == DT_DIR;
 		++d->num_files;
 	}
+
+	closedir(dir);
 
 	return d;
 }

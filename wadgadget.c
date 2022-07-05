@@ -146,6 +146,35 @@ static void SetWindowSizes(void)
 	refresh();
 }
 
+static void NavigateNew(void)
+{
+	enum blob_type bt;
+	struct list_pane *pane = panes[active_pane];
+	const char *path;
+	bt = UI_ListPaneEntryType(pane, pane->selected);
+	path = UI_ListPaneEntryPath(pane, pane->selected);
+
+	// TODO: Memory management: we must discard the old pane and directory
+	// data when navigating to a new place.
+	switch (bt) {
+	case BLOB_TYPE_DIR:
+		panes[active_pane] = UI_NewDirectoryPane(
+			pane_windows[active_pane], DIR_ReadDirectory(path));
+		break;
+
+	case BLOB_TYPE_WAD:
+		panes[active_pane] = UI_NewWadPane(pane_windows[active_pane],
+			W_OpenFile(path));
+		break;
+
+	default:
+		// TODO: Do something else, like display file contents.
+		break;
+	}
+
+	UI_ListPaneActive(panes[active_pane], 1);
+}
+
 static void HandleKeypress(int key)
 {
 	switch (key) {
@@ -161,6 +190,9 @@ static void HandleKeypress(int key)
 		break;
 	case KEY_RESIZE:
 		SetWindowSizes();
+		break;
+	case '\r':
+		NavigateNew();
 		break;
 	case '\t':
 		UI_ListPaneActive(panes[active_pane], 0);
