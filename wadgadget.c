@@ -11,6 +11,7 @@ static WINDOW *pane_windows[2];
 static struct list_pane *panes[2];
 static unsigned int active_pane = 0;
 static WINDOW *actions_win, *info_win, *search_win, *header_win;
+static int main_loop_exited = 0;
 
 struct list_pane_action common_actions[] =
 {
@@ -199,6 +200,9 @@ static void HandleKeypress(int key)
 		active_pane = !active_pane;
 		UI_ListPaneActive(panes[active_pane], 1);
 		break;
+	case 27:
+		main_loop_exited = 1;
+		break;
 	default:
 		UI_ListPaneInput(panes[active_pane], key);
 		break;
@@ -239,7 +243,7 @@ int main(int argc, char *argv[])
 
 	SetWindowSizes();
 
-	for (;;) {
+	while (!main_loop_exited) {
 		int key;
 
 		ShowHeader();
