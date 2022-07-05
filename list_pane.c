@@ -34,7 +34,7 @@ static void DrawEntry(struct list_pane *p, unsigned int idx,
 		             p->blob_list->parent_dir : "");
 		wattron(p->pane, COLOR_PAIR(PAIR_SPECIAL));
 	} else {
-		str = p->get_entry_str(p, idx - 1);
+		str = p->blob_list->get_entry_str(p->blob_list, idx - 1);
 		if (str == NULL) {
 			return;
 		}
@@ -95,7 +95,8 @@ void UI_ListPaneInput(struct list_pane *p, int key)
 		p->window_offset = 0;
 		return;
 	case KEY_DOWN:
-		if (p->get_entry_str(p, p->selected + 1) != NULL) {
+		if (p->blob_list->get_entry_str(
+			p->blob_list, p->selected + 1) != NULL) {
 			++p->selected;
 		}
 		if (p->selected > p->window_offset + Lines(p) - 1) {
@@ -108,7 +109,8 @@ void UI_ListPaneInput(struct list_pane *p, int key)
 		}
 		return;
 	case KEY_END:
-		while (p->get_entry_str(p, p->selected + 1) != NULL) {
+		while (p->blob_list->get_entry_str(
+				p->blob_list, p->selected + 1) != NULL) {
 			++p->selected;
 		}
 		p->window_offset = p->selected - Lines(p) + 1;
@@ -127,12 +129,19 @@ const struct list_pane_action *UI_ListPaneActions(
 	return p->get_actions(other);
 }
 
-enum list_pane_entry_type UI_ListPaneEntryType(
-	struct list_pane *p, unsigned int idx)
+enum blob_type UI_ListPaneEntryType(struct list_pane *p, unsigned int idx)
 {
 	if (idx == 0) {
-		return PANE_ENTRY_DIR;
+		return BLOB_TYPE_DIR;
 	}
-	return p->get_entry_type(p, idx - 1);
+	return p->blob_list->get_entry_type(p->blob_list, idx - 1);
+}
+
+const char *UI_ListPaneEntryPath(struct list_pane *p, unsigned int idx)
+{
+	if (idx == 0) {
+		return p->blob_list->parent_dir;
+	}
+	return p->blob_list->get_entry_path(p->blob_list, idx - 1);
 }
 

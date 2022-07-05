@@ -18,12 +18,42 @@ struct directory_listing {
 	unsigned int num_files;
 };
 
+static const char *GetEntry(struct blob_list *l, unsigned int idx)
+{
+	struct directory_listing *dir = (struct directory_listing *) l;
+	const struct directory_entry *result = DIR_GetFile(dir, idx);
+	if (result != NULL) {
+		return result->filename;
+	}
+	return NULL;
+}
+
+static enum blob_type GetEntryType(struct blob_list *l, unsigned int idx)
+{
+	struct directory_listing *dir = (struct directory_listing *) l;
+	const struct directory_entry *ent = DIR_GetFile(dir, idx);
+
+	if (ent->is_subdirectory) {
+		return BLOB_TYPE_DIR;
+	} else {
+		const char *extn = strlen(ent->filename) > 4 ? ""
+		                 : ent->filename + strlen(ent->filename) - 4;
+		if (!strcasecmp(extn, ".wad")) {
+			return BLOB_TYPE_WAD;
+		} else {
+			return BLOB_TYPE_FILE;
+		}
+	}
+}
+
 struct directory_listing *DIR_ReadDirectory(const char *path)
 {
 	struct directory_listing *d;
 	DIR *dir;
 
 	d = calloc(1, sizeof(struct directory_listing));
+	d->bl.get_entry_str = GetEntry;
+	d->bl.get_entry_type = GetEntryType;
 	dir = opendir(path);
 	assert(dir != NULL);
 

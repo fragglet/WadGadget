@@ -49,24 +49,6 @@ static const struct list_pane_action *GetActions(struct list_pane *other)
 	}
 }
 
-static const char *GetEntry(struct list_pane *l, unsigned int idx)
-{
-	static char buf[9];
-	struct wad_pane *p = (struct wad_pane *) l;
-	const struct wad_file_entry *directory = W_GetDirectory(p->f);
-	if (idx >= W_NumLumps(p->f)) {
-		return NULL;
-	}
-	snprintf(buf, sizeof(buf), "%-8s", directory[idx].name);
-	return buf;
-}
-
-static enum list_pane_entry_type GetEntryType(
-	struct list_pane *l, unsigned int idx)
-{
-	return PANE_ENTRY_LUMP;
-}
-
 struct list_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
 {
 	struct wad_pane *p;
@@ -74,9 +56,7 @@ struct list_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
 	p->pane.pane = pane;
 	p->pane.type = PANE_TYPE_WAD;
 	p->pane.blob_list = (struct blob_list *) f;
-	p->pane.get_entry_str = GetEntry;
 	p->pane.get_actions = GetActions;
-	p->pane.get_entry_type = GetEntryType;
 	p->f = f;
 	return &p->pane;
 }

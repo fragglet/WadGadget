@@ -18,6 +18,22 @@ struct wad_file {
 	unsigned int current_lump_index;
 };
 
+static const char *GetEntry(struct blob_list *l, unsigned int idx)
+{
+	static char buf[9];
+	struct wad_file *f = (struct wad_file *) l;
+	if (idx >= f->num_lumps) {
+		return NULL;
+	}
+	snprintf(buf, sizeof(buf), "%-8s", f->directory[idx].name);
+	return buf;
+}
+
+static enum blob_type GetEntryType(struct blob_list *l, unsigned int idx)
+{
+	return BLOB_TYPE_LUMP;
+}
+
 struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;
@@ -40,6 +56,8 @@ struct wad_file *W_OpenFile(const char *filename)
 	result = calloc(1, sizeof(struct wad_file));
 	assert(result != NULL);
 	result->vfs = vfs;
+	result->bl.get_entry_str = GetEntry;
+	result->bl.get_entry_type = GetEntryType;
 	result->num_lumps = hdr.num_lumps;
 	result->directory = calloc(hdr.num_lumps, sizeof(struct wad_file_entry));
 	assert(result->directory != NULL);

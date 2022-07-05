@@ -51,35 +51,6 @@ static const struct list_pane_action *GetActions(struct list_pane *other)
 	}
 }
 
-static const char *GetEntry(struct list_pane *l, unsigned int idx)
-{
-	struct directory_pane *p = (struct directory_pane *) l;
-	const struct directory_entry *result = DIR_GetFile(p->dir, idx);
-	if (result != NULL) {
-		return result->filename;
-	}
-	return NULL;
-}
-
-static enum list_pane_entry_type GetEntryType(
-	struct list_pane *l, unsigned int idx)
-{
-	struct directory_pane *p = (struct directory_pane *) l;
-	const struct directory_entry *ent = DIR_GetFile(p->dir, idx);
-
-	if (ent->is_subdirectory) {
-		return PANE_ENTRY_DIR;
-	} else {
-		const char *extn = strlen(ent->filename) > 4 ? ""
-		                 : ent->filename + strlen(ent->filename) - 4;
-		if (!strcasecmp(extn, ".wad")) {
-			return PANE_TYPE_WAD;
-		} else {
-			return PANE_ENTRY_FILE;
-		}
-	}
-}
-
 struct list_pane *UI_NewDirectoryPane(
 	WINDOW *pane, struct directory_listing *dir)
 {
@@ -90,8 +61,6 @@ struct list_pane *UI_NewDirectoryPane(
 	p->pane.type = PANE_TYPE_DIR;
 	p->pane.blob_list = (struct blob_list *) dir;
 	p->pane.get_actions = GetActions;
-	p->pane.get_entry_str = GetEntry;
-	p->pane.get_entry_type = GetEntryType;
 	p->dir = dir;
 
 	return &p->pane;
