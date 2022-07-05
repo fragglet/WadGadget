@@ -23,7 +23,7 @@ static const struct list_pane_action dir_to_wad[] = {
 	{"F6", "Rename"},
 	{"F7", "Mkdir"},
 	{"F8", "Delete"},
-	{"F9", "New WAD"},
+	{"F9", "Make WAD"},
 	{NULL, NULL},
 };
 
@@ -34,7 +34,7 @@ static const struct list_pane_action dir_to_dir[] = {
 	{"F6", "Rename"},
 	{"F7", "Mkdir"},
 	{"F8", "Delete"},
-	{"F9", "New WAD"},
+	{"F9", "Make WAD"},
 	{NULL, NULL},
 };
 

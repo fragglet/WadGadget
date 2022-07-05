@@ -17,8 +17,9 @@ Design ideas
     - Export [format] (to dir)   Export multiple [format]s         F5
     - Export LMP (to dir)        Export multiple LMPs to dir       Alt-F5?
     - Rename                     ? Could be: regex rename          F6, Alt-R
+    - New (empty?) lump?         *                                 F7, Ins
     - Delete                     Delete multiple LMPs              F8, Del
-    - New (empty?) lump?         *                                 F9, Ins
+    - Make WAD                   New WAD containing selected lumps F9
 
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
  F2 Right  F3 Open  F4 Edit  F5 Export >>>  F6 Rename  F8 Delete  F9 New lump
@@ -32,7 +33,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     - Rename file                ? Could be: regex rename          F6, Alt-R
     - Make Directory             ?                                 F7
     - Delete file                Delete multiple files             F8, Del
-    - Convert to WAD             Make WAD containing all selected  F9, Ins
+    - Make WAD                   New WAD containing selected files F9
 
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
  F2 Left  F3 Open  <<< F5 Import  F6 Rename  F7 Mkdir  F8 Delete  F9 New WAD
@@ -45,8 +46,9 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     - Edit                       As above                          F4, Alt-E
     - Copy to other WAD          Copy multiple lumps to other WAD  F5
     - Rename                     As above                          F6, Alt-R
+    - Insert new (empty?) lump?  *                                 F7, Ins
     - Delete                     As above                          F8, Del
-    - Insert new (empty?) lump?  *                                 F9, Ins
+    - Make WAD                   New WAD containing selected lumps F9
 
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
  F2 Right  F3 Open  F4 Edit  F5 Copy >>>  F6 Rename  F8 Delete  F9 New lump
@@ -60,7 +62,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     - Rename file                As above                          F6, Alt-R
     - Make Directory             As above                          F7
     - Delete file                As above                          F8, Del
-    - Convert to WAD             As above                          F9, Ins
+    - Make WAD                   New WAD containing selected files F9
 
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
  F2 Left  F3 Open  <<< F5 Copy  F6 Rename  F7 Mkdir  F8 Delete  F9 New WAD

@@ -18,8 +18,9 @@ static const struct list_pane_action wad_to_wad[] = {
 	{"F4", "Edit"},
 	{"F5", "> Copy"},
 	{"F6", "Rename"},
+	{"F7", "New lump"},
 	{"F8", "Delete"},
-	{"F9", "New lump"},
+	{"F9", "Make WAD"},
 	{NULL, NULL},
 };
 
@@ -28,8 +29,9 @@ static const struct list_pane_action wad_to_dir[] = {
 	{"F4", "Edit"},
 	{"F5", "> Export"},
 	{"F6", "Rename"},
+	{"F7", "New lump"},
 	{"F8", "Delete"},
-	{"F9", "New lump"},
+	{"F9", "Make WAD"},
 	{NULL, NULL},
 };
 
