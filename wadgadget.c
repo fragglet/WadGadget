@@ -176,7 +176,8 @@ int main(int argc, char *argv[])
 	panes[0] = UI_NewWadPane(pane_windows[0], W_OpenFile("doom2.wad"));
 	pane_windows[1] = newwin(ScreenLines() - 1, FILE_PANE_WIDTH,
 		1, 80 - FILE_PANE_WIDTH);
-	panes[1] = UI_NewDirectoryPane(pane_windows[1], "/home/fraggle");
+	panes[1] = UI_NewDirectoryPane(pane_windows[1],
+		DIR_ReadDirectory("/home/fraggle"));
 	UI_ListPaneActive(panes[active_pane], 1);
 
 	SetWindowSizes();
