@@ -13,9 +13,14 @@ void BL_SetPathFields(void *_bl, const char *path)
 	assert(bl->path != NULL);
 	s = strrchr(path, '/');
 	if (s != NULL) {
-		bl->parent_dir = strdup(path);
-		assert(bl->parent_dir != NULL);
-		bl->parent_dir[s - path] = '\0';
+		if (s > path) {
+			bl->parent_dir = strdup(path);
+			assert(bl->parent_dir != NULL);
+			bl->parent_dir[s - path] = '\0';
+		} else {
+			bl->parent_dir = strdup("/");
+			assert(bl->parent_dir != NULL);
+		}
 		bl->name = strdup(s + 1);
 		assert(bl->name != NULL);
 	} else {
