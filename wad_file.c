@@ -11,6 +11,10 @@ struct wad_file {
 	VFILE *vfs;
 	struct wad_file_entry *directory;
 	int num_lumps;
+
+	// We can only read/write a single lump at once.
+	VFILE *current_lump;
+	unsigned int current_lump_index;
 };
 
 struct wad_file *W_OpenFile(const char *file)
@@ -58,5 +62,32 @@ void W_CloseFile(struct wad_file *f)
 {
 	vfclose(f->vfs);
 	free(f);
+}
+
+static void LumpClosed(VFILE *fs, void *data)
+{
+	struct wad_file *f = data;
+
+	assert(f->current_lump == fs);
+	f->current_lump = NULL;
+}
+
+VFILE *W_OpenLump(struct wad_file *f, unsigned int lump_index)
+{
+	VFILE *result;
+	long start, end;
+
+	assert(lump_index < f->num_lumps);
+	assert(f->current_lump == NULL);
+
+	start = f->directory[lump_index].position;
+	end = start + f->directory[lump_index].size;
+	result = vfrestrict(f->vfs, start, end, 1);
+
+	f->current_lump = result;
+	f->current_lump_index = lump_index;
+	vfonclose(result, LumpClosed, f);
+
+	return result;
 }
 

@@ -1,4 +1,6 @@
 
+#include "vfile.h"
+
 struct wad_file;
 
 struct wad_file_header {
@@ -17,3 +19,5 @@ struct wad_file *W_OpenFile(const char *file);
 void W_CloseFile(struct wad_file *f);
 struct wad_file_entry *W_GetDirectory(struct wad_file *f);
 unsigned int W_NumLumps(struct wad_file *f);
+VFILE *W_OpenLump(struct wad_file *f, unsigned int lump_index);
+

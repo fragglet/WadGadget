@@ -7,6 +7,8 @@
 struct _VFILE {
 	const struct vfile_functions *functions;
 	void *handle;
+	void (*onclose)(VFILE *, void *);
+	void *onclose_data;
 };
 
 VFILE *vfopen(void *handle, struct vfile_functions *funcs)
@@ -41,8 +43,17 @@ long vftell(VFILE *stream)
 
 void vfclose(VFILE *stream)
 {
+	if (stream->onclose != NULL) {
+		stream->onclose(stream, stream->onclose_data);
+	}
 	stream->functions->close(stream->handle);
 	free(stream);
+}
+
+void vfonclose(VFILE *stream, void (*callback)(VFILE *, void *), void *data)
+{
+	stream->onclose = callback;
+	stream->onclose_data = data;
 }
 
 static size_t wrapped_fread(void *ptr, size_t size, size_t nitems, void *handle)

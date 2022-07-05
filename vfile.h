@@ -20,6 +20,8 @@ VFILE *vfopen(void *handle, struct vfile_functions *funcs);
 VFILE *vfrestrict(VFILE *inner, long start, long end, int ro);
 VFILE *vfwrapfile(FILE *stream);
 
+void vfonclose(VFILE *stream, void (*callback)(VFILE *, void *), void *data);
+
 size_t vfread(void *ptr, size_t size, size_t nitems, VFILE *stream);
 size_t vfwrite(const void *ptr, size_t size, size_t nitems, VFILE *stream);
 
