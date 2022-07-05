@@ -266,5 +266,7 @@ int main(int argc, char *argv[])
 		key = getch();
 		HandleKeypress(key);
 	}
+	clear();
+	refresh();
 	endwin();
 }
