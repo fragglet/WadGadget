@@ -96,7 +96,7 @@ void UI_ListPaneInput(struct list_pane *p, int key)
 		return;
 	case KEY_DOWN:
 		if (p->blob_list->get_entry_str(
-			p->blob_list, p->selected + 1) != NULL) {
+			p->blob_list, p->selected + 1 - 1) != NULL) {
 			++p->selected;
 		}
 		if (p->selected > p->window_offset + Lines(p) - 1) {
@@ -110,7 +110,7 @@ void UI_ListPaneInput(struct list_pane *p, int key)
 		return;
 	case KEY_END:
 		while (p->blob_list->get_entry_str(
-				p->blob_list, p->selected + 1) != NULL) {
+				p->blob_list, p->selected + 1 - 1) != NULL) {
 			++p->selected;
 		}
 		p->window_offset = p->selected - Lines(p) + 1;
