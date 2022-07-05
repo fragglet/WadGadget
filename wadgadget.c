@@ -128,13 +128,14 @@ static void SetWindowSizes(void)
 	int lines = ScreenLines(), columns = ScreenColumns();
 	int pane_width = (columns > 80) ? (FILE_PANE_WIDTH * columns) / 80
 	                              : FILE_PANE_WIDTH;
+	int middle_width = (columns > 80 ? columns : 80) - pane_width * 2;
 	wresize(header_win, 1, columns);
-	wresize(info_win, 5, columns - pane_width * 2);
+	wresize(info_win, 5, middle_width);
 	mvwin(info_win, 1, pane_width);
-	wresize(search_win, 4, columns - (pane_width * 2));
+	wresize(search_win, 4, middle_width);
 	mvwin(search_win, lines - 4, pane_width);
 	
-	wresize(actions_win, 14, columns - pane_width * 2);
+	wresize(actions_win, 14, middle_width);
 	mvwin(actions_win, 6, pane_width);
 	wresize(pane_windows[0], lines - 1, pane_width);
 	mvwin(pane_windows[0], 1, 0);
@@ -184,11 +185,11 @@ int main(int argc, char *argv[])
 		int key;
 
 		ShowHeader();
-		UI_DrawListPane(panes[0]);
-		UI_DrawListPane(panes[1]);
 		ShowInfoWindow();
 		ShowActions();
 		ShowSearchWindow();
+		UI_DrawListPane(panes[0]);
+		UI_DrawListPane(panes[1]);
 
 		key = getch();
 		switch (key) {
