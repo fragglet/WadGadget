@@ -144,10 +144,35 @@ static void SetWindowSizes(void)
 	refresh();
 }
 
+static void HandleKeypress(int key)
+{
+	switch (key) {
+	case KEY_LEFT:
+		active_pane = 0;
+		UI_ListPaneActive(panes[0], 1);
+		UI_ListPaneActive(panes[1], 0);
+		break;
+	case KEY_RIGHT:
+		active_pane = 1;
+		UI_ListPaneActive(panes[0], 0);
+		UI_ListPaneActive(panes[1], 1);
+		break;
+	case KEY_RESIZE:
+		SetWindowSizes();
+		break;
+	case '\t':
+		UI_ListPaneActive(panes[active_pane], 0);
+		active_pane = !active_pane;
+		UI_ListPaneActive(panes[active_pane], 1);
+		break;
+	default:
+		UI_ListPaneInput(panes[active_pane], key);
+		break;
+	}
+}
+
 int main(int argc, char *argv[])
 {
-	WINDOW *pane;
-
 	initscr();
 	start_color();
 	cbreak();
@@ -192,29 +217,7 @@ int main(int argc, char *argv[])
 		UI_DrawListPane(panes[1]);
 
 		key = getch();
-		switch (key) {
-		case KEY_LEFT:
-			active_pane = 0;
-			UI_ListPaneActive(panes[0], 1);
-			UI_ListPaneActive(panes[1], 0);
-			break;
-		case KEY_RIGHT:
-			active_pane = 1;
-			UI_ListPaneActive(panes[0], 0);
-			UI_ListPaneActive(panes[1], 1);
-			break;
-		case KEY_RESIZE:
-			SetWindowSizes();
-			break;
-		case '\t':
-			UI_ListPaneActive(panes[active_pane], 0);
-			active_pane = !active_pane;
-			UI_ListPaneActive(panes[active_pane], 1);
-			break;
-		default:
-			UI_ListPaneInput(panes[active_pane], key);
-			break;
-		}
+		HandleKeypress(key);
 	}
 	endwin();
 }
