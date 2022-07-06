@@ -31,9 +31,9 @@ size_t vfwrite(const void *ptr, size_t size, size_t nitems, VFILE *stream)
 	return stream->functions->write(ptr, size, nitems, stream->handle);
 }
 
-int vfseek(VFILE *stream, long offset)
+int vfseek(VFILE *stream, long offset, int whence)
 {
-	return stream->functions->seek(stream->handle, offset);
+	return stream->functions->seek(stream->handle, offset, whence);
 }
 
 long vftell(VFILE *stream)
@@ -67,9 +67,9 @@ static size_t wrapped_fwrite(const void *ptr, size_t size,
 	return fwrite(ptr, size, nitems, handle);
 }
 
-static int wrapped_fseek(void *handle, long offset)
+static int wrapped_fseek(void *handle, long offset, int whence)
 {
-	return fseek(handle, offset, SEEK_SET);
+	return fseek(handle, offset, whence);
 }
 
 static long wrapped_ftell(void *handle)
@@ -154,10 +154,12 @@ static size_t restricted_fwrite(const void *ptr, size_t size,
 	return result;
 }
 
-static int restricted_vfseek(void *handle, long offset)
+static int restricted_vfseek(void *handle, long offset, int whence)
 {
 	struct restricted_vfile *restricted = handle;
 	long adjusted_offset;
+
+	assert(whence == SEEK_SET); // SEEK_{CUR,END} not implemented.
 
 	adjusted_offset = offset + restricted->start;
 
@@ -165,7 +167,7 @@ static int restricted_vfseek(void *handle, long offset)
 		return -1;
 	}
 
-	if (vfseek(restricted->inner, adjusted_offset) < 0) {
+	if (vfseek(restricted->inner, adjusted_offset, whence) < 0) {
 		return -1;
 	}
 
@@ -196,7 +198,7 @@ static struct vfile_functions restricted_io_functions = {
 VFILE *vfrestrict(VFILE *inner, long start, long end, int ro)
 {
 	struct restricted_vfile *restricted;
-	assert(vfseek(inner, start) == 0);
+	assert(vfseek(inner, start, SEEK_SET) == 0);
 	restricted = checked_calloc(1, sizeof(struct restricted_vfile));
 	restricted->inner = inner;
 	restricted->start = start;
