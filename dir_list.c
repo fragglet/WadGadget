@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+#include "common.h"
 #include "dir_list.h"
 #include "ui.h"
 
@@ -108,12 +109,10 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 		if (dirent->d_name[0] == '.') {
 			continue;
 		}
-		path = strdup(dirent->d_name);
-		assert(path != NULL);
+		path = checked_strdup(dirent->d_name);
 
-		d->files = realloc(d->files,
+		d->files = checked_realloc(d->files,
 			sizeof(struct directory_entry) * (d->num_files + 1));
-		assert(d->files != NULL);
 		ent = &d->files[d->num_files];
 		ent->filename = path;
 		ent->is_subdirectory = dirent->d_type == DT_DIR;

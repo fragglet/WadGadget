@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "common.h"
 #include "ui.h"
 #include "list_pane.h"
 
@@ -30,8 +31,7 @@ static void DrawEntry(struct list_pane *p, unsigned int idx,
 
 	if (idx == 0) {
 		snprintf(buf, w, "^- %s",
-		         p->blob_list->parent_dir != NULL ?
-		             p->blob_list->parent_dir : "");
+		         or_if_null(p->blob_list->parent_dir, ""));
 		wattron(p->pane, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
 		str = p->blob_list->get_entry_str(p->blob_list, idx - 1);

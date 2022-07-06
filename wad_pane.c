@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "common.h"
 #include "ui.h"
 #include "list_pane.h"
 #include "wad_pane.h"
@@ -52,7 +53,7 @@ static const struct list_pane_action *GetActions(struct list_pane *other)
 struct list_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
 {
 	struct wad_pane *p;
-	p = calloc(1, sizeof(struct wad_pane));
+	p = checked_calloc(1, sizeof(struct wad_pane));
 	p->pane.pane = pane;
 	p->pane.type = PANE_TYPE_WAD;
 	p->pane.blob_list = (struct blob_list *) f;

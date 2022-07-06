@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "common.h"
 #include "vfile.h"
 #include "wad_file.h"
 
@@ -58,15 +59,14 @@ struct wad_file *W_OpenFile(const char *filename)
 	       !strncmp(hdr.id, "PWAD", 4));
 	assert(vfseek(vfs, hdr.table_offset) == 0);
 
-	result = calloc(1, sizeof(struct wad_file));
-	assert(result != NULL);
+	result = checked_calloc(1, sizeof(struct wad_file));
 	result->vfs = vfs;
 	result->bl.get_entry_str = GetEntry;
 	result->bl.get_entry_type = GetEntryType;
 	result->bl.free = FreeWadFile;
 	result->num_lumps = hdr.num_lumps;
-	result->directory = calloc(hdr.num_lumps, sizeof(struct wad_file_entry));
-	assert(result->directory != NULL);
+	result->directory = checked_calloc(
+		hdr.num_lumps, sizeof(struct wad_file_entry));
 	assert(vfread(result->directory, sizeof(struct wad_file_entry),
 	              hdr.num_lumps, vfs) == hdr.num_lumps);
 	BL_SetPathFields(&result->bl, filename);

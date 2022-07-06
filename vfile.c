@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "common.h"
 #include "vfile.h"
 
 struct _VFILE {
@@ -14,8 +15,7 @@ struct _VFILE {
 VFILE *vfopen(void *handle, struct vfile_functions *funcs)
 {
 	VFILE *result;
-	result = calloc(1, sizeof(VFILE));
-	assert(result != NULL);
+	result = checked_calloc(1, sizeof(VFILE));
 	result->functions = funcs;
 	result->handle = handle;
 	return result;
@@ -197,8 +197,7 @@ VFILE *vfrestrict(VFILE *inner, long start, long end, int ro)
 {
 	struct restricted_vfile *restricted;
 	assert(vfseek(inner, start) == 0);
-	restricted = calloc(1, sizeof(struct restricted_vfile));
-	assert(restricted != NULL);
+	restricted = checked_calloc(1, sizeof(struct restricted_vfile));
 	restricted->inner = inner;
 	restricted->start = start;
 	restricted->end = end;

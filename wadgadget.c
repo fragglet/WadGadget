@@ -1,6 +1,7 @@
 #include <curses.h>
 #include <string.h>
 
+#include "common.h"
 #include "dir_pane.h"
 #include "wad_pane.h"
 #include "ui.h"
@@ -128,9 +129,8 @@ static void ShowSearchWindow(void)
 static void SetWindowSizes(void)
 {
 	int lines = ScreenLines(), columns = ScreenColumns();
-	int pane_width = (columns > 80) ? (FILE_PANE_WIDTH * columns) / 80
-	                              : FILE_PANE_WIDTH;
-	int middle_width = (columns > 80 ? columns : 80) - pane_width * 2;
+	int pane_width = max(columns, 80) * FILE_PANE_WIDTH / 80;
+	int middle_width = max(columns, 80) - pane_width * 2;
 	wresize(header_win, 1, columns);
 	wresize(info_win, 5, middle_width);
 	mvwin(info_win, 1, pane_width);
