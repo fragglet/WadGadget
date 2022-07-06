@@ -82,7 +82,7 @@ void UI_DrawListPane(struct list_pane *p)
 		DrawEntry(p, p->window_offset + y, y);
 	}
 
-	wrefresh(p->pane);
+	wnoutrefresh(p->pane);
 }
 
 void UI_ListPaneInput(struct list_pane *p, int key)

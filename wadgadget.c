@@ -47,7 +47,7 @@ static void ShowHeader()
 	werase(header_win);
 	mvwaddstr(header_win, 0, 1, "= WadGadget for Doom, Heretic, Hexen, "
 	                "Strife, Chex Quest and the rest =");
-	wrefresh(header_win);
+	wnoutrefresh(header_win);
 }
 
 static void ShowInfoWindow()
@@ -59,7 +59,7 @@ static void ShowInfoWindow()
 
 	mvwaddstr(info_win, 1, 2, "TITLEPIC  123 bytes");
 	mvwaddstr(info_win, 2, 2, "Dimensions: 320x200");
-	wrefresh(info_win);
+	wnoutrefresh(info_win);
 }
 
 static void ShowAction(int y, const struct list_pane_action *action)
@@ -113,7 +113,7 @@ static void ShowActions(void)
 		ShowAction(y, &common_actions[i]);
 		y++;
 	}
-	wrefresh(actions_win);
+	wnoutrefresh(actions_win);
 }
 
 static void ShowSearchWindow(void)
@@ -123,7 +123,7 @@ static void ShowSearchWindow(void)
 	box(search_win, 0, 0);
 	mvwaddstr(search_win, 1, 2, "Search: ");
 	mvwaddstr(search_win, 2, 2, "");
-	wrefresh(search_win);
+	wnoutrefresh(search_win);
 }
 
 static void SetWindowSizes(void)
@@ -262,6 +262,7 @@ int main(int argc, char *argv[])
 		ShowSearchWindow();
 		UI_DrawListPane(panes[0]);
 		UI_DrawListPane(panes[1]);
+		doupdate();
 
 		key = getch();
 		HandleKeypress(key);
