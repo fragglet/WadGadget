@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+#include "common.h"
 #include "dir_pane.h"
 #include "ui.h"
 
@@ -61,7 +62,7 @@ struct list_pane *UI_NewDirectoryPane(
 	p->pane.type = PANE_TYPE_DIR;
 	p->pane.blob_list = (struct blob_list *) dir;
 	p->pane.get_actions = GetActions;
-	p->pane.selected = 1;
+	p->pane.selected = min(1, DIR_NumFiles(dir));
 	p->dir = dir;
 
 	return &p->pane;

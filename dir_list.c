@@ -136,3 +136,8 @@ const struct directory_entry *DIR_GetFile(
 	return &dir->files[file_index];
 }
 
+unsigned int DIR_NumFiles(struct directory_listing *dir)
+{
+	return dir->num_files;
+}
+
