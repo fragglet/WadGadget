@@ -57,7 +57,7 @@ struct wad_file *W_OpenFile(const char *filename)
 	assert(vfread(&hdr, sizeof(struct wad_file_header), 1, vfs) == 1);
 	assert(!strncmp(hdr.id, "IWAD", 4) ||
 	       !strncmp(hdr.id, "PWAD", 4));
-	assert(vfseek(vfs, hdr.table_offset) == 0);
+	assert(vfseek(vfs, hdr.table_offset, SEEK_SET) == 0);
 
 	result = checked_calloc(1, sizeof(struct wad_file));
 	result->vfs = vfs;
@@ -120,6 +120,42 @@ VFILE *W_OpenLump(struct wad_file *f, unsigned int lump_index)
 	f->current_lump = result;
 	f->current_lump_index = lump_index;
 	vfonclose(result, LumpClosed, f);
+
+	return result;
+}
+
+static void WriteLumpClosed(VFILE *fs, void *data)
+{
+	struct wad_file *f = data;
+	long size;
+
+	assert(f->current_lump == fs);
+	f->current_lump = NULL;
+
+	// New size of lump is the offset within the restricted VFILE.
+	size = vftell(fs);
+	assert(f->current_lump_index < f->num_lumps);
+	f->directory[f->current_lump_index].size = (unsigned int) size;
+}
+
+VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
+{
+	VFILE *result;
+	long start;
+
+	assert(lump_index < f->num_lumps);
+	assert(f->current_lump == NULL);
+
+	// We always write at the end of file.
+	assert(!vfseek(f->vfs, 0, SEEK_END));
+	start = vftell(f->vfs);
+	f->directory[lump_index].position = (unsigned int) start;
+
+	result = vfrestrict(f->vfs, start, 0, 0);
+	f->current_lump = result;
+	f->current_lump_index = lump_index;
+
+	vfonclose(result, WriteLumpClosed, f);
 
 	return result;
 }
