@@ -21,4 +21,6 @@ void W_CloseFile(struct wad_file *f);
 struct wad_file_entry *W_GetDirectory(struct wad_file *f);
 unsigned int W_NumLumps(struct wad_file *f);
 VFILE *W_OpenLump(struct wad_file *f, unsigned int lump_index);
+VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index);
+void W_WriteDirectory(struct wad_file *f);
 

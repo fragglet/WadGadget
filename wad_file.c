@@ -11,6 +11,7 @@
 struct wad_file {
 	struct blob_list bl;
 	VFILE *vfs;
+	struct wad_file_header header;
 	struct wad_file_entry *directory;
 	int num_lumps;
 
@@ -43,7 +44,6 @@ static void FreeWadFile(struct blob_list *l)
 struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;
-	struct wad_file_header hdr;
 	FILE *fs;
 	VFILE *vfs;
 
@@ -54,22 +54,24 @@ struct wad_file *W_OpenFile(const char *filename)
 
 	vfs = vfwrapfile(fs);
 
-	assert(vfread(&hdr, sizeof(struct wad_file_header), 1, vfs) == 1);
-	assert(!strncmp(hdr.id, "IWAD", 4) ||
-	       !strncmp(hdr.id, "PWAD", 4));
-	assert(vfseek(vfs, hdr.table_offset, SEEK_SET) == 0);
-
 	result = checked_calloc(1, sizeof(struct wad_file));
 	result->vfs = vfs;
 	result->bl.get_entry_str = GetEntry;
 	result->bl.get_entry_type = GetEntryType;
 	result->bl.free = FreeWadFile;
-	result->num_lumps = hdr.num_lumps;
-	result->directory = checked_calloc(
-		hdr.num_lumps, sizeof(struct wad_file_entry));
-	assert(vfread(result->directory, sizeof(struct wad_file_entry),
-	              hdr.num_lumps, vfs) == hdr.num_lumps);
 	BL_SetPathFields(&result->bl, filename);
+
+	assert(vfread(&result->header,
+	              sizeof(struct wad_file_header), 1, vfs) == 1);
+	assert(!strncmp(result->header.id, "IWAD", 4) ||
+	       !strncmp(result->header.id, "PWAD", 4));
+
+	result->num_lumps = result->header.num_lumps;
+	assert(vfseek(vfs, result->header.table_offset, SEEK_SET) == 0);
+	result->directory = checked_calloc(
+		result->num_lumps, sizeof(struct wad_file_entry));
+	assert(vfread(result->directory, sizeof(struct wad_file_entry),
+	              result->num_lumps, vfs) == result->num_lumps);
 
 	return result;
 }
@@ -158,5 +160,20 @@ VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
 	vfonclose(result, WriteLumpClosed, f);
 
 	return result;
+}
+
+void W_WriteDirectory(struct wad_file *f)
+{
+	// We always write the directory to the end of file.
+	assert(!vfseek(f->vfs, 0, SEEK_END));
+	f->header.table_offset = (unsigned int) vftell(f->vfs);
+	f->header.num_lumps = f->num_lumps;
+	assert(vfwrite(f->directory, sizeof(struct wad_file_entry),
+	               f->num_lumps, f->vfs) == f->num_lumps);
+	vfsync(f->vfs);
+
+	assert(!vfseek(f->vfs, 0, SEEK_SET));
+	assert(vfread(&f->header,
+	              sizeof(struct wad_file_header), 1, f->vfs) == 1);
 }
 
