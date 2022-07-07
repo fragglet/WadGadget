@@ -8,7 +8,7 @@
 
 #define FILE_PANE_WIDTH 27
 
-static struct pane header_pane;
+static struct pane header_pane, info_pane;
 static WINDOW *pane_windows[2];
 static struct list_pane *panes[2];
 static void *pane_data[2];
@@ -40,18 +40,6 @@ static unsigned int ScreenLines(void)
 	getmaxyx(stdscr, y, x);
 	x = x;
 	return y;
-}
-
-static void ShowInfoWindow()
-{
-	wbkgdset(info_win, COLOR_PAIR(PAIR_PANE_COLOR));
-	werase(info_win);
-	box(info_win, 0, 0);
-	mvwaddstr(info_win, 0, 2, " Info ");
-
-	mvwaddstr(info_win, 1, 2, "TITLEPIC  123 bytes");
-	mvwaddstr(info_win, 2, 2, "Dimensions: 320x200");
-	wnoutrefresh(info_win);
 }
 
 static void ShowAction(int y, const struct list_pane_action *action)
@@ -230,6 +218,7 @@ int main(int argc, char *argv[])
 	UI_InitHeaderPane(&header_pane, header_win);
 	info_win = newwin(5, 80 - (FILE_PANE_WIDTH * 2),
 	                  1, FILE_PANE_WIDTH);
+	UI_InitInfoPane(&info_pane, info_win);
 	search_win = newwin(4, 80 - (FILE_PANE_WIDTH * 2),
 	                    20, FILE_PANE_WIDTH);
 	actions_win = newwin(14, 80 - (FILE_PANE_WIDTH * 2),
@@ -250,7 +239,7 @@ int main(int argc, char *argv[])
 		int key;
 
 		UI_PaneDraw(&header_pane);
-		ShowInfoWindow();
+		UI_PaneDraw(&info_pane);
 		ShowActions();
 		ShowSearchWindow();
 		UI_PaneDraw(panes[0]);

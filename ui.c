@@ -3,7 +3,7 @@
 #include "pane.h"
 #include "ui.h"
 
-static void DrawHeader(void *p)
+static void DrawHeaderPane(void *p)
 {
 	struct pane *pane = p;
 
@@ -16,7 +16,28 @@ static void DrawHeader(void *p)
 void UI_InitHeaderPane(struct pane *pane, WINDOW *win)
 {
 	pane->window = win;
-	pane->draw = DrawHeader;
+	pane->draw = DrawHeaderPane;
+	pane->keypress = NULL;
+}
+
+static void DrawInfoPane(void *p)
+{
+	struct pane *pane = p;
+
+	wbkgdset(pane->window, COLOR_PAIR(PAIR_PANE_COLOR));
+	werase(pane->window);
+	box(pane->window, 0, 0);
+	mvwaddstr(pane->window, 0, 2, " Info ");
+
+	mvwaddstr(pane->window, 1, 2, "TITLEPIC  123 bytes");
+	mvwaddstr(pane->window, 2, 2, "Dimensions: 320x200");
+	wnoutrefresh(pane->window);
+}
+
+void UI_InitInfoPane(struct pane *pane, WINDOW *win)
+{
+	pane->window = win;
+	pane->draw = DrawInfoPane;
 	pane->keypress = NULL;
 }
 
