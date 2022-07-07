@@ -13,7 +13,7 @@ static WINDOW *pane_windows[2];
 static struct list_pane *panes[2];
 static void *pane_data[2];
 static unsigned int active_pane = 0;
-static WINDOW *actions_win, *info_win, *search_win, *header_win;
+static WINDOW *actions_win;
 static int main_loop_exited = 0;
 
 struct list_pane_action common_actions[] =
@@ -101,11 +101,11 @@ static void SetWindowSizes(void)
 	int lines = ScreenLines(), columns = ScreenColumns();
 	int pane_width = max(columns, 80) * FILE_PANE_WIDTH / 80;
 	int middle_width = max(columns, 80) - pane_width * 2;
-	wresize(header_win, 1, columns);
-	wresize(info_win, 5, middle_width);
-	mvwin(info_win, 1, pane_width);
-	wresize(search_win, 4, middle_width);
-	mvwin(search_win, lines - 4, pane_width);
+	wresize(header_pane.window, 1, columns);
+	wresize(info_pane.window, 5, middle_width);
+	mvwin(info_pane.window, 1, pane_width);
+	wresize(search_pane.window, 4, middle_width);
+	mvwin(search_pane.window, lines - 4, pane_width);
 	
 	wresize(actions_win, 14, middle_width);
 	mvwin(actions_win, 6, pane_width);
@@ -204,14 +204,15 @@ int main(int argc, char *argv[])
 
 	refresh();
 
-	header_win = newwin(1, 80, 0, 0);
-	UI_InitHeaderPane(&header_pane, header_win);
-	info_win = newwin(5, 80 - (FILE_PANE_WIDTH * 2),
-	                  1, FILE_PANE_WIDTH);
-	UI_InitInfoPane(&info_pane, info_win);
-	search_win = newwin(4, 80 - (FILE_PANE_WIDTH * 2),
-	                    20, FILE_PANE_WIDTH);
-	UI_InitSearchPane(&search_pane, search_win);
+	UI_InitHeaderPane(&header_pane, newwin(1, 80, 0, 0));
+	UI_InitInfoPane(
+		&info_pane,
+		newwin(5, 80 - (FILE_PANE_WIDTH * 2),
+		       1, FILE_PANE_WIDTH));
+	UI_InitSearchPane(
+		&search_pane,
+		newwin(4, 80 - (FILE_PANE_WIDTH * 2),
+		       20, FILE_PANE_WIDTH));
 	actions_win = newwin(14, 80 - (FILE_PANE_WIDTH * 2),
 	                     6, FILE_PANE_WIDTH);
 	pane_windows[0] = newwin(
