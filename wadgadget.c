@@ -8,6 +8,7 @@
 
 #define FILE_PANE_WIDTH 27
 
+static struct pane header_pane;
 static WINDOW *pane_windows[2];
 static struct list_pane *panes[2];
 static void *pane_data[2];
@@ -39,15 +40,6 @@ static unsigned int ScreenLines(void)
 	getmaxyx(stdscr, y, x);
 	x = x;
 	return y;
-}
-
-static void ShowHeader()
-{
-	wbkgdset(header_win, COLOR_PAIR(PAIR_HIGHLIGHT));
-	werase(header_win);
-	mvwaddstr(header_win, 0, 1, "= WadGadget for Doom, Heretic, Hexen, "
-	                "Strife, Chex Quest and the rest =");
-	wnoutrefresh(header_win);
 }
 
 static void ShowInfoWindow()
@@ -235,6 +227,7 @@ int main(int argc, char *argv[])
 	refresh();
 
 	header_win = newwin(1, 80, 0, 0);
+	UI_InitHeaderPane(&header_pane, header_win);
 	info_win = newwin(5, 80 - (FILE_PANE_WIDTH * 2),
 	                  1, FILE_PANE_WIDTH);
 	search_win = newwin(4, 80 - (FILE_PANE_WIDTH * 2),
@@ -256,7 +249,7 @@ int main(int argc, char *argv[])
 	while (!main_loop_exited) {
 		int key;
 
-		ShowHeader();
+		UI_PaneDraw(&header_pane);
 		ShowInfoWindow();
 		ShowActions();
 		ShowSearchWindow();
