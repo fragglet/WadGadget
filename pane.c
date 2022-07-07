@@ -6,6 +6,7 @@ void UI_PaneDraw(void *pane)
 
 	if (p->draw != NULL) {
 		p->draw(pane);
+		wnoutrefresh(p->window);
 	}
 }
 

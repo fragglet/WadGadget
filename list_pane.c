@@ -84,8 +84,6 @@ static void Draw(void *p)
 	for (y = 0; y < Lines(lp); y++) {
 		DrawEntry(lp, lp->window_offset + y, y);
 	}
-
-	wnoutrefresh(win);
 }
 
 static void Keypress(void *p, int key)
