@@ -11,4 +11,5 @@
 
 void UI_InitHeaderPane(struct pane *pane, WINDOW *win);
 void UI_InitInfoPane(struct pane *pane, WINDOW *win);
+void UI_InitSearchPane(struct pane *pane, WINDOW *win);
 

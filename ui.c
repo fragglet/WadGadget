@@ -41,3 +41,22 @@ void UI_InitInfoPane(struct pane *pane, WINDOW *win)
 	pane->keypress = NULL;
 }
 
+static void DrawSearchPane(void *p)
+{
+	struct pane *pane = p;
+
+	wbkgdset(pane->window, COLOR_PAIR(PAIR_PANE_COLOR));
+	werase(pane->window);
+	box(pane->window, 0, 0);
+	mvwaddstr(pane->window, 1, 2, "Search: ");
+	mvwaddstr(pane->window, 2, 2, "");
+	wnoutrefresh(pane->window);
+}
+
+void UI_InitSearchPane(struct pane *pane, WINDOW *win)
+{
+	pane->window = win;
+	pane->draw = DrawSearchPane;
+	pane->keypress = NULL;
+}
+

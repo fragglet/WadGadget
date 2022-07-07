@@ -8,7 +8,7 @@
 
 #define FILE_PANE_WIDTH 27
 
-static struct pane header_pane, info_pane;
+static struct pane header_pane, info_pane, search_pane;
 static WINDOW *pane_windows[2];
 static struct list_pane *panes[2];
 static void *pane_data[2];
@@ -94,16 +94,6 @@ static void ShowActions(void)
 		y++;
 	}
 	wnoutrefresh(actions_win);
-}
-
-static void ShowSearchWindow(void)
-{
-	wbkgdset(search_win, COLOR_PAIR(PAIR_PANE_COLOR));
-	werase(search_win);
-	box(search_win, 0, 0);
-	mvwaddstr(search_win, 1, 2, "Search: ");
-	mvwaddstr(search_win, 2, 2, "");
-	wnoutrefresh(search_win);
 }
 
 static void SetWindowSizes(void)
@@ -221,6 +211,7 @@ int main(int argc, char *argv[])
 	UI_InitInfoPane(&info_pane, info_win);
 	search_win = newwin(4, 80 - (FILE_PANE_WIDTH * 2),
 	                    20, FILE_PANE_WIDTH);
+	UI_InitSearchPane(&search_pane, search_win);
 	actions_win = newwin(14, 80 - (FILE_PANE_WIDTH * 2),
 	                     6, FILE_PANE_WIDTH);
 	pane_windows[0] = newwin(
@@ -241,7 +232,7 @@ int main(int argc, char *argv[])
 		UI_PaneDraw(&header_pane);
 		UI_PaneDraw(&info_pane);
 		ShowActions();
-		ShowSearchWindow();
+		UI_PaneDraw(&search_pane);
 		UI_PaneDraw(panes[0]);
 		UI_PaneDraw(panes[1]);
 		doupdate();
