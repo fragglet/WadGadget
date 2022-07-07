@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <unistd.h>
 
 #include "common.h"
 #include "vfile.h"
@@ -41,6 +42,11 @@ long vftell(VFILE *stream)
 	return stream->functions->tell(stream->handle);
 }
 
+void vfsync(VFILE *stream)
+{
+	stream->functions->sync(stream->handle);
+}
+
 void vfclose(VFILE *stream)
 {
 	if (stream->onclose != NULL) {
@@ -77,6 +83,12 @@ static long wrapped_ftell(void *handle)
 	return ftell(handle);
 }
 
+static void wrapped_fsync(void *handle)
+{
+	fflush(handle);
+	fsync(fileno(handle));
+}
+
 static void wrapped_fclose(void *handle)
 {
 	fclose(handle);
@@ -88,6 +100,7 @@ static struct vfile_functions wrapped_io_functions = {
 	wrapped_fseek,
 	wrapped_ftell,
 	wrapped_fclose,
+	wrapped_fsync,
 };
 
 VFILE *vfwrapfile(FILE *stream)
@@ -181,6 +194,12 @@ static long restricted_vftell(void *handle)
 	return restricted->pos;
 }
 
+static void restricted_vfsync(void *handle)
+{
+	struct restricted_vfile *restricted = handle;
+	vfsync(restricted->inner);
+}
+
 static void restricted_vfclose(void *handle)
 {
 	struct restricted_vfile *restricted = handle;
@@ -193,6 +212,7 @@ static struct vfile_functions restricted_io_functions = {
 	restricted_vfseek,
 	restricted_vftell,
 	restricted_vfclose,
+	restricted_vfsync,
 };
 
 VFILE *vfrestrict(VFILE *inner, long start, long end, int ro)

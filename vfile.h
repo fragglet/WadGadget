@@ -14,6 +14,7 @@ struct vfile_functions {
 	int (*seek)(void *handle, long offset, int whence);
 	long (*tell)(void *handle);
 	void (*close)(void *handle);
+	void (*sync)(void *handle);
 };
 
 VFILE *vfopen(void *handle, struct vfile_functions *funcs);
@@ -28,6 +29,7 @@ size_t vfwrite(const void *ptr, size_t size, size_t nitems, VFILE *stream);
 int vfseek(VFILE *stream, long offset, int whence);
 long vftell(VFILE *stream);
 
+void vfsync(VFILE *stream);
 void vfclose(VFILE *stream);
 
 #endif /* #ifndef INCLUDED_VFILE_H */
