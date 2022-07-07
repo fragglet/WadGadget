@@ -1,8 +1,7 @@
 #ifndef INCLUDE_LIST_PANE_H
 #define INCLUDE_LIST_PANE_H
 
-#include <curses.h>
-
+#include "pane.h"
 #include "blob_list.h"
 
 enum list_pane_type {
@@ -17,17 +16,14 @@ struct list_pane_action {
 };
 
 struct list_pane {
-	WINDOW *pane;
+	struct pane pane;
 	struct blob_list *blob_list;
 	enum list_pane_type type;
 	unsigned int window_offset, selected;
-	unsigned int active;
 	const struct list_pane_action *(*get_actions)(struct list_pane *other);
 };
 
-void UI_DrawListPane(struct list_pane *pane);
-void UI_ListPaneInput(struct list_pane *p, int key);
-void UI_ListPaneActive(struct list_pane *p, int active);
+void UI_ListPaneInit(struct list_pane *p, WINDOW *w);
 const struct list_pane_action *UI_ListPaneActions(
 	struct list_pane *p, struct list_pane *other);
 enum blob_type UI_ListPaneEntryType(struct list_pane *p, unsigned int idx);

@@ -53,12 +53,12 @@ static const struct list_pane_action *GetActions(struct list_pane *other)
 }
 
 struct list_pane *UI_NewDirectoryPane(
-	WINDOW *pane, struct directory_listing *dir)
+	WINDOW *w, struct directory_listing *dir)
 {
 	struct directory_pane *p;
 
 	p = calloc(1, sizeof(struct directory_pane));
-	p->pane.pane = pane;
+	UI_ListPaneInit(&p->pane, w);
 	p->pane.type = PANE_TYPE_DIR;
 	p->pane.blob_list = (struct blob_list *) dir;
 	p->pane.get_actions = GetActions;

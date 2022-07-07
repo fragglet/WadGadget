@@ -50,11 +50,11 @@ static const struct list_pane_action *GetActions(struct list_pane *other)
 	}
 }
 
-struct list_pane *UI_NewWadPane(WINDOW *pane, struct wad_file *f)
+struct list_pane *UI_NewWadPane(WINDOW *w, struct wad_file *f)
 {
 	struct wad_pane *p;
 	p = checked_calloc(1, sizeof(struct wad_pane));
-	p->pane.pane = pane;
+	UI_ListPaneInit(&p->pane, w);
 	p->pane.type = PANE_TYPE_WAD;
 	p->pane.blob_list = (struct blob_list *) f;
 	p->pane.get_actions = GetActions;

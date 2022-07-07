@@ -8,22 +8,23 @@
 #include "ui.h"
 #include "list_pane.h"
 
-static unsigned int Lines(struct list_pane *p)
+static unsigned int Lines(struct list_pane *lp)
 {
 	int x, y;
-	getmaxyx(p->pane, y, x);
+	getmaxyx(lp->pane.window, y, x);
 	x = x;
 	return y - 2;
 }
 
-static void DrawEntry(struct list_pane *p, unsigned int idx,
+static void DrawEntry(struct list_pane *lp, unsigned int idx,
                       unsigned int y)
 {
+	WINDOW *win = lp->pane.window;
 	const char *str;
 	static char buf[128];
 	unsigned int w, h;
 
-	getmaxyx(p->pane, h, w);
+	getmaxyx(win, h, w);
 	w -= 2; h = h;
 	if (w > sizeof(buf)) {
 		w = sizeof(buf);
@@ -31,109 +32,114 @@ static void DrawEntry(struct list_pane *p, unsigned int idx,
 
 	if (idx == 0) {
 		snprintf(buf, w, "^- %s",
-		         or_if_null(p->blob_list->parent_dir, ""));
-		wattron(p->pane, COLOR_PAIR(PAIR_DIRECTORY));
+		         or_if_null(lp->blob_list->parent_dir, ""));
+		wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
-		str = p->blob_list->get_entry_str(p->blob_list, idx - 1);
+		str = lp->blob_list->get_entry_str(lp->blob_list, idx - 1);
 		if (str == NULL) {
 			return;
 		}
-		switch (UI_ListPaneEntryType(p, idx)) {
+		switch (UI_ListPaneEntryType(lp, idx)) {
 			case BLOB_TYPE_DIR:
-				wattron(p->pane, COLOR_PAIR(PAIR_DIRECTORY));
-				wattron(p->pane, A_BOLD);
+				wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
+				wattron(win, A_BOLD);
 				break;
 			case BLOB_TYPE_WAD:
-				wattron(p->pane, COLOR_PAIR(PAIR_WAD_FILE));
+				wattron(win, COLOR_PAIR(PAIR_WAD_FILE));
 				break;
 			default:
 				break;
 		}
 		snprintf(buf, w, " %-200s", str);
 	}
-	if (p->active && idx == p->selected) {
-		wattron(p->pane, A_REVERSE);
+	if (lp->pane.active && idx == lp->selected) {
+		wattron(win, A_REVERSE);
 	}
-	mvwaddstr(p->pane, 1 + y, 1, buf);
-	waddstr(p->pane, " ");
-	wattroff(p->pane, A_REVERSE);
-	wattroff(p->pane, A_BOLD);
-	wattroff(p->pane, COLOR_PAIR(PAIR_DIRECTORY));
-	wattroff(p->pane, COLOR_PAIR(PAIR_WAD_FILE));
+	mvwaddstr(win, 1 + y, 1, buf);
+	waddstr(win, " ");
+	wattroff(win, A_REVERSE);
+	wattroff(win, A_BOLD);
+	wattroff(win, COLOR_PAIR(PAIR_DIRECTORY));
+	wattroff(win, COLOR_PAIR(PAIR_WAD_FILE));
 }
 
-void UI_DrawListPane(struct list_pane *p)
+static void Draw(struct pane *p)
 {
+	struct list_pane *lp = (struct list_pane *) p;
+	WINDOW *win = p->window;
 	unsigned int y;
 
-	werase(p->pane);
-	wattron(p->pane, COLOR_PAIR(PAIR_PANE_COLOR));
-	box(p->pane, 0, 0);
+	werase(win);
+	wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
+	box(win, 0, 0);
 	if (p->active) {
-		wattron(p->pane, A_REVERSE);
+		wattron(win, A_REVERSE);
 	}
-	mvwaddstr(p->pane, 0, 3, " ");
-	waddstr(p->pane, p->blob_list->name);
-	waddstr(p->pane, " ");
-	wattroff(p->pane, A_REVERSE);
-	wattroff(p->pane, COLOR_PAIR(PAIR_PANE_COLOR));
+	mvwaddstr(win, 0, 3, " ");
+	waddstr(win, lp->blob_list->name);
+	waddstr(win, " ");
+	wattroff(win, A_REVERSE);
+	wattroff(win, COLOR_PAIR(PAIR_PANE_COLOR));
 
-	for (y = 0; y < Lines(p); y++) {
-		DrawEntry(p, p->window_offset + y, y);
+	for (y = 0; y < Lines(lp); y++) {
+		DrawEntry(lp, lp->window_offset + y, y);
 	}
 
-	wnoutrefresh(p->pane);
+	wnoutrefresh(win);
 }
 
-void UI_ListPaneInput(struct list_pane *p, int key)
+static void Keypress(struct pane *p, int key)
 {
+	struct list_pane *lp = (struct list_pane *) p;
 	unsigned int i;
 
 	switch (key) {
 	case KEY_UP:
-		if (p->selected > 0) {
-			--p->selected;
+		if (lp->selected > 0) {
+			--lp->selected;
 		}
-		if (p->selected < p->window_offset) {
-			p->window_offset = p->selected;
+		if (lp->selected < lp->window_offset) {
+			lp->window_offset = lp->selected;
 		}
 		return;
 	case KEY_PPAGE:
-		for (i = 0; i < Lines(p); i++) {
-			UI_ListPaneInput(p, KEY_UP);
+		for (i = 0; i < Lines(lp); i++) {
+			Keypress(p, KEY_UP);
 		}
 		return;
 	case KEY_HOME:
-		p->selected = 0;
-		p->window_offset = 0;
+		lp->selected = 0;
+		lp->window_offset = 0;
 		return;
 	case KEY_DOWN:
-		if (p->blob_list->get_entry_str(
-			p->blob_list, p->selected + 1 - 1) != NULL) {
-			++p->selected;
+		if (lp->blob_list->get_entry_str(
+			lp->blob_list, lp->selected + 1 - 1) != NULL) {
+			++lp->selected;
 		}
-		if (p->selected > p->window_offset + Lines(p) - 1) {
-			++p->window_offset;
+		if (lp->selected > lp->window_offset + Lines(lp) - 1) {
+			++lp->window_offset;
 		}
 		return;
 	case KEY_NPAGE:
-		for (i = 0; i < Lines(p); i++) {
-			UI_ListPaneInput(p, KEY_DOWN);
+		for (i = 0; i < Lines(lp); i++) {
+			Keypress(p, KEY_DOWN);
 		}
 		return;
 	case KEY_END:
-		while (p->blob_list->get_entry_str(
-				p->blob_list, p->selected + 1 - 1) != NULL) {
-			++p->selected;
+		while (lp->blob_list->get_entry_str(
+				lp->blob_list, lp->selected + 1 - 1) != NULL) {
+			++lp->selected;
 		}
-		p->window_offset = p->selected - Lines(p) + 1;
+		lp->window_offset = lp->selected - Lines(lp) + 1;
 		return;
 	}
 }
 
-void UI_ListPaneActive(struct list_pane *p, int active)
+void UI_ListPaneInit(struct list_pane *p, WINDOW *w)
 {
-	p->active = active;
+	p->pane.window = w;
+	p->pane.draw = Draw;
+	p->pane.keypress = Keypress;
 }
 
 const struct list_pane_action *UI_ListPaneActions(
