@@ -63,16 +63,16 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 	wattroff(win, COLOR_PAIR(PAIR_WAD_FILE));
 }
 
-static void Draw(struct pane *p)
+static void Draw(void *p)
 {
-	struct list_pane *lp = (struct list_pane *) p;
-	WINDOW *win = p->window;
+	struct list_pane *lp = p;
+	WINDOW *win = lp->pane.window;
 	unsigned int y;
 
 	werase(win);
 	wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	box(win, 0, 0);
-	if (p->active) {
+	if (lp->pane.active) {
 		wattron(win, A_REVERSE);
 	}
 	mvwaddstr(win, 0, 3, " ");
@@ -88,9 +88,9 @@ static void Draw(struct pane *p)
 	wnoutrefresh(win);
 }
 
-static void Keypress(struct pane *p, int key)
+static void Keypress(void *p, int key)
 {
-	struct list_pane *lp = (struct list_pane *) p;
+	struct list_pane *lp = p;
 	unsigned int i;
 
 	switch (key) {
