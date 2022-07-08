@@ -83,10 +83,12 @@ static void NavigateNew(void)
 
 	if (new_pane != NULL) {
 		BL_FreeList(pane_data[active_pane]);
+		UI_PaneHide(pane);
 		UI_ListPaneFree(pane);
 		panes[active_pane] = new_pane;
 		pane_data[active_pane] = new_data;
 		UI_PaneActive(panes[active_pane], 1);
+		UI_PaneShow(new_pane);
 	}
 }
 
@@ -141,26 +143,32 @@ int main(int argc, char *argv[])
 	refresh();
 
 	UI_InitHeaderPane(&header_pane, newwin(1, 80, 0, 0));
+	UI_PaneShow(&header_pane);
 	UI_InitInfoPane(
 		&info_pane,
 		newwin(5, 80 - (FILE_PANE_WIDTH * 2),
 		       1, FILE_PANE_WIDTH));
+	UI_PaneShow(&info_pane);
 	UI_InitSearchPane(
 		&search_pane,
 		newwin(4, 80 - (FILE_PANE_WIDTH * 2),
 		       20, FILE_PANE_WIDTH));
+	UI_PaneShow(&search_pane);
 	UI_ActionsPaneInit(
 		&actions_pane,
 		newwin(14, 80 - (FILE_PANE_WIDTH * 2),
 		       6, FILE_PANE_WIDTH));
+	UI_PaneShow(&actions_pane);
 	pane_windows[0] = newwin(
 		ScreenLines() - 1, FILE_PANE_WIDTH, 1, 0);
 	pane_data[0] = W_OpenFile("doom2.wad");
 	panes[0] = UI_NewWadPane(pane_windows[0], pane_data[0]);
+	UI_PaneShow(panes[0]);
 	pane_windows[1] = newwin(ScreenLines() - 1, FILE_PANE_WIDTH,
 		1, 80 - FILE_PANE_WIDTH);
 	pane_data[1] = DIR_ReadDirectory("/home/fraggle");
 	panes[1] = UI_NewDirectoryPane(pane_windows[1], pane_data[1]);
+	UI_PaneShow(panes[1]);
 	UI_PaneActive(panes[active_pane], 1);
 
 	SetWindowSizes();
@@ -170,13 +178,7 @@ int main(int argc, char *argv[])
 
 		actions_pane.actions = UI_ListPaneActions(
 			panes[active_pane], panes[!active_pane]);
-		UI_PaneDraw(&header_pane);
-		UI_PaneDraw(&info_pane);
-		UI_PaneDraw(&actions_pane);
-		UI_PaneDraw(&search_pane);
-		UI_PaneDraw(panes[0]);
-		UI_PaneDraw(panes[1]);
-		doupdate();
+		UI_DrawAllPanes();
 
 		key = getch();
 		HandleKeypress(key);
