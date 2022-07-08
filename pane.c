@@ -9,16 +9,6 @@
 static struct pane *screen_panes[MAX_SCREEN_PANES];
 static unsigned int num_screen_panes = 0;
 
-void UI_PaneDraw(void *pane)
-{
-	struct pane *p = pane;
-
-	if (p->draw != NULL) {
-		p->draw(pane);
-		wnoutrefresh(p->window);
-	}
-}
-
 void UI_PaneKeypress(void *pane, int key)
 {
 	struct pane *p = pane;
@@ -26,13 +16,6 @@ void UI_PaneKeypress(void *pane, int key)
 	if (p->keypress != NULL) {
 		p->keypress(p, key);
 	}
-}
-
-void UI_PaneActive(void *pane, int active)
-{
-	struct pane *p = pane;
-
-	p->active = active;
 }
 
 void UI_PaneShow(void *pane)
@@ -66,7 +49,11 @@ void UI_DrawAllPanes(void)
 	unsigned int i;
 
 	for (i = 0; i < num_screen_panes; i++) {
-		UI_PaneDraw(screen_panes[i]);
+		struct pane *p = screen_panes[i];
+		if (p->draw != NULL) {
+			p->draw(p, i == num_screen_panes - 1);
+			wnoutrefresh(p->window);
+		}
 	}
 	doupdate();
 }

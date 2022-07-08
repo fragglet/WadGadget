@@ -87,7 +87,6 @@ static void NavigateNew(void)
 		UI_ListPaneFree(pane);
 		panes[active_pane] = new_pane;
 		pane_data[active_pane] = new_data;
-		UI_PaneActive(panes[active_pane], 1);
 		UI_PaneShow(new_pane);
 	}
 }
@@ -97,13 +96,11 @@ static void HandleKeypress(int key)
 	switch (key) {
 	case KEY_LEFT:
 		active_pane = 0;
-		UI_PaneActive(panes[0], 1);
-		UI_PaneActive(panes[1], 0);
+		UI_RaisePaneToTop(panes[0]);
 		break;
 	case KEY_RIGHT:
 		active_pane = 1;
-		UI_PaneActive(panes[0], 0);
-		UI_PaneActive(panes[1], 1);
+		UI_RaisePaneToTop(panes[1]);
 		break;
 	case KEY_RESIZE:
 		SetWindowSizes();
@@ -112,9 +109,8 @@ static void HandleKeypress(int key)
 		NavigateNew();
 		break;
 	case '\t':
-		UI_PaneActive(panes[active_pane], 0);
 		active_pane = !active_pane;
-		UI_PaneActive(panes[active_pane], 1);
+		UI_RaisePaneToTop(panes[active_pane]);
 		break;
 	case 27:
 		main_loop_exited = 1;
@@ -169,7 +165,7 @@ int main(int argc, char *argv[])
 	pane_data[1] = DIR_ReadDirectory("/home/fraggle");
 	panes[1] = UI_NewDirectoryPane(pane_windows[1], pane_data[1]);
 	UI_PaneShow(panes[1]);
-	UI_PaneActive(panes[active_pane], 1);
+	UI_RaisePaneToTop(panes[active_pane]);
 
 	SetWindowSizes();
 

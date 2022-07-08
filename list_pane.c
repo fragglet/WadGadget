@@ -17,7 +17,7 @@ static unsigned int Lines(struct list_pane *lp)
 }
 
 static void DrawEntry(struct list_pane *lp, unsigned int idx,
-                      unsigned int y)
+                      unsigned int y, int active)
 {
 	WINDOW *win = lp->pane.window;
 	const char *str;
@@ -52,7 +52,7 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 		}
 		snprintf(buf, w, " %-200s", str);
 	}
-	if (lp->pane.active && idx == lp->selected) {
+	if (active && idx == lp->selected) {
 		wattron(win, A_REVERSE);
 	}
 	mvwaddstr(win, 1 + y, 1, buf);
@@ -63,7 +63,7 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 	wattroff(win, COLOR_PAIR(PAIR_WAD_FILE));
 }
 
-static void Draw(void *p)
+static void Draw(void *p, int active)
 {
 	struct list_pane *lp = p;
 	WINDOW *win = lp->pane.window;
@@ -72,7 +72,7 @@ static void Draw(void *p)
 	werase(win);
 	wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	box(win, 0, 0);
-	if (lp->pane.active) {
+	if (active) {
 		wattron(win, A_REVERSE);
 	}
 	mvwaddstr(win, 0, 3, " ");
@@ -82,7 +82,7 @@ static void Draw(void *p)
 	wattroff(win, COLOR_PAIR(PAIR_PANE_COLOR));
 
 	for (y = 0; y < Lines(lp); y++) {
-		DrawEntry(lp, lp->window_offset + y, y);
+		DrawEntry(lp, lp->window_offset + y, y, active);
 	}
 }
 
@@ -209,7 +209,7 @@ static void ShowAction(struct actions_pane *p, int y,
 	}
 }
 
-static void DrawActionsPane(void *pane)
+static void DrawActionsPane(void *pane, int active)
 {
 	struct actions_pane *p = pane;
 	WINDOW *win = p->pane.window;

@@ -5,13 +5,10 @@
 
 struct pane {
 	WINDOW *window;
-	void (*draw)(void *pane);
+	void (*draw)(void *pane, int active);
 	void (*keypress)(void *pane, int key);
-	unsigned int active;
 };
 
-void UI_PaneActive(void *pane, int active);
-void UI_PaneDraw(void *pane);
 void UI_PaneKeypress(void *pane, int key);
 void UI_PaneShow(void *pane);
 int UI_PaneHide(void *pane);
