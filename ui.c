@@ -31,7 +31,6 @@ static void DrawInfoPane(void *p, int active)
 
 	mvwaddstr(pane->window, 1, 2, "TITLEPIC  123 bytes");
 	mvwaddstr(pane->window, 2, 2, "Dimensions: 320x200");
-	wnoutrefresh(pane->window);
 }
 
 void UI_InitInfoPane(struct pane *pane, WINDOW *win)
@@ -50,7 +49,6 @@ static void DrawSearchPane(void *p, int active)
 	box(pane->window, 0, 0);
 	mvwaddstr(pane->window, 1, 2, "Search: ");
 	mvwaddstr(pane->window, 2, 2, "");
-	wnoutrefresh(pane->window);
 }
 
 void UI_InitSearchPane(struct pane *pane, WINDOW *win)
