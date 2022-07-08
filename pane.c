@@ -46,12 +46,24 @@ int UI_PaneHide(void *pane)
 
 void UI_DrawAllPanes(void)
 {
-	unsigned int i;
+	int i;
+	struct pane *active_pane = NULL;
+
+	// Active pane is the top pane on the stack that is not an invisible
+	// pane (allows for the fake pane case that eats keypresses but does
+	// not show anything).
+	for (i = num_screen_panes - 1; i >= 0; i--) {
+		struct pane *p = screen_panes[i];
+		if (p->window != NULL) {
+			active_pane = p;
+			break;
+		}
+	}
 
 	for (i = 0; i < num_screen_panes; i++) {
 		struct pane *p = screen_panes[i];
-		if (p->draw != NULL) {
-			p->draw(p, i == num_screen_panes - 1);
+		if (p->window != NULL && p->draw != NULL) {
+			p->draw(p, p == active_pane);
 			wnoutrefresh(p->window);
 		}
 	}

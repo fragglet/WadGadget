@@ -15,6 +15,7 @@ static struct list_pane *panes[2];
 static void *pane_data[2];
 static unsigned int active_pane = 0;
 static int main_loop_exited = 0;
+static struct pane hidden_pane;
 
 static void SetWindowSizes(void)
 {
@@ -75,19 +76,22 @@ static void NavigateNew(void)
 		panes[active_pane] = new_pane;
 		pane_data[active_pane] = new_data;
 		UI_PaneShow(new_pane);
+		UI_RaisePaneToTop(&hidden_pane);
 	}
 }
 
-static void HandleKeypress(int key)
+static void HandleKeypress(void *pane, int key)
 {
 	switch (key) {
 	case KEY_LEFT:
 		active_pane = 0;
 		UI_RaisePaneToTop(panes[0]);
+		UI_RaisePaneToTop(&hidden_pane);
 		break;
 	case KEY_RIGHT:
 		active_pane = 1;
 		UI_RaisePaneToTop(panes[1]);
+		UI_RaisePaneToTop(&hidden_pane);
 		break;
 	case KEY_RESIZE:
 		SetWindowSizes();
@@ -98,6 +102,7 @@ static void HandleKeypress(int key)
 	case '\t':
 		active_pane = !active_pane;
 		UI_RaisePaneToTop(panes[active_pane]);
+		UI_RaisePaneToTop(&hidden_pane);
 		break;
 	case 27:
 		main_loop_exited = 1;
@@ -125,6 +130,11 @@ int main(int argc, char *argv[])
 
 	refresh();
 
+	hidden_pane.window = NULL;
+	hidden_pane.draw = NULL;
+	hidden_pane.keypress = HandleKeypress;
+	UI_PaneShow(&hidden_pane);
+
 	// The hard-coded window sizes and positions here get reset
 	// when SetWindowSizes() is called below.
 	UI_InitHeaderPane(&header_pane, newwin(1, 80, 0, 0));
@@ -150,6 +160,7 @@ int main(int argc, char *argv[])
 	UI_PaneShow(panes[1]);
 
 	UI_RaisePaneToTop(panes[active_pane]);
+	UI_RaisePaneToTop(&hidden_pane);
 
 	SetWindowSizes();
 
@@ -161,7 +172,7 @@ int main(int argc, char *argv[])
 		UI_DrawAllPanes();
 
 		key = getch();
-		HandleKeypress(key);
+		HandleKeypress(NULL, key);
 	}
 	clear();
 	refresh();
