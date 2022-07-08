@@ -16,27 +16,14 @@ static void *pane_data[2];
 static unsigned int active_pane = 0;
 static int main_loop_exited = 0;
 
-static unsigned int ScreenColumns(void)
-{
-	int x, y;
-	getmaxyx(stdscr, y, x);
-	y = y;
-	return x;
-}
-
-static unsigned int ScreenLines(void)
-{
-	int x, y;
-	getmaxyx(stdscr, y, x);
-	x = x;
-	return y;
-}
-
 static void SetWindowSizes(void)
 {
-	int lines = ScreenLines(), columns = ScreenColumns();
-	int pane_width = max(columns, 80) * FILE_PANE_WIDTH / 80;
-	int middle_width = max(columns, 80) - pane_width * 2;
+	int pane_width, middle_width;
+	int lines, columns;
+	getmaxyx(stdscr, lines, columns);
+	pane_width = max(columns, 80) * FILE_PANE_WIDTH / 80;
+	middle_width = max(columns, 80) - pane_width * 2;
+
 	wresize(header_pane.window, 1, columns);
 	wresize(info_pane.window, 5, middle_width);
 	mvwin(info_pane.window, 1, pane_width);
@@ -138,33 +125,30 @@ int main(int argc, char *argv[])
 
 	refresh();
 
+	// The hard-coded window sizes and positions here get reset
+	// when SetWindowSizes() is called below.
 	UI_InitHeaderPane(&header_pane, newwin(1, 80, 0, 0));
 	UI_PaneShow(&header_pane);
-	UI_InitInfoPane(
-		&info_pane,
-		newwin(5, 80 - (FILE_PANE_WIDTH * 2),
-		       1, FILE_PANE_WIDTH));
+
+	UI_InitInfoPane(&info_pane, newwin(5, 26, 1, 27));
 	UI_PaneShow(&info_pane);
-	UI_InitSearchPane(
-		&search_pane,
-		newwin(4, 80 - (FILE_PANE_WIDTH * 2),
-		       20, FILE_PANE_WIDTH));
+
+	UI_InitSearchPane(&search_pane, newwin(4, 26, 20, 27));
 	UI_PaneShow(&search_pane);
-	UI_ActionsPaneInit(
-		&actions_pane,
-		newwin(14, 80 - (FILE_PANE_WIDTH * 2),
-		       6, FILE_PANE_WIDTH));
+
+	UI_ActionsPaneInit(&actions_pane, newwin(14, 26, 6, 27));
 	UI_PaneShow(&actions_pane);
-	pane_windows[0] = newwin(
-		ScreenLines() - 1, FILE_PANE_WIDTH, 1, 0);
+
+	pane_windows[0] = newwin(24, 27, 1, 0);
 	pane_data[0] = W_OpenFile("doom2.wad");
 	panes[0] = UI_NewWadPane(pane_windows[0], pane_data[0]);
 	UI_PaneShow(panes[0]);
-	pane_windows[1] = newwin(ScreenLines() - 1, FILE_PANE_WIDTH,
-		1, 80 - FILE_PANE_WIDTH);
+
+	pane_windows[1] = newwin(24, 27, 1, 53);
 	pane_data[1] = DIR_ReadDirectory("/home/fraggle");
 	panes[1] = UI_NewDirectoryPane(pane_windows[1], pane_data[1]);
 	UI_PaneShow(panes[1]);
+
 	UI_RaisePaneToTop(panes[active_pane]);
 
 	SetWindowSizes();
