@@ -43,7 +43,7 @@ void UI_PaneShow(void *pane)
 	++num_screen_panes;
 }
 
-void UI_PaneHide(void *pane)
+int UI_PaneHide(void *pane)
 {
 	struct pane *p = pane;
 	unsigned int i;
@@ -54,9 +54,11 @@ void UI_PaneHide(void *pane)
 			        (num_screen_panes - i - 1)
 			            * sizeof(struct pane *));
 			--num_screen_panes;
-			return;
+			return 1;
 		}
 	}
+
+	return 0;
 }
 
 void UI_DrawAllPanes(void)
@@ -67,5 +69,12 @@ void UI_DrawAllPanes(void)
 		UI_PaneDraw(screen_panes[i]);
 	}
 	doupdate();
+}
+
+void UI_RaisePaneToTop(void *pane)
+{
+	if (UI_PaneHide(pane)) {
+		UI_PaneShow(pane);
+	}
 }
 

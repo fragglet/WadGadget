@@ -14,8 +14,9 @@ void UI_PaneActive(void *pane, int active);
 void UI_PaneDraw(void *pane);
 void UI_PaneKeypress(void *pane, int key);
 void UI_PaneShow(void *pane);
-void UI_PaneHide(void *pane);
+int UI_PaneHide(void *pane);
 void UI_DrawAllPanes(void);
+void UI_RaisePaneToTop(void *pane);
 
 #endif /* #ifndef PANE_H_INCLUDED */
 
