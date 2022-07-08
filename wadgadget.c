@@ -8,23 +8,13 @@
 
 #define FILE_PANE_WIDTH 27
 
+static struct actions_pane actions_pane;
 static struct pane header_pane, info_pane, search_pane;
 static WINDOW *pane_windows[2];
 static struct list_pane *panes[2];
 static void *pane_data[2];
 static unsigned int active_pane = 0;
-static WINDOW *actions_win;
 static int main_loop_exited = 0;
-
-struct list_pane_action common_actions[] =
-{
-	{"Space", "Mark/unmark"},
-	{"F10", "Unmark all"},
-	{"", ""},
-	{"Tab", "Other pane"},
-	{"ESC", "Quit"},
-	{NULL, NULL},
-};
 
 static unsigned int ScreenColumns(void)
 {
@@ -42,60 +32,6 @@ static unsigned int ScreenLines(void)
 	return y;
 }
 
-static void ShowAction(int y, const struct list_pane_action *action)
-{
-	char *desc;
-
-	if (strlen(action->key) == 0) {
-		return;
-	}
-	wattron(actions_win, A_BOLD);
-	mvwaddstr(actions_win, y, 2, action->key);
-	wattroff(actions_win, A_BOLD);
-	waddstr(actions_win, " - ");
-	desc = action->description;
-	if (action->description[0] == '>') {
-		if (active_pane == 1) {
-			wattron(actions_win, A_BOLD);
-			waddstr(actions_win, "<<< ");
-			wattroff(actions_win, A_BOLD);
-		}
-		desc += 2;
-	}
-	waddstr(actions_win, desc);
-	if (action->description[0] == '>') {
-		if (active_pane == 0) {
-			wattron(actions_win, A_BOLD);
-			waddstr(actions_win, " >>>");
-			wattroff(actions_win, A_BOLD);
-		}
-	}
-}
-
-static void ShowActions(void)
-{
-	const struct list_pane_action *actions;
-	int i, y;
-
-	wbkgdset(actions_win, COLOR_PAIR(PAIR_PANE_COLOR));
-	werase(actions_win);
-	box(actions_win, 0, 0);
-	mvwaddstr(actions_win, 0, 2, " Actions ");
-
-	actions = UI_ListPaneActions(panes[active_pane], panes[!active_pane]);
-
-	y = 1;
-	for (i = 0; actions != NULL && actions[i].key != NULL; i++) {
-		ShowAction(y, &actions[i]);
-		y++;
-	}
-	for (i = 0; common_actions[i].key != NULL; i++) {
-		ShowAction(y, &common_actions[i]);
-		y++;
-	}
-	wnoutrefresh(actions_win);
-}
-
 static void SetWindowSizes(void)
 {
 	int lines = ScreenLines(), columns = ScreenColumns();
@@ -107,8 +43,8 @@ static void SetWindowSizes(void)
 	wresize(search_pane.window, 4, middle_width);
 	mvwin(search_pane.window, lines - 4, pane_width);
 	
-	wresize(actions_win, 14, middle_width);
-	mvwin(actions_win, 6, pane_width);
+	wresize(actions_pane.pane.window, 14, middle_width);
+	mvwin(actions_pane.pane.window, 6, pane_width);
 	wresize(pane_windows[0], lines - 1, pane_width);
 	mvwin(pane_windows[0], 1, 0);
 	wresize(pane_windows[1], lines - 1, pane_width);
@@ -213,8 +149,10 @@ int main(int argc, char *argv[])
 		&search_pane,
 		newwin(4, 80 - (FILE_PANE_WIDTH * 2),
 		       20, FILE_PANE_WIDTH));
-	actions_win = newwin(14, 80 - (FILE_PANE_WIDTH * 2),
-	                     6, FILE_PANE_WIDTH);
+	UI_ActionsPaneInit(
+		&actions_pane,
+		newwin(14, 80 - (FILE_PANE_WIDTH * 2),
+		       6, FILE_PANE_WIDTH));
 	pane_windows[0] = newwin(
 		ScreenLines() - 1, FILE_PANE_WIDTH, 1, 0);
 	pane_data[0] = W_OpenFile("doom2.wad");
@@ -230,9 +168,11 @@ int main(int argc, char *argv[])
 	while (!main_loop_exited) {
 		int key;
 
+		actions_pane.actions = UI_ListPaneActions(
+			panes[active_pane], panes[!active_pane]);
 		UI_PaneDraw(&header_pane);
 		UI_PaneDraw(&info_pane);
-		ShowActions();
+		UI_PaneDraw(&actions_pane);
 		UI_PaneDraw(&search_pane);
 		UI_PaneDraw(panes[0]);
 		UI_PaneDraw(panes[1]);

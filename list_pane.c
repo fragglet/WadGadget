@@ -167,3 +167,76 @@ void UI_ListPaneFree(struct list_pane *p)
 	free(p);
 }
 
+struct list_pane_action common_actions[] =
+{
+	{"Space", "Mark/unmark"},
+	{"F10", "Unmark all"},
+	{"", ""},
+	{"Tab", "Other pane"},
+	{"ESC", "Quit"},
+	{NULL, NULL},
+};
+
+static void ShowAction(struct actions_pane *p, int y,
+                       const struct list_pane_action *action)
+{
+	WINDOW *win = p->pane.window;
+	char *desc;
+
+	if (strlen(action->key) == 0) {
+		return;
+	}
+	wattron(win, A_BOLD);
+	mvwaddstr(win, y, 2, action->key);
+	wattroff(win, A_BOLD);
+	waddstr(win, " - ");
+	desc = action->description;
+	if (action->description[0] == '>') {
+		if (!p->left_to_right) {
+			wattron(win, A_BOLD);
+			waddstr(win, "<<< ");
+			wattroff(win, A_BOLD);
+		}
+		desc += 2;
+	}
+	waddstr(win, desc);
+	if (action->description[0] == '>') {
+		if (p->left_to_right) {
+			wattron(win, A_BOLD);
+			waddstr(win, " >>>");
+			wattroff(win, A_BOLD);
+		}
+	}
+}
+
+static void DrawActionsPane(void *pane)
+{
+	struct actions_pane *p = pane;
+	WINDOW *win = p->pane.window;
+	int i, y;
+
+	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
+	werase(win);
+	box(win, 0, 0);
+	mvwaddstr(win, 0, 2, " Actions ");
+
+	y = 1;
+	for (i = 0; p->actions != NULL
+	         && p->actions[i].key != NULL; i++) {
+		ShowAction(p, y, &p->actions[i]);
+		y++;
+	}
+	for (i = 0; common_actions[i].key != NULL; i++) {
+		ShowAction(p, y, &common_actions[i]);
+		y++;
+	}
+}
+
+void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win)
+{
+	pane->pane.window = win;
+	pane->pane.draw = DrawActionsPane;
+	pane->pane.keypress = NULL;
+	pane->actions = NULL;
+}
+
