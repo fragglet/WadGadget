@@ -124,3 +124,96 @@ Generic decode for different lump types:
 
 Convert to Yocton format and back again, with basic editor in program
 
+== Interpretations of import
+
+When importing a resource into a WAD it could mean one of:
+
+* Copy contents of file into WAD as a lump
+* Convert contents of file (eg. GIF, PNG, WAV) and put in WAD as lump
+
+Also, when importing we can do:
+
+I1. Create new lumps, insert at WAD cursor position
+  - Advantage of being simple and easy to comprehend. "Take the thing from over
+    there are put it over there".
+  - Workable: to update a lump you import the new lump and delete the old one
+  - Could have an action that deletes duplicates
+  - Allows for the "rename lump after import" case
+I2. Overwrite content of selected lump
+  - Somewhat easy to comprehend
+  - Does not scale to multiple lumps. Could be a good approach for single lumps
+    but might be confusing to have the behavior for single/multiple differ
+I3. Update lumps by name
+  - Look for existing lumps with names that match the filename. We overwrite
+    the existing lump contents with new contents, possibly prompting for
+    confirmation from user first.
+  - Somewhat complicated. There is not the visual confirmation of things being
+    updated. Perhaps some kind of highlight could be used to show things that
+    have been updated recently.
+
+Added complexity:
+C1. When importing a level we should usually treat the level as a whole, not
+    just a bag of unrelated lumps
+  - But sometimes maybe we do want to think about individual lumps?
+C2. Sprites should be enclosedin SS_START..END, flats in FF_START..END etc.
+
+Use cases:
+
+U1. Making a new WAD. I first create an empty WAD and then want to import some
+    things into the WAD. Maybe from an existing WAD or from files.
+U2. I am iteratively developing some mod. I go through a cycle of eg.
+    edit graphics -> import into WAD -> test in game -> repeat. So I want to be
+    able to get my updated graphics into the WAD with minimum complexity.
+U3. I just want to update a single lump
+U4. I have a WAD and want to add more things into it (eg. add graphics into a
+    WAD that has a level.
+
+Design ideas:
+* When importing a single lump, the user usually gets prompted:
+
+        Importing foo.gif
+
+    Do you want to:
+     (*) Replace lump named TITLEPIC?
+     ( ) Update lump named FOO
+     ( ) Insert a new lump named FOO
+
+  - Some or all of these options can be missing:
+    - Case U1: there is no lump to replace or update. We can only do
+      I1, no prompt needed.
+    - Case U2: there is likely a lump to update. If it is the same as
+      the lump that's selected, there's no need to show both options.
+      Maybe in this case we don't even bother to show the dialog?
+    - Case U3: If selected matches name, there's no need to show both
+      options. Just update or insert.
+    - Case U4: Lump isn't in the WAD already, but we need to ask so that
+      we can distinguish between U3/U4.
+
+* When importing multiple lumps, the user usually gets prompted:
+
+        Importing 5 files.
+
+    Do you want to:
+     ( ) Update lumps by filename.
+     ( ) Insert a new lumps by filename.
+
+  - If one of these options is not relevant, we don't need to prompt.
+    - Case U1: there are no lumps to update. We must insert.
+    - Case U2: We probably want update. But not so certain that we
+      shouldn't ask? We should be consistent with the single lump case.
+      Where filename doesn't match any existing lump, we must insert.
+    - Case U3: N/A
+    - Case U4: None of the filenames match existing lump names. In this
+      case we cannot update any existing lumps, so we can just insert.
+
+ * C1: Importing a level header copies the whole level. It's as though
+       that lump being marked means that all the other level lumps are
+       also marked. So if the user selects all lumps or some of them,
+       as long as the header lump is marked, all are copied.
+   - But, if individual level lumps are marked without the level header,
+     only those level lumps are copied.
+
+ * C2: When copying from WAD to WAD, if a lump is in a special section
+       then on insert we create the section lumps too if they aren't
+       present. If the destination lump already exists (ie. update not
+       insert) then we do not do anything special.
