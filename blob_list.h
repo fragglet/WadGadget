@@ -12,11 +12,16 @@ enum blob_type {
 	BLOB_TYPE_WAD,
 };
 
+struct blob_list_entry {
+	enum blob_type type;
+	char *name;
+};
+
 struct blob_list {
 	char *path;
 	char *parent_dir, *name;
-	const char *(*get_entry_str)(struct blob_list *p, unsigned int i);
-	enum blob_type (*get_entry_type)(struct blob_list *l, unsigned int idx);
+	const struct blob_list_entry *(*get_entry)(
+		struct blob_list *p, unsigned int i);
 	const char *(*get_entry_path)(struct blob_list *l, unsigned int idx);
 	void (*free)(struct blob_list *bl);
 };

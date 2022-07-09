@@ -20,20 +20,19 @@ struct wad_file {
 	unsigned int current_lump_index;
 };
 
-static const char *GetEntry(struct blob_list *l, unsigned int idx)
+static const struct blob_list_entry *GetEntry(
+	struct blob_list *l, unsigned int idx)
 {
 	static char buf[9];
+	static struct blob_list_entry result;
 	struct wad_file *f = (struct wad_file *) l;
 	if (idx >= f->num_lumps) {
 		return NULL;
 	}
 	snprintf(buf, sizeof(buf), "%-8s", f->directory[idx].name);
-	return buf;
-}
-
-static enum blob_type GetEntryType(struct blob_list *l, unsigned int idx)
-{
-	return BLOB_TYPE_LUMP;
+	result.name = buf;
+	result.type = BLOB_TYPE_LUMP;
+	return &result;
 }
 
 static void FreeWadFile(struct blob_list *l)
@@ -56,8 +55,7 @@ struct wad_file *W_OpenFile(const char *filename)
 
 	result = checked_calloc(1, sizeof(struct wad_file));
 	result->vfs = vfs;
-	result->bl.get_entry_str = GetEntry;
-	result->bl.get_entry_type = GetEntryType;
+	result->bl.get_entry = GetEntry;
 	result->bl.free = FreeWadFile;
 	BL_SetPathFields(&result->bl, filename);
 

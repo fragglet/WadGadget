@@ -20,7 +20,7 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
                       unsigned int y, int active)
 {
 	WINDOW *win = lp->pane.window;
-	const char *str;
+	const struct blob_list_entry *ent;
 	static char buf[128];
 	unsigned int w, h;
 
@@ -35,11 +35,11 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 		         or_if_null(lp->blob_list->parent_dir, ""));
 		wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
-		str = lp->blob_list->get_entry_str(lp->blob_list, idx - 1);
-		if (str == NULL) {
+		ent = lp->blob_list->get_entry(lp->blob_list, idx - 1);
+		if (ent == NULL) {
 			return;
 		}
-		switch (UI_ListPaneEntryType(lp, idx)) {
+		switch (ent->type) {
 			case BLOB_TYPE_DIR:
 				wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 				wattron(win, A_BOLD);
@@ -50,7 +50,7 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 			default:
 				break;
 		}
-		snprintf(buf, w, " %-200s", str);
+		snprintf(buf, w, " %-200s", ent->name);
 	}
 	if (active && idx == lp->selected) {
 		wattron(win, A_REVERSE);
@@ -110,7 +110,7 @@ static void Keypress(void *p, int key)
 		lp->window_offset = 0;
 		return;
 	case KEY_DOWN:
-		if (lp->blob_list->get_entry_str(
+		if (lp->blob_list->get_entry(
 			lp->blob_list, lp->selected + 1 - 1) != NULL) {
 			++lp->selected;
 		}
@@ -124,7 +124,7 @@ static void Keypress(void *p, int key)
 		}
 		return;
 	case KEY_END:
-		while (lp->blob_list->get_entry_str(
+		while (lp->blob_list->get_entry(
 				lp->blob_list, lp->selected + 1 - 1) != NULL) {
 			++lp->selected;
 		}
@@ -148,10 +148,12 @@ const struct list_pane_action *UI_ListPaneActions(
 
 enum blob_type UI_ListPaneEntryType(struct list_pane *p, unsigned int idx)
 {
+	const struct blob_list_entry *ent;
 	if (idx == 0) {
 		return BLOB_TYPE_DIR;
 	}
-	return p->blob_list->get_entry_type(p->blob_list, idx - 1);
+	ent = p->blob_list->get_entry(p->blob_list, idx - 1);
+	return ent->type;
 }
 
 const char *UI_ListPaneEntryPath(struct list_pane *p, unsigned int idx)
