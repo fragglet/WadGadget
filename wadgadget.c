@@ -14,7 +14,6 @@ static WINDOW *pane_windows[2];
 static struct list_pane *panes[2];
 static void *pane_data[2];
 static unsigned int active_pane = 0;
-static int main_loop_exited = 0;
 static struct pane hidden_pane;
 
 static void SetWindowSizes(void)
@@ -40,6 +39,19 @@ static void SetWindowSizes(void)
 
 	erase();
 	refresh();
+}
+
+static void SwitchToPane(unsigned int pane)
+{
+	active_pane = pane;
+	UI_RaisePaneToTop(panes[pane]);
+	// The hidden pane always sits on top of the active pane to
+	// intercept keypresses:
+	UI_RaisePaneToTop(&hidden_pane);
+
+	actions_pane.left_to_right = active_pane == 0;
+	actions_pane.actions = UI_ListPaneActions(
+		panes[active_pane], panes[!active_pane]);
 }
 
 static void NavigateNew(void)
@@ -76,7 +88,8 @@ static void NavigateNew(void)
 		panes[active_pane] = new_pane;
 		pane_data[active_pane] = new_data;
 		UI_PaneShow(new_pane);
-		UI_RaisePaneToTop(&hidden_pane);
+
+		SwitchToPane(active_pane);
 	}
 }
 
@@ -84,14 +97,10 @@ static void HandleKeypress(void *pane, int key)
 {
 	switch (key) {
 	case KEY_LEFT:
-		active_pane = 0;
-		UI_RaisePaneToTop(panes[0]);
-		UI_RaisePaneToTop(&hidden_pane);
+		SwitchToPane(0);
 		break;
 	case KEY_RIGHT:
-		active_pane = 1;
-		UI_RaisePaneToTop(panes[1]);
-		UI_RaisePaneToTop(&hidden_pane);
+		SwitchToPane(1);
 		break;
 	case KEY_RESIZE:
 		SetWindowSizes();
@@ -100,12 +109,10 @@ static void HandleKeypress(void *pane, int key)
 		NavigateNew();
 		break;
 	case '\t':
-		active_pane = !active_pane;
-		UI_RaisePaneToTop(panes[active_pane]);
-		UI_RaisePaneToTop(&hidden_pane);
+		SwitchToPane(!active_pane);
 		break;
 	case 27:
-		main_loop_exited = 1;
+		UI_ExitMainLoop();
 		break;
 	default:
 		UI_PaneKeypress(panes[active_pane], key);
@@ -159,21 +166,11 @@ int main(int argc, char *argv[])
 	panes[1] = UI_NewDirectoryPane(pane_windows[1], pane_data[1]);
 	UI_PaneShow(panes[1]);
 
-	UI_RaisePaneToTop(panes[active_pane]);
-	UI_RaisePaneToTop(&hidden_pane);
+	SwitchToPane(0);
 
 	SetWindowSizes();
+	UI_RunMainLoop();
 
-	while (!main_loop_exited) {
-		int key;
-
-		actions_pane.actions = UI_ListPaneActions(
-			panes[active_pane], panes[!active_pane]);
-		UI_DrawAllPanes();
-
-		key = getch();
-		HandleKeypress(NULL, key);
-	}
 	clear();
 	refresh();
 	endwin();

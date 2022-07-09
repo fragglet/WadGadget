@@ -8,6 +8,7 @@
 
 static struct pane *screen_panes[MAX_SCREEN_PANES];
 static unsigned int num_screen_panes = 0;
+static int main_loop_exited = 0;
 
 void UI_PaneKeypress(void *pane, int key)
 {
@@ -75,5 +76,37 @@ void UI_RaisePaneToTop(void *pane)
 	if (UI_PaneHide(pane)) {
 		UI_PaneShow(pane);
 	}
+}
+
+static void HandleKeypresses(void)
+{
+	int key, i;
+
+	// TODO: This should handle multiple keypresses before returning.
+
+	key = getch();
+
+	// Keypress goes to the top pane that has a keypress handler.
+	for (i = num_screen_panes - 1; i >= 0; i--) {
+		if (screen_panes[i]->keypress != NULL) {
+			UI_PaneKeypress(screen_panes[i], key);
+			break;
+		}
+	}
+}
+
+void UI_RunMainLoop(void)
+{
+	while (!main_loop_exited) {
+		UI_DrawAllPanes();
+		HandleKeypresses();
+	}
+
+	main_loop_exited = 0;
+}
+
+void UI_ExitMainLoop(void)
+{
+	main_loop_exited = 1;
 }
 
