@@ -47,8 +47,8 @@ static void DrawSearchPane(void *p, int active)
 	wbkgdset(pane->window, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(pane->window);
 	box(pane->window, 0, 0);
-	mvwaddstr(pane->window, 1, 2, "Search: ");
-	mvwaddstr(pane->window, 2, 2, "");
+	mvwaddstr(pane->window, 0, 2, " Search ");
+	mvwaddstr(pane->window, 1, 1, "");
 }
 
 void UI_InitSearchPane(struct pane *pane, WINDOW *win)

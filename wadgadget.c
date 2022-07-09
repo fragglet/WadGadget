@@ -27,8 +27,8 @@ static void SetWindowSizes(void)
 	wresize(header_pane.window, 1, columns);
 	wresize(info_pane.window, 5, middle_width);
 	mvwin(info_pane.window, 1, pane_width);
-	wresize(search_pane.window, 4, middle_width);
-	mvwin(search_pane.window, lines - 4, pane_width);
+	wresize(search_pane.window, 3, middle_width);
+	mvwin(search_pane.window, lines - 3, pane_width);
 	
 	wresize(actions_pane.pane.window, 14, middle_width);
 	mvwin(actions_pane.pane.window, 6, pane_width);
