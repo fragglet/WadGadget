@@ -23,4 +23,5 @@ unsigned int W_NumLumps(struct wad_file *f);
 VFILE *W_OpenLump(struct wad_file *f, unsigned int lump_index);
 VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index);
 void W_WriteDirectory(struct wad_file *f);
+void W_DeleteEntry(struct wad_file *f, unsigned int index);
 

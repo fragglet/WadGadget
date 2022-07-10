@@ -97,6 +97,14 @@ void W_CloseFile(struct wad_file *f)
 	free(f);
 }
 
+void W_DeleteEntry(struct wad_file *f, unsigned int index)
+{
+	assert(index < f->num_lumps);
+	memmove(&f->directory[index], &f->directory[index + 1],
+	        (f->num_lumps - index - 1) * sizeof(struct wad_file_entry));
+	--f->num_lumps;
+}
+
 static void LumpClosed(VFILE *fs, void *data)
 {
 	struct wad_file *f = data;
