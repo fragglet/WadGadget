@@ -86,7 +86,7 @@ static void Draw(void *p, int active)
 	}
 }
 
-static void Keypress(void *p, int key)
+void UI_ListPaneKeypress(void *p, int key)
 {
 	struct list_pane *lp = p;
 	unsigned int i;
@@ -102,7 +102,7 @@ static void Keypress(void *p, int key)
 		return;
 	case KEY_PPAGE:
 		for (i = 0; i < Lines(lp); i++) {
-			Keypress(p, KEY_UP);
+			UI_ListPaneKeypress(p, KEY_UP);
 		}
 		return;
 	case KEY_HOME:
@@ -120,7 +120,7 @@ static void Keypress(void *p, int key)
 		return;
 	case KEY_NPAGE:
 		for (i = 0; i < Lines(lp); i++) {
-			Keypress(p, KEY_DOWN);
+			UI_ListPaneKeypress(p, KEY_DOWN);
 		}
 		return;
 	case KEY_END:
@@ -137,7 +137,7 @@ void UI_ListPaneInit(struct list_pane *p, WINDOW *w)
 {
 	p->pane.window = w;
 	p->pane.draw = Draw;
-	p->pane.keypress = Keypress;
+	p->pane.keypress = UI_ListPaneKeypress;
 }
 
 const struct list_pane_action *UI_ListPaneActions(

@@ -34,6 +34,7 @@ const struct list_pane_action *UI_ListPaneActions(
 	struct list_pane *p, struct list_pane *other);
 enum blob_type UI_ListPaneEntryType(struct list_pane *p, unsigned int idx);
 const char *UI_ListPaneEntryPath(struct list_pane *p, unsigned int idx);
+void UI_ListPaneKeypress(void *p, int key);
 void UI_ListPaneFree(struct list_pane *p);
 
 void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win);
