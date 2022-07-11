@@ -97,6 +97,27 @@ void W_CloseFile(struct wad_file *f)
 	free(f);
 }
 
+void W_AddEntries(struct wad_file *f, unsigned int after_index,
+                  unsigned int count)
+{
+	unsigned int i;
+	struct wad_file_entry *ent;
+
+	assert(after_index <= f->num_lumps);
+	f->directory = realloc(f->directory,
+	    (f->num_lumps + count) * sizeof(struct wad_file_entry));
+	memmove(&f->directory[after_index + count],
+	        &f->directory[after_index],
+	        (f->num_lumps - after_index) * sizeof(struct wad_file_entry));
+	f->num_lumps += count;
+	for (i = 0; i < count; i++) {
+		ent = &f->directory[after_index + i];
+		ent->position = 0;
+		ent->size = 0;
+		snprintf(ent->name, 8, "UNNAMED");
+	}
+}
+
 void W_DeleteEntry(struct wad_file *f, unsigned int index)
 {
 	assert(index < f->num_lumps);

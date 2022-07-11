@@ -56,6 +56,15 @@ static void Keypress(void *wad_pane, int key)
 	struct wad_pane *p = wad_pane;
 	unsigned int selected = p->pane.selected;
 
+	if (key == KEY_F(7)) {
+		W_AddEntries(p->f, selected, 1);
+		++p->pane.selected;
+		if (p->pane.selected - p->pane.window_offset > 10) {
+			++p->pane.window_offset;
+		}
+		return;
+	}
+
 	if (key == KEY_F(8) && selected > 0) {
 		if (UI_ConfirmDialogBox(
 		     "Confirm delete",
