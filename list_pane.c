@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "colors.h"
 #include "common.h"
 #include "ui.h"
 #include "list_pane.h"

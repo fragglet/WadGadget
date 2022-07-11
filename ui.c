@@ -1,5 +1,7 @@
+#include <stdlib.h>
 #include <curses.h>
 
+#include "colors.h"
 #include "pane.h"
 #include "ui.h"
 

@@ -1,6 +1,7 @@
 #include <curses.h>
 #include <string.h>
 
+#include "colors.h"
 #include "common.h"
 #include "dir_pane.h"
 #include "wad_pane.h"
@@ -130,6 +131,7 @@ int main(int argc, char *argv[])
 	intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
 
+	init_pair(PAIR_WHITE_BLACK, COLOR_WHITE, COLOR_BLACK);
 	init_pair(PAIR_PANE_COLOR, COLOR_WHITE, COLOR_BLUE);
 	init_pair(PAIR_HIGHLIGHT, COLOR_BLACK, COLOR_CYAN);
 	init_pair(PAIR_DIRECTORY, COLOR_CYAN, COLOR_BLACK);
