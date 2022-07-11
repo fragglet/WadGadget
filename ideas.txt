@@ -217,3 +217,19 @@ Design ideas:
        then on insert we create the section lumps too if they aren't
        present. If the destination lump already exists (ie. update not
        insert) then we do not do anything special.
+
+== Dialog types
+
+- Text entry
+  - Rename file or lump
+  - New lump (if we decide to prompt)
+  - Make WAD (prompt for WAD name)
+  - Make directory
+- Confirm dialog
+  - Delete lump
+  - Delete file
+  - Overwrite file
+- Multiple choice prompt:
+  - As above, for import/export
+- Configuration dialog
+
