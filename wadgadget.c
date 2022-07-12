@@ -9,6 +9,11 @@
 
 #define FILE_PANE_WIDTH 27
 
+struct search_pane {
+	struct pane pane;
+	struct text_input_box input;
+};
+
 static struct actions_pane actions_pane;
 static struct pane header_pane, info_pane;
 static struct search_pane search_pane;
@@ -16,7 +21,6 @@ static WINDOW *pane_windows[2];
 static struct list_pane *panes[2];
 static void *pane_data[2];
 static unsigned int active_pane = 0;
-static struct pane hidden_pane;
 
 static void SetWindowSizes(void)
 {
@@ -50,9 +54,9 @@ static void SwitchToPane(unsigned int pane)
 	active_pane = pane;
 	UI_RaisePaneToTop(panes[pane]);
 	panes[active_pane]->active = 1;
-	// The hidden pane always sits on top of the active pane to
+	// The search pane always sits on top of the stack.
 	// intercept keypresses:
-	UI_RaisePaneToTop(&hidden_pane);
+	UI_RaisePaneToTop(&search_pane);
 
 	actions_pane.left_to_right = active_pane == 0;
 	actions_pane.actions = UI_ListPaneActions(
@@ -121,17 +125,35 @@ static void HandleKeypress(void *pane, int key)
 		break;
 	default:
 		UI_PaneKeypress(panes[active_pane], key);
-		UI_PaneKeypress(&search_pane, key);
 		break;
 	}
 }
 
-static void HiddenPaneDrawer(void *p)
+static void DrawSearchPane(void *pane)
 {
-	// Gross hack to make the cursor appear in the search window even
-	// though it's not the active window.
-	search_pane.pane.draw(&search_pane);
-	wnoutrefresh(search_pane.pane.window);
+	struct search_pane *p = pane;
+	WINDOW *win = p->pane.window;
+
+	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
+	werase(win);
+	box(win, 0, 0);
+	mvwaddstr(win, 0, 2, " Search ");
+	UI_TextInputDraw(&p->input);
+}
+
+static void SearchPaneKeypress(void *pane, int key)
+{
+	struct search_pane *p = pane;
+	UI_TextInputKeypress(&p->input, key);
+	HandleKeypress(NULL, key);
+}
+
+static void InitSearchPane(WINDOW *win)
+{
+	search_pane.pane.window = win;
+	search_pane.pane.draw = DrawSearchPane;
+	search_pane.pane.keypress = SearchPaneKeypress;
+	UI_TextInputInit(&search_pane.input, win, 1, 20);
 }
 
 int main(int argc, char *argv[])
@@ -153,11 +175,6 @@ int main(int argc, char *argv[])
 
 	refresh();
 
-	hidden_pane.window = NULL;
-	hidden_pane.draw = HiddenPaneDrawer;
-	hidden_pane.keypress = HandleKeypress;
-	UI_PaneShow(&hidden_pane);
-
 	// The hard-coded window sizes and positions here get reset
 	// when SetWindowSizes() is called below.
 	UI_InitHeaderPane(&header_pane, newwin(1, 80, 0, 0));
@@ -166,8 +183,8 @@ int main(int argc, char *argv[])
 	UI_InitInfoPane(&info_pane, newwin(5, 26, 1, 27));
 	UI_PaneShow(&info_pane);
 
-	UI_InitSearchPane(&search_pane, newwin(4, 26, 20, 27));
-	// No call to UI_PaneShow because hidden pane draws it.
+	InitSearchPane(newwin(4, 26, 20, 27));
+	UI_PaneShow(&search_pane);
 
 	UI_ActionsPaneInit(&actions_pane, newwin(14, 26, 6, 27));
 	UI_PaneShow(&actions_pane);
