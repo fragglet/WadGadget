@@ -123,3 +123,80 @@ int UI_ConfirmDialogBox(char *title, char *msg, ...)
 	return dialog.result;
 }
 
+struct text_input_dialog_box {
+	struct pane pane;
+	char *title;
+	char msg[128];
+	int result;
+	struct text_input_box input;
+};
+
+static void DrawTextInputDialog(void *pane)
+{
+	struct text_input_dialog_box *dialog = pane;
+	WINDOW *win = dialog->pane.window;
+	int w, h;
+
+	getmaxyx(win, h, w);
+	w = w;
+
+	wbkgdset(win, COLOR_PAIR(PAIR_DIALOG_BOX));
+	wattron(win, A_BOLD);
+	werase(win);
+	wattron(win, A_BOLD);
+	box(win, 0, 0);
+	if (dialog->title != NULL) {
+		mvwaddstr(win, 0, 2, " ");
+		waddstr(win, dialog->title);
+		waddstr(win, " ");
+	}
+
+	PrintMultilineString(win, 1, 2, dialog->msg);
+
+	mvwaddstr(win, h - 2, 1, " ESC - Cancel ");
+	mvwaddstr(win, h - 2, w - 16, " ENT - Confirm ");
+
+	wattroff(win, A_BOLD);
+	UI_TextInputDraw(&dialog->input);
+}
+
+static void TextInputDialogKeypress(void *dialog, int key)
+{
+	struct text_input_dialog_box *d = dialog;
+
+	if (key == 27) {
+		d->result = 0;
+		UI_ExitMainLoop();
+		return;
+	}
+	UI_TextInputKeypress(&d->input, key);
+}
+
+int UI_TextInputDialogBox(char *title, size_t max_chars, char *msg, ...)
+{
+	struct text_input_dialog_box dialog;
+	int scrh, scrw;
+	int w, h;
+	va_list args;
+	getmaxyx(stdscr, scrh, scrw);
+
+	va_start(args, msg);
+	vsnprintf(dialog.msg, sizeof(dialog.msg), msg, args);
+	va_end(args);
+
+	w = max(StringWidth(dialog.msg) + 4, 35);
+	h = StringHeight(dialog.msg) + 5;
+	dialog.pane.window = newwin(h, w, (scrh / 2) - h, (scrw - w) / 2);
+	dialog.pane.draw = DrawTextInputDialog;
+	dialog.pane.keypress = TextInputDialogKeypress;
+	dialog.title = title;
+	dialog.result = 0;
+	UI_TextInputInit(&dialog.input, dialog.pane.window, h - 4, max_chars);
+
+	UI_PaneShow(&dialog);
+	UI_RunMainLoop();
+	UI_PaneHide(&dialog);
+
+	return dialog.result;
+}
+
