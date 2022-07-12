@@ -43,24 +43,25 @@ void UI_TextInputDraw(struct text_input_box *input)
 	wattroff(input->win, COLOR_PAIR(PAIR_WHITE_BLACK));
 }
 
-void UI_TextInputKeypress(struct text_input_box *input, int keypress)
+int UI_TextInputKeypress(struct text_input_box *input, int keypress)
 {
 	size_t pos;
 
 	if (keypress == KEY_BACKSPACE && strlen(input->input) > 0) {
 		input->input[strlen(input->input) - 1] = '\0';
-		return;
+		return 1;
 	}
 
 	if (keypress >= 128 || !isprint(keypress)) {
-		return;
+		return 0;
 	}
 
 	pos = strlen(input->input);
 	if (pos + 1 >= input->input_sz) {
-		return;
+		return 0;
 	}
 	input->input[pos] = keypress;
 	input->input[pos + 1] = '\0';
+	return 1;
 }
 
