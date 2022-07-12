@@ -1,4 +1,5 @@
 
+#include <stdlib.h>
 #include <curses.h>
 
 #include "colors.h"
@@ -172,7 +173,7 @@ static void TextInputDialogKeypress(void *dialog, int key)
 	UI_TextInputKeypress(&d->input, key);
 }
 
-int UI_TextInputDialogBox(char *title, size_t max_chars, char *msg, ...)
+char *UI_TextInputDialogBox(char *title, size_t max_chars, char *msg, ...)
 {
 	struct text_input_dialog_box dialog;
 	int scrh, scrw;
@@ -197,6 +198,11 @@ int UI_TextInputDialogBox(char *title, size_t max_chars, char *msg, ...)
 	UI_RunMainLoop();
 	UI_PaneHide(&dialog);
 
-	return dialog.result;
+	if (!dialog.result) {
+		free(dialog.input.input);
+		return NULL;
+	}
+
+	return dialog.input.input;
 }
 
