@@ -20,6 +20,7 @@ struct list_pane {
 	struct blob_list *blob_list;
 	enum list_pane_type type;
 	unsigned int window_offset, selected;
+	int active;
 	const struct list_pane_action *(*get_actions)(struct list_pane *other);
 };
 

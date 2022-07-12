@@ -5,7 +5,7 @@
 
 struct pane {
 	WINDOW *window;
-	void (*draw)(void *pane, int active);
+	void (*draw)(void *pane);
 	void (*keypress)(void *pane, int key);
 };
 

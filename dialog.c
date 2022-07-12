@@ -59,7 +59,7 @@ static void PrintMultilineString(WINDOW *win, int y, int x, char *s)
 	}
 }
 
-static void DrawConfirmDialog(void *pane, int active)
+static void DrawConfirmDialog(void *pane)
 {
 	struct confirm_dialog_box *dialog = pane;
 	WINDOW *win = dialog->pane.window;

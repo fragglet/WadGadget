@@ -5,7 +5,7 @@
 #include "pane.h"
 #include "ui.h"
 
-static void DrawHeaderPane(void *p, int active)
+static void DrawHeaderPane(void *p)
 {
 	struct pane *pane = p;
 
@@ -22,7 +22,7 @@ void UI_InitHeaderPane(struct pane *pane, WINDOW *win)
 	pane->keypress = NULL;
 }
 
-static void DrawInfoPane(void *p, int active)
+static void DrawInfoPane(void *p)
 {
 	struct pane *pane = p;
 
@@ -42,7 +42,7 @@ void UI_InitInfoPane(struct pane *pane, WINDOW *win)
 	pane->keypress = NULL;
 }
 
-static void DrawSearchPane(void *pane, int active)
+static void DrawSearchPane(void *pane)
 {
 	struct search_pane *p = pane;
 	WINDOW *win = p->pane.window;

@@ -46,8 +46,10 @@ static void SetWindowSizes(void)
 
 static void SwitchToPane(unsigned int pane)
 {
+	panes[active_pane]->active = 0;
 	active_pane = pane;
 	UI_RaisePaneToTop(panes[pane]);
+	panes[active_pane]->active = 1;
 	// The hidden pane always sits on top of the active pane to
 	// intercept keypresses:
 	UI_RaisePaneToTop(&hidden_pane);
@@ -124,11 +126,11 @@ static void HandleKeypress(void *pane, int key)
 	}
 }
 
-static void HiddenPaneDrawer(void *p, int active)
+static void HiddenPaneDrawer(void *p)
 {
 	// Gross hack to make the cursor appear in the search window even
 	// though it's not the active window.
-	search_pane.pane.draw(&search_pane, 0);
+	search_pane.pane.draw(&search_pane);
 	wnoutrefresh(search_pane.pane.window);
 }
 

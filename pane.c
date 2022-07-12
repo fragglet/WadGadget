@@ -49,18 +49,6 @@ void UI_DrawAllPanes(void)
 {
 	static WINDOW *fullscr_win = NULL;
 	int i;
-	struct pane *active_pane = NULL;
-
-	// Active pane is the top pane on the stack that is not an invisible
-	// pane (allows for the fake pane case that eats keypresses but does
-	// not show anything).
-	for (i = num_screen_panes - 1; i >= 0; i--) {
-		struct pane *p = screen_panes[i];
-		if (p->window != NULL) {
-			active_pane = p;
-			break;
-		}
-	}
 
 	// We maintain a background full-screen window that we just erase
 	// entirely before we draw the others. This ensures that any "crud"
@@ -74,7 +62,7 @@ void UI_DrawAllPanes(void)
 	for (i = 0; i < num_screen_panes; i++) {
 		struct pane *p = screen_panes[i];
 		if (p->draw != NULL) {
-			p->draw(p, p == active_pane);
+			p->draw(p);
 			wnoutrefresh(p->window);
 		}
 	}
