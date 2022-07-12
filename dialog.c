@@ -170,6 +170,10 @@ static void TextInputDialogKeypress(void *dialog, int key)
 		UI_ExitMainLoop();
 		return;
 	}
+	if (key == '\r') {
+		d->result = 1;
+		UI_ExitMainLoop();
+	}
 	UI_TextInputKeypress(&d->input, key);
 }
 
