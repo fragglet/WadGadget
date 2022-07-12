@@ -68,6 +68,7 @@ static void DrawConfirmDialog(void *pane)
 	getmaxyx(win, h, w);
 
 	wbkgdset(win, COLOR_PAIR(PAIR_DIALOG_BOX));
+	wattron(win, A_BOLD);
 	werase(win);
 	box(win, 0, 0);
 	if (dialog->title != NULL) {
@@ -75,10 +76,11 @@ static void DrawConfirmDialog(void *pane)
 		waddstr(win, dialog->title);
 		waddstr(win, " ");
 	}
-	PrintMultilineString(win, 1, 2, dialog->msg);
 
+	PrintMultilineString(win, 1, 2, dialog->msg);
 	mvwaddstr(win, h - 2, 1, " ESC - Cancel ");
 	mvwaddstr(win, h - 2, w - 14, " Y - Confirm ");
+	wattroff(win, A_BOLD);
 }
 
 static void ConfirmDialogKeypress(void *dialog, int key)
