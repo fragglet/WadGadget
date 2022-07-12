@@ -47,6 +47,7 @@ int UI_PaneHide(void *pane)
 
 void UI_DrawAllPanes(void)
 {
+	static WINDOW *fullscr_win = NULL;
 	int i;
 	struct pane *active_pane = NULL;
 
@@ -60,6 +61,15 @@ void UI_DrawAllPanes(void)
 			break;
 		}
 	}
+
+	// We maintain a background full-screen window that we just erase
+	// entirely before we draw the others. This ensures that any "crud"
+	// left over after a window is closed will get erased.
+	if (fullscr_win == NULL) {
+		fullscr_win = newwin(0, 0, 0, 0);
+	}
+	werase(fullscr_win);
+	wnoutrefresh(fullscr_win);
 
 	for (i = 0; i < num_screen_panes; i++) {
 		struct pane *p = screen_panes[i];
