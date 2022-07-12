@@ -10,7 +10,8 @@
 #define FILE_PANE_WIDTH 27
 
 static struct actions_pane actions_pane;
-static struct pane header_pane, info_pane, search_pane;
+static struct pane header_pane, info_pane;
+static struct search_pane search_pane;
 static WINDOW *pane_windows[2];
 static struct list_pane *panes[2];
 static void *pane_data[2];
@@ -28,8 +29,8 @@ static void SetWindowSizes(void)
 	wresize(header_pane.window, 1, columns);
 	wresize(info_pane.window, 5, middle_width);
 	mvwin(info_pane.window, 1, pane_width);
-	wresize(search_pane.window, 3, middle_width);
-	mvwin(search_pane.window, lines - 3, pane_width);
+	wresize(search_pane.pane.window, 3, middle_width);
+	mvwin(search_pane.pane.window, lines - 3, pane_width);
 	
 	wresize(actions_pane.pane.window, 14, middle_width);
 	mvwin(actions_pane.pane.window, 6, pane_width);
@@ -117,6 +118,7 @@ static void HandleKeypress(void *pane, int key)
 		break;
 	default:
 		UI_PaneKeypress(panes[active_pane], key);
+		UI_PaneKeypress(&search_pane, key);
 		break;
 	}
 }
