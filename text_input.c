@@ -25,15 +25,15 @@ void UI_TextInputDraw(struct text_input_box *input)
 	int x;
 
 	getmaxyx(input->win, h, w);
-	w -= 2; h = h;
+	w -= 4; h = h;
 
 	wattron(input->win, COLOR_PAIR(PAIR_WHITE_BLACK));
-	wmove(input->win, input->y, 1);
+	wmove(input->win, input->y, 2);
 	for (x = 0; x < w; x++) {
 		waddch(input->win, ' ');
 	}
 
-	wmove(input->win, input->y, 1);
+	wmove(input->win, input->y, 2);
 	s_len = strlen(input->input);
 	s = input->input;
 	if (s_len + 1 > w) {
