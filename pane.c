@@ -63,7 +63,7 @@ void UI_DrawAllPanes(void)
 
 	for (i = 0; i < num_screen_panes; i++) {
 		struct pane *p = screen_panes[i];
-		if (p->window != NULL && p->draw != NULL) {
+		if (p->draw != NULL) {
 			p->draw(p, p == active_pane);
 			wnoutrefresh(p->window);
 		}

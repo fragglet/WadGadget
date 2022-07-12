@@ -123,6 +123,14 @@ static void HandleKeypress(void *pane, int key)
 	}
 }
 
+static void HiddenPaneDrawer(void *p, int active)
+{
+	// Gross hack to make the cursor appear in the search window even
+	// though it's not the active window.
+	search_pane.pane.draw(&search_pane, 0);
+	wnoutrefresh(search_pane.pane.window);
+}
+
 int main(int argc, char *argv[])
 {
 	initscr();
@@ -143,7 +151,7 @@ int main(int argc, char *argv[])
 	refresh();
 
 	hidden_pane.window = NULL;
-	hidden_pane.draw = NULL;
+	hidden_pane.draw = HiddenPaneDrawer;
 	hidden_pane.keypress = HandleKeypress;
 	UI_PaneShow(&hidden_pane);
 
@@ -156,7 +164,7 @@ int main(int argc, char *argv[])
 	UI_PaneShow(&info_pane);
 
 	UI_InitSearchPane(&search_pane, newwin(4, 26, 20, 27));
-	UI_PaneShow(&search_pane);
+	// No call to UI_PaneShow because hidden pane draws it.
 
 	UI_ActionsPaneInit(&actions_pane, newwin(14, 26, 6, 27));
 	UI_PaneShow(&actions_pane);
