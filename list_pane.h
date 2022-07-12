@@ -37,6 +37,7 @@ enum blob_type UI_ListPaneEntryType(struct list_pane *p, unsigned int idx);
 const char *UI_ListPaneEntryPath(struct list_pane *p, unsigned int idx);
 void UI_ListPaneKeypress(void *p, int key);
 void UI_ListPaneFree(struct list_pane *p);
+void UI_ListPaneSearch(void *p, char *needle);
 
 void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win);
 

@@ -87,6 +87,52 @@ static void Draw(void *p)
 	}
 }
 
+void UI_ListPaneSearch(void *p, char *needle)
+{
+	const struct blob_list_entry *ent;
+	struct list_pane *lp = p;
+	size_t haystack_len, needle_len = strlen(needle);
+	int i, j;
+
+	if (strlen(needle) == 0) {
+		return;
+	}
+
+	// Check for prefix first, so user can type entire lump name.
+	for (i = 0;; i++) {
+		ent = lp->blob_list->get_entry(lp->blob_list, i);
+		if (ent == NULL) {
+			break;
+		}
+		if (!strncasecmp(ent->name, needle, needle_len)) {
+			lp->selected = i + 1;
+			lp->window_offset = lp->selected >= 10 ?
+			    lp->selected - 10 : 0;
+			return;
+		}
+	}
+
+	// Second time through, we look for a substring match.
+	for (i = 0;; i++) {
+		ent = lp->blob_list->get_entry(lp->blob_list, i);
+		if (ent == NULL) {
+			break;
+		}
+		haystack_len = strlen(ent->name);
+		if (haystack_len < needle_len) {
+			continue;
+		}
+		for (j = 0; j < haystack_len - needle_len; j++) {
+			if (!strncasecmp(&ent->name[j], needle, needle_len)) {
+				lp->selected = i + 1;
+				lp->window_offset = lp->selected >= 10 ?
+				    lp->selected - 10 : 0;
+				return;
+			}
+		}
+	}
+}
+
 void UI_ListPaneKeypress(void *p, int key)
 {
 	struct list_pane *lp = p;
