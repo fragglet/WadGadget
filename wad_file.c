@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <assert.h>
 
 #include "common.h"
@@ -124,6 +125,18 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index)
 	memmove(&f->directory[index], &f->directory[index + 1],
 	        (f->num_lumps - index - 1) * sizeof(struct wad_file_entry));
 	--f->num_lumps;
+}
+
+void W_SetLumpName(struct wad_file *f, unsigned int index, char *name)
+{
+	unsigned int i;
+	assert(index < f->num_lumps);
+	for (i = 0; i < 8; i++) {
+		f->directory[index].name[i] = toupper(name[i]);
+		if (name[i] == '\0') {
+			break;
+		}
+	}
 }
 
 static void LumpClosed(VFILE *fs, void *data)
