@@ -56,6 +56,17 @@ static void Keypress(void *wad_pane, int key)
 	struct wad_pane *p = wad_pane;
 	unsigned int selected = p->pane.selected;
 
+	if (key == KEY_F(6) && selected > 0) {
+		char *name = UI_TextInputDialogBox(
+		    "Rename lump", 8,
+		    "Enter new name for lump:");
+		if (name == NULL) {
+			return;
+		}
+		W_SetLumpName(p->f, selected - 1, name);
+		free(name);
+	}
+
 	if (key == KEY_F(7)) {
 		W_AddEntries(p->f, selected, 1);
 		++p->pane.selected;
