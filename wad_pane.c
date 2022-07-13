@@ -68,7 +68,14 @@ static void Keypress(void *wad_pane, int key)
 	}
 
 	if (key == KEY_F(7)) {
+		char *name = UI_TextInputDialogBox(
+		    "New lump", 8,
+		    "Enter name for new lump:");
+		if (name == NULL) {
+			return;
+		}
 		W_AddEntries(p->f, selected, 1);
+		W_SetLumpName(p->f, selected, name);
 		++p->pane.selected;
 		if (p->pane.selected - p->pane.window_offset > 10) {
 			++p->pane.window_offset;
