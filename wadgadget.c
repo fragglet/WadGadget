@@ -144,7 +144,8 @@ static void DrawSearchPane(void *pane)
 static void SearchPaneKeypress(void *pane, int key)
 {
 	struct search_pane *p = pane;
-	if (UI_TextInputKeypress(&p->input, key)) {
+	// Space key triggers mark, does not go to search input.
+	if (key != ' ' && UI_TextInputKeypress(&p->input, key)) {
 		UI_ListPaneSearch(panes[active_pane], p->input.input);
 	} else {
 		HandleKeypress(NULL, key);

@@ -56,12 +56,16 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 	if (lp->active && idx == lp->selected) {
 		wattron(win, A_REVERSE);
 	}
+	if (BL_IsTagged(&lp->blob_list->tags, idx - 1)) {
+		wattron(win, COLOR_PAIR(PAIR_HIGHLIGHT));
+	}
 	mvwaddstr(win, 1 + y, 1, buf);
 	waddstr(win, " ");
 	wattroff(win, A_REVERSE);
 	wattroff(win, A_BOLD);
 	wattroff(win, COLOR_PAIR(PAIR_DIRECTORY));
 	wattroff(win, COLOR_PAIR(PAIR_WAD_FILE));
+	wattroff(win, COLOR_PAIR(PAIR_HIGHLIGHT));
 }
 
 static void Draw(void *p)
@@ -136,6 +140,7 @@ void UI_ListPaneSearch(void *p, char *needle)
 void UI_ListPaneKeypress(void *p, int key)
 {
 	struct list_pane *lp = p;
+	struct blob_tag_list *tags = &lp->blob_list->tags;
 	unsigned int i;
 
 	switch (key) {
@@ -156,6 +161,15 @@ void UI_ListPaneKeypress(void *p, int key)
 		lp->selected = 0;
 		lp->window_offset = 0;
 		return;
+	case ' ':
+		if (lp->selected > 0) {
+			if (BL_IsTagged(tags, lp->selected - 1)) {
+				BL_RemoveTag(tags, lp->selected - 1);
+			} else {
+				BL_AddTag(tags, lp->selected - 1);
+			}
+		}
+		/* fallthrough */
 	case KEY_DOWN:
 		if (lp->blob_list->get_entry(
 			lp->blob_list, lp->selected + 1 - 1) != NULL) {

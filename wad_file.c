@@ -116,6 +116,7 @@ void W_AddEntries(struct wad_file *f, unsigned int after_index,
 		ent->position = 0;
 		ent->size = 0;
 		snprintf(ent->name, 8, "UNNAMED");
+		BL_HandleInsert(&f->bl.tags, after_index + i);
 	}
 }
 
@@ -124,6 +125,7 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index)
 	assert(index < f->num_lumps);
 	memmove(&f->directory[index], &f->directory[index + 1],
 	        (f->num_lumps - index - 1) * sizeof(struct wad_file_entry));
+	BL_HandleDelete(&f->bl.tags, index);
 	--f->num_lumps;
 }
 
