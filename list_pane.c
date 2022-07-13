@@ -160,6 +160,9 @@ void UI_ListPaneKeypress(void *p, int key)
 		lp->selected = 0;
 		lp->window_offset = 0;
 		return;
+	case KEY_F(10):
+		BL_ClearTags(&lp->blob_list->tags);
+		return;
 	case ' ':
 		if (lp->selected > 0) {
 			if (BL_IsTagged(tags, lp->selected - 1)) {

@@ -104,6 +104,11 @@ void BL_HandleInsert(struct blob_tag_list *l, unsigned int index)
 	}
 }
 
+void BL_ClearTags(struct blob_tag_list *l)
+{
+	l->num_entries = 0;
+}
+
 void BL_HandleDelete(struct blob_tag_list *l, unsigned int index)
 {
 	unsigned int entries_index;
