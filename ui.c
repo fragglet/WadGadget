@@ -9,7 +9,7 @@ static void DrawHeaderPane(void *p)
 {
 	struct pane *pane = p;
 
-	wbkgdset(pane->window, COLOR_PAIR(PAIR_HIGHLIGHT));
+	wbkgdset(pane->window, COLOR_PAIR(PAIR_HEADER));
 	werase(pane->window);
 	mvwaddstr(pane->window, 0, 1, "= WadGadget for Doom, Heretic, Hexen, "
 	                "Strife, Chex Quest and the rest =");

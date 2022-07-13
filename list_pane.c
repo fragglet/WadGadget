@@ -55,9 +55,8 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 	}
 	if (lp->active && idx == lp->selected) {
 		wattron(win, A_REVERSE);
-	}
-	if (BL_IsTagged(&lp->blob_list->tags, idx - 1)) {
-		wattron(win, COLOR_PAIR(PAIR_HIGHLIGHT));
+	} else if (BL_IsTagged(&lp->blob_list->tags, idx - 1)) {
+		wattron(win, COLOR_PAIR(PAIR_TAGGED));
 	}
 	mvwaddstr(win, 1 + y, 1, buf);
 	waddstr(win, " ");
@@ -65,7 +64,7 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 	wattroff(win, A_BOLD);
 	wattroff(win, COLOR_PAIR(PAIR_DIRECTORY));
 	wattroff(win, COLOR_PAIR(PAIR_WAD_FILE));
-	wattroff(win, COLOR_PAIR(PAIR_HIGHLIGHT));
+	wattroff(win, COLOR_PAIR(PAIR_TAGGED));
 }
 
 static void Draw(void *p)
