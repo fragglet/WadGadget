@@ -14,52 +14,6 @@ struct confirm_dialog_box {
 	int result;
 };
 
-static int StringWidth(char *s)
-{
-	int max_width = 0, cur_width = 0;
-	char *p;
-
-	for (p = s; *p != '\0'; ++p) {
-		if (*p != '\n') {
-			++cur_width;
-			continue;
-		}
-		max_width = max(max_width, cur_width);
-		cur_width = 0;
-	}
-	return max(cur_width, max_width);
-}
-
-static int StringHeight(char *s)
-{
-	int lines = 1;
-	char *p;
-
-	for (p = s; *p != '\0'; ++p) {
-		if (*p == '\n' && *(p+1) != '\0') {
-			++lines;
-		}
-	}
-	return lines;
-}
-
-// Print string at given position in window, with newlines wrapping to the
-// next line at the same starting x position.
-static void PrintMultilineString(WINDOW *win, int y, int x, char *s)
-{
-	char *p;
-
-	wmove(win, y, x);
-	for (p = s; *p != '\0'; ++p) {
-		if (*p == '\n') {
-			++y;
-			wmove(win, y, x);
-		} else {
-			waddch(win, *p);
-		}
-	}
-}
-
 static void DrawConfirmDialog(void *pane)
 {
 	struct confirm_dialog_box *dialog = pane;
@@ -78,7 +32,7 @@ static void DrawConfirmDialog(void *pane)
 		waddstr(win, " ");
 	}
 
-	PrintMultilineString(win, 1, 2, dialog->msg);
+	UI_PrintMultilineString(win, 1, 2, dialog->msg);
 	mvwaddstr(win, h - 2, 1, " ESC - Cancel ");
 	mvwaddstr(win, h - 2, w - 14, " Y - Confirm ");
 	wattroff(win, A_BOLD);
@@ -110,8 +64,8 @@ int UI_ConfirmDialogBox(char *title, char *msg, ...)
 	vsnprintf(dialog.msg, sizeof(dialog.msg), msg, args);
 	va_end(args);
 
-	w = max(StringWidth(dialog.msg) + 4, 35);
-	h = StringHeight(dialog.msg) + 4;
+	w = max(UI_StringWidth(dialog.msg) + 4, 35);
+	h = UI_StringHeight(dialog.msg) + 4;
 	dialog.pane.window = newwin(h, w, (scrh / 2) - h, (scrw - w) / 2);
 	dialog.pane.draw = DrawConfirmDialog;
 	dialog.pane.keypress = ConfirmDialogKeypress;
@@ -152,7 +106,7 @@ static void DrawTextInputDialog(void *pane)
 		waddstr(win, " ");
 	}
 
-	PrintMultilineString(win, 1, 2, dialog->msg);
+	UI_PrintMultilineString(win, 1, 2, dialog->msg);
 
 	mvwaddstr(win, h - 2, 1, " ESC - Cancel ");
 	mvwaddstr(win, h - 2, w - 16, " ENT - Confirm ");
@@ -189,8 +143,8 @@ char *UI_TextInputDialogBox(char *title, size_t max_chars, char *msg, ...)
 	vsnprintf(dialog.msg, sizeof(dialog.msg), msg, args);
 	va_end(args);
 
-	w = max(StringWidth(dialog.msg) + 4, 35);
-	h = StringHeight(dialog.msg) + 5;
+	w = max(UI_StringWidth(dialog.msg) + 4, 35);
+	h = UI_StringHeight(dialog.msg) + 5;
 	dialog.pane.window = newwin(h, w, (scrh / 2) - h, (scrw - w) / 2);
 	dialog.pane.draw = DrawTextInputDialog;
 	dialog.pane.keypress = TextInputDialogKeypress;
