@@ -199,7 +199,7 @@ static void DrawInfoPane(void *p)
 	box(pane->window, 0, 0);
 	mvwaddstr(pane->window, 0, 2, " Info ");
 
-	mvwaddstr(pane->window, 1, 2, GetLumpDescription());
+	UI_PrintMultilineString(pane->window, 1, 2, GetLumpDescription());
 }
 
 static void DrawSearchPane(void *pane)
