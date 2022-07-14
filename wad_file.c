@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <ctype.h>
 #include <assert.h>
 
@@ -9,12 +10,18 @@
 #include "vfile.h"
 #include "wad_file.h"
 
+#define LUMP_HEADER_LEN 8
+
+typedef uint8_t lump_header[LUMP_HEADER_LEN];
+
 struct wad_file {
 	struct blob_list bl;
 	VFILE *vfs;
 	struct wad_file_header header;
 	struct wad_file_entry *directory;
 	int num_lumps;
+
+	lump_header *lump_headers;
 
 	// We can only read/write a single lump at once.
 	VFILE *current_lump;
@@ -45,6 +52,7 @@ struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;
 	FILE *fs;
+	int i;
 	VFILE *vfs;
 
 	fs = fopen(filename, "r");
@@ -71,6 +79,19 @@ struct wad_file *W_OpenFile(const char *filename)
 		result->num_lumps, sizeof(struct wad_file_entry));
 	assert(vfread(result->directory, sizeof(struct wad_file_entry),
 	              result->num_lumps, vfs) == result->num_lumps);
+
+	// Read and save the first few bytes of every lump. This contains
+	// enough information that we can give a basic summary of several
+	// common lump types, eg. demos, graphics, MID/MUS.
+	result->lump_headers =
+	    checked_calloc(result->num_lumps, LUMP_HEADER_LEN);
+	for (i = 0; i < result->num_lumps; i++) {
+		size_t bytes = min(result->directory[i].size, LUMP_HEADER_LEN);
+		assert(vfseek(vfs, result->directory[i].position,
+		              SEEK_SET) == 0);
+		assert(vfread(&result->lump_headers[i],
+		              1, bytes, vfs) == bytes);
+	}
 
 	return result;
 }
@@ -139,6 +160,15 @@ void W_SetLumpName(struct wad_file *f, unsigned int index, char *name)
 			break;
 		}
 	}
+}
+
+size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
+                        uint8_t *buf, size_t buf_len)
+{
+	assert(index < f->num_lumps);
+	buf_len = min(buf_len, min(LUMP_HEADER_LEN, f->directory[index].size));
+	memcpy(buf, &f->lump_headers[index], buf_len);
+	return buf_len;
 }
 
 static void LumpClosed(VFILE *fs, void *data)

@@ -27,4 +27,6 @@ void W_AddEntries(struct wad_file *f, unsigned int after_index,
                   unsigned int count);
 void W_DeleteEntry(struct wad_file *f, unsigned int index);
 void W_SetLumpName(struct wad_file *f, unsigned int index, char *name);
+size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
+                        uint8_t *buf, size_t buf_len);
 
