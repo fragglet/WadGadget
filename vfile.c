@@ -86,7 +86,7 @@ static long wrapped_ftell(void *handle)
 static void wrapped_fsync(void *handle)
 {
 	fflush(handle);
-	fsync(fileno(handle));
+	fsync(fileno((FILE *) handle));
 }
 
 static void wrapped_fclose(void *handle)
