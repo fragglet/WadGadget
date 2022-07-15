@@ -18,12 +18,56 @@ struct patch_header {
 	int16_t xoff, yoff;
 };
 
+static const struct {
+	const char *name, *description;
+} level_lumps[] = {
+	{"THINGS",    "Level things data"},
+	{"LINEDEFS",  "Level linedef data"},
+	{"SIDEDEFS",  "Level sidedef data"},
+	{"VERTEXES",  "Level vertex data"},
+	{"SEGS",      "Level wall segments"},
+	{"SSECTORS",  "Level subsectors"},
+	{"NODES",     "Level BSP nodes"},
+	{"SECTORS",   "Level sector data"},
+	{"REJECT",    "Level reject table"},
+	{"BLOCKMAP",  "Level blockmap data"},
+	{"BEHAVIOR",  "Hexen compiled scripts"},
+	{"SCRIPTS",   "Hexen script source code"},
+	{"LEAFS",     "PSX/D64 node leaves"},
+	{"LIGHTS",    "PSX/D64 colored lights"},
+	{"MACROS",    "Doom 64 Macros"},
+	{"GL_VERT",   "OpenGL extra vertices"},
+	{"GL_SEGS",   "OpenGL line segments"},
+	{"GL_SSECT",  "OpenGL subsectors"},
+	{"GL_NODES",  "OpenGL BSP nodes"},
+	{"GL_PVS",    "Potentially visible set"},
+	{"TEXTMAP",   "UDMF level data"},
+	{"DIALOGUE",  "Strife conversations"},
+	{"ZNODES",    "UDMF BSP data"},
+	{"ENDMAP",    "UDMF end of level"},
+	{NULL, NULL},
+};
+
 static const char *CheckForEmptyLump(struct wad_file_entry *ent,
                                      void *buf)
 {
 	if (ent->size == 0) {
 		return "Empty";
 	}
+	return NULL;
+}
+
+static const char *CheckForLevelLump(struct wad_file_entry *ent,
+                                     void *buf)
+{
+	int i;
+
+	for (i = 0; level_lumps[i].name != NULL; i++) {
+		if (!strncmp(ent->name, level_lumps[i].name, 8)) {
+			return level_lumps[i].description;
+		}
+	}
+
 	return NULL;
 }
 
@@ -92,6 +136,7 @@ typedef const char *(*check_function)(struct wad_file_entry *ent, void *buf);
 
 static check_function check_functions[] = {
 	CheckForEmptyLump,
+	CheckForLevelLump,
 	CheckForSoundLump,
 	CheckForGraphicLump,
 	CheckForMusicLump,
