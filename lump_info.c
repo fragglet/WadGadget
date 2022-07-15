@@ -80,6 +80,14 @@ static const char *CheckForMusicLump(struct wad_file_entry *ent,
 	return NULL;
 }
 
+static const char *CheckForFlat(struct wad_file_entry *ent, void *buf)
+{
+	if (ent->size == 4096) {
+		return "Floor/ceiling texture";
+	}
+	return NULL;
+}
+
 typedef const char *(*check_function)(struct wad_file_entry *ent, void *buf);
 
 static check_function check_functions[] = {
@@ -87,6 +95,7 @@ static check_function check_functions[] = {
 	CheckForSoundLump,
 	CheckForGraphicLump,
 	CheckForMusicLump,
+	CheckForFlat,
 	NULL,
 };
 
