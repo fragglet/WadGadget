@@ -62,12 +62,31 @@ static const char *CheckForGraphicLump(struct wad_file_entry *ent,
 	return NULL;
 }
 
+static const char *CheckForMusicLump(struct wad_file_entry *ent,
+                                     void *buf)
+{
+	if (ent->size < 4) {
+		return NULL;
+	}
+
+	if (!memcmp(buf, "MThd", 4)) {
+		return "MIDI music track";
+	}
+
+	if (!memcmp(buf, "MUS\x1a", 4)) {
+		return "DMX MUS music track";
+	}
+
+	return NULL;
+}
+
 typedef const char *(*check_function)(struct wad_file_entry *ent, void *buf);
 
 static check_function check_functions[] = {
 	CheckForEmptyLump,
 	CheckForSoundLump,
 	CheckForGraphicLump,
+	CheckForMusicLump,
 	NULL,
 };
 
