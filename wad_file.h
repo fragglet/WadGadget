@@ -1,4 +1,7 @@
 
+#ifndef WAD_FILE_INCLUDED
+#define WAD_FILE_INCLUDED
+
 #include "blob_list.h"
 #include "vfile.h"
 
@@ -29,4 +32,6 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index);
 void W_SetLumpName(struct wad_file *f, unsigned int index, char *name);
 size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
                         uint8_t *buf, size_t buf_len);
+
+#endif /* #ifndef WAD_FILE_INCLUDED */
 

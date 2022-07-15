@@ -5,6 +5,7 @@
 #include "colors.h"
 #include "common.h"
 #include "dir_pane.h"
+#include "lump_info.h"
 #include "wad_pane.h"
 #include "ui.h"
 
@@ -130,66 +131,6 @@ static void HandleKeypress(void *pane, int key)
 	}
 }
 
-struct sound_header {
-	uint16_t format;
-	uint16_t sample_rate;
-	uint32_t num_samples;
-};
-
-struct patch_header {
-	uint16_t width, height;
-	int16_t xoff, yoff;
-};
-
-static const char *GetLumpDescription(void)
-{
-	static char description[128];
-	struct wad_file *f;
-	uint8_t buf[8];
-	struct sound_header *sound;
-	struct patch_header *patch;
-
-	if (panes[active_pane]->type != PANE_TYPE_WAD
-	 || panes[active_pane]->selected <= 0) {
-		return "";
-	}
-
-	f = pane_data[active_pane];
-	if (W_ReadLumpHeader(f, panes[active_pane]->selected - 1,
-	                     buf, sizeof(buf)) < sizeof(buf)) {
-		return "";
-	}
-
-	sound = (struct sound_header *) buf;
-	if (sound->format == 3 && (sound->sample_rate == 8000
-	                        || sound->sample_rate == 11025
-	                        || sound->sample_rate == 22050
-	                        || sound->sample_rate == 44100)) {
-		snprintf(description, sizeof(description),
-		         "Sound, %d hz\nLength: %0.02fs",
-		         sound->sample_rate,
-		         (float) sound->num_samples / sound->sample_rate);
-		return description;
-	}
-	patch = (struct patch_header *) buf;
-	if (patch->width > 0 && patch->height > 0
-	 && patch->width <= 320 && patch->height <= 200
-	 && patch->xoff > -192 && patch->xoff <= 192
-	 && patch->yoff > -192 && patch->yoff <= 192) {
-		snprintf(description, sizeof(description),
-		         "Graphic (%dx%d)\nOffsets: %d, %d",
-		         patch->width, patch->height,
-		         patch->xoff, patch->yoff);
-		return description;
-	}
-
-	// TODO
-	snprintf(description, sizeof(description),
-	         "%02x %02x %02x %02x %02x %02x %02x %02x",
-	         buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
-	return description;
-}
-
 static void DrawInfoPane(void *p)
 {
 	struct pane *pane = p;
@@ -199,7 +140,12 @@ static void DrawInfoPane(void *p)
 	box(pane->window, 0, 0);
 	mvwaddstr(pane->window, 0, 2, " Info ");
 
-	UI_PrintMultilineString(pane->window, 1, 2, GetLumpDescription());
+       if (panes[active_pane]->type == PANE_TYPE_WAD
+        && panes[active_pane]->selected > 0) {
+		unsigned int lump_index = panes[active_pane]->selected - 1;
+		UI_PrintMultilineString(pane->window, 1, 2,
+		    GetLumpDescription(pane_data[active_pane], lump_index));
+       }
 }
 
 static void DrawSearchPane(void *pane)
