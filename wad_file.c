@@ -55,7 +55,7 @@ struct wad_file *W_OpenFile(const char *filename)
 	int i;
 	VFILE *vfs;
 
-	fs = fopen(filename, "r");
+	fs = fopen(filename, "r+");
 	if (fs == NULL) {
 		return NULL;
 	}
