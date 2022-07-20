@@ -13,6 +13,7 @@ struct vfile_functions {
 
 	int (*seek)(void *handle, long offset, int whence);
 	long (*tell)(void *handle);
+	void (*truncate)(void *handle);
 	void (*close)(void *handle);
 	void (*sync)(void *handle);
 };
@@ -25,6 +26,9 @@ void vfonclose(VFILE *stream, void (*callback)(VFILE *, void *), void *data);
 
 size_t vfread(void *ptr, size_t size, size_t nitems, VFILE *stream);
 size_t vfwrite(const void *ptr, size_t size, size_t nitems, VFILE *stream);
+
+// Truncates at current position (unlike ftruncate).
+void vftruncate(VFILE *stream);
 
 int vfseek(VFILE *stream, long offset, int whence);
 long vftell(VFILE *stream);

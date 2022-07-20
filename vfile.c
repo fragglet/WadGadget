@@ -32,6 +32,11 @@ size_t vfwrite(const void *ptr, size_t size, size_t nitems, VFILE *stream)
 	return stream->functions->write(ptr, size, nitems, stream->handle);
 }
 
+void vftruncate(VFILE *stream)
+{
+	return stream->functions->truncate(stream->handle);
+}
+
 int vfseek(VFILE *stream, long offset, int whence)
 {
 	return stream->functions->seek(stream->handle, offset, whence);
@@ -73,6 +78,11 @@ static size_t wrapped_fwrite(const void *ptr, size_t size,
 	return fwrite(ptr, size, nitems, handle);
 }
 
+static void wrapped_ftruncate(void *handle)
+{
+	ftruncate(fileno((FILE *) handle), ftell(handle));
+}
+
 static int wrapped_fseek(void *handle, long offset, int whence)
 {
 	return fseek(handle, offset, whence);
@@ -99,6 +109,7 @@ static struct vfile_functions wrapped_io_functions = {
 	wrapped_fwrite,
 	wrapped_fseek,
 	wrapped_ftell,
+	wrapped_ftruncate,
 	wrapped_fclose,
 	wrapped_fsync,
 };
@@ -194,6 +205,12 @@ static long restricted_vftell(void *handle)
 	return restricted->pos;
 }
 
+static void restricted_vftruncate(void *handle)
+{
+	// Can't truncate file within a restricted file?
+	assert(0);
+}
+
 static void restricted_vfsync(void *handle)
 {
 	struct restricted_vfile *restricted = handle;
@@ -211,6 +228,7 @@ static struct vfile_functions restricted_io_functions = {
 	restricted_fwrite,
 	restricted_vfseek,
 	restricted_vftell,
+	restricted_vftruncate,
 	restricted_vfclose,
 	restricted_vfsync,
 };
