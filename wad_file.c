@@ -146,6 +146,7 @@ void W_AddEntries(struct wad_file *f, unsigned int after_index,
 		snprintf(ent->name, 8, "UNNAMED");
 		BL_HandleInsert(&f->bl.tags, after_index + i);
 	}
+	W_WriteDirectory(f);
 }
 
 void W_DeleteEntry(struct wad_file *f, unsigned int index)
@@ -155,6 +156,7 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index)
 	        (f->num_lumps - index - 1) * sizeof(struct wad_file_entry));
 	BL_HandleDelete(&f->bl.tags, index);
 	--f->num_lumps;
+	W_WriteDirectory(f);
 }
 
 void W_SetLumpName(struct wad_file *f, unsigned int index, char *name)
@@ -167,6 +169,7 @@ void W_SetLumpName(struct wad_file *f, unsigned int index, char *name)
 			break;
 		}
 	}
+	W_WriteDirectory(f);
 }
 
 size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
@@ -246,6 +249,8 @@ static void WriteLumpClosed(VFILE *fs, void *data)
 	size = vftell(fs);
 	assert(f->current_lump_index < f->num_lumps);
 	f->directory[f->current_lump_index].size = (unsigned int) size;
+
+	W_WriteDirectory(f);
 }
 
 VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
