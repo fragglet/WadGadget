@@ -18,9 +18,29 @@ struct patch_header {
 	int16_t xoff, yoff;
 };
 
-static const struct {
+struct lump_description {
 	const char *name, *description;
-} level_lumps[] = {
+};
+
+static const struct lump_description special_lumps[] = {
+	{"PLAYPAL",   "VGA palette"},
+	{"COLORMAP",  "Lighting translation map"},
+	{"TINTTAB",   "Translucency table"},
+	{"XLATAB",    "Translucency table"},
+	{"AUTOPAGE",  "Map background texture"},
+	{"ENDOOM",    "Text mode exit screen"},
+	{"ENDTEXT",   "Text mode exit screen"},
+	{"ENDSTRF",   "Text mode exit screen"},
+	{"GENMIDI",   "OPL FM synth instruments"},
+	{"DMXGUS",    "GUS instrument mappings"},
+	{"DMXGUSC",   "GUS instrument mappings"},
+	{"TEXTURE1",  "Texture table"},
+	{"TEXTURE2",  "Texture table (registered)"},
+	{"PNAMES",    "Wall patch list"},
+	{NULL, NULL},
+};
+
+static const struct lump_description level_lumps[] = {
 	{"THINGS",    "Level things data"},
 	{"LINEDEFS",  "Level linedef data"},
 	{"SIDEDEFS",  "Level sidedef data"},
@@ -48,6 +68,20 @@ static const struct {
 	{NULL, NULL},
 };
 
+static const char *LookupDescription(const struct lump_description *table,
+                                     struct wad_file_entry *ent)
+{
+	int i;
+
+	for (i = 0; table[i].name != NULL; i++) {
+		if (!strncmp(ent->name, table[i].name, 8)) {
+			return table[i].description;
+		}
+	}
+
+	return NULL;
+}
+
 static const char *CheckForEmptyLump(struct wad_file_entry *ent,
                                      void *buf)
 {
@@ -57,18 +91,14 @@ static const char *CheckForEmptyLump(struct wad_file_entry *ent,
 	return NULL;
 }
 
-static const char *CheckForLevelLump(struct wad_file_entry *ent,
-                                     void *buf)
+static const char *CheckForLevelLump(struct wad_file_entry *ent, void *buf)
 {
-	int i;
+	return LookupDescription(level_lumps, ent);
+}
 
-	for (i = 0; level_lumps[i].name != NULL; i++) {
-		if (!strncmp(ent->name, level_lumps[i].name, 8)) {
-			return level_lumps[i].description;
-		}
-	}
-
-	return NULL;
+static const char *CheckForSpecialLump(struct wad_file_entry *ent, void *buf)
+{
+	return LookupDescription(special_lumps, ent);
 }
 
 static const char *CheckForSoundLump(struct wad_file_entry *ent,
@@ -207,6 +237,7 @@ typedef const char *(*check_function)(struct wad_file_entry *ent, void *buf);
 static check_function check_functions[] = {
 	CheckForEmptyLump,
 	CheckForLevelLump,
+	CheckForSpecialLump,
 	CheckForSoundLump,
 	CheckForGraphicLump,
 	CheckForMusicLump,
