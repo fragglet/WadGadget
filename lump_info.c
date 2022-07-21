@@ -132,6 +132,76 @@ static const char *CheckForFlat(struct wad_file_entry *ent, void *buf)
 	return NULL;
 }
 
+static const struct {
+	int code;
+	const char *str;
+} versions[] = {
+	{106, "v1.666"},
+	{107, "v1.7/1.7a"},
+	{108, "v1.8"},
+	{109, "v1.9"},
+	{0},
+};
+
+static const char *VersionCodeString(int code)
+{
+	int i;
+
+	if (code < 5) {
+		return "v1.2";
+	}
+
+	for (i = 0; versions[i].code != 0; i++) {
+		if (code == versions[i].code) {
+			return versions[i].str;
+		}
+	}
+
+	return "v?.?";
+}
+
+static const char *CheckForDemo(struct wad_file_entry *ent, void *buf)
+{
+	char level_buf[20];
+	const char *modestr;
+	uint8_t *bytes = buf;
+	int ep, map;
+
+	if (strncasecmp(ent->name, "DEMO", 4) != 0) {
+		return NULL;
+	}
+
+	ep = bytes[2]; map = bytes[3];
+	if (ep != 1) {
+		snprintf(level_buf, sizeof(level_buf), "E%dM%d", ep, map);
+	} else if (map < 10) {
+		snprintf(level_buf, sizeof(level_buf),
+		         "E1M%d or MAP%02d", map, map);
+	} else {
+		snprintf(level_buf, sizeof(level_buf), "MAP%02d", map);
+	}
+
+	switch (bytes[4]) {
+		case 0:
+			modestr = "SP/Coop";
+			break;
+		case 1:
+			modestr = "Deathmatch";
+			break;
+		case 2:
+			modestr = "Altdeath";
+			break;
+		default:
+			modestr = "";
+			break;
+	}
+
+	snprintf(description_buf, sizeof(description_buf),
+	         "Demo recording: %s, skill %d\n%s; %s",
+	         VersionCodeString(bytes[0]), bytes[1], modestr, level_buf);
+	return description_buf;
+}
+
 typedef const char *(*check_function)(struct wad_file_entry *ent, void *buf);
 
 static check_function check_functions[] = {
@@ -141,6 +211,7 @@ static check_function check_functions[] = {
 	CheckForGraphicLump,
 	CheckForMusicLump,
 	CheckForFlat,
+	CheckForDemo,
 	NULL,
 };
 
