@@ -232,12 +232,32 @@ static const char *CheckForDemo(struct wad_file_entry *ent, void *buf)
 	return description_buf;
 }
 
+static const char *CheckForPcSpeaker(struct wad_file_entry *ent, void *buf)
+{
+	uint8_t *bytes = buf;
+	size_t len;
+
+	if (strncasecmp(ent->name, "DP", 2) != 0) {
+		return NULL;
+	}
+
+	len = bytes[2] | (bytes[3] << 8);
+	if (bytes[0] == 0 && bytes[1] == 0 && len + 4 == ent->size) {
+		snprintf(description_buf, sizeof(description_buf),
+		         "PC speaker sound, %0.02fs", (float) len / 140);
+		return description_buf;
+	}
+
+	return NULL;
+}
+
 typedef const char *(*check_function)(struct wad_file_entry *ent, void *buf);
 
 static check_function check_functions[] = {
 	CheckForEmptyLump,
 	CheckForLevelLump,
 	CheckForSpecialLump,
+	CheckForPcSpeaker,
 	CheckForSoundLump,
 	CheckForGraphicLump,
 	CheckForMusicLump,
