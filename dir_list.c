@@ -14,6 +14,7 @@
 struct directory_listing {
 	struct blob_list bl;
 	struct blob_list_entry *files;
+	char *path;
 	unsigned int num_files;
 };
 
@@ -71,21 +72,26 @@ static int HasWadExtension(char *name)
 	return !strcasecmp(extn, ".wad");
 }
 
-struct directory_listing *DIR_ReadDirectory(const char *path)
+static void FreeEntries(struct directory_listing *d)
 {
-	struct directory_listing *d;
-	DIR *dir;
+	int i;
 
-	d = calloc(1, sizeof(struct directory_listing));
-	d->bl.get_entry = GetEntry;
-	d->bl.get_entry_path = GetEntryPath;
-	d->bl.free = FreeDirectory;
-	dir = opendir(path);
-	assert(dir != NULL);
+	for (i = 0; i < d->num_files; i++) {
+		free(d->files[i].name);
+	}
 
-	BL_SetPathFields(&d->bl, path);
+	free(d->files);
 	d->files = NULL;
 	d->num_files = 0;
+}
+
+void DIR_RefreshDirectory(struct directory_listing *d)
+{
+	DIR *dir = opendir(d->path);
+	assert(dir != NULL);
+
+	FreeEntries(d);
+	BL_SetPathFields(&d->bl, d->path);
 	for (;;)
 	{
 		struct dirent *dirent = readdir(dir);
@@ -113,6 +119,21 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 
 	qsort(d->files, d->num_files, sizeof(struct blob_list_entry),
 	      OrderByName);
+}
+
+struct directory_listing *DIR_ReadDirectory(const char *path)
+{
+	struct directory_listing *d;
+
+	d = calloc(1, sizeof(struct directory_listing));
+	d->bl.get_entry = GetEntry;
+	d->bl.get_entry_path = GetEntryPath;
+	d->bl.free = FreeDirectory;
+	d->path = checked_strdup(path);
+	d->files = NULL;
+	d->num_files = 0;
+
+	DIR_RefreshDirectory(d);
 
 	return d;
 }

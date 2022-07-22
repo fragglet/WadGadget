@@ -9,4 +9,5 @@ void DIR_FreeDirectory(struct directory_listing *dir);
 const struct blob_list_entry *DIR_GetFile(
 	struct directory_listing *dir, unsigned int file_index);
 unsigned int DIR_NumFiles(struct directory_listing *dir);
+void DIR_RefreshDirectory(struct directory_listing *d);
 
