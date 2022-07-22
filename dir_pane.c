@@ -8,6 +8,7 @@
 #include <dirent.h>
 
 #include "common.h"
+#include "dialog.h"
 #include "dir_pane.h"
 #include "ui.h"
 
@@ -52,6 +53,37 @@ static const struct list_pane_action *GetActions(struct list_pane *other)
 	}
 }
 
+static void RefreshDir(struct directory_pane *p)
+{
+	DIR_RefreshDirectory(p->dir);
+
+	while (p->pane.selected > 0
+	    && DIR_GetFile(p->dir, p->pane.selected - 1) == NULL) {
+		--p->pane.selected;
+	}
+}
+
+static void Keypress(void *directory_pane, int key)
+{
+	struct directory_pane *p = directory_pane;
+	unsigned int selected = p->pane.selected;
+
+	if (key == KEY_F(6) && selected > 0) {
+		char *old_name = DIR_GetFile(p->dir, selected-1)->name;
+		char *new_name = UI_TextInputDialogBox(
+		    "Rename", 30, "New name for '%s'?", old_name);
+		if (new_name == NULL) {
+			return;
+		}
+		rename(old_name, new_name);
+		free(new_name);
+		RefreshDir(p);
+		return;
+	}
+
+	UI_ListPaneKeypress(directory_pane, key);
+}
+
 struct list_pane *UI_NewDirectoryPane(
 	WINDOW *w, struct directory_listing *dir)
 {
@@ -59,6 +91,7 @@ struct list_pane *UI_NewDirectoryPane(
 
 	p = calloc(1, sizeof(struct directory_pane));
 	UI_ListPaneInit(&p->pane, w);
+	p->pane.pane.keypress = Keypress;
 	p->pane.type = PANE_TYPE_DIR;
 	p->pane.blob_list = (struct blob_list *) dir;
 	p->pane.get_actions = GetActions;
