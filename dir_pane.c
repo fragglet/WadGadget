@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <sys/stat.h>
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -77,6 +78,27 @@ static void Keypress(void *directory_pane, int key)
 		}
 		rename(old_name, new_name);
 		free(new_name);
+		RefreshDir(p);
+		return;
+	}
+	if (key == KEY_F(7) && selected > 0) {
+		char *filename = UI_TextInputDialogBox(
+		    "Make directory", 30, "Name for new directory?");
+		if (filename == NULL) {
+			return;
+		}
+		mkdir(filename, 0777);
+		free(filename);
+		RefreshDir(p);
+		return;
+	}
+	if (key == KEY_F(8) && selected > 0) {
+		char *filename = DIR_GetFile(p->dir, selected-1)->name;
+		if (!UI_ConfirmDialogBox("Confirm Delete", "Delete file '%s'?",
+		                         filename)) {
+			return;
+		}
+		remove(filename);
 		RefreshDir(p);
 		return;
 	}
