@@ -24,18 +24,18 @@ struct lump_description {
 
 static const struct lump_description special_lumps[] = {
 	{"PLAYPAL",   "VGA palette"},
-	{"COLORMAP",  "Lighting translation map"},
+	{"COLORMAP",  "Light translation map"},
 	{"TINTTAB",   "Translucency table"},
 	{"XLATAB",    "Translucency table"},
 	{"AUTOPAGE",  "Map background texture"},
 	{"ENDOOM",    "Text mode exit screen"},
 	{"ENDTEXT",   "Text mode exit screen"},
 	{"ENDSTRF",   "Text mode exit screen"},
-	{"GENMIDI",   "OPL FM synth instruments"},
-	{"DMXGUS",    "GUS instrument mappings"},
-	{"DMXGUSC",   "GUS instrument mappings"},
+	{"GENMIDI",   "OPL FM synth instrs."},
+	{"DMXGUS",    "GUS instr. mappings"},
+	{"DMXGUSC",   "GUS instr. mappings"},
 	{"TEXTURE1",  "Texture table"},
-	{"TEXTURE2",  "Texture table (registered)"},
+	{"TEXTURE2",  "Texture table (reg.)"},
 	{"PNAMES",    "Wall patch list"},
 	{NULL, NULL},
 };
@@ -52,7 +52,7 @@ static const struct lump_description level_lumps[] = {
 	{"REJECT",    "Level reject table"},
 	{"BLOCKMAP",  "Level blockmap data"},
 	{"BEHAVIOR",  "Hexen compiled scripts"},
-	{"SCRIPTS",   "Hexen script source code"},
+	{"SCRIPTS",   "Hexen script source"},
 	{"LEAFS",     "PSX/D64 node leaves"},
 	{"LIGHTS",    "PSX/D64 colored lights"},
 	{"MACROS",    "Doom 64 Macros"},
@@ -60,7 +60,7 @@ static const struct lump_description level_lumps[] = {
 	{"GL_SEGS",   "OpenGL line segments"},
 	{"GL_SSECT",  "OpenGL subsectors"},
 	{"GL_NODES",  "OpenGL BSP nodes"},
-	{"GL_PVS",    "Potentially visible set"},
+	{"GL_PVS",    "Potential Vis. Set"},
 	{"TEXTMAP",   "UDMF level data"},
 	{"DIALOGUE",  "Strife conversations"},
 	{"ZNODES",    "UDMF BSP data"},
@@ -227,7 +227,7 @@ static const char *CheckForDemo(struct wad_file_entry *ent, void *buf)
 	}
 
 	snprintf(description_buf, sizeof(description_buf),
-	         "Demo recording: %s, skill %d\n%s; %s",
+	         "Demo: %s, skill %d\n%s; %s",
 	         VersionCodeString(bytes[0]), bytes[1], modestr, level_buf);
 	return description_buf;
 }
