@@ -69,6 +69,7 @@ static void Keypress(void *directory_pane, int key)
 	struct directory_pane *p = directory_pane;
 	unsigned int selected = p->pane.selected;
 
+	// TODO: Operate on absolute paths, not cwd
 	if (key == KEY_F(6) && selected > 0) {
 		char *old_name = DIR_GetFile(p->dir, selected-1)->name;
 		char *new_name = UI_TextInputDialogBox(
@@ -92,6 +93,7 @@ static void Keypress(void *directory_pane, int key)
 		RefreshDir(p);
 		return;
 	}
+	// TODO: Delete all marked
 	if (key == KEY_F(8) && selected > 0) {
 		char *filename = DIR_GetFile(p->dir, selected-1)->name;
 		if (!UI_ConfirmDialogBox("Confirm Delete", "Delete file '%s'?",

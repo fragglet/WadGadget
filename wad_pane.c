@@ -83,6 +83,7 @@ static void Keypress(void *wad_pane, int key)
 		return;
 	}
 
+	// TODO: Delete multiple
 	if (key == KEY_F(8) && selected > 0) {
 		if (UI_ConfirmDialogBox(
 		     "Confirm delete",
