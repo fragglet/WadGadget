@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 #ifdef _WIN32
 #define DIR_SEPARATOR "\\"
@@ -265,9 +266,57 @@ const char *PathBaseName(const char *path)
 }
 
 // Sanitize path, expanding to an absolute path.
-// Path doesn't start with "/" -> implicitly starts from WD/
-// "foo////bar" -> "foo/bar"
-// "foo/./bar" -> "foo/bar"
-// "foo/../bar" -> "bar"
-// DOS: path starts with "\" -> "X:\" (X from WD)
-//      path starts "X:" (not "X:\") -> WD on X:
+char *PathSanitize(const char *filename)
+{
+	char *result, *dst;
+	const char *src_filename, *src;
+
+	if (filename[0] == '/') {
+		result = StringDuplicate(filename);
+		src_filename = filename;
+	} else {
+		char cwd[128];
+		if (getcwd(cwd, sizeof(cwd)) == NULL) {
+			perror("getcwd");
+			abort();
+		}
+		// We allocate a buffer to join CWD to filename but reuse
+		// the buffer as our result buffer; since the next stage can
+		// only ever make the result smaller, this is fine.
+		result = StringJoin("/", cwd, filename, NULL);
+		src_filename = result;
+	}
+
+	src = src_filename;
+	dst = result;
+
+	while (*src != '\0') {
+		// "foo////bar" -> "foo/bar"
+		if (StringHasPrefix(src, "//")) {
+			++src;
+			continue;
+		}
+		// "foo/./bar" -> "foo/bar"
+		if (StringHasPrefix(src, "/./")) {
+			src += 2;
+			continue;
+		}
+		// "foo/../bar" -> "bar"
+		if (StringHasPrefix(src, "/../")) {
+			do {
+				--dst;
+			} while (dst > result && *dst != '/');
+			src += 3;
+			continue;
+		}
+		// TODO for DOS:
+		// path starts with "\" -> "X:\" (X from WD)
+		// path starts "X:" (not "X:\") -> WD on X:
+		*dst = *src;
+		++dst; ++src;
+	}
+
+	*dst = '\0';
+
+	return result;
+}
