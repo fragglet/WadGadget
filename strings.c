@@ -272,7 +272,7 @@ char *PathSanitize(const char *filename)
 	const char *src_filename, *src;
 
 	if (filename[0] == '/') {
-		result = StringDuplicate(filename);
+		result = StringJoin("/",  filename, "", NULL);
 		src_filename = filename;
 	} else {
 		char cwd[128];
@@ -283,7 +283,7 @@ char *PathSanitize(const char *filename)
 		// We allocate a buffer to join CWD to filename but reuse
 		// the buffer as our result buffer; since the next stage can
 		// only ever make the result smaller, this is fine.
-		result = StringJoin("/", cwd, filename, NULL);
+		result = StringJoin("/", cwd, filename, "", NULL);
 		src_filename = result;
 	}
 
@@ -314,6 +314,11 @@ char *PathSanitize(const char *filename)
 		// path starts "X:" (not "X:\") -> WD on X:
 		*dst = *src;
 		++dst; ++src;
+	}
+
+	// No trailing '/':
+	while (dst > result && *(dst-1) == '/') {
+		--dst;
 	}
 
 	*dst = '\0';
