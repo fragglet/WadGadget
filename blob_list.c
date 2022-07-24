@@ -5,25 +5,14 @@
 
 #include "common.h"
 #include "blob_list.h"
+#include "strings.h"
 
 void BL_SetPathFields(void *_bl, const char *path)
 {
 	struct blob_list *bl = _bl;
-	char *s;
-	bl->path = checked_strdup(path);
-	s = strrchr(path, '/');
-	if (s != NULL) {
-		if (s > path) {
-			bl->parent_dir = checked_strdup(path);
-			bl->parent_dir[s - path] = '\0';
-		} else {
-			bl->parent_dir = checked_strdup("/");
-		}
-		bl->name = checked_strdup(s + 1);
-	} else {
-		bl->parent_dir = NULL;
-		bl->name = checked_strdup(path);
-	}
+	bl->path = PathSanitize(path);
+	bl->parent_dir = PathDirName(bl->path);
+	bl->name = checked_strdup(PathBaseName(bl->path));
 }
 
 void BL_FreeList(void *ptr)

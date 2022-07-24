@@ -9,6 +9,7 @@
 
 #include "common.h"
 #include "dir_list.h"
+#include "strings.h"
 #include "ui.h"
 
 struct directory_listing {
@@ -129,7 +130,7 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 	d->bl.get_entry = GetEntry;
 	d->bl.get_entry_path = GetEntryPath;
 	d->bl.free = FreeDirectory;
-	d->path = checked_strdup(path);
+	d->path = PathSanitize(path);
 	d->files = NULL;
 	d->num_files = 0;
 

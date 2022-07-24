@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
 	UI_PaneShow(panes[0]);
 
 	pane_windows[1] = newwin(24, 27, 1, 53);
-	pane_data[1] = DIR_ReadDirectory(getenv("HOME"));
+	pane_data[1] = DIR_ReadDirectory(".");
 	panes[1] = UI_NewDirectoryPane(pane_windows[1], pane_data[1]);
 	UI_PaneShow(panes[1]);
 
