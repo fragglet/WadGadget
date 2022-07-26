@@ -91,6 +91,9 @@ void DIR_RefreshDirectory(struct directory_listing *d)
 	DIR *dir = opendir(d->path);
 	assert(dir != NULL);
 
+	// TODO: Save marked file list and preserve across refresh.
+	BL_ClearTags(&d->bl.tags);
+
 	FreeEntries(d);
 	BL_SetPathFields(&d->bl, d->path);
 	for (;;)
