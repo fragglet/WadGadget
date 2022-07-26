@@ -244,6 +244,10 @@ char *PathDirName(const char *path)
 	if (p == NULL) {
 		return StringDuplicate(".");
 	}
+	// Root dir is a special case.
+	if (p == path) {
+		return StringDuplicate("/");
+	}
 
 	result = StringDuplicate(path);
 	result[p - path] = '\0';
@@ -256,6 +260,11 @@ char *PathDirName(const char *path)
 const char *PathBaseName(const char *path)
 {
 	const char *p;
+
+	// Root dir is a special case.
+	if (!strcmp(path, "/")) {
+		return "/";
+	}
 
 	p = strrchr(path, DIR_SEPARATOR[0]);
 	if (p == NULL) {
@@ -316,8 +325,8 @@ char *PathSanitize(const char *filename)
 		++dst; ++src;
 	}
 
-	// No trailing '/':
-	while (dst > result && *(dst-1) == '/') {
+	// No trailing '/', except in the case of root dir.
+	while (dst > result + 1 && *(dst-1) == '/') {
 		--dst;
 	}
 
