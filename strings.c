@@ -178,11 +178,11 @@ char *StringJoin(const char *sep, const char *s, ...)
 			break;
 		}
 
-		StringConcat(r, sep, result_len);
+		StringConcat(r, sep, r_len);
 		r += sep_len; r_len -= sep_len;
 
 		v_len = strlen(v);
-		StringConcat(r, v, result_len);
+		StringConcat(r, v, r_len);
 		r += v_len; r_len -= v_len;
 	}
 	va_end(args);
