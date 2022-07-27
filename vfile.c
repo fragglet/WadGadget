@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <stdint.h>
 #include <unistd.h>
 
 #include "common.h"
@@ -243,5 +244,21 @@ VFILE *vfrestrict(VFILE *inner, long start, long end, int ro)
 	restricted->end = end;
 	restricted->ro = ro;
 	return vfopen(restricted, &restricted_io_functions);
+}
+
+int vfcopy(VFILE *from, VFILE *to)
+{
+	uint8_t buf[256];
+	size_t nbytes;
+
+	for (;;) {
+		nbytes = vfread(buf, 1, sizeof(buf), from);
+		if (nbytes == 0) {
+			return 0;
+		}
+		if (vfwrite(buf, 1, nbytes, to) != nbytes) {
+			return -1;
+		}
+	}
 }
 
