@@ -39,6 +39,7 @@ void BL_AddTag(struct blob_tag_list *l, unsigned int index);
 void BL_RemoveTag(struct blob_tag_list *l, unsigned int index);
 int BL_IsTagged(struct blob_tag_list *l, unsigned int index);
 void BL_ClearTags(struct blob_tag_list *l);
+int BL_NumTagged(struct blob_tag_list *l);
 
 // Handle renumbering of indexes after an item is inserted or removed.
 void BL_HandleInsert(struct blob_tag_list *l, unsigned int index);

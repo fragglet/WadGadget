@@ -113,3 +113,8 @@ void BL_HandleDelete(struct blob_tag_list *l, unsigned int index)
 		l->entries[i]--;
 	}
 }
+
+int BL_NumTagged(struct blob_tag_list *l)
+{
+	return l->num_entries;
+}
