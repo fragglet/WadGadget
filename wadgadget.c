@@ -4,8 +4,10 @@
 
 #include "colors.h"
 #include "common.h"
+#include "dialog.h"
 #include "dir_pane.h"
 #include "lump_info.h"
+#include "strings.h"
 #include "wad_pane.h"
 #include "ui.h"
 
@@ -104,6 +106,69 @@ static void NavigateNew(void)
 	}
 }
 
+static void PerformExport(struct list_pane *from, struct list_pane *to)
+{
+	VFILE *fromlump, *tofile;
+	struct directory_listing *dir;
+	FILE *f;
+	char *filename;
+	struct wad_file *wad;
+	const struct wad_file_entry *wadent;
+	char lumpname[9];
+	int lump_index;
+
+	dir = (struct directory_listing *) to->blob_list;
+
+	// TODO
+	if (BL_NumTagged(&from->blob_list->tags) > 0) {
+		UI_ConfirmDialogBox(
+		    "Sorry", "Multi-export not implemented yet.");
+		return;
+	}
+
+	lump_index = UI_ListPaneSelected(from);
+	if (lump_index < 0) {
+		return;
+	}
+	wad = (struct wad_file *) from->blob_list;
+	wadent = &W_GetDirectory(wad)[lump_index];
+	StringPrintf(lumpname, sizeof(lumpname), "%.8s", wadent->name);
+
+	// TODO: Export in other formats: .png, .wav, etc.
+	filename = StringJoin("", DIR_GetPath(dir), "/",
+	                      lumpname, ".lmp", NULL);
+
+	// TODO: Confirm file overwrite if already present.
+	f = fopen(filename, "wb");
+	if (f != NULL) {
+		tofile = vfwrapfile(f);
+
+		fromlump = W_OpenLump(wad, lump_index);
+
+		vfcopy(fromlump, tofile);
+		vfclose(tofile);
+		vfclose(fromlump);
+	}
+
+	free(filename);
+
+	DIR_RefreshDirectory(dir);
+	// TODO: Mark new exported file(s) to highlight
+}
+
+static void PerformCopy(void)
+{
+	struct list_pane *from, *to;
+	from = panes[active_pane]; to = panes[!active_pane];
+
+	if (from->type == PANE_TYPE_WAD && to->type == PANE_TYPE_DIR) {
+		PerformExport(from, to);
+		return;
+	}
+
+	UI_ConfirmDialogBox("Sorry", "This isn't implemented yet.");
+}
+
 static void HandleKeypress(void *pane, int key)
 {
 	switch (key) {
@@ -115,6 +180,9 @@ static void HandleKeypress(void *pane, int key)
 		break;
 	case KEY_RESIZE:
 		SetWindowSizes();
+		break;
+	case KEY_F(5):
+		PerformCopy();
 		break;
 	case '\r':
 		NavigateNew();
