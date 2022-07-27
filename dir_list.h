@@ -10,4 +10,5 @@ const struct blob_list_entry *DIR_GetFile(
 	struct directory_listing *dir, unsigned int file_index);
 unsigned int DIR_NumFiles(struct directory_listing *dir);
 void DIR_RefreshDirectory(struct directory_listing *d);
+const char *DIR_GetPath(struct directory_listing *d);
 

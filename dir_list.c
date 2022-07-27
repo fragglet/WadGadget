@@ -156,3 +156,7 @@ unsigned int DIR_NumFiles(struct directory_listing *dir)
 	return dir->num_files;
 }
 
+const char *DIR_GetPath(struct directory_listing *dir)
+{
+	return dir->path;
+}
