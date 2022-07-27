@@ -39,6 +39,8 @@ void UI_ListPaneKeypress(void *p, int key);
 void UI_ListPaneFree(struct list_pane *p);
 void UI_ListPaneSearch(void *p, char *needle);
 
+int UI_ListPaneSelected(struct list_pane *p);
+
 void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win);
 
 #endif /* #ifndef INCLUDE_LIST_PANE_H */

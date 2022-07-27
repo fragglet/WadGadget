@@ -136,6 +136,11 @@ void UI_ListPaneSearch(void *p, char *needle)
 	}
 }
 
+int UI_ListPaneSelected(struct list_pane *p)
+{
+	return p->selected - 1;
+}
+
 void UI_ListPaneKeypress(void *p, int key)
 {
 	struct list_pane *lp = p;
@@ -165,16 +170,16 @@ void UI_ListPaneKeypress(void *p, int key)
 		return;
 	case ' ':
 		if (lp->selected > 0) {
-			if (BL_IsTagged(tags, lp->selected - 1)) {
-				BL_RemoveTag(tags, lp->selected - 1);
+			if (BL_IsTagged(tags, UI_ListPaneSelected(lp))) {
+				BL_RemoveTag(tags, UI_ListPaneSelected(lp));
 			} else {
-				BL_AddTag(tags, lp->selected - 1);
+				BL_AddTag(tags, UI_ListPaneSelected(lp));
 			}
 		}
 		/* fallthrough */
 	case KEY_DOWN:
 		if (lp->blob_list->get_entry(
-			lp->blob_list, lp->selected + 1 - 1) != NULL) {
+			lp->blob_list, UI_ListPaneSelected(lp) + 1) != NULL) {
 			++lp->selected;
 		}
 		if (lp->selected > lp->window_offset + Lines(lp) - 1) {
@@ -188,7 +193,7 @@ void UI_ListPaneKeypress(void *p, int key)
 		return;
 	case KEY_END:
 		while (lp->blob_list->get_entry(
-				lp->blob_list, lp->selected + 1 - 1) != NULL) {
+				lp->blob_list, UI_ListPaneSelected(lp) + 1) != NULL) {
 			++lp->selected;
 		}
 		lp->window_offset = lp->selected - Lines(lp) + 1;
