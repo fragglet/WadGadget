@@ -54,6 +54,15 @@ static void FreeWadFile(struct blob_list *l)
 	W_CloseFile((struct wad_file *) l);
 }
 
+static void ReadLumpHeader(struct wad_file *wad, unsigned int lump_index)
+{
+	size_t bytes = min(wad->directory[lump_index].size, LUMP_HEADER_LEN);
+	assert(vfseek(wad->vfs, wad->directory[lump_index].position,
+	              SEEK_SET) == 0);
+	assert(vfread(&wad->lump_headers[lump_index],
+	              1, bytes, wad->vfs) == bytes);
+}
+
 struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;
@@ -93,11 +102,7 @@ struct wad_file *W_OpenFile(const char *filename)
 	result->lump_headers =
 	    checked_calloc(result->num_lumps, LUMP_HEADER_LEN);
 	for (i = 0; i < result->num_lumps; i++) {
-		size_t bytes = min(result->directory[i].size, LUMP_HEADER_LEN);
-		assert(vfseek(vfs, result->directory[i].position,
-		              SEEK_SET) == 0);
-		assert(vfread(&result->lump_headers[i],
-		              1, bytes, vfs) == bytes);
+		ReadLumpHeader(result, i);
 	}
 
 	return result;
@@ -146,6 +151,7 @@ void W_AddEntries(struct wad_file *f, unsigned int after_index,
 		snprintf(ent->name, 8, "UNNAMED");
 		BL_HandleInsert(&f->bl.tags, after_index + i);
 	}
+	// TODO: Adjust lump headers array too
 	W_WriteDirectory(f);
 }
 
@@ -155,6 +161,7 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index)
 	memmove(&f->directory[index], &f->directory[index + 1],
 	        (f->num_lumps - index - 1) * sizeof(struct wad_file_entry));
 	BL_HandleDelete(&f->bl.tags, index);
+	// TODO: Adjust lump headers array too
 	--f->num_lumps;
 	W_WriteDirectory(f);
 }
