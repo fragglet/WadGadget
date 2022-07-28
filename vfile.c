@@ -161,7 +161,8 @@ static size_t restricted_fwrite(const void *ptr, size_t size,
 	}
 
 	if (restricted->end >= 0) {
-		nwriteable = (restricted->end - restricted->pos) / size;
+		nwriteable = (restricted->end - restricted->start
+		            - restricted->pos) / size;
 		if (nitems > nwriteable) {
 			nitems = nwriteable;
 		}
@@ -243,6 +244,7 @@ VFILE *vfrestrict(VFILE *inner, long start, long end, int ro)
 	restricted->start = start;
 	restricted->end = end;
 	restricted->ro = ro;
+	restricted->pos = 0;
 	return vfopen(restricted, &restricted_io_functions);
 }
 
