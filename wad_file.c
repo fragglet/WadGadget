@@ -32,6 +32,12 @@ struct wad_file {
 	// state. If rollback_header.table_offset=0 then there is
 	// no old directory.
 	struct wad_file_header rollback_header;
+
+	// File offset of the most recently written lump. If this is zero then
+	// no lump has been written since the WAD was opened. This is used for
+	// an optimization where if we write the same lump repeatedly then we
+	// overwrite the previous data.
+	unsigned int last_lump_pos;
 };
 
 static const struct blob_list_entry *GetEntry(
@@ -80,6 +86,7 @@ struct wad_file *W_OpenFile(const char *filename)
 	result = checked_calloc(1, sizeof(struct wad_file));
 	result->vfs = vfs;
 	result->rollback_header.table_offset = 0;
+	result->last_lump_pos = 0;
 	result->bl.get_entry = GetEntry;
 	result->bl.free = FreeWadFile;
 	BL_SetPathFields(&result->bl, filename);
@@ -196,13 +203,14 @@ static void WriteHeader(struct wad_file *f)
 }
 
 // MaybeRollbackDirectory rolls back the last write of the WAD header to point
-// to the previous directory, if there is such a directory.
-static void MaybeRollbackDirectory(struct wad_file *f)
+// to the previous directory, if there is such a directory. Returns 1 if a
+// rollback was performed.
+static int MaybeRollbackDirectory(struct wad_file *f)
 {
 	unsigned int truncate_at;
 
 	if (f->rollback_header.table_offset == 0) {
-		return;
+		return 0;
 	}
 
 	truncate_at = f->header.table_offset;
@@ -215,6 +223,8 @@ static void MaybeRollbackDirectory(struct wad_file *f)
 	// Truncate off the new directory now that we no longer point at it.
 	vfseek(f->vfs, truncate_at, SEEK_SET);
 	vftruncate(f->vfs);
+
+	return 1;
 }
 
 static void LumpClosed(VFILE *fs, void *data)
@@ -258,15 +268,19 @@ static void WriteLumpClosed(VFILE *fs, void *data)
 	f->directory[f->current_lump_index].size = (unsigned int) size;
 
 	W_WriteDirectory(f);
+
+	ReadLumpHeader(f, f->current_lump_index);
 }
 
 VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
 {
 	VFILE *result;
+	struct wad_file_entry *wadent;
 	long start;
 
 	assert(lump_index < f->num_lumps);
 	assert(f->current_lump == NULL);
+	wadent = &f->directory[lump_index];
 
 	// Every time we write a lump we write the new data to the EOF, then
 	// the new directory, then update the WAD header. As an optimization,
@@ -276,16 +290,26 @@ VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
 	// file will only have one new directory written to it, rather than N
 	// copies of the directory. But at each stage the WAD file is always
 	// consistent.
-	MaybeRollbackDirectory(f);
+	if (MaybeRollbackDirectory(f)
+	 && f->last_lump_pos > 0 && wadent->size > 0
+	 && f->last_lump_pos == wadent->position) {
+		// We performed a rollback. But there's an additional
+		// optimization we can still perform. At the tail of the file
+		// is now the lump data for the last lump we wrote. If we're
+		// writing the same lump again then we can overwrite that, too.
+		start = f->last_lump_pos;
+		assert(!vfseek(f->vfs, start, SEEK_SET));
+	} else {
+		assert(!vfseek(f->vfs, 0, SEEK_END));
+		start = vftell(f->vfs);
+	}
 
-	// We always write at the end of file.
-	assert(!vfseek(f->vfs, 0, SEEK_END));
-	start = vftell(f->vfs);
 	f->directory[lump_index].position = (unsigned int) start;
 
 	result = vfrestrict(f->vfs, start, 0, 0);
 	f->current_lump = result;
 	f->current_lump_index = lump_index;
+	f->last_lump_pos = start;
 
 	vfonclose(result, WriteLumpClosed, f);
 
