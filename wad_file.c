@@ -138,25 +138,25 @@ void W_CloseFile(struct wad_file *f)
 	free(f);
 }
 
-void W_AddEntries(struct wad_file *f, unsigned int after_index,
+void W_AddEntries(struct wad_file *f, unsigned int before_index,
                   unsigned int count)
 {
 	unsigned int i;
 	struct wad_file_entry *ent;
 
-	assert(after_index <= f->num_lumps);
+	assert(before_index <= f->num_lumps);
 	f->directory = realloc(f->directory,
 	    (f->num_lumps + count) * sizeof(struct wad_file_entry));
-	memmove(&f->directory[after_index + count],
-	        &f->directory[after_index],
-	        (f->num_lumps - after_index) * sizeof(struct wad_file_entry));
+	memmove(&f->directory[before_index + count],
+	        &f->directory[before_index],
+	        (f->num_lumps - before_index) * sizeof(struct wad_file_entry));
 	f->num_lumps += count;
 	for (i = 0; i < count; i++) {
-		ent = &f->directory[after_index + i];
+		ent = &f->directory[before_index + i];
 		ent->position = 0;
 		ent->size = 0;
 		snprintf(ent->name, 8, "UNNAMED");
-		BL_HandleInsert(&f->bl.tags, after_index + i);
+		BL_HandleInsert(&f->bl.tags, before_index + i);
 	}
 	// TODO: Adjust lump headers array too
 	W_WriteDirectory(f);
