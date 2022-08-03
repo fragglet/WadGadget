@@ -25,16 +25,16 @@ void PerformExport(struct blob_list *from, int from_index,
 
 	switch (dirent->type) {
 	case BLOB_TYPE_FILE:
+	case BLOB_TYPE_WAD:
 		extn = "";
 		break;
 	case BLOB_TYPE_LUMP:
 		extn = ".lmp";
-		// TODO: Convert to .gif/.wav etc.
+		// TODO: Convert to .png/.wav etc.
 		break;
 	default:
 		return;
 	}
-	// TODO: Export in other formats: .png, .wav, etc.
 	filename = StringJoin("", DIR_GetPath(to), "/",
 	                      dirent->name, extn, NULL);
 
