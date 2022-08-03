@@ -69,6 +69,12 @@ static void ReadLumpHeader(struct wad_file *wad, unsigned int lump_index)
 	              1, bytes, wad->vfs) == bytes);
 }
 
+static VFILE *OpenLump(void *_wad, int lump_index)
+{
+	struct wad_file *wad = _wad;
+	return W_OpenLump(wad, lump_index);
+}
+
 struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;
@@ -89,6 +95,7 @@ struct wad_file *W_OpenFile(const char *filename)
 	result->last_lump_pos = 0;
 	result->bl.get_entry = GetEntry;
 	result->bl.free = FreeWadFile;
+	result->bl.open_blob = OpenLump;
 	BL_SetPathFields(&result->bl, filename);
 
 	assert(vfread(&result->header,

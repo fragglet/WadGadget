@@ -86,6 +86,26 @@ static void FreeEntries(struct directory_listing *d)
 	d->num_files = 0;
 }
 
+static VFILE *OpenFile(void *_dir, int file_index)
+{
+	struct directory_listing *dir = _dir;
+	VFILE *result;
+	FILE *fs;
+	char *filename;
+
+	assert(file_index >= 0 && file_index < dir->num_files);
+
+	filename = StringJoin("", DIR_GetPath(dir), "/",
+	                      dir->files[file_index], NULL);
+
+	fs = fopen(filename, "rb");
+	assert(fs != NULL);
+	result = vfwrapfile(fs);
+	free(filename);
+
+	return result;
+}
+
 void DIR_RefreshDirectory(struct directory_listing *d)
 {
 	DIR *dir = opendir(d->path);
@@ -132,6 +152,7 @@ struct directory_listing *DIR_ReadDirectory(const char *path)
 	d = calloc(1, sizeof(struct directory_listing));
 	d->bl.get_entry = GetEntry;
 	d->bl.get_entry_path = GetEntryPath;
+	d->bl.open_blob = OpenFile;
 	d->bl.free = FreeDirectory;
 	d->path = PathSanitize(path);
 	d->files = NULL;

@@ -5,6 +5,8 @@
 #ifndef INCLUDED_BLOB_LIST_H
 #define INCLUDED_BLOB_LIST_H
 
+#include "vfile.h"
+
 struct blob_tag_list {
 	unsigned int *entries;
 	size_t num_entries;
@@ -26,6 +28,7 @@ struct blob_list {
 	char *path;
 	char *parent_dir, *name;
 	struct blob_tag_list tags;
+	VFILE *(*open_blob)(void *_dir, int lump_index);
 	const struct blob_list_entry *(*get_entry)(
 		struct blob_list *p, unsigned int i);
 	const char *(*get_entry_path)(struct blob_list *l, unsigned int idx);
