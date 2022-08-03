@@ -132,6 +132,7 @@ void W_CloseFile(struct wad_file *f)
 	}
 	vfclose(f->vfs);
 	free(f->directory);
+	free(f->lump_headers);
 	free(f->bl.path);
 	free(f->bl.parent_dir);
 	free(f->bl.name);
