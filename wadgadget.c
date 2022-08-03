@@ -6,6 +6,7 @@
 #include "common.h"
 #include "dialog.h"
 #include "dir_pane.h"
+#include "import.h"
 #include "lump_info.h"
 #include "strings.h"
 #include "wad_pane.h"
@@ -106,77 +107,6 @@ static void NavigateNew(void)
 	}
 }
 
-static void PerformImport(struct list_pane *from, struct list_pane *to)
-{
-	VFILE *fromfile, *tolump;
-	struct directory_listing *dir;
-	FILE *f;
-	char *filename, *p;
-	struct wad_file *wad;
-	const struct blob_list_entry *dirent;
-	char namebuf[9];
-	int lump_index, file_index;
-
-	// TODO: Update/overwrite existing lump instead of creating a new
-	// lump.
-
-	// TODO
-	if (BL_NumTagged(&from->blob_list->tags) > 0) {
-		UI_ConfirmDialogBox(
-		    "Sorry", "Multi-import not implemented yet.");
-		return;
-	}
-
-	dir = (struct directory_listing *) from->blob_list;
-	file_index = UI_ListPaneSelected(from);
-	if (file_index < 0) {
-		return;
-	}
-	dirent = DIR_GetFile(dir, file_index);
-	if (dirent->type != BLOB_TYPE_LUMP
-	 && dirent->type != BLOB_TYPE_FILE) {
-		return;
-	}
-
-	lump_index = UI_ListPaneSelected(from);
-	if (lump_index < 0) {
-		return;
-	}
-
-	wad = (struct wad_file *) to->blob_list;
-
-	lump_index = UI_ListPaneSelected(to) + 1;
-	W_AddEntries(wad, lump_index, 1);
-
-	// TODO: Import and convert from other formats: .png, .wav, etc.
-	filename = StringJoin("", DIR_GetPath(dir), "/", dirent->name, NULL);
-
-	// TODO: Confirm file overwrite if already present.
-	f = fopen(filename, "rb");
-	if (f != NULL) {
-		fromfile = vfwrapfile(f);
-
-		tolump = W_OpenLumpRewrite(wad, lump_index);
-
-		vfcopy(fromfile, tolump);
-		vfclose(fromfile);
-		vfclose(tolump);
-	}
-
-	free(filename);
-
-	// Lump name gets set from filename, but we strip extension.
-	StringCopy(namebuf, dirent->name, sizeof(namebuf));
-	p = strrchr(namebuf, '.');
-	if (p != NULL) {
-		*p = '\0';
-	}
-
-	W_SetLumpName(wad, lump_index, namebuf);
-
-	// TODO: Mark new imported lump(s) to highlight
-}
-
 static void PerformExport(struct list_pane *from, struct list_pane *to)
 {
 	VFILE *fromlump, *tofile;
@@ -238,7 +168,9 @@ static void PerformCopy(void)
 	}
 
 	if (from->type == PANE_TYPE_DIR && to->type == PANE_TYPE_WAD) {
-		PerformImport(from, to);
+		PerformImport(from->blob_list, UI_ListPaneSelected(from),
+		              (struct wad_file *) to->blob_list,
+		              UI_ListPaneSelected(to) + 1);
 		return;
 	}
 
