@@ -145,20 +145,31 @@ void W_AddEntries(struct wad_file *f, unsigned int before_index,
 	struct wad_file_entry *ent;
 
 	assert(before_index <= f->num_lumps);
+
+	// We need to rearrange both the WAD directory and the lump headers
+	// array to make room for the new entries.
 	f->directory = realloc(f->directory,
 	    (f->num_lumps + count) * sizeof(struct wad_file_entry));
 	memmove(&f->directory[before_index + count],
 	        &f->directory[before_index],
 	        (f->num_lumps - before_index) * sizeof(struct wad_file_entry));
+
+	f->lump_headers = realloc(f->lump_headers,
+	    (f->num_lumps + count) * sizeof(lump_header));
+	memmove(&f->lump_headers[before_index + count],
+	        &f->lump_headers[before_index],
+	        (f->num_lumps - before_index) * sizeof(lump_header));
+
 	f->num_lumps += count;
+
 	for (i = 0; i < count; i++) {
 		ent = &f->directory[before_index + i];
 		ent->position = 0;
 		ent->size = 0;
 		snprintf(ent->name, 8, "UNNAMED");
 		BL_HandleInsert(&f->bl.tags, before_index + i);
+		memset(&f->lump_headers[i], 0, sizeof(lump_header));
 	}
-	// TODO: Adjust lump headers array too
 	W_WriteDirectory(f);
 }
 
@@ -167,8 +178,9 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index)
 	assert(index < f->num_lumps);
 	memmove(&f->directory[index], &f->directory[index + 1],
 	        (f->num_lumps - index - 1) * sizeof(struct wad_file_entry));
+	memmove(&f->lump_headers[index], &f->lump_headers[index + 1],
+	        (f->num_lumps - index - 1) * sizeof(lump_header));
 	BL_HandleDelete(&f->bl.tags, index);
-	// TODO: Adjust lump headers array too
 	--f->num_lumps;
 	W_WriteDirectory(f);
 }
