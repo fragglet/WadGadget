@@ -29,28 +29,31 @@ void PerformImport(struct blob_list *from, int from_index,
 	}
 
 	dirent = from->get_entry(from, from_index);
-	if (dirent->type != BLOB_TYPE_LUMP
-	 && dirent->type != BLOB_TYPE_FILE) {
+	StringCopy(namebuf, dirent->name, sizeof(namebuf));
+
+	switch (dirent->type) {
+	case BLOB_TYPE_LUMP:
+		// WAD to WAD copy.
+		break;
+	case BLOB_TYPE_FILE:
+		// Lump name was set from filename, but we strip extension.
+		p = strrchr(namebuf, '.');
+		if (p != NULL) {
+			*p = '\0';
+		}
+		// TODO: Convert from other formats: .png, .wav, etc.
+	default:
 		return;
 	}
 
 	W_AddEntries(to, to_index, 1);
 
 	fromfile = from->open_blob(from, from_index);
-	// TODO: Import and convert from other formats: .png, .wav, etc.
 
 	tolump = W_OpenLumpRewrite(to, to_index);
 	vfcopy(fromfile, tolump);
 	vfclose(fromfile);
 	vfclose(tolump);
-
-	// Lump name gets set from filename, but we strip extension.
-	StringCopy(namebuf, dirent->name, sizeof(namebuf));
-	p = strrchr(namebuf, '.');
-	if (p != NULL) {
-		*p = '\0';
-	}
-
 	W_SetLumpName(to, to_index, namebuf);
 
 	// TODO: Mark new imported lump(s) to highlight

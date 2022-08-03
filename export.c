@@ -11,7 +11,7 @@ void PerformExport(struct blob_list *from, int from_index,
 {
 	VFILE *fromlump, *tofile;
 	FILE *f;
-	char *filename;
+	char *filename, *extn;
 	const struct blob_list_entry *dirent;
 
 	// TODO
@@ -23,9 +23,20 @@ void PerformExport(struct blob_list *from, int from_index,
 
 	dirent = from->get_entry(from, from_index);
 
+	switch (dirent->type) {
+	case BLOB_TYPE_FILE:
+		extn = "";
+		break;
+	case BLOB_TYPE_LUMP:
+		extn = ".lmp";
+		// TODO: Convert to .gif/.wav etc.
+		break;
+	default:
+		return;
+	}
 	// TODO: Export in other formats: .png, .wav, etc.
 	filename = StringJoin("", DIR_GetPath(to), "/",
-	                      dirent->name, ".lmp", NULL);
+	                      dirent->name, extn, NULL);
 
 	// TODO: Confirm file overwrite if already present.
 	f = fopen(filename, "wb");
