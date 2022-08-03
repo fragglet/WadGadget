@@ -27,7 +27,7 @@ void PerformImport(struct blob_list *from, int from_index,
 	if (from_index < 0 || to_index < 0) {
 		return;
 	}
-	
+
 	dirent = from->get_entry(from, from_index);
 	if (dirent->type != BLOB_TYPE_LUMP
 	 && dirent->type != BLOB_TYPE_FILE) {
