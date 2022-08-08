@@ -74,19 +74,18 @@ static void NavigateNew(void)
 	struct list_pane *pane = panes[active_pane];
 	struct list_pane *new_pane = NULL;
 	void *new_data;
-	enum blob_type bt;
 	const char *path;
-	bt = UI_ListPaneEntryType(pane, pane->selected);
-	path = UI_ListPaneEntryPath(pane, pane->selected);
 
-	switch (bt) {
+	switch (UI_ListPaneEntryType(pane, pane->selected)) {
 	case BLOB_TYPE_DIR:
+		path = UI_ListPaneEntryPath(pane, pane->selected);
 		new_data = DIR_ReadDirectory(path);
 		new_pane = UI_NewDirectoryPane(
 			pane_windows[active_pane], new_data);
 		break;
 
 	case BLOB_TYPE_WAD:
+		path = UI_ListPaneEntryPath(pane, pane->selected);
 		new_data = W_OpenFile(path);
 		new_pane = UI_NewWadPane(pane_windows[active_pane], new_data);
 		break;
