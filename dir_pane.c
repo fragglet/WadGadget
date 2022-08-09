@@ -11,6 +11,7 @@
 #include "common.h"
 #include "dialog.h"
 #include "dir_pane.h"
+#include "strings.h"
 #include "ui.h"
 
 struct directory_pane {
@@ -67,40 +68,53 @@ static void RefreshDir(struct directory_pane *p)
 static void Keypress(void *directory_pane, int key)
 {
 	struct directory_pane *p = directory_pane;
+	char *input_filename;
 	unsigned int selected = p->pane.selected;
 
-	// TODO: Operate on absolute paths, not cwd
 	if (key == KEY_F(6) && selected > 0) {
 		char *old_name = DIR_GetFile(p->dir, selected-1)->name;
-		char *new_name = UI_TextInputDialogBox(
+		char *new_name;
+		input_filename = UI_TextInputDialogBox(
 		    "Rename", 30, "New name for '%s'?", old_name);
-		if (new_name == NULL) {
+		if (input_filename == NULL) {
 			return;
 		}
+		old_name = StringJoin("/", DIR_GetPath(p->dir), old_name, NULL);
+		new_name = StringJoin("/", DIR_GetPath(p->dir),
+		                      input_filename, NULL);
 		rename(old_name, new_name);
+		free(old_name);
 		free(new_name);
+		free(input_filename);
 		RefreshDir(p);
 		return;
 	}
 	if (key == KEY_F(7) && selected > 0) {
-		char *filename = UI_TextInputDialogBox(
+		char *filename;
+		input_filename = UI_TextInputDialogBox(
 		    "Make directory", 30, "Name for new directory?");
-		if (filename == NULL) {
+		if (input_filename == NULL) {
 			return;
 		}
+		filename = StringJoin("/", DIR_GetPath(p->dir),
+		                      input_filename, NULL);
 		mkdir(filename, 0777);
+		free(input_filename);
 		free(filename);
 		RefreshDir(p);
 		return;
 	}
 	// TODO: Delete all marked
 	if (key == KEY_F(8) && selected > 0) {
-		char *filename = DIR_GetFile(p->dir, selected-1)->name;
+		char *filename;
+		filename = DIR_GetFile(p->dir, selected-1)->name;
 		if (!UI_ConfirmDialogBox("Confirm Delete", "Delete file '%s'?",
 		                         filename)) {
 			return;
 		}
+		filename = StringJoin("/", DIR_GetPath(p->dir), filename, NULL);
 		remove(filename);
+		free(filename);
 		RefreshDir(p);
 		return;
 	}
