@@ -49,7 +49,7 @@ static const struct blob_list_entry *GetEntry(
 	if (idx >= f->num_lumps) {
 		return NULL;
 	}
-	snprintf(buf, sizeof(buf), "%-8s", f->directory[idx].name);
+	snprintf(buf, sizeof(buf), "%.8s", f->directory[idx].name);
 	result.name = buf;
 	result.type = BLOB_TYPE_LUMP;
 	return &result;
