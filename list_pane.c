@@ -36,22 +36,25 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 		         or_if_null(lp->blob_list->parent_dir, ""));
 		wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
+		char prefix = ' ';
+
 		ent = lp->blob_list->get_entry(lp->blob_list, idx - 1);
 		if (ent == NULL) {
 			return;
 		}
 		switch (ent->type) {
 			case BLOB_TYPE_DIR:
-				wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 				wattron(win, A_BOLD);
+				prefix = '/';
 				break;
 			case BLOB_TYPE_WAD:
 				wattron(win, COLOR_PAIR(PAIR_WAD_FILE));
+				wattron(win, A_BOLD);
 				break;
 			default:
 				break;
 		}
-		snprintf(buf, w, " %-200s", ent->name);
+		snprintf(buf, w - 2, "%c%-200s", prefix, ent->name);
 	}
 	if (lp->active && idx == lp->selected) {
 		wattron(win, A_REVERSE);
