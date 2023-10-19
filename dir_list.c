@@ -60,6 +60,12 @@ static void FreeDirectory(struct blob_list *l)
 static int OrderByName(const void *x, const void *y)
 {
 	const struct blob_list_entry *dx = x, *dy = y;
+	// Directories get listed before files.
+	int cmp = (dy->type == BLOB_TYPE_DIR)
+	        - (dx->type == BLOB_TYPE_DIR);
+	if (cmp != 0) {
+		return cmp;
+	}
 	return strcasecmp(dx->name, dy->name);
 }
 
