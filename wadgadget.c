@@ -75,6 +75,7 @@ static void NavigateNew(void)
 	struct list_pane *new_pane = NULL;
 	void *new_data;
 	const char *path;
+	char *old_path = pane->blob_list->path;
 
 	switch (UI_ListPaneEntryType(pane, pane->selected)) {
 	case BLOB_TYPE_DIR:
@@ -93,6 +94,13 @@ static void NavigateNew(void)
 	default:
 		// TODO: Do something else, like display file contents.
 		break;
+	}
+
+	// Select subfolder we just navigated out of?
+	if (strlen(path) < strlen(old_path)) {
+		char *fname = strrchr(old_path, '/');
+		UI_ListPaneSearch(new_pane,
+		                  fname != NULL ? fname + 1 : old_path);
 	}
 
 	if (new_pane != NULL) {
