@@ -132,7 +132,8 @@ static size_t restricted_vfread(void *ptr, size_t size, size_t nitems, void *han
 	size_t nreadable, result;
 
 	if (restricted->end >= 0) {
-		nreadable = (restricted->end - restricted->pos) / size;
+		size_t len = restricted->end - restricted->start;
+		nreadable = (len - restricted->pos) / size;
 		if (nitems > nreadable) {
 			nitems = nreadable;
 		}
