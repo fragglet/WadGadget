@@ -15,33 +15,57 @@
 
 #define FILE_PANE_WIDTH 27
 
+#define COLORX_DARKGREY       (COLOR_BLACK + 8)
+#define COLORX_BRIGHTBLUE     (COLOR_BLUE + 8)
+#define COLORX_BRIGHTGREEN    (COLOR_GREEN + 8)
+#define COLORX_BRIGHTCYAN     (COLOR_CYAN + 8)
+#define COLORX_BRIGHTRED      (COLOR_RED + 8)
+#define COLORX_BRIGHTMAGENTA  (COLOR_MAGENTA + 8)
+#define COLORX_BRIGHTYELLOW   (COLOR_YELLOW + 8)
+#define COLORX_BRIGHTWHITE    (COLOR_WHITE + 8)
+
 struct palette {
 	size_t num_colors;
-	struct { uint8_t c, r, g, b; } colors[16];
+	struct { int c, r, g, b; } colors[16];
 };
 
 // We use the curses init_color() function to set a custom color palette
 // that matches the palette from NWT; these values are from the ScreenPal[]
 // array in wadview.c.
+#define V(x) ((x * 1000) / 63)
+
 static struct palette nwt_palette = {
-	8,
+	16,
 	{
-		{COLOR_BLACK,     0,   0,   0},
-		{COLOR_BLUE,      0,   0,  25},
-		{COLOR_GREEN,     0,  42,   0},
-		{COLOR_CYAN,      0,  42,  42},
-		{COLOR_RED,      42,   0,   0},
-		{COLOR_MAGENTA,  42,   0,  42},
-		//{COLOR_BROWN,          42,  42,   0},
-		//{COLOR_GREY,           34,  34,  34},
-		//{COLOR_DARKGREY,        0,   0,  21},
-		//{COLOR_BRIGHTBLUE,      0,   0,  63},
-		//{COLOR_BRIGHTGREEN      0,  42,  21},
-		//{COLOR_BRIGHTCYAN,      0,  42,  63},
-		//{COLOR_BRIGHTRED,      42,   0,  21},
-		//{COLOR_BRIGHTMAGENTA,  42,   0,  63},
-		{COLOR_YELLOW,   42,  42,  21},
-		{COLOR_WHITE,    57,  57,  57},
+		{COLOR_BLACK,          V( 0), V( 0), V( 0)},
+		{COLOR_BLUE,           V( 0), V( 0), V(25)},
+		{COLOR_GREEN,          V( 0), V(42), V( 0)},
+		{COLOR_CYAN,           V( 0), V(42), V(42)},
+		{COLOR_RED,            V(42), V( 0), V( 0)},
+		{COLOR_MAGENTA,        V(42), V( 0), V(42)},
+		{COLOR_YELLOW,         V(42), V(42), V( 0)},
+		{COLOR_WHITE,          V(34), V(34), V(34)},
+
+		{COLORX_DARKGREY,      V(21), V(21), V(21)},
+		{COLORX_BRIGHTBLUE,    V( 0), V( 0), V(63)},
+		{COLORX_BRIGHTGREEN,   V( 0), V(63), V( 0)},
+		{COLORX_BRIGHTCYAN,    V( 0), V(63), V(63)},
+		{COLORX_BRIGHTRED,     V(63), V( 0), V( 0)},
+		{COLORX_BRIGHTMAGENTA, V(63), V( 0), V(63)},
+		{COLORX_BRIGHTYELLOW,  V(63), V(63), V( 0)},
+		{COLORX_BRIGHTWHITE,   V(63), V(63), V(63)},
+		/* The actual values from the NWT table for the
+		   upper range of colors. A bunch of these don't
+		   make much sense (???)
+		{COLORX_DARKGREY,      V( 0), V( 0), V(21)},
+		{COLORX_BRIGHTBLUE,    V( 0), V( 0), V(63)},
+		{COLORX_BRIGHTGREEN,   V( 0), V(42), V(21)},
+		{COLORX_BRIGHTCYAN,    V( 0), V(42), V(63)},
+		{COLORX_BRIGHTRED,     V(42), V( 0), V(21)},
+		{COLORX_BRIGHTMAGENTA, V(42), V( 0), V(63)},
+		{COLORX_BRIGHTYELLOW,  V(42), V(42), V(21)},
+		{COLORX_BRIGHTWHITE,   V(57), V(57), V(57)},
+                */
 	},
 };
 
@@ -261,13 +285,13 @@ static void SavePalette(struct palette *p)
 	short r, g, b;
 	int i;
 
-	p->num_colors = 8;
+	p->num_colors = 16;
 	for (i = 0; i < p->num_colors; i++) {
 		p->colors[i].c = i;
 		color_content(i, &r, &g, &b);
-		p->colors[i].r = (r * 63) / 1000;
-		p->colors[i].g = (g * 63) / 1000;
-		p->colors[i].b = (b * 63) / 1000;
+		p->colors[i].r = r;
+		p->colors[i].g = g;
+		p->colors[i].b = b;
 	}
 }
 
@@ -276,10 +300,8 @@ static void SetPalette(struct palette *p)
 	int i;
 
 	for (i = 0; i < p->num_colors; i++) {
-		init_color(p->colors[i].c,
-		           (p->colors[i].r * 1000) / 63,
-		           (p->colors[i].g * 1000) / 63,
-		           (p->colors[i].b * 1000) / 63);
+		init_color(p->colors[i].c, p->colors[i].r, p->colors[i].g,
+		           p->colors[i].b);
 	}
 }
 
@@ -295,13 +317,13 @@ int main(int argc, char *argv[])
 
 	SavePalette(&old_palette);
 	SetPalette(&nwt_palette);
-	init_pair(PAIR_WHITE_BLACK, COLOR_WHITE, COLOR_BLACK);
-	init_pair(PAIR_PANE_COLOR, COLOR_WHITE, COLOR_BLUE);
+	init_pair(PAIR_WHITE_BLACK, COLORX_BRIGHTWHITE, COLOR_BLACK);
+	init_pair(PAIR_PANE_COLOR, COLORX_BRIGHTWHITE, COLOR_BLUE);
 	init_pair(PAIR_HEADER, COLOR_BLACK, COLOR_CYAN);
 	init_pair(PAIR_DIRECTORY, COLOR_CYAN, COLOR_BLACK);
-	init_pair(PAIR_WAD_FILE, COLOR_RED, COLOR_BLACK);
-	init_pair(PAIR_DIALOG_BOX, COLOR_WHITE, COLOR_MAGENTA);
-	init_pair(PAIR_TAGGED, COLOR_WHITE, COLOR_RED);
+	init_pair(PAIR_WAD_FILE, COLORX_BRIGHTRED, COLOR_BLACK);
+	init_pair(PAIR_DIALOG_BOX, COLORX_BRIGHTWHITE, COLOR_MAGENTA);
+	init_pair(PAIR_TAGGED, COLORX_BRIGHTWHITE, COLOR_RED);
 
 	refresh();
 

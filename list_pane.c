@@ -49,9 +49,9 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 				break;
 			case BLOB_TYPE_WAD:
 				wattron(win, COLOR_PAIR(PAIR_WAD_FILE));
-				wattron(win, A_BOLD);
 				break;
 			default:
+				wattron(win, COLOR_PAIR(PAIR_WHITE_BLACK));
 				break;
 		}
 		snprintf(buf, w - 2, "%c%-200s", prefix, ent->name);
@@ -65,6 +65,7 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 	waddstr(win, " ");
 	wattroff(win, A_REVERSE);
 	wattroff(win, A_BOLD);
+	wattroff(win, COLOR_PAIR(PAIR_WHITE_BLACK));
 	wattroff(win, COLOR_PAIR(PAIR_DIRECTORY));
 	wattroff(win, COLOR_PAIR(PAIR_WAD_FILE));
 	wattroff(win, COLOR_PAIR(PAIR_TAGGED));
