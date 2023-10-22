@@ -74,6 +74,7 @@ static void DrawHeaderPane(void *p)
 
 	wbkgdset(pane->window, COLOR_PAIR(PAIR_HEADER));
 	werase(pane->window);
+	wattron(pane->window, A_BOLD);
 	mvwaddstr(pane->window, 0, 1, START_STR);
 
 	count_extra = 0;
@@ -107,6 +108,7 @@ static void DrawHeaderPane(void *p)
 	}
 
 	waddstr(pane->window, END_STR);
+	wattroff(pane->window, A_BOLD);
 }
 
 void UI_InitHeaderPane(struct pane *pane, WINDOW *win)
