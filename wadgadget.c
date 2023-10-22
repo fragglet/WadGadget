@@ -15,6 +15,39 @@
 
 #define FILE_PANE_WIDTH 27
 
+struct palette {
+	size_t num_colors;
+	struct { uint8_t c, r, g, b; } colors[16];
+};
+
+// We use the curses init_color() function to set a custom color palette
+// that matches the palette from NWT; these values are from the ScreenPal[]
+// array in wadview.c.
+static struct palette nwt_palette = {
+	8,
+	{
+		{COLOR_BLACK,     0,   0,   0},
+		{COLOR_BLUE,      0,   0,  25},
+		{COLOR_GREEN,     0,  42,   0},
+		{COLOR_CYAN,      0,  42,  42},
+		{COLOR_RED,      42,   0,   0},
+		{COLOR_MAGENTA,  42,   0,  42},
+		//{COLOR_BROWN,          42,  42,   0},
+		//{COLOR_GREY,           34,  34,  34},
+		//{COLOR_DARKGREY,        0,   0,  21},
+		//{COLOR_BRIGHTBLUE,      0,   0,  63},
+		//{COLOR_BRIGHTGREEN      0,  42,  21},
+		//{COLOR_BRIGHTCYAN,      0,  42,  63},
+		//{COLOR_BRIGHTRED,      42,   0,  21},
+		//{COLOR_BRIGHTMAGENTA,  42,   0,  63},
+		{COLOR_YELLOW,   42,  42,  21},
+		{COLOR_WHITE,    57,  57,  57},
+	},
+};
+
+// Old palette we saved and restore on quit.
+static struct palette old_palette;
+
 struct search_pane {
 	struct pane pane;
 	struct text_input_box input;
@@ -223,6 +256,33 @@ static void InitSearchPane(WINDOW *win)
 	UI_TextInputInit(&search_pane.input, win, 1, 20);
 }
 
+static void SavePalette(struct palette *p)
+{
+	short r, g, b;
+	int i;
+
+	p->num_colors = 8;
+	for (i = 0; i < p->num_colors; i++) {
+		p->colors[i].c = i;
+		color_content(i, &r, &g, &b);
+		p->colors[i].r = (r * 63) / 1000;
+		p->colors[i].g = (g * 63) / 1000;
+		p->colors[i].b = (b * 63) / 1000;
+	}
+}
+
+static void SetPalette(struct palette *p)
+{
+	int i;
+
+	for (i = 0; i < p->num_colors; i++) {
+		init_color(p->colors[i].c,
+		           (p->colors[i].r * 1000) / 63,
+		           (p->colors[i].g * 1000) / 63,
+		           (p->colors[i].b * 1000) / 63);
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	initscr();
@@ -233,6 +293,8 @@ int main(int argc, char *argv[])
 	intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
 
+	SavePalette(&old_palette);
+	SetPalette(&nwt_palette);
 	init_pair(PAIR_WHITE_BLACK, COLOR_WHITE, COLOR_BLACK);
 	init_pair(PAIR_PANE_COLOR, COLOR_WHITE, COLOR_BLUE);
 	init_pair(PAIR_HEADER, COLOR_BLACK, COLOR_CYAN);
@@ -272,6 +334,7 @@ int main(int argc, char *argv[])
 	SetWindowSizes();
 	UI_RunMainLoop();
 
+	SetPalette(&old_palette);
 	clear();
 	refresh();
 	endwin();
