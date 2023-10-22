@@ -46,26 +46,14 @@ static struct palette nwt_palette = {
 		{COLOR_YELLOW,         V(42), V(42), V( 0)},
 		{COLOR_WHITE,          V(34), V(34), V(34)},
 
-		{COLORX_DARKGREY,      V(21), V(21), V(21)},
-		{COLORX_BRIGHTBLUE,    V( 0), V( 0), V(63)},
-		{COLORX_BRIGHTGREEN,   V( 0), V(63), V( 0)},
-		{COLORX_BRIGHTCYAN,    V( 0), V(63), V(63)},
-		{COLORX_BRIGHTRED,     V(63), V( 0), V( 0)},
-		{COLORX_BRIGHTMAGENTA, V(63), V( 0), V(63)},
-		{COLORX_BRIGHTYELLOW,  V(63), V(63), V( 0)},
-		{COLORX_BRIGHTWHITE,   V(63), V(63), V(63)},
-		/* The actual values from the NWT table for the
-		   upper range of colors. A bunch of these don't
-		   make much sense (???)
-		{COLORX_DARKGREY,      V( 0), V( 0), V(21)},
-		{COLORX_BRIGHTBLUE,    V( 0), V( 0), V(63)},
-		{COLORX_BRIGHTGREEN,   V( 0), V(42), V(21)},
-		{COLORX_BRIGHTCYAN,    V( 0), V(42), V(63)},
-		{COLORX_BRIGHTRED,     V(42), V( 0), V(21)},
-		{COLORX_BRIGHTMAGENTA, V(42), V( 0), V(63)},
-		{COLORX_BRIGHTYELLOW,  V(42), V(42), V(21)},
-		{COLORX_BRIGHTWHITE,   V(57), V(57), V(57)},
-                */
+		{COLORX_DARKGREY,      V( 0), V( 0), V(13)},
+		{COLORX_BRIGHTBLUE,    V( 0), V( 0), V(55)},
+		{COLORX_BRIGHTGREEN,   V( 0), V(34), V(13)},
+		{COLORX_BRIGHTCYAN,    V( 0), V(34), V(55)},
+		{COLORX_BRIGHTRED,     V(34), V( 0), V(13)},
+		{COLORX_BRIGHTMAGENTA, V(34), V( 0), V(55)},
+		{COLORX_BRIGHTYELLOW,  V(34), V(34), V(13)},
+		{COLORX_BRIGHTWHITE,   V(55), V(55), V(55)},
 	},
 };
 
@@ -320,8 +308,8 @@ int main(int argc, char *argv[])
 	init_pair(PAIR_WHITE_BLACK, COLORX_BRIGHTWHITE, COLOR_BLACK);
 	init_pair(PAIR_PANE_COLOR, COLORX_BRIGHTWHITE, COLOR_BLUE);
 	init_pair(PAIR_HEADER, COLOR_BLACK, COLOR_CYAN);
-	init_pair(PAIR_DIRECTORY, COLOR_CYAN, COLOR_BLACK);
-	init_pair(PAIR_WAD_FILE, COLORX_BRIGHTRED, COLOR_BLACK);
+	init_pair(PAIR_DIRECTORY, COLOR_WHITE, COLOR_BLACK);
+	init_pair(PAIR_WAD_FILE, COLOR_RED, COLOR_BLACK);
 	init_pair(PAIR_DIALOG_BOX, COLORX_BRIGHTWHITE, COLOR_MAGENTA);
 	init_pair(PAIR_TAGGED, COLORX_BRIGHTWHITE, COLOR_RED);
 
