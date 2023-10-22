@@ -17,6 +17,23 @@ static unsigned int Lines(struct list_pane *lp)
 	return y - 2;
 }
 
+static void SummarizeSize(int64_t len, char buf[10])
+{
+	if (len < 0) {
+		snprintf(buf, 10, "");
+	} else if (len < 1000000) {
+		snprintf(buf, 10, " %lld", len);
+	} else if (len < 1000000000) {
+		snprintf(buf, 10, " %lldK", len / 1000);
+	} else if (len < 1000000000000) {
+		snprintf(buf, 10, " %lldM", len / 1000000);
+	} else if (len < 1000000000000000) {
+		snprintf(buf, 10, " %lldG", len / 1000000000);
+	} else {
+		snprintf(buf, 10, " big!");
+	}
+}
+
 static void DrawEntry(struct list_pane *lp, unsigned int idx,
                       unsigned int y)
 {
@@ -24,6 +41,7 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 	const struct blob_list_entry *ent;
 	static char buf[128];
 	unsigned int w, h;
+	char size[10] = "";
 
 	getmaxyx(win, h, w);
 	w -= 2; h = h;
@@ -54,6 +72,7 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 				wattron(win, COLOR_PAIR(PAIR_WHITE_BLACK));
 				break;
 		}
+		SummarizeSize(ent->size, size);
 		snprintf(buf, w - 2, "%c%-200s", prefix, ent->name);
 	}
 	if (lp->active && idx == lp->selected) {
@@ -63,6 +82,7 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 	}
 	mvwaddstr(win, 1 + y, 1, buf);
 	waddstr(win, " ");
+	mvwaddstr(win, 1 + y, w - strlen(size), size);
 	wattroff(win, A_REVERSE);
 	wattroff(win, A_BOLD);
 	wattroff(win, COLOR_PAIR(PAIR_WHITE_BLACK));

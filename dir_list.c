@@ -142,6 +142,7 @@ void DIR_RefreshDirectory(struct directory_listing *d)
 		ent->type = dirent->d_type == DT_DIR ? BLOB_TYPE_DIR :
 		            HasWadExtension(ent->name) ? BLOB_TYPE_WAD :
 		            BLOB_TYPE_FILE;
+		ent->size = -1;
 		++d->num_files;
 	}
 

@@ -52,6 +52,7 @@ static const struct blob_list_entry *GetEntry(
 	snprintf(buf, sizeof(buf), "%.8s", f->directory[idx].name);
 	result.name = buf;
 	result.type = BLOB_TYPE_LUMP;
+	result.size = f->directory[idx].size;
 	return &result;
 }
 

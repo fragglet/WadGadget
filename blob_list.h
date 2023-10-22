@@ -22,6 +22,7 @@ enum blob_type {
 struct blob_list_entry {
 	enum blob_type type;
 	char *name;
+	ssize_t size;
 };
 
 struct blob_list {
