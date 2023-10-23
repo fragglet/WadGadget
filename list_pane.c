@@ -50,7 +50,7 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 	}
 
 	if (idx == 0) {
-		snprintf(buf, w, "^- %s",
+		snprintf(buf, w, "^ %s",
 		         or_if_null(lp->blob_list->parent_dir, ""));
 		wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
@@ -82,6 +82,10 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 	}
 	mvwaddstr(win, 1 + y, 1, buf);
 	waddstr(win, " ");
+	if (idx == 0) {
+		mvwaddch(win, 1 + y, 1, ACS_LLCORNER);
+		mvwaddch(win, 1 + y, 2, ACS_HLINE);
+	}
 	mvwaddstr(win, 1 + y, w - strlen(size), size);
 	wattroff(win, A_REVERSE);
 	wattroff(win, A_BOLD);
