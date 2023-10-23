@@ -73,7 +73,7 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 				break;
 		}
 		SummarizeSize(ent->size, size);
-		snprintf(buf, w - 2, "%c%-200s", prefix, ent->name);
+		snprintf(buf, w, "%c%-200s", prefix, ent->name);
 	}
 	if (lp->active && idx == lp->selected) {
 		wattron(win, A_REVERSE);
