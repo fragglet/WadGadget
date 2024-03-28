@@ -140,7 +140,7 @@ static void NavigateNew(void)
 
 	default:
 		// TODO: Do something else, like display file contents.
-		break;
+		return;
 	}
 
 	// Select subfolder we just navigated out of?
