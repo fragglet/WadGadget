@@ -13,7 +13,7 @@
 #include "wad_pane.h"
 #include "ui.h"
 
-#define FILE_PANE_WIDTH 27
+#define INFO_PANE_WIDTH 27
 
 #define COLORX_DARKGREY       (COLOR_BLACK + 8)
 #define COLORX_BRIGHTBLUE     (COLOR_BLUE + 8)
@@ -75,25 +75,27 @@ static unsigned int active_pane = 0;
 
 static void SetWindowSizes(void)
 {
-	int pane_width, middle_width;
+	int left_width, middle_width, right_width;
 	int lines, columns;
 	getmaxyx(stdscr, lines, columns);
-	pane_width = max(columns, 80) * FILE_PANE_WIDTH / 80;
-	middle_width = max(columns, 80) - pane_width * 2;
+
+	middle_width = INFO_PANE_WIDTH;
+	left_width = (max(columns, 80) - middle_width) / 2;
+	right_width = max(columns, 80) - left_width - middle_width;
 
 	wresize(header_pane.window, 1, columns);
 	wresize(info_pane.window, 5, middle_width);
-	mvwin(info_pane.window, 1, pane_width);
+	mvwin(info_pane.window, 1, left_width);
 	wresize(search_pane.pane.window, 3, middle_width);
 	mvwin(search_pane.pane.window, lines - 3,
-	      columns - middle_width - pane_width);
+	      left_width);
 	
 	wresize(actions_pane.pane.window, 14, middle_width);
-	mvwin(actions_pane.pane.window, 6, pane_width);
-	wresize(pane_windows[0], lines - 1, pane_width);
+	mvwin(actions_pane.pane.window, 6, left_width);
+	wresize(pane_windows[0], lines - 1, left_width);
 	mvwin(pane_windows[0], 1, 0);
-	wresize(pane_windows[1], lines - 1, pane_width);
-	mvwin(pane_windows[1], 1, columns - pane_width);
+	wresize(pane_windows[1], lines - 1, right_width);
+	mvwin(pane_windows[1], 1, columns - right_width);
 
 	erase();
 	refresh();
