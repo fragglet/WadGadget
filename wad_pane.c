@@ -89,6 +89,7 @@ static void Keypress(void *wad_pane, int key)
 		     "Delete lump named '%.8s'?",
 		     W_GetDirectory(p->f)[selected - 1].name)) {
 			W_DeleteEntry(p->f, selected - 1);
+			p->pane.selected--;
 		}
 		return;
 	}
