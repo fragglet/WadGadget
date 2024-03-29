@@ -14,7 +14,7 @@ void UI_TextInputInit(struct text_input_box *input, WINDOW *win, int y,
 	input->y = y;
 	input->input_sz = max_chars + 1;
 	input->input = checked_calloc(input->input_sz, 1);
-	input->input[0] = '\0';
+	UI_TextInputClear(input);
 }
 
 void UI_TextInputDraw(struct text_input_box *input)
@@ -63,5 +63,10 @@ int UI_TextInputKeypress(struct text_input_box *input, int keypress)
 	input->input[pos] = keypress;
 	input->input[pos + 1] = '\0';
 	return 1;
+}
+
+void UI_TextInputClear(struct text_input_box *input)
+{
+	input->input[0] = '\0';
 }
 

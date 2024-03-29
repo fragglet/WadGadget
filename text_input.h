@@ -12,4 +12,5 @@ void UI_TextInputInit(struct text_input_box *input, WINDOW *win, int y,
                       size_t max_chars);
 void UI_TextInputDraw(struct text_input_box *input);
 int UI_TextInputKeypress(struct text_input_box *input, int keypress);
+void UI_TextInputClear(struct text_input_box *input);
 

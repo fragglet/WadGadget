@@ -159,6 +159,7 @@ static void NavigateNew(void)
 		UI_PaneShow(new_pane);
 
 		SwitchToPane(active_pane);
+		UI_TextInputClear(&search_pane.input);
 	}
 }
 
