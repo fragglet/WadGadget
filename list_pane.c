@@ -129,6 +129,12 @@ void UI_ListPaneSearch(void *p, char *needle)
 		return;
 	}
 
+	if (!strcmp(needle, "..")) {
+		lp->selected = 0;
+		lp->window_offset = 0;
+		return;
+	}
+
 	// Check for prefix first, so user can type entire lump name.
 	for (i = 0;; i++) {
 		ent = lp->blob_list->get_entry(lp->blob_list, i);
