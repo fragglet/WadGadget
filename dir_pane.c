@@ -15,11 +15,11 @@
 #include "ui.h"
 
 struct directory_pane {
-	struct list_pane pane;
+	struct blob_list_pane pane;
 	struct directory_listing *dir;
 };
 
-static const struct list_pane_action dir_to_wad[] = {
+static const struct blob_list_pane_action dir_to_wad[] = {
 	{"F3", "View"},
 	{"F4", "Edit"},
 	{"F5", "> Import"},
@@ -30,7 +30,7 @@ static const struct list_pane_action dir_to_wad[] = {
 	{NULL, NULL},
 };
 
-static const struct list_pane_action dir_to_dir[] = {
+static const struct blob_list_pane_action dir_to_dir[] = {
 	{"F3", "View"},
 	{"F4", "Edit"},
 	{"F5", "> Copy"},
@@ -41,7 +41,8 @@ static const struct list_pane_action dir_to_dir[] = {
 	{NULL, NULL},
 };
 
-static const struct list_pane_action *GetActions(struct list_pane *other)
+static const struct blob_list_pane_action *GetActions(
+	struct blob_list_pane *other)
 {
 	switch (other->type) {
 		case PANE_TYPE_DIR:
@@ -119,16 +120,16 @@ static void Keypress(void *directory_pane, int key)
 		return;
 	}
 
-	UI_ListPaneKeypress(directory_pane, key);
+	UI_BlobListPaneKeypress(directory_pane, key);
 }
 
-struct list_pane *UI_NewDirectoryPane(
+struct blob_list_pane *UI_NewDirectoryPane(
 	WINDOW *w, struct directory_listing *dir)
 {
 	struct directory_pane *p;
 
 	p = calloc(1, sizeof(struct directory_pane));
-	UI_ListPaneInit(&p->pane, w);
+	UI_BlobListPaneInit(&p->pane, w);
 	p->pane.pane.keypress = Keypress;
 	p->pane.type = PANE_TYPE_DIR;
 	p->pane.blob_list = (struct blob_list *) dir;

@@ -1,6 +1,6 @@
 
 #include "blob_list.h"
-#include "list_pane.h"
+#include "blob_list_pane.h"
 
 struct directory_listing;
 

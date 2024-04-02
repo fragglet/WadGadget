@@ -69,7 +69,7 @@ static struct actions_pane actions_pane;
 static struct pane header_pane, info_pane;
 static struct search_pane search_pane;
 static WINDOW *pane_windows[2];
-static struct list_pane *panes[2];
+static struct blob_list_pane *panes[2];
 static void *pane_data[2];
 static unsigned int active_pane = 0;
 
@@ -112,28 +112,28 @@ static void SwitchToPane(unsigned int pane)
 	UI_RaisePaneToTop(&search_pane);
 
 	actions_pane.left_to_right = active_pane == 0;
-	actions_pane.actions = UI_ListPaneActions(
+	actions_pane.actions = UI_BlobListPaneActions(
 		panes[active_pane], panes[!active_pane]);
 }
 
 static void NavigateNew(void)
 {
-	struct list_pane *pane = panes[active_pane];
-	struct list_pane *new_pane = NULL;
+	struct blob_list_pane *pane = panes[active_pane];
+	struct blob_list_pane *new_pane = NULL;
 	void *new_data;
 	const char *path;
 	char *old_path = pane->blob_list->path;
 
-	switch (UI_ListPaneEntryType(pane, pane->selected)) {
+	switch (UI_BlobListPaneEntryType(pane, pane->selected)) {
 	case BLOB_TYPE_DIR:
-		path = UI_ListPaneEntryPath(pane, pane->selected);
+		path = UI_BlobListPaneEntryPath(pane, pane->selected);
 		new_data = DIR_ReadDirectory(path);
 		new_pane = UI_NewDirectoryPane(
 			pane_windows[active_pane], new_data);
 		break;
 
 	case BLOB_TYPE_WAD:
-		path = UI_ListPaneEntryPath(pane, pane->selected);
+		path = UI_BlobListPaneEntryPath(pane, pane->selected);
 		new_data = W_OpenFile(path);
 		new_pane = UI_NewWadPane(pane_windows[active_pane], new_data);
 		break;
@@ -146,14 +146,14 @@ static void NavigateNew(void)
 	// Select subfolder we just navigated out of?
 	if (strlen(path) < strlen(old_path)) {
 		char *fname = strrchr(old_path, '/');
-		UI_ListPaneSearch(new_pane,
+		UI_BlobListPaneSearch(new_pane,
 		                  fname != NULL ? fname + 1 : old_path);
 	}
 
 	if (new_pane != NULL) {
 		BL_FreeList(pane_data[active_pane]);
 		UI_PaneHide(pane);
-		UI_ListPaneFree(pane);
+		UI_BlobListPaneFree(pane);
 		panes[active_pane] = new_pane;
 		pane_data[active_pane] = new_data;
 		UI_PaneShow(new_pane);
@@ -165,19 +165,19 @@ static void NavigateNew(void)
 
 static void PerformCopy(void)
 {
-	struct list_pane *from, *to;
+	struct blob_list_pane *from, *to;
 	from = panes[active_pane]; to = panes[!active_pane];
 
 	if (to->type == PANE_TYPE_DIR) {
-		PerformExport(from->blob_list, UI_ListPaneSelected(from),
+		PerformExport(from->blob_list, UI_BlobListPaneSelected(from),
 		              (struct directory_listing *) to->blob_list);
 		return;
 	}
 
 	if (to->type == PANE_TYPE_WAD) {
-		PerformImport(from->blob_list, UI_ListPaneSelected(from),
+		PerformImport(from->blob_list, UI_BlobListPaneSelected(from),
 		              (struct wad_file *) to->blob_list,
-		              UI_ListPaneSelected(to) + 1);
+		              UI_BlobListPaneSelected(to) + 1);
 		return;
 	}
 
@@ -252,7 +252,7 @@ static void SearchPaneKeypress(void *pane, int key)
 	// Space key triggers mark, does not go to search input.
 	if (key != ' ' && UI_TextInputKeypress(&p->input, key)) {
 		if (key != KEY_BACKSPACE) {
-			UI_ListPaneSearch(panes[active_pane], p->input.input);
+			UI_BlobListPaneSearch(panes[active_pane], p->input.input);
 		}
 	} else {
 		HandleKeypress(NULL, key);

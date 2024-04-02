@@ -7,15 +7,15 @@
 #include "common.h"
 #include "dialog.h"
 #include "ui.h"
-#include "list_pane.h"
+#include "blob_list_pane.h"
 #include "wad_pane.h"
 
 struct wad_pane {
-	struct list_pane pane;
+	struct blob_list_pane pane;
 	struct wad_file *f;
 };
 
-static const struct list_pane_action wad_to_wad[] = {
+static const struct blob_list_pane_action wad_to_wad[] = {
 	{"F3", "View"},
 	{"F4", "Edit"},
 	{"F5", "> Copy"},
@@ -25,7 +25,7 @@ static const struct list_pane_action wad_to_wad[] = {
 	{NULL, NULL},
 };
 
-static const struct list_pane_action wad_to_dir[] = {
+static const struct blob_list_pane_action wad_to_dir[] = {
 	{"F3", "View"},
 	{"F4", "Edit"},
 	{"F5", "> Export"},
@@ -36,7 +36,7 @@ static const struct list_pane_action wad_to_dir[] = {
 	{NULL, NULL},
 };
 
-static const struct list_pane_action *GetActions(struct list_pane *other)
+static const struct blob_list_pane_action *GetActions(struct blob_list_pane *other)
 {
 	switch (other->type) {
 		case PANE_TYPE_DIR:
@@ -94,14 +94,14 @@ static void Keypress(void *wad_pane, int key)
 		return;
 	}
 
-	UI_ListPaneKeypress(wad_pane, key);
+	UI_BlobListPaneKeypress(wad_pane, key);
 }
 
-struct list_pane *UI_NewWadPane(WINDOW *w, struct wad_file *f)
+struct blob_list_pane *UI_NewWadPane(WINDOW *w, struct wad_file *f)
 {
 	struct wad_pane *p;
 	p = checked_calloc(1, sizeof(struct wad_pane));
-	UI_ListPaneInit(&p->pane, w);
+	UI_BlobListPaneInit(&p->pane, w);
 	p->pane.pane.keypress = Keypress;
 	p->pane.type = PANE_TYPE_WAD;
 	p->pane.blob_list = (struct blob_list *) f;

@@ -7,9 +7,9 @@
 #include "colors.h"
 #include "common.h"
 #include "ui.h"
-#include "list_pane.h"
+#include "blob_list_pane.h"
 
-static unsigned int Lines(struct list_pane *lp)
+static unsigned int Lines(struct blob_list_pane *lp)
 {
 	int x, y;
 	getmaxyx(lp->pane.window, y, x);
@@ -34,7 +34,7 @@ static void SummarizeSize(int64_t len, char buf[10])
 	}
 }
 
-static void DrawEntry(struct list_pane *lp, unsigned int idx,
+static void DrawEntry(struct blob_list_pane *lp, unsigned int idx,
                       unsigned int y)
 {
 	WINDOW *win = lp->pane.window;
@@ -97,7 +97,7 @@ static void DrawEntry(struct list_pane *lp, unsigned int idx,
 
 static void Draw(void *p)
 {
-	struct list_pane *lp = p;
+	struct blob_list_pane *lp = p;
 	WINDOW *win = lp->pane.window;
 	unsigned int y;
 
@@ -118,10 +118,10 @@ static void Draw(void *p)
 	}
 }
 
-void UI_ListPaneSearch(void *p, char *needle)
+void UI_BlobListPaneSearch(void *p, char *needle)
 {
 	const struct blob_list_entry *ent;
-	struct list_pane *lp = p;
+	struct blob_list_pane *lp = p;
 	size_t haystack_len, needle_len = strlen(needle);
 	int i, j;
 
@@ -170,14 +170,14 @@ void UI_ListPaneSearch(void *p, char *needle)
 	}
 }
 
-int UI_ListPaneSelected(struct list_pane *p)
+int UI_BlobListPaneSelected(struct blob_list_pane *p)
 {
 	return p->selected - 1;
 }
 
-void UI_ListPaneKeypress(void *p, int key)
+void UI_BlobListPaneKeypress(void *p, int key)
 {
-	struct list_pane *lp = p;
+	struct blob_list_pane *lp = p;
 	struct blob_tag_list *tags = &lp->blob_list->tags;
 	unsigned int i;
 
@@ -192,7 +192,7 @@ void UI_ListPaneKeypress(void *p, int key)
 		return;
 	case KEY_PPAGE:
 		for (i = 0; i < Lines(lp); i++) {
-			UI_ListPaneKeypress(p, KEY_UP);
+			UI_BlobListPaneKeypress(p, KEY_UP);
 		}
 		return;
 	case KEY_HOME:
@@ -204,16 +204,16 @@ void UI_ListPaneKeypress(void *p, int key)
 		return;
 	case ' ':
 		if (lp->selected > 0) {
-			if (BL_IsTagged(tags, UI_ListPaneSelected(lp))) {
-				BL_RemoveTag(tags, UI_ListPaneSelected(lp));
+			if (BL_IsTagged(tags, UI_BlobListPaneSelected(lp))) {
+				BL_RemoveTag(tags, UI_BlobListPaneSelected(lp));
 			} else {
-				BL_AddTag(tags, UI_ListPaneSelected(lp));
+				BL_AddTag(tags, UI_BlobListPaneSelected(lp));
 			}
 		}
 		/* fallthrough */
 	case KEY_DOWN:
 		if (lp->blob_list->get_entry(
-			lp->blob_list, UI_ListPaneSelected(lp) + 1) != NULL) {
+			lp->blob_list, UI_BlobListPaneSelected(lp) + 1) != NULL) {
 			++lp->selected;
 		}
 		if (lp->selected > lp->window_offset + Lines(lp) - 1) {
@@ -222,12 +222,12 @@ void UI_ListPaneKeypress(void *p, int key)
 		return;
 	case KEY_NPAGE:
 		for (i = 0; i < Lines(lp); i++) {
-			UI_ListPaneKeypress(p, KEY_DOWN);
+			UI_BlobListPaneKeypress(p, KEY_DOWN);
 		}
 		return;
 	case KEY_END:
 		while (lp->blob_list->get_entry(
-				lp->blob_list, UI_ListPaneSelected(lp) + 1) != NULL) {
+				lp->blob_list, UI_BlobListPaneSelected(lp) + 1) != NULL) {
 			++lp->selected;
 		}
 		lp->window_offset = lp->selected - Lines(lp) + 1;
@@ -235,20 +235,20 @@ void UI_ListPaneKeypress(void *p, int key)
 	}
 }
 
-void UI_ListPaneInit(struct list_pane *p, WINDOW *w)
+void UI_BlobListPaneInit(struct blob_list_pane *p, WINDOW *w)
 {
 	p->pane.window = w;
 	p->pane.draw = Draw;
-	p->pane.keypress = UI_ListPaneKeypress;
+	p->pane.keypress = UI_BlobListPaneKeypress;
 }
 
-const struct list_pane_action *UI_ListPaneActions(
-	struct list_pane *p, struct list_pane *other)
+const struct blob_list_pane_action *UI_BlobListPaneActions(
+	struct blob_list_pane *p, struct blob_list_pane *other)
 {
 	return p->get_actions(other);
 }
 
-enum blob_type UI_ListPaneEntryType(struct list_pane *p, unsigned int idx)
+enum blob_type UI_BlobListPaneEntryType(struct blob_list_pane *p, unsigned int idx)
 {
 	const struct blob_list_entry *ent;
 	if (idx == 0) {
@@ -258,7 +258,7 @@ enum blob_type UI_ListPaneEntryType(struct list_pane *p, unsigned int idx)
 	return ent->type;
 }
 
-const char *UI_ListPaneEntryPath(struct list_pane *p, unsigned int idx)
+const char *UI_BlobListPaneEntryPath(struct blob_list_pane *p, unsigned int idx)
 {
 	if (idx == 0) {
 		return p->blob_list->parent_dir;
@@ -266,12 +266,12 @@ const char *UI_ListPaneEntryPath(struct list_pane *p, unsigned int idx)
 	return p->blob_list->get_entry_path(p->blob_list, idx - 1);
 }
 
-void UI_ListPaneFree(struct list_pane *p)
+void UI_BlobListPaneFree(struct blob_list_pane *p)
 {
 	free(p);
 }
 
-struct list_pane_action common_actions[] =
+struct blob_list_pane_action common_actions[] =
 {
 	{"Space", "Mark/unmark"},
 	{"F10", "Unmark all"},
@@ -282,7 +282,7 @@ struct list_pane_action common_actions[] =
 };
 
 static void ShowAction(struct actions_pane *p, int y,
-                       const struct list_pane_action *action)
+                       const struct blob_list_pane_action *action)
 {
 	WINDOW *win = p->pane.window;
 	char *desc;
