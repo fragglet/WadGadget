@@ -53,16 +53,16 @@ static const struct blob_list_pane_action *GetActions(struct blob_list_pane *oth
 static void Keypress(void *wad_pane, int key)
 {
 	struct wad_pane *p = wad_pane;
-	unsigned int selected = p->pane.pane.selected;
+	int selected = UI_BlobListPaneSelected(&p->pane);
 
-	if (key == KEY_F(6) && selected > 0) {
+	if (key == KEY_F(6) && selected >= 0) {
 		char *name = UI_TextInputDialogBox(
 		    "Rename lump", 8,
 		    "Enter new name for lump:");
 		if (name == NULL) {
 			return;
 		}
-		W_SetLumpName(p->f, selected - 1, name);
+		W_SetLumpName(p->f, selected, name);
 		free(name);
 	}
 
@@ -75,21 +75,18 @@ static void Keypress(void *wad_pane, int key)
 		}
 		W_AddEntries(p->f, selected, 1);
 		W_SetLumpName(p->f, selected, name);
-		++p->pane.pane.selected;
-		if (p->pane.pane.selected - p->pane.pane.window_offset > 10) {
-			++p->pane.pane.window_offset;
-		}
+		UI_BlobListPaneKeypress(&p->pane, KEY_DOWN);
 		return;
 	}
 
 	// TODO: Delete multiple
-	if (key == KEY_F(8) && selected > 0) {
+	if (key == KEY_F(8) && selected >= 0) {
 		if (UI_ConfirmDialogBox(
 		     "Confirm delete",
 		     "Delete lump named '%.8s'?",
-		     W_GetDirectory(p->f)[selected - 1].name)) {
-			W_DeleteEntry(p->f, selected - 1);
-			p->pane.pane.selected--;
+		     W_GetDirectory(p->f)[selected].name)) {
+			W_DeleteEntry(p->f, selected);
+			UI_BlobListPaneKeypress(&p->pane, KEY_UP);
 		}
 		return;
 	}
@@ -107,8 +104,9 @@ struct blob_list_pane *UI_NewWadPane(WINDOW *w, struct wad_file *f)
 	p->pane.type = PANE_TYPE_WAD;
 	p->pane.blob_list = (struct blob_list *) f;
 	p->pane.get_actions = GetActions;
-	p->pane.pane.selected = min(1, W_NumLumps(f));
 	p->f = f;
+	// Select first item (assuming there is one):
+	UI_BlobListPaneKeypress(&p->pane, KEY_DOWN);
 	return &p->pane;
 }
 

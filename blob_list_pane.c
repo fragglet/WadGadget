@@ -199,22 +199,22 @@ const struct blob_list_pane_action *UI_BlobListPaneActions(
 	return p->get_actions(other);
 }
 
-enum blob_type UI_BlobListPaneEntryType(struct blob_list_pane *p, unsigned int idx)
+enum blob_type UI_BlobListPaneEntryType(struct blob_list_pane *p, int idx)
 {
 	const struct blob_list_entry *ent;
-	if (idx == 0) {
+	if (idx < 0) {
 		return BLOB_TYPE_DIR;
 	}
-	ent = p->blob_list->get_entry(p->blob_list, idx - 1);
+	ent = p->blob_list->get_entry(p->blob_list, idx);
 	return ent->type;
 }
 
-const char *UI_BlobListPaneEntryPath(struct blob_list_pane *p, unsigned int idx)
+const char *UI_BlobListPaneEntryPath(struct blob_list_pane *p, int idx)
 {
-	if (idx == 0) {
+	if (idx < 0) {
 		return p->blob_list->parent_dir;
 	}
-	return p->blob_list->get_entry_path(p->blob_list, idx - 1);
+	return p->blob_list->get_entry_path(p->blob_list, idx);
 }
 
 void UI_BlobListPaneFree(struct blob_list_pane *p)

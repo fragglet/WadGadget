@@ -32,8 +32,8 @@ struct actions_pane {
 void UI_BlobListPaneInit(struct blob_list_pane *p, WINDOW *w);
 const struct blob_list_pane_action *UI_BlobListPaneActions(
 	struct blob_list_pane *p, struct blob_list_pane *other);
-enum blob_type UI_BlobListPaneEntryType(struct blob_list_pane *p, unsigned int idx);
-const char *UI_BlobListPaneEntryPath(struct blob_list_pane *p, unsigned int idx);
+enum blob_type UI_BlobListPaneEntryType(struct blob_list_pane *p, int idx);
+const char *UI_BlobListPaneEntryPath(struct blob_list_pane *p, int idx);
 void UI_BlobListPaneKeypress(void *p, int key);
 void UI_BlobListPaneFree(struct blob_list_pane *p);
 void UI_BlobListPaneSearch(void *p, char *needle);

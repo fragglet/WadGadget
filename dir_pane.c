@@ -70,10 +70,10 @@ static void Keypress(void *directory_pane, int key)
 {
 	struct directory_pane *p = directory_pane;
 	char *input_filename;
-	unsigned int selected = p->pane.pane.selected;
+	int selected = UI_BlobListPaneSelected(&p->pane);
 
-	if (key == KEY_F(6) && selected > 0) {
-		char *old_name = DIR_GetFile(p->dir, selected-1)->name;
+	if (key == KEY_F(6) && selected >= 0) {
+		char *old_name = DIR_GetFile(p->dir, selected)->name;
 		char *new_name;
 		input_filename = UI_TextInputDialogBox(
 		    "Rename", 30, "New name for '%s'?", old_name);
@@ -90,7 +90,7 @@ static void Keypress(void *directory_pane, int key)
 		RefreshDir(p);
 		return;
 	}
-	if (key == KEY_F(7) && selected > 0) {
+	if (key == KEY_F(7)) {
 		char *filename;
 		input_filename = UI_TextInputDialogBox(
 		    "Make directory", 30, "Name for new directory?");
@@ -106,9 +106,9 @@ static void Keypress(void *directory_pane, int key)
 		return;
 	}
 	// TODO: Delete all marked
-	if (key == KEY_F(8) && selected > 0) {
+	if (key == KEY_F(8) && selected >= 0) {
 		char *filename;
-		filename = DIR_GetFile(p->dir, selected-1)->name;
+		filename = DIR_GetFile(p->dir, selected)->name;
 		if (!UI_ConfirmDialogBox("Confirm Delete", "Delete file '%s'?",
 		                         filename)) {
 			return;
@@ -135,8 +135,9 @@ struct blob_list_pane *UI_NewDirectoryPane(
 	p->pane.type = PANE_TYPE_DIR;
 	p->pane.blob_list = (struct blob_list *) dir;
 	p->pane.get_actions = GetActions;
-	p->pane.pane.selected = min(1, DIR_NumFiles(dir));
 	p->dir = dir;
+	// Select first item (assuming there is one):
+	UI_BlobListPaneKeypress(&p->pane, KEY_DOWN);
 
 	return &p->pane;
 }

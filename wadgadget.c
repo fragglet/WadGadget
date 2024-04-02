@@ -120,20 +120,21 @@ static void NavigateNew(void)
 {
 	struct blob_list_pane *pane = panes[active_pane];
 	struct blob_list_pane *new_pane = NULL;
+	int selected = UI_BlobListPaneSelected(pane);
 	void *new_data;
 	const char *path;
 	char *old_path = pane->blob_list->path;
 
-	switch (UI_BlobListPaneEntryType(pane, pane->pane.selected)) {
+	switch (UI_BlobListPaneEntryType(pane, selected)) {
 	case BLOB_TYPE_DIR:
-		path = UI_BlobListPaneEntryPath(pane, pane->pane.selected);
+		path = UI_BlobListPaneEntryPath(pane, selected);
 		new_data = DIR_ReadDirectory(path);
 		new_pane = UI_NewDirectoryPane(
 			pane_windows[active_pane], new_data);
 		break;
 
 	case BLOB_TYPE_WAD:
-		path = UI_BlobListPaneEntryPath(pane, pane->pane.selected);
+		path = UI_BlobListPaneEntryPath(pane, selected);
 		new_data = W_OpenFile(path);
 		new_pane = UI_NewWadPane(pane_windows[active_pane], new_data);
 		break;
@@ -220,15 +221,14 @@ static void HandleKeypress(void *pane, int key)
 static void DrawInfoPane(void *p)
 {
 	struct pane *pane = p;
+	int lump_index = UI_BlobListPaneSelected(panes[active_pane]);
 
 	wbkgdset(pane->window, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(pane->window);
 	box(pane->window, 0, 0);
 	mvwaddstr(pane->window, 0, 2, " Info ");
 
-       if (panes[active_pane]->type == PANE_TYPE_WAD
-        && panes[active_pane]->pane.selected > 0) {
-		unsigned int lump_index = panes[active_pane]->pane.selected - 1;
+       if (panes[active_pane]->type == PANE_TYPE_WAD && lump_index >= 0) {
 		UI_PrintMultilineString(pane->window, 1, 2,
 		    GetLumpDescription(pane_data[active_pane], lump_index));
        }
