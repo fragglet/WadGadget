@@ -1,0 +1,125 @@
+#include <curses.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "colors.h"
+#include "common.h"
+#include "ui.h"
+#include "list_pane.h"
+
+static unsigned int NumEntries(struct list_pane *lp)
+{
+	return lp->funcs->num_entries(lp->data);
+}
+
+unsigned int UI_ListPaneLines(struct list_pane *lp)
+{
+	int x, y;
+	getmaxyx(lp->pane.window, y, x);
+	x = x;
+	return y - 2;
+}
+
+static void Draw(void *p)
+{
+	struct list_pane *lp = p;
+	WINDOW *win = lp->pane.window;
+	unsigned int y, idx, num_entries;
+
+	werase(win);
+	wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
+	box(win, 0, 0);
+	if (lp->title != NULL) {
+		if (lp->active) {
+			wattron(win, A_REVERSE);
+		}
+		mvwaddstr(win, 0, 3, " ");
+		waddstr(win, lp->title);
+		waddstr(win, " ");
+		wattroff(win, A_REVERSE);
+	}
+	wattroff(win, COLOR_PAIR(PAIR_PANE_COLOR));
+
+	{
+		int wx, wy;
+		getmaxyx(lp->pane.window, wy, wx);
+		wy = wy;
+		wresize(lp->subwin, 1, wx - 1);
+	}
+
+	// Each list element gets drawn inside a subwindow of the main
+	// window. We move the subwindow line by line before drawing.
+	num_entries = NumEntries(lp);
+	for (y = 0; y < UI_ListPaneLines(lp); y++) {
+		idx = lp->window_offset + y;
+		if (idx >= num_entries) {
+			break;
+		}
+		mvderwin(lp->subwin, y + 1, 1);
+		lp->funcs->draw_element(lp->subwin, idx, lp->data);
+	}
+}
+
+void UI_ListPaneKeypress(void *p, int key)
+{
+	struct list_pane *lp = p;
+	unsigned int i;
+
+	switch (key) {
+	case KEY_UP:
+		if (lp->selected > 0) {
+			--lp->selected;
+		}
+		if (lp->selected < lp->window_offset) {
+			lp->window_offset = lp->selected;
+		}
+		return;
+	case KEY_PPAGE:
+		for (i = 0; i < UI_ListPaneLines(lp); i++) {
+			UI_ListPaneKeypress(p, KEY_UP);
+		}
+		return;
+	case KEY_HOME:
+		lp->selected = 0;
+		lp->window_offset = 0;
+		return;
+	case KEY_DOWN:
+		if (lp->selected + 1 < NumEntries(lp)) {
+			++lp->selected;
+		}
+		if (lp->selected > lp->window_offset + UI_ListPaneLines(lp) - 1) {
+			++lp->window_offset;
+		}
+		return;
+	case KEY_NPAGE:
+		for (i = 0; i < UI_ListPaneLines(lp); i++) {
+			UI_ListPaneKeypress(p, KEY_DOWN);
+		}
+		return;
+	case KEY_END:
+		lp->selected = NumEntries(lp) - 1;
+		lp->window_offset = lp->selected - UI_ListPaneLines(lp) + 1;
+		if (lp->window_offset < 0) {
+			lp->window_offset = 0;
+		}
+		return;
+	}
+}
+
+void UI_ListPaneInit(struct list_pane *p, WINDOW *w,
+                     const struct list_pane_funcs *funcs, void *data)
+{
+	p->pane.window = w;
+	p->pane.draw = Draw;
+	p->pane.keypress = UI_ListPaneKeypress;
+	p->subwin = derwin(w, 1, 20, 0, 0);
+	p->funcs = funcs;
+	p->data = data;
+}
+
+int UI_ListPaneSelected(struct list_pane *p)
+{
+	return p->selected;
+}

@@ -53,7 +53,7 @@ static const struct blob_list_pane_action *GetActions(struct blob_list_pane *oth
 static void Keypress(void *wad_pane, int key)
 {
 	struct wad_pane *p = wad_pane;
-	unsigned int selected = p->pane.selected;
+	unsigned int selected = p->pane.pane.selected;
 
 	if (key == KEY_F(6) && selected > 0) {
 		char *name = UI_TextInputDialogBox(
@@ -75,9 +75,9 @@ static void Keypress(void *wad_pane, int key)
 		}
 		W_AddEntries(p->f, selected, 1);
 		W_SetLumpName(p->f, selected, name);
-		++p->pane.selected;
-		if (p->pane.selected - p->pane.window_offset > 10) {
-			++p->pane.window_offset;
+		++p->pane.pane.selected;
+		if (p->pane.pane.selected - p->pane.pane.window_offset > 10) {
+			++p->pane.pane.window_offset;
 		}
 		return;
 	}
@@ -89,7 +89,7 @@ static void Keypress(void *wad_pane, int key)
 		     "Delete lump named '%.8s'?",
 		     W_GetDirectory(p->f)[selected - 1].name)) {
 			W_DeleteEntry(p->f, selected - 1);
-			p->pane.selected--;
+			p->pane.pane.selected--;
 		}
 		return;
 	}
@@ -102,11 +102,12 @@ struct blob_list_pane *UI_NewWadPane(WINDOW *w, struct wad_file *f)
 	struct wad_pane *p;
 	p = checked_calloc(1, sizeof(struct wad_pane));
 	UI_BlobListPaneInit(&p->pane, w);
-	p->pane.pane.keypress = Keypress;
+	// TODO: Set the window title
+	p->pane.pane.pane.keypress = Keypress;
 	p->pane.type = PANE_TYPE_WAD;
 	p->pane.blob_list = (struct blob_list *) f;
 	p->pane.get_actions = GetActions;
-	p->pane.selected = min(1, W_NumLumps(f));
+	p->pane.pane.selected = min(1, W_NumLumps(f));
 	p->f = f;
 	return &p->pane;
 }

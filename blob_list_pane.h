@@ -1,7 +1,7 @@
 #ifndef INCLUDE_BLOB_LIST_PANE_H
 #define INCLUDE_BLOB_LIST_PANE_H
 
-#include "pane.h"
+#include "list_pane.h"
 #include "blob_list.h"
 
 enum blob_list_pane_type {
@@ -16,11 +16,9 @@ struct blob_list_pane_action {
 };
 
 struct blob_list_pane {
-	struct pane pane;
+	struct list_pane pane;
 	struct blob_list *blob_list;
 	enum blob_list_pane_type type;
-	unsigned int window_offset, selected;
-	int active;
 	const struct blob_list_pane_action *(*get_actions)(
 		struct blob_list_pane *other);
 };

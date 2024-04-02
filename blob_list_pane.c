@@ -9,14 +9,6 @@
 #include "ui.h"
 #include "blob_list_pane.h"
 
-static unsigned int Lines(struct blob_list_pane *lp)
-{
-	int x, y;
-	getmaxyx(lp->pane.window, y, x);
-	x = x;
-	return y - 2;
-}
-
 static void SummarizeSize(int64_t len, char buf[10])
 {
 	if (len < 0) {
@@ -34,10 +26,9 @@ static void SummarizeSize(int64_t len, char buf[10])
 	}
 }
 
-static void DrawEntry(struct blob_list_pane *lp, unsigned int idx,
-                      unsigned int y)
+static void DrawEntry(WINDOW *win, int idx, void *data)
 {
-	WINDOW *win = lp->pane.window;
+	struct blob_list_pane *lp = data;
 	const struct blob_list_entry *ent;
 	static char buf[128];
 	unsigned int w, h;
@@ -75,18 +66,18 @@ static void DrawEntry(struct blob_list_pane *lp, unsigned int idx,
 		SummarizeSize(ent->size, size);
 		snprintf(buf, w, "%c%-200s", prefix, ent->name);
 	}
-	if (lp->active && idx == lp->selected) {
+	if (lp->pane.active && idx == lp->pane.selected) {
 		wattron(win, A_REVERSE);
 	} else if (BL_IsTagged(&lp->blob_list->tags, idx - 1)) {
 		wattron(win, COLOR_PAIR(PAIR_TAGGED));
 	}
-	mvwaddstr(win, 1 + y, 1, buf);
+	mvwaddstr(win, 0, 0, buf);
 	waddstr(win, " ");
 	if (idx == 0) {
-		mvwaddch(win, 1 + y, 1, ACS_LLCORNER);
-		mvwaddch(win, 1 + y, 2, ACS_HLINE);
+		mvwaddch(win, 0, 0, ACS_LLCORNER);
+		mvwaddch(win, 0, 1, ACS_HLINE);
 	}
-	mvwaddstr(win, 1 + y, w - strlen(size), size);
+	mvwaddstr(win, 0, w - strlen(size), size);
 	wattroff(win, A_REVERSE);
 	wattroff(win, A_BOLD);
 	wattroff(win, COLOR_PAIR(PAIR_WHITE_BLACK));
@@ -95,27 +86,19 @@ static void DrawEntry(struct blob_list_pane *lp, unsigned int idx,
 	wattroff(win, COLOR_PAIR(PAIR_TAGGED));
 }
 
-static void Draw(void *p)
+static unsigned int NumEntries(void *data)
 {
-	struct blob_list_pane *lp = p;
-	WINDOW *win = lp->pane.window;
-	unsigned int y;
+	struct blob_list_pane *lp = data;
+	int result;
 
-	werase(win);
-	wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
-	box(win, 0, 0);
-	if (lp->active) {
-		wattron(win, A_REVERSE);
+	// TODO: This is a terrible hack until a proper num_entries method
+	// is added to blob_list.
+	result = lp->pane.selected;
+	while (lp->blob_list->get_entry(lp->blob_list, result) != NULL) {
+		++result;
 	}
-	mvwaddstr(win, 0, 3, " ");
-	waddstr(win, lp->blob_list->name);
-	waddstr(win, " ");
-	wattroff(win, A_REVERSE);
-	wattroff(win, COLOR_PAIR(PAIR_PANE_COLOR));
 
-	for (y = 0; y < Lines(lp); y++) {
-		DrawEntry(lp, lp->window_offset + y, y);
-	}
+	return result + 1;
 }
 
 void UI_BlobListPaneSearch(void *p, char *needle)
@@ -130,8 +113,8 @@ void UI_BlobListPaneSearch(void *p, char *needle)
 	}
 
 	if (!strcmp(needle, "..")) {
-		lp->selected = 0;
-		lp->window_offset = 0;
+		lp->pane.selected = 0;
+		lp->pane.window_offset = 0;
 		return;
 	}
 
@@ -142,9 +125,9 @@ void UI_BlobListPaneSearch(void *p, char *needle)
 			break;
 		}
 		if (!strncasecmp(ent->name, needle, needle_len)) {
-			lp->selected = i + 1;
-			lp->window_offset = lp->selected >= 10 ?
-			    lp->selected - 10 : 0;
+			lp->pane.selected = i + 1;
+			lp->pane.window_offset = lp->pane.selected >= 10 ?
+			    lp->pane.selected - 10 : 0;
 			return;
 		}
 	}
@@ -161,9 +144,9 @@ void UI_BlobListPaneSearch(void *p, char *needle)
 		}
 		for (j = 0; j < haystack_len - needle_len; j++) {
 			if (!strncasecmp(&ent->name[j], needle, needle_len)) {
-				lp->selected = i + 1;
-				lp->window_offset = lp->selected >= 10 ?
-				    lp->selected - 10 : 0;
+				lp->pane.selected = i + 1;
+				lp->pane.window_offset = lp->pane.selected >= 10 ?
+				    lp->pane.selected - 10 : 0;
 				return;
 			}
 		}
@@ -172,74 +155,42 @@ void UI_BlobListPaneSearch(void *p, char *needle)
 
 int UI_BlobListPaneSelected(struct blob_list_pane *p)
 {
-	return p->selected - 1;
+	return UI_ListPaneSelected(&p->pane) - 1;
 }
 
 void UI_BlobListPaneKeypress(void *p, int key)
 {
 	struct blob_list_pane *lp = p;
 	struct blob_tag_list *tags = &lp->blob_list->tags;
-	unsigned int i;
 
 	switch (key) {
-	case KEY_UP:
-		if (lp->selected > 0) {
-			--lp->selected;
-		}
-		if (lp->selected < lp->window_offset) {
-			lp->window_offset = lp->selected;
-		}
-		return;
-	case KEY_PPAGE:
-		for (i = 0; i < Lines(lp); i++) {
-			UI_BlobListPaneKeypress(p, KEY_UP);
-		}
-		return;
-	case KEY_HOME:
-		lp->selected = 0;
-		lp->window_offset = 0;
-		return;
 	case KEY_F(10):
 		BL_ClearTags(&lp->blob_list->tags);
 		return;
 	case ' ':
-		if (lp->selected > 0) {
+		if (lp->pane.selected > 0) {
 			if (BL_IsTagged(tags, UI_BlobListPaneSelected(lp))) {
 				BL_RemoveTag(tags, UI_BlobListPaneSelected(lp));
 			} else {
 				BL_AddTag(tags, UI_BlobListPaneSelected(lp));
 			}
 		}
-		/* fallthrough */
-	case KEY_DOWN:
-		if (lp->blob_list->get_entry(
-			lp->blob_list, UI_BlobListPaneSelected(lp) + 1) != NULL) {
-			++lp->selected;
-		}
-		if (lp->selected > lp->window_offset + Lines(lp) - 1) {
-			++lp->window_offset;
-		}
+		UI_ListPaneKeypress(lp, KEY_DOWN);
 		return;
-	case KEY_NPAGE:
-		for (i = 0; i < Lines(lp); i++) {
-			UI_BlobListPaneKeypress(p, KEY_DOWN);
-		}
-		return;
-	case KEY_END:
-		while (lp->blob_list->get_entry(
-				lp->blob_list, UI_BlobListPaneSelected(lp) + 1) != NULL) {
-			++lp->selected;
-		}
-		lp->window_offset = lp->selected - Lines(lp) + 1;
-		return;
+	default:
+		UI_ListPaneKeypress(lp, key);
 	}
 }
 
+static const struct list_pane_funcs blob_list_pane_funcs = {
+	DrawEntry,
+	NumEntries,
+};
+
 void UI_BlobListPaneInit(struct blob_list_pane *p, WINDOW *w)
 {
-	p->pane.window = w;
-	p->pane.draw = Draw;
-	p->pane.keypress = UI_BlobListPaneKeypress;
+	UI_ListPaneInit(&p->pane, w, &blob_list_pane_funcs, p);
+	p->pane.pane.keypress = UI_BlobListPaneKeypress;
 }
 
 const struct blob_list_pane_action *UI_BlobListPaneActions(
@@ -270,6 +221,8 @@ void UI_BlobListPaneFree(struct blob_list_pane *p)
 {
 	free(p);
 }
+
+// TODO: None of the stuff below really belongs in this file.
 
 struct blob_list_pane_action common_actions[] =
 {

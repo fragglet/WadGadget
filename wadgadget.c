@@ -103,10 +103,10 @@ static void SetWindowSizes(void)
 
 static void SwitchToPane(unsigned int pane)
 {
-	panes[active_pane]->active = 0;
+	panes[active_pane]->pane.active = 0;
 	active_pane = pane;
 	UI_RaisePaneToTop(panes[pane]);
-	panes[active_pane]->active = 1;
+	panes[active_pane]->pane.active = 1;
 	// The search pane always sits on top of the stack.
 	// intercept keypresses:
 	UI_RaisePaneToTop(&search_pane);
@@ -124,16 +124,16 @@ static void NavigateNew(void)
 	const char *path;
 	char *old_path = pane->blob_list->path;
 
-	switch (UI_BlobListPaneEntryType(pane, pane->selected)) {
+	switch (UI_BlobListPaneEntryType(pane, pane->pane.selected)) {
 	case BLOB_TYPE_DIR:
-		path = UI_BlobListPaneEntryPath(pane, pane->selected);
+		path = UI_BlobListPaneEntryPath(pane, pane->pane.selected);
 		new_data = DIR_ReadDirectory(path);
 		new_pane = UI_NewDirectoryPane(
 			pane_windows[active_pane], new_data);
 		break;
 
 	case BLOB_TYPE_WAD:
-		path = UI_BlobListPaneEntryPath(pane, pane->selected);
+		path = UI_BlobListPaneEntryPath(pane, pane->pane.selected);
 		new_data = W_OpenFile(path);
 		new_pane = UI_NewWadPane(pane_windows[active_pane], new_data);
 		break;
@@ -227,8 +227,8 @@ static void DrawInfoPane(void *p)
 	mvwaddstr(pane->window, 0, 2, " Info ");
 
        if (panes[active_pane]->type == PANE_TYPE_WAD
-        && panes[active_pane]->selected > 0) {
-		unsigned int lump_index = panes[active_pane]->selected - 1;
+        && panes[active_pane]->pane.selected > 0) {
+		unsigned int lump_index = panes[active_pane]->pane.selected - 1;
 		UI_PrintMultilineString(pane->window, 1, 2,
 		    GetLumpDescription(pane_data[active_pane], lump_index));
        }

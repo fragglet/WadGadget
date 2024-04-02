@@ -60,9 +60,9 @@ static void RefreshDir(struct directory_pane *p)
 {
 	DIR_RefreshDirectory(p->dir);
 
-	while (p->pane.selected > 0
-	    && DIR_GetFile(p->dir, p->pane.selected - 1) == NULL) {
-		--p->pane.selected;
+	while (p->pane.pane.selected > 0
+	    && DIR_GetFile(p->dir, p->pane.pane.selected - 1) == NULL) {
+		--p->pane.pane.selected;
 	}
 }
 
@@ -70,7 +70,7 @@ static void Keypress(void *directory_pane, int key)
 {
 	struct directory_pane *p = directory_pane;
 	char *input_filename;
-	unsigned int selected = p->pane.selected;
+	unsigned int selected = p->pane.pane.selected;
 
 	if (key == KEY_F(6) && selected > 0) {
 		char *old_name = DIR_GetFile(p->dir, selected-1)->name;
@@ -130,11 +130,12 @@ struct blob_list_pane *UI_NewDirectoryPane(
 
 	p = calloc(1, sizeof(struct directory_pane));
 	UI_BlobListPaneInit(&p->pane, w);
-	p->pane.pane.keypress = Keypress;
+	// TODO: Set the window title
+	p->pane.pane.pane.keypress = Keypress;
 	p->pane.type = PANE_TYPE_DIR;
 	p->pane.blob_list = (struct blob_list *) dir;
 	p->pane.get_actions = GetActions;
-	p->pane.selected = min(1, DIR_NumFiles(dir));
+	p->pane.pane.selected = min(1, DIR_NumFiles(dir));
 	p->dir = dir;
 
 	return &p->pane;
