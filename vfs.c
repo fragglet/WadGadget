@@ -76,9 +76,9 @@ static void FreeEntries(struct directory *d)
 	d->entries = 0;
 }
 
-static int HasWadExtension(char *name)
+static int HasWadExtension(const char *name)
 {
-	char *extn;
+	const char *extn;
 	if (strlen(name) < 4) {
 		return 0;
 	}
@@ -144,17 +144,6 @@ static void InitDirectory(struct directory *d, const char *path)
 	d->num_entries = 0;
 }
 
-struct directory *VFS_OpenDir(const char *path)
-{
-	struct directory *d = checked_calloc(1, sizeof(struct directory));
-
-	d->directory_funcs = &realdir_funcs;
-	InitDirectory(d, path);
-	RealDirRefresh(d);
-
-	return d;
-}
-
 static void ReadWadDirectory(struct wad_directory *dir)
 {
 	struct wad_file_entry *waddir = W_GetDirectory(dir->wad_file);
@@ -187,6 +176,24 @@ static struct directory *OpenWadAsDirectory(const char *path)
 	ReadWadDirectory(d);
 
 	return &d->dir;
+}
+
+struct directory *VFS_OpenDir(const char *path)
+{
+	struct directory *d;
+
+	// TODO: This is kind of a hack.
+	if (HasWadExtension(path)) {
+		return OpenWadAsDirectory(path);
+	}
+
+	d = checked_calloc(1, sizeof(struct directory));
+
+	d->directory_funcs = &realdir_funcs;
+	InitDirectory(d, path);
+	RealDirRefresh(d);
+
+	return d;
 }
 
 struct directory *VFS_OpenDirByEntry(struct directory *dir,
