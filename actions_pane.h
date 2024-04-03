@@ -1,6 +1,5 @@
 #include "pane.h"
-
-enum action_pane_type { ACTION_PANE_DIR, ACTION_PANE_WAD };
+#include "vfs.h"
 
 struct action {
 	char *key;
@@ -10,9 +9,9 @@ struct action {
 struct actions_pane {
 	struct pane pane;
 	int left_to_right;
-	enum action_pane_type active, other;
+	enum file_type active, other;
 };
 
 void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win);
-void UI_ActionsPaneSet(struct actions_pane *pane, enum action_pane_type active,
-                       enum action_pane_type other, int left_to_right);
+void UI_ActionsPaneSet(struct actions_pane *pane, enum file_type active,
+                       enum file_type other, int left_to_right);

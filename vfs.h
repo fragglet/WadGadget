@@ -25,6 +25,7 @@ struct directory_funcs {
 };
 
 struct directory {
+	enum file_type type;
 	const struct directory_funcs *directory_funcs;
 	char *path;
 	int refcount;

@@ -101,7 +101,8 @@ static void DrawActionsPane(void *pane)
 	WINDOW *win = p->pane.window;
 	int i, y;
 
-	actions = action_lists[p->active][p->other];
+	actions = action_lists[p->active != FILE_TYPE_FILE]
+	                      [p->other != FILE_TYPE_FILE];
 
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);
@@ -124,12 +125,12 @@ void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win)
 	pane->pane.window = win;
 	pane->pane.draw = DrawActionsPane;
 	pane->pane.keypress = NULL;
-	pane->active = ACTION_PANE_DIR;
-	pane->other = ACTION_PANE_DIR;
+	pane->active = FILE_TYPE_DIR;
+	pane->other = FILE_TYPE_DIR;
 }
 
-void UI_ActionsPaneSet(struct actions_pane *pane, enum action_pane_type active,
-                       enum action_pane_type other, int left_to_right)
+void UI_ActionsPaneSet(struct actions_pane *pane, enum file_type active,
+                       enum file_type other, int left_to_right)
 {
 	pane->active = active;
 	pane->other = other;

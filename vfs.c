@@ -171,6 +171,7 @@ static struct directory *OpenWadAsDirectory(const char *path)
 
 	d->dir.directory_funcs = &waddir_funcs;
 	InitDirectory(&d->dir, path);
+	d->dir.type = FILE_TYPE_WAD;
 	d->wad_file = W_OpenFile(path);
 	assert(d->wad_file != NULL);
 	ReadWadDirectory(d);
@@ -191,6 +192,7 @@ struct directory *VFS_OpenDir(const char *path)
 
 	d->directory_funcs = &realdir_funcs;
 	InitDirectory(d, path);
+	d->type = FILE_TYPE_FILE;
 	RealDirRefresh(d);
 
 	return d;
