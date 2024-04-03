@@ -182,6 +182,8 @@ static struct directory *OpenWadAsDirectory(const char *path)
 
 	d->dir.directory_funcs = &waddir_funcs;
 	InitDirectory(&d->dir, path);
+	d->wad_file = W_OpenFile(path);
+	assert(d->wad_file != NULL);
 	ReadWadDirectory(d);
 
 	return &d->dir;
