@@ -254,3 +254,20 @@ void VFS_DirectoryUnref(struct directory *dir)
 		free(dir);
 	}
 }
+
+#ifdef TEST
+int main(int argc, char *argv[])
+{
+	struct directory *dir;
+	int i;
+
+	dir = VFS_OpenDir(argv[1]);
+
+	for (i = 0; i < dir->num_entries; i++) {
+		printf("%4d%8d %s\n", dir->entries[i].type,
+		       dir->entries[i].size, dir->entries[i].name);
+	}
+
+	return 0;
+}
+#endif
