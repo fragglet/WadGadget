@@ -87,6 +87,7 @@ static void RealDirRefresh(void *_d)
 		            HasWadExtension(ent->name) ? FILE_TYPE_WAD :
 		            FILE_TYPE_FILE;
 		ent->size = -1;
+		ent->serial_no = dirent->d_ino;
 		++d->num_entries;
 	}
 
@@ -159,6 +160,7 @@ static void WadDirectoryRefresh(void *_dir)
 		memcpy(ent->name, waddir[i].name, 8);
 		ent->name[8] = '\0';
 		ent->size = waddir[i].size;
+		ent->serial_no = waddir[i].serial_no;
 	}
 }
 
@@ -283,17 +285,22 @@ VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry)
 	return dir->directory_funcs->open(dir, entry);
 }
 
+void VFS_Refresh(struct directory *dir)
+{
+	dir->directory_funcs->refresh(dir);
+}
+
 void VFS_Remove(struct directory *dir, struct directory_entry *entry)
 {
 	dir->directory_funcs->remove(dir, entry);
-	dir->directory_funcs->refresh(dir);
+	VFS_Refresh(dir);
 }
 
 void VFS_Rename(struct directory *dir, struct directory_entry *entry,
                 const char *new_name)
 {
 	dir->directory_funcs->rename(dir, entry, new_name);
-	dir->directory_funcs->refresh(dir);
+	VFS_Refresh(dir);
 }
 
 void VFS_DirectoryRef(struct directory *dir)

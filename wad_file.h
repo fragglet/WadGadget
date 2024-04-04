@@ -17,6 +17,7 @@ struct wad_file_entry {
 	unsigned int position;
 	unsigned int size;
 	char name[8];
+	uint64_t serial_no;
 };
 
 struct wad_file *W_OpenFile(const char *file);

@@ -26,6 +26,7 @@ void UI_ListPaneFree(struct list_pane *p);
 int UI_ListPaneSelected(struct list_pane *p);
 unsigned int UI_ListPaneLines(struct list_pane *lp);
 void UI_ListPaneSetTitle(struct list_pane *lp, const char *title);
+void UI_ListPaneSelect(struct list_pane *p, unsigned int idx);
 
 #endif /* #ifndef INCLUDE_LIST_PANE_H */
 

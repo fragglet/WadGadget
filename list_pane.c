@@ -62,6 +62,21 @@ static void Draw(void *p)
 	}
 }
 
+void UI_ListPaneSelect(struct list_pane *p, unsigned int idx)
+{
+	p->selected = idx;
+	if (idx >= p->window_offset &&
+	    idx < p->window_offset + UI_ListPaneLines(p)) {
+		// Current window offset is okay
+		return;
+	}
+	if (idx < 5) {
+		p->window_offset = 0;
+	} else {
+		p->window_offset = idx - 5;
+	}
+}
+
 void UI_ListPaneKeypress(void *p, int key)
 {
 	struct list_pane *lp = p;

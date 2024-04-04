@@ -15,6 +15,7 @@ struct directory_entry {
 	enum file_type type;
 	char *name;
 	ssize_t size;
+	uint64_t serial_no;
 };
 
 struct directory_funcs {
@@ -45,6 +46,7 @@ VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry);
 void VFS_Remove(struct directory *dir, struct directory_entry *entry);
 void VFS_Rename(struct directory *dir, struct directory_entry *entry,
                 const char *new_name);
+void VFS_Refresh(struct directory *dir);
 
 void VFS_DirectoryRef(struct directory *dir);
 void VFS_DirectoryUnref(struct directory *dir);

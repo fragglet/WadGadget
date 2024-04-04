@@ -95,6 +95,30 @@ static unsigned int NumEntries(void *data)
 	return dp->dir->num_entries + 1;
 }
 
+static void SelectByName(struct directory_pane *p, const char *name)
+{
+	int i;
+
+	for (i = 0; i < p->dir->num_entries; i++) {
+		if (!strcmp(p->dir->entries[i].name, name)) {
+			UI_ListPaneSelect(&p->pane, i + 1);
+			return;
+		}
+	}
+}
+
+static void SelectBySerial(struct directory_pane *p, uint64_t serial_no)
+{
+	int i;
+
+	for (i = 0; i < p->dir->num_entries; i++) {
+		if (p->dir->entries[i].serial_no == serial_no) {
+			UI_ListPaneSelect(&p->pane, i + 1);
+			return;
+		}
+	}
+}
+
 void UI_DirectoryPaneSearch(void *p, char *needle)
 {
 	const struct directory_entry *ent;
@@ -175,6 +199,7 @@ static void Keypress(void *directory_pane, int key)
 
 	if (key == KEY_F(6) && selected >= 0) {
 		char *old_name = p->dir->entries[selected].name;
+		uint64_t serial_no = p->dir->entries[selected].serial_no;
 		input_filename = UI_TextInputDialogBox(
 		    "Rename", 30, "New name for '%s'?", old_name);
 		if (input_filename == NULL) {
@@ -183,6 +208,7 @@ static void Keypress(void *directory_pane, int key)
 		VFS_Rename(p->dir, &p->dir->entries[selected],
 		           input_filename);
 		free(input_filename);
+		SelectBySerial(p, serial_no);
 		return;
 	}
 	if (p->dir->type == FILE_TYPE_DIR && key == KEY_F(7)) {
@@ -194,6 +220,8 @@ static void Keypress(void *directory_pane, int key)
 		}
 		filename = StringJoin("/", p->dir->path, input_filename, NULL);
 		mkdir(filename, 0777);
+		VFS_Refresh(p->dir);
+		SelectByName(p, input_filename);
 		free(input_filename);
 		free(filename);
 		return;

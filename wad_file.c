@@ -108,8 +108,16 @@ struct wad_file *W_OpenFile(const char *filename)
 	assert(vfseek(vfs, result->header.table_offset, SEEK_SET) == 0);
 	result->directory = checked_calloc(
 		result->num_lumps, sizeof(struct wad_file_entry));
-	assert(vfread(result->directory, sizeof(struct wad_file_entry),
-	              result->num_lumps, vfs) == result->num_lumps);
+	for (i = 0; i < result->num_lumps; i++) {
+		static uint64_t serial_no = 0x800000;
+		struct wad_file_entry *ent = &result->directory[i];
+		assert(vfread(&ent->position, 4, 1, vfs) == 1 &&
+		       vfread(&ent->size, 4, 1, vfs) == 1 &&
+		       vfread(&ent->name, 8, 1, vfs) == 1);
+		ent->serial_no = serial_no;
+		++serial_no;
+
+	}
 
 	// Read and save the first few bytes of every lump. This contains
 	// enough information that we can give a basic summary of several
