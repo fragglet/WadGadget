@@ -200,9 +200,6 @@ static void HandleKeypress(void *pane, int key)
 	case KEY_F(5):
 		PerformCopy();
 		break;
-	case ('U' & 0x1f):   // ^U
-		UI_TextInputClear(&search_pane.input);
-		break;
 	case '\r':
 		NavigateNew();
 		break;
