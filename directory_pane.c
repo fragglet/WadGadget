@@ -113,7 +113,7 @@ void UI_DirectoryPaneSearch(void *p, char *needle)
 	}
 
 	// Check for prefix first, so user can type entire lump name.
-	for (i = 0;; i++) {
+	for (i = 0; i < dp->dir->num_entries; i++) {
 		ent = &dp->dir->entries[i];
 		if (!strncasecmp(ent->name, needle, needle_len)) {
 			dp->pane.selected = i + 1;
@@ -124,7 +124,7 @@ void UI_DirectoryPaneSearch(void *p, char *needle)
 	}
 
 	// Second time through, we look for a substring match.
-	for (i = 0;; i++) {
+	for (i = 0; i < dp->dir->num_entries; i++) {
 		ent = &dp->dir->entries[i];
 		haystack_len = strlen(ent->name);
 		if (haystack_len < needle_len) {
