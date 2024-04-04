@@ -23,49 +23,6 @@ static char *EntryPath(struct directory *dir, struct directory_entry *entry)
 	return StringJoin("/", dir->path, entry->name, NULL);
 }
 
-static VFILE *RealDirOpen(void *_dir, struct directory_entry *entry)
-{
-	struct directory *dir = _dir;
-	char *filename = EntryPath(dir, entry);
-	FILE *fs;
-
-	fs = fopen(filename, "r+");
-	free(filename);
-
-	if (fs == NULL) {
-		return NULL;
-	}
-
-	return vfwrapfile(fs);
-}
-
-static const struct directory_funcs realdir_funcs = {
-	RealDirOpen,
-	NULL,
-};
-
-static VFILE *WadDirOpen(void *_dir, struct directory_entry *entry)
-{
-	struct wad_directory *dir = _dir;
-	// TODO: We shoud ideally do something that will more reliably
-	// map back to the WAD file lump number after inserting and
-	// deleting lumps:
-	unsigned int lump_index = entry - dir->dir.entries;
-
-	return W_OpenLump(dir->wad_file, lump_index);
-}
-
-static void WadDirFree(void *_dir)
-{
-	struct wad_directory *dir = _dir;
-	W_CloseFile(dir->wad_file);
-}
-
-static const struct directory_funcs waddir_funcs = {
-	WadDirOpen,
-	WadDirFree,
-};
-
 static void FreeEntries(struct directory *d)
 {
 	int i;
@@ -73,7 +30,9 @@ static void FreeEntries(struct directory *d)
 	for (i = 0; i < d->num_entries; i++) {
 		free(d->entries[i].name);
 	}
-	d->entries = 0;
+	free(d->entries);
+	d->entries = NULL;
+	d->num_entries = 0;
 }
 
 static int HasWadExtension(const char *name)
@@ -98,8 +57,9 @@ static int OrderByName(const void *x, const void *y)
 	return strcasecmp(dx->name, dy->name);
 }
 
-static void RealDirRefresh(struct directory *d)
+static void RealDirRefresh(void *_d)
 {
+	struct directory *d = _d;
 	DIR *dir;
 
 	FreeEntries(d);
@@ -136,23 +96,49 @@ static void RealDirRefresh(struct directory *d)
 	      OrderByName);
 }
 
-static void InitDirectory(struct directory *d, const char *path)
+static VFILE *RealDirOpen(void *_dir, struct directory_entry *entry)
 {
-	d->path = checked_strdup(path);
-	d->refcount = 1;
-	d->entries = NULL;
-	d->num_entries = 0;
+	struct directory *dir = _dir;
+	char *filename = EntryPath(dir, entry);
+	FILE *fs;
+
+	fs = fopen(filename, "r+");
+	free(filename);
+
+	if (fs == NULL) {
+		return NULL;
+	}
+
+	return vfwrapfile(fs);
 }
 
-static void ReadWadDirectory(struct wad_directory *dir)
+static void RealDirRemove(void *_dir, struct directory_entry *entry)
 {
+	struct directory *dir = _dir;
+	char *filename = EntryPath(dir, entry);
+	remove(filename);
+	free(filename);
+}
+
+static const struct directory_funcs realdir_funcs = {
+	RealDirRefresh,
+	RealDirOpen,
+	RealDirRemove,
+	NULL,
+};
+
+static void WadDirectoryRefresh(void *_dir)
+{
+	struct wad_directory *dir = _dir;
 	struct wad_file_entry *waddir = W_GetDirectory(dir->wad_file);
 	unsigned int i, num_lumps = W_NumLumps(dir->wad_file);
 	struct directory_entry *ent;
 
+	FreeEntries(&dir->dir);
+
 	dir->dir.num_entries = num_lumps;
-	dir->dir.entries =
-		checked_calloc(num_lumps, sizeof(struct directory_entry));
+	dir->dir.entries = checked_calloc(
+		num_lumps, sizeof(struct directory_entry));
 
 	for (i = 0; i < num_lumps; i++) {
 		ent = &dir->dir.entries[i];
@@ -162,6 +148,44 @@ static void ReadWadDirectory(struct wad_directory *dir)
 		ent->name[8] = '\0';
 		ent->size = waddir[i].size;
 	}
+}
+
+static VFILE *WadDirOpen(void *_dir, struct directory_entry *entry)
+{
+	struct wad_directory *dir = _dir;
+	// TODO: We shoud ideally do something that will more reliably
+	// map back to the WAD file lump number after inserting and
+	// deleting lumps:
+	unsigned int lump_index = entry - dir->dir.entries;
+
+	return W_OpenLump(dir->wad_file, lump_index);
+}
+
+static void WadDirRemove(void *_dir, struct directory_entry *entry)
+{
+	struct wad_directory *dir = _dir;
+	W_DeleteEntry(dir->wad_file, entry - dir->dir.entries);
+}
+
+static void WadDirFree(void *_dir)
+{
+	struct wad_directory *dir = _dir;
+	W_CloseFile(dir->wad_file);
+}
+
+static const struct directory_funcs waddir_funcs = {
+	WadDirectoryRefresh,
+	WadDirOpen,
+	WadDirRemove,
+	WadDirFree,
+};
+
+static void InitDirectory(struct directory *d, const char *path)
+{
+	d->path = checked_strdup(path);
+	d->refcount = 1;
+	d->entries = NULL;
+	d->num_entries = 0;
 }
 
 static struct directory *OpenWadAsDirectory(const char *path)
@@ -174,7 +198,7 @@ static struct directory *OpenWadAsDirectory(const char *path)
 	d->dir.type = FILE_TYPE_WAD;
 	d->wad_file = W_OpenFile(path);
 	assert(d->wad_file != NULL);
-	ReadWadDirectory(d);
+	WadDirectoryRefresh(d);
 
 	return &d->dir;
 }
@@ -236,6 +260,12 @@ VFILE *VFS_Open(const char *path)
 VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry)
 {
 	return dir->directory_funcs->open(dir, entry);
+}
+
+void VFS_Remove(struct directory *dir, struct directory_entry *entry)
+{
+	dir->directory_funcs->remove(dir, entry);
+	dir->directory_funcs->refresh(dir);
 }
 
 void VFS_DirectoryRef(struct directory *dir)

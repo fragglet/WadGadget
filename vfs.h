@@ -18,9 +18,10 @@ struct directory_entry {
 };
 
 struct directory_funcs {
+	void (*refresh)(void *dir);
 	VFILE *(*open)(void *dir, struct directory_entry *entry);
+	void (*remove)(void *dir, struct directory_entry *entry);
 	// TODO: insert
-	// TODO: delete
 	void (*free)(void *dir);
 };
 
@@ -39,6 +40,7 @@ struct directory *VFS_OpenDirByEntry(struct directory *dir,
 
 VFILE *VFS_Open(const char *path);
 VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry);
+void VFS_Remove(struct directory *dir, struct directory_entry *entry);
 
 void VFS_DirectoryRef(struct directory *dir);
 void VFS_DirectoryUnref(struct directory *dir);

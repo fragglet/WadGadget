@@ -169,7 +169,7 @@ const char *UI_DirectoryPaneEntryPath(struct directory_pane *p, int idx)
 
 static void RefreshDir(struct directory_pane *p)
 {
-	// TODO
+	// TODO: call refresh method
 }
 
 static void Keypress(void *directory_pane, int key)
@@ -208,22 +208,16 @@ static void Keypress(void *directory_pane, int key)
 		mkdir(filename, 0777);
 		free(input_filename);
 		free(filename);
-		RefreshDir(p);
 		return;
 	}
 	// TODO: Delete all marked
 	if (key == KEY_F(8) && selected >= 0) {
-		char *filename;
-		filename = p->dir->entries[selected].name;
-		if (!UI_ConfirmDialogBox("Confirm Delete", "Delete file '%s'?",
+		char *filename = p->dir->entries[selected].name;
+		if (!UI_ConfirmDialogBox("Confirm Delete", "Delete '%s'?",
 		                         filename)) {
 			return;
 		}
-		filename = StringJoin("/", p->dir->path, filename, NULL);
-		// TODO: delete should happen through VFS
-		remove(filename);
-		free(filename);
-		RefreshDir(p);
+		VFS_Remove(p->dir, &p->dir->entries[selected]);
 		return;
 	}
 	/*
