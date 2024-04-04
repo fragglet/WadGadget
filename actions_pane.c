@@ -101,8 +101,8 @@ static void DrawActionsPane(void *pane)
 	WINDOW *win = p->pane.window;
 	int i, y;
 
-	actions = action_lists[p->active != FILE_TYPE_FILE]
-	                      [p->other != FILE_TYPE_FILE];
+	actions = action_lists[p->active != FILE_TYPE_DIR]
+	                      [p->other != FILE_TYPE_DIR];
 
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);

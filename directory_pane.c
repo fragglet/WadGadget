@@ -185,7 +185,7 @@ static void Keypress(void *directory_pane, int key)
 		free(input_filename);
 		return;
 	}
-	if (key == KEY_F(7)) {
+	if (p->dir->type == FILE_TYPE_DIR && key == KEY_F(7)) {
 		char *filename;
 		input_filename = UI_TextInputDialogBox(
 		    "Make directory", 30, "Name for new directory?");

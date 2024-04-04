@@ -237,7 +237,7 @@ struct directory *VFS_OpenDir(const char *path)
 
 	d->directory_funcs = &realdir_funcs;
 	InitDirectory(d, path);
-	d->type = FILE_TYPE_FILE;
+	d->type = FILE_TYPE_DIR;
 	RealDirRefresh(d);
 
 	return d;
