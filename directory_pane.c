@@ -167,11 +167,6 @@ const char *UI_DirectoryPaneEntryPath(struct directory_pane *p, int idx)
 	return NULL;
 }
 
-static void RefreshDir(struct directory_pane *p)
-{
-	// TODO: call refresh method
-}
-
 static void Keypress(void *directory_pane, int key)
 {
 	struct directory_pane *p = directory_pane;
@@ -180,21 +175,14 @@ static void Keypress(void *directory_pane, int key)
 
 	if (key == KEY_F(6) && selected >= 0) {
 		char *old_name = p->dir->entries[selected].name;
-		char *new_name;
 		input_filename = UI_TextInputDialogBox(
 		    "Rename", 30, "New name for '%s'?", old_name);
 		if (input_filename == NULL) {
 			return;
 		}
-		old_name = StringJoin("/", p->dir->path, old_name, NULL);
-		new_name = StringJoin("/", p->dir->path,
-		                      input_filename, NULL);
-		// TODO: rename should happen through VFS
-		rename(old_name, new_name);
-		free(old_name);
-		free(new_name);
+		VFS_Rename(p->dir, &p->dir->entries[selected],
+		           input_filename);
 		free(input_filename);
-		RefreshDir(p);
 		return;
 	}
 	if (key == KEY_F(7)) {

@@ -194,7 +194,7 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index)
 	W_WriteDirectory(f);
 }
 
-void W_SetLumpName(struct wad_file *f, unsigned int index, char *name)
+void W_SetLumpName(struct wad_file *f, unsigned int index, const char *name)
 {
 	unsigned int i;
 	assert(index < f->num_lumps);

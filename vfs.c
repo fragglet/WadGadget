@@ -120,10 +120,22 @@ static void RealDirRemove(void *_dir, struct directory_entry *entry)
 	free(filename);
 }
 
+static void RealDirRename(void *_dir, struct directory_entry *entry,
+                          const char *new_name)
+{
+	struct directory *dir = _dir;
+	char *filename = EntryPath(dir, entry);
+	char *full_new_name = StringJoin("/", dir->path, new_name, NULL);
+	rename(filename, full_new_name);
+	free(filename);
+	free(full_new_name);
+}
+
 static const struct directory_funcs realdir_funcs = {
 	RealDirRefresh,
 	RealDirOpen,
 	RealDirRemove,
+	RealDirRename,
 	NULL,
 };
 
@@ -167,6 +179,14 @@ static void WadDirRemove(void *_dir, struct directory_entry *entry)
 	W_DeleteEntry(dir->wad_file, entry - dir->dir.entries);
 }
 
+static void WadDirRename(void *_dir, struct directory_entry *entry,
+                         const char *new_name)
+{
+	struct wad_directory *dir = _dir;
+	// TODO: Check new name is valid?
+	W_SetLumpName(dir->wad_file, entry - dir->dir.entries, new_name);
+}
+
 static void WadDirFree(void *_dir)
 {
 	struct wad_directory *dir = _dir;
@@ -177,6 +197,7 @@ static const struct directory_funcs waddir_funcs = {
 	WadDirectoryRefresh,
 	WadDirOpen,
 	WadDirRemove,
+	WadDirRename,
 	WadDirFree,
 };
 
@@ -265,6 +286,13 @@ VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry)
 void VFS_Remove(struct directory *dir, struct directory_entry *entry)
 {
 	dir->directory_funcs->remove(dir, entry);
+	dir->directory_funcs->refresh(dir);
+}
+
+void VFS_Rename(struct directory *dir, struct directory_entry *entry,
+                const char *new_name)
+{
+	dir->directory_funcs->rename(dir, entry, new_name);
 	dir->directory_funcs->refresh(dir);
 }
 
