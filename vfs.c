@@ -205,7 +205,7 @@ static const struct directory_funcs waddir_funcs = {
 
 static void InitDirectory(struct directory *d, const char *path)
 {
-	d->path = checked_strdup(path);
+	d->path = PathSanitize(path);
 	d->refcount = 1;
 	d->entries = NULL;
 	d->num_entries = 0;
