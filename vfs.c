@@ -367,6 +367,20 @@ VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry)
 	return dir->directory_funcs->open(dir, entry);
 }
 
+struct directory_entry *VFS_EntryBySerial(struct directory *dir,
+                                          uint64_t serial_no)
+{
+	int i;
+
+	for (i = 0; i < dir->num_entries; i++) {
+		if (dir->entries[i].serial_no == serial_no) {
+			return &dir->entries[i];
+		}
+	}
+
+	return NULL;
+}
+
 void VFS_Refresh(struct directory *dir)
 {
 	dir->directory_funcs->refresh(dir);

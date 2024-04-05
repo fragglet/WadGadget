@@ -12,6 +12,8 @@ enum file_type {
 	FILE_TYPE_WAD,
 };
 
+#define EMPTY_FILE_SET {NULL, 0}
+
 struct file_set {
 	uint64_t *entries;
 	size_t num_entries;
@@ -55,6 +57,8 @@ void VFS_Rename(struct directory *dir, struct directory_entry *entry,
 void VFS_Refresh(struct directory *dir);
 struct wad_file *VFS_WadFile(struct directory *dir);
 char *VFS_EntryPath(struct directory *dir, struct directory_entry *entry);
+struct directory_entry *VFS_EntryBySerial(struct directory *p,
+                                          uint64_t serial_no);
 
 void VFS_DirectoryRef(struct directory *dir);
 void VFS_DirectoryUnref(struct directory *dir);

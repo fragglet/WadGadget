@@ -109,13 +109,9 @@ static void SelectByName(struct directory_pane *p, const char *name)
 
 static void SelectBySerial(struct directory_pane *p, uint64_t serial_no)
 {
-	int i;
-
-	for (i = 0; i < p->dir->num_entries; i++) {
-		if (p->dir->entries[i].serial_no == serial_no) {
-			UI_ListPaneSelect(&p->pane, i + 1);
-			return;
-		}
+	struct directory_entry *entry = VFS_EntryBySerial(p->dir, serial_no);
+	if (entry != NULL) {
+		UI_ListPaneSelect(&p->pane, entry - p->dir->entries + 1);
 	}
 }
 

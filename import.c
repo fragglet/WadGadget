@@ -6,7 +6,7 @@
 #include "import.h"
 #include "strings.h"
 
-void PerformImport(struct directory *from, int from_index,
+void PerformImport(struct directory *from, struct file_set *from_set,
                    struct directory *to, int to_index)
 {
 	VFILE *fromfile, *tolump;
@@ -18,20 +18,22 @@ void PerformImport(struct directory *from, int from_index,
 	// TODO: Update/overwrite existing lump instead of creating a new
 	// lump.
 
-	/*
-	// TODO
-	if (BL_NumTagged(&from->tags) > 0) {
+	if (from_set->num_entries < 1) {
+		UI_ConfirmDialogBox(
+		    "Message", "You have not selected anything to import!");
+		return;
+	}
+	if (from_set->num_entries > 1) {
 		UI_ConfirmDialogBox(
 		    "Sorry", "Multi-import not implemented yet.");
 		return;
 	}
-	*/
 
-	if (from_index < 0 || to_index < 0) {
+	dirent = VFS_EntryBySerial(from, from_set->entries[0]);
+	if (dirent == NULL) {
 		return;
 	}
 
-	dirent = &from->entries[from_index];
 	StringCopy(namebuf, dirent->name, sizeof(namebuf));
 
 	switch (dirent->type) {

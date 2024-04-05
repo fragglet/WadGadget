@@ -159,14 +159,18 @@ static void PerformCopy(void)
 	struct directory *from = dirs[active_pane],
 	                 *to = dirs[!active_pane];
 	if (to->type == FILE_TYPE_DIR) {
-		PerformExport(from,
-		    UI_DirectoryPaneSelected(panes[active_pane]), to);
+		struct file_set export_set = EMPTY_FILE_SET;
+		UI_DirectoryPaneTagged(panes[active_pane], &export_set);
+		PerformExport(from, &export_set, to);
+		VFS_FreeSet(&export_set);
 		return;
 	}
 	if (to->type == FILE_TYPE_WAD) {
-		PerformImport(
-		    from, UI_DirectoryPaneSelected(panes[active_pane]),
-		    to, UI_DirectoryPaneSelected(panes[!active_pane]));
+		struct file_set import_set = EMPTY_FILE_SET;
+		UI_DirectoryPaneTagged(panes[active_pane], &import_set);
+		PerformImport(from, &import_set, to,
+		              UI_DirectoryPaneSelected(panes[!active_pane]));
+		VFS_FreeSet(&import_set);
 		return;
 	}
 

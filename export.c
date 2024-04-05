@@ -6,7 +6,7 @@
 #include "export.h"
 #include "strings.h"
 
-void PerformExport(struct directory *from, int from_index,
+void PerformExport(struct directory *from, struct file_set *from_set,
                    struct directory *to)
 {
 	VFILE *fromlump, *tofile;
@@ -14,16 +14,21 @@ void PerformExport(struct directory *from, int from_index,
 	char *filename, *extn;
 	struct directory_entry *dirent;
 
-	/*
-	// TODO
-	if (BL_NumTagged(&from->tags) > 0) {
+	if (from_set->num_entries < 1) {
+		UI_ConfirmDialogBox(
+		    "Message", "You have not selected anything to export!");
+		return;
+	}
+	if (from_set->num_entries > 1) {
 		UI_ConfirmDialogBox(
 		    "Sorry", "Multi-export not implemented yet.");
 		return;
 	}
-	*/
 
-	dirent = &from->entries[from_index];
+	dirent = VFS_EntryBySerial(from, from_set->entries[0]);
+	if (dirent == NULL) {
+		return;
+	}
 
 	switch (dirent->type) {
 	case FILE_TYPE_FILE:
