@@ -90,6 +90,21 @@ char *VFS_EntryPath(struct directory *dir, struct directory_entry *entry)
 	return StringJoin("/", dir->path, entry->name, NULL);
 }
 
+void VFS_CopySet(struct file_set *to, struct file_set *from)
+{
+	to->num_entries = from->num_entries;
+	to->entries = checked_calloc(to->num_entries, sizeof(uint64_t));
+	memcpy(to->entries, from->entries,
+	       to->num_entries * sizeof(uint64_t));
+}
+
+void VFS_FreeSet(struct file_set *set)
+{
+	free(set->entries);
+	set->entries = NULL;
+	set->num_entries = 0;
+}
+
 static void FreeEntries(struct directory *d)
 {
 	int i;

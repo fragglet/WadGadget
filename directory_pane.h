@@ -17,6 +17,7 @@ void UI_DirectoryPaneKeypress(void *p, int key);
 void UI_DirectoryPaneFree(struct directory_pane *p);
 void UI_DirectoryPaneSearch(void *p, const char *needle);
 int UI_DirectoryPaneSelected(struct directory_pane *p);
+void UI_DirectoryPaneTagged(struct directory_pane *p, struct file_set *set);
 
 struct directory_pane *UI_NewDirectoryPane(
 	WINDOW *pane, struct directory *dir);

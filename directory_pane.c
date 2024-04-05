@@ -170,6 +170,19 @@ int UI_DirectoryPaneSelected(struct directory_pane *p)
 	return UI_ListPaneSelected(&p->pane) - 1;
 }
 
+void UI_DirectoryPaneTagged(struct directory_pane *p, struct file_set *set)
+{
+	if (p->tagged.num_entries > 0) {
+		VFS_CopySet(set, &p->tagged);
+	} else {
+		int selected = UI_DirectoryPaneSelected(p);
+		VFS_ClearSet(set);
+		if (selected >= 0) {
+			VFS_AddToSet(set, p->dir->entries[selected].serial_no);
+		}
+	}
+}
+
 static const struct list_pane_funcs directory_pane_funcs = {
 	DrawEntry,
 	NumEntries,
