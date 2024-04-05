@@ -240,14 +240,14 @@ static const struct list_pane_funcs directory_pane_funcs = {
 	NumEntries,
 };
 
-enum file_type UI_DirectoryPaneEntryType(struct directory_pane *p, int idx)
+enum file_type UI_DirectoryPaneEntryType(struct directory_pane *p)
 {
-	const struct directory_entry *ent;
-	if (idx < 0) {
+	int selected = UI_DirectoryPaneSelected(p);
+
+	if (selected < 0) {
 		return FILE_TYPE_DIR;
 	}
-	ent = &p->dir->entries[idx - 1];
-	return ent->type;
+	return p->dir->entries[selected].type;
 }
 
 // Get path to currently selected entry.

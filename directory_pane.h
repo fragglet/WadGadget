@@ -16,7 +16,7 @@ struct directory_pane {
 	struct directory_tag_list tagged;
 };
 
-enum file_type UI_DirectoryPaneEntryType(struct directory_pane *p, int idx);
+enum file_type UI_DirectoryPaneEntryType(struct directory_pane *p);
 char *UI_DirectoryPaneEntryPath(struct directory_pane *p);
 void UI_DirectoryPaneKeypress(void *p, int key);
 void UI_DirectoryPaneFree(struct directory_pane *p);
