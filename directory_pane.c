@@ -266,7 +266,7 @@ struct directory_pane *UI_NewDirectoryPane(
 	UI_ListPaneInit(&p->pane, w, &directory_pane_funcs, p);
 	p->pane.pane.keypress = Keypress;
 	// TODO: Free
-	// TODO: Set the window title
+	UI_ListPaneSetTitle(&p->pane, PathBaseName(dir->path));
 	p->dir = dir;
 	// Select first item (assuming there is one):
 	Keypress(&p->pane, KEY_DOWN);

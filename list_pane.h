@@ -12,7 +12,7 @@ struct list_pane {
 	struct pane pane;
 	const struct list_pane_funcs *funcs;
 	void *data;  // for funcs
-	const char *title;
+	char *title;
 	unsigned int window_offset, selected;
 	int active;
 	unsigned int num_entries;

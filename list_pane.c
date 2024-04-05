@@ -138,3 +138,13 @@ int UI_ListPaneSelected(struct list_pane *p)
 {
 	return p->selected;
 }
+
+void UI_ListPaneSetTitle(struct list_pane *lp, const char *title)
+{
+	lp->title = strdup(title);
+}
+
+void UI_ListPaneFree(struct list_pane *lp)
+{
+	free(lp->title);
+}
