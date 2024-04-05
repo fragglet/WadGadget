@@ -1,6 +1,5 @@
-#include "blob_list.h"
-#include "dir_list.h"
+#include "vfs.h"
 
-void PerformExport(struct blob_list *from, int from_index,
-                   struct directory_listing *to);
+void PerformExport(struct directory *from, int from_index,
+                   struct directory *to);
 

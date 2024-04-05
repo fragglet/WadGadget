@@ -7,7 +7,7 @@
 #include "common.h"
 #include "dialog.h"
 #include "directory_pane.h"
-//#include "export.h"
+#include "export.h"
 #include "import.h"
 #include "lump_info.h"
 #include "strings.h"
@@ -154,28 +154,24 @@ static void NavigateNew(void)
 	}
 }
 
-#if 0
 static void PerformCopy(void)
 {
-	struct list_pane *from, *to;
-	from = panes[active_pane]; to = panes[!active_pane];
-
-	if (to->type == PANE_TYPE_DIR) {
-		PerformExport(from->blob_list, UI_BlobListPaneSelected(from),
-		              (struct directory_listing *) to->blob_list);
+	struct directory *from = dirs[active_pane],
+	                 *to = dirs[!active_pane];
+	if (to->type == FILE_TYPE_DIR) {
+		PerformExport(from,
+		    UI_DirectoryPaneSelected(panes[active_pane]), to);
 		return;
 	}
-
-	if (to->type == PANE_TYPE_WAD) {
-		PerformImport(from->blob_list, UI_BlobListPaneSelected(from),
-		              (struct wad_file *) to->blob_list,
-		              UI_BlobListPaneSelected(to) + 1);
+	if (to->type == FILE_TYPE_WAD) {
+		PerformImport(
+		    from, UI_DirectoryPaneSelected(panes[active_pane]),
+		    to, UI_DirectoryPaneSelected(panes[!active_pane]));
 		return;
 	}
 
 	UI_ConfirmDialogBox("Sorry", "This isn't implemented yet.");
 }
-#endif
 
 static void HandleKeypress(void *pane, int key)
 {
@@ -189,11 +185,9 @@ static void HandleKeypress(void *pane, int key)
 	case KEY_RESIZE:
 		SetWindowSizes();
 		break;
-		/*
 	case KEY_F(5):
 		PerformCopy();
 		break;
-		*/
 	case '\r':
 		NavigateNew();
 		break;

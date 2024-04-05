@@ -1,6 +1,5 @@
-#include "blob_list.h"
-#include "wad_file.h"
+#include "vfs.h"
 
-void PerformImport(struct blob_list *from, int from_index,
-                   struct wad_file *to, int to_index);
+void PerformImport(struct directory *from, int from_index,
+                   struct directory *to, int to_index);
 

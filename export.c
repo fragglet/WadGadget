@@ -3,47 +3,50 @@
 #include <string.h>
 
 #include "dialog.h"
-#include "dir_list.h"
+#include "export.h"
 #include "strings.h"
 
-void PerformExport(struct blob_list *from, int from_index,
-                   struct directory_listing *to)
+void PerformExport(struct directory *from, int from_index,
+                   struct directory *to)
 {
 	VFILE *fromlump, *tofile;
 	FILE *f;
 	char *filename, *extn;
-	const struct blob_list_entry *dirent;
+	struct directory_entry *dirent;
 
+	/*
 	// TODO
 	if (BL_NumTagged(&from->tags) > 0) {
 		UI_ConfirmDialogBox(
 		    "Sorry", "Multi-export not implemented yet.");
 		return;
 	}
+	*/
 
-	dirent = from->get_entry(from, from_index);
+	dirent = &from->entries[from_index];
 
 	switch (dirent->type) {
-	case BLOB_TYPE_FILE:
-	case BLOB_TYPE_WAD:
+	case FILE_TYPE_FILE:
+	case FILE_TYPE_WAD:
 		extn = "";
 		break;
-	case BLOB_TYPE_LUMP:
+	case FILE_TYPE_LUMP:
 		extn = ".lmp";
 		// TODO: Convert to .png/.wav etc.
 		break;
 	default:
 		return;
 	}
-	filename = StringJoin("", DIR_GetPath(to), "/",
+	filename = StringJoin("", to->path, "/",
 	                      dirent->name, extn, NULL);
 
 	// TODO: Confirm file overwrite if already present.
+	// TODO: This should be written through VFS.
 	f = fopen(filename, "wb");
 	if (f != NULL) {
 		tofile = vfwrapfile(f);
 
-		fromlump = from->open_blob(from, from_index);
+		fromlump = VFS_OpenByEntry(from, dirent);
 		vfcopy(fromlump, tofile);
 		vfclose(fromlump);
 		vfclose(tofile);
@@ -51,7 +54,7 @@ void PerformExport(struct blob_list *from, int from_index,
 
 	free(filename);
 
-	DIR_RefreshDirectory(to);
+	VFS_Refresh(to);
 	// TODO: Mark new exported file(s) to highlight
 }
 
