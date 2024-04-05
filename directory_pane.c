@@ -184,7 +184,7 @@ static void SelectBySerial(struct directory_pane *p, uint64_t serial_no)
 	}
 }
 
-void UI_DirectoryPaneSearch(void *p, char *needle)
+void UI_DirectoryPaneSearch(void *p, const char *needle)
 {
 	const struct directory_entry *ent;
 	struct directory_pane *dp = p;
