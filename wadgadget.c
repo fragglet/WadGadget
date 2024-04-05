@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "actions_pane.h"
 #include "colors.h"
 #include "common.h"
 #include "dialog.h"
-#include "dir_pane.h"
-#include "export.h"
+#include "directory_pane.h"
+//#include "export.h"
 #include "import.h"
 #include "lump_info.h"
 #include "strings.h"
-#include "wad_pane.h"
 #include "ui.h"
 
 #define INFO_PANE_WIDTH 27
@@ -69,8 +69,8 @@ static struct actions_pane actions_pane;
 static struct pane header_pane, info_pane;
 static struct search_pane search_pane;
 static WINDOW *pane_windows[2];
-static struct blob_list_pane *panes[2];
-static void *pane_data[2];
+static struct directory_pane *panes[2];
+static struct directory *dirs[2];
 static unsigned int active_pane = 0;
 
 static void SetWindowSizes(void)
@@ -111,52 +111,42 @@ static void SwitchToPane(unsigned int pane)
 	// intercept keypresses:
 	UI_RaisePaneToTop(&search_pane);
 
-	actions_pane.left_to_right = active_pane == 0;
-	actions_pane.actions = UI_BlobListPaneActions(
-		panes[active_pane], panes[!active_pane]);
+	UI_ActionsPaneSet(&actions_pane, dirs[active_pane]->type,
+	                  dirs[!active_pane]->type, active_pane == 0);
 }
 
 static void NavigateNew(void)
 {
-	struct blob_list_pane *pane = panes[active_pane];
-	struct blob_list_pane *new_pane = NULL;
-	int selected = UI_BlobListPaneSelected(pane);
-	void *new_data;
-	const char *path;
-	char *old_path = pane->blob_list->path;
+	struct directory_pane *pane = panes[active_pane];
+	struct directory_pane *new_pane = NULL;
+	struct directory *new_dir;
+	enum file_type typ;
+	const char *old_path;
+	char *path;
 
-	switch (UI_BlobListPaneEntryType(pane, selected)) {
-	case BLOB_TYPE_DIR:
-		path = UI_BlobListPaneEntryPath(pane, selected);
-		new_data = DIR_ReadDirectory(path);
-		new_pane = UI_NewDirectoryPane(
-			pane_windows[active_pane], new_data);
-		break;
-
-	case BLOB_TYPE_WAD:
-		path = UI_BlobListPaneEntryPath(pane, selected);
-		new_data = W_OpenFile(path);
-		new_pane = UI_NewWadPane(pane_windows[active_pane], new_data);
-		break;
-
-	default:
-		// TODO: Do something else, like display file contents.
+	typ = UI_DirectoryPaneEntryType(pane);
+	if (typ != FILE_TYPE_WAD && typ != FILE_TYPE_DIR) {
 		return;
 	}
 
+	path = UI_DirectoryPaneEntryPath(pane);
+	new_dir = VFS_OpenDir(path);
+	new_pane = UI_NewDirectoryPane(pane_windows[active_pane], new_dir);
+
 	// Select subfolder we just navigated out of?
+	old_path = dirs[active_pane]->path;
 	if (strlen(path) < strlen(old_path)) {
-		char *fname = strrchr(old_path, '/');
-		UI_BlobListPaneSearch(new_pane,
-		                  fname != NULL ? fname + 1 : old_path);
+		UI_DirectoryPaneSearch(new_pane, PathBaseName(old_path));
 	}
 
+	free(path);
+
 	if (new_pane != NULL) {
-		BL_FreeList(pane_data[active_pane]);
+		VFS_CloseDir(dirs[active_pane]);
 		UI_PaneHide(pane);
-		UI_BlobListPaneFree(pane);
+		// TODO UI_DirectoryPaneFree(pane);
 		panes[active_pane] = new_pane;
-		pane_data[active_pane] = new_data;
+		dirs[active_pane] = new_dir;
 		UI_PaneShow(new_pane);
 
 		SwitchToPane(active_pane);
@@ -164,9 +154,10 @@ static void NavigateNew(void)
 	}
 }
 
+#if 0
 static void PerformCopy(void)
 {
-	struct blob_list_pane *from, *to;
+	struct list_pane *from, *to;
 	from = panes[active_pane]; to = panes[!active_pane];
 
 	if (to->type == PANE_TYPE_DIR) {
@@ -184,6 +175,7 @@ static void PerformCopy(void)
 
 	UI_ConfirmDialogBox("Sorry", "This isn't implemented yet.");
 }
+#endif
 
 static void HandleKeypress(void *pane, int key)
 {
@@ -197,9 +189,11 @@ static void HandleKeypress(void *pane, int key)
 	case KEY_RESIZE:
 		SetWindowSizes();
 		break;
+		/*
 	case KEY_F(5):
 		PerformCopy();
 		break;
+		*/
 	case '\r':
 		NavigateNew();
 		break;
@@ -218,16 +212,20 @@ static void HandleKeypress(void *pane, int key)
 static void DrawInfoPane(void *p)
 {
 	struct pane *pane = p;
-	int lump_index = UI_BlobListPaneSelected(panes[active_pane]);
+	int idx = UI_DirectoryPaneSelected(panes[active_pane]);
 
 	wbkgdset(pane->window, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(pane->window);
 	box(pane->window, 0, 0);
 	mvwaddstr(pane->window, 0, 2, " Info ");
 
-       if (panes[active_pane]->type == PANE_TYPE_WAD && lump_index >= 0) {
+	if (idx < 0) {
+		return;
+	}
+	if (dirs[active_pane]->entries[idx].type == FILE_TYPE_LUMP) {
+		struct wad_file *wf = VFS_WadFile(dirs[active_pane]);
 		UI_PrintMultilineString(pane->window, 1, 2,
-		    GetLumpDescription(pane_data[active_pane], lump_index));
+		    GetLumpDescription(wf, idx));
        }
 }
 
@@ -246,10 +244,12 @@ static void DrawSearchPane(void *pane)
 static void SearchPaneKeypress(void *pane, int key)
 {
 	struct search_pane *p = pane;
+
 	// Space key triggers mark, does not go to search input.
 	if (key != ' ' && UI_TextInputKeypress(&p->input, key)) {
 		if (key != KEY_BACKSPACE) {
-			UI_BlobListPaneSearch(panes[active_pane], p->input.input);
+			UI_DirectoryPaneSearch(panes[active_pane],
+			                       p->input.input);
 		}
 	} else {
 		HandleKeypress(NULL, key);
@@ -333,13 +333,13 @@ int main(int argc, char *argv[])
 	UI_PaneShow(&actions_pane);
 
 	pane_windows[0] = newwin(24, 27, 1, 0);
-	pane_data[0] = W_OpenFile("doom2.wad");
-	panes[0] = UI_NewWadPane(pane_windows[0], pane_data[0]);
+	dirs[0] = VFS_OpenDir("doom2.wad");
+	panes[0] = UI_NewDirectoryPane(pane_windows[0], dirs[0]);
 	UI_PaneShow(panes[0]);
 
 	pane_windows[1] = newwin(24, 27, 1, 53);
-	pane_data[1] = DIR_ReadDirectory(".");
-	panes[1] = UI_NewDirectoryPane(pane_windows[1], pane_data[1]);
+	dirs[1] = VFS_OpenDir("testdir");
+	panes[1] = UI_NewDirectoryPane(pane_windows[1], dirs[1]);
 	UI_PaneShow(panes[1]);
 
 	SwitchToPane(0);
