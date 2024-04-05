@@ -12,6 +12,72 @@
 #include "ui.h"
 #include "directory_pane.h"
 
+static void ClearTags(struct directory_tag_list *l)
+{
+	l->num_entries = 0;
+}
+
+static unsigned int SearchForTag(struct directory_tag_list *l, unsigned int index)
+{
+	unsigned int min = 0, max = l->num_entries;
+
+	while (min < max) {
+		unsigned int midpoint, test_index;
+		midpoint = (min + max) / 2;
+		test_index = l->entries[midpoint];
+		if (index == test_index) {
+			return midpoint;
+		} else if (index > test_index) {
+			min = midpoint + 1;
+		} else {
+			max = midpoint;
+		}
+	}
+
+	return min;
+}
+
+static void AddTag(struct directory_tag_list *l, unsigned int index)
+{
+	unsigned int entries_index = SearchForTag(l, index);
+
+	// Already in list?
+	if (entries_index < l->num_entries
+	 && l->entries[entries_index] == index) {
+		return;
+	}
+
+	l->entries = checked_realloc(l->entries,
+		sizeof(uint64_t) * (l->num_entries + 1));
+	memmove(&l->entries[entries_index + 1], &l->entries[entries_index],
+	        sizeof(uint64_t) * (l->num_entries - entries_index));
+	l->entries[entries_index] = index;
+	++l->num_entries;
+}
+
+static void RemoveTag(struct directory_tag_list *l, unsigned int index)
+{
+	unsigned int entries_index = SearchForTag(l, index);
+
+	// Not in list?
+	if (entries_index >= l->num_entries
+	 || l->entries[entries_index] != index) {
+		return;
+	}
+
+	memmove(&l->entries[entries_index], &l->entries[entries_index + 1],
+	        sizeof(uint64_t) * (l->num_entries - 1 - entries_index));
+	--l->num_entries;
+}
+
+static int IsTagged(struct directory_tag_list *l, unsigned int index)
+{
+	unsigned int entries_index = SearchForTag(l, index);
+
+	return entries_index < l->num_entries
+	    && l->entries[entries_index] == index;
+}
+
 static void SummarizeSize(int64_t len, char buf[10])
 {
 	if (len < 0) {
@@ -69,10 +135,9 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	}
 	if (dp->pane.active && idx == dp->pane.selected) {
 		wattron(win, A_REVERSE);
-		/* TODO 
-	} else if (BL_IsTagged(&dp->blob_list->tags, idx - 1)) {
+	} else if (idx > 0 &&
+	           IsTagged(&dp->tagged, dp->dir->entries[idx - 1].serial_no)) {
 		wattron(win, COLOR_PAIR(PAIR_TAGGED));
-		*/
 	}
 	mvwaddstr(win, 0, 0, buf);
 	waddstr(win, " ");
@@ -236,23 +301,24 @@ static void Keypress(void *directory_pane, int key)
 		VFS_Remove(p->dir, &p->dir->entries[selected]);
 		return;
 	}
-	/*
 	if (key == KEY_F(10)) {
-		BL_ClearTags(&p->blob_list->tags);
+		ClearTags(&p->tagged);
 		return;
 	}
 	if (key == ' ') {
-		if (p->pane.selected > 0) {
-			if (BL_IsTagged(tags, UI_DirectoryPaneSelected(p))) {
-				BL_RemoveTag(tags, UI_DirectoryPaneSelected(p));
-			} else {
-				BL_AddTag(tags, UI_DirectoryPaneSelected(p));
-			}
+		struct directory_entry *ent;
+		if (p->pane.selected <= 0) {
+			return;
+		}
+		ent = &p->dir->entries[UI_DirectoryPaneSelected(p)];
+		if (IsTagged(&p->tagged, ent->serial_no)) {
+			RemoveTag(&p->tagged, ent->serial_no);
+		} else {
+			AddTag(&p->tagged, ent->serial_no);
 		}
 		UI_ListPaneKeypress(p, KEY_DOWN);
 		return;
 	}
-	*/
 
 	UI_ListPaneKeypress(p, key);
 }
