@@ -322,6 +322,18 @@ void VFS_DirectoryUnref(struct directory *dir)
 	}
 }
 
+struct wad_file *VFS_WadFile(struct directory *dir)
+{
+	struct wad_directory *wdir;
+
+	if (dir->type != FILE_TYPE_WAD) {
+		return NULL;
+	}
+
+	wdir = (struct wad_directory *) dir;
+	return wdir->wad_file;
+}
+
 #ifdef TEST
 int main(int argc, char *argv[])
 {

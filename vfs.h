@@ -3,6 +3,7 @@
 #define INCLUDED_VFS_H
 
 #include "vfile.h"
+#include "wad_file.h"
 
 enum file_type {
 	FILE_TYPE_FILE,
@@ -47,6 +48,7 @@ void VFS_Remove(struct directory *dir, struct directory_entry *entry);
 void VFS_Rename(struct directory *dir, struct directory_entry *entry,
                 const char *new_name);
 void VFS_Refresh(struct directory *dir);
+struct wad_file *VFS_WadFile(struct directory *dir);
 
 void VFS_DirectoryRef(struct directory *dir);
 void VFS_DirectoryUnref(struct directory *dir);
