@@ -310,6 +310,8 @@ VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
 
 void W_WriteDirectory(struct wad_file *f)
 {
+	int i;
+
 	// See comment in W_OpenLumpRewrite above. If we are writing a new
 	// lump (as opposed to directory modification) then this has already
 	// taken place.
@@ -323,8 +325,13 @@ void W_WriteDirectory(struct wad_file *f)
 	assert(!vfseek(f->vfs, 0, SEEK_END));
 	f->header.table_offset = (unsigned int) vftell(f->vfs);
 	f->header.num_lumps = f->num_lumps;
-	assert(vfwrite(f->directory, sizeof(struct wad_file_entry),
-	               f->num_lumps, f->vfs) == f->num_lumps);
+	for (i = 0; i < f->num_lumps; i++) {
+		struct wad_file_entry *ent = &f->directory[i];
+		assert(vfwrite(&ent->position, 4, 1, f->vfs) == 1 &&
+		       vfwrite(&ent->size, 4, 1, f->vfs) == 1 &&
+		       vfwrite(&ent->name, 8, 1, f->vfs) == 1);
+
+	}
 	vfsync(f->vfs);
 
 	WriteHeader(f);
