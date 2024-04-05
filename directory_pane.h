@@ -21,6 +21,7 @@ const char *UI_DirectoryPaneEntryPath(struct directory_pane *p, int idx);
 void UI_DirectoryPaneKeypress(void *p, int key);
 void UI_DirectoryPaneFree(struct directory_pane *p);
 void UI_DirectoryPaneSearch(void *p, char *needle);
+int UI_DirectoryPaneSelected(struct directory_pane *p);
 
 struct directory_pane *UI_NewDirectoryPane(
 	WINDOW *pane, struct directory *dir);
