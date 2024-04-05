@@ -250,10 +250,16 @@ enum file_type UI_DirectoryPaneEntryType(struct directory_pane *p, int idx)
 	return ent->type;
 }
 
-const char *UI_DirectoryPaneEntryPath(struct directory_pane *p, int idx)
+// Get path to currently selected entry.
+char *UI_DirectoryPaneEntryPath(struct directory_pane *p)
 {
-	// TODO
-	return NULL;
+	int selected = UI_DirectoryPaneSelected(p);
+
+	if (selected < 0) {
+		return PathDirName(p->dir->path);
+	} else {
+		return VFS_EntryPath(p->dir, &p->dir->entries[selected]);
+	}
 }
 
 static void Keypress(void *directory_pane, int key)

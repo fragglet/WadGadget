@@ -18,7 +18,7 @@ struct wad_directory {
 	struct wad_file *wad_file;
 };
 
-static char *EntryPath(struct directory *dir, struct directory_entry *entry)
+char *VFS_EntryPath(struct directory *dir, struct directory_entry *entry)
 {
 	return StringJoin("/", dir->path, entry->name, NULL);
 }
@@ -100,7 +100,7 @@ static void RealDirRefresh(void *_d)
 static VFILE *RealDirOpen(void *_dir, struct directory_entry *entry)
 {
 	struct directory *dir = _dir;
-	char *filename = EntryPath(dir, entry);
+	char *filename = VFS_EntryPath(dir, entry);
 	FILE *fs;
 
 	fs = fopen(filename, "r+");
@@ -116,7 +116,7 @@ static VFILE *RealDirOpen(void *_dir, struct directory_entry *entry)
 static void RealDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct directory *dir = _dir;
-	char *filename = EntryPath(dir, entry);
+	char *filename = VFS_EntryPath(dir, entry);
 	remove(filename);
 	free(filename);
 }
@@ -125,7 +125,7 @@ static void RealDirRename(void *_dir, struct directory_entry *entry,
                           const char *new_name)
 {
 	struct directory *dir = _dir;
-	char *filename = EntryPath(dir, entry);
+	char *filename = VFS_EntryPath(dir, entry);
 	char *full_new_name = StringJoin("/", dir->path, new_name, NULL);
 	rename(filename, full_new_name);
 	free(filename);
@@ -248,7 +248,7 @@ struct directory *VFS_OpenDir(const char *path)
 struct directory *VFS_OpenDirByEntry(struct directory *dir,
                                      struct directory_entry *entry)
 {
-	char *path = EntryPath(dir, entry);
+	char *path = VFS_EntryPath(dir, entry);
 	struct directory *result = NULL;
 
 	switch (entry->type) {

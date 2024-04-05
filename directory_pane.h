@@ -17,7 +17,7 @@ struct directory_pane {
 };
 
 enum file_type UI_DirectoryPaneEntryType(struct directory_pane *p, int idx);
-const char *UI_DirectoryPaneEntryPath(struct directory_pane *p, int idx);
+char *UI_DirectoryPaneEntryPath(struct directory_pane *p);
 void UI_DirectoryPaneKeypress(void *p, int key);
 void UI_DirectoryPaneFree(struct directory_pane *p);
 void UI_DirectoryPaneSearch(void *p, char *needle);

@@ -49,6 +49,7 @@ void VFS_Rename(struct directory *dir, struct directory_entry *entry,
                 const char *new_name);
 void VFS_Refresh(struct directory *dir);
 struct wad_file *VFS_WadFile(struct directory *dir);
+char *VFS_EntryPath(struct directory *dir, struct directory_entry *entry);
 
 void VFS_DirectoryRef(struct directory *dir);
 void VFS_DirectoryUnref(struct directory *dir);
