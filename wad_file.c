@@ -15,7 +15,6 @@
 typedef uint8_t lump_header[LUMP_HEADER_LEN];
 
 struct wad_file {
-	struct blob_list bl;
 	VFILE *vfs;
 	struct wad_file_header header;
 	struct wad_file_entry *directory;
@@ -40,27 +39,6 @@ struct wad_file {
 	unsigned int last_lump_pos;
 };
 
-static const struct blob_list_entry *GetEntry(
-	struct blob_list *l, unsigned int idx)
-{
-	static char buf[9];
-	static struct blob_list_entry result;
-	struct wad_file *f = (struct wad_file *) l;
-	if (idx >= f->num_lumps) {
-		return NULL;
-	}
-	snprintf(buf, sizeof(buf), "%.8s", f->directory[idx].name);
-	result.name = buf;
-	result.type = BLOB_TYPE_LUMP;
-	result.size = f->directory[idx].size;
-	return &result;
-}
-
-static void FreeWadFile(struct blob_list *l)
-{
-	W_CloseFile((struct wad_file *) l);
-}
-
 static void ReadLumpHeader(struct wad_file *wad, unsigned int lump_index)
 {
 	size_t bytes = min(wad->directory[lump_index].size, LUMP_HEADER_LEN);
@@ -68,12 +46,6 @@ static void ReadLumpHeader(struct wad_file *wad, unsigned int lump_index)
 	              SEEK_SET) == 0);
 	assert(vfread(&wad->lump_headers[lump_index],
 	              1, bytes, wad->vfs) == bytes);
-}
-
-static VFILE *OpenLump(void *_wad, int lump_index)
-{
-	struct wad_file *wad = _wad;
-	return W_OpenLump(wad, lump_index);
 }
 
 struct wad_file *W_OpenFile(const char *filename)
@@ -94,10 +66,6 @@ struct wad_file *W_OpenFile(const char *filename)
 	result->vfs = vfs;
 	result->rollback_header.table_offset = 0;
 	result->last_lump_pos = 0;
-	result->bl.get_entry = GetEntry;
-	result->bl.free = FreeWadFile;
-	result->bl.open_blob = OpenLump;
-	BL_SetPathFields(&result->bl, filename);
 
 	assert(vfread(&result->header,
 	              sizeof(struct wad_file_header), 1, vfs) == 1);
@@ -149,9 +117,6 @@ void W_CloseFile(struct wad_file *f)
 	vfclose(f->vfs);
 	free(f->directory);
 	free(f->lump_headers);
-	free(f->bl.path);
-	free(f->bl.parent_dir);
-	free(f->bl.name);
 	free(f);
 }
 
@@ -184,7 +149,6 @@ void W_AddEntries(struct wad_file *f, unsigned int before_index,
 		ent->position = 0;
 		ent->size = 0;
 		snprintf(ent->name, 8, "UNNAMED");
-		BL_HandleInsert(&f->bl.tags, before_index + i);
 		memset(&f->lump_headers[i], 0, sizeof(lump_header));
 	}
 	W_WriteDirectory(f);
@@ -197,7 +161,6 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index)
 	        (f->num_lumps - index - 1) * sizeof(struct wad_file_entry));
 	memmove(&f->lump_headers[index], &f->lump_headers[index + 1],
 	        (f->num_lumps - index - 1) * sizeof(lump_header));
-	BL_HandleDelete(&f->bl.tags, index);
 	--f->num_lumps;
 	W_WriteDirectory(f);
 }

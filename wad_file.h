@@ -2,7 +2,6 @@
 #ifndef WAD_FILE_INCLUDED
 #define WAD_FILE_INCLUDED
 
-#include "blob_list.h"
 #include "vfile.h"
 
 struct wad_file;
