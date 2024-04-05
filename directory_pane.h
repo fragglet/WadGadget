@@ -4,16 +4,11 @@
 #include "list_pane.h"
 #include "vfs.h"
 
-struct directory_tag_list {
-	uint64_t *entries;
-	size_t num_entries;
-};
-
 struct directory_pane {
 	struct list_pane pane;
 	int left_to_right;
 	struct directory *dir;
-	struct directory_tag_list tagged;
+	struct file_set tagged;
 };
 
 enum file_type UI_DirectoryPaneEntryType(struct directory_pane *p);

@@ -12,6 +12,11 @@ enum file_type {
 	FILE_TYPE_WAD,
 };
 
+struct file_set {
+	uint64_t *entries;
+	size_t num_entries;
+};
+
 struct directory_entry {
 	enum file_type type;
 	char *name;
@@ -53,6 +58,11 @@ char *VFS_EntryPath(struct directory *dir, struct directory_entry *entry);
 
 void VFS_DirectoryRef(struct directory *dir);
 void VFS_DirectoryUnref(struct directory *dir);
+
+void VFS_ClearSet(struct file_set *l);
+void VFS_AddToSet(struct file_set *l, unsigned int serial_no);
+void VFS_RemoveFromSet(struct file_set *l, unsigned int serial_no);
+int VFS_SetHas(struct file_set *l, unsigned int serial_no);
 
 #define VFS_CloseDir VFS_DirectoryUnref
 

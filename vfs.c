@@ -18,6 +18,73 @@ struct wad_directory {
 	struct wad_file *wad_file;
 };
 
+void VFS_ClearSet(struct file_set *l)
+{
+	l->num_entries = 0;
+}
+
+static unsigned int SearchForTag(struct file_set *l, unsigned int serial_no)
+{
+	unsigned int min = 0, max = l->num_entries;
+
+	while (min < max) {
+		unsigned int midpoint, test_serial;
+		midpoint = (min + max) / 2;
+		test_serial = l->entries[midpoint];
+		if (serial_no == test_serial) {
+			return midpoint;
+		} else if (serial_no > test_serial) {
+			min = midpoint + 1;
+		} else {
+			max = midpoint;
+		}
+	}
+
+	return min;
+}
+
+void VFS_AddToSet(struct file_set *l, unsigned int serial_no)
+{
+	unsigned int entries_index = SearchForTag(l, serial_no);
+
+	// Already in list?
+	if (entries_index < l->num_entries
+	 && l->entries[entries_index] == serial_no) {
+		return;
+	}
+
+	l->entries = checked_realloc(l->entries,
+		sizeof(uint64_t) * (l->num_entries + 1));
+	memmove(&l->entries[entries_index + 1], &l->entries[entries_index],
+	        sizeof(uint64_t) * (l->num_entries - entries_index));
+	l->entries[entries_index] = serial_no;
+	++l->num_entries;
+}
+
+void VFS_RemoveFromSet(struct file_set *l, unsigned int serial_no)
+{
+	unsigned int entries_index = SearchForTag(l, serial_no);
+
+	// Not in list?
+	if (entries_index >= l->num_entries
+	 || l->entries[entries_index] != serial_no) {
+		return;
+	}
+
+	memmove(&l->entries[entries_index], &l->entries[entries_index + 1],
+	        sizeof(uint64_t) * (l->num_entries - 1 - entries_index));
+	--l->num_entries;
+}
+
+int VFS_SetHas(struct file_set *l, unsigned int serial_no)
+{
+	unsigned int entries_index = SearchForTag(l, serial_no);
+
+	return entries_index < l->num_entries
+	    && l->entries[entries_index] == serial_no;
+}
+
+
 char *VFS_EntryPath(struct directory *dir, struct directory_entry *entry)
 {
 	return StringJoin("/", dir->path, entry->name, NULL);
