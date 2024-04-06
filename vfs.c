@@ -444,6 +444,26 @@ struct wad_file *VFS_WadFile(struct directory *dir)
 	return wdir->wad_file;
 }
 
+void VFS_DescribeSet(struct directory *dir, struct file_set *set,
+                     char *buf, size_t buf_len)
+{
+	if (set->num_entries == 0) {
+		snprintf(buf, buf_len, "nothing");
+	} if (set->num_entries == 1) {
+		struct directory_entry *ent;
+		ent = VFS_EntryBySerial(dir, set->entries[0]);
+		if (ent == NULL) {
+			snprintf(buf, buf_len, "nothing?");
+			return;
+		}
+		snprintf(buf, buf_len, "'%s'", ent->name);
+	} else {
+		snprintf(buf, buf_len, "%d %s",
+		         set->num_entries,
+		         dir->type == FILE_TYPE_WAD ? "lumps" : "files");
+	}
+}
+
 #ifdef TEST
 int main(int argc, char *argv[])
 {
