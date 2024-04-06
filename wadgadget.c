@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
 	UI_PaneShow(panes[0]);
 
 	pane_windows[1] = newwin(24, 27, 1, 53);
-	dirs[1] = VFS_OpenDir("testdir");
+	dirs[1] = VFS_OpenDir(".");
 	panes[1] = UI_NewDirectoryPane(pane_windows[1], dirs[1]);
 	UI_PaneShow(panes[1]);
 
