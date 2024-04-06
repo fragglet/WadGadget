@@ -212,11 +212,23 @@ static void Keypress(void *directory_pane, int key)
 {
 	struct directory_pane *p = directory_pane;
 	char *input_filename;
+	struct file_set *tagged = UI_DirectoryPaneTagged(p);
 	int selected = UI_DirectoryPaneSelected(p);
 
-	if (key == KEY_F(6) && selected >= 0) {
+	if (key == KEY_F(6)) {
 		char *old_name = p->dir->entries[selected].name;
 		uint64_t serial_no = p->dir->entries[selected].serial_no;
+
+		if (tagged->num_entries == 0) {
+			UI_ConfirmDialogBox("Message",
+				"You must select something to rename.");
+			return;
+		} else if (tagged->num_entries > 1) {
+			UI_ConfirmDialogBox("Message",
+				"You can't rename more than one thing at once.");
+			return;
+		}
+
 		input_filename = UI_TextInputDialogBox(
 		    "Rename", 30, "New name for '%s'?", old_name);
 		if (input_filename == NULL) {
