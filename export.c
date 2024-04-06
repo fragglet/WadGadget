@@ -6,29 +6,9 @@
 #include "export.h"
 #include "strings.h"
 
-void PerformExport(struct directory *from, struct file_set *from_set,
-                   struct directory *to)
+static char *FileNameForEntry(struct directory_entry *dirent)
 {
-	VFILE *fromlump, *tofile;
-	FILE *f;
-	char *filename, *extn;
-	struct directory_entry *dirent;
-
-	if (from_set->num_entries < 1) {
-		UI_ConfirmDialogBox(
-		    "Message", "You have not selected anything to export!");
-		return;
-	}
-	if (from_set->num_entries > 1) {
-		UI_ConfirmDialogBox(
-		    "Sorry", "Multi-export not implemented yet.");
-		return;
-	}
-
-	dirent = VFS_EntryBySerial(from, from_set->entries[0]);
-	if (dirent == NULL) {
-		return;
-	}
+	char *extn;
 
 	switch (dirent->type) {
 	case FILE_TYPE_FILE:
@@ -40,24 +20,94 @@ void PerformExport(struct directory *from, struct file_set *from_set,
 		// TODO: Convert to .png/.wav etc.
 		break;
 	default:
+		return NULL;
+	}
+
+	return StringJoin("", dirent->name, extn, NULL);
+}
+
+static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
+                           struct directory *to)
+{
+	struct file_set overwrite_set = EMPTY_FILE_SET;
+	struct directory_entry *ent;
+	bool result;
+	char buf[64];
+	char *filename;
+	int i;
+
+	for (i = 0; i < from_set->num_entries; i++) {
+		ent = VFS_EntryBySerial(from, from_set->entries[i]);
+		if (ent == NULL) {
+			continue;
+		}
+		filename = FileNameForEntry(ent);
+		if (filename == NULL) {
+			continue;
+		}
+		ent = VFS_EntryByName(to, filename);
+		if (ent != NULL) {
+			VFS_AddToSet(&overwrite_set, ent->serial_no);
+		}
+
+		free(filename);
+	}
+
+	if (overwrite_set.num_entries == 0) {
+		// Nothing to overwrite.
+		return true;
+	}
+
+	VFS_DescribeSet(to, &overwrite_set, buf, sizeof(buf));
+	result = UI_ConfirmDialogBox("Message", "Overwrite %s?", buf);
+	VFS_FreeSet(&overwrite_set);
+	return result;
+}
+
+void PerformExport(struct directory *from, struct file_set *from_set,
+                   struct directory *to)
+{
+	VFILE *fromlump, *tofile;
+	FILE *f;
+	char *filename, *filename2;
+	struct directory_entry *ent;
+	int i;
+
+	if (from_set->num_entries < 1) {
+		UI_ConfirmDialogBox(
+		    "Message", "You have not selected anything to export!");
 		return;
 	}
-	filename = StringJoin("", to->path, "/",
-	                      dirent->name, extn, NULL);
 
-	// TODO: Confirm file overwrite if already present.
-	// TODO: This should be written through VFS.
-	f = fopen(filename, "wb");
-	if (f != NULL) {
-		tofile = vfwrapfile(f);
-
-		fromlump = VFS_OpenByEntry(from, dirent);
-		vfcopy(fromlump, tofile);
-		vfclose(fromlump);
-		vfclose(tofile);
+	if (!ConfirmOverwrite(from, from_set, to)) {
+		return;
 	}
 
-	free(filename);
+	for (i = 0; i < from_set->num_entries; i++) {
+		ent = VFS_EntryBySerial(from, from_set->entries[i]);
+		if (ent == NULL) {
+			continue;
+		}
+		filename = FileNameForEntry(ent);
+		if (filename == NULL) {
+			continue;
+		}
+		filename2 = StringJoin("", to->path, "/", filename, NULL);
+		free(filename);
+
+		// TODO: This should be written through VFS.
+		f = fopen(filename2, "wb");
+		if (f != NULL) {
+			tofile = vfwrapfile(f);
+
+			fromlump = VFS_OpenByEntry(from, ent);
+			vfcopy(fromlump, tofile);
+			vfclose(fromlump);
+			vfclose(tofile);
+		}
+
+		free(filename2);
+	}
 
 	VFS_Refresh(to);
 	// TODO: Mark new exported file(s) to highlight
