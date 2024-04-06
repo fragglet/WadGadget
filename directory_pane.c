@@ -44,9 +44,9 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	}
 
 	if (idx == 0) {
-		snprintf(buf, w, "^ %s",
-		         "parent");
-	//	         or_if_null(dp->blob_list->parent_dir, ""));
+		char *parent = PathDirName(dp->dir->path);
+		snprintf(buf, w, "^  Parent (%s)", PathBaseName(parent));
+		free(parent);
 		wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
 		char prefix = ' ';
