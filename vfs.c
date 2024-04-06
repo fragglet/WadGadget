@@ -381,6 +381,20 @@ struct directory_entry *VFS_EntryBySerial(struct directory *dir,
 	return NULL;
 }
 
+struct directory_entry *VFS_EntryByName(struct directory *dir,
+                                        const char *name)
+{
+	int i;
+
+	for (i = 0; i < dir->num_entries; i++) {
+		if (!strcmp(dir->entries[i].name, name)) {
+			return &dir->entries[i];
+		}
+	}
+
+	return NULL;
+}
+
 void VFS_Refresh(struct directory *dir)
 {
 	dir->directory_funcs->refresh(dir);

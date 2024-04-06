@@ -97,13 +97,9 @@ static unsigned int NumEntries(void *data)
 
 static void SelectByName(struct directory_pane *p, const char *name)
 {
-	int i;
-
-	for (i = 0; i < p->dir->num_entries; i++) {
-		if (!strcmp(p->dir->entries[i].name, name)) {
-			UI_ListPaneSelect(&p->pane, i + 1);
-			return;
-		}
+	struct directory_entry *entry = VFS_EntryByName(p->dir, name);
+	if (entry != NULL) {
+		UI_ListPaneSelect(&p->pane, entry - p->dir->entries + 1);
 	}
 }
 
