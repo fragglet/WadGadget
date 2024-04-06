@@ -27,7 +27,7 @@ static char *FileNameForEntry(struct directory_entry *dirent)
 }
 
 static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
-                           struct directory *to)
+                             struct directory *to)
 {
 	struct file_set overwrite_set = EMPTY_FILE_SET;
 	struct directory_entry *ent;
@@ -35,6 +35,8 @@ static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
 	char buf[64];
 	char *filename;
 	int i;
+
+	VFS_Refresh(to);
 
 	for (i = 0; i < from_set->num_entries; i++) {
 		ent = VFS_EntryBySerial(from, from_set->entries[i]);
