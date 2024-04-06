@@ -162,16 +162,22 @@ int UI_DirectoryPaneSelected(struct directory_pane *p)
 	return UI_ListPaneSelected(&p->pane) - 1;
 }
 
-void UI_DirectoryPaneTagged(struct directory_pane *p, struct file_set *set)
+struct file_set *UI_DirectoryPaneTagged(struct directory_pane *p)
 {
 	if (p->tagged.num_entries > 0) {
-		VFS_CopySet(set, &p->tagged);
+		return &p->tagged;
 	} else {
+		static struct file_set result;
 		int selected = UI_DirectoryPaneSelected(p);
-		VFS_ClearSet(set);
 		if (selected >= 0) {
-			VFS_AddToSet(set, p->dir->entries[selected].serial_no);
+			// Some devious pointer magic here.
+			result.entries = &p->dir->entries[selected].serial_no;
+			result.num_entries = 1;
+		} else {
+			result.entries = NULL;
+			result.num_entries = 0;
 		}
+		return &result;
 	}
 }
 
