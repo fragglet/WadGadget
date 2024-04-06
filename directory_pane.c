@@ -270,6 +270,12 @@ static void Keypress(void *directory_pane, int key)
 		if (!UI_ConfirmDialogBox("Confirm Delete", "Delete %s?", buf)) {
 			return;
 		}
+		// Note that there's a corner-case gotcha here. VFS serial
+		// numbers for files are inode numbers, and through hardlinks
+		// multiple files can have the same inode number. However,
+		// the way things are implemented here, we only ever delete one
+		// of each serial number. So the wrong file can end up being
+		// deleted, but we'll never delete both.
 		for (i = 0; i < tagged->num_entries; i++) {
 			struct directory_entry *ent;
 			ent = VFS_EntryBySerial(p->dir, tagged->entries[i]);
