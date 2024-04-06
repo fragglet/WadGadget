@@ -256,13 +256,29 @@ static void Keypress(void *directory_pane, int key)
 		return;
 	}
 	// TODO: Delete all marked
-	if (key == KEY_F(8) && selected >= 0) {
-		char *filename = p->dir->entries[selected].name;
-		if (!UI_ConfirmDialogBox("Confirm Delete", "Delete '%s'?",
-		                         filename)) {
+	if (key == KEY_F(8)) {
+		char buf[64];
+		int i;
+
+		if (tagged->num_entries == 0) {
+			UI_ConfirmDialogBox("Message",
+				"You must select something to delete.");
 			return;
 		}
-		VFS_Remove(p->dir, &p->dir->entries[selected]);
+
+		VFS_DescribeSet(p->dir, tagged, buf, sizeof(buf));
+		if (!UI_ConfirmDialogBox("Confirm Delete", "Delete %s?", buf)) {
+			return;
+		}
+		for (i = 0; i < tagged->num_entries; i++) {
+			struct directory_entry *ent;
+			ent = VFS_EntryBySerial(p->dir, tagged->entries[i]);
+			if (ent == NULL) {
+				continue;
+			}
+			VFS_Remove(p->dir, ent);
+		}
+		VFS_ClearSet(&p->tagged);
 		return;
 	}
 	if (key == KEY_F(10)) {
