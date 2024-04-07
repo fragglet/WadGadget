@@ -185,7 +185,7 @@ static void PerformCopy(void)
 		return;
 	}
 
-	UI_ConfirmDialogBox("Sorry", "This isn't implemented yet.");
+	UI_MessageBox("Sorry, this isn't implemented yet.");
 }
 
 static void HandleKeypress(void *pane, int key)

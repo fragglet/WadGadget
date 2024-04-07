@@ -26,7 +26,7 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 		// TODO: Convert from other formats: .png, .wav, etc.
 		break;
 	default:
-		UI_ConfirmDialogBox("Error", "Can't import this file type");
+		UI_MessageBox("Can't import this file type.");
 		return;
 	}
 }
@@ -46,8 +46,8 @@ void PerformImport(struct directory *from, struct file_set *from_set,
 	// lump.
 
 	if (from_set->num_entries < 1) {
-		UI_ConfirmDialogBox(
-		    "Message", "You have not selected anything to import!");
+		UI_MessageBox(
+		    "You have not selected anything to import.");
 		return;
 	}
 

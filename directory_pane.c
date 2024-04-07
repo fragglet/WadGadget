@@ -234,12 +234,12 @@ static void Keypress(void *directory_pane, int key)
 		uint64_t serial_no = p->dir->entries[selected].serial_no;
 
 		if (tagged->num_entries == 0) {
-			UI_ConfirmDialogBox("Message",
-				"You must select something to rename.");
+			UI_MessageBox(
+			    "You have not selected anything to rename.");
 			return;
 		} else if (tagged->num_entries > 1) {
-			UI_ConfirmDialogBox("Message",
-				"You can't rename more than one thing at once.");
+			UI_MessageBox(
+			    "You can't rename more than one thing at once.");
 			return;
 		}
 
@@ -276,8 +276,8 @@ static void Keypress(void *directory_pane, int key)
 		int i;
 
 		if (tagged->num_entries == 0) {
-			UI_ConfirmDialogBox("Message",
-				"You must select something to delete.");
+			UI_MessageBox(
+			    "You have not selected anything to delete.");
 			return;
 		}
 

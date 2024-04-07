@@ -76,13 +76,13 @@ void PerformExport(struct directory *from, struct file_set *from_set,
 	int idx;
 
 	if (from_set->num_entries < 1) {
-		UI_ConfirmDialogBox(
-		    "Message", "You have not selected anything to export!");
+		UI_MessageBox(
+		    "You have not selected anything to export.");
 		return;
 	}
 	if (from->type == FILE_TYPE_DIR && !strcmp(from->path, to->path)) {
-		UI_ConfirmDialogBox(
-		    "Message", "You can't copy to the same directory!");
+		UI_MessageBox(
+		    "You can't copy to the same directory.");
 		return;
 	}
 

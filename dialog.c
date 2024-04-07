@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include <curses.h>
 
 #include "colors.h"
@@ -9,9 +10,10 @@
 
 struct confirm_dialog_box {
 	struct pane pane;
-	char *title;
+	const char *title;
 	char msg[128];
 	int result;
+	bool has_confirm;
 };
 
 static void DrawConfirmDialog(void *pane)
@@ -33,8 +35,12 @@ static void DrawConfirmDialog(void *pane)
 	}
 
 	UI_PrintMultilineString(win, 1, 2, dialog->msg);
-	mvwaddstr(win, h - 2, 1, " ESC - Cancel ");
-	mvwaddstr(win, h - 2, w - 14, " Y - Confirm ");
+	if (dialog->has_confirm) {
+		mvwaddstr(win, h - 2, 1, " ESC - Cancel ");
+		mvwaddstr(win, h - 2, w - 14, " Y - Confirm ");
+	} else {
+		mvwaddstr(win, h - 2, w - 14, " ESC - Close ");
+	}
 	wattroff(win, A_BOLD);
 }
 
@@ -52,30 +58,55 @@ static void ConfirmDialogKeypress(void *dialog, int key)
 	}
 }
 
-int UI_ConfirmDialogBox(char *title, char *msg, ...)
+static void InitDialogBox(struct confirm_dialog_box *dialog,
+                          const char *title, const char *msg)
 {
-	struct confirm_dialog_box dialog;
 	int scrh, scrw;
 	int w, h;
-	va_list args;
 	getmaxyx(stdscr, scrh, scrw);
+
+	w = max(UI_StringWidth(dialog->msg) + 4, 35);
+	h = UI_StringHeight(dialog->msg) + 4;
+	dialog->pane.window = newwin(h, w, (scrh / 2) - h, (scrw - w) / 2);
+	dialog->pane.draw = DrawConfirmDialog;
+	dialog->pane.keypress = ConfirmDialogKeypress;
+	dialog->title = title;
+}
+
+int UI_ConfirmDialogBox(const char *title, const char *msg, ...)
+{
+	struct confirm_dialog_box dialog;
+	va_list args;
 
 	va_start(args, msg);
 	vsnprintf(dialog.msg, sizeof(dialog.msg), msg, args);
 	va_end(args);
 
-	w = max(UI_StringWidth(dialog.msg) + 4, 35);
-	h = UI_StringHeight(dialog.msg) + 4;
-	dialog.pane.window = newwin(h, w, (scrh / 2) - h, (scrw - w) / 2);
-	dialog.pane.draw = DrawConfirmDialog;
-	dialog.pane.keypress = ConfirmDialogKeypress;
-	dialog.title = title;
+	InitDialogBox(&dialog, title, msg);
+	dialog.has_confirm = true;
 
 	UI_PaneShow(&dialog);
 	UI_RunMainLoop();
 	UI_PaneHide(&dialog);
 
 	return dialog.result;
+}
+
+void UI_MessageBox(const char *msg, ...)
+{
+	struct confirm_dialog_box dialog;
+	va_list args;
+
+	va_start(args, msg);
+	vsnprintf(dialog.msg, sizeof(dialog.msg), msg, args);
+	va_end(args);
+
+	InitDialogBox(&dialog, NULL, msg);
+	dialog.has_confirm = false;
+
+	UI_PaneShow(&dialog);
+	UI_RunMainLoop();
+	UI_PaneHide(&dialog);
 }
 
 struct text_input_dialog_box {
