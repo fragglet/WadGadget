@@ -395,6 +395,20 @@ struct directory_entry *VFS_EntryByName(struct directory *dir,
 	return NULL;
 }
 
+struct directory_entry *VFS_IterateSet(struct directory *dir,
+                                       struct file_set *set, int *idx)
+{
+	while (*idx < dir->num_entries) {
+		struct directory_entry *ent = &dir->entries[*idx];
+		++*idx;
+		if (VFS_SetHas(set, ent->serial_no)) {
+			return ent;
+		}
+	}
+
+	return NULL;
+}
+
 void VFS_Refresh(struct directory *dir)
 {
 	dir->directory_funcs->refresh(dir);

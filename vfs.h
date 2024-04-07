@@ -61,6 +61,8 @@ struct directory_entry *VFS_EntryBySerial(struct directory *p,
                                           uint64_t serial_no);
 struct directory_entry *VFS_EntryByName(struct directory *dir,
                                         const char *name);
+struct directory_entry *VFS_IterateSet(struct directory *dir,
+                                       struct file_set *set, int *idx);
 void VFS_DescribeSet(struct directory *dir, struct file_set *set,
                      char *buf, size_t buf_len);
 
