@@ -181,6 +181,20 @@ struct file_set *UI_DirectoryPaneTagged(struct directory_pane *p)
 	}
 }
 
+void UI_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set)
+{
+	struct directory_entry *dirent;
+	int idx = 0;
+
+	VFS_CopySet(&p->tagged, set);
+
+	// Jump to first in the set.
+	dirent = VFS_IterateSet(p->dir, &p->tagged, &idx);
+	if (dirent != NULL) {
+		SelectBySerial(p, dirent->serial_no);
+	}
+}
+
 static const struct list_pane_funcs directory_pane_funcs = {
 	DrawEntry,
 	NumEntries,

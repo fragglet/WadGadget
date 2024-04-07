@@ -32,11 +32,13 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 }
 
 void PerformImport(struct directory *from, struct file_set *from_set,
-                   struct directory *to, int to_index)
+                   struct directory *to, int to_index,
+                   struct file_set *result)
 {
 	VFILE *fromfile, *tolump;
 	struct directory_entry *ent;
 	struct wad_file *to_wad;
+	struct wad_file_entry *waddir;
 	char namebuf[9];
 	int idx, lumpnum;
 
@@ -52,6 +54,7 @@ void PerformImport(struct directory *from, struct file_set *from_set,
 	to_wad = VFS_WadFile(to);
 	lumpnum = to_index + 1;
 	W_AddEntries(to_wad, lumpnum, from_set->num_entries);
+	waddir = W_GetDirectory(to_wad);
 
 	idx = 0;
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
@@ -64,11 +67,11 @@ void PerformImport(struct directory *from, struct file_set *from_set,
 		vfcopy(fromfile, tolump);
 		vfclose(fromfile);
 		vfclose(tolump);
+		VFS_AddToSet(result, waddir[lumpnum].serial_no);
 		++lumpnum;
+
+		VFS_RemoveFromSet(from_set, ent->serial_no);
 	}
 
 	VFS_Refresh(to);
-
-	// TODO: Mark new imported lump(s) to highlight
 }
-

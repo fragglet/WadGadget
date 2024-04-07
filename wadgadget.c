@@ -167,8 +167,13 @@ static void PerformCopy(void)
 	if (to->type == FILE_TYPE_WAD) {
 		struct file_set *import_set =
 			UI_DirectoryPaneTagged(panes[active_pane]);
+		struct file_set result = EMPTY_FILE_SET;
 		PerformImport(from, import_set, to,
-		              UI_DirectoryPaneSelected(panes[!active_pane]));
+		              UI_DirectoryPaneSelected(panes[!active_pane]),
+		              &result);
+		UI_DirectoryPaneSetTagged(panes[!active_pane], &result);
+		VFS_FreeSet(&result);
+		SwitchToPane(!active_pane);
 		return;
 	}
 
