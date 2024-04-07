@@ -255,6 +255,21 @@ static void Keypress(void *directory_pane, int key)
 		SelectBySerial(p, serial_no);
 		return;
 	}
+	if (p->dir->type == FILE_TYPE_WAD && key == KEY_F(7)) {
+		struct wad_file *f = VFS_WadFile(p->dir);
+		char *name = UI_TextInputDialogBox(
+			"New lump", 8,
+			"Enter name for new lump:");
+		if (name == NULL) {
+			return;
+		}
+		W_AddEntries(f, selected + 1, 1);
+		W_SetLumpName(f, selected + 1, name);
+		free(name);
+		VFS_Refresh(p->dir);
+		UI_ListPaneKeypress(p, KEY_DOWN);
+		return;
+	}
 	if (p->dir->type == FILE_TYPE_DIR && key == KEY_F(7)) {
 		char *filename;
 		input_filename = UI_TextInputDialogBox(
