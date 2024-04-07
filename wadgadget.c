@@ -158,16 +158,24 @@ static void PerformCopy(void)
 {
 	struct directory *from = dirs[active_pane],
 	                 *to = dirs[!active_pane];
+	struct file_set result = EMPTY_FILE_SET;
+
+	// When we do an export or import, we create the new files/lumps
+	// in the destination, and then switch to the other pane where they
+	// are highlighted. The import/export functions both populate a
+	// result set that contains the serial numbers of the new files.
 	if (to->type == FILE_TYPE_DIR) {
 		struct file_set *export_set =
 			UI_DirectoryPaneTagged(panes[active_pane]);
-		PerformExport(from, export_set, to);
+		PerformExport(from, export_set, to, &result);
+		UI_DirectoryPaneSetTagged(panes[!active_pane], &result);
+		VFS_FreeSet(&result);
+		SwitchToPane(!active_pane);
 		return;
 	}
 	if (to->type == FILE_TYPE_WAD) {
 		struct file_set *import_set =
 			UI_DirectoryPaneTagged(panes[active_pane]);
-		struct file_set result = EMPTY_FILE_SET;
 		PerformImport(from, import_set, to,
 		              UI_DirectoryPaneSelected(panes[!active_pane]),
 		              &result);

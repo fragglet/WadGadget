@@ -67,13 +67,13 @@ static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
 }
 
 void PerformExport(struct directory *from, struct file_set *from_set,
-                   struct directory *to)
+                   struct directory *to, struct file_set *result)
 {
 	VFILE *fromlump, *tofile;
 	FILE *f;
 	char *filename, *filename2;
-	struct directory_entry *ent;
-	int i;
+	struct directory_entry *ent, *ent2;
+	int idx;
 
 	if (from_set->num_entries < 1) {
 		UI_ConfirmDialogBox(
@@ -85,11 +85,8 @@ void PerformExport(struct directory *from, struct file_set *from_set,
 		return;
 	}
 
-	for (i = 0; i < from_set->num_entries; i++) {
-		ent = VFS_EntryBySerial(from, from_set->entries[i]);
-		if (ent == NULL) {
-			continue;
-		}
+	idx = 0;
+	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
 		filename = FileNameForEntry(ent);
 		if (filename == NULL) {
 			continue;
@@ -112,6 +109,18 @@ void PerformExport(struct directory *from, struct file_set *from_set,
 	}
 
 	VFS_Refresh(to);
-	// TODO: Mark new exported file(s) to highlight
-}
 
+	idx = 0;
+	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
+		VFS_RemoveFromSet(from_set, ent->serial_no);
+		filename = FileNameForEntry(ent);
+		if (filename == NULL) {
+			continue;
+		}
+		ent2 = VFS_EntryByName(to, filename);
+		free(filename);
+		if (ent2 != NULL) {
+			VFS_AddToSet(result, ent2->serial_no);
+		}
+	}
+}
