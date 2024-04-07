@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <limits.h>
 
@@ -31,7 +32,7 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 	}
 }
 
-void PerformImport(struct directory *from, struct file_set *from_set,
+bool PerformImport(struct directory *from, struct file_set *from_set,
                    struct directory *to, int to_index,
                    struct file_set *result)
 {
@@ -48,7 +49,7 @@ void PerformImport(struct directory *from, struct file_set *from_set,
 	if (from_set->num_entries < 1) {
 		UI_MessageBox(
 		    "You have not selected anything to import.");
-		return;
+		return false;
 	}
 
 	to_wad = VFS_WadFile(to);
@@ -74,4 +75,5 @@ void PerformImport(struct directory *from, struct file_set *from_set,
 	}
 
 	VFS_Refresh(to);
+	return true;
 }

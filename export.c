@@ -1,4 +1,5 @@
 #include <curses.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -61,12 +62,12 @@ static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
 	}
 
 	VFS_DescribeSet(to, &overwrite_set, buf, sizeof(buf));
-	result = UI_ConfirmDialogBox("Message", "Overwrite %s?", buf);
+	result = UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite %s?", buf);
 	VFS_FreeSet(&overwrite_set);
 	return result;
 }
 
-void PerformExport(struct directory *from, struct file_set *from_set,
+bool PerformExport(struct directory *from, struct file_set *from_set,
                    struct directory *to, struct file_set *result)
 {
 	VFILE *fromlump, *tofile;
@@ -78,16 +79,16 @@ void PerformExport(struct directory *from, struct file_set *from_set,
 	if (from_set->num_entries < 1) {
 		UI_MessageBox(
 		    "You have not selected anything to export.");
-		return;
+		return false;
 	}
 	if (from->type == FILE_TYPE_DIR && !strcmp(from->path, to->path)) {
 		UI_MessageBox(
 		    "You can't copy to the same directory.");
-		return;
+		return false;
 	}
 
 	if (!ConfirmOverwrite(from, from_set, to)) {
-		return;
+		return false;
 	}
 
 	idx = 0;
@@ -128,4 +129,6 @@ void PerformExport(struct directory *from, struct file_set *from_set,
 			VFS_AddToSet(result, ent2->serial_no);
 		}
 	}
+
+	return true;
 }
