@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <ctype.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "common.h"
 #include "vfile.h"
@@ -37,6 +38,9 @@ struct wad_file {
 	// an optimization where if we write the same lump repeatedly then we
 	// overwrite the previous data.
 	unsigned int last_lump_pos;
+
+	// Call to W_WriteDirectory needed.
+	bool dirty;
 };
 
 static void ReadLumpHeader(struct wad_file *wad, unsigned int lump_index)
@@ -157,7 +161,7 @@ void W_AddEntries(struct wad_file *f, unsigned int before_index,
 		snprintf(ent->name, 8, "UNNAMED");
 		memset(&f->lump_headers[i], 0, sizeof(lump_header));
 	}
-	W_WriteDirectory(f);
+	f->dirty = true;
 }
 
 void W_DeleteEntry(struct wad_file *f, unsigned int index)
@@ -168,7 +172,7 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index)
 	memmove(&f->lump_headers[index], &f->lump_headers[index + 1],
 	        (f->num_lumps - index - 1) * sizeof(lump_header));
 	--f->num_lumps;
-	W_WriteDirectory(f);
+	f->dirty = true;
 }
 
 void W_SetLumpName(struct wad_file *f, unsigned int index, const char *name)
@@ -181,7 +185,7 @@ void W_SetLumpName(struct wad_file *f, unsigned int index, const char *name)
 			break;
 		}
 	}
-	W_WriteDirectory(f);
+	f->dirty = true;
 }
 
 size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
@@ -265,7 +269,7 @@ static void WriteLumpClosed(VFILE *fs, void *data)
 	assert(f->current_lump_index < f->num_lumps);
 	f->directory[f->current_lump_index].size = (unsigned int) size;
 
-	W_WriteDirectory(f);
+	f->dirty = true;
 
 	ReadLumpHeader(f, f->current_lump_index);
 }
@@ -318,6 +322,10 @@ void W_WriteDirectory(struct wad_file *f)
 {
 	int i;
 
+	if (!f->dirty) {
+		return;
+	}
+
 	// See comment in W_OpenLumpRewrite above. If we are writing a new
 	// lump (as opposed to directory modification) then this has already
 	// taken place.
@@ -341,5 +349,6 @@ void W_WriteDirectory(struct wad_file *f)
 	vfsync(f->vfs);
 
 	WriteHeader(f);
-}
 
+	f->dirty = false;
+}

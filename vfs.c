@@ -229,6 +229,8 @@ static void WadDirectoryRefresh(void *_dir)
 	unsigned int i, num_lumps = W_NumLumps(dir->wad_file);
 	struct directory_entry *ent;
 
+	W_WriteDirectory(dir->wad_file);
+
 	FreeEntries(&dir->dir);
 
 	dir->dir.num_entries = num_lumps;
@@ -416,15 +418,20 @@ void VFS_Refresh(struct directory *dir)
 
 void VFS_Remove(struct directory *dir, struct directory_entry *entry)
 {
+	unsigned int index = entry - dir->entries;
+
 	dir->directory_funcs->remove(dir, entry);
-	VFS_Refresh(dir);
+
+	memmove(&dir->entries[index], &dir->entries[index + 1],
+	        (dir->num_entries - index - 1)
+	          * sizeof(struct directory_entry));
+	--dir->num_entries;
 }
 
 void VFS_Rename(struct directory *dir, struct directory_entry *entry,
                 const char *new_name)
 {
 	dir->directory_funcs->rename(dir, entry, new_name);
-	VFS_Refresh(dir);
 }
 
 void VFS_DirectoryRef(struct directory *dir)

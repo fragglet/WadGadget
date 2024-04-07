@@ -236,6 +236,7 @@ static void Keypress(void *directory_pane, int key)
 		}
 		VFS_Rename(p->dir, &p->dir->entries[selected],
 		           input_filename);
+		VFS_Refresh(p->dir);
 		free(input_filename);
 		SelectBySerial(p, serial_no);
 		return;
@@ -285,6 +286,7 @@ static void Keypress(void *directory_pane, int key)
 			VFS_Remove(p->dir, ent);
 		}
 		VFS_ClearSet(&p->tagged);
+		VFS_Refresh(p->dir);
 		if (UI_DirectoryPaneSelected(p) >= p->dir->num_entries) {
 			UI_ListPaneSelect(&p->pane, p->dir->num_entries);
 		}
