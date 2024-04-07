@@ -48,6 +48,14 @@ static void ReadLumpHeader(struct wad_file *wad, unsigned int lump_index)
 	              1, bytes, wad->vfs) == bytes);
 }
 
+static uint64_t NewSerialNo(void)
+{
+	static uint64_t serial_no = 0x800000;
+	uint64_t result = serial_no;
+	++serial_no;
+	return result;
+}
+
 struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;
@@ -77,14 +85,11 @@ struct wad_file *W_OpenFile(const char *filename)
 	result->directory = checked_calloc(
 		result->num_lumps, sizeof(struct wad_file_entry));
 	for (i = 0; i < result->num_lumps; i++) {
-		static uint64_t serial_no = 0x800000;
 		struct wad_file_entry *ent = &result->directory[i];
 		assert(vfread(&ent->position, 4, 1, vfs) == 1 &&
 		       vfread(&ent->size, 4, 1, vfs) == 1 &&
 		       vfread(&ent->name, 8, 1, vfs) == 1);
-		ent->serial_no = serial_no;
-		++serial_no;
-
+		ent->serial_no = NewSerialNo();
 	}
 
 	// Read and save the first few bytes of every lump. This contains
@@ -148,6 +153,7 @@ void W_AddEntries(struct wad_file *f, unsigned int before_index,
 		ent = &f->directory[before_index + i];
 		ent->position = 0;
 		ent->size = 0;
+		ent->serial_no = NewSerialNo();
 		snprintf(ent->name, 8, "UNNAMED");
 		memset(&f->lump_headers[i], 0, sizeof(lump_header));
 	}
