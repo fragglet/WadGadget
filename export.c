@@ -44,6 +44,10 @@ static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
 		if (ent == NULL) {
 			continue;
 		}
+		if (ent->type == FILE_TYPE_DIR) {
+			UI_MessageBox("You can't copy directories.");
+			return false;
+		}
 		filename = FileNameForEntry(ent);
 		if (filename == NULL) {
 			continue;
