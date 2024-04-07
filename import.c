@@ -1,42 +1,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <limits.h>
 
 #include "dialog.h"
 #include "import.h"
 #include "strings.h"
 
-void PerformImport(struct directory *from, struct file_set *from_set,
-                   struct directory *to, int to_index)
+static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 {
-	VFILE *fromfile, *tolump;
 	char *p;
-	struct directory_entry *dirent;
-	struct wad_file *to_wad;
-	char namebuf[9];
 
-	// TODO: Update/overwrite existing lump instead of creating a new
-	// lump.
+	StringCopy(namebuf, ent->name, 9);
 
-	if (from_set->num_entries < 1) {
-		UI_ConfirmDialogBox(
-		    "Message", "You have not selected anything to import!");
-		return;
-	}
-	if (from_set->num_entries > 1) {
-		UI_ConfirmDialogBox(
-		    "Sorry", "Multi-import not implemented yet.");
-		return;
-	}
-
-	dirent = VFS_EntryBySerial(from, from_set->entries[0]);
-	if (dirent == NULL) {
-		return;
-	}
-
-	StringCopy(namebuf, dirent->name, sizeof(namebuf));
-
-	switch (dirent->type) {
+	switch (ent->type) {
 	case FILE_TYPE_LUMP:
 		// WAD to WAD copy.
 		break;
@@ -49,19 +26,47 @@ void PerformImport(struct directory *from, struct file_set *from_set,
 		// TODO: Convert from other formats: .png, .wav, etc.
 		break;
 	default:
+		UI_ConfirmDialogBox("Error", "Can't import this file type");
+		return;
+	}
+}
+
+void PerformImport(struct directory *from, struct file_set *from_set,
+                   struct directory *to, int to_index)
+{
+	VFILE *fromfile, *tolump;
+	struct directory_entry *ent;
+	struct wad_file *to_wad;
+	char namebuf[9];
+	int idx, lumpnum;
+
+	// TODO: Update/overwrite existing lump instead of creating a new
+	// lump.
+
+	if (from_set->num_entries < 1) {
+		UI_ConfirmDialogBox(
+		    "Message", "You have not selected anything to import!");
 		return;
 	}
 
-	// TODO: This should be being done via VFS.
 	to_wad = VFS_WadFile(to);
-	W_AddEntries(to_wad, to_index, 1);
+	lumpnum = to_index + 1;
+	W_AddEntries(to_wad, lumpnum, from_set->num_entries);
 
-	fromfile = VFS_OpenByEntry(from, dirent);
-	tolump = W_OpenLumpRewrite(to_wad, to_index);
-	vfcopy(fromfile, tolump);
-	vfclose(fromfile);
-	vfclose(tolump);
-	W_SetLumpName(to_wad, to_index, namebuf);
+	idx = 0;
+	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
+		LumpNameForEntry(namebuf, ent);
+		W_SetLumpName(to_wad, lumpnum, namebuf);
+
+		// TODO: This should be being done via VFS.
+		fromfile = VFS_OpenByEntry(from, ent);
+		tolump = W_OpenLumpRewrite(to_wad, lumpnum);
+		vfcopy(fromfile, tolump);
+		vfclose(fromfile);
+		vfclose(tolump);
+		++lumpnum;
+	}
+
 	VFS_Refresh(to);
 
 	// TODO: Mark new imported lump(s) to highlight
