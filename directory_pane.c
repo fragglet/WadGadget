@@ -285,6 +285,9 @@ static void Keypress(void *directory_pane, int key)
 			VFS_Remove(p->dir, ent);
 		}
 		VFS_ClearSet(&p->tagged);
+		if (UI_DirectoryPaneSelected(p) >= p->dir->num_entries) {
+			UI_ListPaneSelect(&p->pane, p->dir->num_entries);
+		}
 		return;
 	}
 	if (key == KEY_F(10)) {
