@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
 	UI_PaneShow(&actions_pane);
 
 	pane_windows[0] = newwin(24, 27, 1, 0);
-	dirs[0] = VFS_OpenDir("doom2.wad");
+	dirs[0] = VFS_OpenDir(".");
 	panes[0] = UI_NewDirectoryPane(pane_windows[0], dirs[0]);
 	UI_PaneShow(panes[0]);
 
