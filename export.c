@@ -80,6 +80,11 @@ void PerformExport(struct directory *from, struct file_set *from_set,
 		    "Message", "You have not selected anything to export!");
 		return;
 	}
+	if (from->type == FILE_TYPE_DIR && !strcmp(from->path, to->path)) {
+		UI_ConfirmDialogBox(
+		    "Message", "You can't copy to the same directory!");
+		return;
+	}
 
 	if (!ConfirmOverwrite(from, from_set, to)) {
 		return;
