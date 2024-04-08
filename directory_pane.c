@@ -229,6 +229,11 @@ static void Keypress(void *directory_pane, int key)
 	struct file_set *tagged = UI_DirectoryPaneTagged(p);
 	int selected = UI_DirectoryPaneSelected(p);
 
+	if (key == KEY_F(2) || key == KEY_F(3) || key == KEY_F(9)) {
+		UI_MessageBox("Sorry, not implemented yet.");
+		return;
+	}
+
 	if (key == KEY_F(6)) {
 		char *old_name = p->dir->entries[selected].name;
 		uint64_t serial_no = p->dir->entries[selected].serial_no;
