@@ -17,13 +17,13 @@ static void SummarizeSize(int64_t len, char buf[10])
 	if (len < 0) {
 		strncpy(buf, "", 10);
 	} else if (len < 1000000) {
-		snprintf(buf, 10, " %lld", len);
+		snprintf(buf, 10, " %d", (int) len);
 	} else if (len < 1000000000) {
-		snprintf(buf, 10, " %lldK", len / 1000);
+		snprintf(buf, 10, " %dK", (int) (len / 1000));
 	} else if (len < 1000000000000) {
-		snprintf(buf, 10, " %lldM", len / 1000000);
+		snprintf(buf, 10, " %dM", (int) (len / 1000000));
 	} else if (len < 1000000000000000) {
-		snprintf(buf, 10, " %lldG", len / 1000000000);
+		snprintf(buf, 10, " %dG", (int) (len / 1000000000));
 	} else {
 		snprintf(buf, 10, " big!");
 	}
