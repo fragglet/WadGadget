@@ -480,7 +480,7 @@ void VFS_DescribeSet(struct directory *dir, struct file_set *set,
 		snprintf(buf, buf_len, "'%s'", ent->name);
 	} else {
 		snprintf(buf, buf_len, "%d %s",
-		         set->num_entries,
+		         (int) set->num_entries,
 		         dir->type == FILE_TYPE_WAD ? "lumps" : "files");
 	}
 }
