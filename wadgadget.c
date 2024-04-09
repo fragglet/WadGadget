@@ -334,8 +334,9 @@ static void DrawInfoPane(void *p)
 	}
 	if (dirs[active_pane]->entries[idx].type == FILE_TYPE_LUMP) {
 		struct wad_file *wf = VFS_WadFile(dirs[active_pane]);
+		const struct lump_type *lt = LI_IdentifyLump(wf, idx);
 		UI_PrintMultilineString(pane->window, 1, 2,
-		    GetLumpDescription(wf, idx));
+		    LI_DescribeLump(lt, wf, idx));
        }
 }
 

@@ -4,9 +4,14 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "common.h"
 #include "wad_file.h"
 
-static char description_buf[128];
+struct lump_type {
+	bool (*check)(struct wad_file_entry *ent, uint8_t *buf);
+	void (*format)(struct wad_file_entry *ent, uint8_t *buf,
+	               char *descr_buf, size_t descr_buf_len);
+};
 
 struct sound_header {
 	uint16_t format;
@@ -83,85 +88,150 @@ static const char *LookupDescription(const struct lump_description *table,
 	return NULL;
 }
 
-static const char *CheckForEmptyLump(struct wad_file_entry *ent,
-                                     void *buf)
+// Empty lump (size=0)
+
+static bool EmptyLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	if (ent->size == 0) {
-		return "Empty";
-	}
-	return NULL;
+	return ent->size == 0;
 }
 
-static const char *CheckForLevelLump(struct wad_file_entry *ent, void *buf)
+static void EmptyLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                            char *descr_buf, size_t descr_buf_len)
 {
-	return LookupDescription(level_lumps, ent);
+	snprintf(descr_buf, descr_buf_len, "Empty");
 }
 
-static const char *CheckForSpecialLump(struct wad_file_entry *ent, void *buf)
+const struct lump_type lump_type_empty = {
+	EmptyLumpCheck,
+	EmptyLumpFormat,
+};
+
+// Lump with one of the standard "level" names, eg. "LINEDEFS", "SECTORS", etc.
+
+static bool LevelLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return LookupDescription(special_lumps, ent);
+	return LookupDescription(level_lumps, ent) != NULL;
 }
 
-static const char *CheckForSoundLump(struct wad_file_entry *ent,
-                                     void *buf)
+static void LevelLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                            char *descr_buf, size_t descr_buf_len)
 {
-	struct sound_header *sound = buf;
-
-	if (ent->size >= 16 && sound->format == 3
-	 && (sound->sample_rate == 8000 || sound->sample_rate == 11025
-	  || sound->sample_rate == 22050 || sound->sample_rate == 44100)) {
-		snprintf(description_buf, sizeof(description_buf),
-		         "Sound, %d hz\nLength: %0.02fs",
-		         sound->sample_rate,
-		         (float) sound->num_samples / sound->sample_rate);
-		return description_buf;
-	}
-	return NULL;
+	snprintf(descr_buf, descr_buf_len, "%s",
+	         LookupDescription(level_lumps, ent));
 }
 
-static const char *CheckForGraphicLump(struct wad_file_entry *ent,
-                                       void *buf)
-{
-	struct patch_header *patch = buf;
+const struct lump_type lump_type_level = {
+	LevelLumpCheck,
+	LevelLumpFormat,
+};
 
-	if (ent->size >= 8 && patch->width > 0 && patch->height > 0
-	 && patch->width <= 320 && patch->height <= 200
-	 && patch->xoff > -192 && patch->xoff <= 192
-	 && patch->yoff > -192 && patch->yoff <= 192) {
-		snprintf(description_buf, sizeof(description_buf),
-		         "Graphic (%dx%d)\nOffsets: %d, %d",
-		         patch->width, patch->height,
-		         patch->xoff, patch->yoff);
-		return description_buf;
-	}
-	return NULL;
+// "Special" one-of-a-kind lumps that are listed in the special_lumps array.
+
+static bool SpecialLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return LookupDescription(special_lumps, ent) != NULL;
 }
 
-static const char *CheckForMusicLump(struct wad_file_entry *ent,
-                                     void *buf)
+static void SpecialLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                              char *descr_buf, size_t descr_buf_len)
 {
-	if (ent->size < 4) {
-		return NULL;
-	}
-
-	if (!memcmp(buf, "MThd", 4)) {
-		return "MIDI music track";
-	}
-
-	if (!memcmp(buf, "MUS\x1a", 4)) {
-		return "DMX MUS music track";
-	}
-
-	return NULL;
+	snprintf(descr_buf, descr_buf_len, "%s",
+	         LookupDescription(special_lumps, ent));
 }
 
-static const char *CheckForFlat(struct wad_file_entry *ent, void *buf)
+const struct lump_type lump_type_special = {
+	SpecialLumpCheck,
+	SpecialLumpFormat,
+};
+
+// PCM sound effects.
+
+static bool SoundLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	if (ent->size == 4096) {
-		return "Floor/ceiling texture";
-	}
-	return NULL;
+	struct sound_header *sound = (struct sound_header *) buf;
+
+	return ent->size >= 16 && sound->format == 3
+	   && (sound->sample_rate == 8000 || sound->sample_rate == 11025
+	    || sound->sample_rate == 22050 || sound->sample_rate == 44100);
 }
+
+static void SoundLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                              char *descr_buf, size_t descr_buf_len)
+{
+	struct sound_header *sound = (struct sound_header *) buf;
+
+	snprintf(descr_buf, descr_buf_len,
+	         "Sound, %d hz\nLength: %0.02fs",
+	         sound->sample_rate,
+	         (float) sound->num_samples / sound->sample_rate);
+}
+
+const struct lump_type lump_type_sound = {
+	SoundLumpCheck,
+	SoundLumpFormat,
+};
+
+// Graphic lump (sprite, texture, etc.)
+
+static bool GraphicLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	struct patch_header *patch = (struct patch_header *) buf;
+
+	return ent->size >= 8 && patch->width > 0 && patch->height > 0
+	    && patch->width <= 320 && patch->height <= 200
+	    && patch->xoff > -192 && patch->xoff <= 192
+	    && patch->yoff > -192 && patch->yoff <= 192;
+}
+
+static void GraphicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                              char *descr_buf, size_t descr_buf_len)
+{
+	struct patch_header *patch = (struct patch_header *) buf;
+
+	snprintf(descr_buf, descr_buf_len,
+	         "Graphic (%dx%d)\nOffsets: %d, %d",
+	         patch->width, patch->height,
+	         patch->xoff, patch->yoff);
+}
+
+const struct lump_type lump_type_graphic = {
+	GraphicLumpCheck,
+	GraphicLumpFormat,
+};
+
+static bool MusicLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return ent->size >= 4
+	    && (!memcmp(buf, "MThd", 4) || !memcmp(buf, "MUS\x1a", 4));
+}
+
+static void MusicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                            char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "%s music track",
+	         !memcmp(buf, "MThd", 4) ? "MIDI" : "DMX MUS");
+}
+
+const struct lump_type lump_type_music = {
+	MusicLumpCheck,
+	MusicLumpFormat,
+};
+
+static bool FlatLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return ent->size == 4096;
+}
+
+static void FlatLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                           char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "Floor/ceiling texture");
+}
+
+const struct lump_type lump_type_flat = {
+	FlatLumpCheck,
+	FlatLumpFormat,
+};
 
 static const struct {
 	int code;
@@ -191,18 +261,19 @@ static const char *VersionCodeString(int code)
 	return "v?.?";
 }
 
-static const char *CheckForDemo(struct wad_file_entry *ent, void *buf)
+static bool DemoLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return !strncasecmp(ent->name, "DEMO", 4);
+}
+
+static void DemoLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                           char *descr_buf, size_t descr_buf_len)
 {
 	char level_buf[20];
 	const char *modestr;
-	uint8_t *bytes = buf;
 	int ep, map;
 
-	if (strncasecmp(ent->name, "DEMO", 4) != 0) {
-		return NULL;
-	}
-
-	ep = bytes[2]; map = bytes[3];
+	ep = buf[2]; map = buf[3];
 	if (ep != 1) {
 		snprintf(level_buf, sizeof(level_buf), "E%dM%d", ep, map);
 	} else if (map < 10) {
@@ -212,7 +283,7 @@ static const char *CheckForDemo(struct wad_file_entry *ent, void *buf)
 		snprintf(level_buf, sizeof(level_buf), "MAP%02d", map);
 	}
 
-	switch (bytes[4]) {
+	switch (buf[4]) {
 		case 0:
 			modestr = "SP/Coop";
 			break;
@@ -227,48 +298,78 @@ static const char *CheckForDemo(struct wad_file_entry *ent, void *buf)
 			break;
 	}
 
-	snprintf(description_buf, sizeof(description_buf),
+	snprintf(descr_buf, descr_buf_len,
 	         "Demo: %s, skill %d\n%s; %s",
-	         VersionCodeString(bytes[0]), bytes[1], modestr, level_buf);
-	return description_buf;
+	         VersionCodeString(buf[0]), buf[1], modestr, level_buf);
 }
 
-static const char *CheckForPcSpeaker(struct wad_file_entry *ent, void *buf)
+const struct lump_type lump_type_demo = {
+	DemoLumpCheck,
+	DemoLumpFormat,
+};
+
+static bool PcSpeakerLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	uint8_t *bytes = buf;
 	size_t len;
 
 	if (strncasecmp(ent->name, "DP", 2) != 0) {
-		return NULL;
+		return false;
 	}
 
-	len = bytes[2] | (bytes[3] << 8);
-	if (bytes[0] == 0 && bytes[1] == 0 && len + 4 == ent->size) {
-		snprintf(description_buf, sizeof(description_buf),
-		         "PC speaker sound, %0.02fs", (float) len / 140);
-		return description_buf;
-	}
-
-	return NULL;
+	len = buf[2] | (buf[3] << 8);
+	return buf[0] == 0 && buf[1] == 0 && len + 4 == ent->size;
 }
 
-typedef const char *(*check_function)(struct wad_file_entry *ent, void *buf);
+static void PcSpeakerLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                           char *descr_buf, size_t descr_buf_len)
+{
+	size_t len = buf[2] | (buf[3] << 8);
 
-static check_function check_functions[] = {
-	CheckForEmptyLump,
-	CheckForLevelLump,
-	CheckForSpecialLump,
-	CheckForPcSpeaker,
-	CheckForSoundLump,
-	CheckForGraphicLump,
-	CheckForMusicLump,
-	CheckForFlat,
-	CheckForDemo,
-	NULL,
+	snprintf(descr_buf, descr_buf_len,
+	         "PC speaker sound, %0.02fs", (float) len / 140);
+}
+
+const struct lump_type lump_type_pcspeaker = {
+	PcSpeakerLumpCheck,
+	PcSpeakerLumpFormat,
 };
 
-const char *GetLumpDescription(struct wad_file *f,
-                               unsigned int lump_index)
+// Fallback, "generic lump"
+
+static bool UnknownLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return true;
+}
+
+static void UnknownLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                            char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len,
+	         "%02x %02x %02x %02x %02x %02x %02x %02x",
+	         buf[0], buf[1], buf[2], buf[3],
+	         buf[4], buf[5], buf[6], buf[7]);
+}
+
+const struct lump_type lump_type_unknown = {
+	UnknownLumpCheck,
+	UnknownLumpFormat,
+};
+
+static const struct lump_type *lump_types[] = {
+	&lump_type_empty,
+	&lump_type_level,
+	&lump_type_special,
+	&lump_type_sound,
+	&lump_type_graphic,
+	&lump_type_music,
+	&lump_type_flat,
+	&lump_type_demo,
+	&lump_type_pcspeaker,
+	&lump_type_unknown,
+};
+
+const struct lump_type *LI_IdentifyLump(struct wad_file *f,
+                                        unsigned int lump_index)
 {
 	struct wad_file_entry *ent;
 	uint8_t buf[8];
@@ -279,16 +380,28 @@ const char *GetLumpDescription(struct wad_file *f,
 	memset(buf, 0, sizeof(buf));
 	W_ReadLumpHeader(f, lump_index, buf, sizeof(buf));
 
-	for (i = 0; check_functions[i] != NULL; i++) {
-		const char *result = check_functions[i](ent, buf);
-		if (result != NULL) {
-			return result;
+	for (i = 0; i < arrlen(lump_types); i++) {
+		if (lump_types[i]->check(ent, buf)) {
+			return lump_types[i];
 		}
 	}
 
-	snprintf(description_buf, sizeof(description_buf),
-	         "%02x %02x %02x %02x %02x %02x %02x %02x",
-	         buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
-	return description_buf;
+	return NULL;
 }
 
+const char *LI_DescribeLump(const struct lump_type *t, struct wad_file *f,
+                            unsigned int lump_index)
+{
+	static char description_buf[128];
+	struct wad_file_entry *ent;
+	uint8_t buf[8];
+
+	ent = &W_GetDirectory(f)[lump_index];
+
+	memset(buf, 0, sizeof(buf));
+	W_ReadLumpHeader(f, lump_index, buf, sizeof(buf));
+
+	t->format(ent, buf, description_buf, sizeof(description_buf));
+
+	return description_buf;
+}
