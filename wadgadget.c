@@ -130,6 +130,15 @@ static void NavigateNew(void)
 	}
 
 	path = UI_DirectoryPaneEntryPath(pane);
+
+	// Don't allow the same WAD to be opened twice.
+	if (!strcmp(path, dirs[!active_pane]->path)
+	 && dirs[!active_pane]->type == FILE_TYPE_WAD) {
+		free(path);
+		SwitchToPane(!active_pane);
+		return;
+	}
+
 	new_dir = VFS_OpenDir(path);
 	new_pane = UI_NewDirectoryPane(pane_windows[active_pane], new_dir);
 
@@ -303,6 +312,10 @@ static void HandleKeypress(void *pane, int key)
 		break;
 	case KEY_F(9):
 		CreateWad();
+		break;
+	case ('L' & 0x1f):  // ^L = redraw whole screen
+		clearok(stdscr, TRUE);
+		wrefresh(stdscr);
 		break;
 	case '\r':
 		NavigateNew();
