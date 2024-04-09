@@ -80,11 +80,6 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 	struct directory_entry *ent, *ent2;
 	int idx;
 
-	if (from_set->num_entries < 1) {
-		UI_MessageBox(
-		    "You have not selected anything to export.");
-		return false;
-	}
 	if (from->type == FILE_TYPE_DIR && !strcmp(from->path, to->path)) {
 		UI_MessageBox(
 		    "You can't copy to the same directory.");

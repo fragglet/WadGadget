@@ -46,12 +46,6 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	// TODO: Update/overwrite existing lump instead of creating a new
 	// lump.
 
-	if (from_set->num_entries < 1) {
-		UI_MessageBox(
-		    "You have not selected anything to import.");
-		return false;
-	}
-
 	to_wad = VFS_WadFile(to);
 	lumpnum = to_index;
 	W_AddEntries(to_wad, lumpnum, from_set->num_entries);

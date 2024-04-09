@@ -167,6 +167,12 @@ static void PerformCopy(void)
 	if (to->type == FILE_TYPE_DIR) {
 		struct file_set *export_set =
 			UI_DirectoryPaneTagged(panes[active_pane]);
+		if (export_set->num_entries < 1) {
+			UI_MessageBox(
+			    "You have not selected anything to export.");
+			VFS_FreeSet(&result);
+			return;
+		}
 		if (PerformExport(from, export_set, to, &result)) {
 			UI_DirectoryPaneSetTagged(panes[!active_pane], &result);
 			SwitchToPane(!active_pane);
@@ -178,6 +184,12 @@ static void PerformCopy(void)
 		struct file_set *import_set =
 			UI_DirectoryPaneTagged(panes[active_pane]);
 		int to_point = UI_DirectoryPaneSelected(panes[!active_pane]) + 1;
+		if (import_set->num_entries < 1) {
+			UI_MessageBox(
+			    "You have not selected anything to import.");
+			VFS_FreeSet(&result);
+			return;
+		}
 		if (PerformImport(from, import_set, to, to_point, &result)) {
 			UI_DirectoryPaneSetTagged(panes[!active_pane], &result);
 			SwitchToPane(!active_pane);
@@ -189,64 +201,89 @@ static void PerformCopy(void)
 	UI_MessageBox("Sorry, this isn't implemented yet.");
 }
 
-static void CreateWad(void)
+static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
+                            struct directory *to)
 {
-	struct directory_pane *apane = panes[active_pane],
-	                      *opane = panes[!active_pane];
-	struct directory *adir = dirs[active_pane], *odir = dirs[!active_pane];
-	struct file_set *import_set, result = EMPTY_FILE_SET;
+	struct file_set result = EMPTY_FILE_SET;
 	struct directory *newfile;
 	char *filename, *filename2;
-
-	// TODO: Create WAD directly from files
-	if (adir->type != FILE_TYPE_WAD || odir->type != FILE_TYPE_DIR) {
-		return;
-	}
-
-	if (apane->tagged.num_entries == 0) {
-		UI_MessageBox("You have not selected any lumps to export.");
-		return;
-	}
 
 	filename = UI_TextInputDialogBox(
 		"Make new WAD", 64,
 		"Enter name for new WAD file:");
 
-	if (VFS_EntryByName(odir, filename) != NULL
+	if (VFS_EntryByName(to, filename) != NULL
 	 && !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite existing '%s'?",
 	                         filename)) {
 		free(filename);
-		return;
+		return NULL;
 	}
 
-	filename2 = StringJoin("", odir->path, "/", filename, NULL);
+	filename2 = StringJoin("", to->path, "/", filename, NULL);
 
 	if (!W_CreateFile(filename2)) {
 		UI_MessageBox("Failed to create new WAD file.");
 		free(filename);
 		free(filename2);
-		return;
+		return NULL;
 	}
 	newfile = VFS_OpenDir(filename2);
 	if (newfile == NULL) {
 		UI_MessageBox("Failed to open new file after creating.");
 		free(filename);
 		free(filename2);
-		return;
+		return NULL;
 	}
 
 	free(filename2);
 
-	import_set = UI_DirectoryPaneTagged(panes[active_pane]);
-	if (PerformImport(adir, import_set, newfile, 0, &result)) {
-		VFS_Refresh(odir);
-		UI_DirectoryPaneSearch(opane, filename);
-		SwitchToPane(!active_pane);
+	if (!PerformImport(from, from_set, newfile, 0, &result)) {
+		free(filename);
+		filename = NULL;
 	}
+	VFS_Refresh(to);
 	VFS_FreeSet(&result);
 	VFS_CloseDir(newfile);
 
-	free(filename);
+	return filename;
+}
+
+static void CreateWad(void)
+{
+	struct directory_pane *from_pane, *to_pane;
+	struct file_set *import_set;
+	char *filename;
+
+	if (panes[active_pane]->dir->type == FILE_TYPE_WAD
+	 && panes[!active_pane]->dir->type == FILE_TYPE_DIR) {
+		// Export from existing WAD to new WAD
+		from_pane = panes[active_pane];
+		to_pane = panes[!active_pane];
+		if (from_pane->tagged.num_entries == 0) {
+			UI_MessageBox("You have not selected any "
+			              "lumps to export.");
+			return;
+		}
+	} else if (panes[active_pane]->dir->type == FILE_TYPE_DIR) {
+		// Create new WAD and import tagged files.
+		from_pane = panes[active_pane];
+		to_pane = panes[active_pane];
+		if (from_pane->tagged.num_entries == 0
+		 && !UI_ConfirmDialogBox("Create WAD",
+		                         "Create an empty WAD file?")) {
+			return;
+		}
+	} else {
+		return;
+	}
+
+	import_set = &from_pane->tagged;
+	filename = CreateWadInDir(from_pane->dir, import_set, to_pane->dir);
+	if (filename != NULL) {
+		UI_DirectoryPaneSearch(to_pane, filename);
+		free(filename);
+		SwitchToPane(panes[0] == to_pane ? 0 : 1);
+	}
 }
 
 static void HandleKeypress(void *pane, int key)
