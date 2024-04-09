@@ -177,7 +177,7 @@ static void PerformCopy(void)
 	if (to->type == FILE_TYPE_WAD) {
 		struct file_set *import_set =
 			UI_DirectoryPaneTagged(panes[active_pane]);
-		int to_point = UI_DirectoryPaneSelected(panes[!active_pane]);
+		int to_point = UI_DirectoryPaneSelected(panes[!active_pane]) + 1;
 		if (PerformImport(from, import_set, to, to_point, &result)) {
 			UI_DirectoryPaneSetTagged(panes[!active_pane], &result);
 			SwitchToPane(!active_pane);
@@ -187,6 +187,66 @@ static void PerformCopy(void)
 	}
 
 	UI_MessageBox("Sorry, this isn't implemented yet.");
+}
+
+static void CreateWad(void)
+{
+	struct directory_pane *apane = panes[active_pane],
+	                      *opane = panes[!active_pane];
+	struct directory *adir = dirs[active_pane], *odir = dirs[!active_pane];
+	struct file_set *import_set, result = EMPTY_FILE_SET;
+	struct directory *newfile;
+	char *filename, *filename2;
+
+	// TODO: Create WAD directly from files
+	if (adir->type != FILE_TYPE_WAD || odir->type != FILE_TYPE_DIR) {
+		return;
+	}
+
+	if (apane->tagged.num_entries == 0) {
+		UI_MessageBox("You have not selected any lumps to export.");
+		return;
+	}
+
+	filename = UI_TextInputDialogBox(
+		"Make new WAD", 64,
+		"Enter name for new WAD file:");
+
+	if (VFS_EntryByName(odir, filename) != NULL
+	 && !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite existing '%s'?",
+	                         filename)) {
+		free(filename);
+		return;
+	}
+
+	filename2 = StringJoin("", odir->path, "/", filename, NULL);
+
+	if (!W_CreateFile(filename2)) {
+		UI_MessageBox("Failed to create new WAD file.");
+		free(filename);
+		free(filename2);
+		return;
+	}
+	newfile = VFS_OpenDir(filename2);
+	if (newfile == NULL) {
+		UI_MessageBox("Failed to open new file after creating.");
+		free(filename);
+		free(filename2);
+		return;
+	}
+
+	free(filename2);
+
+	import_set = UI_DirectoryPaneTagged(panes[active_pane]);
+	if (PerformImport(adir, import_set, newfile, 0, &result)) {
+		VFS_Refresh(odir);
+		UI_DirectoryPaneSearch(opane, filename);
+		SwitchToPane(!active_pane);
+	}
+	VFS_FreeSet(&result);
+	VFS_CloseDir(newfile);
+
+	free(filename);
 }
 
 static void HandleKeypress(void *pane, int key)
@@ -203,6 +263,9 @@ static void HandleKeypress(void *pane, int key)
 		break;
 	case KEY_F(5):
 		PerformCopy();
+		break;
+	case KEY_F(9):
+		CreateWad();
 		break;
 	case '\r':
 		NavigateNew();

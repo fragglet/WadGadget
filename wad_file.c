@@ -60,6 +60,30 @@ static uint64_t NewSerialNo(void)
 	return result;
 }
 
+// Just creates an empty WAD file.
+bool W_CreateFile(const char *filename)
+{
+	uint8_t zerobuf[sizeof(struct wad_file_header)];
+	struct wad_file *wf;
+	FILE *fs;
+
+	fs = fopen(filename, "w+");
+	if (fs == NULL) {
+		return false;
+	}
+
+	assert(fwrite(zerobuf, sizeof(zerobuf), 1, fs) == 1);
+
+	wf = checked_calloc(1, sizeof(struct wad_file));
+	wf->vfs = vfwrapfile(fs);
+	wf->dirty = true;
+	memcpy(wf->header.id, "PWAD", 4);
+	W_WriteDirectory(wf);
+	W_CloseFile(wf);
+
+	return true;
+}
+
 struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;

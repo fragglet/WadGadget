@@ -19,7 +19,8 @@ struct wad_file_entry {
 	uint64_t serial_no;
 };
 
-struct wad_file *W_OpenFile(const char *file);
+bool W_CreateFile(const char *filename);
+struct wad_file *W_OpenFile(const char *filename);
 void W_CloseFile(struct wad_file *f);
 struct wad_file_entry *W_GetDirectory(struct wad_file *f);
 unsigned int W_NumLumps(struct wad_file *f);
