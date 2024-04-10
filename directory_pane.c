@@ -270,7 +270,7 @@ static void Keypress(void *directory_pane, int key)
 	struct file_set *tagged = UI_DirectoryPaneTagged(p);
 	int selected = UI_DirectoryPaneSelected(p);
 
-	if (key == KEY_F(2)) {
+	if (key == KEY_F(2) || key == KEY_F(4)) {
 		UI_MessageBox("Sorry, not implemented yet.");
 		return;
 	}
