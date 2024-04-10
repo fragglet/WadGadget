@@ -28,15 +28,16 @@ struct lump_description {
 	const char *name, *description;
 };
 
+struct sized_lump {
+	int size;
+	const char *description;
+};
+
 static const struct lump_description special_lumps[] = {
 	{"PLAYPAL",   "VGA palette"},
-	{"COLORMAP",  "Light translation map"},
 	{"TINTTAB",   "Translucency table"},
 	{"XLATAB",    "Translucency table"},
 	{"AUTOPAGE",  "Map background texture"},
-	{"ENDOOM",    "Text mode exit screen"},
-	{"ENDTEXT",   "Text mode exit screen"},
-	{"ENDSTRF",   "Text mode exit screen"},
 	{"GENMIDI",   "OPL FM synth instrs."},
 	{"DMXGUS",    "GUS instr. mappings"},
 	{"DMXGUSC",   "GUS instr. mappings"},
@@ -74,6 +75,15 @@ static const struct lump_description level_lumps[] = {
 	{NULL, NULL},
 };
 
+static const struct sized_lump lumps_by_size[] = {
+	{8704,   "Light translation map"},
+	{64000,  "Fullscreen image"},
+	{4000,   "Text mode screen"},
+	{4096,   "Floor/ceiling texture"},
+	{256,    "Color translation table"},
+	{0,      "Empty"},
+};
+
 static const char *LookupDescription(const struct lump_description *table,
                                      struct wad_file_entry *ent)
 {
@@ -87,24 +97,6 @@ static const char *LookupDescription(const struct lump_description *table,
 
 	return NULL;
 }
-
-// Empty lump (size=0)
-
-static bool EmptyLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
-{
-	return ent->size == 0;
-}
-
-static void EmptyLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
-                            char *descr_buf, size_t descr_buf_len)
-{
-	snprintf(descr_buf, descr_buf_len, "Empty");
-}
-
-const struct lump_type lump_type_empty = {
-	EmptyLumpCheck,
-	EmptyLumpFormat,
-};
 
 // Lump with one of the standard "level" names, eg. "LINEDEFS", "SECTORS", etc.
 
@@ -217,22 +209,6 @@ const struct lump_type lump_type_music = {
 	MusicLumpFormat,
 };
 
-static bool FlatLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
-{
-	return ent->size == 4096;
-}
-
-static void FlatLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
-                           char *descr_buf, size_t descr_buf_len)
-{
-	snprintf(descr_buf, descr_buf_len, "Floor/ceiling texture");
-}
-
-const struct lump_type lump_type_flat = {
-	FlatLumpCheck,
-	FlatLumpFormat,
-};
-
 static const struct {
 	int code;
 	const char *str;
@@ -334,6 +310,40 @@ const struct lump_type lump_type_pcspeaker = {
 	PcSpeakerLumpFormat,
 };
 
+// Lump types identified by fixed size. This type is last in the identification
+// list before "unknown" because it uses the least information to make the
+// identification.
+
+static const struct sized_lump *LumpTypeForSize(unsigned int len)
+{
+	int i;
+
+	for (i = 0; i < arrlen(lumps_by_size); i++) {
+		if (lumps_by_size[i].size == len) {
+			return &lumps_by_size[i];
+		}
+	}
+
+	return NULL;
+}
+
+static bool SizedLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return LumpTypeForSize(ent->size) != NULL;
+}
+
+static void SizedLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                           char *descr_buf, size_t descr_buf_len)
+{
+	const struct sized_lump *lt = LumpTypeForSize(ent->size);
+	snprintf(descr_buf, descr_buf_len, "%s", lt->description);
+}
+
+const struct lump_type lump_type_sized = {
+	SizedLumpCheck,
+	SizedLumpFormat,
+};
+
 // Fallback, "generic lump"
 
 static bool UnknownLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
@@ -356,15 +366,14 @@ const struct lump_type lump_type_unknown = {
 };
 
 static const struct lump_type *lump_types[] = {
-	&lump_type_empty,
 	&lump_type_level,
 	&lump_type_special,
 	&lump_type_sound,
 	&lump_type_graphic,
 	&lump_type_music,
-	&lump_type_flat,
 	&lump_type_demo,
 	&lump_type_pcspeaker,
+	&lump_type_sized,
 	&lump_type_unknown,
 };
 
