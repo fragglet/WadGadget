@@ -161,7 +161,7 @@ static void SoundLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	struct sound_header *sound = (struct sound_header *) buf;
 
 	snprintf(descr_buf, descr_buf_len,
-	         "Sound, %d hz\nLength: %0.02fs",
+	         "PCM sound effect\nSample rate: %d hz\nLength: %0.02fs",
 	         sound->sample_rate,
 	         (float) sound->num_samples / sound->sample_rate);
 }
@@ -189,7 +189,7 @@ static void GraphicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	struct patch_header *patch = (struct patch_header *) buf;
 
 	snprintf(descr_buf, descr_buf_len,
-	         "Graphic (%dx%d)\nOffsets: %d, %d",
+	         "Graphic\nDimensions: %dx%d\nOffsets: %d, %d",
 	         patch->width, patch->height,
 	         patch->xoff, patch->yoff);
 }
@@ -299,7 +299,7 @@ static void DemoLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	}
 
 	snprintf(descr_buf, descr_buf_len,
-	         "Demo: %s, skill %d\n%s; %s",
+	         "Demo recording\nVersion: %s, Skill: %d\n%s; %s",
 	         VersionCodeString(buf[0]), buf[1], modestr, level_buf);
 }
 
@@ -326,7 +326,7 @@ static void PcSpeakerLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	size_t len = buf[2] | (buf[3] << 8);
 
 	snprintf(descr_buf, descr_buf_len,
-	         "PC speaker sound, %0.02fs", (float) len / 140);
+	         "PC speaker sound\nLength: %0.02fs", (float) len / 140);
 }
 
 const struct lump_type lump_type_pcspeaker = {
