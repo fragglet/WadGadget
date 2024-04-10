@@ -171,8 +171,8 @@ static bool GraphicLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 
 	return ent->size >= 8 && patch->width > 0 && patch->height > 0
 	    && patch->width <= 320 && patch->height <= 200
-	    && patch->xoff > -192 && patch->xoff <= 192
-	    && patch->yoff > -192 && patch->yoff <= 192;
+	    && patch->xoff >= -256 && patch->xoff < 256
+	    && patch->yoff >= -256 && patch->yoff < 256;
 }
 
 static void GraphicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
