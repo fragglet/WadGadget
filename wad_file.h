@@ -4,6 +4,8 @@
 
 #include "vfile.h"
 
+#define LUMP_HEADER_LEN 8
+
 struct wad_file;
 
 struct wad_file_header {
@@ -17,6 +19,7 @@ struct wad_file_entry {
 	unsigned int size;
 	char name[8];
 	uint64_t serial_no;
+	uint8_t lump_header[LUMP_HEADER_LEN];
 };
 
 bool W_CreateFile(const char *filename);

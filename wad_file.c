@@ -11,17 +11,11 @@
 #include "vfile.h"
 #include "wad_file.h"
 
-#define LUMP_HEADER_LEN 8
-
-typedef uint8_t lump_header[LUMP_HEADER_LEN];
-
 struct wad_file {
 	VFILE *vfs;
 	struct wad_file_header header;
 	struct wad_file_entry *directory;
 	int num_lumps;
-
-	lump_header *lump_headers;
 
 	// We can only read/write a single lump at once.
 	VFILE *current_lump;
@@ -48,7 +42,7 @@ static void ReadLumpHeader(struct wad_file *wad, unsigned int lump_index)
 	size_t bytes = min(wad->directory[lump_index].size, LUMP_HEADER_LEN);
 	assert(vfseek(wad->vfs, wad->directory[lump_index].position,
 	              SEEK_SET) == 0);
-	assert(vfread(&wad->lump_headers[lump_index],
+	assert(vfread(&wad->directory[lump_index].lump_header,
 	              1, bytes, wad->vfs) == bytes);
 }
 
@@ -123,8 +117,6 @@ struct wad_file *W_OpenFile(const char *filename)
 	// Read and save the first few bytes of every lump. This contains
 	// enough information that we can give a basic summary of several
 	// common lump types, eg. demos, graphics, MID/MUS.
-	result->lump_headers =
-	    checked_calloc(result->num_lumps, LUMP_HEADER_LEN);
 	for (i = 0; i < result->num_lumps; i++) {
 		ReadLumpHeader(result, i);
 	}
@@ -149,7 +141,6 @@ void W_CloseFile(struct wad_file *f)
 	}
 	vfclose(f->vfs);
 	free(f->directory);
-	free(f->lump_headers);
 	free(f);
 }
 
@@ -169,12 +160,6 @@ void W_AddEntries(struct wad_file *f, unsigned int before_index,
 	        &f->directory[before_index],
 	        (f->num_lumps - before_index) * sizeof(struct wad_file_entry));
 
-	f->lump_headers = realloc(f->lump_headers,
-	    (f->num_lumps + count) * sizeof(lump_header));
-	memmove(&f->lump_headers[before_index + count],
-	        &f->lump_headers[before_index],
-	        (f->num_lumps - before_index) * sizeof(lump_header));
-
 	f->num_lumps += count;
 
 	for (i = 0; i < count; i++) {
@@ -183,7 +168,7 @@ void W_AddEntries(struct wad_file *f, unsigned int before_index,
 		ent->size = 0;
 		ent->serial_no = NewSerialNo();
 		snprintf(ent->name, 8, "UNNAMED");
-		memset(&f->lump_headers[i], 0, sizeof(lump_header));
+		memset(&ent->lump_header, 0, LUMP_HEADER_LEN);
 	}
 	f->dirty = true;
 }
@@ -193,8 +178,6 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index)
 	assert(index < f->num_lumps);
 	memmove(&f->directory[index], &f->directory[index + 1],
 	        (f->num_lumps - index - 1) * sizeof(struct wad_file_entry));
-	memmove(&f->lump_headers[index], &f->lump_headers[index + 1],
-	        (f->num_lumps - index - 1) * sizeof(lump_header));
 	--f->num_lumps;
 	f->dirty = true;
 }
@@ -217,7 +200,7 @@ size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
 {
 	assert(index < f->num_lumps);
 	buf_len = min(buf_len, min(LUMP_HEADER_LEN, f->directory[index].size));
-	memcpy(buf, &f->lump_headers[index], buf_len);
+	memcpy(buf, &f->directory[index].lump_header, buf_len);
 	return buf_len;
 }
 
