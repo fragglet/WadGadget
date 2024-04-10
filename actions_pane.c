@@ -5,8 +5,8 @@
 #include "colors.h"
 
 static const struct action wad_to_wad[] = {
-	{"F2", "View"},
-	{"F3", "Edit"},
+	{"F2", "Edit"},
+	{"F3", "Move lumps"},
 	{"F4", "> Update"},
 	{"F5", "> Copy"},
 	{"F6", "Rename"},
@@ -16,8 +16,8 @@ static const struct action wad_to_wad[] = {
 };
 
 static const struct action wad_to_dir[] = {
-	{"F2", "View"},
-	{"F3", "Edit"},
+	{"F2", "Edit"},
+	{"F3", "Move lumps"},
 	{"F5", "> Export"},
 	{"F6", "Rename"},
 	{"F7", "New lump"},

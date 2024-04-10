@@ -222,6 +222,47 @@ char *UI_DirectoryPaneEntryPath(struct directory_pane *p)
 	}
 }
 
+static void MoveLumps(struct directory_pane *p, struct wad_file *wf)
+{
+	struct wad_file_entry *dir;
+	int i, numlumps;
+	int insert_start, insert_end, insert_point;
+
+	insert_start = UI_DirectoryPaneSelected(p) + 1;
+	insert_end = insert_start + p->tagged.num_entries;
+	insert_point = insert_start;
+
+	W_AddEntries(wf, insert_start, p->tagged.num_entries);
+	dir = W_GetDirectory(wf);
+	numlumps = W_NumLumps(wf);
+
+	for (i = 0; i < numlumps; i++) {
+		if (i >= insert_start && i < insert_end) {
+			continue;
+		}
+		if (!VFS_SetHas(&p->tagged, dir[i].serial_no)) {
+			continue;
+		}
+		// This is a lump we want to move.
+		memcpy(&dir[insert_point], &dir[i],
+		       sizeof(struct wad_file_entry));
+		++insert_point;
+
+		W_DeleteEntry(wf, i);
+		if (i <= insert_start) {
+			--insert_start;
+			--insert_end;
+			--insert_point;
+		}
+		--numlumps;
+		--i;
+		dir = W_GetDirectory(wf);
+	}
+
+	UI_ListPaneSelect(&p->pane, insert_start + 1);
+	VFS_Refresh(p->dir);
+}
+
 static void Keypress(void *directory_pane, int key)
 {
 	struct directory_pane *p = directory_pane;
@@ -229,11 +270,19 @@ static void Keypress(void *directory_pane, int key)
 	struct file_set *tagged = UI_DirectoryPaneTagged(p);
 	int selected = UI_DirectoryPaneSelected(p);
 
-	if (key == KEY_F(2) || key == KEY_F(3)) {
+	if (key == KEY_F(2)) {
 		UI_MessageBox("Sorry, not implemented yet.");
 		return;
 	}
-
+	if (p->dir->type == FILE_TYPE_WAD && key == KEY_F(3)) {
+		if (p->tagged.num_entries == 0) {
+			UI_MessageBox(
+			    "You have not selected any lumps to move.");
+			return;
+		}
+		MoveLumps(p, VFS_WadFile(p->dir));
+		return;
+	}
 	if (key == KEY_F(6)) {
 		char *old_name = p->dir->entries[selected].name;
 		uint64_t serial_no = p->dir->entries[selected].serial_no;
