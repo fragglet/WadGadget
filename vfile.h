@@ -3,6 +3,7 @@
 #define INCLUDED_VFILE_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 typedef struct _VFILE VFILE;
 
@@ -31,6 +32,10 @@ size_t vfwrite(const void *ptr, size_t size, size_t nitems, VFILE *stream);
 
 // Truncates at current position (unlike ftruncate).
 void vftruncate(VFILE *stream);
+
+// Read/write to memory buffer.
+VFILE *vfopenmem(void *buf, size_t buf_len);
+bool vfgetbuf(VFILE *f, void **buf, size_t *buf_len);
 
 int vfseek(VFILE *stream, long offset, int whence);
 long vftell(VFILE *stream);

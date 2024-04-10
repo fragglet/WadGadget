@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdint.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "common.h"
@@ -247,6 +248,131 @@ VFILE *vfrestrict(VFILE *inner, long start, long end, int ro)
 	restricted->ro = ro;
 	restricted->pos = 0;
 	return vfopen(restricted, &restricted_io_functions);
+}
+
+struct memory_vfile {
+	uint8_t *buf;
+	size_t buf_len, pos;
+};
+
+static size_t memory_vfread(void *ptr, size_t size, size_t nitems, void *handle)
+{
+	struct memory_vfile *f = handle;
+	size_t buf_len = size * nitems, buf_remaining;
+	size_t result;
+
+	buf_remaining = f->buf_len - f->pos;
+	if (buf_len < buf_remaining) {
+		buf_len = buf_remaining;
+	}
+
+	nitems = buf_len / size;
+	result = nitems * size;
+	memcpy(ptr, &f->buf[f->pos], result);
+
+	f->pos += result;
+	return result;
+}
+
+static size_t memory_fwrite(const void *ptr, size_t size,
+                            size_t nitems, void *handle)
+{
+	struct memory_vfile *f = handle;
+	size_t num_bytes = size * nitems;
+	size_t new_pos = f->pos + num_bytes;
+
+	if (new_pos > f->buf_len) {
+		f->buf = checked_realloc(f->buf, new_pos);
+		f->buf_len = new_pos;
+	}
+
+	memcpy(&f->buf[f->pos], ptr, num_bytes);
+	f->pos = new_pos;
+
+	return nitems;
+}
+
+static int memory_vfseek(void *handle, long offset, int whence)
+{
+	struct memory_vfile *f = handle;
+
+	switch (whence) {
+	case SEEK_SET:
+		break;
+
+	case SEEK_CUR:
+		offset += f->pos;
+		break;
+
+	case SEEK_END:
+		offset = f->pos - offset;
+		break;
+	}
+
+	if (offset < 0 || offset > f->buf_len) {
+		return -1;
+	}
+	f->pos = offset;
+	return 0;
+}
+
+static long memory_vftell(void *handle)
+{
+	struct memory_vfile *f = handle;
+	return f->pos;
+}
+
+static void memory_vftruncate(void *handle)
+{
+	struct memory_vfile *f = handle;
+
+	f->buf_len = f->pos;
+}
+
+static void memory_vfsync(void *handle)
+{
+}
+
+static void memory_vfclose(void *handle)
+{
+	struct memory_vfile *f = handle;
+	free(f->buf);
+	free(f);
+}
+
+static struct vfile_functions memory_io_functions = {
+	memory_vfread,
+	memory_fwrite,
+	memory_vfseek,
+	memory_vftell,
+	memory_vftruncate,
+	memory_vfclose,
+	memory_vfsync,
+};
+
+VFILE *vfopenmem(void *buf, size_t buf_len)
+{
+	struct memory_vfile *memfile;
+	memfile = checked_calloc(1, sizeof(struct memory_vfile));
+	memfile->buf = checked_malloc(buf_len);
+	memcpy(memfile->buf, buf, buf_len);
+	memfile->pos = 0;
+	memfile->buf_len = buf_len;
+	return vfopen(memfile, &memory_io_functions);
+}
+
+bool vfgetbuf(VFILE *f, void **buf, size_t *buf_len)
+{
+	struct memory_vfile *memfile = f->handle;
+
+	if (f->functions != &memory_io_functions) {
+		return false;
+	}
+
+	*buf = memfile->buf;
+	*buf_len = memfile->buf_len;
+
+	return true;
 }
 
 int vfcopy(VFILE *from, VFILE *to)
