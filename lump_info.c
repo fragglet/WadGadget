@@ -344,6 +344,41 @@ const struct lump_type lump_type_sized = {
 	SizedLumpFormat,
 };
 
+// Plain text lumps, as found in Hexen IWAD and also used by source ports.
+
+static bool IsPlainText(const unsigned char *buf, size_t buf_len)
+{
+	static const char whitespace_chars[] = "\t\n\r";
+	int i;
+
+	for (i = 0; i < buf_len; i++) {
+		unsigned char c = buf[i];
+		if (c >= 0x7f ||
+		    (c < 0x20 && strchr(whitespace_chars, c) == NULL)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+static bool PlainTextLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return ent->size >= LUMP_HEADER_LEN
+	    && IsPlainText(buf, LUMP_HEADER_LEN);
+}
+
+static void PlainTextLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                                char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "%s", "Plain text");
+}
+
+const struct lump_type lump_type_plaintext = {
+	PlainTextLumpCheck,
+	PlainTextLumpFormat,
+};
+
 // Fallback, "generic lump"
 
 static bool UnknownLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
@@ -374,6 +409,7 @@ static const struct lump_type *lump_types[] = {
 	&lump_type_demo,
 	&lump_type_pcspeaker,
 	&lump_type_sized,
+	&lump_type_plaintext,
 	&lump_type_unknown,
 };
 
