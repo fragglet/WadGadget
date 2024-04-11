@@ -33,6 +33,33 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 	}
 }
 
+static const char *audio_extensions[] = {
+	".aiff", ".wav", ".voc", ".flac", NULL,
+};
+
+static bool HasExtension(const char *filename, const char **exts)
+{
+	int i;
+
+	for (i = 0; exts[i] != NULL; i++) {
+		if (StringHasSuffix(filename, exts[i])) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static VFILE *PerformConversion(VFILE *input, struct directory_entry *ent)
+{
+	if (ent->type == FILE_TYPE_FILE
+	 && HasExtension(ent->name, audio_extensions)) {
+		return S_FromAudioFile(input);
+	}
+
+	return input;
+}
+
 bool PerformImport(struct directory *from, struct file_set *from_set,
                    struct directory *to, int to_index,
                    struct file_set *result)
@@ -57,8 +84,9 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 		LumpNameForEntry(namebuf, ent);
 		W_SetLumpName(to_wad, lumpnum, namebuf);
 
-		// TODO: This should be being done via VFS.
 		fromfile = VFS_OpenByEntry(from, ent);
+		fromfile = PerformConversion(fromfile, ent);
+		// TODO: This should be being done via VFS.
 		tolump = W_OpenLumpRewrite(to_wad, lumpnum);
 		vfcopy(fromfile, tolump);
 		vfclose(fromfile);
