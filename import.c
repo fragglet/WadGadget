@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <limits.h>
 
+#include "audio.h"
 #include "dialog.h"
 #include "import.h"
 #include "strings.h"

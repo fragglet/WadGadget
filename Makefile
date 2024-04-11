@@ -1,9 +1,9 @@
-CFLAGS = -g -Wall -O0
+CFLAGS = -g -Wall -O0 $(shell pkg-config --cflags audiofile)
+LDFLAGS = -lncurses $(shell pkg-config --libs audiofile)
 
-LDFLAGS = -lncurses
 OBJS = wadgadget.o wad_file.o vfile.o pane.o ui.o dialog.o text_input.o \
        lump_info.o strings.o import.o struct.o list_pane.o vfs.o \
-       directory_pane.o actions_pane.o export.o
+       directory_pane.o actions_pane.o export.o audio.o
 
 wadgadget : $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS)

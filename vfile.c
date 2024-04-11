@@ -258,14 +258,10 @@ struct memory_vfile {
 static size_t memory_vfread(void *ptr, size_t size, size_t nitems, void *handle)
 {
 	struct memory_vfile *f = handle;
-	size_t buf_len = size * nitems, buf_remaining;
+	size_t buf_len = size * nitems;
 	size_t result;
 
-	buf_remaining = f->buf_len - f->pos;
-	if (buf_len < buf_remaining) {
-		buf_len = buf_remaining;
-	}
-
+	buf_len = min(buf_len, f->buf_len - f->pos);
 	nitems = buf_len / size;
 	result = nitems * size;
 	memcpy(ptr, &f->buf[f->pos], result);
@@ -274,8 +270,8 @@ static size_t memory_vfread(void *ptr, size_t size, size_t nitems, void *handle)
 	return result;
 }
 
-static size_t memory_fwrite(const void *ptr, size_t size,
-                            size_t nitems, void *handle)
+static size_t memory_vfwrite(const void *ptr, size_t size,
+                             size_t nitems, void *handle)
 {
 	struct memory_vfile *f = handle;
 	size_t num_bytes = size * nitems;
@@ -342,7 +338,7 @@ static void memory_vfclose(void *handle)
 
 static struct vfile_functions memory_io_functions = {
 	memory_vfread,
-	memory_fwrite,
+	memory_vfwrite,
 	memory_vfseek,
 	memory_vftell,
 	memory_vftruncate,
