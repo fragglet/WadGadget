@@ -270,11 +270,11 @@ static void Keypress(void *directory_pane, int key)
 	struct file_set *tagged = UI_DirectoryPaneTagged(p);
 	int selected = UI_DirectoryPaneSelected(p);
 
-	if (key == KEY_F(2) || key == KEY_F(4)) {
+	if (key == KEY_F(3) || key == KEY_F(4)) {
 		UI_MessageBox("Sorry, not implemented yet.");
 		return;
 	}
-	if (p->dir->type == FILE_TYPE_WAD && key == KEY_F(3)) {
+	if (p->dir->type == FILE_TYPE_WAD && key == KEY_F(2)) {
 		if (p->tagged.num_entries == 0) {
 			UI_MessageBox(
 			    "You have not selected any lumps to move.");

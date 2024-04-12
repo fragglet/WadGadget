@@ -67,6 +67,21 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
  F2 Left  F3 Open  <<< F5 Copy  F6 Rename  F7 Mkdir  F8 Delete  F9 New WAD
 
+ == Function keys
+
+     Norton        WAD->Dir    WAD->WAD    Dir->WAD    Dir->Dir
+-------------------------------------------------------------------
+F1   Help
+F2   Menu          Rearrange   Rearrange
+F3   View          View/Edit   View/Edit   View/Edit   View/Edit
+F4   Edit                      Update      Update
+F5   Copy          Export      Copy        Import      Copy
+F6   Move/Rename   Rename      Rename      Rename      Rename
+F7   Mkdir         New lump    New lump    Mkdir       Mkdir
+F8   Delete        Delete      Delete      Delete      Delete
+F9   PullDn        Export WAD  -           Make WAD    Make WAD
+F10  Quit          ClrSelect   ClrSelect   ClrSelect   ClrSelect
+
 == Old NWT commands
 
 View Hex Dump
