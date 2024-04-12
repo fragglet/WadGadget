@@ -221,9 +221,13 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 		"Make new WAD", 64,
 		"Enter name for new WAD file:");
 
+	if (filename == NULL) {
+		return NULL;
+	}
+
 	if (VFS_EntryByName(to, filename) != NULL
-	 && !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite existing '%s'?",
-	                         filename)) {
+	 && !UI_ConfirmDialogBox("Confirm Overwrite",
+	                         "Overwrite existing '%s'?", filename)) {
 		free(filename);
 		return NULL;
 	}
