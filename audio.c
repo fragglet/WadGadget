@@ -118,3 +118,61 @@ end:
 	return result;
 }
 
+VFILE *S_ToAudioFile(VFILE *input)
+{
+	struct sound_header hdr;
+	AFfilesetup setup = afNewFileSetup();
+	VFILE *result = vfopenmem(NULL, 0);
+	AFvirtualfile *avf;
+	AFfilehandle af;
+
+	assert(vfread(&hdr, sizeof(hdr), 1, input) == 1);
+	assert(hdr.format == 3);
+
+	afInitFileFormat(setup, AF_FILE_WAVE);
+	afInitChannels(setup, AF_DEFAULT_TRACK, 1);
+	afInitRate(setup, AF_DEFAULT_TRACK, hdr.sample_rate);
+	afInitSampleFormat(setup, AF_DEFAULT_TRACK, AF_SAMPFMT_UNSIGNED, 8);
+
+	avf = MakeVirtualFile(result);
+	af = afOpenVirtualFile(avf, "w", setup);
+	if (af == NULL) {
+		goto fail;
+	}
+
+	for (;;) {
+		uint8_t buf[512];
+		int frames = vfread(buf, 1, sizeof(buf), input);
+
+		if (frames < 0) {
+			goto fail;
+		} else if (frames == 0) {
+			break;
+		}
+
+		if (afWriteFrames(af, AF_DEFAULT_TRACK, buf, frames) < 0) {
+			goto fail;
+		}
+	}
+
+	goto end;
+
+fail:
+	vfclose(result);
+	result = NULL;
+
+end:
+	if (af != NULL) {
+		afCloseFile(af);
+	} else {
+		af_virtual_file_destroy(avf);
+	}
+	vfclose(input);
+	afFreeFileSetup(setup);
+
+	if (result != NULL) {
+		vfseek(result, 0, SEEK_SET);
+	}
+
+	return result;
+}

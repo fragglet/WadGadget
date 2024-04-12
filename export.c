@@ -3,34 +3,61 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "audio.h"
 #include "dialog.h"
 #include "export.h"
+#include "lump_info.h"
 #include "strings.h"
 
-static char *FileNameForEntry(struct directory_entry *dirent)
+static VFILE *PerformConversion(VFILE *input, const struct lump_type *lt)
+{
+	if (lt == &lump_type_sound) {
+		return S_ToAudioFile(input);
+	} else {
+		return input;
+	}
+}
+
+static const struct lump_type *IdentifyLumpType(struct directory *dir,
+                                                struct directory_entry *ent)
+{
+	struct wad_file *wf;
+	unsigned int idx;
+
+	if (ent->type != FILE_TYPE_LUMP) {
+		return &lump_type_unknown;
+	}
+
+	wf = VFS_WadFile(dir);
+	idx = ent - dir->entries;
+
+	return LI_IdentifyLump(wf, idx);
+}
+
+static char *FileNameForEntry(const struct lump_type *lt,
+                              struct directory_entry *ent)
 {
 	char *extn;
 
-	switch (dirent->type) {
-	case FILE_TYPE_FILE:
-	case FILE_TYPE_WAD:
+	if (ent->type == FILE_TYPE_LUMP) {
+		if (lt == &lump_type_sound) {
+			extn = ".wav";
+		} else {
+			extn = ".lmp";
+		}
+		// TODO: .png, etc.
+	} else {
 		extn = "";
-		break;
-	case FILE_TYPE_LUMP:
-		extn = ".lmp";
-		// TODO: Convert to .png/.wav etc.
-		break;
-	default:
-		return NULL;
 	}
 
-	return StringJoin("", dirent->name, extn, NULL);
+	return StringJoin("", ent->name, extn, NULL);
 }
 
 static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
                              struct directory *to)
 {
 	struct file_set overwrite_set = EMPTY_FILE_SET;
+	const struct lump_type *lt;
 	struct directory_entry *ent;
 	bool result;
 	char buf[64];
@@ -48,7 +75,8 @@ static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
 			UI_MessageBox("You can't copy directories.");
 			return false;
 		}
-		filename = FileNameForEntry(ent);
+		lt = IdentifyLumpType(from, ent);
+		filename = FileNameForEntry(lt, ent);
 		if (filename == NULL) {
 			continue;
 		}
@@ -92,7 +120,8 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 
 	idx = 0;
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
-		filename = FileNameForEntry(ent);
+		const struct lump_type *lt = IdentifyLumpType(from, ent);
+		filename = FileNameForEntry(lt, ent);
 		if (filename == NULL) {
 			continue;
 		}
@@ -105,6 +134,7 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 			tofile = vfwrapfile(f);
 
 			fromlump = VFS_OpenByEntry(from, ent);
+			fromlump = PerformConversion(fromlump, lt);
 			vfcopy(fromlump, tofile);
 			vfclose(fromlump);
 			vfclose(tofile);
@@ -117,8 +147,9 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 
 	idx = 0;
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
+		const struct lump_type *lt = IdentifyLumpType(from, ent);
 		VFS_RemoveFromSet(from_set, ent->serial_no);
-		filename = FileNameForEntry(ent);
+		filename = FileNameForEntry(lt, ent);
 		if (filename == NULL) {
 			continue;
 		}
