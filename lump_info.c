@@ -191,22 +191,40 @@ const struct lump_type lump_type_graphic = {
 	GraphicLumpFormat,
 };
 
-static bool MusicLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+// DMX .MUS format.
+
+static bool MusLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return ent->size >= 4
-	    && (!memcmp(buf, "MThd", 4) || !memcmp(buf, "MUS\x1a", 4));
+	return ent->size >= 4 && !memcmp(buf, "MUS\x1a", 4);
 }
 
-static void MusicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
-                            char *descr_buf, size_t descr_buf_len)
+static void MusLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                          char *descr_buf, size_t descr_buf_len)
 {
-	snprintf(descr_buf, descr_buf_len, "%s music track",
-	         !memcmp(buf, "MThd", 4) ? "MIDI" : "DMX MUS");
+	snprintf(descr_buf, descr_buf_len, "DMX MUS music track");
 }
 
-const struct lump_type lump_type_music = {
-	MusicLumpCheck,
-	MusicLumpFormat,
+const struct lump_type lump_type_mus = {
+	MusLumpCheck,
+	MusLumpFormat,
+};
+
+// Embedded MIDI file (also supported by DMX)
+
+static bool MidiLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return ent->size >= 4 && !memcmp(buf, "MThd", 4);
+}
+
+static void MidiLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                           char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "MIDI music track");
+}
+
+const struct lump_type lump_type_midi = {
+	MidiLumpCheck,
+	MidiLumpFormat,
 };
 
 static const struct {
@@ -405,7 +423,8 @@ static const struct lump_type *lump_types[] = {
 	&lump_type_special,
 	&lump_type_sound,
 	&lump_type_graphic,
-	&lump_type_music,
+	&lump_type_mus,
+	&lump_type_midi,
 	&lump_type_demo,
 	&lump_type_pcspeaker,
 	&lump_type_sized,
