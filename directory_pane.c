@@ -157,7 +157,7 @@ void UI_DirectoryPaneSearch(void *p, const char *needle)
 		if (haystack_len < needle_len) {
 			continue;
 		}
-		for (j = 0; j < haystack_len - needle_len; j++) {
+		for (j = 0; j < haystack_len - needle_len + 1; j++) {
 			if (!strncasecmp(&ent->name[j], needle, needle_len)) {
 				dp->pane.selected = i + 1;
 				dp->pane.window_offset = dp->pane.selected >= 10 ?
