@@ -12,7 +12,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt update
-        sudo apt -q install libncurses-dev gcc make
+        sudo apt -q install libncurses-dev gcc make libaudiofile-dev
 
     - uses: actions/checkout@v4
 
