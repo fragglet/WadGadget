@@ -20,10 +20,9 @@
 #ifndef MUS2MID_H
 #define MUS2MID_H
 
-#include "doomtype.h"
-#include "memio.h"
+#include "vfile.h"
 
-boolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput);
+bool mus2mid(VFILE *musinput, VFILE *midioutput);
 
 #endif /* #ifndef MUS2MID_H */
 
