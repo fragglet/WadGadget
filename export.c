@@ -7,12 +7,23 @@
 #include "dialog.h"
 #include "export.h"
 #include "lump_info.h"
+#include "mus2mid.h"
 #include "strings.h"
 
 static VFILE *PerformConversion(VFILE *input, const struct lump_type *lt)
 {
 	if (lt == &lump_type_sound) {
 		return S_ToAudioFile(input);
+	} else if (lt == &lump_type_mus) {
+		VFILE *result = vfopenmem(NULL, 0);
+		if (mus2mid(input, result)) {
+			vfclose(input);
+			vfclose(result);
+			return NULL;
+		}
+		vfseek(result, 0, SEEK_SET);
+		vfclose(input);
+		return result;
 	} else {
 		return input;
 	}
@@ -42,6 +53,8 @@ static char *FileNameForEntry(const struct lump_type *lt,
 	if (ent->type == FILE_TYPE_LUMP) {
 		if (lt == &lump_type_sound) {
 			extn = ".wav";
+		} else if (lt == &lump_type_mus || lt == &lump_type_midi) {
+			extn = ".mid";
 		} else {
 			extn = ".lmp";
 		}
@@ -135,6 +148,10 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 
 			fromlump = VFS_OpenByEntry(from, ent);
 			fromlump = PerformConversion(fromlump, lt);
+			if (fromlump == NULL) {
+				free(filename2);
+				return false;
+			}
 			vfcopy(fromlump, tofile);
 			vfclose(fromlump);
 			vfclose(tofile);
