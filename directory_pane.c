@@ -309,7 +309,8 @@ static void Keypress(void *directory_pane, int key)
 		SelectBySerial(p, serial_no);
 		return;
 	}
-	if (p->dir->type == FILE_TYPE_WAD && key == KEY_F(7)) {
+	if (p->dir->type == FILE_TYPE_WAD
+	 && (key == KEY_F(7) || key == KEY_IC)) {
 		struct wad_file *f = VFS_WadFile(p->dir);
 		char *name = UI_TextInputDialogBox(
 			"New lump", 8,
@@ -340,7 +341,7 @@ static void Keypress(void *directory_pane, int key)
 		return;
 	}
 	// TODO: Delete all marked
-	if (key == KEY_F(8)) {
+	if (key == KEY_F(8) || key == KEY_DC) {
 		char buf[64];
 		int i;
 
