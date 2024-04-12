@@ -107,10 +107,13 @@ struct wad_file *W_OpenFile(const char *filename)
 	result->rollback_header.table_offset = 0;
 	result->last_lump_pos = 0;
 
-	assert(vfread(&result->header,
-	              sizeof(struct wad_file_header), 1, vfs) == 1);
-	assert(!strncmp(result->header.id, "IWAD", 4) ||
-	       !strncmp(result->header.id, "PWAD", 4));
+	if (vfread(&result->header,
+	           sizeof(struct wad_file_header), 1, vfs) != 1
+	 || (strncmp(result->header.id, "IWAD", 4) != 0
+	  && strncmp(result->header.id, "PWAD", 4) != 0)) {
+		W_CloseFile(result);
+		return NULL;
+	}
 
 	result->num_lumps = result->header.num_lumps;
 	assert(vfseek(vfs, result->header.table_offset, SEEK_SET) == 0);
@@ -118,9 +121,12 @@ struct wad_file *W_OpenFile(const char *filename)
 		result->num_lumps, sizeof(struct wad_file_entry));
 	for (i = 0; i < result->num_lumps; i++) {
 		struct wad_file_entry *ent = &result->directory[i];
-		assert(vfread(&ent->position, 4, 1, vfs) == 1 &&
-		       vfread(&ent->size, 4, 1, vfs) == 1 &&
-		       vfread(&ent->name, 8, 1, vfs) == 1);
+		if (vfread(&ent->position, 4, 1, vfs) != 1
+		 || vfread(&ent->size, 4, 1, vfs) != 1
+		 || vfread(&ent->name, 8, 1, vfs) != 1) {
+			W_CloseFile(result);
+			return NULL;
+		}
 		ent->serial_no = NewSerialNo();
 	}
 
