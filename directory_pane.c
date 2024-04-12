@@ -122,12 +122,55 @@ static void SelectBySerial(struct directory_pane *p, uint64_t serial_no)
 	}
 }
 
+static bool PrefixSearch(struct directory_pane *dp, const char *needle,
+                         int start_index)
+{
+	size_t needle_len = strlen(needle);
+	const struct directory_entry *ent;
+	int i;
+
+	for (i = start_index; i < dp->dir->num_entries; i++) {
+		ent = &dp->dir->entries[i];
+		if (!strncasecmp(ent->name, needle, needle_len)) {
+			dp->pane.selected = i + 1;
+			dp->pane.window_offset = dp->pane.selected >= 10 ?
+			    dp->pane.selected - 10 : 0;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static bool SubstringSearch(struct directory_pane *dp, const char *needle,
+                            int start_index)
+{
+	size_t haystack_len, needle_len = strlen(needle);
+	const struct directory_entry *ent;
+	int i, j;
+
+	for (i = start_index; i < dp->dir->num_entries; i++) {
+		ent = &dp->dir->entries[i];
+		haystack_len = strlen(ent->name);
+		if (haystack_len < needle_len) {
+			continue;
+		}
+		for (j = 0; j < haystack_len - needle_len + 1; j++) {
+			if (!strncasecmp(&ent->name[j], needle, needle_len)) {
+				dp->pane.selected = i + 1;
+				dp->pane.window_offset = dp->pane.selected >= 10 ?
+				    dp->pane.selected - 10 : 0;
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 void UI_DirectoryPaneSearch(void *p, const char *needle)
 {
-	const struct directory_entry *ent;
 	struct directory_pane *dp = p;
-	size_t haystack_len, needle_len = strlen(needle);
-	int i, j;
 
 	if (strlen(needle) == 0) {
 		return;
@@ -140,31 +183,24 @@ void UI_DirectoryPaneSearch(void *p, const char *needle)
 	}
 
 	// Check for prefix first, so user can type entire lump name.
-	for (i = 0; i < dp->dir->num_entries; i++) {
-		ent = &dp->dir->entries[i];
-		if (!strncasecmp(ent->name, needle, needle_len)) {
-			dp->pane.selected = i + 1;
-			dp->pane.window_offset = dp->pane.selected >= 10 ?
-			    dp->pane.selected - 10 : 0;
-			return;
-		}
+	if (!PrefixSearch(dp, needle, 0)) {
+		// If nothing found, try a substring match.
+		(void) SubstringSearch(dp, needle, 0);
+	}
+}
+
+void UI_DirectoryPaneSearchAgain(void *p, const char *needle)
+{
+	struct directory_pane *dp = p;
+	int start_index = dp->pane.selected;
+
+	if (strlen(needle) == 0 || !strcmp(needle, "..")) {
+		return;
 	}
 
-	// Second time through, we look for a substring match.
-	for (i = 0; i < dp->dir->num_entries; i++) {
-		ent = &dp->dir->entries[i];
-		haystack_len = strlen(ent->name);
-		if (haystack_len < needle_len) {
-			continue;
-		}
-		for (j = 0; j < haystack_len - needle_len + 1; j++) {
-			if (!strncasecmp(&ent->name[j], needle, needle_len)) {
-				dp->pane.selected = i + 1;
-				dp->pane.window_offset = dp->pane.selected >= 10 ?
-				    dp->pane.selected - 10 : 0;
-				return;
-			}
-		}
+	// When searching again, we only do substring matches.
+	if (!SubstringSearch(dp, needle, start_index)) {
+		(void) SubstringSearch(dp, needle, 0);
 	}
 }
 

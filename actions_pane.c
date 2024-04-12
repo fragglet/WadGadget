@@ -63,6 +63,7 @@ struct action common_actions[] =
 	{"F10", "Unmark all"},
 	{"", ""},
 	{"Tab", "Other pane"},
+	{"^N", "Search again"},
 	{"ESC", "Quit"},
 	{NULL, NULL},
 };

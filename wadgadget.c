@@ -110,7 +110,7 @@ static void SetWindowSizes(void)
 	mvwin(search_pane.pane.window, lines - 3,
 	      left_width);
 	
-	wresize(actions_pane.pane.window, 14, middle_width);
+	wresize(actions_pane.pane.window, 15, middle_width);
 	mvwin(actions_pane.pane.window, 6, left_width);
 	wresize(pane_windows[0], lines - 1, left_width);
 	mvwin(pane_windows[0], 1, 0);
@@ -344,6 +344,10 @@ static void HandleKeypress(void *pane, int key)
 	case ('R' & 0x1f):  // ^R = reload dir
 		VFS_Refresh(dirs[active_pane]);
 		break;
+	case ('N' & 0x1f):  // ^N = search again
+		UI_DirectoryPaneSearchAgain(panes[active_pane],
+		                            search_pane.input.input);
+		break;
 	case '\r':
 		NavigateNew();
 		break;
@@ -485,7 +489,7 @@ int main(int argc, char *argv[])
 	InitSearchPane(newwin(4, 26, 20, 27));
 	UI_PaneShow(&search_pane);
 
-	UI_ActionsPaneInit(&actions_pane, newwin(14, 26, 6, 27));
+	UI_ActionsPaneInit(&actions_pane, newwin(15, 26, 6, 27));
 	UI_PaneShow(&actions_pane);
 
 	pane_windows[0] = newwin(24, 27, 1, 0);
