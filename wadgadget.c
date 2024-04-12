@@ -160,6 +160,14 @@ static void NavigateNew(void)
 	}
 
 	new_dir = VFS_OpenDir(path);
+	if (new_dir == NULL) {
+		int idx = UI_DirectoryPaneSelected(pane);
+		free(path);
+		UI_MessageBox("Error when opening '%s'.",
+		              dirs[active_pane]->entries[idx].name);
+		return;
+	}
+
 	new_pane = UI_NewDirectoryPane(pane_windows[active_pane], new_dir);
 
 	// Select subfolder we just navigated out of?

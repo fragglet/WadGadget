@@ -150,15 +150,16 @@ static int OrderByName(const void *x, const void *y)
 	return strcasecmp(dx->name, dy->name);
 }
 
-static void RealDirRefresh(void *_d)
+static bool _RealDirRefresh(struct directory *d)
 {
-	struct directory *d = _d;
 	DIR *dir;
 
 	FreeEntries(d);
 
 	dir = opendir(d->path);
-	assert(dir != NULL);  // TODO
+	if (dir == NULL) {
+		return false;
+	}
 
 	for (;;) {
 		struct dirent *dirent = readdir(dir);
@@ -188,6 +189,12 @@ static void RealDirRefresh(void *_d)
 
 	qsort(d->entries, d->num_entries, sizeof(struct directory_entry),
 	      OrderByName);
+	return true;
+}
+
+static void RealDirRefresh(void *d)
+{
+	(void) _RealDirRefresh(d);
 }
 
 static VFILE *RealDirOpen(void *_dir, struct directory_entry *entry)
@@ -287,7 +294,9 @@ static void WadDirRename(void *_dir, struct directory_entry *entry,
 static void WadDirFree(void *_dir)
 {
 	struct wad_directory *dir = _dir;
-	W_CloseFile(dir->wad_file);
+	if (dir->wad_file != NULL) {
+		W_CloseFile(dir->wad_file);
+	}
 }
 
 static const struct directory_funcs waddir_funcs = {
@@ -315,7 +324,10 @@ static struct directory *OpenWadAsDirectory(const char *path)
 	InitDirectory(&d->dir, path);
 	d->dir.type = FILE_TYPE_WAD;
 	d->wad_file = W_OpenFile(path);
-	assert(d->wad_file != NULL);
+	if (d->wad_file == NULL) {
+		VFS_CloseDir(&d->dir);
+		return NULL;
+	}
 	WadDirectoryRefresh(d);
 
 	return &d->dir;
@@ -335,7 +347,10 @@ struct directory *VFS_OpenDir(const char *path)
 	d->directory_funcs = &realdir_funcs;
 	InitDirectory(d, path);
 	d->type = FILE_TYPE_DIR;
-	RealDirRefresh(d);
+	if (!_RealDirRefresh(d)) {
+		VFS_CloseDir(d);
+		return NULL;
+	}
 
 	return d;
 }
