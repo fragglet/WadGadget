@@ -459,11 +459,27 @@ static void SetPalette(struct palette *p)
 	}
 }
 
+static void Shutdown(void)
+{
+	SetPalette(&old_palette);
+	clear();
+	refresh();
+	endwin();
+}
+
 int main(int argc, char *argv[])
 {
+	const char *start_path1 = ".", *start_path2 = ".";
+
 	if (argc == 2 && !strcmp(argv[1], "--version")) {
 		printf(VERSION_OUTPUT);
 		exit(0);
+	}
+	if (argc >= 2) {
+		start_path1 = argv[1];
+	}
+	if (argc >= 3) {
+		start_path2 = argv[2];
 	}
 
 	initscr();
@@ -476,6 +492,7 @@ int main(int argc, char *argv[])
 
 	SavePalette(&old_palette);
 	SetPalette(&nwt_palette);
+
 	init_pair(PAIR_WHITE_BLACK, COLORX_BRIGHTWHITE, COLOR_BLACK);
 	init_pair(PAIR_PANE_COLOR, COLORX_BRIGHTWHITE, COLOR_BLUE);
 	init_pair(PAIR_HEADER, COLOR_BLACK, COLORX_BRIGHTCYAN);
@@ -501,12 +518,28 @@ int main(int argc, char *argv[])
 	UI_PaneShow(&actions_pane);
 
 	pane_windows[0] = newwin(24, 27, 1, 0);
-	dirs[0] = VFS_OpenDir(".");
+	dirs[0] = VFS_OpenDir(start_path1);
+	if (dirs[0] == NULL) {
+		Shutdown();
+		fprintf(stderr, "Failed to open '%s'.\n", start_path1);
+		exit(-1);
+	}
 	panes[0] = UI_NewDirectoryPane(pane_windows[0], dirs[0]);
 	UI_PaneShow(panes[0]);
 
+	if (dirs[0]->type == FILE_TYPE_WAD
+	 && !strcmp(start_path1, start_path2)) {
+		Shutdown();
+		fprintf(stderr, "Can't open the same WAD in both panes.\n");
+		exit(-1);
+	}
 	pane_windows[1] = newwin(24, 27, 1, 53);
-	dirs[1] = VFS_OpenDir(".");
+	dirs[1] = VFS_OpenDir(start_path2);
+	if (dirs[1] == NULL) {
+		Shutdown();
+		fprintf(stderr, "Failed to open '%s'.\n", start_path2);
+		exit(-1);
+	}
 	panes[1] = UI_NewDirectoryPane(pane_windows[1], dirs[1]);
 	UI_PaneShow(panes[1]);
 
@@ -515,8 +548,5 @@ int main(int argc, char *argv[])
 	SetWindowSizes();
 	UI_RunMainLoop();
 
-	SetPalette(&old_palette);
-	clear();
-	refresh();
-	endwin();
+	Shutdown();
 }
