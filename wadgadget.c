@@ -317,6 +317,9 @@ static void HandleKeypress(void *pane, int key)
 		clearok(stdscr, TRUE);
 		wrefresh(stdscr);
 		break;
+	case ('R' & 0x1f):  // ^R = reload dir
+		VFS_Refresh(dirs[active_pane]);
+		break;
 	case '\r':
 		NavigateNew();
 		break;
