@@ -1,3 +1,14 @@
+//
+// Copyright(C) 2022-2024 Simon Howard
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the
+// Free Software Foundation; either version 2 of the License, or (at your
+// option) any later version. This program is distributed in the hope that
+// it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//
+
 #include <curses.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +23,15 @@
 #include "lump_info.h"
 #include "strings.h"
 #include "ui.h"
+
+#define VERSION_OUTPUT \
+"WadGadget version ?\n" \
+"Copyright (C) 2022-2024 Simon Howard\n" \
+"License GPLv2+: GNU GPL version 2 or later:\n" \
+"<https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>\n" \
+"\n" \
+"This is free software; see COPYING.md for copying conditions. There is NO\n" \
+"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 
 #define INFO_PANE_WIDTH 27
 
@@ -429,6 +449,11 @@ static void SetPalette(struct palette *p)
 
 int main(int argc, char *argv[])
 {
+	if (argc == 2 && !strcmp(argv[1], "--version")) {
+		printf(VERSION_OUTPUT);
+		exit(0);
+	}
+
 	initscr();
 	start_color();
 	cbreak();
