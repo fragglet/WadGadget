@@ -87,13 +87,15 @@ void UI_RaisePaneToTop(void *pane)
 	}
 }
 
-static void HandleKeypresses(void)
+static bool HandleKeypress(void)
 {
 	int key, i;
 
 	// TODO: This should handle multiple keypresses before returning.
-
 	key = getch();
+	if (key == ERR) {
+		return false;
+	}
 
 	// Keypress goes to the top pane that has a keypress handler.
 	for (i = num_screen_panes - 1; i >= 0; i--) {
@@ -101,6 +103,22 @@ static void HandleKeypresses(void)
 			UI_PaneKeypress(screen_panes[i], key);
 			break;
 		}
+	}
+
+	return true;
+}
+
+static void HandleKeypresses(void)
+{
+	// Block on the first keypress.
+	nodelay(stdscr, 0);
+	HandleKeypress();
+
+	// We now need to do at least one screen update. But read any
+	// additional keypresses first.
+	nodelay(stdscr, 1);
+	while (HandleKeypress())
+	{
 	}
 }
 
