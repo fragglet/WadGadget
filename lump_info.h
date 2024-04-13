@@ -22,6 +22,7 @@ extern const struct lump_type lump_type_midi;
 extern const struct lump_type lump_type_demo;
 extern const struct lump_type lump_type_pcspeaker;
 extern const struct lump_type lump_type_sized;
+extern const struct lump_type lump_type_plaintext;
 extern const struct lump_type lump_type_unknown;
 
 const struct lump_type *LI_IdentifyLump(struct wad_file *f,

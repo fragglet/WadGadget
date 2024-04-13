@@ -66,6 +66,8 @@ static char *FileNameForEntry(const struct lump_type *lt,
 			extn = ".wav";
 		} else if (lt == &lump_type_mus || lt == &lump_type_midi) {
 			extn = ".mid";
+		} else if (lt == &lump_type_plaintext) {
+			extn = ".txt";
 		} else {
 			extn = ".lmp";
 		}
