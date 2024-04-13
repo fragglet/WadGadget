@@ -91,7 +91,7 @@ void UI_ListPaneSelect(struct list_pane *p, unsigned int idx)
 void UI_ListPaneKeypress(void *p, int key)
 {
 	struct list_pane *lp = p;
-	unsigned int i;
+	unsigned int i, lines;
 
 	switch (key) {
 	case KEY_UP:
@@ -126,8 +126,10 @@ void UI_ListPaneKeypress(void *p, int key)
 		return;
 	case KEY_END:
 		lp->selected = NumEntries(lp) - 1;
-		lp->window_offset = lp->selected - UI_ListPaneLines(lp) + 1;
-		if (lp->window_offset < 0) {
+		lines = UI_ListPaneLines(lp);
+		if (lines < lp->selected) {
+			lp->window_offset = lp->selected - lines + 1;
+		} else {
 			lp->window_offset = 0;
 		}
 		return;
