@@ -240,7 +240,7 @@ static void PerformCopy(bool convert)
 }
 
 static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
-                            struct directory *to)
+                            struct directory *to, bool convert)
 {
 	struct file_set result = EMPTY_FILE_SET;
 	struct directory *newfile;
@@ -279,7 +279,7 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 
 	free(filename2);
 
-	if (!PerformImport(from, from_set, newfile, 0, &result, true)) {
+	if (!PerformImport(from, from_set, newfile, 0, &result, convert)) {
 		free(filename);
 		filename = NULL;
 	}
@@ -290,7 +290,7 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 	return filename;
 }
 
-static void CreateWad(void)
+static void CreateWad(bool convert)
 {
 	struct directory_pane *from_pane, *to_pane;
 	struct file_set *import_set;
@@ -320,7 +320,8 @@ static void CreateWad(void)
 	}
 
 	import_set = &from_pane->tagged;
-	filename = CreateWadInDir(from_pane->dir, import_set, to_pane->dir);
+	filename = CreateWadInDir(from_pane->dir, import_set, to_pane->dir,
+	                          convert);
 	if (filename != NULL) {
 		UI_DirectoryPaneSearch(to_pane, filename);
 		free(filename);
@@ -349,7 +350,10 @@ static void HandleKeypress(void *pane, int key)
 		PerformCopy(false);
 		break;
 	case KEY_F(9):
-		CreateWad();
+		CreateWad(true);
+		break;
+	case SHIFT_KEY_F(9):
+		CreateWad(false);
 		break;
 	case ('L' & 0x1f):  // ^L = redraw whole screen
 		clearok(stdscr, TRUE);
