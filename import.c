@@ -73,7 +73,7 @@ static VFILE *PerformConversion(VFILE *input, struct directory_entry *ent)
 
 bool PerformImport(struct directory *from, struct file_set *from_set,
                    struct directory *to, int to_index,
-                   struct file_set *result)
+                   struct file_set *result, bool convert)
 {
 	VFILE *fromfile, *tolump;
 	struct directory_entry *ent;
@@ -96,7 +96,9 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 		W_SetLumpName(to_wad, lumpnum, namebuf);
 
 		fromfile = VFS_OpenByEntry(from, ent);
-		fromfile = PerformConversion(fromfile, ent);
+		if (convert) {
+			fromfile = PerformConversion(fromfile, ent);
+		}
 		// TODO: This should be being done via VFS.
 		tolump = W_OpenLumpRewrite(to_wad, lumpnum);
 		vfcopy(fromfile, tolump);

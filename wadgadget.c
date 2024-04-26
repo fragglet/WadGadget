@@ -191,7 +191,7 @@ static void NavigateNew(void)
 	}
 }
 
-static void PerformCopy(void)
+static void PerformCopy(bool convert)
 {
 	struct directory *from = dirs[active_pane],
 	                 *to = dirs[!active_pane];
@@ -210,7 +210,7 @@ static void PerformCopy(void)
 			VFS_FreeSet(&result);
 			return;
 		}
-		if (PerformExport(from, export_set, to, &result)) {
+		if (PerformExport(from, export_set, to, &result, convert)) {
 			UI_DirectoryPaneSetTagged(panes[!active_pane], &result);
 			SwitchToPane(!active_pane);
 		}
@@ -227,7 +227,8 @@ static void PerformCopy(void)
 			VFS_FreeSet(&result);
 			return;
 		}
-		if (PerformImport(from, import_set, to, to_point, &result)) {
+		if (PerformImport(from, import_set, to, to_point,
+		                  &result, convert)) {
 			UI_DirectoryPaneSetTagged(panes[!active_pane], &result);
 			SwitchToPane(!active_pane);
 		}
@@ -278,7 +279,7 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 
 	free(filename2);
 
-	if (!PerformImport(from, from_set, newfile, 0, &result)) {
+	if (!PerformImport(from, from_set, newfile, 0, &result, true)) {
 		free(filename);
 		filename = NULL;
 	}
@@ -327,6 +328,8 @@ static void CreateWad(void)
 	}
 }
 
+#define SHIFT_KEY_F(n) KEY_F(n + 12)
+
 static void HandleKeypress(void *pane, int key)
 {
 	switch (key) {
@@ -340,7 +343,10 @@ static void HandleKeypress(void *pane, int key)
 		SetWindowSizes();
 		break;
 	case KEY_F(5):
-		PerformCopy();
+		PerformCopy(true);
+		break;
+	case SHIFT_KEY_F(5):
+		PerformCopy(false);
 		break;
 	case KEY_F(9):
 		CreateWad();
