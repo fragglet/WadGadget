@@ -61,21 +61,23 @@ static char *FileNameForEntry(const struct lump_type *lt,
 {
 	char *extn;
 
-	if (ent->type == FILE_TYPE_LUMP) {
-		if (!convert) {
-			extn = ".lmp";
-		} else if (lt == &lump_type_sound) {
-			extn = ".wav";
-		} else if (lt == &lump_type_mus || lt == &lump_type_midi) {
-			extn = ".mid";
-		} else if (lt == &lump_type_plaintext) {
-			extn = ".txt";
+	if (ent->type != FILE_TYPE_LUMP) {
+		extn = "";
+	} else if (!convert) {
+		if (lt == &lump_type_mus) {
+			extn = ".mus";
 		} else {
 			extn = ".lmp";
 		}
-		// TODO: .png, etc.
+	} else if (lt == &lump_type_sound) {
+		extn = ".wav";
+	} else if (lt == &lump_type_mus || lt == &lump_type_midi) {
+		extn = ".mid";
+	} else if (lt == &lump_type_plaintext) {
+		extn = ".txt";
 	} else {
-		extn = "";
+		extn = ".lmp";
+		// TODO: .png, etc.
 	}
 
 	return StringJoin("", ent->name, extn, NULL);
