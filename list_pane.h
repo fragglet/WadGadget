@@ -11,7 +11,10 @@
 #ifndef INCLUDE_LIST_PANE_H
 #define INCLUDE_LIST_PANE_H
 
+#include <limits.h>
 #include "pane.h"
+
+#define LIST_PANE_END_MARKER  INT_MAX
 
 struct list_pane_funcs {
 	void (*draw_element)(WINDOW *w, int index, void *data);

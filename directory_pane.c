@@ -53,6 +53,13 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 		w = sizeof(buf);
 	}
 
+	if (idx == LIST_PANE_END_MARKER) {
+		if (dp->dir->num_entries == 0) {
+			mvwaddstr(win, 0, 0, " (empty)");
+		}
+		return;
+	}
+
 	if (idx == 0) {
 		char *parent = PathDirName(dp->dir->path);
 		snprintf(buf, w, "^  Parent (%s)", PathBaseName(parent));

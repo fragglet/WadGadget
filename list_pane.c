@@ -70,6 +70,13 @@ static void Draw(void *p)
 		mvderwin(lp->subwin, y + 1, 1);
 		lp->funcs->draw_element(lp->subwin, idx, lp->data);
 	}
+	// If we're at the end of the list, we let the list implementation
+	// display an end marker.
+	if (y < UI_ListPaneLines(lp)) {
+		mvderwin(lp->subwin, y + 1, 1);
+		lp->funcs->draw_element(lp->subwin, LIST_PANE_END_MARKER,
+		                        lp->data);
+	}
 }
 
 void UI_ListPaneSelect(struct list_pane *p, unsigned int idx)
