@@ -76,6 +76,18 @@ static struct palette nwt_palette = {
 	},
 };
 
+static const struct {
+	int pair_index, fg, bg;
+} color_pairs[] = {
+	{PAIR_WHITE_BLACK, COLORX_BRIGHTWHITE, COLOR_BLACK},
+	{PAIR_PANE_COLOR,  COLORX_BRIGHTWHITE, COLOR_BLUE},
+	{PAIR_HEADER,      COLOR_BLACK,        COLORX_BRIGHTCYAN},
+	{PAIR_DIRECTORY,   COLOR_WHITE,        COLOR_BLACK},
+	{PAIR_WAD_FILE,    COLOR_RED,          COLOR_BLACK},
+	{PAIR_DIALOG_BOX,  COLORX_BRIGHTWHITE, COLOR_MAGENTA},
+	{PAIR_TAGGED,      COLORX_BRIGHTWHITE, COLOR_RED},
+};
+
 // Old palette we saved and restore on quit.
 static struct palette old_palette;
 
@@ -462,9 +474,33 @@ static void SetPalette(struct palette *p)
 {
 	int i;
 
+	if (!has_colors() || !can_change_color()) {
+		return;
+	}
+
 	for (i = 0; i < p->num_colors; i++) {
+		if (p->colors[i].c >= COLORS) {
+			continue;
+		}
 		init_color(p->colors[i].c, p->colors[i].r, p->colors[i].g,
 		           p->colors[i].b);
+	}
+}
+
+static void SetColorPairs(void)
+{
+	int i, mask = 0xff;
+
+	// If we do not support extended colors, we
+	// instead fall back to the standard colors.
+	if (COLORS < 16) {
+		mask = 0x07;
+	}
+
+	for (i = 0; i < arrlen(color_pairs); i++) {
+		init_pair(color_pairs[i].pair_index,
+		          color_pairs[i].fg & mask,
+		          color_pairs[i].bg & mask);
 	}
 }
 
@@ -501,14 +537,7 @@ int main(int argc, char *argv[])
 
 	SavePalette(&old_palette);
 	SetPalette(&nwt_palette);
-
-	init_pair(PAIR_WHITE_BLACK, COLORX_BRIGHTWHITE, COLOR_BLACK);
-	init_pair(PAIR_PANE_COLOR, COLORX_BRIGHTWHITE, COLOR_BLUE);
-	init_pair(PAIR_HEADER, COLOR_BLACK, COLORX_BRIGHTCYAN);
-	init_pair(PAIR_DIRECTORY, COLOR_WHITE, COLOR_BLACK);
-	init_pair(PAIR_WAD_FILE, COLOR_RED, COLOR_BLACK);
-	init_pair(PAIR_DIALOG_BOX, COLORX_BRIGHTWHITE, COLOR_MAGENTA);
-	init_pair(PAIR_TAGGED, COLORX_BRIGHTWHITE, COLOR_RED);
+	SetColorPairs();
 
 	refresh();
 
