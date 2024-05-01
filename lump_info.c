@@ -478,3 +478,23 @@ const char *LI_DescribeLump(const struct lump_type *t, struct wad_file *f,
 
 	return description_buf;
 }
+
+const char *LI_GetExtension(const struct lump_type *lt, bool convert)
+{
+	if (!convert) {
+		if (lt == &lump_type_mus) {
+			return ".mus";
+		} else {
+			return ".lmp";
+		}
+	} else if (lt == &lump_type_sound) {
+		return ".wav";
+	} else if (lt == &lump_type_mus || lt == &lump_type_midi) {
+		return ".mid";
+	} else if (lt == &lump_type_plaintext) {
+		return ".txt";
+	} else {
+		return ".lmp";
+		// TODO: .png, etc.
+	}
+}

@@ -59,25 +59,12 @@ static char *FileNameForEntry(const struct lump_type *lt,
                               struct directory_entry *ent,
                               bool convert)
 {
-	char *extn;
+	const char *extn;
 
 	if (ent->type != FILE_TYPE_LUMP) {
 		extn = "";
-	} else if (!convert) {
-		if (lt == &lump_type_mus) {
-			extn = ".mus";
-		} else {
-			extn = ".lmp";
-		}
-	} else if (lt == &lump_type_sound) {
-		extn = ".wav";
-	} else if (lt == &lump_type_mus || lt == &lump_type_midi) {
-		extn = ".mid";
-	} else if (lt == &lump_type_plaintext) {
-		extn = ".txt";
 	} else {
-		extn = ".lmp";
-		// TODO: .png, etc.
+		extn = LI_GetExtension(lt, convert);
 	}
 
 	return StringJoin("", ent->name, extn, NULL);

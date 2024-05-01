@@ -28,4 +28,5 @@ const struct lump_type *LI_IdentifyLump(struct wad_file *f,
                                         unsigned int lump_index);
 const char *LI_DescribeLump(const struct lump_type *t, struct wad_file *f,
                             unsigned int lump_index);
+const char *LI_GetExtension(const struct lump_type *lt, bool convert);
 
