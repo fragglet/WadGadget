@@ -116,14 +116,43 @@ static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
 	return result;
 }
 
+bool ExportToFile(struct directory *from, struct directory_entry *ent,
+                  const struct lump_type *lt, const char *to_filename,
+                  bool convert)
+{
+	VFILE *fromlump, *tofile;
+	FILE *f;
+
+	fromlump = VFS_OpenByEntry(from, ent);
+	if (convert) {
+		fromlump = PerformConversion(fromlump, lt);
+	}
+	if (fromlump == NULL) {
+		return false;
+	}
+
+	// TODO: This should be written through VFS.
+	f = fopen(to_filename, "wb");
+	if (f == NULL) {
+		vfclose(fromlump);
+		return false;
+	}
+
+	tofile = vfwrapfile(f);
+	vfcopy(fromlump, tofile);
+	vfclose(fromlump);
+	vfclose(tofile);
+
+	return true;
+}
+
 bool PerformExport(struct directory *from, struct file_set *from_set,
                    struct directory *to, struct file_set *result,
                    bool convert)
 {
-	VFILE *fromlump, *tofile;
-	FILE *f;
 	char *filename, *filename2;
 	struct directory_entry *ent, *ent2;
+	bool success;
 	int idx;
 
 	if (from->type == FILE_TYPE_DIR && !strcmp(from->path, to->path)) {
@@ -145,26 +174,11 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 		}
 		filename2 = StringJoin("", to->path, "/", filename, NULL);
 		free(filename);
-
-		// TODO: This should be written through VFS.
-		f = fopen(filename2, "wb");
-		if (f != NULL) {
-			tofile = vfwrapfile(f);
-
-			fromlump = VFS_OpenByEntry(from, ent);
-			if (convert) {
-				fromlump = PerformConversion(fromlump, lt);
-			}
-			if (fromlump == NULL) {
-				free(filename2);
-				return false;
-			}
-			vfcopy(fromlump, tofile);
-			vfclose(fromlump);
-			vfclose(tofile);
-		}
-
+		success = ExportToFile(from, ent, lt, filename2, convert);
 		free(filename2);
+		if (!success) {
+			return false;
+		}
 	}
 
 	VFS_Refresh(to);
