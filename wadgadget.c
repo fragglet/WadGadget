@@ -11,6 +11,8 @@
 #include <curses.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 #include "actions_pane.h"
 #include "colors.h"
@@ -146,19 +148,28 @@ static void SwitchToPane(unsigned int pane)
 	                  dirs[!active_pane]->type, active_pane == 0);
 }
 
+static void RedrawScreen(void)
+{
+	clearok(stdscr, TRUE);
+	wrefresh(stdscr);
+}
+
+static void SetCursesModes(void)
+{
+	cbreak();
+	noecho();
+	nonl();
+	intrflush(stdscr, FALSE);
+	keypad(stdscr, TRUE);
+}
+
 static void NavigateNew(void)
 {
 	struct directory_pane *pane = panes[active_pane];
 	struct directory_pane *new_pane = NULL;
 	struct directory *new_dir;
-	enum file_type typ;
 	const char *old_path;
 	char *path;
-
-	typ = UI_DirectoryPaneEntryType(pane);
-	if (typ != FILE_TYPE_WAD && typ != FILE_TYPE_DIR) {
-		return;
-	}
 
 	path = UI_DirectoryPaneEntryPath(pane);
 
@@ -200,6 +211,63 @@ static void NavigateNew(void)
 		SwitchToPane(active_pane);
 		UI_TextInputClear(&search_pane.input);
 	}
+}
+
+static void OpenEntry(void)
+{
+	struct directory_pane *pane = panes[active_pane];
+	struct directory_entry *ent;
+	char *argv[3];
+	enum file_type typ;
+	int selected;
+
+	typ = UI_DirectoryPaneEntryType(pane);
+
+	// Change directory?
+	if (typ == FILE_TYPE_WAD || typ == FILE_TYPE_DIR) {
+		NavigateNew();
+		return;
+	}
+
+	selected = UI_DirectoryPaneSelected(pane);
+	if (selected < 0) {
+		return;
+	}
+
+	ent = &pane->dir->entries[selected];
+	argv[0] = "xdg-open";
+	argv[2] = NULL;
+
+	if (typ == FILE_TYPE_FILE) {
+		argv[1] = VFS_EntryPath(pane->dir, ent);
+	} else {
+		// TODO: Export to temp file
+		return;
+	}
+
+	// TODO: Error on fail
+	{
+		pid_t pid = fork();
+		if (pid == -1) {
+			UI_MessageBox("Failed to fork subprocess.");
+		} else if (pid == 0) {
+			execvp(argv[0], argv);
+			exit(-1);
+		} else {
+			int result;
+			waitpid(pid, &result, 0);
+			if (!WIFEXITED(result) || WEXITSTATUS(result) != 0) {
+				UI_MessageBox("Error opening file.");
+			}
+		}
+	}
+
+	free(argv[1]);
+
+	// Restore the curses display which may have been trashed if another
+	// curses program was opened.
+	SetCursesModes();
+	RedrawScreen();
 }
 
 static void PerformCopy(bool convert)
@@ -378,7 +446,7 @@ static void HandleKeypress(void *pane, int key)
 		                            search_pane.input.input);
 		break;
 	case '\r':
-		NavigateNew();
+		OpenEntry();
 		break;
 	case '\t':
 		SwitchToPane(!active_pane);
@@ -529,11 +597,7 @@ int main(int argc, char *argv[])
 
 	initscr();
 	start_color();
-	cbreak();
-	noecho();
-	nonl();
-	intrflush(stdscr, FALSE);
-	keypad(stdscr, TRUE);
+	SetCursesModes();
 
 	SavePalette(&old_palette);
 	SetPalette(&nwt_palette);
