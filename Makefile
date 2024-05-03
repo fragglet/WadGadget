@@ -1,10 +1,18 @@
-PKGS = audiofile ncurses
-CFLAGS = -g -Wall -O0 $(shell pkg-config --cflags $(PKGS))
-LDFLAGS = $(shell pkg-config --libs $(PKGS))
+
+LIBSIXEL_CFLAGS = \
+    $(shell pkg-config --silence-errors --cflags libsixel \
+   && echo -DHAVE_LIBSIXEL)
+LIBSIXEL_LDFLAGS = \
+    $(shell pkg-config --silence-errors --libs libsixel)
+
+REQUIRED_PKGS = audiofile ncurses
+CFLAGS = -g -Wall -O0 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
+         $(LIBSIXEL_CFLAGS)
+LDFLAGS = $(shell pkg-config --libs $(REQUIRED_PKGS)) $(LIBSIXEL_LDFLAGS)
 
 OBJS = wadgadget.o wad_file.o vfile.o pane.o ui.o dialog.o text_input.o \
        lump_info.o strings.o import.o struct.o list_pane.o vfs.o \
-       directory_pane.o actions_pane.o export.o audio.o mus2mid.o
+       directory_pane.o actions_pane.o export.o audio.o mus2mid.o sixel.o
 
 wadgadget : $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS)
