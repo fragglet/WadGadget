@@ -213,13 +213,38 @@ static void NavigateNew(void)
 	}
 }
 
+// In all honesty, the Windows spawnv() API is much more convenient an API
+// than the Unix fork/exec. For simplicity for porting for Windows, let's
+// just emulate it where we don't have it.
+#ifndef _WIN32
+#define _P_WAIT 1
+static intptr_t _spawnv(int mode, const char *cmdname, char **argv)
+{
+	pid_t pid = fork();
+	if (pid == -1) {
+		return -1;
+	} else if (pid == 0) {
+		execvp(cmdname, argv);
+		exit(-1);
+	} else {
+		int result;
+		waitpid(pid, &result, 0);
+		if (!WIFEXITED(result)) {
+			return -1;
+		} else {
+			return WEXITSTATUS(result);
+		}
+	}
+}
+#endif
+
 static void OpenEntry(void)
 {
 	struct directory_pane *pane = panes[active_pane];
 	struct directory_entry *ent;
 	char *argv[3];
 	enum file_type typ;
-	int selected;
+	int selected, result;
 
 	typ = UI_DirectoryPaneEntryType(pane);
 
@@ -235,7 +260,11 @@ static void OpenEntry(void)
 	}
 
 	ent = &pane->dir->entries[selected];
+#ifdef __APPLE__
+	argv[0] = "open";
+#else
 	argv[0] = "xdg-open";
+#endif
 	argv[2] = NULL;
 
 	if (typ == FILE_TYPE_FILE) {
@@ -245,29 +274,25 @@ static void OpenEntry(void)
 		return;
 	}
 
-	// TODO: Error on fail
-	{
-		pid_t pid = fork();
-		if (pid == -1) {
-			UI_MessageBox("Failed to fork subprocess.");
-		} else if (pid == 0) {
-			execvp(argv[0], argv);
-			exit(-1);
-		} else {
-			int result;
-			waitpid(pid, &result, 0);
-			if (!WIFEXITED(result) || WEXITSTATUS(result) != 0) {
-				UI_MessageBox("Error opening file.");
-			}
-		}
-	}
+	// Temporarily suspend curses until the subprogram returns.
+	endwin();
+	printf("Opening %s '%s'...\n"
+	       "Please wait until program terminates.\n\n",
+	       ent->type == FILE_TYPE_LUMP ? "lump" : "file",
+	       ent->name);
 
+	result = _spawnv(_P_WAIT, argv[0], argv);
 	free(argv[1]);
 
 	// Restore the curses display which may have been trashed if another
 	// curses program was opened.
 	SetCursesModes();
 	RedrawScreen();
+
+	if (result != 0) {
+		UI_MessageBox("Failed executing command to open file,\n"
+		              "or program exited with an error.");
+	}
 }
 
 static void PerformCopy(bool convert)
