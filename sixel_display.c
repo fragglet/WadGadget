@@ -176,7 +176,6 @@ static int PromptUser(void)
 		result = tolower(result);
 	}
 	RestoreNormalMode(&saved);
-	printf("\n\n");
 
 	return result;
 }
@@ -185,6 +184,7 @@ bool SIXEL_DisplayImage(const char *filename)
 {
 	SIXELSTATUS status = SIXEL_FALSE;
 	sixel_encoder_t *encoder;
+	bool result;
 
 	if (!sixels_available) {
 		return false;
@@ -212,7 +212,14 @@ bool SIXEL_DisplayImage(const char *filename)
 
 	// "Edit" command simulates a failure in displaying the image, in
 	// which case we'll fall through to opening in another program.
-	return PromptUser() != 'e';
+	result = PromptUser() != 'e';
+
+	// Clear screen before returning; this means that when we switch
+	// back (eg. to display another image), the terminal won't have to
+	// briefly display the image all over again.
+	write(1, CLEAR_SCREEN_ESCAPE, strlen(CLEAR_SCREEN_ESCAPE));
+
+	return result;
 }
 
 #else
