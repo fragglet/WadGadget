@@ -22,6 +22,7 @@
 #include "export.h"
 #include "import.h"
 #include "lump_info.h"
+#include "sixel.h"
 #include "strings.h"
 #include "ui.h"
 
@@ -276,12 +277,25 @@ static void OpenEntry(void)
 
 	// Temporarily suspend curses until the subprogram returns.
 	endwin();
-	printf("Opening %s '%s'...\n"
-	       "Please wait until program terminates.\n\n",
-	       ent->type == FILE_TYPE_LUMP ? "lump" : "file",
-	       ent->name);
+	clear();
 
-	result = _spawnv(_P_WAIT, argv[0], argv);
+	result = 1;
+
+	if (StringHasSuffix(argv[1], ".png")) {
+		result = !SIXEL_DisplayImage(argv[1]);
+		// TODO:
+		{ char buf[10]; fgets(buf, sizeof(buf), stdin); }
+	}
+
+	if (result != 0) {
+		printf("Opening %s '%s'...\n"
+		       "Please wait until program terminates.\n\n",
+		       ent->type == FILE_TYPE_LUMP ? "lump" : "file",
+		       ent->name);
+
+		result = _spawnv(_P_WAIT, argv[0], argv);
+	}
+
 	free(argv[1]);
 
 	// Restore the curses display which may have been trashed if another
@@ -608,6 +622,8 @@ static void Shutdown(void)
 int main(int argc, char *argv[])
 {
 	const char *start_path1 = ".", *start_path2 = ".";
+
+	SIXEL_CheckSupported();
 
 	if (argc == 2 && !strcmp(argv[1], "--version")) {
 		printf(VERSION_OUTPUT);

@@ -11,8 +11,15 @@
 #include <string.h>
 #include <sys/time.h>
 
+#include <sixel.h>
+
+#include "sixel.h"
+
+#define CLEAR_SCREEN_ESCAPE "\x1b[H\x1b[2J"
 #define SEND_ATTRIBUTES_ESCAPE  "\x1b[c"
 #define RESPONSE_TIMEOUT 1000 /* ms */
+
+static bool sixels_available = false;
 
 struct saved_flags {
 	int fcntl_opts;
@@ -135,12 +142,39 @@ bool SIXEL_CheckSupported(void)
 
 done:
 	RestoreNormalMode(&saved);
+	sixels_available = result;
 	return result;
+}
+
+bool SIXEL_DisplayImage(const char *filename)
+{
+	SIXELSTATUS status = SIXEL_FALSE;
+	sixel_encoder_t *encoder;
+
+	if (!sixels_available) {
+		return false;
+	}
+
+	status = sixel_encoder_new(&encoder, NULL);
+	if (SIXEL_FAILED(status)) {
+		return false;
+	}
+
+	write(1, CLEAR_SCREEN_ESCAPE, strlen(CLEAR_SCREEN_ESCAPE));
+	status = sixel_encoder_encode(encoder, filename);
+	sixel_encoder_unref(encoder);
+
+	return !SIXEL_FAILED(status);
 }
 
 #else
 
 bool SIXEL_CheckSupported(void)
+{
+	return false;
+}
+
+bool SIXEL_DisplayImage(const char *filename)
 {
 	return false;
 }
