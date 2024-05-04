@@ -2,9 +2,11 @@
 #ifdef HAVE_LIBSIXEL
 
 #include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -27,13 +29,15 @@ struct saved_flags {
 	struct termios termios;
 };
 
-static void SetRawMode(struct saved_flags *f)
+static void SetRawMode(struct saved_flags *f, bool blocking)
 {
 	struct termios raw;
 
 	// Don't block reads from stdin; we want to time out.
-	f->fcntl_opts = fcntl(0, F_GETFL);
-	fcntl(0, F_SETFL, f->fcntl_opts | O_NONBLOCK);
+	if (!blocking) {
+		f->fcntl_opts = fcntl(0, F_GETFL);
+		fcntl(0, F_SETFL, f->fcntl_opts | O_NONBLOCK);
+	}
 
 	// Don't print the response, and don't wait for a newline.
 	tcgetattr(0, &f->termios);
@@ -94,7 +98,7 @@ bool SIXEL_CheckSupported(void)
 	// The terminal will write the response to stdin. We need to read
 	// it back, but we have to set some special options to be able to
 	// read as intended.
-	SetRawMode(&saved);
+	SetRawMode(&saved, false);
 
 	gettimeofday(&start, NULL);
 
@@ -147,6 +151,36 @@ done:
 	return result;
 }
 
+void SIXEL_ClearAndPrint(const char *msg, ...)
+{
+	va_list args;
+
+	write(1, CLEAR_SCREEN_ESCAPE, strlen(CLEAR_SCREEN_ESCAPE));
+
+	va_start(args, msg);
+	vprintf(msg, args);
+	va_end(args);
+}
+
+static int PromptUser(void)
+{
+	struct saved_flags saved;
+	int result;
+
+	printf("Press enter to continue, or 'E' to edit: ");
+	fflush(stdout);
+
+	SetRawMode(&saved, true);
+	for (result = 0; result != '\n' && result != 'e';) {
+		result = getchar();
+		result = tolower(result);
+	}
+	RestoreNormalMode(&saved);
+	printf("\n\n");
+
+	return result;
+}
+
 bool SIXEL_DisplayImage(const char *filename)
 {
 	SIXELSTATUS status = SIXEL_FALSE;
@@ -169,11 +203,16 @@ bool SIXEL_DisplayImage(const char *filename)
 	// Blur-o-vision forever.
 	sixel_encoder_setopt(encoder, SIXEL_OPTFLAG_RESAMPLING, "nearest");
 
-	write(1, CLEAR_SCREEN_ESCAPE, strlen(CLEAR_SCREEN_ESCAPE));
 	status = sixel_encoder_encode(encoder, filename);
 	sixel_encoder_unref(encoder);
 
-	return !SIXEL_FAILED(status);
+	if (SIXEL_FAILED(status)) {
+		return false;
+	}
+
+	// "Edit" command simulates a failure in displaying the image, in
+	// which case we'll fall through to opening in another program.
+	return PromptUser() != 'e';
 }
 
 #else

@@ -282,9 +282,8 @@ static void OpenEntry(void)
 	result = 1;
 
 	if (StringHasSuffix(argv[1], ".png")) {
+		SIXEL_ClearAndPrint("Contents of '%s':\n", ent->name);
 		result = !SIXEL_DisplayImage(argv[1]);
-		// TODO:
-		{ char buf[10]; fgets(buf, sizeof(buf), stdin); }
 	}
 
 	if (result != 0) {
