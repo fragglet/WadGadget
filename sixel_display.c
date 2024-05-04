@@ -167,7 +167,7 @@ static int PromptUser(void)
 	struct saved_flags saved;
 	int result;
 
-	printf("Press enter to continue, or 'E' to edit: ");
+	printf("\nPress enter to continue, or 'E' to edit: ");
 	fflush(stdout);
 
 	SetRawMode(&saved, true);
