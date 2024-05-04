@@ -12,7 +12,8 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt update
-        sudo apt -q install libncurses-dev gcc make libaudiofile-dev
+        sudo apt -q install libncurses-dev gcc make \
+                            libaudiofile-dev libsixel-dev
 
     - uses: actions/checkout@v4
 
