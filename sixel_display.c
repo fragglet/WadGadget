@@ -15,6 +15,7 @@
 
 #include "sixel_display.h"
 
+#define SCALE "200%"
 #define CLEAR_SCREEN_ESCAPE "\x1b[H\x1b[2J"
 #define SEND_ATTRIBUTES_ESCAPE  "\x1b[c"
 #define RESPONSE_TIMEOUT 1000 /* ms */
@@ -159,6 +160,14 @@ bool SIXEL_DisplayImage(const char *filename)
 	if (SIXEL_FAILED(status)) {
 		return false;
 	}
+
+	// We scale up the graphics, otherwise they look very small,
+	// especially in iTerm on a retina display.
+	sixel_encoder_setopt(encoder, SIXEL_OPTFLAG_WIDTH, SCALE);
+	sixel_encoder_setopt(encoder, SIXEL_OPTFLAG_HEIGHT, SCALE);
+
+	// Blur-o-vision forever.
+	sixel_encoder_setopt(encoder, SIXEL_OPTFLAG_RESAMPLING, "nearest");
 
 	write(1, CLEAR_SCREEN_ESCAPE, strlen(CLEAR_SCREEN_ESCAPE));
 	status = sixel_encoder_encode(encoder, filename);
