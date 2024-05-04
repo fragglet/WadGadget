@@ -22,7 +22,7 @@
 #include "export.h"
 #include "import.h"
 #include "lump_info.h"
-#include "sixel.h"
+#include "sixel_display.h"
 #include "strings.h"
 #include "ui.h"
 

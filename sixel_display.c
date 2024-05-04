@@ -13,7 +13,7 @@
 
 #include <sixel.h>
 
-#include "sixel.h"
+#include "sixel_display.h"
 
 #define CLEAR_SCREEN_ESCAPE "\x1b[H\x1b[2J"
 #define SEND_ATTRIBUTES_ESCAPE  "\x1b[c"
