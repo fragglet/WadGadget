@@ -10,6 +10,7 @@
 
 #include <curses.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -621,6 +622,9 @@ static void Shutdown(void)
 int main(int argc, char *argv[])
 {
 	const char *start_path1 = ".", *start_path2 = ".";
+
+	signal(SIGIO, SIG_IGN);
+	signal(SIGPOLL, SIG_IGN);
 
 	SIXEL_CheckSupported();
 
