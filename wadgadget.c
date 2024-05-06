@@ -277,8 +277,11 @@ static void OpenEntry(void)
 	}
 
 	// Temporarily suspend curses until the subprogram returns.
-	endwin();
+	// We clear the screen first to avoid a brief flash of palette
+	// switching during the endwin() call.
 	clear();
+	refresh();
+	endwin();
 
 	result = 1;
 
