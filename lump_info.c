@@ -491,6 +491,8 @@ const char *LI_GetExtension(const struct lump_type *lt, bool convert)
 		return ".wav";
 	} else if (lt == &lump_type_mus || lt == &lump_type_midi) {
 		return ".mid";
+	} else if (lt == &lump_type_graphic) {
+		return ".png";
 	} else if (lt == &lump_type_plaintext) {
 		return ".txt";
 	} else {

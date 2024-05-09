@@ -16,6 +16,7 @@
 #include "audio.h"
 #include "dialog.h"
 #include "export.h"
+#include "graphic.h"
 #include "lump_info.h"
 #include "mus2mid.h"
 #include "strings.h"
@@ -24,6 +25,8 @@ static VFILE *PerformConversion(VFILE *input, const struct lump_type *lt)
 {
 	if (lt == &lump_type_sound) {
 		return S_ToAudioFile(input);
+	} else if (lt == &lump_type_graphic) {
+		return V_ToImageFile(input);
 	} else if (lt == &lump_type_mus) {
 		VFILE *result = vfopenmem(NULL, 0);
 		if (mus2mid(input, result)) {
@@ -128,6 +131,7 @@ bool ExportToFile(struct directory *from, struct directory_entry *ent,
 		fromlump = PerformConversion(fromlump, lt);
 	}
 	if (fromlump == NULL) {
+		// TODO: Print an error message on failed conversion
 		return false;
 	}
 
