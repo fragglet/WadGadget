@@ -7,7 +7,8 @@
 #include "vfile.h"
 #include "graphic.h"
 
-#define TRANSPARENT  247
+#define TRANSPARENT   247
+#define MAX_POST_LEN  0x80
 
 struct patch_header
 {
@@ -160,6 +161,23 @@ static void WarningCallback(png_structp p, png_const_charp s)
 	fprintf(stderr, "libpng warning: %s\n", s);
 }
 
+static void PngReadCallback(png_structp ppng, png_bytep buf, size_t len)
+{
+	VFILE *vf = png_get_io_ptr(ppng);
+	int result;
+
+	memset(buf, 0, len);
+	result = vfread(buf, 1, len, vf);
+	if (result == 0)
+	{
+		png_error(ppng, "end of file reached");
+	}
+	else if (result < 0)
+	{
+		png_error(ppng, "read error");
+	}
+}
+
 static void PngWriteCallback(png_structp ppng, png_bytep buf, size_t len)
 {
 	VFILE *vf = png_get_io_ptr(ppng);
@@ -169,6 +187,191 @@ static void PngWriteCallback(png_structp ppng, png_bytep buf, size_t len)
 static void PngFlushCallback(png_structp ppng)
 {
 	// no-op
+}
+
+static uint8_t FindColor(const png_color *pal, int r, int g, int b)
+{
+	int diff, best_diff = INT_MAX, i, best_idx = -1;
+
+	for (i = 0; i < 256; i++) {
+		diff = (r - pal[i].red) * (r - pal[i].red)
+		     + (g - pal[i].green) * (g - pal[i].green)
+		     + (b - pal[i].blue) * (b - pal[i].blue);
+		if (diff < best_diff) {
+			best_idx = i;
+			best_diff = diff;
+		}
+	}
+
+	return best_idx;
+}
+
+static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
+                                int width, int height)
+{
+	VFILE *result;
+	uint32_t *column_offsets;
+	uint8_t *post, *pixel;
+	struct patch_header hdr;
+	int x, y, post_len;
+
+	// Sanity check.
+	if (width >= UINT16_MAX || height >= UINT16_MAX) {
+		return NULL;
+	}
+
+	result = vfopenmem(NULL, 0);
+
+	// Write header.
+	hdr.width = width;
+	hdr.height = height;
+	hdr.leftoffset = 0;
+	hdr.topoffset = 0;
+	vfwrite(&hdr, 8, 1, result);
+
+	// Write fake column directory; we'll go back later
+	// and overwrite it with the actual data.
+	column_offsets = checked_calloc(width, sizeof(uint32_t));
+	vfwrite(column_offsets, sizeof(uint32_t), width, result);
+
+	post = checked_calloc(MAX_POST_LEN + 4, 1);
+	for (x = 0; x < width; x++) {
+		// TODO: swap
+		column_offsets[x] = vftell(result);
+		y = 0;
+		while (y < height) {
+			// Scan through to start of next post.
+			while (y < height) {
+				pixel = &buffer[y * rowstep + x * 4];
+				if (pixel[3] == 0xff) { // alpha
+					break;
+				}
+				y++;
+			}
+			if (y >= height) {
+				break;
+			}
+			// 0xff indicates end of column, so if the start y has
+			// reached this we (1) cannot fit this in one byte;
+			// (2) cannot use 0xff as topdelta.
+			if (y >= 0xff) {
+				vfclose(result);
+				goto fail;
+			}
+			// At this point, we are sure that we are building a
+			// post with at least one pixel. We do not allow the
+			// post length to reach 0x80, because that is the limit
+			// of what vanilla supports for post height.
+			post_len = 0;
+			post[0] = y;  // topdelta
+			while (y < height && post_len < MAX_POST_LEN) {
+				pixel = &buffer[y * rowstep + x * 4];
+				if (pixel[3] != 0xff) { // alpha
+					// end of post
+					break;
+				}
+				post[post_len + 3] = FindColor(
+					doom_palette, pixel[0], pixel[1], pixel[2]);
+				y++;
+				post_len++;
+			}
+			post[1] = post_len; // length
+			// Overflow bytes
+			post[2] = post[3];
+			post[post_len + 3] = post[post_len + 2];
+			vfwrite(post, 1, post_len + 4, result);
+		}
+
+		// end of column.
+		post[0] = 0xff;
+		vfwrite(post, 1, 1, result);
+	}
+
+	// Now go back and write the real column directory.
+	vfseek(result, 8, SEEK_SET);
+	vfwrite(column_offsets, sizeof(uint32_t), width, result);
+
+	// We're done.
+	vfseek(result, 0, SEEK_SET);
+
+fail:
+	free(column_offsets);
+	free(post);
+
+	return result;
+}
+
+VFILE *V_FromImageFile(VFILE *input)
+{
+	png_structp ppng;
+	png_infop pinfo = NULL;
+	VFILE *result = NULL;
+	png_uint_32 width, height;
+	uint8_t *imgbuf;
+	int rowstep, y;
+	int bit_depth, color_type, ilace_type, comp_type, filter_method;
+
+	ppng = png_create_read_struct(PNG_LIBPNG_VER_STRING,
+	                              NULL, NULL, NULL);
+	if (!ppng) {
+		goto fail1;
+	}
+
+	pinfo = png_create_info_struct(ppng);
+	if (!pinfo) {
+		goto fail2;
+	}
+
+	png_set_read_fn(ppng, input, PngReadCallback);
+	png_read_info(ppng, pinfo);
+	png_get_IHDR(ppng, pinfo, &width, &height, &bit_depth, &color_type,
+	             &ilace_type, &comp_type, &filter_method);
+
+	// Convert all input files to RGBA format.
+	png_set_add_alpha(ppng, 0xff, PNG_FILLER_AFTER);
+	if (color_type == PNG_COLOR_TYPE_PALETTE) {
+		png_set_palette_to_rgb(ppng);
+	}
+	if (png_get_valid(ppng, pinfo, PNG_INFO_tRNS)) {
+		png_set_tRNS_to_alpha(ppng);
+	}
+	if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) {
+		png_set_expand_gray_1_2_4_to_8(ppng);
+	}
+	if (bit_depth < 8) {
+		png_set_packing(ppng);
+	}
+
+	png_read_update_info(ppng, pinfo);
+
+	rowstep = png_get_rowbytes(ppng, pinfo);
+	imgbuf = checked_malloc(rowstep * height + 1);
+
+	for (y = 0; y < height; ++y) {
+		png_read_row(ppng, imgbuf + y * rowstep, NULL);
+		/* debugging code
+		{
+			int x;
+			printf("%5d: ", y);
+			for (x = 0; x < width; ++x) {
+				int c = imgbuf[y * rowstep + x * 4];
+				printf("%c", c ? '#' : ' ');
+			}
+			printf("\r\n");
+		}*/
+	}
+
+	png_read_end(ppng, NULL);
+
+	// Convert to in-memory VFILE containing patch data. Note that this
+	// may return NULL.
+	result = RGBABufferToPatch(imgbuf, rowstep, width, height);
+	free(imgbuf);
+fail2:
+	png_destroy_read_struct(&ppng, &pinfo, NULL);
+fail1:
+	vfclose(input);
+	return result;
 }
 
 static bool DrawPatch(uint8_t *srcbuf, size_t srcbuf_len, uint8_t *dstbuf)

@@ -11,3 +11,4 @@
 #include "vfile.h"
 
 VFILE *V_ToImageFile(VFILE *input);
+VFILE *V_FromImageFile(VFILE *input);

@@ -17,6 +17,7 @@
 #include "audio.h"
 #include "dialog.h"
 #include "import.h"
+#include "graphic.h"
 #include "strings.h"
 
 static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
@@ -62,9 +63,13 @@ static bool HasExtension(const char *filename, const char **exts)
 
 static VFILE *PerformConversion(VFILE *input, struct directory_entry *ent)
 {
-	if (ent->type == FILE_TYPE_FILE
-	 && HasExtension(ent->name, audio_extensions)) {
-		return S_FromAudioFile(input);
+	if (ent->type == FILE_TYPE_FILE) {
+		if (HasExtension(ent->name, audio_extensions)) {
+			return S_FromAudioFile(input);
+		}
+		if (StringHasSuffix(ent->name, ".png")) {
+			return V_FromImageFile(input);
+		}
 	}
 
 	return input;
