@@ -156,6 +156,7 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 {
 	char *filename, *filename2;
 	struct directory_entry *ent, *ent2;
+	struct progress_window progress;
 	bool success;
 	int idx;
 
@@ -168,6 +169,10 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 	if (!ConfirmOverwrite(from, from_set, to, convert)) {
 		return false;
 	}
+
+	UI_InitProgressWindow(
+		&progress, from_set->num_entries,
+		from->type == FILE_TYPE_DIR ? "Copying" : "Exporting");
 
 	idx = 0;
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
@@ -183,6 +188,7 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 		if (!success) {
 			return false;
 		}
+		UI_UpdateProgressWindow(&progress, ent->name);
 	}
 
 	VFS_Refresh(to);

@@ -14,8 +14,78 @@
 
 #include "colors.h"
 #include "common.h"
+#include "dialog.h"
 #include "pane.h"
 #include "ui.h"
+
+struct nonblocking_window {
+	struct pane pane;
+	char msg[128];
+};
+
+static void DrawNonblockingWindow(void *pane)
+{
+	struct nonblocking_window *nbw = pane;
+	WINDOW *win = nbw->pane.window;
+	int w, h;
+
+	wbkgdset(win, COLOR_PAIR(PAIR_DIALOG_BOX));
+	werase(win);
+	box(win, 0, 0);
+
+	UI_PrintMultilineString(win, 1, 2, nbw->msg);
+	wattroff(win, A_BOLD);
+
+	getmaxyx(win, h, w);
+	mvwaddstr(win, h - 1, w - 2, "");
+}
+
+void UI_ShowNonblockingWindow(const char *msg, ...)
+{
+	struct nonblocking_window nbw;
+	va_list args;
+	int scrh, scrw;
+	int w, h;
+
+	va_start(args, msg);
+	vsnprintf(nbw.msg, sizeof(nbw.msg), msg, args);
+	va_end(args);
+
+	getmaxyx(stdscr, scrh, scrw);
+
+	w = max(UI_StringWidth(nbw.msg) + 4, 35);
+	h = UI_StringHeight(nbw.msg) + 2;
+
+	nbw.pane.window = newwin(h, w, (scrh / 2) - h, (scrw - w) / 2);
+	nbw.pane.draw = DrawNonblockingWindow;
+	nbw.pane.keypress = NULL;
+
+	UI_PaneShow(&nbw);
+	UI_DrawAllPanes();
+	UI_PaneHide(&nbw);
+}
+
+void UI_InitProgressWindow(struct progress_window *win, int total,
+                           const char *operation)
+{
+	win->operation = operation;
+	win->count = 0;
+	win->total = total;
+	win->last_update = 0;
+}
+
+void UI_UpdateProgressWindow(struct progress_window *win, const char *ctx)
+{
+	clock_t now = clock();
+
+	++win->count;
+	if (now - win->last_update > (CLOCKS_PER_SEC / 4)) {
+		UI_ShowNonblockingWindow("%s (%d / %d)...\n%s",
+		                         win->operation, win->count,
+		                         win->total, ctx);
+		win->last_update = now;
+	}
+}
 
 struct confirm_dialog_box {
 	struct pane pane;

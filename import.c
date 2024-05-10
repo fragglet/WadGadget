@@ -83,8 +83,11 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	struct directory_entry *ent;
 	struct wad_file *to_wad;
 	struct wad_file_entry *waddir;
+	struct progress_window progress;
 	char namebuf[9];
 	int idx, lumpnum;
+
+	UI_InitProgressWindow(&progress, from_set->num_entries, "Importing");
 
 	// TODO: Update/overwrite existing lump instead of creating a new
 	// lump.
@@ -103,6 +106,11 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 		if (convert) {
 			fromfile = PerformConversion(fromfile, ent);
 		}
+		if (fromfile == NULL) {
+			// TODO: Delete the new entries we added?
+			// TODO: Show an error message
+			return false;
+		}
 		// TODO: This should be being done via VFS.
 		tolump = W_OpenLumpRewrite(to_wad, lumpnum);
 		vfcopy(fromfile, tolump);
@@ -112,6 +120,7 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 		++lumpnum;
 
 		VFS_RemoveFromSet(from_set, ent->serial_no);
+		UI_UpdateProgressWindow(&progress, ent->name);
 	}
 
 	VFS_Refresh(to);

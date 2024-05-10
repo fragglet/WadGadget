@@ -8,6 +8,19 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include <time.h>
+
+struct progress_window {
+	const char *operation;
+	int count, total;
+	time_t last_update;
+};
+
+void UI_InitProgressWindow(struct progress_window *win, int total,
+                           const char *operation);
+void UI_UpdateProgressWindow(struct progress_window *win, const char *ctx);
+
+void UI_ShowNonblockingWindow(const char *msg, ...);
 int UI_ConfirmDialogBox(const char *title, const char *msg, ...);
 
 void UI_MessageBox(const char *msg, ...);
