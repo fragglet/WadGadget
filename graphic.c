@@ -387,6 +387,39 @@ fail:
 	return result;
 }
 
+VFILE *V_FlatFromImageFile(VFILE *input)
+{
+	VFILE *result = NULL;
+	struct patch_header hdr;
+	uint8_t *imgbuf = NULL, *rowdata = NULL, *pixel;
+	int x, y, rowstep;
+
+	imgbuf = ReadPNG(input, &hdr, &rowstep);
+	vfclose(input);
+	if (imgbuf == NULL || hdr.width != 64 || hdr.height != 64) {
+		goto fail;
+	}
+
+	result = vfopenmem(NULL, 0);
+
+	rowdata = checked_malloc(hdr.width);
+	for (y = 0; y < hdr.height; ++y) {
+		for (x = 0; x < hdr.width; ++x) {
+			pixel = &imgbuf[y * rowstep + x * 4];
+			rowdata[x] = FindColor(
+				doom_palette, pixel[0], pixel[1], pixel[2]);
+		}
+		vfwrite(rowdata, 1, hdr.width, result);
+	}
+
+	// Rewind so that the caller can read from the stream.
+	vfseek(result, 0, SEEK_SET);
+fail:
+	free(imgbuf);
+	free(rowdata);
+	return result;
+}
+
 static bool DrawPatch(uint8_t *srcbuf, size_t srcbuf_len, uint8_t *dstbuf)
 {
 	struct patch_header *hdr = (struct patch_header *) srcbuf;
