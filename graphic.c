@@ -460,51 +460,30 @@ static bool DrawPatch(uint8_t *srcbuf, size_t srcbuf_len, uint8_t *dstbuf)
 	return true;
 }
 
-VFILE *V_ToImageFile(VFILE *input)
+static VFILE *WritePNG(struct patch_header *hdr, uint8_t *imgbuf)
 {
+	VFILE *result = NULL;
+	uint8_t *alphabuf;
 	png_structp ppng;
 	png_infop pinfo = NULL;
-	uint8_t *buf, *imgbuf = NULL, *alphabuf = NULL;
-	struct patch_header *hdr;
-	size_t buf_len;
 	int y;
-	VFILE *bufreader, *result = NULL;
-
-	bufreader = vfopenmem(NULL, 0);
-	vfcopy(input, bufreader);
-	vfclose(input);
-
-	if (!vfgetbuf(bufreader, (void **) &buf, &buf_len)
-	 || buf_len < 6)
-	{
-		goto fail1;
-	}
-
-	// TODO: We need a special-case conversion routine for flats.
-
-	hdr = (struct patch_header *) buf;
-	imgbuf = checked_malloc(hdr->width * hdr->height);
-	alphabuf = checked_malloc(256);
-	if (!DrawPatch(buf, buf_len, imgbuf))
-	{
-		goto fail1;
-	}
-
-	memset(alphabuf, 0xff, 256);
-	alphabuf[TRANSPARENT] = 0;
 
 	ppng = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
 	                               ErrorCallback, WarningCallback);
 	if (!ppng)
 	{
-		goto fail1;
+		return NULL;
 	}
 
 	pinfo = png_create_info_struct(ppng);
 	if (!pinfo)
 	{
-		goto fail2;
+		goto fail;
 	}
+
+	alphabuf = checked_malloc(256);
+	memset(alphabuf, 0xff, 256);
+	alphabuf[TRANSPARENT] = 0;
 
 	result = vfopenmem(NULL, 0);
 	png_set_write_fn(ppng, result, PngWriteCallback, PngFlushCallback);
@@ -522,12 +501,43 @@ VFILE *V_ToImageFile(VFILE *input)
 
 	png_write_end(ppng, pinfo);
 	vfseek(result, 0, SEEK_SET);
-
-fail2:
-	png_destroy_write_struct(&ppng, &pinfo);
-fail1:
-	free(imgbuf);
 	free(alphabuf);
+
+fail:
+	png_destroy_write_struct(&ppng, &pinfo);
+	return result;
+}
+
+VFILE *V_ToImageFile(VFILE *input)
+{
+	uint8_t *buf, *imgbuf = NULL;
+	struct patch_header *hdr;
+	size_t buf_len;
+	VFILE *bufreader, *result = NULL;
+
+	bufreader = vfopenmem(NULL, 0);
+	vfcopy(input, bufreader);
+	vfclose(input);
+
+	if (!vfgetbuf(bufreader, (void **) &buf, &buf_len)
+	 || buf_len < 6)
+	{
+		goto fail;
+	}
+
+	// TODO: We need a special-case conversion routine for flats.
+
+	hdr = (struct patch_header *) buf;
+	imgbuf = checked_malloc(hdr->width * hdr->height);
+	if (!DrawPatch(buf, buf_len, imgbuf))
+	{
+		goto fail;
+	}
+
+	result = WritePNG(hdr, imgbuf);
+
+fail:
+	free(imgbuf);
 	vfclose(bufreader);
 
 	return result;
