@@ -87,7 +87,9 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	char namebuf[9];
 	int idx, lumpnum;
 
-	UI_InitProgressWindow(&progress, from_set->num_entries, "Importing");
+	UI_InitProgressWindow(
+		&progress, from_set->num_entries,
+		from->type == FILE_TYPE_DIR ? "Importing" : "Copying");
 
 	// TODO: Update/overwrite existing lump instead of creating a new
 	// lump.
