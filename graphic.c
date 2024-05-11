@@ -525,8 +525,6 @@ VFILE *V_ToImageFile(VFILE *input)
 		goto fail;
 	}
 
-	// TODO: We need a special-case conversion routine for flats.
-
 	hdr = (struct patch_header *) buf;
 	imgbuf = checked_malloc(hdr->width * hdr->height);
 	if (!DrawPatch(buf, buf_len, imgbuf))
@@ -543,3 +541,32 @@ fail:
 	return result;
 }
 
+VFILE *V_FlatToImageFile(VFILE *input)
+{
+	uint8_t *buf;
+	struct patch_header hdr;
+	size_t buf_len;
+	VFILE *bufreader, *result = NULL;
+
+	bufreader = vfopenmem(NULL, 0);
+	vfcopy(input, bufreader);
+	vfclose(input);
+
+	// Lump must be exactly 4096 bytes.
+	if (!vfgetbuf(bufreader, (void **) &buf, &buf_len)
+	 || buf_len != 4096)
+	{
+		goto fail;
+	}
+
+	hdr.width = 64;
+	hdr.height = 64;
+	hdr.topoffset = 0;
+	hdr.leftoffset = 0;
+	result = WritePNG(&hdr, buf);
+
+fail:
+	vfclose(bufreader);
+
+	return result;
+}

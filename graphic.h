@@ -13,3 +13,4 @@
 VFILE *V_ToImageFile(VFILE *input);
 VFILE *V_FromImageFile(VFILE *input);
 VFILE *V_FlatFromImageFile(VFILE *input);
+VFILE *V_FlatToImageFile(VFILE *input);
