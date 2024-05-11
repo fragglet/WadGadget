@@ -36,7 +36,7 @@
 "This is free software; see COPYING.md for copying conditions. There is NO\n" \
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 
-#define INFO_PANE_WIDTH 27
+#define INFO_PANE_WIDTH 28
 
 #define COLORX_DARKGREY       (COLOR_BLACK + 8)
 #define COLORX_BRIGHTBLUE     (COLOR_BLUE + 8)
@@ -125,7 +125,7 @@ static void SetWindowSizes(void)
 	mvwin(search_pane.pane.window, lines - 3,
 	      left_width);
 	
-	wresize(actions_pane.pane.window, 15, middle_width);
+	wresize(actions_pane.pane.window, 16, middle_width);
 	mvwin(actions_pane.pane.window, 6, left_width);
 	wresize(pane_windows[0], lines - 1, left_width);
 	mvwin(pane_windows[0], 1, 0);
@@ -449,8 +449,6 @@ static void CreateWad(bool convert)
 		SwitchToPane(panes[0] == to_pane ? 0 : 1);
 	}
 }
-
-#define SHIFT_KEY_F(n) KEY_F(n + 12)
 
 static void HandleKeypress(void *pane, int key)
 {

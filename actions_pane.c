@@ -56,10 +56,10 @@ static const struct action dir_to_dir[] = {
 	{NULL, NULL},
 };
 
-struct action common_actions[] =
-{
+struct action common_actions[] = {
 	{"Space", "Mark/unmark"},
 	{"F10", "Unmark all"},
+	{"Shift-F10", "Mark pattern"},
 	{"", ""},
 	{"Tab", "Other pane"},
 	{"^N", "Search again"},

@@ -429,6 +429,13 @@ static void Keypress(void *directory_pane, int key)
 		}
 		return;
 	}
+	if (key == SHIFT_KEY_F(10)) {
+		char *glob = UI_TextInputDialogBox(
+			"Mark pattern", 15,
+			"Enter a wildcard pattern (eg. *.png):");
+		VFS_AddGlobToSet(p->dir, &p->tagged, glob);
+		free(glob);
+	}
 	if (key == KEY_F(10)) {
 		VFS_ClearSet(&p->tagged);
 		return;

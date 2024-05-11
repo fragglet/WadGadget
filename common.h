@@ -10,6 +10,8 @@
 
 #include <assert.h>
 
+#define SHIFT_KEY_F(n) KEY_F(n + 12)
+
 #define arrlen(x) (sizeof(x) / sizeof(*(x)))
 
 #define min(x, y) ((x) < (y) ? (x) : (y))

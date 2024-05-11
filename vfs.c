@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -69,6 +70,34 @@ void VFS_AddToSet(struct file_set *l, unsigned int serial_no)
 	        sizeof(uint64_t) * (l->num_entries - entries_index));
 	l->entries[entries_index] = serial_no;
 	++l->num_entries;
+}
+
+static bool GlobMatch(const char *pattern, const char *s)
+{
+	switch (*pattern) {
+	case '*':
+		return GlobMatch(pattern + 1, s)
+		    || (*s != '\0' && GlobMatch(pattern, s + 1));
+	case '\0':
+		return *s == '\0';
+	case '?':
+		return *s != '\0' && GlobMatch(pattern + 1, s + 1);
+	default:
+		return tolower(*s) == tolower(*pattern)
+		    && GlobMatch(pattern + 1, s + 1);
+	}
+}
+
+void VFS_AddGlobToSet(struct directory *dir, struct file_set *l,
+                      const char *glob)
+{
+	int i = 0;
+
+	for (i = 0; i < dir->num_entries; ++i) {
+		if (GlobMatch(glob, dir->entries[i].name)) {
+			VFS_AddToSet(l, dir->entries[i].serial_no);
+		}
+	}
 }
 
 void VFS_RemoveFromSet(struct file_set *l, unsigned int serial_no)
