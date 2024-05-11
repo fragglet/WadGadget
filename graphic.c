@@ -207,48 +207,38 @@ static uint8_t FindColor(const png_color *pal, int r, int g, int b)
 }
 
 static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
-                                int width, int height)
+                                struct patch_header *hdr)
 {
 	VFILE *result;
 	uint32_t *column_offsets;
 	uint8_t *post, *pixel;
-	struct patch_header hdr;
 	int x, y, post_len;
-
-	// Sanity check.
-	if (width >= UINT16_MAX || height >= UINT16_MAX) {
-		return NULL;
-	}
 
 	result = vfopenmem(NULL, 0);
 
 	// Write header.
-	hdr.width = width;
-	hdr.height = height;
-	hdr.leftoffset = 0;
-	hdr.topoffset = 0;
-	vfwrite(&hdr, 8, 1, result);
+	vfwrite(hdr, 8, 1, result);
 
 	// Write fake column directory; we'll go back later
 	// and overwrite it with the actual data.
-	column_offsets = checked_calloc(width, sizeof(uint32_t));
-	vfwrite(column_offsets, sizeof(uint32_t), width, result);
+	column_offsets = checked_calloc(hdr->width, sizeof(uint32_t));
+	vfwrite(column_offsets, sizeof(uint32_t), hdr->width, result);
 
 	post = checked_calloc(MAX_POST_LEN + 4, 1);
-	for (x = 0; x < width; x++) {
+	for (x = 0; x < hdr->width; x++) {
 		// TODO: swap
 		column_offsets[x] = vftell(result);
 		y = 0;
-		while (y < height) {
+		while (y < hdr->height) {
 			// Scan through to start of next post.
-			while (y < height) {
+			while (y < hdr->height) {
 				pixel = &buffer[y * rowstep + x * 4];
 				if (pixel[3] == 0xff) { // alpha
 					break;
 				}
 				y++;
 			}
-			if (y >= height) {
+			if (y >= hdr->height) {
 				break;
 			}
 			// 0xff indicates end of column, so if the start y has
@@ -264,7 +254,7 @@ static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
 			// of what vanilla supports for post height.
 			post_len = 0;
 			post[0] = y;  // topdelta
-			while (y < height && post_len < MAX_POST_LEN) {
+			while (y < hdr->height && post_len < MAX_POST_LEN) {
 				pixel = &buffer[y * rowstep + x * 4];
 				if (pixel[3] != 0xff) { // alpha
 					// end of post
@@ -289,7 +279,7 @@ static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
 
 	// Now go back and write the real column directory.
 	vfseek(result, 8, SEEK_SET);
-	vfwrite(column_offsets, sizeof(uint32_t), width, result);
+	vfwrite(column_offsets, sizeof(uint32_t), hdr->width, result);
 
 	// We're done.
 	vfseek(result, 0, SEEK_SET);
@@ -301,15 +291,14 @@ fail:
 	return result;
 }
 
-VFILE *V_FromImageFile(VFILE *input)
+static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
+                        int *rowstep)
 {
 	png_structp ppng;
-	png_infop pinfo = NULL;
-	VFILE *result = NULL;
+	png_infop pinfo;
+	int bit_depth, color_type, ilace_type, comp_type, filter_method, y;
 	png_uint_32 width, height;
-	uint8_t *imgbuf;
-	int rowstep, y;
-	int bit_depth, color_type, ilace_type, comp_type, filter_method;
+	uint8_t *imgbuf = NULL;
 
 	ppng = png_create_read_struct(PNG_LIBPNG_VER_STRING,
 	                              NULL, NULL, NULL);
@@ -324,8 +313,19 @@ VFILE *V_FromImageFile(VFILE *input)
 
 	png_set_read_fn(ppng, input, PngReadCallback);
 	png_read_info(ppng, pinfo);
+
 	png_get_IHDR(ppng, pinfo, &width, &height, &bit_depth, &color_type,
 	             &ilace_type, &comp_type, &filter_method);
+
+	// Sanity check.
+	if (width >= UINT16_MAX || height >= UINT16_MAX) {
+		goto fail2;
+	}
+
+	hdr->width = width;
+	hdr->height = height;
+	hdr->leftoffset = 0;
+	hdr->topoffset = 0;
 
 	// Convert all input files to RGBA format.
 	png_set_add_alpha(ppng, 0xff, PNG_FILLER_AFTER);
@@ -344,11 +344,11 @@ VFILE *V_FromImageFile(VFILE *input)
 
 	png_read_update_info(ppng, pinfo);
 
-	rowstep = png_get_rowbytes(ppng, pinfo);
-	imgbuf = checked_malloc(rowstep * height + 1);
+	*rowstep = png_get_rowbytes(ppng, pinfo);
+	imgbuf = checked_malloc(*rowstep * height);
 
 	for (y = 0; y < height; ++y) {
-		png_read_row(ppng, imgbuf + y * rowstep, NULL);
+		png_read_row(ppng, imgbuf + y * *rowstep, NULL);
 		/* debugging code
 		{
 			int x;
@@ -362,15 +362,28 @@ VFILE *V_FromImageFile(VFILE *input)
 	}
 
 	png_read_end(ppng, NULL);
-
-	// Convert to in-memory VFILE containing patch data. Note that this
-	// may return NULL.
-	result = RGBABufferToPatch(imgbuf, rowstep, width, height);
-	free(imgbuf);
 fail2:
 	png_destroy_read_struct(&ppng, &pinfo, NULL);
 fail1:
+	return imgbuf;
+}
+
+VFILE *V_FromImageFile(VFILE *input)
+{
+	VFILE *result = NULL;
+	struct patch_header hdr;
+	uint8_t *imgbuf;
+	int rowstep;
+
+	imgbuf = ReadPNG(input, &hdr, &rowstep);
 	vfclose(input);
+	if (imgbuf == NULL) {
+		goto fail;
+	}
+
+	result = RGBABufferToPatch(imgbuf, rowstep, &hdr);
+	free(imgbuf);
+fail:
 	return result;
 }
 
