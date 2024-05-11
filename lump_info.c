@@ -16,6 +16,11 @@
 #include "common.h"
 #include "wad_file.h"
 
+struct lump_section {
+	const char *start1, *start2;
+	const char *end1, *end2;
+};
+
 struct lump_type {
 	bool (*check)(struct wad_file_entry *ent, uint8_t *buf);
 	void (*format)(struct wad_file_entry *ent, uint8_t *buf,
@@ -40,6 +45,18 @@ struct lump_description {
 struct sized_lump {
 	int size;
 	const char *description;
+};
+
+const struct lump_section lump_section_sprites = {
+	"S_START", "SS_START", "S_END", "SS_END",
+};
+
+const struct lump_section lump_section_patches = {
+	"P_START", "PP_START", "P_END", "PP_END",
+};
+
+const struct lump_section lump_section_flats = {
+	"F_START", "FF_START", "F_END", "FF_END",
 };
 
 static const struct lump_description special_lumps[] = {
@@ -92,6 +109,31 @@ static const struct sized_lump lumps_by_size[] = {
 	{256,    "Color translation table"},
 	{0,      "Empty"},
 };
+
+bool LI_LumpInSection(struct wad_file *wf, unsigned int lump_index,
+                      const struct lump_section *section)
+{
+	const struct wad_file_entry *dir = W_GetDirectory(wf);
+	int num_lumps = W_NumLumps(wf);
+	int i;
+
+	for (i = lump_index; i >= 0; i--) {
+		if (!strncasecmp(dir[i].name, section->start1, 8)
+		 || !strncasecmp(dir[i].name, section->start2, 8)) {
+			break;
+		}
+	}
+	if (i < 0) {
+		return false;
+	}
+	for (i = lump_index + 1; i < num_lumps; i++) {
+		if (!strncasecmp(dir[i].name, section->end1, 8)
+		 || !strncasecmp(dir[i].name, section->end2, 8)) {
+			return true;
+		}
+	}
+	return false;
+}
 
 static const char *LookupDescription(const struct lump_description *table,
                                      struct wad_file_entry *ent)
