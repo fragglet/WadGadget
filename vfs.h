@@ -81,8 +81,8 @@ void VFS_DirectoryUnref(struct directory *dir);
 void VFS_ClearSet(struct file_set *l);
 void VFS_AddToSet(struct file_set *l, unsigned int serial_no);
 void VFS_RemoveFromSet(struct file_set *l, unsigned int serial_no);
-void VFS_AddGlobToSet(struct directory *dir, struct file_set *l,
-                      const char *glob);
+int VFS_AddGlobToSet(struct directory *dir, struct file_set *l,
+                     const char *glob);
 int VFS_SetHas(struct file_set *l, unsigned int serial_no);
 void VFS_CopySet(struct file_set *to, struct file_set *from);
 void VFS_FreeSet(struct file_set *set);

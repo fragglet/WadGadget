@@ -430,11 +430,21 @@ static void Keypress(void *directory_pane, int key)
 		return;
 	}
 	if (key == SHIFT_KEY_F(10)) {
+		int first_match;
 		char *glob = UI_TextInputDialogBox(
 			"Mark pattern", 15,
 			"Enter a wildcard pattern (eg. *.png):");
-		VFS_AddGlobToSet(p->dir, &p->tagged, glob);
+		if (glob == NULL) {
+			return;
+		}
+		first_match = VFS_AddGlobToSet(p->dir, &p->tagged, glob);
+		if (first_match < 0) {
+			UI_MessageBox("No matches found.");
+		} else {
+			UI_ListPaneSelect(&p->pane, first_match + 1);
+		}
 		free(glob);
+		return;
 	}
 	if (key == KEY_F(10)) {
 		VFS_ClearSet(&p->tagged);

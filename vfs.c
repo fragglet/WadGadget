@@ -88,18 +88,23 @@ static bool GlobMatch(const char *pattern, const char *s)
 	}
 }
 
-void VFS_AddGlobToSet(struct directory *dir, struct file_set *l,
-                      const char *glob)
+// Mark all entries matching glob pattern. Returns index of first match.
+int VFS_AddGlobToSet(struct directory *dir, struct file_set *l,
+                     const char *glob)
 {
 	struct directory_entry *ent;
-	int i = 0;
+	int i = 0, result = -1;
 
 	for (i = 0; i < dir->num_entries; ++i) {
 		ent = &dir->entries[i];
 		if (ent->type != FILE_TYPE_DIR && GlobMatch(glob, ent->name)) {
 			VFS_AddToSet(l, ent->serial_no);
+			if (result == -1) {
+				result = i;
+			}
 		}
 	}
+	return result;
 }
 
 void VFS_RemoveFromSet(struct file_set *l, unsigned int serial_no)
