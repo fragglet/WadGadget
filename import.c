@@ -18,6 +18,7 @@
 #include "dialog.h"
 #include "import.h"
 #include "graphic.h"
+#include "lump_info.h"
 #include "strings.h"
 
 static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
@@ -61,14 +62,19 @@ static bool HasExtension(const char *filename, const char **exts)
 	return false;
 }
 
-static VFILE *PerformConversion(VFILE *input, struct directory_entry *ent)
+static VFILE *PerformConversion(VFILE *input, struct directory_entry *ent,
+                                bool flats_section)
 {
 	if (ent->type == FILE_TYPE_FILE) {
 		if (HasExtension(ent->name, audio_extensions)) {
 			return S_FromAudioFile(input);
 		}
 		if (StringHasSuffix(ent->name, ".png")) {
-			return V_FromImageFile(input);
+			if (flats_section) {
+				return V_FlatFromImageFile(input);
+			} else {
+				return V_FromImageFile(input);
+			}
 		}
 	}
 
@@ -86,6 +92,7 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	struct progress_window progress;
 	char namebuf[9];
 	int idx, lumpnum;
+	bool flats_section;
 
 	UI_InitProgressWindow(
 		&progress, from_set->num_entries,
@@ -99,6 +106,9 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	W_AddEntries(to_wad, lumpnum, from_set->num_entries);
 	waddir = W_GetDirectory(to_wad);
 
+	flats_section = LI_LumpInSection(to_wad, to_index,
+	                                 &lump_section_flats);
+
 	idx = 0;
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
 		LumpNameForEntry(namebuf, ent);
@@ -106,7 +116,8 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 
 		fromfile = VFS_OpenByEntry(from, ent);
 		if (convert) {
-			fromfile = PerformConversion(fromfile, ent);
+			fromfile = PerformConversion(fromfile, ent,
+			                             flats_section);
 		}
 		if (fromfile == NULL) {
 			// TODO: Delete the new entries we added?
