@@ -116,7 +116,7 @@ bool LI_LumpInSection(struct wad_file *wf, unsigned int lump_index,
 	int num_lumps = W_NumLumps(wf);
 	int i;
 
-	for (i = lump_index; i >= 0; i--) {
+	for (i = lump_index; i >= 0 && i < num_lumps; i--) {
 		if (!strncasecmp(dir[i].name, section->start1, 8)
 		 || !strncasecmp(dir[i].name, section->start2, 8)) {
 			break;
