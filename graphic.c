@@ -396,8 +396,15 @@ VFILE *V_FlatFromImageFile(VFILE *input)
 
 	imgbuf = ReadPNG(input, &hdr, &rowstep);
 	vfclose(input);
-	if (imgbuf == NULL || hdr.width != 64 || hdr.height != 64) {
+	if (imgbuf == NULL) {
 		goto fail;
+	}
+	// The image has to be a 64x64 graphic. If it isn't, do a normal
+	// patch format conversion as above.
+	if (hdr.width != 64 || hdr.height != 64) {
+		result = RGBABufferToPatch(imgbuf, rowstep, &hdr);
+		free(imgbuf);
+		return result;
 	}
 
 	result = vfopenmem(NULL, 0);
