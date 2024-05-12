@@ -105,7 +105,6 @@ static const struct sized_lump lumps_by_size[] = {
 	{8704,   "Light translation map"},
 	{64000,  "Fullscreen image"},
 	{4000,   "Text mode screen"},
-	{4096,   "Floor/ceiling texture"},
 	{256,    "Color translation table"},
 	{0,      "Empty"},
 };
@@ -240,6 +239,26 @@ static void GraphicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_graphic = {
 	GraphicLumpCheck,
 	GraphicLumpFormat,
+};
+
+// Floor/ceiling texture.
+
+static bool FlatLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	// Flats are a special case that we identify by looking at lump size
+	// and WAD section.
+	assert(false);
+}
+
+static void FlatLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                           char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "Floor/ceiling texture");
+}
+
+const struct lump_type lump_type_flat = {
+	FlatLumpCheck,
+	FlatLumpFormat,
 };
 
 // DMX .MUS format.
@@ -491,6 +510,14 @@ const struct lump_type *LI_IdentifyLump(struct wad_file *f,
 	int i;
 
 	ent = &W_GetDirectory(f)[lump_index];
+
+	// Flats are a special case where we look at lump size but also
+	// check the section of the WAD; it must be between
+	// F_START/F_END markers.
+	if (ent->size == 4096
+	 && LI_LumpInSection(f, lump_index, &lump_section_flats)) {
+		return &lump_type_flat;
+	}
 
 	memset(buf, 0, sizeof(buf));
 	W_ReadLumpHeader(f, lump_index, buf, sizeof(buf));

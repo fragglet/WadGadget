@@ -16,6 +16,7 @@ struct lump_section;
 extern const struct lump_type lump_type_level;
 extern const struct lump_type lump_type_special;
 extern const struct lump_type lump_type_sound;
+extern const struct lump_type lump_type_flat;
 extern const struct lump_type lump_type_graphic;
 extern const struct lump_type lump_type_mus;
 extern const struct lump_type lump_type_midi;
