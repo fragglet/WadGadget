@@ -25,6 +25,8 @@ static VFILE *PerformConversion(VFILE *input, const struct lump_type *lt)
 {
 	if (lt == &lump_type_sound) {
 		return S_ToAudioFile(input);
+	} else if (lt == &lump_type_flat) {
+		return V_FlatToImageFile(input);
 	} else if (lt == &lump_type_graphic) {
 		return V_ToImageFile(input);
 	} else if (lt == &lump_type_mus) {
