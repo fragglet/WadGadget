@@ -31,6 +31,10 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 	case FILE_TYPE_LUMP:
 		// WAD to WAD copy.
 		break;
+	case FILE_TYPE_WAD:
+		// It's weird to import a WAD into a WAD, but there's no
+		// reason to forbid it.
+		/* fallthrough */
 	case FILE_TYPE_FILE:
 		// Lump name was set from filename, but we strip extension.
 		p = strrchr(namebuf, '.');
