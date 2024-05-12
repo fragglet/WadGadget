@@ -468,10 +468,10 @@ static void HandleKeypress(void *pane, int key)
 	case SHIFT_KEY_F(5):
 		PerformCopy(false);
 		break;
-	case KEY_F(9):
+	case KEY_F(3):
 		CreateWad(true);
 		break;
-	case SHIFT_KEY_F(9):
+	case SHIFT_KEY_F(3):
 		CreateWad(false);
 		break;
 	case ('L' & 0x1f):  // ^L = redraw whole screen

@@ -14,8 +14,8 @@
 #include "colors.h"
 
 static const struct action wad_to_wad[] = {
+	{"Ent", "View/Edit"},
 	{"F2", "Move (rearrange)"},
-	{"F3", "View/Edit"},
 	{"F4", "> Update"},
 	{"F5", "> Copy"},
 	{"F6", "Rename"},
@@ -25,41 +25,41 @@ static const struct action wad_to_wad[] = {
 };
 
 static const struct action wad_to_dir[] = {
+	{"Ent", "View/Edit"},
 	{"F2", "Move (rearrange)"},
-	{"F3", "View/Edit"},
-	{"F5", "> Export"},
+	{"F3", "> Export as WAD"},
+	{"F5", "> Export to files"},
 	{"F6", "Rename"},
 	{"F7", "New lump"},
 	{"F8", "Delete"},
-	{"F9", "> Export as WAD"},
 	{NULL, NULL},
 };
 
 static const struct action dir_to_wad[] = {
-	{"F3", "View/Edit"},
+	{"Ent", "View/Edit"},
+	{"F3", "Make WAD"},
 	{"F4", "> Update"},
 	{"F5", "> Import"},
 	{"F6", "Rename"},
 	{"F7", "Mkdir"},
 	{"F8", "Delete"},
-	{"F9", "Make WAD"},
 	{NULL, NULL},
 };
 
 static const struct action dir_to_dir[] = {
-	{"F3", "View/Edit"},
+	{"Ent", "View/Edit"},
+	{"F3", "Make WAD"},
 	{"F5", "> Copy"},
 	{"F6", "Rename"},
 	{"F7", "Mkdir"},
 	{"F8", "Delete"},
-	{"F9", "Make WAD"},
 	{NULL, NULL},
 };
 
 struct action common_actions[] = {
 	{"Space", "Mark/unmark"},
+	{"F9", "Mark pattern"},
 	{"F10", "Unmark all"},
-	{"Shift-F10", "Mark pattern"},
 	{"", ""},
 	{"Tab", "Other pane"},
 	{"^N", "Search again"},

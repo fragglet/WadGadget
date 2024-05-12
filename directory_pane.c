@@ -429,7 +429,7 @@ static void Keypress(void *directory_pane, int key)
 		}
 		return;
 	}
-	if (key == SHIFT_KEY_F(10)) {
+	if (key == KEY_F(9)) {
 		int first_match;
 		char *glob = UI_TextInputDialogBox(
 			"Mark pattern", 15,
