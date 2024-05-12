@@ -375,6 +375,13 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 		return NULL;
 	}
 
+	// Forgot to include .wad extension?
+	if (strchr(filename, '.') == NULL) {
+		filename2 = StringJoin("", filename, ".wad", NULL);
+		free(filename);
+		filename = filename2;
+	}
+
 	if (VFS_EntryByName(to, filename) != NULL
 	 && !UI_ConfirmDialogBox("Confirm Overwrite",
 	                         "Overwrite existing '%s'?", filename)) {
