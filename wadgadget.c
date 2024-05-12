@@ -392,14 +392,15 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 	filename2 = StringJoin("", to->path, "/", filename, NULL);
 
 	if (!W_CreateFile(filename2)) {
-		UI_MessageBox("Failed to create new WAD file.");
+		UI_MessageBox("%s\nFailed to create new WAD file.", filename);
 		free(filename);
 		free(filename2);
 		return NULL;
 	}
 	newfile = VFS_OpenDir(filename2);
 	if (newfile == NULL) {
-		UI_MessageBox("Failed to open new file after creating.");
+		UI_MessageBox("%s\nFailed to open new file after creating.",
+		              filename);
 		free(filename);
 		free(filename2);
 		return NULL;

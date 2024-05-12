@@ -40,7 +40,8 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 		// TODO: Convert from other formats: .png, .wav, etc.
 		break;
 	default:
-		UI_MessageBox("Can't import this file type.");
+		UI_MessageBox("%s\nCan't import this file type.",
+		              ent->name);
 		return;
 	}
 }
