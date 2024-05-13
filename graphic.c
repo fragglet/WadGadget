@@ -7,6 +7,8 @@
 #include "vfile.h"
 #include "graphic.h"
 
+#define OFFSET_CHUNK_NAME  "grAb"
+
 #define TRANSPARENT   247
 #define MAX_POST_LEN  0x80
 
@@ -17,6 +19,11 @@ struct patch_header
 	int16_t leftoffset;
 	int16_t topoffset;
 	int32_t columnofs[1];
+};
+
+struct offsets_chunk {
+	int32_t leftoffset, topoffset;
+	int32_t crc;
 };
 
 // TODO: Get palette from current WADs
@@ -150,6 +157,63 @@ static const png_color doom_palette[256] = {
 	{0xcf, 0x00, 0xcf}, {0x9f, 0x00, 0x9b},
 	{0x6f, 0x00, 0x6b}, {0xa7, 0x6b, 0x6b},
 };
+
+static uint32_t crc_table[256] = {0};
+
+static void BuildCrcTable(void)
+{
+	int32_t i, j;
+	uint32_t c;
+
+	for (i = 0; i < 256; i++) {
+		c = (uint32_t) i;
+		for (j = 0; j < 8; j++) {
+			if (c & 1) {
+				c = ((uint32_t) 0xedb88320) ^ (c >> 1);
+			} else {
+				c = c >> 1;
+			}
+		}
+		crc_table[i] = c;
+	}
+}
+
+static uint32_t OffsetsChunkCrc(struct offsets_chunk *chunk)
+{
+	uint8_t *buf = (uint8_t *) chunk;
+	uint32_t crc = 0xffffffff;
+	unsigned int i, c;
+
+	if (crc_table[0] == 0) {
+		BuildCrcTable();
+	}
+
+	for (i = 0; i < 4; i++) {
+		c = OFFSET_CHUNK_NAME[i];
+		crc = crc_table[(crc ^ c) & 0xff] ^ (crc >> 8);
+	}
+	for (i = 0; i < 8; i++) {
+		c = buf[i];
+		crc = crc_table[(crc ^ c) & 0xff] ^ (crc >> 8);
+	}
+
+	return crc ^ ((uint32_t) 0xffffffff);
+}
+
+static void WriteOffsetChunk(png_structp ppng, const struct patch_header *hdr)
+{
+	struct offsets_chunk chunk;
+
+	chunk.leftoffset = hdr->leftoffset;
+	chunk.topoffset = hdr->topoffset;
+	SwapBE32(&chunk.leftoffset);
+	SwapBE32(&chunk.topoffset);
+	chunk.crc = OffsetsChunkCrc(&chunk);
+	SwapBE32(&chunk.crc);
+	png_write_chunk(ppng, (png_const_bytep) OFFSET_CHUNK_NAME,
+	                (png_const_bytep) &chunk,
+	                sizeof(chunk));
+}
 
 static void ErrorCallback(png_structp p, png_const_charp s)
 {
@@ -500,6 +564,9 @@ static VFILE *WritePNG(struct patch_header *hdr, uint8_t *imgbuf)
 	png_set_tRNS(ppng, pinfo, alphabuf, 256, NULL);
 	png_set_PLTE(ppng, pinfo, doom_palette, 256);
 	png_write_info(ppng, pinfo);
+	if (hdr->topoffset != 0 || hdr->leftoffset != 0) {
+		WriteOffsetChunk(ppng, hdr);
+	}
 
 	for (y = 0; y < hdr->height; y++)
 	{
