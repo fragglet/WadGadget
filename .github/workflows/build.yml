@@ -19,3 +19,20 @@ jobs:
 
     - name: make
       run: make -j8 -k
+
+  build:
+    name: Build (no libsixel)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install build dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt update
+        sudo apt -q install libncurses-dev gcc make \
+                            libaudiofile-dev libpng-dev
+
+    - uses: actions/checkout@v4
+
+    - name: make
+      run: make -j8 -k
