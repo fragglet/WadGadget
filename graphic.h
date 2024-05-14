@@ -10,7 +10,13 @@
 
 #include "vfile.h"
 
+struct patch_header {
+	uint16_t width, height;
+	int16_t leftoffset, topoffset;
+};
+
 VFILE *V_ToImageFile(VFILE *input);
 VFILE *V_FromImageFile(VFILE *input);
 VFILE *V_FlatFromImageFile(VFILE *input);
 VFILE *V_FlatToImageFile(VFILE *input);
+void V_SwapPatchHeader(struct patch_header *hdr);

@@ -12,15 +12,6 @@
 #define TRANSPARENT   247
 #define MAX_POST_LEN  0x80
 
-struct patch_header
-{
-	uint16_t width;
-	uint16_t height;
-	int16_t leftoffset;
-	int16_t topoffset;
-	int32_t columnofs[1];
-};
-
 struct offsets_chunk {
 	int32_t leftoffset, topoffset;
 	int32_t crc;
@@ -156,6 +147,14 @@ static const png_color doom_palette[256] = {
 	{0xff, 0x7b, 0xff}, {0xff, 0x00, 0xff},
 	{0xcf, 0x00, 0xcf}, {0x9f, 0x00, 0x9b},
 	{0x6f, 0x00, 0x6b}, {0xa7, 0x6b, 0x6b},
+};
+
+void V_SwapPatchHeader(struct patch_header *hdr)
+{
+	SwapLE16(&hdr->width);
+	SwapLE16(&hdr->height);
+	SwapLE16(&hdr->leftoffset);
+	SwapLE16(&hdr->topoffset);
 };
 
 static uint32_t crc_table[256] = {0};
@@ -494,13 +493,15 @@ fail:
 static bool DrawPatch(uint8_t *srcbuf, size_t srcbuf_len, uint8_t *dstbuf)
 {
 	struct patch_header *hdr = (struct patch_header *) srcbuf;
+	uint32_t *columnofs =
+		(uint32_t *) (srcbuf + sizeof(struct patch_header));
 	int x, y, off, i, cnt;
 
 	memset(dstbuf, TRANSPARENT, hdr->width * hdr->height);
 
 	for (x = 0; x < hdr->width; ++x)
 	{
-		off = hdr->columnofs[x];
+		off = columnofs[x];
 		if (off > srcbuf_len - 1)
 		{
 			return false;

@@ -14,6 +14,8 @@
 #include <string.h>
 
 #include "common.h"
+#include "audio.h"
+#include "graphic.h"
 #include "wad_file.h"
 
 struct lump_section {
@@ -25,17 +27,6 @@ struct lump_type {
 	bool (*check)(struct wad_file_entry *ent, uint8_t *buf);
 	void (*format)(struct wad_file_entry *ent, uint8_t *buf,
 	               char *descr_buf, size_t descr_buf_len);
-};
-
-struct sound_header {
-	uint16_t format;
-	uint16_t sample_rate;
-	uint32_t num_samples;
-};
-
-struct patch_header {
-	uint16_t width, height;
-	int16_t xoff, yoff;
 };
 
 struct lump_description {
@@ -221,8 +212,8 @@ static bool GraphicLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 
 	return ent->size >= 8 && patch->width > 0 && patch->height > 0
 	    && patch->width <= 320 && patch->height <= 200
-	    && patch->xoff >= -256 && patch->xoff < 256
-	    && patch->yoff >= -256 && patch->yoff < 256;
+	    && patch->leftoffset >= -256 && patch->leftoffset < 256
+	    && patch->topoffset >= -256 && patch->topoffset < 256;
 }
 
 static void GraphicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
@@ -233,7 +224,7 @@ static void GraphicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	snprintf(descr_buf, descr_buf_len,
 	         "Graphic\nDimensions: %dx%d\nOffsets: %d, %d",
 	         patch->width, patch->height,
-	         patch->xoff, patch->yoff);
+	         patch->leftoffset, patch->topoffset);
 }
 
 const struct lump_type lump_type_graphic = {

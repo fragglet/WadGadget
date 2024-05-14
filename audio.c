@@ -13,11 +13,13 @@
 #include <assert.h>
 
 #include "audio.h"
+#include "common.h"
 
-struct sound_header {
-	uint16_t format;
-	uint16_t sample_rate;
-	uint32_t num_samples;
+void S_SwapSoundHeader(struct sound_header *hdr)
+{
+	SwapLE16(&hdr->format);
+	SwapLE16(&hdr->sample_rate);
+	SwapLE32(&hdr->num_samples);
 };
 
 static ssize_t AudioFileRead(AFvirtualfile *vfile, void *data, size_t nbytes)

@@ -10,6 +10,13 @@
 
 #include "vfile.h"
 
+struct sound_header {
+	uint16_t format;
+	uint16_t sample_rate;
+	uint32_t num_samples;
+};
+
 VFILE *S_FromAudioFile(VFILE *input);
 VFILE *S_ToAudioFile(VFILE *input);
+void S_SwapSoundHeader(struct sound_header *hdr);
 
