@@ -632,8 +632,12 @@ int main(int argc, char *argv[])
 {
 	const char *start_path1 = ".", *start_path2 = ".";
 
+#ifdef SIGIO
 	signal(SIGIO, SIG_IGN);
+#endif
+#ifdef SIGPOLL
 	signal(SIGPOLL, SIG_IGN);
+#endif
 
 	SIXEL_CheckSupported();
 
