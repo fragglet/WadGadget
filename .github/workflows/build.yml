@@ -20,7 +20,7 @@ jobs:
     - name: make
       run: make -j8 -k
 
-  build:
+  build_nosixel:
     name: Build (no libsixel)
     runs-on: ubuntu-latest
 
