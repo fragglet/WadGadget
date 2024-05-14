@@ -181,22 +181,23 @@ const struct lump_type lump_type_special = {
 
 static bool SoundLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	struct sound_header *sound = (struct sound_header *) buf;
-
-	return ent->size >= 16 && sound->format == 3
-	   && (sound->sample_rate == 8000 || sound->sample_rate == 11025
-	    || sound->sample_rate == 22050 || sound->sample_rate == 44100);
+	struct sound_header sound = *((struct sound_header *) buf);
+	S_SwapSoundHeader(&sound);
+	return ent->size >= 16 && sound.format == 3
+	   && (sound.sample_rate == 8000 || sound.sample_rate == 11025
+	    || sound.sample_rate == 22050 || sound.sample_rate == 44100);
 }
 
 static void SoundLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
                               char *descr_buf, size_t descr_buf_len)
 {
-	struct sound_header *sound = (struct sound_header *) buf;
+	struct sound_header sound = *((struct sound_header *) buf);
+	S_SwapSoundHeader(&sound);
 
 	snprintf(descr_buf, descr_buf_len,
 	         "PCM sound effect\nSample rate: %d hz\nLength: %0.02fs",
-	         sound->sample_rate,
-	         (float) sound->num_samples / sound->sample_rate);
+	         sound.sample_rate,
+	         (float) sound.num_samples / sound.sample_rate);
 }
 
 const struct lump_type lump_type_sound = {
@@ -208,23 +209,25 @@ const struct lump_type lump_type_sound = {
 
 static bool GraphicLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	struct patch_header *patch = (struct patch_header *) buf;
+	struct patch_header patch = *((struct patch_header *) buf);
+	V_SwapPatchHeader(&patch);
 
-	return ent->size >= 8 && patch->width > 0 && patch->height > 0
-	    && patch->width <= 320 && patch->height <= 200
-	    && patch->leftoffset >= -256 && patch->leftoffset < 256
-	    && patch->topoffset >= -256 && patch->topoffset < 256;
+	return ent->size >= 8 && patch.width > 0 && patch.height > 0
+	    && patch.width <= 320 && patch.height <= 200
+	    && patch.leftoffset >= -256 && patch.leftoffset < 256
+	    && patch.topoffset >= -256 && patch.topoffset < 256;
 }
 
 static void GraphicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
                               char *descr_buf, size_t descr_buf_len)
 {
-	struct patch_header *patch = (struct patch_header *) buf;
+	struct patch_header patch = *((struct patch_header *) buf);
+	V_SwapPatchHeader(&patch);
 
 	snprintf(descr_buf, descr_buf_len,
 	         "Graphic\nDimensions: %dx%d\nOffsets: %d, %d",
-	         patch->width, patch->height,
-	         patch->leftoffset, patch->topoffset);
+	         patch.width, patch.height,
+	         patch.leftoffset, patch.topoffset);
 }
 
 const struct lump_type lump_type_graphic = {
