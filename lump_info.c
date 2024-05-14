@@ -435,7 +435,7 @@ static bool IsPlainText(const unsigned char *buf, size_t buf_len)
 
 	for (i = 0; i < buf_len; i++) {
 		unsigned char c = buf[i];
-		if (c >= 0x7f ||
+		if (c >= 0x7f || c == 0 ||
 		    (c < 0x20 && strchr(whitespace_chars, c) == NULL)) {
 			return false;
 		}
