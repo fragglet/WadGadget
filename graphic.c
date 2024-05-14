@@ -481,27 +481,21 @@ static bool DrawPatch(uint8_t *srcbuf, size_t srcbuf_len, uint8_t *dstbuf)
 
 	memset(dstbuf, TRANSPARENT, hdr->width * hdr->height);
 
-	for (x = 0; x < hdr->width; ++x)
-	{
+	for (x = 0; x < hdr->width; ++x) {
 		off = columnofs[x];
-		if (off > srcbuf_len - 1)
-		{
+		if (off > srcbuf_len - 1) {
 			return false;
 		}
-		while (srcbuf[off] != 0xff)
-		{
+		while (srcbuf[off] != 0xff) {
 			if (off >= srcbuf_len - 2
-			 || off + srcbuf[off + 1] + 4 >= srcbuf_len)
-			{
+			 || off + srcbuf[off + 1] + 4 >= srcbuf_len) {
 				return false;
 			}
 			y = srcbuf[off];
 			cnt = srcbuf[off + 1];
 			off += 3;
-			for (i = 0; i < cnt; i++, y++)
-			{
-				if (y < hdr->height)
-				{
+			for (i = 0; i < cnt; i++, y++) {
+				if (y < hdr->height) {
 					dstbuf[y * hdr->width + x] =
 						srcbuf[off];
 				}
@@ -524,14 +518,12 @@ static VFILE *WritePNG(struct patch_header *hdr, uint8_t *imgbuf)
 
 	ppng = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
 	                               ErrorCallback, WarningCallback);
-	if (!ppng)
-	{
+	if (!ppng) {
 		return NULL;
 	}
 
 	pinfo = png_create_info_struct(ppng);
-	if (!pinfo)
-	{
+	if (!pinfo) {
 		goto fail;
 	}
 
@@ -551,8 +543,7 @@ static VFILE *WritePNG(struct patch_header *hdr, uint8_t *imgbuf)
 		WriteOffsetChunk(ppng, hdr);
 	}
 
-	for (y = 0; y < hdr->height; y++)
-	{
+	for (y = 0; y < hdr->height; y++) {
 		png_write_row(ppng, imgbuf + y * hdr->width);
 	}
 
@@ -576,16 +567,13 @@ VFILE *V_ToImageFile(VFILE *input)
 	vfcopy(input, bufreader);
 	vfclose(input);
 
-	if (!vfgetbuf(bufreader, (void **) &buf, &buf_len)
-	 || buf_len < 6)
-	{
+	if (!vfgetbuf(bufreader, (void **) &buf, &buf_len) || buf_len < 6) {
 		goto fail;
 	}
 
 	hdr = (struct patch_header *) buf;
 	imgbuf = checked_malloc(hdr->width * hdr->height);
-	if (!DrawPatch(buf, buf_len, imgbuf))
-	{
+	if (!DrawPatch(buf, buf_len, imgbuf)) {
 		goto fail;
 	}
 
@@ -610,9 +598,7 @@ VFILE *V_FlatToImageFile(VFILE *input)
 	vfclose(input);
 
 	// Lump must be exactly 4096 bytes.
-	if (!vfgetbuf(bufreader, (void **) &buf, &buf_len)
-	 || buf_len != 4096)
-	{
+	if (!vfgetbuf(bufreader, (void **) &buf, &buf_len) || buf_len != 4096) {
 		goto fail;
 	}
 
