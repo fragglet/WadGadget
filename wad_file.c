@@ -87,6 +87,18 @@ bool W_CreateFile(const char *filename)
 	return true;
 }
 
+static void SwapHeader(struct wad_file_header *hdr)
+{
+	SwapLE32(&hdr->num_lumps);
+	SwapLE32(&hdr->table_offset);
+}
+
+static void SwapEntry(struct wad_file_entry *entry)
+{
+	SwapLE32(&entry->position);
+	SwapLE32(&entry->size);
+}
+
 struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;
@@ -114,6 +126,8 @@ struct wad_file *W_OpenFile(const char *filename)
 		return NULL;
 	}
 
+	SwapHeader(&result->header);
+
 	result->num_lumps = result->header.num_lumps;
 	assert(vfseek(vfs, result->header.table_offset, SEEK_SET) == 0);
 	result->directory = checked_calloc(
@@ -126,6 +140,7 @@ struct wad_file *W_OpenFile(const char *filename)
 			W_CloseFile(result);
 			return NULL;
 		}
+		SwapEntry(ent);
 		ent->serial_no = NewSerialNo();
 	}
 
@@ -221,9 +236,10 @@ size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
 
 static void WriteHeader(struct wad_file *f)
 {
+	struct wad_file_header hdr = f->header;
+	SwapHeader(&hdr);
 	assert(!vfseek(f->vfs, 0, SEEK_SET));
-	assert(vfwrite(&f->header, sizeof(struct wad_file_header),
-	               1, f->vfs) == 1);
+	assert(vfwrite(&hdr, sizeof(struct wad_file_header), 1, f->vfs) == 1);
 }
 
 // MaybeRollbackDirectory rolls back the last write of the WAD header to point
@@ -362,10 +378,11 @@ void W_WriteDirectory(struct wad_file *f)
 	f->header.table_offset = (unsigned int) vftell(f->vfs);
 	f->header.num_lumps = f->num_lumps;
 	for (i = 0; i < f->num_lumps; i++) {
-		struct wad_file_entry *ent = &f->directory[i];
-		assert(vfwrite(&ent->position, 4, 1, f->vfs) == 1 &&
-		       vfwrite(&ent->size, 4, 1, f->vfs) == 1 &&
-		       vfwrite(&ent->name, 8, 1, f->vfs) == 1);
+		struct wad_file_entry ent = f->directory[i];
+		SwapEntry(&ent);
+		assert(vfwrite(&ent.position, 4, 1, f->vfs) == 1 &&
+		       vfwrite(&ent.size, 4, 1, f->vfs) == 1 &&
+		       vfwrite(&ent.name, 8, 1, f->vfs) == 1);
 
 	}
 	vfsync(f->vfs);
