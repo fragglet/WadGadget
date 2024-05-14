@@ -95,6 +95,7 @@ VFILE *S_FromAudioFile(VFILE *input)
 	hdr.format = 3;
 	hdr.sample_rate = (int) afGetRate(af, AF_DEFAULT_TRACK);
 	hdr.num_samples = afGetFrameCount(af, AF_DEFAULT_TRACK);
+	S_SwapSoundHeader(&hdr);
 	vfwrite(&hdr, sizeof(hdr), 1, result);
 
 	for (;;) {
@@ -138,6 +139,7 @@ VFILE *S_ToAudioFile(VFILE *input)
 	AFfilehandle af;
 
 	assert(vfread(&hdr, sizeof(hdr), 1, input) == 1);
+	S_SwapSoundHeader(&hdr);
 	assert(hdr.format == 3);
 
 	afInitFileFormat(setup, AF_FILE_WAVE);
