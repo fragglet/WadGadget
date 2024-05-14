@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdarg.h>
 #include <curses.h>
 
 #include "colors.h"
