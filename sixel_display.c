@@ -224,9 +224,15 @@ bool SIXEL_DisplayImage(const char *filename)
 
 #else
 
+#include <stdbool.h>
+
 bool SIXEL_CheckSupported(void)
 {
 	return false;
+}
+
+void SIXEL_ClearAndPrint(const char *msg, ...)
+{
 }
 
 bool SIXEL_DisplayImage(const char *filename)
