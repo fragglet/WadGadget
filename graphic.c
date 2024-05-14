@@ -14,7 +14,6 @@
 
 struct offsets_chunk {
 	int32_t leftoffset, topoffset;
-	int32_t crc;
 };
 
 // TODO: Get palette from current WADs
@@ -157,46 +156,10 @@ void V_SwapPatchHeader(struct patch_header *hdr)
 	SwapLE16(&hdr->topoffset);
 };
 
-static uint32_t crc_table[256] = {0};
-
-static void BuildCrcTable(void)
+static void SwapOffsetsChunk(struct offsets_chunk *chunk)
 {
-	int32_t i, j;
-	uint32_t c;
-
-	for (i = 0; i < 256; i++) {
-		c = (uint32_t) i;
-		for (j = 0; j < 8; j++) {
-			if (c & 1) {
-				c = ((uint32_t) 0xedb88320) ^ (c >> 1);
-			} else {
-				c = c >> 1;
-			}
-		}
-		crc_table[i] = c;
-	}
-}
-
-static uint32_t OffsetsChunkCrc(struct offsets_chunk *chunk)
-{
-	uint8_t *buf = (uint8_t *) chunk;
-	uint32_t crc = 0xffffffff;
-	unsigned int i, c;
-
-	if (crc_table[0] == 0) {
-		BuildCrcTable();
-	}
-
-	for (i = 0; i < 4; i++) {
-		c = OFFSET_CHUNK_NAME[i];
-		crc = crc_table[(crc ^ c) & 0xff] ^ (crc >> 8);
-	}
-	for (i = 0; i < 8; i++) {
-		c = buf[i];
-		crc = crc_table[(crc ^ c) & 0xff] ^ (crc >> 8);
-	}
-
-	return crc ^ ((uint32_t) 0xffffffff);
+	SwapBE32(&chunk->leftoffset);
+	SwapBE32(&chunk->topoffset);
 }
 
 static void WriteOffsetChunk(png_structp ppng, const struct patch_header *hdr)
@@ -205,10 +168,7 @@ static void WriteOffsetChunk(png_structp ppng, const struct patch_header *hdr)
 
 	chunk.leftoffset = hdr->leftoffset;
 	chunk.topoffset = hdr->topoffset;
-	SwapBE32(&chunk.leftoffset);
-	SwapBE32(&chunk.topoffset);
-	chunk.crc = OffsetsChunkCrc(&chunk);
-	SwapBE32(&chunk.crc);
+	SwapOffsetsChunk(&chunk);
 	png_write_chunk(ppng, (png_const_bytep) OFFSET_CHUNK_NAME,
 	                (png_const_bytep) &chunk,
 	                sizeof(chunk));
