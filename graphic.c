@@ -314,6 +314,27 @@ fail:
 	return result;
 }
 
+static int UserChunkCallback(png_structp ppng, png_unknown_chunkp chunk)
+{
+	struct patch_header *hdr = png_get_user_chunk_ptr(ppng);
+	struct offsets_chunk offs;
+
+	if (strncmp((const char *) chunk->name, OFFSET_CHUNK_NAME, 4) != 0
+	 || chunk->size < sizeof(struct offsets_chunk)) {
+		return 1;
+	}
+
+	offs = *((const struct offsets_chunk *) chunk->data);
+	SwapOffsetsChunk(&offs);
+
+	if (hdr->leftoffset >= INT16_MIN && hdr->leftoffset <= INT16_MAX
+	 && hdr->topoffset >= INT16_MIN && hdr->topoffset <= INT16_MAX) {
+		hdr->leftoffset = offs.leftoffset;
+		hdr->topoffset = offs.topoffset;
+	}
+	return 1;
+}
+
 static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
                         int *rowstep)
 {
@@ -322,6 +343,9 @@ static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
 	int bit_depth, color_type, ilace_type, comp_type, filter_method, y;
 	png_uint_32 width, height;
 	uint8_t *imgbuf = NULL;
+
+	hdr->leftoffset = 0;
+	hdr->topoffset = 0;
 
 	ppng = png_create_read_struct(PNG_LIBPNG_VER_STRING,
 	                              NULL, NULL, NULL);
@@ -335,6 +359,7 @@ static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
 	}
 
 	png_set_read_fn(ppng, input, PngReadCallback);
+	png_set_read_user_chunk_fn(ppng, hdr, UserChunkCallback);
 	png_read_info(ppng, pinfo);
 
 	png_get_IHDR(ppng, pinfo, &width, &height, &bit_depth, &color_type,
@@ -347,9 +372,6 @@ static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
 
 	hdr->width = width;
 	hdr->height = height;
-	hdr->leftoffset = 0;
-	hdr->topoffset = 0;
-
 	// Convert all input files to RGBA format.
 	png_set_add_alpha(ppng, 0xff, PNG_FILLER_AFTER);
 	if (color_type == PNG_COLOR_TYPE_PALETTE) {
