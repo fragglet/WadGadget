@@ -393,7 +393,6 @@ static void Keypress(void *directory_pane, int key)
 		free(filename);
 		return;
 	}
-	// TODO: Delete all marked
 	if (key == KEY_F(8) || key == KEY_DC) {
 		char buf[64];
 		int i;

@@ -560,6 +560,5 @@ const char *LI_GetExtension(const struct lump_type *lt, bool convert)
 		return ".txt";
 	} else {
 		return ".lmp";
-		// TODO: .png, etc.
 	}
 }
