@@ -81,30 +81,24 @@ int StringHasSuffix(const char *s, const char *suffix)
 // Case-insensitive version of strstr()
 const char *StrCaseStr(const char *haystack, const char *needle)
 {
-    unsigned int haystack_len;
-    unsigned int needle_len;
-    unsigned int len;
-    unsigned int i;
+	unsigned int haystack_len, needle_len, len, i;
 
-    haystack_len = strlen(haystack);
-    needle_len = strlen(needle);
+	haystack_len = strlen(haystack);
+	needle_len = strlen(needle);
 
-    if (haystack_len < needle_len)
-    {
-        return NULL;
-    }
+	if (haystack_len < needle_len) {
+		return NULL;
+	}
 
-    len = haystack_len - needle_len;
+	len = haystack_len - needle_len;
 
-    for (i = 0; i <= len; ++i)
-    {
-        if (!strncasecmp(haystack + i, needle, needle_len))
-        {
-            return haystack + i;
-        }
-    }
+	for (i = 0; i <= len; ++i) {
+		if (!strncasecmp(haystack + i, needle, needle_len)) {
+			return haystack + i;
+		}
+	}
 
-    return NULL;
+	return NULL;
 }
 
 
