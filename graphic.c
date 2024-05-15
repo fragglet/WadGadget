@@ -233,6 +233,7 @@ static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
                                 struct patch_header *hdr)
 {
 	VFILE *result;
+	struct patch_header swapped_hdr;
 	uint32_t *column_offsets;
 	uint8_t *post, *pixel;
 	int x, y, post_len;
@@ -240,7 +241,9 @@ static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
 	result = vfopenmem(NULL, 0);
 
 	// Write header.
-	vfwrite(hdr, 8, 1, result);
+	swapped_hdr = *hdr;
+	V_SwapPatchHeader(&swapped_hdr);
+	vfwrite(&swapped_hdr, 8, 1, result);
 
 	// Write fake column directory; we'll go back later
 	// and overwrite it with the actual data.
@@ -249,8 +252,8 @@ static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
 
 	post = checked_calloc(MAX_POST_LEN + 4, 1);
 	for (x = 0; x < hdr->width; x++) {
-		// TODO: swap
 		column_offsets[x] = vftell(result);
+		SwapLE32(&column_offsets[x]);
 		y = 0;
 		while (y < hdr->height) {
 			// Scan through to start of next post.
@@ -472,17 +475,19 @@ fail:
 	return result;
 }
 
-static bool DrawPatch(uint8_t *srcbuf, size_t srcbuf_len, uint8_t *dstbuf)
+static bool DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
+                      size_t srcbuf_len, uint8_t *dstbuf)
 {
-	struct patch_header *hdr = (struct patch_header *) srcbuf;
 	uint32_t *columnofs =
 		(uint32_t *) (srcbuf + sizeof(struct patch_header));
-	int x, y, off, i, cnt;
+	uint32_t off;
+	int x, y, i, cnt;
 
 	memset(dstbuf, TRANSPARENT, hdr->width * hdr->height);
 
 	for (x = 0; x < hdr->width; ++x) {
 		off = columnofs[x];
+		SwapLE32(&off);
 		if (off > srcbuf_len - 1) {
 			return false;
 		}
@@ -559,7 +564,7 @@ fail:
 VFILE *V_ToImageFile(VFILE *input)
 {
 	uint8_t *buf, *imgbuf = NULL;
-	struct patch_header *hdr;
+	struct patch_header hdr;
 	size_t buf_len;
 	VFILE *bufreader, *result = NULL;
 
@@ -571,13 +576,14 @@ VFILE *V_ToImageFile(VFILE *input)
 		goto fail;
 	}
 
-	hdr = (struct patch_header *) buf;
-	imgbuf = checked_malloc(hdr->width * hdr->height);
-	if (!DrawPatch(buf, buf_len, imgbuf)) {
+	hdr = *((struct patch_header *) buf);
+	V_SwapPatchHeader(&hdr);
+	imgbuf = checked_malloc(hdr.width * hdr.height);
+	if (!DrawPatch(&hdr, buf, buf_len, imgbuf)) {
 		goto fail;
 	}
 
-	result = WritePNG(hdr, imgbuf);
+	result = WritePNG(&hdr, imgbuf);
 
 fail:
 	free(imgbuf);
