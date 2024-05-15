@@ -230,8 +230,16 @@ static intptr_t _spawnv(int mode, const char *cmdname, char **argv)
 		execvp(cmdname, argv);
 		exit(-1);
 	} else {
+		void (*old_sigint)(int), (*old_sigterm)(int);
 		int result;
+		// We ignore SIGINT while waiting; the subprocess handles
+		// it as appropriate. This allows us to ^C the subcommand
+		// without exiting the entire program.
+		old_sigint = signal(SIGINT, SIG_IGN);
+		old_sigterm = signal(SIGTERM, SIG_IGN);
 		waitpid(pid, &result, 0);
+		signal(SIGINT, old_sigint);
+		signal(SIGTERM, old_sigterm);
 		if (!WIFEXITED(result)) {
 			return -1;
 		} else {
