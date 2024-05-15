@@ -107,6 +107,7 @@ static WINDOW *pane_windows[2];
 static struct directory_pane *panes[2];
 static struct directory *dirs[2];
 static unsigned int active_pane = 0;
+static bool have_xdg_utils;
 
 static void SetWindowSizes(void)
 {
@@ -240,6 +241,11 @@ static intptr_t _spawnv(int mode, const char *cmdname, char **argv)
 }
 #endif
 
+static bool CheckHaveXdgUtils(void)
+{
+	return system("xdg-open --version >/dev/null 2>&1") == 0;
+}
+
 static void OpenEntry(void)
 {
 	struct directory_pane *pane = panes[active_pane];
@@ -262,12 +268,6 @@ static void OpenEntry(void)
 	}
 
 	ent = &pane->dir->entries[selected];
-#ifdef __APPLE__
-	argv[0] = "open";
-#else
-	argv[0] = "xdg-open";
-#endif
-	argv[2] = NULL;
 
 	if (typ == FILE_TYPE_FILE) {
 		argv[1] = VFS_EntryPath(pane->dir, ent);
@@ -289,6 +289,19 @@ static void OpenEntry(void)
 		SIXEL_ClearAndPrint("Contents of '%s':\n", ent->name);
 		result = !SIXEL_DisplayImage(argv[1]);
 	}
+
+#ifdef __APPLE__
+	argv[0] = "open";
+#else
+	if (result != 0 && !have_xdg_utils) {
+		UI_MessageBox("Sorry, can't open files; xdg-open command "
+		              "not found.\n"
+		              "You should install the xdg-utils package.");
+		result = 0;
+	}
+	argv[0] = "xdg-open";
+#endif
+	argv[2] = NULL;
 
 	if (result != 0) {
 		printf("Opening %s '%s'...\n"
@@ -638,6 +651,8 @@ int main(int argc, char *argv[])
 #ifdef SIGPOLL
 	signal(SIGPOLL, SIG_IGN);
 #endif
+
+	have_xdg_utils = CheckHaveXdgUtils();
 
 	SIXEL_CheckSupported();
 
