@@ -66,30 +66,48 @@ static bool HasExtension(const char *filename, const char **exts)
 	return false;
 }
 
-static VFILE *PerformConversion(VFILE *input, struct directory_entry *ent,
+static VFILE *PerformConversion(VFILE *input, const char *src_name,
                                 bool flats_section)
 {
-	if (ent->type == FILE_TYPE_FILE) {
-		if (HasExtension(ent->name, audio_extensions)) {
-			return S_FromAudioFile(input);
-		}
-		if (StringHasSuffix(ent->name, ".png")) {
-			if (flats_section) {
-				return V_FlatFromImageFile(input);
-			} else {
-				return V_FromImageFile(input);
-			}
+	if (HasExtension(src_name, audio_extensions)) {
+		return S_FromAudioFile(input);
+	} else if (StringHasSuffix(src_name, ".png")) {
+		if (flats_section) {
+			return V_FlatFromImageFile(input);
+		} else {
+			return V_FromImageFile(input);
 		}
 	}
 
 	return input;
 }
 
+bool ImportFromFile(VFILE *from_file, const char *src_name,
+                    struct wad_file *to_wad, int lumpnum,
+                    bool flats_section, bool convert)
+{
+	VFILE *to_lump;
+
+	if (convert) {
+		from_file = PerformConversion(from_file, src_name,
+		                              flats_section);
+	}
+	if (from_file == NULL) {
+		return false;
+	}
+
+	to_lump = W_OpenLumpRewrite(to_wad, lumpnum);
+	vfcopy(from_file, to_lump);
+	vfclose(from_file);
+	vfclose(to_lump);
+	return true;
+}
+
 bool PerformImport(struct directory *from, struct file_set *from_set,
                    struct directory *to, int to_index,
                    struct file_set *result, bool convert)
 {
-	VFILE *fromfile, *tolump;
+	VFILE *from_file;
 	struct directory_entry *ent;
 	struct wad_file *to_wad;
 	struct wad_file_entry *waddir;
@@ -110,29 +128,26 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	W_AddEntries(to_wad, lumpnum, from_set->num_entries);
 	waddir = W_GetDirectory(to_wad);
 
+	// We only ever do conversions when importing from files.
+	convert = convert && from->type == FILE_TYPE_DIR;
 	flats_section = LI_LumpInSection(to_wad, to_index,
 	                                 &lump_section_flats);
 
 	idx = 0;
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
+
 		LumpNameForEntry(namebuf, ent);
 		W_SetLumpName(to_wad, lumpnum, namebuf);
 
-		fromfile = VFS_OpenByEntry(from, ent);
-		if (convert) {
-			fromfile = PerformConversion(fromfile, ent,
-			                             flats_section);
-		}
-		if (fromfile == NULL) {
+		from_file = VFS_OpenByEntry(from, ent);
+
+		if (!ImportFromFile(from_file, ent->name, to_wad, lumpnum,
+		                    flats_section, convert)) {
 			// TODO: Delete the new entries we added?
 			// TODO: Show an error message
 			return false;
 		}
-		// TODO: This should be being done via VFS.
-		tolump = W_OpenLumpRewrite(to_wad, lumpnum);
-		vfcopy(fromfile, tolump);
-		vfclose(fromfile);
-		vfclose(tolump);
+
 		VFS_AddToSet(result, waddir[lumpnum].serial_no);
 		++lumpnum;
 
