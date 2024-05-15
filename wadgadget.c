@@ -254,8 +254,63 @@ static bool CheckHaveXdgUtils(void)
 	return system("xdg-open --version >/dev/null 2>&1") == 0;
 }
 
+struct temp_edit_context {
+	char *temp_dir;
+	char *filename;
+	struct directory *from;
+};
+
+static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
+                        struct directory_entry *ent)
+{
+	const struct lump_type *lt;
+	char *temp_dir;
+	int lumpnum;
+
+	ctx->from = from;
+
+	temp_dir = getenv("TEMP");
+	if (temp_dir == NULL) {
+		temp_dir = "/tmp";
+	}
+	ctx->temp_dir = StringJoin("/", temp_dir, "wadgadget-XXXXXX", NULL);
+	ctx->temp_dir = mkdtemp(ctx->temp_dir);
+
+	lumpnum = ent - from->entries;
+	lt = LI_IdentifyLump(VFS_WadFile(from), lumpnum);
+	// TODO: If lt == &lump_type_level, export the whole level to a
+	// temp file so we can edit it in a level editor.
+
+	ctx->filename = StringJoin("", ctx->temp_dir, "/", ent->name,
+	                           LI_GetExtension(lt, true), NULL);
+
+	if (!ExportToFile(ctx->from, ent, lt, ctx->filename, true)) {
+		UI_MessageBox("Failed to export to temp file:\n%s",
+		              ctx->filename);
+		free(ctx->filename);
+		rmdir(ctx->temp_dir);
+		free(ctx->temp_dir);
+		ctx->temp_dir = NULL;
+		return NULL;
+	}
+
+	return ctx->filename;
+}
+
+static void TempCleanup(struct temp_edit_context *ctx)
+{
+	if (ctx->temp_dir == NULL) {
+		return;
+	}
+	remove(ctx->filename);
+	rmdir(ctx->temp_dir);
+	free(ctx->temp_dir);
+	// ctx->filename will be freed by OpenEntry().
+}
+
 static void OpenEntry(void)
 {
+	struct temp_edit_context temp_ctx = {NULL};
 	struct directory_pane *pane = panes[active_pane];
 	struct directory_entry *ent;
 	char *argv[3];
@@ -280,8 +335,10 @@ static void OpenEntry(void)
 	if (typ == FILE_TYPE_FILE) {
 		argv[1] = VFS_EntryPath(pane->dir, ent);
 	} else {
-		// TODO: Export to temp file
-		return;
+		argv[1] = TempExport(&temp_ctx, pane->dir, ent);
+		if (argv[1] == NULL) {
+			return;
+		}
 	}
 
 	// Temporarily suspend curses until the subprogram returns.
@@ -320,6 +377,7 @@ static void OpenEntry(void)
 		result = _spawnv(_P_WAIT, argv[0], argv);
 	}
 
+	TempCleanup(&temp_ctx);
 	free(argv[1]);
 
 	// Restore the curses display which may have been trashed if another
