@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 
 #include "actions_pane.h"
@@ -258,16 +259,30 @@ struct temp_edit_context {
 	char *temp_dir;
 	char *filename;
 	struct directory *from;
+	struct directory_entry *ent;
+	const struct lump_type *lt;
+	int lumpnum;
+	time_t orig_time;
 };
+
+static time_t ReadFileTime(const char *filename)
+{
+	struct stat s;
+
+	if (stat(filename, &s) != 0) {
+		return 0;
+	}
+
+	return s.st_mtim.tv_sec;
+}
 
 static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
                         struct directory_entry *ent)
 {
-	const struct lump_type *lt;
 	char *temp_dir;
-	int lumpnum;
 
 	ctx->from = from;
+	ctx->ent = ent;
 
 	temp_dir = getenv("TEMP");
 	if (temp_dir == NULL) {
@@ -276,15 +291,15 @@ static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
 	ctx->temp_dir = StringJoin("/", temp_dir, "wadgadget-XXXXXX", NULL);
 	ctx->temp_dir = mkdtemp(ctx->temp_dir);
 
-	lumpnum = ent - from->entries;
-	lt = LI_IdentifyLump(VFS_WadFile(from), lumpnum);
+	ctx->lumpnum = ent - from->entries;
+	ctx->lt = LI_IdentifyLump(VFS_WadFile(from), ctx->lumpnum);
 	// TODO: If lt == &lump_type_level, export the whole level to a
 	// temp file so we can edit it in a level editor.
 
 	ctx->filename = StringJoin("", ctx->temp_dir, "/", ent->name,
-	                           LI_GetExtension(lt, true), NULL);
+	                           LI_GetExtension(ctx->lt, true), NULL);
 
-	if (!ExportToFile(ctx->from, ent, lt, ctx->filename, true)) {
+	if (!ExportToFile(ctx->from, ctx->ent, ctx->lt, ctx->filename, true)) {
 		UI_MessageBox("Failed to export to temp file:\n%s",
 		              ctx->filename);
 		free(ctx->filename);
@@ -294,7 +309,54 @@ static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
 		return NULL;
 	}
 
+	ctx->orig_time = ReadFileTime(ctx->filename);
+
 	return ctx->filename;
+}
+
+// Called after a successful edit to (if appropriate) import the changed
+// file back into the WAD.
+static void TempMaybeImport(struct temp_edit_context *ctx)
+{
+	VFILE *from_file;
+	time_t modtime;
+	bool flats_section;
+	int do_import;
+
+	if (ctx->temp_dir == NULL) {
+		return;
+	}
+
+	modtime = ReadFileTime(ctx->filename);
+	if (modtime == 0 || ctx->orig_time == 0 || modtime <= ctx->orig_time) {
+		// No change to file.
+		return;
+	}
+
+	do_import = UI_ConfirmDialogBox(
+		"Update WAD?",
+		"File was changed. Import back into WAD?");
+	if (!do_import) {
+		return;
+	}
+
+	// Things can be a bit confusing here because we reversed directions
+	// compared to the original export. 'from' was the WAD and lump we
+	// originally exported from, but now it becomes the 'to' that we're
+	// importing back to.
+
+	flats_section = LI_LumpInSection(VFS_WadFile(ctx->from), ctx->lumpnum,
+                                         &lump_section_flats);
+
+	from_file = VFS_Open(ctx->filename);
+	if (from_file == NULL) {
+		UI_MessageBox("Import failed when opening temp file.\n%s",
+		              ctx->filename);
+	} else if (!ImportFromFile(from_file, ctx->filename,
+	                           VFS_WadFile(ctx->from), ctx->lumpnum,
+	                           flats_section, true)) {
+		UI_MessageBox("Import failed when importing back to WAD.");
+	}
 }
 
 static void TempCleanup(struct temp_edit_context *ctx)
@@ -375,6 +437,10 @@ static void OpenEntry(void)
 		       ent->name);
 
 		result = _spawnv(_P_WAIT, argv[0], argv);
+
+		if (result == 0) {
+			TempMaybeImport(&temp_ctx);
+		}
 	}
 
 	TempCleanup(&temp_ctx);
