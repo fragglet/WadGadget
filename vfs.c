@@ -16,6 +16,7 @@
 #include <assert.h>
 #include <ctype.h>
 
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
 
@@ -185,6 +186,20 @@ static int OrderByName(const void *x, const void *y)
 	return strcasecmp(dx->name, dy->name);
 }
 
+static int FollowSymlink(struct directory *d, const char *filename)
+{
+	struct stat s;
+	char *path = StringJoin("/", d->path, filename, NULL);
+	int result = DT_REG;
+
+	if (stat(path, &s) == 0 && S_ISDIR(s.st_mode)) {
+		result = DT_DIR;
+	}
+
+	free(path);
+	return result;
+}
+
 static bool _RealDirRefresh(struct directory *d)
 {
 	DIR *dir;
@@ -205,6 +220,11 @@ static bool _RealDirRefresh(struct directory *d)
 		}
 		if (dirent->d_name[0] == '.') {
 			continue;
+		}
+		// For symlinks, follow the link to get the actual file type.
+		// This ensures links to directories are handled properly.
+		if (dirent->d_type == DT_LNK) {
+			dirent->d_type = FollowSymlink(d, dirent->d_name);
 		}
 		path = checked_strdup(dirent->d_name);
 
