@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 
@@ -218,10 +219,68 @@ static void NavigateNew(void)
 	}
 }
 
+#ifndef _WIN32
+
+static bool got_tstp;
+
+// Handler function invoked when SIGTSTP (^Z) is received.
+static void TstpHandler(int)
+{
+	// Allow the waitpid() loop below to exit; we don't want to continue
+	// waiting for the subprogram to exit.
+	got_tstp = true;
+
+	// The subprocess(es) are part of the same process group, so they all
+	// received a TSTP just like us. We want them to be able to continue
+	// running, so send them a SIGCONT.
+	kill(0, SIGCONT);
+}
+
+static intptr_t WaitSubprocess(pid_t pid)
+{
+	void (*old_sigint)(int), (*old_sigterm)(int);
+	struct sigaction tstp_action, old_sigtstp;
+	int result, err;
+
+	// We have special handling for the SIGTSTP signal. If the user presses
+	// ^Z we stop waiting and let the editor keep running in the background
+	// (useful if the program is a GUI app like the Gimp). To do this, we
+	// have to install our own signal handler and disable the SA_RESTART
+	// flag so that waitpid() below will return.
+	sigaction(SIGTSTP, NULL, &old_sigtstp);
+	memset(&tstp_action, 0, sizeof(struct sigaction));
+	tstp_action.sa_handler = TstpHandler;
+	tstp_action.sa_mask = old_sigtstp.sa_mask;
+	tstp_action.sa_flags = old_sigtstp.sa_flags & ~SA_RESTART;
+	sigaction(SIGTSTP, &tstp_action, &old_sigtstp);
+	got_tstp = false;
+
+	// We ignore SIGINT while waiting; the subprocess handles it. This
+	// allows us to ^C the subcommand without exiting the entire program.
+	old_sigint = signal(SIGINT, SIG_IGN);
+	old_sigterm = signal(SIGTERM, SIG_IGN);
+
+	// Keep restarting waitpid unless we receive a SIGTSTP.
+	do {
+		err = waitpid(pid, &result, 0);
+	} while (err == EAGAIN && !got_tstp);
+
+	signal(SIGINT, old_sigint);
+	signal(SIGTERM, old_sigterm);
+	sigaction(SIGTSTP, &old_sigtstp, NULL);
+
+	if (got_tstp) {
+		return 0;
+	} else if (!WIFEXITED(result)) {
+		return -1;
+	} else {
+		return WEXITSTATUS(result);
+	}
+}
+
 // In all honesty, the Windows spawnv() API is much more convenient an API
 // than the Unix fork/exec. For simplicity for porting for Windows, let's
 // just emulate it where we don't have it.
-#ifndef _WIN32
 #define _P_WAIT 1
 static intptr_t _spawnv(int mode, const char *cmdname, char **argv)
 {
@@ -232,21 +291,7 @@ static intptr_t _spawnv(int mode, const char *cmdname, char **argv)
 		execvp(cmdname, argv);
 		exit(-1);
 	} else {
-		void (*old_sigint)(int), (*old_sigterm)(int);
-		int result;
-		// We ignore SIGINT while waiting; the subprocess handles
-		// it as appropriate. This allows us to ^C the subcommand
-		// without exiting the entire program.
-		old_sigint = signal(SIGINT, SIG_IGN);
-		old_sigterm = signal(SIGTERM, SIG_IGN);
-		waitpid(pid, &result, 0);
-		signal(SIGINT, old_sigint);
-		signal(SIGTERM, old_sigterm);
-		if (!WIFEXITED(result)) {
-			return -1;
-		} else {
-			return WEXITSTATUS(result);
-		}
+		return WaitSubprocess(pid);
 	}
 }
 #endif
@@ -463,7 +508,8 @@ static void OpenEntry(void)
 
 	if (result != 0) {
 		printf("Opening %s '%s'...\n"
-		       "Please wait until program terminates.\n\n",
+		       "Waiting until program terminates.\n"
+		       "(^Z = stop waiting, continue in background)\n",
 		       ent->type == FILE_TYPE_LUMP ? "lump" : "file",
 		       ent->name);
 
