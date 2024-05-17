@@ -156,6 +156,7 @@ static void RedrawScreen(void)
 {
 	clearok(stdscr, TRUE);
 	wrefresh(stdscr);
+	UI_DrawAllPanes();
 }
 
 static void SetCursesModes(void)
@@ -314,12 +315,23 @@ static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
 	return ctx->filename;
 }
 
+static bool TempFileChanged(struct temp_edit_context *ctx)
+{
+	time_t modtime;
+
+	if (ctx->temp_dir == NULL) {
+		return false;
+	}
+
+	modtime = ReadFileTime(ctx->filename);
+	return modtime != 0 && ctx->orig_time != 0 && modtime > ctx->orig_time;
+}
+
 // Called after a successful edit to (if appropriate) import the changed
 // file back into the WAD.
 static void TempMaybeImport(struct temp_edit_context *ctx)
 {
 	VFILE *from_file;
-	time_t modtime;
 	bool flats_section;
 	int do_import;
 
@@ -327,12 +339,30 @@ static void TempMaybeImport(struct temp_edit_context *ctx)
 		return;
 	}
 
-	modtime = ReadFileTime(ctx->filename);
-	if (modtime == 0 || ctx->orig_time == 0 || modtime <= ctx->orig_time) {
-		// No change to file.
-		return;
+	// If the edit command succeeded, there are two possibilities. One is
+	// that the editor really has run its course, and we immediately prompt
+	// the user if the file was changed. The second, if we invoked
+	// something like the Gimp, is that the file was loaded into an already
+	// running program in the background. If this happens, the command
+	// exits immediately but the user may still be editing. To handle the
+	// latter case, we return back to the normal browsing screen, but
+	// continue to silently keep checking in the background to see if the file
+	// changes. As soon as the user presses a key we give up and stop, but
+	// if the file does get changed in the background we can still take the
+	// opportunity to prompt.
+	timeout(100);
+	while (!TempFileChanged(ctx)) {
+		int c = getch();
+		if (c != ERR) {
+			ungetch(c);
+			timeout(-1);
+			RedrawScreen();
+			return;
+		}
 	}
+	timeout(-1);
 
+	RedrawScreen();
 	do_import = UI_ConfirmDialogBox(
 		"Update WAD?",
 		"File was changed. Import back into WAD?");
@@ -375,6 +405,7 @@ static void OpenEntry(void)
 	struct temp_edit_context temp_ctx = {NULL};
 	struct directory_pane *pane = panes[active_pane];
 	struct directory_entry *ent;
+	bool edit_success = false;
 	char *argv[3];
 	enum file_type typ;
 	int selected, result;
@@ -437,19 +468,20 @@ static void OpenEntry(void)
 		       ent->name);
 
 		result = _spawnv(_P_WAIT, argv[0], argv);
-
-		if (result == 0) {
-			TempMaybeImport(&temp_ctx);
-		}
+		edit_success = result == 0;
 	}
-
-	TempCleanup(&temp_ctx);
-	free(argv[1]);
 
 	// Restore the curses display which may have been trashed if another
 	// curses program was opened.
 	SetCursesModes();
 	RedrawScreen();
+
+	if (edit_success) {
+		TempMaybeImport(&temp_ctx);
+	}
+
+	TempCleanup(&temp_ctx);
+	free(argv[1]);
 
 	if (result != 0) {
 		UI_MessageBox("Failed executing command to open file,\n"
