@@ -169,6 +169,7 @@ VFILE_CONTEXT *vfswitchcontext(VFILE *f, VFILE_CONTEXT *ctx)
 
 struct restricted_vfile {
 	VFILE *inner;
+	VFILE_CONTEXT ctx;
 	long start, end, pos;
 	int ro;
 };
@@ -189,7 +190,8 @@ static size_t restricted_vfread(void *ptr, size_t size, size_t nitems, void *han
 		return 0;
 	}
 
-	result = vfread(ptr, size, nitems, restricted->inner);
+	WITH_VFCONTEXT(restricted->inner, &restricted->ctx,
+		result = vfread(ptr, size, nitems, restricted->inner));
 	if (result < 0) {
 		return -1;
 	}
@@ -219,7 +221,8 @@ static size_t restricted_fwrite(const void *ptr, size_t size,
 		return 0;
 	}
 
-	result = vfwrite(ptr, size, nitems, restricted->inner);
+	WITH_VFCONTEXT(restricted->inner, &restricted->ctx,
+		result = vfwrite(ptr, size, nitems, restricted->inner));
 	if (result < 0) {
 		return -1;
 	}
@@ -232,6 +235,7 @@ static int restricted_vfseek(void *handle, long offset, int whence)
 {
 	struct restricted_vfile *restricted = handle;
 	long adjusted_offset;
+	int result;
 
 	assert(whence == SEEK_SET); // SEEK_{CUR,END} not implemented.
 
@@ -241,11 +245,13 @@ static int restricted_vfseek(void *handle, long offset, int whence)
 		return -1;
 	}
 
-	if (vfseek(restricted->inner, adjusted_offset, whence) < 0) {
+	WITH_VFCONTEXT(restricted->inner, &restricted->ctx,
+		result = vfseek(restricted->inner, adjusted_offset, whence));
+
+	if (result < 0) {
 		return -1;
 	}
 
-	restricted->pos = offset;
 	return 0;
 }
 
@@ -264,12 +270,16 @@ static void restricted_vftruncate(void *handle)
 static void restricted_vfsync(void *handle)
 {
 	struct restricted_vfile *restricted = handle;
-	vfsync(restricted->inner);
+	WITH_VFCONTEXT(restricted->inner, &restricted->ctx,
+		vfsync(restricted->inner));
 }
 
 static void restricted_vfclose(void *handle)
 {
 	struct restricted_vfile *restricted = handle;
+	// We want to be absolutely sure restricted->inner->last_ctx no longer
+	// points to &restricted->ctx
+	SwitchSavedPos(restricted->inner, true);
 	free(restricted);
 }
 
@@ -285,15 +295,22 @@ static struct vfile_functions restricted_io_functions = {
 
 VFILE *vfrestrict(VFILE *inner, long start, long end, int ro)
 {
+	VFILE *result;
 	struct restricted_vfile *restricted;
-	assert(vfseek(inner, start, SEEK_SET) == 0);
 	restricted = checked_calloc(1, sizeof(struct restricted_vfile));
 	restricted->inner = inner;
 	restricted->start = start;
 	restricted->end = end;
 	restricted->ro = ro;
 	restricted->pos = 0;
-	return vfopen(restricted, &restricted_io_functions);
+	result = vfopen(restricted, &restricted_io_functions);
+
+	// Seek to start of new file.
+	if (result != NULL && vfseek(result, 0, SEEK_SET) != 0) {
+		vfclose(result);
+		result = NULL;
+	}
+	return result;
 }
 
 struct memory_vfile {
