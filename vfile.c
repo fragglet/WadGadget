@@ -22,6 +22,8 @@ struct _VFILE {
 	void *handle;
 	void (*onclose)(VFILE *, void *);
 	void *onclose_data;
+	VFILE_CONTEXT local_ctx;
+	VFILE_CONTEXT *current_ctx, *last_ctx;
 };
 
 VFILE *vfopen(void *handle, struct vfile_functions *funcs)
@@ -30,41 +32,69 @@ VFILE *vfopen(void *handle, struct vfile_functions *funcs)
 	result = checked_calloc(1, sizeof(VFILE));
 	result->functions = funcs;
 	result->handle = handle;
+	result->current_ctx = &result->local_ctx;
+	result->last_ctx = &result->local_ctx;
 	return result;
+}
+
+// The context system is to support wrapper files like the restricted_vfile
+// below, which might read/write concurrently using the same underlying VFILE.
+// If current_ctx has changed since last operation, we lazily save and switch
+// to the new one. All vf* functions below call this first.
+static void SwitchSavedPos(VFILE *stream, bool do_seek)
+{
+	if (stream->current_ctx == stream->last_ctx) {
+		return;
+	}
+
+	stream->last_ctx->pos =
+		stream->functions->tell(stream->handle);
+	if (do_seek) {
+		stream->functions->seek(
+			stream->handle, stream->current_ctx->pos, SEEK_SET);
+	}
+	stream->last_ctx = stream->current_ctx;
 }
 
 size_t vfread(void *ptr, size_t size, size_t nitems, VFILE *stream)
 {
+	SwitchSavedPos(stream, true);
 	return stream->functions->read(ptr, size, nitems, stream->handle);
 }
 
 size_t vfwrite(const void *ptr, size_t size, size_t nitems, VFILE *stream)
 {
+	SwitchSavedPos(stream, true);
 	return stream->functions->write(ptr, size, nitems, stream->handle);
 }
 
 void vftruncate(VFILE *stream)
 {
+	SwitchSavedPos(stream, true);
 	return stream->functions->truncate(stream->handle);
 }
 
 int vfseek(VFILE *stream, long offset, int whence)
 {
+	SwitchSavedPos(stream, false);
 	return stream->functions->seek(stream->handle, offset, whence);
 }
 
 long vftell(VFILE *stream)
 {
+	SwitchSavedPos(stream, true);
 	return stream->functions->tell(stream->handle);
 }
 
 void vfsync(VFILE *stream)
 {
+	SwitchSavedPos(stream, true);
 	stream->functions->sync(stream->handle);
 }
 
 void vfclose(VFILE *stream)
 {
+	SwitchSavedPos(stream, true);
 	if (stream->onclose != NULL) {
 		stream->onclose(stream, stream->onclose_data);
 	}
@@ -128,6 +158,13 @@ static struct vfile_functions wrapped_io_functions = {
 VFILE *vfwrapfile(FILE *stream)
 {
 	return vfopen(stream, &wrapped_io_functions);
+}
+
+VFILE_CONTEXT *vfswitchcontext(VFILE *f, VFILE_CONTEXT *ctx)
+{
+	VFILE_CONTEXT *saved_ctx = f->current_ctx;
+	f->current_ctx = ctx;
+	return saved_ctx;
 }
 
 struct restricted_vfile {

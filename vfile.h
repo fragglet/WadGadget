@@ -15,6 +15,11 @@
 #include <stdbool.h>
 
 typedef struct _VFILE VFILE;
+typedef struct _VFILE_CONTEXT VFILE_CONTEXT;
+
+struct _VFILE_CONTEXT {
+	long pos;
+};
 
 struct vfile_functions {
 	size_t (*read)(void *ptr, size_t size, size_t nitems, void *handle);
@@ -51,6 +56,13 @@ long vftell(VFILE *stream);
 
 void vfsync(VFILE *stream);
 void vfclose(VFILE *stream);
+VFILE_CONTEXT *vfswitchcontext(VFILE *f, VFILE_CONTEXT *ctx);
+
+#define WITH_VFCONTEXT(vf, ctx, statement) do { \
+		VFILE_CONTEXT *saved_ctx = vfswitchcontext(vf, ctx); \
+		statement; \
+		vfswitchcontext(vf, saved_ctx); \
+	} while (0)
 
 #endif /* #ifndef INCLUDED_VFILE_H */
 
