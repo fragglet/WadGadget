@@ -27,7 +27,7 @@ The following table gives a brief summary of the current state:
 |                                | NWT                  | WadGadget                                   | SLADE                                |
 |--------------------------------|----------------------|---------------------------------------------|--------------------------------------|
 | Operating System               | DOS                  | Linux, BSD, other Unixes                    | Windows, macOS, Linux                |
-| Software License               | [License-free](https://en.wikipedia.org/wiki/License-free_software); v1.3 source is public | GNU GPLv2 | GNU GPLv2 }
+| Software License               | [License-free](https://en.wikipedia.org/wiki/License-free_software); v1.3 source is public | GNU GPLv2 | GNU GPLv2 |
 | Interface                      | Text UI (80x25)      | ncurses (~any screen size)                  | GUI (wxWidgets)                      |
 | Two pane view                  | ✓ (in 1.4 beta)      | ✓                                           | ✓ (multi-tab)                        |
 | File formats                   | WAD                  | WAD                                         | WAD, ZIP, PAK, HOG, many others      |
