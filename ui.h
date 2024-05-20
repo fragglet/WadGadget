@@ -19,4 +19,6 @@ void UI_InitHeaderPane(struct pane *pane, WINDOW *win);
 int UI_StringWidth(char *s);
 int UI_StringHeight(char *s);
 void UI_PrintMultilineString(WINDOW *win, int y, int x, const char *s);
+void UI_DrawBox(WINDOW *win, int x, int y, int w, int h);
+void UI_DrawWindowBox(WINDOW *win);
 

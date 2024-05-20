@@ -128,3 +128,121 @@ void UI_InitHeaderPane(struct pane *pane, WINDOW *win)
 	pane->keypress = NULL;
 }
 
+// These are clock hand directions. Imagine all the border characters as a
+// combination of these four directions.
+#define DIR_12_OCLOCK   0x1
+#define DIR_3_OCLOCK    0x2
+#define DIR_6_OCLOCK    0x4
+#define DIR_9_OCLOCK    0x8
+
+static int border_chars[16];
+
+// The ACS_ constants are not actually constants, so this needs to be done
+// programatically. Sigh.
+static void InitBorderChars(void)
+{
+	border_chars[0] = ' ';
+	border_chars[DIR_12_OCLOCK] = 0;
+	border_chars[DIR_3_OCLOCK] = 0;
+	border_chars[DIR_3_OCLOCK|DIR_12_OCLOCK] = ACS_LLCORNER;
+	border_chars[DIR_6_OCLOCK] = 0;
+	border_chars[DIR_6_OCLOCK|DIR_12_OCLOCK] = ACS_VLINE;
+	border_chars[DIR_6_OCLOCK|DIR_3_OCLOCK] = ACS_ULCORNER;
+	border_chars[DIR_6_OCLOCK|DIR_3_OCLOCK|DIR_12_OCLOCK] = ACS_LTEE;
+	border_chars[DIR_9_OCLOCK] = 0;
+	border_chars[DIR_9_OCLOCK|DIR_12_OCLOCK] = ACS_LRCORNER;
+	border_chars[DIR_9_OCLOCK|DIR_3_OCLOCK] = ACS_HLINE;
+	border_chars[DIR_9_OCLOCK|DIR_3_OCLOCK|DIR_12_OCLOCK] = ACS_BTEE;
+	border_chars[DIR_9_OCLOCK|DIR_6_OCLOCK] = ACS_URCORNER;
+	border_chars[DIR_9_OCLOCK|DIR_6_OCLOCK|DIR_12_OCLOCK] = ACS_RTEE;
+	border_chars[DIR_9_OCLOCK|DIR_6_OCLOCK|DIR_3_OCLOCK] = ACS_TTEE;
+	border_chars[DIR_9_OCLOCK|DIR_6_OCLOCK|DIR_3_OCLOCK|DIR_12_OCLOCK]
+		= ACS_PLUS;
+}
+
+// Reverse lookup the border bitmask for the given character.
+static int BordersForChar(int c)
+{
+	int i;
+
+	for (i = 0; i < arrlen(border_chars); i++) {
+		if (border_chars[i] != 0
+		 && (border_chars[i] & A_CHARTEXT) == (c & A_CHARTEXT)) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+static void DrawBorderChar(WINDOW *win, int x, int y, int borders)
+{
+	int winx, winy, c;
+	int curr_borders, new_borders;
+
+	// To read the current character, we have to read from `newscr`
+	// (the screen buffer with all changes not yet sent). So we have
+	// to calculate the absolute screen location to read from.
+	getbegyx(win, winy, winx);
+	c = mvwinch(newscr, y + winy, x + winx);
+
+	curr_borders = BordersForChar(c);
+
+	if (curr_borders < 0) {
+		// Not a character we understand; we will just overwrite.
+		curr_borders = 0;
+	}
+
+	new_borders = curr_borders | borders;
+	mvwaddch(win, y, x, border_chars[new_borders]);
+}
+
+static void DrawHLine(WINDOW *win, int x, int y, int w)
+{
+	int i;
+
+	for (i = 0; i < w; i++) {
+		DrawBorderChar(win, x + i, y, DIR_3_OCLOCK|DIR_9_OCLOCK);
+	}
+}
+
+static void DrawVLine(WINDOW *win, int x, int y, int h)
+{
+	int i;
+
+	for (i = 0; i < h; i++) {
+		DrawBorderChar(win, x, y + i, DIR_12_OCLOCK|DIR_6_OCLOCK);
+	}
+}
+
+void UI_DrawBox(WINDOW *win, int x, int y, int w, int h)
+{
+	static bool initted = false;
+	int rx = x + w - 1, by = y + h - 1;
+
+	if (!initted) {
+		InitBorderChars();
+		initted = true;
+	}
+
+	if (w < 2 || h < 2) {
+		return;
+	}
+
+	DrawBorderChar(win, x, y, DIR_3_OCLOCK|DIR_6_OCLOCK);     // TL
+	DrawHLine(win, x + 1, y, w - 2);                          // T
+	DrawBorderChar(win, rx, y, DIR_6_OCLOCK|DIR_9_OCLOCK);    // TR
+	DrawVLine(win, rx, y + 1, h - 2);                         // R
+	DrawBorderChar(win, rx, by, DIR_12_OCLOCK|DIR_9_OCLOCK);  // BR
+	DrawVLine(win, x, y + 1, h - 2);                          // B
+	DrawBorderChar(win, x, by, DIR_12_OCLOCK|DIR_3_OCLOCK);   // BL
+	DrawHLine(win, x + 1, by, w - 2);                         // L
+}
+
+void UI_DrawWindowBox(WINDOW *win)
+{
+	int w, h;
+
+	getmaxyx(win, h, w);
+	UI_DrawBox(win, 0, 0, w, h);
+}
