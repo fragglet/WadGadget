@@ -12,6 +12,7 @@
 
 #include "actions_pane.h"
 #include "colors.h"
+#include "ui.h"
 
 static const struct action wad_to_wad[] = {
 	{"Ent", "View/Edit"},
@@ -116,7 +117,7 @@ static void DrawActionsPane(void *pane)
 
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);
-	box(win, 0, 0);
+	UI_DrawWindowBox(win);
 	mvwaddstr(win, 0, 2, " Actions ");
 
 	y = 1;

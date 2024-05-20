@@ -124,8 +124,8 @@ static void SetWindowSizes(void)
 	mvwin(search_pane.pane.window, lines - 3,
 	      left_width);
 	
-	wresize(actions_pane.pane.window, 16, middle_width);
-	mvwin(actions_pane.pane.window, 6, left_width);
+	wresize(actions_pane.pane.window, 18, middle_width);
+	mvwin(actions_pane.pane.window, 5, left_width);
 	wresize(pane_windows[0], lines - 1, left_width);
 	mvwin(pane_windows[0], 1, 0);
 	wresize(pane_windows[1], lines - 1, right_width);
@@ -441,7 +441,7 @@ static void DrawInfoPane(void *p)
 
 	wbkgdset(pane->window, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(pane->window);
-	box(pane->window, 0, 0);
+	UI_DrawWindowBox(pane->window);
 	mvwaddstr(pane->window, 0, 2, " Info ");
 
 	if (idx < 0) {
@@ -462,7 +462,7 @@ static void DrawSearchPane(void *pane)
 
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);
-	box(win, 0, 0);
+	UI_DrawWindowBox(win);
 	mvwaddstr(win, 0, 2, " Search ");
 	UI_TextInputDraw(&p->input);
 }
