@@ -113,19 +113,21 @@ static void SetWindowSizes(void)
 	int lines, columns;
 	getmaxyx(stdscr, lines, columns);
 
+	// Note minor adjustments here because the borders of the panes
+	// overlap one another.
 	middle_width = INFO_PANE_WIDTH;
-	left_width = (max(columns, 80) - middle_width) / 2;
-	right_width = max(columns, 80) - left_width - middle_width;
+	left_width = (max(columns, 80) - middle_width + 1) / 2;
+	right_width = max(columns, 80) - left_width - middle_width + 2;
 
 	wresize(header_pane.window, 1, columns);
 	wresize(info_pane.window, 5, middle_width);
-	mvwin(info_pane.window, 1, left_width);
+	mvwin(info_pane.window, 1, left_width - 1);
 	wresize(search_pane.pane.window, 3, middle_width);
 	mvwin(search_pane.pane.window, lines - 3,
-	      left_width);
+	      left_width - 1);
 	
 	wresize(actions_pane.pane.window, 18, middle_width);
-	mvwin(actions_pane.pane.window, 5, left_width);
+	mvwin(actions_pane.pane.window, 5, left_width - 1);
 	wresize(pane_windows[0], lines - 1, left_width);
 	mvwin(pane_windows[0], 1, 0);
 	wresize(pane_windows[1], lines - 1, right_width);

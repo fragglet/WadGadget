@@ -40,7 +40,7 @@ static void Draw(void *p)
 
 	werase(win);
 	wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
-	box(win, 0, 0);
+	UI_DrawWindowBox(win);
 	if (lp->title != NULL) {
 		if (lp->active) {
 			wattron(win, A_REVERSE);
