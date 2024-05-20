@@ -107,31 +107,67 @@ static struct directory_pane *panes[2];
 static struct directory *dirs[2];
 static unsigned int active_pane = 0;
 
-static void SetWindowSizes(void)
+static void SetNwtWindowSizes(int columns, int lines)
 {
-	int left_width, middle_width, right_width;
-	int lines, columns;
-	getmaxyx(stdscr, lines, columns);
+	int left_width, right_width;
 
-	// Note minor adjustments here because the borders of the panes
-	// overlap one another.
-	middle_width = INFO_PANE_WIDTH;
-	left_width = (max(columns, 80) - middle_width + 1) / 2;
-	right_width = max(columns, 80) - left_width - middle_width + 2;
+	// Note minor adjustments here because the borders of the
+	// panes overlap one another.
+	left_width = (max(columns, 80) - INFO_PANE_WIDTH + 1) / 2;
+	right_width = max(columns, 80) - left_width - INFO_PANE_WIDTH + 2;
 
-	wresize(header_pane.window, 1, columns);
-	wresize(info_pane.window, 5, middle_width);
+	wresize(info_pane.window, 5, INFO_PANE_WIDTH);
 	mvwin(info_pane.window, 1, left_width - 1);
-	wresize(search_pane.pane.window, 3, middle_width);
+	wresize(actions_pane.pane.window, 18, INFO_PANE_WIDTH);
+	mvwin(actions_pane.pane.window, 5, left_width - 1);
+	wresize(search_pane.pane.window, 3, INFO_PANE_WIDTH);
 	mvwin(search_pane.pane.window, lines - 3,
 	      left_width - 1);
-	
-	wresize(actions_pane.pane.window, 18, middle_width);
-	mvwin(actions_pane.pane.window, 5, left_width - 1);
+
 	wresize(pane_windows[0], lines - 1, left_width);
 	mvwin(pane_windows[0], 1, 0);
 	wresize(pane_windows[1], lines - 1, right_width);
 	mvwin(pane_windows[1], 1, columns - right_width);
+}
+
+// Commander mode will eventually be an alternative look that emulates
+// the look of Norton Commander & its clones. It's incomplete and for
+// now just used for small window sizes.
+static void SetCmdrWindowSizes(int columns, int lines)
+{
+	int left_width = columns / 2;
+
+	// This is a hack: shrink these to effectively "hide" them.
+	wresize(info_pane.window, 1, 1);
+	mvwin(info_pane.window, 1, 1);
+	wresize(actions_pane.pane.window, 1, 1);
+	mvwin(actions_pane.pane.window, 1, 1);
+
+	// Search pane fits along bottom of screen.
+	// TODO: This should be one-line.
+	wresize(search_pane.pane.window, 3, columns);
+	mvwin(search_pane.pane.window, lines - 3, 0);
+
+	wresize(pane_windows[0], lines - 3, left_width);
+	mvwin(pane_windows[0], 1, 0);
+	wresize(pane_windows[1], lines - 3, columns - left_width + 1);
+	mvwin(pane_windows[1], 1, left_width - 1);
+
+	// TODO: nc-style function keys row
+}
+
+static void SetWindowSizes(void)
+{
+	int lines, columns;
+	getmaxyx(stdscr, lines, columns);
+
+	wresize(header_pane.window, 1, columns);
+
+	if (columns >= 80) {
+		SetNwtWindowSizes(columns, lines);
+	} else {
+		SetCmdrWindowSizes(columns, lines);
+	}
 
 	erase();
 	refresh();
