@@ -176,9 +176,6 @@ static void SetWindowSizes(void)
 	} else {
 		SetCmdrWindowSizes(columns, lines);
 	}
-
-	erase();
-	refresh();
 }
 
 static void SwitchToPane(unsigned int pane)
@@ -195,6 +192,7 @@ static void SwitchToPane(unsigned int pane)
 	                 dirs[!active_pane]->type);
 	UI_ActionsPaneSet(&actions_pane, dirs[active_pane]->type,
 	                  dirs[!active_pane]->type, active_pane == 0);
+	SetWindowSizes();
 }
 
 void RedrawScreen(void)
