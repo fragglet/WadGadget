@@ -506,11 +506,14 @@ static void DrawSearchPane(void *pane)
 {
 	struct search_pane *p = pane;
 	WINDOW *win = p->pane.window;
+	int w = getmaxx(win);
 
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);
 	UI_DrawWindowBox(win);
 	mvwaddstr(win, 0, 2, " Search ");
+	mvderwin(p->input.win, 1, 2);
+	wresize(p->input.win, 1, w - 4);
 	UI_TextInputDraw(&p->input);
 }
 
@@ -541,7 +544,7 @@ static void InitSearchPane(WINDOW *win)
 	search_pane.pane.window = win;
 	search_pane.pane.draw = DrawSearchPane;
 	search_pane.pane.keypress = SearchPaneKeypress;
-	UI_TextInputInit(&search_pane.input, win, 1, 20);
+	UI_TextInputInit(&search_pane.input, win, 20);
 }
 
 static void SavePalette(struct palette *p)

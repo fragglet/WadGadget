@@ -261,7 +261,9 @@ char *UI_TextInputDialogBox(char *title, size_t max_chars, char *msg, ...)
 	dialog.pane.keypress = TextInputDialogKeypress;
 	dialog.title = title;
 	dialog.result = 0;
-	UI_TextInputInit(&dialog.input, dialog.pane.window, h - 4, max_chars);
+	UI_TextInputInit(&dialog.input, dialog.pane.window, max_chars);
+	mvderwin(dialog.input.win, h - 4, 2);
+	wresize(dialog.input.win, 1, w - 4);
 
 	UI_PaneShow(&dialog);
 	UI_RunMainLoop();

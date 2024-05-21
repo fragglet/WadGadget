@@ -16,11 +16,11 @@
 #include "common.h"
 #include "text_input.h"
 
-void UI_TextInputInit(struct text_input_box *input, WINDOW *win, int y,
+void UI_TextInputInit(struct text_input_box *input, WINDOW *win,
                       size_t max_chars)
 {
-	input->win = win;
-	input->y = y;
+	input->win = derwin(win, 1, max_chars, 0, 0);
+	input->parent_win = win;
 	input->input_sz = max_chars + 1;
 	input->input = checked_calloc(input->input_sz, 1);
 	UI_TextInputClear(input);
@@ -30,19 +30,17 @@ void UI_TextInputDraw(struct text_input_box *input)
 {
 	char *s;
 	size_t s_len;
-	int w, h;
-	int x;
+	int w, x;
 
-	getmaxyx(input->win, h, w);
-	w -= 4; h = h;
+	w = getmaxx(input->win);
 
 	wattron(input->win, COLOR_PAIR(PAIR_WHITE_BLACK));
-	wmove(input->win, input->y, 2);
+	wmove(input->win, 0, 0);
 	for (x = 0; x < w; x++) {
 		waddch(input->win, ' ');
 	}
 
-	wmove(input->win, input->y, 2);
+	wmove(input->win, 0, 0);
 	s_len = strlen(input->input);
 	s = input->input;
 	if (s_len + 1 > w) {
@@ -50,6 +48,11 @@ void UI_TextInputDraw(struct text_input_box *input)
 	}
 	waddstr(input->win, s);
 	wattroff(input->win, COLOR_PAIR(PAIR_WHITE_BLACK));
+
+	// Cursor needs to be set via parent window
+	mvwaddstr(input->parent_win,
+	          getcury(input->win) + getpary(input->win),
+	          getcurx(input->win) + getparx(input->win), "");
 }
 
 int UI_TextInputKeypress(struct text_input_box *input, int keypress)
