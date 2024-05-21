@@ -163,11 +163,12 @@ static void InitBorderChars(void)
 // Reverse lookup the border bitmask for the given character.
 static int BordersForChar(int c)
 {
+	const int bits = A_CHARTEXT | A_ALTCHARSET;
 	int i;
 
 	for (i = 0; i < arrlen(border_chars); i++) {
 		if (border_chars[i] != 0
-		 && (border_chars[i] & A_CHARTEXT) == (c & A_CHARTEXT)) {
+		 && (border_chars[i] & bits) == (c & bits)) {
 			return i;
 		}
 	}
