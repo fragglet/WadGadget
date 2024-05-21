@@ -100,6 +100,7 @@ struct search_pane {
 };
 
 static struct actions_pane actions_pane;
+static struct actions_bar actions_bar;
 static struct pane header_pane, info_pane;
 static struct search_pane search_pane;
 static WINDOW *pane_windows[2];
@@ -124,6 +125,10 @@ static void SetNwtWindowSizes(int columns, int lines)
 	mvwin(search_pane.pane.window, lines - 3,
 	      left_width - 1);
 
+	// Disabled.
+	wresize(actions_bar.pane.window, 1, 1);
+	mvwin(actions_bar.pane.window, 1, 1);
+
 	wresize(pane_windows[0], lines - 1, left_width);
 	mvwin(pane_windows[0], 1, 0);
 	wresize(pane_windows[1], lines - 1, right_width);
@@ -146,11 +151,14 @@ static void SetCmdrWindowSizes(int columns, int lines)
 	// Search pane fits along bottom of screen.
 	// TODO: This should be one-line.
 	wresize(search_pane.pane.window, 3, columns);
-	mvwin(search_pane.pane.window, lines - 3, 0);
+	mvwin(search_pane.pane.window, lines - 4, 0);
 
-	wresize(pane_windows[0], lines - 3, left_width);
+	wresize(actions_bar.pane.window, 1, columns);
+	mvwin(actions_bar.pane.window, lines - 1, 0);
+
+	wresize(pane_windows[0], lines - 4, left_width);
 	mvwin(pane_windows[0], 1, 0);
-	wresize(pane_windows[1], lines - 3, columns - left_width + 1);
+	wresize(pane_windows[1], lines - 4, columns - left_width + 1);
 	mvwin(pane_windows[1], 1, left_width - 1);
 
 	// TODO: nc-style function keys row
@@ -183,6 +191,8 @@ static void SwitchToPane(unsigned int pane)
 	// intercept keypresses:
 	UI_RaisePaneToTop(&search_pane);
 
+	UI_ActionsBarSet(&actions_bar, dirs[active_pane]->type,
+	                 dirs[!active_pane]->type);
 	UI_ActionsPaneSet(&actions_pane, dirs[active_pane]->type,
 	                  dirs[!active_pane]->type, active_pane == 0);
 }
@@ -274,7 +284,6 @@ static void OpenEntry(void)
 
 	PerformView(pane->dir, &pane->dir->entries[selected]);
 }
-
 
 static void PerformCopy(bool convert)
 {
@@ -639,6 +648,9 @@ int main(int argc, char *argv[])
 
 	UI_ActionsPaneInit(&actions_pane, newwin(15, 26, 6, 27));
 	UI_PaneShow(&actions_pane);
+
+	UI_ActionsBarInit(&actions_bar, newwin(1, 1, 1, 1));
+	UI_PaneShow(&actions_bar);
 
 	pane_windows[0] = newwin(24, 27, 1, 0);
 	dirs[0] = VFS_OpenDir(start_path1);

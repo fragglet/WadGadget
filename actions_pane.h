@@ -12,7 +12,9 @@
 #include "vfs.h"
 
 struct action {
+	int f_key;
 	char *key;
+	char *shortname;
 	char *description;
 };
 
@@ -22,6 +24,15 @@ struct actions_pane {
 	enum file_type active, other;
 };
 
+struct actions_bar {
+	struct pane pane;
+	enum file_type active, other;
+};
+
 void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win);
 void UI_ActionsPaneSet(struct actions_pane *pane, enum file_type active,
                        enum file_type other, int left_to_right);
+
+void UI_ActionsBarInit(struct actions_bar *pane, WINDOW *win);
+void UI_ActionsBarSet(struct actions_bar *pane, enum file_type active,
+                       enum file_type other);
