@@ -149,16 +149,15 @@ static void SetCmdrWindowSizes(int columns, int lines)
 	mvwin(actions_pane.pane.window, 1, 1);
 
 	// Search pane fits along bottom of screen.
-	// TODO: This should be one-line.
-	wresize(search_pane.pane.window, 3, columns);
-	mvwin(search_pane.pane.window, lines - 4, 0);
+	wresize(search_pane.pane.window, 1, columns);
+	mvwin(search_pane.pane.window, lines - 2, 0);
 
 	wresize(actions_bar.pane.window, 1, columns);
 	mvwin(actions_bar.pane.window, lines - 1, 0);
 
-	wresize(pane_windows[0], lines - 4, left_width);
+	wresize(pane_windows[0], lines - 3, left_width);
 	mvwin(pane_windows[0], 1, 0);
-	wresize(pane_windows[1], lines - 4, columns - left_width + 1);
+	wresize(pane_windows[1], lines - 3, columns - left_width + 1);
 	mvwin(pane_windows[1], 1, left_width - 1);
 
 	// TODO: nc-style function keys row
@@ -506,12 +505,20 @@ static void DrawSearchPane(void *pane)
 	WINDOW *win = p->pane.window;
 	int w = getmaxx(win);
 
-	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
-	werase(win);
-	UI_DrawWindowBox(win);
-	mvwaddstr(win, 0, 2, " Search ");
-	mvderwin(p->input.win, 1, 2);
-	wresize(p->input.win, 1, w - 4);
+	if (getmaxy(win) > 1) {
+		wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
+		werase(win);
+		UI_DrawWindowBox(win);
+		mvwaddstr(win, 0, 2, " Search ");
+		mvderwin(p->input.win, 1, 2);
+		wresize(p->input.win, 1, w - 4);
+	} else {
+		wbkgdset(win, COLOR_PAIR(PAIR_WHITE_BLACK));
+		werase(win);
+		mvwaddstr(win, 0, 0, " Search: ");
+		mvderwin(p->input.win, 0, 9);
+		wresize(p->input.win, 1, w - 9);
+	}
 	UI_TextInputDraw(&p->input);
 }
 
