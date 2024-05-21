@@ -26,6 +26,8 @@ struct actions_pane {
 
 struct actions_bar {
 	struct pane pane;
+	const char *names[10];
+	int last_width, spacing;
 	enum file_type active, other;
 };
 

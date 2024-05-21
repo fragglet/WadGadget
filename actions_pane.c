@@ -228,48 +228,17 @@ static int SelectShortcutNames(const struct action **cells,
 	return spacing / num_shortcuts;
 }
 
-static void DrawShortcuts(WINDOW *win, const struct action **cells)
+static void RecalculateNames(struct actions_bar *p, int columns)
 {
-	const char *names[10];
-	int i, j;
-	int columns = getmaxx(win);
-	int spacing = SelectShortcutNames(cells, names, columns);
-
-	wbkgdset(win, COLOR_PAIR(PAIR_WHITE_BLACK));
-	werase(win);
-	mvwaddstr(win, 0, 0, "");
-
-	for (i = 0; i < 10; ++i) {
-		char buf[10];
-		if (names[i] == NULL) {
-			continue;
-		}
-		wattron(win, COLOR_PAIR(PAIR_WHITE_BLACK));
-		for (j = 0; j < spacing; j++) {
-			waddstr(win, " ");
-		}
-		wattron(win, A_BOLD);
-		snprintf(buf, sizeof(buf), "%d", i + 1);
-		waddstr(win, buf);
-		wattroff(win, A_BOLD);
-		wattron(win, COLOR_PAIR(PAIR_HEADER));
-		waddstr(win, names[i]);
-	}
-}
-
-static void DrawActionsBar(void *pane)
-{
-	struct actions_bar *p = pane;
-	WINDOW *win = p->pane.window;
 	const struct action *actions, *a, *cells[10];
-	int i, y, main_cnt, num_cells = 0;
+	int i, main_cnt, num_cells = 0;
 
 	actions = action_lists[p->active != FILE_TYPE_DIR]
 	                      [p->other != FILE_TYPE_DIR];
 
 	main_cnt = INT_MAX;
 	memset(cells, 0, sizeof(cells));
-	for (i = 0, y = 1;; i++, y++) {
+	for (i = 0;; i++) {
 		if (i < main_cnt && actions[i].key == NULL) {
 			// End of main actions
 			main_cnt = i;
@@ -286,7 +255,42 @@ static void DrawActionsBar(void *pane)
 			++num_cells;
 		}
 	}
-	DrawShortcuts(win, cells);
+
+	p->spacing = SelectShortcutNames(cells, p->names, columns);
+	p->last_width = columns;
+}
+
+static void DrawActionsBar(void *pane)
+{
+	struct actions_bar *p = pane;
+	WINDOW *win = p->pane.window;
+	int i, j;
+	int columns = getmaxx(win);
+
+	if (columns != p->last_width) {
+		RecalculateNames(p, columns);
+	}
+
+	wbkgdset(win, COLOR_PAIR(PAIR_WHITE_BLACK));
+	werase(win);
+	mvwaddstr(win, 0, 0, "");
+
+	for (i = 0; i < 10; ++i) {
+		char buf[10];
+		if (p->names[i] == NULL) {
+			continue;
+		}
+		wattron(win, COLOR_PAIR(PAIR_WHITE_BLACK));
+		for (j = 0; j < p->spacing; j++) {
+			waddstr(win, " ");
+		}
+		wattron(win, A_BOLD);
+		snprintf(buf, sizeof(buf), "%d", i + 1);
+		waddstr(win, buf);
+		wattroff(win, A_BOLD);
+		wattron(win, COLOR_PAIR(PAIR_HEADER));
+		waddstr(win, p->names[i]);
+	}
 }
 
 void UI_ActionsBarInit(struct actions_bar *pane, WINDOW *win)
@@ -303,4 +307,5 @@ void UI_ActionsBarSet(struct actions_bar *pane, enum file_type active,
 {
 	pane->active = active;
 	pane->other = other;
+	RecalculateNames(pane, getmaxx(pane->pane.window));
 }
