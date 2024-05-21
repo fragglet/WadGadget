@@ -13,17 +13,18 @@
 
 #include "actions_pane.h"
 #include "colors.h"
+#include "strings.h"
 #include "ui.h"
 
 static const struct action wad_to_wad[] = {
-	{ 0, "Ent", NULL,     "View/Edit"},
-	{ 2, "F2",  "Rearr",  "Move (rearrange)"},
-	{ 4, "F4",  "Update", "> Update"},
-	{ 5, "F5",  "Copy",   "> Copy"},
-	{ 6, "F6",  "Rename", "Rename"},
+	{ 0, "Ent", NULL,      "View/Edit"},
+	{ 2, "F2",  "Rearr",   "Move (rearrange)"},
+	{ 4, "F4",  "Upd",     "> Update"},
+	{ 5, "F5",  "Copy",    "> Copy"},
+	{ 6, "F6",  "Ren",     "Rename"},
 	{ 7, "F7",  "NewLump", "New lump"},
-	{ 8, "F8",  "Delete", "Delete"},
-	{ 0, NULL,  NULL,     NULL},
+	{ 8, "F8",  "Del",     "Delete"},
+	{ 0, NULL,  NULL,      NULL},
 };
 
 static const struct action wad_to_dir[] = {
@@ -31,20 +32,20 @@ static const struct action wad_to_dir[] = {
 	{ 2, "F2",  "Rearr",   "Move (rearrange)"},
 	{ 3, "F3",  "ExpWAD",  "> Export as WAD"},
 	{ 5, "F5",  "Export",  "> Export to files"},
-	{ 6, "F6",  "Rename",  "Rename"},
+	{ 6, "F6",  "Ren",     "Rename"},
 	{ 7, "F7",  "NewLump", "New lump"},
-	{ 8, "F8",  "Delete",  "Delete"},
+	{ 8, "F8",  "Del",     "Delete"},
 	{ 0, NULL,  NULL,      NULL},
 };
 
 static const struct action dir_to_wad[] = {
 	{ 0, "Ent", NULL,     "View/Edit"},
 	{ 3, "F3",  "MkWAD",  "Make WAD"},
-	{ 4, "F4",  "Update", "> Update"},
+	{ 4, "F4",  "Upd",    "> Update"},
 	{ 5, "F5",  "Import", "> Import"},
-	{ 6, "F6",  "Rename", "Rename"},
+	{ 6, "F6",  "Ren",    "Rename"},
 	{ 7, "F7",  "Mkdir",  "Mkdir"},
-	{ 8, "F8",  "Delete", "Delete"},
+	{ 8, "F8",  "Del",    "Delete"},
 	{ 0, NULL,  NULL,     NULL},
 };
 
@@ -52,13 +53,14 @@ static const struct action dir_to_dir[] = {
 	{ 0, "Ent", NULL,     "View/Edit"},
 	{ 3, "F3",  "MkWAD",  "Make WAD"},
 	{ 5, "F5",  "Copy",   "> Copy"},
-	{ 6, "F6",  "Rename", "Rename"},
+	{ 6, "F6",  "Ren",    "Rename"},
 	{ 7, "F7",  "Mkdir",  "Mkdir"},
-	{ 8, "F8",  "Delete", "Delete"},
+	{ 8, "F8",  "Del",    "Delete"},
 	{ 0, NULL,  NULL,     NULL},
 };
 
 struct action common_actions[] = {
+	//{ 1, "F1",    "?",        "Help"},
 	{ 0, "Space", NULL,       "Mark/unmark"},
 	{ 9, "F9",    "MarkPat",  "Mark pattern"},
 	{10, "F10",   "UnmrkAll", "Unmark all"},
@@ -155,15 +157,112 @@ void UI_ActionsPaneSet(struct actions_pane *pane, enum file_type active,
 	pane->left_to_right = left_to_right;
 }
 
+static int NumShortcuts(const struct action **cells)
+{
+	int result = 0, i;
+
+	for (i = 0; i < 10; i++) {
+		if (cells[i] != NULL) {
+			++result;
+		}
+	}
+	return result;
+}
+
+static const char *LongName(const struct action *a)
+{
+	const char *result = a->description;
+	if (StringHasPrefix(result, "> ")) {
+		result += 2;
+	}
+	return result;
+}
+
+static int SelectShortcutNames(const struct action **cells,
+                               const char **names, int columns)
+{
+	int i;
+	int spacing = columns - 2;
+	int num_shortcuts = NumShortcuts(cells);
+
+	memset(names, 0, 10 * sizeof(char *));
+
+	for (i = 0; i < 10; ++i) {
+		if (cells[i] != NULL) {
+			names[i] = cells[i]->shortname;
+			spacing -= 1 + strlen(names[i]);
+		}
+	}
+
+	if (spacing < 0) {
+		return 0;
+	}
+
+	// Expand some to longer names where possible, but always keep
+	// at least one space between shortcuts.
+	while (spacing >= num_shortcuts) {
+		int best = -1, best_diff = INT_MAX, diff;
+		const char *longname;
+
+		for (i = 0; i < 10; i++) {
+			if (cells[i] == NULL) {
+				continue;
+			}
+			longname = LongName(cells[i]);
+			diff = strlen(longname) - strlen(names[i]);
+			if (diff > 0 && diff < best_diff
+			 && spacing - diff >= num_shortcuts) {
+				best_diff = diff;
+				best = i;
+			}
+		}
+
+		if (best < 0) {
+			break;
+		}
+
+		names[best] = LongName(cells[best]);
+		spacing -= best_diff;
+	}
+
+	return spacing / num_shortcuts;
+}
+
+static void DrawShortcuts(WINDOW *win, const struct action **cells)
+{
+	const char *names[10];
+	int i, j;
+	int columns = getmaxx(win);
+	int spacing = SelectShortcutNames(cells, names, columns);
+
+	wbkgdset(win, COLOR_PAIR(PAIR_WHITE_BLACK));
+	werase(win);
+	mvwaddstr(win, 0, 0, "");
+
+	for (i = 0; i < 10; ++i) {
+		char buf[10];
+		if (names[i] == NULL) {
+			continue;
+		}
+		wattron(win, COLOR_PAIR(PAIR_WHITE_BLACK));
+		for (j = 0; j < spacing; j++) {
+			waddstr(win, " ");
+		}
+		wattron(win, A_BOLD);
+		snprintf(buf, sizeof(buf), "%d", i + 1);
+		waddstr(win, buf);
+		wattroff(win, A_BOLD);
+		wattron(win, COLOR_PAIR(PAIR_HEADER));
+		waddstr(win, names[i]);
+	}
+}
+
 static void DrawActionsBar(void *pane)
 {
 	struct actions_bar *p = pane;
 	WINDOW *win = p->pane.window;
 	const struct action *actions, *a, *cells[10];
-	int i, j, y, cnt, main_cnt, num_cells = 0, spacing, columns;
-	bool first;
-
-	columns = getmaxx(p->pane.window);
+	int i, y, main_cnt, num_cells = 0;
 
 	actions = action_lists[p->active != FILE_TYPE_DIR]
 	                      [p->other != FILE_TYPE_DIR];
@@ -187,47 +286,7 @@ static void DrawActionsBar(void *pane)
 			++num_cells;
 		}
 	}
-
-	spacing = columns - 2;
-	for (i = 0, cnt = 0; i < 10; ++i) {
-		if (cells[i] != NULL) {
-			spacing -= 1 + strlen(cells[i]->shortname);
-			cnt++;
-		}
-	}
-
-	wbkgdset(p->pane.window, COLOR_PAIR(PAIR_WHITE_BLACK));
-	werase(p->pane.window);
-	mvwaddstr(p->pane.window, 0, 0, "");
-
-	if (spacing < 0) {
-		spacing = 0;
-	} else {
-		int i = (spacing - 1) / (cnt - 1);
-		int leftover = spacing - (cnt - 1) * i;
-		for (j = 0; j < leftover; j++) {
-			waddstr(p->pane.window, " ");
-		}
-		spacing = i;
-	}
-
-	for (i = 0, first = true; i < 10; ++i) {
-		char buf[10];
-		if (cells[i] == NULL) {
-			continue;
-		}
-		wattron(p->pane.window, COLOR_PAIR(PAIR_WHITE_BLACK));
-		for (j = 0; !first && j < spacing; j++) {
-			waddstr(p->pane.window, " ");
-		}
-		wattron(win, A_BOLD);
-		snprintf(buf, sizeof(buf), "%d", cells[i]->f_key);
-		waddstr(p->pane.window, buf);
-		wattroff(win, A_BOLD);
-		wattron(p->pane.window, COLOR_PAIR(PAIR_HEADER));
-		waddstr(p->pane.window, cells[i]->shortname);
-		first = false;
-	}
+	DrawShortcuts(win, cells);
 }
 
 void UI_ActionsBarInit(struct actions_bar *pane, WINDOW *win)
