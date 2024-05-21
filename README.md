@@ -38,10 +38,10 @@ The following table gives a brief summary of the current state:
 | Quick search within WAD        | ✓                    | ✓                                           |                                      |
 | Open/edit via external editors |                      | ✓                                           |                                      |
 | Quick summary of lump contents | ✓ (graphics, demos)  | ✓ (graphics, demos, SFX, PC speaker sounds) | ✓ (almost everything)                |
-| WAD clean/compact              | ✓ (via command line) |                                             | ✓                                    |
-| Undo                           |                      |                                             | ✓ (multi-level, plus redo)           |
-| Hexdump view                   | ✓                    |                                             | ✓                                    |
-| View ENDOOM                    | ✓                    |                                             | ✓                                    |
+| WAD clean/compact              | ✓ (via command line) | fragglet/WadGadget#5                        | ✓                                    |
+| Undo                           |                      | fragglet/WadGadget#6                        | ✓ (multi-level, plus redo)           |
+| Hexdump view                   | ✓                    | fragglet/WadGadget#7                        | ✓                                    |
+| View ENDOOM                    | ✓                    | fragglet/WadGadget#8                        | ✓                                    |
 | Viewing graphics/flats         | ✓                    | ✓ (for terminals that support Sixels)       | ✓                                    |
 | Graphics import                | ✓ (GIF, PCX)         | ✓ (PNG)                                     | ✓ (many formats)                     |
 | Graphics export                | ✓ (GIF, PCX)         | ✓ (PNG)                                     | ✓ (many formats)                     |
@@ -53,8 +53,8 @@ The following table gives a brief summary of the current state:
 | Music playback                 | ✓                    |                                             | ✓                                    |
 | Music import                   | ✓                    | ✓                                           | ✓ (many formats)                     |
 | Music export                   | ✓ (MUS)              | ✓ (converts MUS to MID)                     | ✓ (many formats)                     |
-| Texture editor                 | ✓                    |                                             | ✓                                    |
-| PNAMES editor                  | ✓                    |                                             | ✓                                    |
+| Texture editor                 | ✓                    | fragglet/WadGadget#9                        | ✓                                    |
+| PNAMES editor                  | ✓                    | fragglet/WadGadget#10                       | ✓                                    |
 | Online help                    |                      |                                             | ✓ (browser tabs to access help/wiki) |
 | View/edit levels               |                      |                                             | ✓                                    |
 | Edit ACS scripts               |                      |                                             | ✓                                    |
