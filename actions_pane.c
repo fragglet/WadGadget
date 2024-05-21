@@ -271,7 +271,7 @@ static void DrawActionsBar(void *pane)
 		RecalculateNames(p, columns);
 	}
 
-	wbkgdset(win, COLOR_PAIR(PAIR_WHITE_BLACK));
+	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);
 	mvwaddstr(win, 0, 0, "");
 
@@ -280,7 +280,7 @@ static void DrawActionsBar(void *pane)
 		if (p->names[i] == NULL) {
 			continue;
 		}
-		wattron(win, COLOR_PAIR(PAIR_WHITE_BLACK));
+		wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
 		for (j = 0; j < p->spacing; j++) {
 			waddstr(win, " ");
 		}
