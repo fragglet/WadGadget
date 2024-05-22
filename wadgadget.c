@@ -141,10 +141,14 @@ static void SetNwtWindowSizes(int columns, int lines)
 static void SetCmdrWindowSizes(int columns, int lines)
 {
 	int left_width = columns / 2;
+	int right_width = columns - left_width + 1;
+
+	wresize(info_pane.window, 5,
+	        active_pane != 0 ? right_width : left_width);
+	mvwin(info_pane.window, lines - 7,
+	      active_pane != 0 ? left_width - 1 : 0);
 
 	// This is a hack: shrink these to effectively "hide" them.
-	wresize(info_pane.window, 1, 1);
-	mvwin(info_pane.window, 1, 1);
 	wresize(actions_pane.pane.window, 1, 1);
 	mvwin(actions_pane.pane.window, 1, 1);
 
@@ -155,9 +159,11 @@ static void SetCmdrWindowSizes(int columns, int lines)
 	wresize(actions_bar.pane.window, 1, columns);
 	mvwin(actions_bar.pane.window, lines - 1, 0);
 
-	wresize(pane_windows[0], lines - 3, left_width);
+	wresize(pane_windows[0], lines - (active_pane ? 3 : 7),
+	        left_width);
 	mvwin(pane_windows[0], 1, 0);
-	wresize(pane_windows[1], lines - 3, columns - left_width + 1);
+	wresize(pane_windows[1], lines - (active_pane ? 7 : 3),
+	        right_width);
 	mvwin(pane_windows[1], 1, left_width - 1);
 
 	// TODO: nc-style function keys row
