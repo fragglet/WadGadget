@@ -45,7 +45,7 @@ The following table gives a brief summary of the current state:
 | Viewing graphics/flats         | ✓                    | ✓ (for terminals that support Sixels)       | ✓                                    |
 | Graphics import                | ✓ (GIF, PCX)         | ✓ (PNG)                                     | ✓ (many formats)                     |
 | Graphics export                | ✓ (GIF, PCX)         | ✓ (PNG)                                     | ✓ (many formats)                     |
-| Edit graphic offsets           | ✓                    |                                             | ✓                                    |
+| Edit graphic offsets           | ✓                    | fragglet/WadGadget#11                       | ✓                                    |
 | PNG grAb chunk support         |                      | ✓                                           | ✓                                    |
 | Audio playback                 | ✓                    |                                             | ✓                                    |
 | Audio import                   | ✓ (WAV, VOC)         | ✓ (WAV, VOC, FLAC, others)                  | ✓ (many formats)                     |
