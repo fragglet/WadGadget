@@ -41,7 +41,7 @@ The following table gives a brief summary of the current state:
 | WAD clean/compact              | ✓ (via command line) | fragglet/WadGadget#5                        | ✓                                    |
 | Undo                           |                      | fragglet/WadGadget#6                        | ✓ (multi-level, plus redo)           |
 | Hexdump view                   | ✓                    | fragglet/WadGadget#7                        | ✓                                    |
-| View ENDOOM                    | ✓                    | fragglet/WadGadget#8                        | ✓                                    |
+| View ENDOOM                    | ✓                    | ✓                                           | ✓                                    |
 | Viewing graphics/flats         | ✓                    | ✓ (for terminals that support Sixels)       | ✓                                    |
 | Graphics import                | ✓ (GIF, PCX)         | ✓ (PNG)                                     | ✓ (many formats)                     |
 | Graphics export                | ✓ (GIF, PCX)         | ✓ (PNG)                                     | ✓ (many formats)                     |

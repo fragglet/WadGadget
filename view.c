@@ -19,6 +19,7 @@
 
 #include "common.h"
 #include "dialog.h"
+#include "endoom.h"
 #include "export.h"
 #include "import.h"
 #include "lump_info.h"
@@ -284,6 +285,10 @@ void PerformView(struct directory *dir, struct directory_entry *ent)
 	if (StringHasSuffix(argv[1], ".png")) {
 		SIXEL_ClearAndPrint("Contents of '%s':\n", ent->name);
 		result = !SIXEL_DisplayImage(argv[1]);
+	} else if (StringHasSuffix(argv[1], ".lmp")
+	        && ent->size == ENDOOM_SIZE) {
+		ENDOOM_ShowFile(argv[1]);
+		result = 0;
 	}
 
 #ifdef __APPLE__
