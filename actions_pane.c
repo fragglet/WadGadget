@@ -17,58 +17,58 @@
 #include "ui.h"
 
 static const struct action wad_to_wad[] = {
-	{ 0, "Ent", NULL,      "View/Edit"},
-	{ 2, "F2",  "Rearr",   "Move (rearrange)"},
-	{ 4, "F4",  "Upd",     "> Update"},
-	{ 5, "F5",  "Copy",    "> Copy"},
-	{ 6, "F6",  "Ren",     "Rename"},
-	{ 7, "F7",  "NewLump", "New lump"},
-	{ 8, "F8",  "Del",     "Delete"},
-	{ 0, NULL,  NULL,      NULL},
+	{ KEY_ENTER, NULL,      "View/Edit"},
+	{ KEY_F(2),  "Rearr",   "Move (rearrange)"},
+	{ KEY_F(4),  "Upd",     "> Update"},
+	{ KEY_F(5),  "Copy",    "> Copy"},
+	{ KEY_F(6),  "Ren",     "Rename"},
+	{ KEY_F(7),  "NewLump", "New lump"},
+	{ KEY_F(8),  "Del",     "Delete"},
+	{ 0,         NULL,      NULL},
 };
 
 static const struct action wad_to_dir[] = {
-	{ 0, "Ent", NULL,      "View/Edit"},
-	{ 2, "F2",  "Rearr",   "Move (rearrange)"},
-	{ 3, "F3",  "ExpWAD",  "> Export as WAD"},
-	{ 5, "F5",  "Export",  "> Export to files"},
-	{ 6, "F6",  "Ren",     "Rename"},
-	{ 7, "F7",  "NewLump", "New lump"},
-	{ 8, "F8",  "Del",     "Delete"},
-	{ 0, NULL,  NULL,      NULL},
+	{ KEY_ENTER, NULL,      "View/Edit"},
+	{ KEY_F(2),  "Rearr",   "Move (rearrange)"},
+	{ KEY_F(3),  "ExpWAD",  "> Export as WAD"},
+	{ KEY_F(5),  "Export",  "> Export to files"},
+	{ KEY_F(6),  "Ren",     "Rename"},
+	{ KEY_F(7),  "NewLump", "New lump"},
+	{ KEY_F(8),  "Del",     "Delete"},
+	{ 0,         NULL,      NULL},
 };
 
 static const struct action dir_to_wad[] = {
-	{ 0, "Ent", NULL,     "View/Edit"},
-	{ 3, "F3",  "MkWAD",  "Make WAD"},
-	{ 4, "F4",  "Upd",    "> Update"},
-	{ 5, "F5",  "Import", "> Import"},
-	{ 6, "F6",  "Ren",    "Rename"},
-	{ 7, "F7",  "Mkdir",  "Mkdir"},
-	{ 8, "F8",  "Del",    "Delete"},
-	{ 0, NULL,  NULL,     NULL},
+	{ KEY_ENTER, NULL,     "View/Edit"},
+	{ KEY_F(3),  "MkWAD",  "Make WAD"},
+	{ KEY_F(4),  "Upd",    "> Update"},
+	{ KEY_F(5),  "Import", "> Import"},
+	{ KEY_F(6),  "Ren",    "Rename"},
+	{ KEY_F(7),  "Mkdir",  "Mkdir"},
+	{ KEY_F(8),  "Del",    "Delete"},
+	{ 0,        NULL,     NULL},
 };
 
 static const struct action dir_to_dir[] = {
-	{ 0, "Ent", NULL,     "View/Edit"},
-	{ 3, "F3",  "MkWAD",  "Make WAD"},
-	{ 5, "F5",  "Copy",   "> Copy"},
-	{ 6, "F6",  "Ren",    "Rename"},
-	{ 7, "F7",  "Mkdir",  "Mkdir"},
-	{ 8, "F8",  "Del",    "Delete"},
-	{ 0, NULL,  NULL,     NULL},
+	{ KEY_ENTER, NULL,     "View/Edit"},
+	{ KEY_F(3),  "MkWAD",  "Make WAD"},
+	{ KEY_F(5),  "Copy",   "> Copy"},
+	{ KEY_F(6),  "Ren",    "Rename"},
+	{ KEY_F(7),  "Mkdir",  "Mkdir"},
+	{ KEY_F(8),  "Del",    "Delete"},
+	{ 0,        NULL,     NULL},
 };
 
 struct action common_actions[] = {
 	//{ 1, "F1",    "?",        "Help"},
-	{ 0, "Space", NULL,       "Mark/unmark"},
-	{ 9, "F9",    "MarkPat",  "Mark pattern"},
-	{10, "F10",   "UnmrkAll", "Unmark all"},
-	{ 0, "",      NULL,       ""},
-	{ 0, "Tab",   NULL,       "Other pane"},
-	{ 0, "^N",    NULL,       "Search again"},
-	{ 0, "ESC",   NULL,       "Quit"},
-	{ 0, NULL,    NULL,       NULL},
+	{ ' ',        NULL,       "Mark/unmark"},
+	{ KEY_F(9),   "MarkPat",  "Mark pattern"},
+	{ KEY_F(10),  "UnmrkAll", "Unmark all"},
+	{ 0,          NULL,       ""},
+	{ '\t',       NULL,       "> Other pane"},
+	{ 'N' & 0x1f, NULL,       "Search again"},
+	{ 0x1f,       NULL,       "Quit"},
+	{ 0,          NULL,       NULL},
 };
 
 static const struct action *action_lists[2][2] = {
@@ -76,17 +76,44 @@ static const struct action *action_lists[2][2] = {
 	{wad_to_dir, wad_to_wad},
 };
 
+static const char *KeyDescription(int key)
+{
+	static char buf[10];
+	switch (key) {
+	case KEY_F(1): return "F1";
+	case KEY_F(2): return "F2";
+	case KEY_F(3): return "F3";
+	case KEY_F(4): return "F4";
+	case KEY_F(5): return "F5";
+	case KEY_F(6): return "F6";
+	case KEY_F(7): return "F7";
+	case KEY_F(8): return "F8";
+	case KEY_F(9): return "F9";
+	case KEY_F(10): return "F10";
+	case ' ': return "Space";
+	case '\t': return "Tab";
+	case KEY_ENTER: return "Ent";
+	case 0x1f: return "Esc";
+	default: break;
+	}
+	if (key < 0x1f) {
+		snprintf(buf, sizeof(buf), "^%c", 'A' + (key & 0x1f) - 1);
+		return buf;
+	}
+	return "?";
+}
+
 static void ShowAction(struct actions_pane *p, int y,
                        const struct action *action)
 {
 	WINDOW *win = p->pane.window;
 	char *desc;
 
-	if (strlen(action->key) == 0) {
+	if (action->key == 0) {
 		return;
 	}
 	wattron(win, A_BOLD);
-	mvwaddstr(win, y, 2, action->key);
+	mvwaddstr(win, y, 2, KeyDescription(action->key));
 	wattroff(win, A_BOLD);
 	waddstr(win, " - ");
 	desc = action->description;
@@ -125,13 +152,13 @@ static void DrawActionsPane(void *pane)
 
 	main_cnt = INT_MAX;
 	for (i = 0, y = 1;; i++, y++) {
-		if (i < main_cnt && actions[i].key == NULL) {
+		if (i < main_cnt && actions[i].description == NULL) {
 			// End of main actions
 			main_cnt = i;
 		}
 		if (i < main_cnt) {
 			a = &actions[i];
-		} else if (common_actions[i - main_cnt].key == NULL) {
+		} else if (common_actions[i - main_cnt].description == NULL) {
 			break;
 		} else {
 			a = &common_actions[i - main_cnt];
@@ -239,19 +266,19 @@ static void RecalculateNames(struct actions_bar *p, int columns)
 	main_cnt = INT_MAX;
 	memset(cells, 0, sizeof(cells));
 	for (i = 0;; i++) {
-		if (i < main_cnt && actions[i].key == NULL) {
+		if (i < main_cnt && actions[i].description == NULL) {
 			// End of main actions
 			main_cnt = i;
 		}
 		if (i < main_cnt) {
 			a = &actions[i];
-		} else if (common_actions[i - main_cnt].key == NULL) {
+		} else if (common_actions[i - main_cnt].description == NULL) {
 			break;
 		} else {
 			a = &common_actions[i - main_cnt];
 		}
-		if (a->f_key != 0) {
-			cells[a->f_key - 1] = a;
+		if (a->key >= KEY_F(1) && a->key <= KEY_F(12)) {
+			cells[a->key - KEY_F(1)] = a;
 			++num_cells;
 		}
 	}

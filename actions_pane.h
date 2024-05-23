@@ -12,8 +12,7 @@
 #include "vfs.h"
 
 struct action {
-	int f_key;
-	char *key;
+	int key;
 	char *shortname;
 	char *description;
 };
