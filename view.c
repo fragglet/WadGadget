@@ -25,15 +25,21 @@
 #include "lump_info.h"
 #include "sixel_display.h"
 #include "strings.h"
+#include "termfuncs.h"
+#include "ui.h"
 #include "vfile.h"
 #include "vfs.h"
-
-extern void RedrawScreen(void);
-extern void SetCursesModes(void);
 
 #ifndef _WIN32
 
 static bool got_tstp;
+
+static void RedrawScreen(void)
+{
+	clearok(stdscr, TRUE);
+	wrefresh(stdscr);
+	UI_DrawAllPanes();
+}
 
 // Handler function invoked when SIGTSTP (^Z) is received.
 static void TstpHandler(int)
@@ -322,7 +328,7 @@ void PerformView(struct directory *dir, struct directory_entry *ent)
 
 	// Restore the curses display which may have been trashed if another
 	// curses program was opened.
-	SetCursesModes();
+	TF_SetCursesModes();
 	RedrawScreen();
 
 	if (edit_success) {

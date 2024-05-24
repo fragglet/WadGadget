@@ -23,6 +23,7 @@
 #include "lump_info.h"
 #include "sixel_display.h"
 #include "strings.h"
+#include "termfuncs.h"
 #include "ui.h"
 #include "view.h"
 
@@ -36,63 +37,6 @@
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 
 #define INFO_PANE_WIDTH 28
-
-#define COLORX_DARKGREY       (COLOR_BLACK + 8)
-#define COLORX_BRIGHTBLUE     (COLOR_BLUE + 8)
-#define COLORX_BRIGHTGREEN    (COLOR_GREEN + 8)
-#define COLORX_BRIGHTCYAN     (COLOR_CYAN + 8)
-#define COLORX_BRIGHTRED      (COLOR_RED + 8)
-#define COLORX_BRIGHTMAGENTA  (COLOR_MAGENTA + 8)
-#define COLORX_BRIGHTYELLOW   (COLOR_YELLOW + 8)
-#define COLORX_BRIGHTWHITE    (COLOR_WHITE + 8)
-
-struct palette {
-	size_t num_colors;
-	struct { int c, r, g, b; } colors[16];
-};
-
-// We use the curses init_color() function to set a custom color palette
-// that matches the palette from NWT; these values are from the ScreenPal[]
-// array in wadview.c.
-#define V(x) ((x * 1000) / 63)
-
-static struct palette nwt_palette = {
-	16,
-	{
-		{COLOR_BLACK,          V( 0), V( 0), V( 0)},
-		{COLOR_BLUE,           V( 0), V( 0), V(25)},
-		{COLOR_GREEN,          V( 0), V(42), V( 0)},
-		{COLOR_CYAN,           V( 0), V(42), V(42)},
-		{COLOR_RED,            V(42), V( 0), V( 0)},
-		{COLOR_MAGENTA,        V(42), V( 0), V(42)},
-		{COLOR_YELLOW,         V(42), V(42), V( 0)},
-		{COLOR_WHITE,          V(34), V(34), V(34)},
-
-		{COLORX_DARKGREY,      V( 0), V( 0), V(13)},
-		{COLORX_BRIGHTBLUE,    V( 0), V( 0), V(55)},
-		{COLORX_BRIGHTGREEN,   V( 0), V(34), V(13)},
-		{COLORX_BRIGHTCYAN,    V( 0), V(34), V(55)},
-		{COLORX_BRIGHTRED,     V(34), V( 0), V(13)},
-		{COLORX_BRIGHTMAGENTA, V(34), V( 0), V(55)},
-		{COLORX_BRIGHTYELLOW,  V(34), V(34), V(13)},
-		{COLORX_BRIGHTWHITE,   V(55), V(55), V(55)},
-	},
-};
-
-static const struct {
-	int pair_index, fg, bg;
-} color_pairs[] = {
-	{PAIR_WHITE_BLACK, COLORX_BRIGHTWHITE, COLOR_BLACK},
-	{PAIR_PANE_COLOR,  COLORX_BRIGHTWHITE, COLOR_BLUE},
-	{PAIR_HEADER,      COLOR_BLACK,        COLORX_BRIGHTCYAN},
-	{PAIR_DIRECTORY,   COLOR_WHITE,        COLOR_BLACK},
-	{PAIR_WAD_FILE,    COLOR_RED,          COLOR_BLACK},
-	{PAIR_DIALOG_BOX,  COLORX_BRIGHTWHITE, COLOR_MAGENTA},
-	{PAIR_TAGGED,      COLORX_BRIGHTWHITE, COLOR_RED},
-};
-
-// Old palette we saved and restore on quit.
-static struct palette old_palette;
 
 struct search_pane {
 	struct pane pane;
@@ -198,22 +142,6 @@ static void SwitchToPane(unsigned int pane)
 	UI_ActionsPaneSet(&actions_pane, dirs[active_pane]->type,
 	                  dirs[!active_pane]->type, active_pane == 0);
 	SetWindowSizes();
-}
-
-void RedrawScreen(void)
-{
-	clearok(stdscr, TRUE);
-	wrefresh(stdscr);
-	UI_DrawAllPanes();
-}
-
-void SetCursesModes(void)
-{
-	cbreak();
-	noecho();
-	nonl();
-	intrflush(stdscr, FALSE);
-	keypad(stdscr, TRUE);
 }
 
 static void NavigateNew(void)
@@ -558,58 +486,9 @@ static void InitSearchPane(WINDOW *win)
 	UI_TextInputInit(&search_pane.input, win, 20);
 }
 
-static void SavePalette(struct palette *p)
-{
-	short r, g, b;
-	int i;
-
-	p->num_colors = 16;
-	for (i = 0; i < p->num_colors; i++) {
-		p->colors[i].c = i;
-		color_content(i, &r, &g, &b);
-		p->colors[i].r = r;
-		p->colors[i].g = g;
-		p->colors[i].b = b;
-	}
-}
-
-static void SetPalette(struct palette *p)
-{
-	int i;
-
-	if (!has_colors() || !can_change_color()) {
-		return;
-	}
-
-	for (i = 0; i < p->num_colors; i++) {
-		if (p->colors[i].c >= COLORS) {
-			continue;
-		}
-		init_color(p->colors[i].c, p->colors[i].r, p->colors[i].g,
-		           p->colors[i].b);
-	}
-}
-
-static void SetColorPairs(void)
-{
-	int i, mask = 0xff;
-
-	// If we do not support extended colors, we
-	// instead fall back to the standard colors.
-	if (COLORS < 16) {
-		mask = 0x07;
-	}
-
-	for (i = 0; i < arrlen(color_pairs); i++) {
-		init_pair(color_pairs[i].pair_index,
-		          color_pairs[i].fg & mask,
-		          color_pairs[i].bg & mask);
-	}
-}
-
 static void Shutdown(void)
 {
-	SetPalette(&old_palette);
+	TF_RestoreOldPalette();
 	clear();
 	refresh();
 	endwin();
@@ -641,11 +520,9 @@ int main(int argc, char *argv[])
 
 	initscr();
 	start_color();
-	SetCursesModes();
-
-	SavePalette(&old_palette);
-	SetPalette(&nwt_palette);
-	SetColorPairs();
+	TF_SetCursesModes();
+	TF_SetNewPalette();
+	TF_SetColorPairs();
 
 	refresh();
 
