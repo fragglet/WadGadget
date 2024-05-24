@@ -9,6 +9,8 @@
 //
 
 #include <stdlib.h>
+#include <termios.h>
+#include <unistd.h>
 
 #define COLORX_DARKGREY       (COLOR_BLACK + 8)
 #define COLORX_BRIGHTBLUE     (COLOR_BLUE + 8)
@@ -24,6 +26,11 @@ struct palette {
 	struct { int c, r, g, b; } colors[16];
 };
 
+struct saved_flags {
+	int fcntl_opts;
+	struct termios termios;
+};
+
 void TF_SetCursesModes(void);
 void TF_SavePalette(struct palette *p);
 void TF_SetPalette(struct palette *p);
@@ -31,3 +38,8 @@ void TF_SetColorPairs(void);
 void TF_SetNewPalette(void);
 void TF_RestoreOldPalette(void);
 
+void TF_SetRawMode(struct saved_flags *f, bool blocking);
+void TF_RestoreNormalMode(struct saved_flags *f);
+int TF_PollingReadChar(struct timeval *start);
+
+void TF_ClearScreen();

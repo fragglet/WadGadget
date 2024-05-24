@@ -9,13 +9,19 @@
 //
 
 #include <curses.h>
-#include <stdlib.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 
 #include "colors.h"
 #include "common.h"
 #include "termfuncs.h"
+
+#define CLEAR_SCREEN_ESCAPE "\x1b[H\x1b[2J"
+#define RESPONSE_TIMEOUT 1000 /* ms */
 
 // We use the curses init_color() function to set a custom color palette
 // that matches the palette from NWT; these values are from the ScreenPal[]
@@ -127,4 +133,63 @@ void TF_SetNewPalette(void)
 void TF_RestoreOldPalette(void)
 {
 	TF_SetPalette(&old_palette);
+}
+
+void TF_SetRawMode(struct saved_flags *f, bool blocking)
+{
+	struct termios raw;
+
+	// Don't block reads from stdin; we want to time out.
+	if (!blocking) {
+		f->fcntl_opts = fcntl(0, F_GETFL);
+		fcntl(0, F_SETFL, f->fcntl_opts | O_NONBLOCK);
+	}
+
+	// Don't print the response, and don't wait for a newline.
+	tcgetattr(0, &f->termios);
+	raw = f->termios;
+	raw.c_lflag &= ~(ECHO | ICANON);
+	tcsetattr(0, TCSAFLUSH, &raw);
+}
+
+void TF_RestoreNormalMode(struct saved_flags *f)
+{
+	fcntl(0, F_SETFL, f->fcntl_opts);
+	tcsetattr(0, TCSAFLUSH, &f->termios);
+}
+
+static int TimeDiffMs(struct timeval *a, struct timeval *b)
+{
+	return (a->tv_sec - b->tv_sec) * 1000
+	     + (a->tv_usec - b->tv_usec) / 1000;
+}
+
+// Read a character from stdin, timing out if no response is received
+// in RESPONSE_TIMEOUT milliseconds.
+int TF_PollingReadChar(struct timeval *start)
+{
+	struct timeval now;
+	int c;
+
+	for (;;) {
+		gettimeofday(&now, NULL);
+		if (TimeDiffMs(&now, start) > RESPONSE_TIMEOUT) {
+			errno = EWOULDBLOCK;
+			return 0;
+		}
+		errno = 0;
+		c = getchar();
+		if (errno == EAGAIN || errno == EWOULDBLOCK) {
+			usleep(1000);
+			continue;
+		} else if (errno != 0) {
+			return 0;
+		}
+		return c;
+	}
+}
+
+void TF_ClearScreen(void)
+{
+	write(1, CLEAR_SCREEN_ESCAPE, strlen(CLEAR_SCREEN_ESCAPE));
 }

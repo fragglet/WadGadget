@@ -18,8 +18,7 @@
 
 #include "common.h"
 #include "endoom.h"
-
-#define CLEAR_SCREEN_ESCAPE "\x1b[H\x1b[2J"
+#include "termfuncs.h"
 
 static const char *cp437_to_utf8[256] = {
 	" ", "\xe2\x98\xba", "\xe2\x98\xbb", "\xe2\x99\xa5",
@@ -102,7 +101,7 @@ static void PrintEndoom(uint8_t *endoom, bool use_utf8)
 	const char *foreground, *background, *blink, *cs;
 	int i;
 
-	printf(CLEAR_SCREEN_ESCAPE);
+	TF_ClearScreen();
 
 	for (i = 0; i < ENDOOM_SIZE / 2; ++i) {
 		character = endoom[i * 2];
