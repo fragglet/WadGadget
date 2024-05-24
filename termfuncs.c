@@ -73,6 +73,20 @@ void TF_SetCursesModes(void)
 	nonl();
 	intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
+	TF_SetPalette(&nwt_palette);
+}
+
+void TF_SuspendCursesMode(void)
+{
+	// Restore the normal palette.
+	TF_SetPalette(&old_palette);
+
+	// We clear the screen first to avoid a brief flash of palette
+	// switching during the endwin() call.
+	clear();
+	refresh();
+
+	endwin();
 }
 
 void TF_SavePalette(struct palette *p)

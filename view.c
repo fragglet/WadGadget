@@ -280,11 +280,7 @@ void PerformView(struct directory *dir, struct directory_entry *ent)
 	}
 
 	// Temporarily suspend curses until the subprogram returns.
-	// We clear the screen first to avoid a brief flash of palette
-	// switching during the endwin() call.
-	clear();
-	refresh();
-	endwin();
+	TF_SuspendCursesMode();
 
 	result = 1;
 

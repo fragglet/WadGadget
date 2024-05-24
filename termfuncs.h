@@ -32,6 +32,8 @@ struct saved_flags {
 };
 
 void TF_SetCursesModes(void);
+void TF_SuspendCursesMode(void);
+
 void TF_SavePalette(struct palette *p);
 void TF_SetPalette(struct palette *p);
 void TF_SetColorPairs(void);

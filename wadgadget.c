@@ -520,8 +520,8 @@ int main(int argc, char *argv[])
 
 	initscr();
 	start_color();
-	TF_SetCursesModes();
 	TF_SetNewPalette();
+	TF_SetCursesModes();
 	TF_SetColorPairs();
 
 	refresh();
