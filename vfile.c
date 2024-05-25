@@ -293,6 +293,7 @@ static struct vfile_functions restricted_io_functions = {
 	restricted_vfsync,
 };
 
+// Create restricted file slice starting at given offset. end=-1 mean no limit
 VFILE *vfrestrict(VFILE *inner, long start, long end, int ro)
 {
 	VFILE *result;

@@ -346,7 +346,7 @@ VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
 
 	f->directory[lump_index].position = (unsigned int) start;
 
-	result = vfrestrict(f->vfs, start, 0, 0);
+	result = vfrestrict(f->vfs, start, -1, 0);
 	f->current_lump = result;
 	f->current_lump_index = lump_index;
 	f->last_lump_pos = start;
