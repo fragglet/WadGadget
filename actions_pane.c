@@ -20,7 +20,7 @@
 static const int key_ordering[] = {
 	KEY_ENTER, KEY_F(1), KEY_F(2), KEY_F(3), KEY_F(4), KEY_F(5), KEY_F(6),
 	KEY_F(7), KEY_F(8), ' ', KEY_F(9), KEY_F(10), 0, '\t',
-	CTRL_('D'), 0x1f,
+	CTRL_('D'), 27,
 };
 
 static const char *KeyDescription(const struct action *a)
@@ -39,7 +39,7 @@ static const char *KeyDescription(const struct action *a)
 	case ' ': return "Space";
 	case '\t': return "Tab";
 	case KEY_ENTER: return "Ent";
-	case 0x1f: return "Esc";
+	case 27: return "Esc";
 	default: break;
 	}
 	if (a->ctrl_key) {
