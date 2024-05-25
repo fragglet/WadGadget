@@ -50,6 +50,7 @@ static struct search_pane search_pane;
 static WINDOW *pane_windows[2];
 static struct directory_pane *panes[2];
 static struct directory *dirs[2];
+static bool cmdr_mode = false;
 static unsigned int active_pane = 0;
 
 static void SetNwtWindowSizes(int columns, int lines)
@@ -120,7 +121,7 @@ static void SetWindowSizes(void)
 
 	wresize(header_pane.window, 1, columns);
 
-	if (columns >= 80) {
+	if (!cmdr_mode && columns >= 80) {
 		SetNwtWindowSizes(columns, lines);
 	} else {
 		SetCmdrWindowSizes(columns, lines);
@@ -385,6 +386,10 @@ static void HandleKeypress(void *pane, int key)
 		break;
 	case SHIFT_KEY_F(3):
 		CreateWad(false);
+		break;
+	case ('D' & 0x1f):  // ^D = display; toggle UI
+		cmdr_mode = !cmdr_mode;
+		SetWindowSizes();
 		break;
 	case ('L' & 0x1f):  // ^L = redraw whole screen
 		clearok(stdscr, TRUE);

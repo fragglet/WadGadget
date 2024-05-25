@@ -22,7 +22,7 @@
 static const int key_ordering[] = {
 	KEY_ENTER, KEY_F(1), KEY_F(2), KEY_F(3), KEY_F(4), KEY_F(5), KEY_F(6),
 	KEY_F(7), KEY_F(8), ' ', KEY_F(9), KEY_F(10), 0, '\t',
-	0x1f,
+	'D' & 0x1f, 0x1f,
 };
 
 static const struct action wad_actions[] = {
@@ -70,6 +70,7 @@ struct action common_actions[] = {
 	{ KEY_F(9),   "MarkPat",  "Mark pattern"},
 	{ KEY_F(10),  "UnmrkAll", "Unmark all"},
 	{ '\t',       NULL,       "> Other pane"},
+	{ 'D' & 0x1f, NULL,       "CmdrMode"},
 	{ 0x1f,       NULL,       "Quit"},
 	{ 0 },
 };
