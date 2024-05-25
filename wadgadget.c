@@ -446,6 +446,12 @@ static void DrawSearchPane(void *pane)
 		mvwaddstr(win, 0, 2, " Search ");
 		mvderwin(p->input.win, 1, 2);
 		wresize(p->input.win, 1, w - 4);
+		if (strlen(p->input.input) > 0) {
+			mvwaddstr(win, 0, w - 13, "[   - Next]");
+			wattron(win, A_BOLD);
+			mvwaddstr(win, 0, w - 12, "^N");
+			wattroff(win, A_BOLD);
+		}
 	} else {
 		wbkgdset(win, COLOR_PAIR(PAIR_WHITE_BLACK));
 		werase(win);
