@@ -137,7 +137,7 @@ static time_t ReadFileTime(const char *filename)
 		return 0;
 	}
 
-	return s.st_mtim.tv_sec;
+	return s.st_mtime;
 }
 
 static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
