@@ -134,8 +134,9 @@ static void SwitchToPane(unsigned int pane)
 	active_pane = pane;
 	UI_RaisePaneToTop(panes[pane]);
 	panes[active_pane]->pane.active = 1;
-	// The search pane always sits on top of the stack.
-	// intercept keypresses:
+	// Info pane always above dir panes to preserve its title:
+	UI_RaisePaneToTop(&info_pane);
+	// Search pane is always at the top to catch keypresses:
 	UI_RaisePaneToTop(&search_pane);
 
 	UI_ActionsBarSet(&actions_bar, dirs[active_pane]->type,
