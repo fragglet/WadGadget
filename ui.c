@@ -67,7 +67,8 @@ void UI_PrintMultilineString(WINDOW *win, int y, int x, const char *s)
 static const char *games[] = {
 	"Doom", "[Doom II", "[Final Doom", "Heretic", "Hexen", "Strife",
 	"[Chex Quest", "[Freedoom", "[Rise of the Triad", "[HACX",
-	"[Amulets & Armor", "[Duke Nukem 3D", NULL,
+	"[Amulets & Armor", "[Duke Nukem 3D", "[Tank Wars",
+	"[Birthright: The Gorgon's Alliance", "[Doom 2D", NULL,
 };
 
 #define START_STR "= WadGadget for "
