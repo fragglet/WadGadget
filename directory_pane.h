@@ -29,6 +29,7 @@ void UI_DirectoryPaneSearch(void *p, const char *needle);
 void UI_DirectoryPaneSearchAgain(void *p, const char *needle);
 void UI_DirectoryPaneSelectBySerial(struct directory_pane *p,
                                     uint64_t serial_no);
+void UI_DirectoryPaneSelectByName(struct directory_pane *p, const char *name);
 int UI_DirectoryPaneSelected(struct directory_pane *p);
 struct file_set *UI_DirectoryPaneTagged(struct directory_pane *p);
 void UI_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set);

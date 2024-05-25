@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <sys/stat.h>
 
 #include "colors.h"
 #include "common.h"
@@ -112,7 +111,7 @@ static unsigned int NumEntries(void *data)
 	return dp->dir->num_entries + 1;
 }
 
-static void SelectByName(struct directory_pane *p, const char *name)
+void UI_DirectoryPaneSelectByName(struct directory_pane *p, const char *name)
 {
 	struct directory_entry *entry = VFS_EntryByName(p->dir, name);
 	if (entry != NULL) {
@@ -276,101 +275,6 @@ char *UI_DirectoryPaneEntryPath(struct directory_pane *p)
 	}
 }
 
-static void MoveLumps(struct directory_pane *p, struct wad_file *wf)
-{
-	struct wad_file_entry *dir;
-	int i, numlumps;
-	int insert_start, insert_end, insert_point;
-
-	insert_start = UI_DirectoryPaneSelected(p) + 1;
-	insert_end = insert_start + p->tagged.num_entries;
-	insert_point = insert_start;
-
-	W_AddEntries(wf, insert_start, p->tagged.num_entries);
-	dir = W_GetDirectory(wf);
-	numlumps = W_NumLumps(wf);
-
-	for (i = 0; i < numlumps; i++) {
-		if (i >= insert_start && i < insert_end) {
-			continue;
-		}
-		if (!VFS_SetHas(&p->tagged, dir[i].serial_no)) {
-			continue;
-		}
-		// This is a lump we want to move.
-		memcpy(&dir[insert_point], &dir[i],
-		       sizeof(struct wad_file_entry));
-		++insert_point;
-
-		W_DeleteEntry(wf, i);
-		if (i <= insert_start) {
-			--insert_start;
-			--insert_end;
-			--insert_point;
-		}
-		--numlumps;
-		--i;
-		dir = W_GetDirectory(wf);
-	}
-
-	UI_ListPaneSelect(&p->pane, insert_start + 1);
-	VFS_Refresh(p->dir);
-}
-
-static void Keypress(void *directory_pane, int key)
-{
-	struct directory_pane *p = directory_pane;
-	char *input_filename;
-	int selected = UI_DirectoryPaneSelected(p);
-
-	if (key == KEY_F(3) || key == KEY_F(4)) {
-		UI_MessageBox("Sorry, not implemented yet.");
-		return;
-	}
-	if (p->dir->type == FILE_TYPE_WAD && key == KEY_F(2)) {
-		if (p->tagged.num_entries == 0) {
-			UI_MessageBox(
-			    "You have not selected any lumps to move.");
-			return;
-		}
-		MoveLumps(p, VFS_WadFile(p->dir));
-		return;
-	}
-	if (p->dir->type == FILE_TYPE_WAD
-	 && (key == KEY_F(7) || key == KEY_IC)) {
-		struct wad_file *f = VFS_WadFile(p->dir);
-		char *name = UI_TextInputDialogBox(
-			"New lump", 8,
-			"Enter name for new lump:");
-		if (name == NULL) {
-			return;
-		}
-		W_AddEntries(f, selected + 1, 1);
-		W_SetLumpName(f, selected + 1, name);
-		free(name);
-		VFS_Refresh(p->dir);
-		UI_ListPaneKeypress(p, KEY_DOWN);
-		return;
-	}
-	if (p->dir->type == FILE_TYPE_DIR && key == KEY_F(7)) {
-		char *filename;
-		input_filename = UI_TextInputDialogBox(
-		    "Make directory", 30, "Name for new directory?");
-		if (input_filename == NULL) {
-			return;
-		}
-		filename = StringJoin("/", p->dir->path, input_filename, NULL);
-		mkdir(filename, 0777);
-		VFS_Refresh(p->dir);
-		SelectByName(p, input_filename);
-		free(input_filename);
-		free(filename);
-		return;
-	}
-
-	UI_ListPaneKeypress(p, key);
-}
-
 struct directory_pane *UI_NewDirectoryPane(
 	WINDOW *w, struct directory *dir)
 {
@@ -378,12 +282,11 @@ struct directory_pane *UI_NewDirectoryPane(
 
 	p = calloc(1, sizeof(struct directory_pane));
 	UI_ListPaneInit(&p->pane, w, &directory_pane_funcs, p);
-	p->pane.pane.keypress = Keypress;
 	// TODO: Free
 	UI_ListPaneSetTitle(&p->pane, PathBaseName(dir->path));
 	p->dir = dir;
 	// Select first item (assuming there is one):
-	Keypress(&p->pane, KEY_DOWN);
+	UI_ListPaneKeypress(&p->pane, KEY_DOWN);
 
 	return p;
 }

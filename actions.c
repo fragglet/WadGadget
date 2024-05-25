@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "actions.h"
 #include "common.h"
@@ -103,6 +104,41 @@ const struct action import_action = {
 const struct action import_noconv_action = {
 	SHIFT_KEY_F(5), 0, "Import", "> Import (no convert)",
 	PerformCopyNoConvert,
+};
+
+static void PerformUpdate(struct directory_pane *active_pane,
+                          struct directory_pane *other_pane)
+{
+	UI_MessageBox("Sorry, not implemented yet.");
+}
+
+const struct action update_action = {
+	KEY_F(4), 'U', "Upd",     "> Update",
+	PerformUpdate,
+};
+
+static void PerformMkdir(struct directory_pane *active_pane,
+                         struct directory_pane *other_pane)
+{
+	char *input_filename, *filename;
+
+	input_filename = UI_TextInputDialogBox(
+	    "Make directory", 30, "Name for new directory?");
+	if (input_filename == NULL) {
+		return;
+	}
+	filename = StringJoin("/", active_pane->dir->path, input_filename,
+	                      NULL);
+	mkdir(filename, 0777);
+	VFS_Refresh(active_pane->dir);
+	UI_DirectoryPaneSelectByName(active_pane, input_filename);
+	free(input_filename);
+	free(filename);
+}
+
+const struct action mkdir_action = {
+	KEY_F(7), 'K', "Mkdir",  "Mkdir",
+	PerformMkdir,
 };
 
 static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
@@ -227,6 +263,86 @@ const struct action make_wad_noconv_action = {
 const struct action export_wad_action = {
 	KEY_F(3), 'F', "ExpWAD",  "> Export as WAD",
 	CreateWadConvert,
+};
+
+static void MoveLumps(struct directory_pane *p, struct wad_file *wf)
+{
+	struct wad_file_entry *dir;
+	int i, numlumps;
+	int insert_start, insert_end, insert_point;
+
+	insert_start = UI_DirectoryPaneSelected(p) + 1;
+	insert_end = insert_start + p->tagged.num_entries;
+	insert_point = insert_start;
+
+	W_AddEntries(wf, insert_start, p->tagged.num_entries);
+	dir = W_GetDirectory(wf);
+	numlumps = W_NumLumps(wf);
+
+	for (i = 0; i < numlumps; i++) {
+		if (i >= insert_start && i < insert_end) {
+			continue;
+		}
+		if (!VFS_SetHas(&p->tagged, dir[i].serial_no)) {
+			continue;
+		}
+		// This is a lump we want to move.
+		memcpy(&dir[insert_point], &dir[i],
+		       sizeof(struct wad_file_entry));
+		++insert_point;
+
+		W_DeleteEntry(wf, i);
+		if (i <= insert_start) {
+			--insert_start;
+			--insert_end;
+			--insert_point;
+		}
+		--numlumps;
+		--i;
+		dir = W_GetDirectory(wf);
+	}
+
+	UI_ListPaneSelect(&p->pane, insert_start + 1);
+	VFS_Refresh(p->dir);
+}
+
+static void PerformRearrange(struct directory_pane *active_pane,
+                             struct directory_pane *other_pane)
+{
+	if (active_pane->tagged.num_entries == 0) {
+		UI_MessageBox("You have not selected any lumps to move.");
+		return;
+	}
+	MoveLumps(active_pane, VFS_WadFile(active_pane->dir));
+}
+
+const struct action rearrange_action = {
+	KEY_F(2), 'V', "Rearr",   "Move (rearrange)",
+	PerformRearrange,
+};
+
+static void PerformNewLump(struct directory_pane *active_pane,
+                           struct directory_pane *other_pane)
+{
+	int selected = UI_DirectoryPaneSelected(active_pane);
+	struct wad_file *f = VFS_WadFile(active_pane->dir);
+
+	char *name = UI_TextInputDialogBox(
+		"New lump", 8,
+		"Enter name for new lump:");
+	if (name == NULL) {
+		return;
+	}
+	W_AddEntries(f, selected + 1, 1);
+	W_SetLumpName(f, selected + 1, name);
+	free(name);
+	VFS_Refresh(active_pane->dir);
+	UI_ListPaneKeypress(active_pane, KEY_DOWN);
+}
+
+const struct action new_lump_action = {
+	KEY_F(7), 'K', "NewLump", "New lump",
+	PerformNewLump,
 };
 
 static void PerformRename(struct directory_pane *active_pane,
@@ -405,18 +521,4 @@ const struct action reload_action = {
 // TODO:
 const struct action view_action = {
 	KEY_ENTER, 0,   NULL,       "View/Edit",
-};
-
-const struct action rearrange_action = {
-	KEY_F(2), 'V', "Rearr",   "Move (rearrange)",
-};
-const struct action new_lump_action = {
-	KEY_F(7), 'K', "NewLump", "New lump",
-};
-
-const struct action mkdir_action = {
-	KEY_F(7), 'K', "Mkdir",  "Mkdir",
-};
-const struct action update_action = {
-	KEY_F(4), 'U', "Upd",     "> Update",
 };
