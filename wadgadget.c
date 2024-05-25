@@ -388,18 +388,18 @@ static void HandleKeypress(void *pane, int key)
 	case SHIFT_KEY_F(3):
 		CreateWad(false);
 		break;
-	case ('D' & 0x1f):  // ^D = display; toggle UI
+	case CTRL_('D'):  // ^D = display; toggle UI
 		cmdr_mode = !cmdr_mode;
 		SetWindowSizes();
 		break;
-	case ('L' & 0x1f):  // ^L = redraw whole screen
+	case CTRL_('L'):  // ^L = redraw whole screen
 		clearok(stdscr, TRUE);
 		wrefresh(stdscr);
 		break;
-	case ('R' & 0x1f):  // ^R = reload dir
+	case CTRL_('R'):  // ^R = reload dir
 		VFS_Refresh(dirs[active_pane]);
 		break;
-	case ('N' & 0x1f):  // ^N = search again
+	case CTRL_('N'):  // ^N = search again
 		UI_DirectoryPaneSearchAgain(panes[active_pane],
 		                            search_pane.input.input);
 		break;

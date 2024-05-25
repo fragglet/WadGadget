@@ -22,7 +22,7 @@
 static const int key_ordering[] = {
 	KEY_ENTER, KEY_F(1), KEY_F(2), KEY_F(3), KEY_F(4), KEY_F(5), KEY_F(6),
 	KEY_F(7), KEY_F(8), ' ', KEY_F(9), KEY_F(10), 0, '\t',
-	'D' & 0x1f, 0x1f,
+	CTRL_('D'), 0x1f,
 };
 
 static const struct action wad_actions[] = {
@@ -119,7 +119,7 @@ static void AddActionList(const struct action **result,
 		for (j = 0; j < MAX_KEY_BINDINGS; j++) {
 			if (key_ordering[j] != 0
 			 && (list[i].key == key_ordering[j]
-			  || (list[i].ctrl_key & 0x1f) == key_ordering[j])) {
+			  || CTRL_(list[i].ctrl_key) == key_ordering[j])) {
 				break;
 			}
 		}

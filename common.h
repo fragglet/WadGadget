@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <assert.h>
 
+#define CTRL_(x) ((x) & 0x1f)
 #define SHIFT_KEY_F(n) KEY_F(n + 12)
 
 #define arrlen(x) (sizeof(x) / sizeof(*(x)))
