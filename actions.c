@@ -21,6 +21,8 @@
 #include "strings.h"
 #include "vfs.h"
 
+extern void SwitchToPane(struct directory_pane *pane); // in wadgadget.c
+
 static void PerformCopy(struct directory_pane *active_pane,
                         struct directory_pane *other_pane, bool convert)
 {
@@ -42,7 +44,7 @@ static void PerformCopy(struct directory_pane *active_pane,
 		}
 		if (PerformExport(from, export_set, to, &result, convert)) {
 			UI_DirectoryPaneSetTagged(other_pane, &result);
-			//SwitchToPane(!active_pane);
+			SwitchToPane(other_pane);
 		}
 		VFS_FreeSet(&result);
 		return;
@@ -60,7 +62,7 @@ static void PerformCopy(struct directory_pane *active_pane,
 		if (PerformImport(from, import_set, to, to_point,
 		                  &result, convert)) {
 			UI_DirectoryPaneSetTagged(other_pane, &result);
-		//	SwitchToPane(!active_pane);
+			SwitchToPane(other_pane);
 		}
 		VFS_FreeSet(&result);
 		return;
@@ -236,7 +238,7 @@ static void CreateWad(struct directory_pane *active_pane,
 	if (filename != NULL) {
 		UI_DirectoryPaneSearch(to_pane, filename);
 		free(filename);
-	//	SwitchToPane(panes[0] == to_pane ? 0 : 1);
+		SwitchToPane(to_pane);
 	}
 }
 

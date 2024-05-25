@@ -38,7 +38,7 @@
 
 #define INFO_PANE_WIDTH 28
 
-static void SwitchToPane(struct directory_pane *pane);
+void SwitchToPane(struct directory_pane *pane);
 
 struct search_pane {
 	struct pane pane;
@@ -254,7 +254,7 @@ static void BuildActionsList(void)
 	actions[idx] = NULL;
 }
 
-static void SwitchToPane(struct directory_pane *pane)
+void SwitchToPane(struct directory_pane *pane)
 {
 	unsigned int pane_num = pane != panes[0];
 
