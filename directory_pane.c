@@ -120,7 +120,8 @@ static void SelectByName(struct directory_pane *p, const char *name)
 	}
 }
 
-static void SelectBySerial(struct directory_pane *p, uint64_t serial_no)
+void UI_DirectoryPaneSelectBySerial(struct directory_pane *p,
+                                    uint64_t serial_no)
 {
 	struct directory_entry *entry = VFS_EntryBySerial(p->dir, serial_no);
 	if (entry != NULL) {
@@ -244,7 +245,7 @@ void UI_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set)
 	// Jump to first in the set.
 	dirent = VFS_IterateSet(p->dir, &p->tagged, &idx);
 	if (dirent != NULL) {
-		SelectBySerial(p, dirent->serial_no);
+		UI_DirectoryPaneSelectBySerial(p, dirent->serial_no);
 	}
 }
 
@@ -320,7 +321,6 @@ static void Keypress(void *directory_pane, int key)
 {
 	struct directory_pane *p = directory_pane;
 	char *input_filename;
-	struct file_set *tagged = UI_DirectoryPaneTagged(p);
 	int selected = UI_DirectoryPaneSelected(p);
 
 	if (key == KEY_F(3) || key == KEY_F(4)) {
@@ -334,32 +334,6 @@ static void Keypress(void *directory_pane, int key)
 			return;
 		}
 		MoveLumps(p, VFS_WadFile(p->dir));
-		return;
-	}
-	if (key == KEY_F(6)) {
-		char *old_name = p->dir->entries[selected].name;
-		uint64_t serial_no = p->dir->entries[selected].serial_no;
-
-		if (tagged->num_entries == 0) {
-			UI_MessageBox(
-			    "You have not selected anything to rename.");
-			return;
-		} else if (tagged->num_entries > 1) {
-			UI_MessageBox(
-			    "You can't rename more than one thing at once.");
-			return;
-		}
-
-		input_filename = UI_TextInputDialogBox(
-		    "Rename", 30, "New name for '%s'?", old_name);
-		if (input_filename == NULL) {
-			return;
-		}
-		VFS_Rename(p->dir, &p->dir->entries[selected],
-		           input_filename);
-		VFS_Refresh(p->dir);
-		free(input_filename);
-		SelectBySerial(p, serial_no);
 		return;
 	}
 	if (p->dir->type == FILE_TYPE_WAD
@@ -391,76 +365,6 @@ static void Keypress(void *directory_pane, int key)
 		SelectByName(p, input_filename);
 		free(input_filename);
 		free(filename);
-		return;
-	}
-	if (key == KEY_F(8) || key == KEY_DC) {
-		char buf[64];
-		int i;
-
-		if (tagged->num_entries == 0) {
-			UI_MessageBox(
-			    "You have not selected anything to delete.");
-			return;
-		}
-
-		VFS_DescribeSet(p->dir, tagged, buf, sizeof(buf));
-		if (!UI_ConfirmDialogBox("Confirm Delete", "Delete %s?", buf)) {
-			return;
-		}
-		// Note that there's a corner-case gotcha here. VFS serial
-		// numbers for files are inode numbers, and through hardlinks
-		// multiple files can have the same inode number. However,
-		// the way things are implemented here, we only ever delete one
-		// of each serial number. So the wrong file can end up being
-		// deleted, but we'll never delete both.
-		for (i = 0; i < tagged->num_entries; i++) {
-			struct directory_entry *ent;
-			ent = VFS_EntryBySerial(p->dir, tagged->entries[i]);
-			if (ent == NULL) {
-				continue;
-			}
-			VFS_Remove(p->dir, ent);
-		}
-		VFS_ClearSet(&p->tagged);
-		VFS_Refresh(p->dir);
-		if (UI_DirectoryPaneSelected(p) >= p->dir->num_entries) {
-			UI_ListPaneSelect(&p->pane, p->dir->num_entries);
-		}
-		return;
-	}
-	if (key == KEY_F(9)) {
-		int first_match;
-		char *glob = UI_TextInputDialogBox(
-			"Mark pattern", 15,
-			"Enter a wildcard pattern (eg. *.png):");
-		if (glob == NULL) {
-			return;
-		}
-		first_match = VFS_AddGlobToSet(p->dir, &p->tagged, glob);
-		if (first_match < 0) {
-			UI_MessageBox("No matches found.");
-		} else {
-			UI_ListPaneSelect(&p->pane, first_match + 1);
-		}
-		free(glob);
-		return;
-	}
-	if (key == KEY_F(10)) {
-		VFS_ClearSet(&p->tagged);
-		return;
-	}
-	if (key == ' ') {
-		struct directory_entry *ent;
-		if (p->pane.selected <= 0) {
-			return;
-		}
-		ent = &p->dir->entries[UI_DirectoryPaneSelected(p)];
-		if (VFS_SetHas(&p->tagged, ent->serial_no)) {
-			VFS_RemoveFromSet(&p->tagged, ent->serial_no);
-		} else {
-			VFS_AddToSet(&p->tagged, ent->serial_no);
-		}
-		UI_ListPaneKeypress(p, KEY_DOWN);
 		return;
 	}
 

@@ -29,3 +29,14 @@ extern const struct action make_wad_action;
 extern const struct action make_wad_noconv_action;
 extern const struct action export_wad_action;
 extern const struct action export_wad_action;
+
+extern const struct action rename_action;
+extern const struct action delete_action;
+extern const struct action mark_pattern_action;
+extern const struct action unmark_all_action;
+extern const struct action mark_action;
+extern const struct action view_action;
+extern const struct action rearrange_action;
+extern const struct action new_lump_action;
+extern const struct action mkdir_action;
+extern const struct action update_action;

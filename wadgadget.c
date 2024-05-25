@@ -223,6 +223,11 @@ static const struct action *actions[] = {
 	&copy_noconv_action,
 	&make_wad_action,
 	&make_wad_noconv_action,
+	&rename_action,
+	&delete_action,
+	&mark_pattern_action,
+	&unmark_all_action,
+	&mark_action,
 };
 
 static void HandleKeypress(void *pane, int key)

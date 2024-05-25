@@ -232,6 +232,145 @@ const struct action export_wad_noconv_action = {
 	CreateWadNoConvert,
 };
 
+static void PerformRename(struct directory_pane *active_pane,
+                          struct directory_pane *other_pane)
+{
+	char *input_filename;
+	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
+	int selected = UI_DirectoryPaneSelected(active_pane);
+	char *old_name = active_pane->dir->entries[selected].name;
+	uint64_t serial_no = active_pane->dir->entries[selected].serial_no;
+
+	if (tagged->num_entries == 0) {
+		UI_MessageBox(
+		    "You have not selected anything to rename.");
+		return;
+	} else if (tagged->num_entries > 1) {
+		UI_MessageBox(
+		    "You can't rename more than one thing at once.");
+		return;
+	}
+
+	input_filename = UI_TextInputDialogBox(
+	    "Rename", 30, "New name for '%s'?", old_name);
+	if (input_filename == NULL) {
+		return;
+	}
+	VFS_Rename(active_pane->dir, &active_pane->dir->entries[selected],
+		   input_filename);
+	VFS_Refresh(active_pane->dir);
+	free(input_filename);
+	UI_DirectoryPaneSelectBySerial(active_pane, serial_no);
+}
+
+const struct action rename_action = {
+	KEY_F(6),  'B', "Ren",      "Rename",
+	PerformRename,
+};
+
+static void PerformDelete(struct directory_pane *active_pane,
+                          struct directory_pane *other_pane)
+{
+	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
+	char buf[64];
+	int i;
+
+	if (tagged->num_entries == 0) {
+		UI_MessageBox(
+		    "You have not selected anything to delete.");
+		return;
+	}
+
+	VFS_DescribeSet(active_pane->dir, tagged, buf, sizeof(buf));
+	if (!UI_ConfirmDialogBox("Confirm Delete", "Delete %s?", buf)) {
+		return;
+	}
+	// Note that there's a corner-case gotcha here. VFS serial
+	// numbers for files are inode numbers, and through hardlinks
+	// multiple files can have the same inode number. However,
+	// the way things are implemented here, we only ever delete one
+	// of each serial number. So the wrong file can end up being
+	// deleted, but we'll never delete both.
+	for (i = 0; i < tagged->num_entries; i++) {
+		struct directory_entry *ent;
+		ent = VFS_EntryBySerial(active_pane->dir, tagged->entries[i]);
+		if (ent == NULL) {
+			continue;
+		}
+		VFS_Remove(active_pane->dir, ent);
+	}
+	VFS_ClearSet(&active_pane->tagged);
+	VFS_Refresh(active_pane->dir);
+	if (UI_DirectoryPaneSelected(active_pane)
+	    >= active_pane->dir->num_entries) {
+		UI_ListPaneSelect(&active_pane->pane,
+		                  active_pane->dir->num_entries);
+	}
+}
+
+const struct action delete_action = {
+	KEY_F(8),  'X', "Del",      "Delete",
+	PerformDelete,
+};
+
+static void PerformMarkPattern(struct directory_pane *active_pane,
+                               struct directory_pane *other_pane)
+{
+	int first_match;
+	char *glob = UI_TextInputDialogBox(
+		"Mark pattern", 15,
+		"Enter a wildcard pattern (eg. *.png):");
+	if (glob == NULL) {
+		return;
+	}
+	first_match = VFS_AddGlobToSet(active_pane->dir, &active_pane->tagged, glob);
+	if (first_match < 0) {
+		UI_MessageBox("No matches found.");
+	} else {
+		UI_ListPaneSelect(&active_pane->pane, first_match + 1);
+	}
+	free(glob);
+}
+
+const struct action mark_pattern_action = {
+	KEY_F(9),  'G', "MarkPat",  "Mark pattern",
+	PerformMarkPattern,
+};
+
+static void PerformUnmarkAll(struct directory_pane *active_pane,
+                             struct directory_pane *other_pane)
+{
+	VFS_ClearSet(&active_pane->tagged);
+}
+
+const struct action unmark_all_action = {
+	KEY_F(10), 'A', "UnmrkAll", "Unmark all",
+	PerformUnmarkAll,
+};
+
+static void PerformMark(struct directory_pane *active_pane,
+                        struct directory_pane *other_pane)
+{
+	int selected = UI_DirectoryPaneSelected(active_pane);
+	struct directory_entry *ent;
+
+	if (active_pane->pane.selected <= 0) {
+		return;
+	}
+	ent = &active_pane->dir->entries[selected];
+	if (VFS_SetHas(&active_pane->tagged, ent->serial_no)) {
+		VFS_RemoveFromSet(&active_pane->tagged, ent->serial_no);
+	} else {
+		VFS_AddToSet(&active_pane->tagged, ent->serial_no);
+	}
+	UI_ListPaneKeypress(active_pane, KEY_DOWN);
+}
+
+const struct action mark_action = {
+	' ',       0,    NULL,      "Mark/unmark",
+	PerformMark,
+};
+
 /* TODO -
 const struct action view_action = {
 	KEY_ENTER, 0,   NULL,       "View/Edit",
@@ -251,19 +390,4 @@ const struct action update_action = {
 	KEY_F(4), 'U', "Upd",     "> Update",
 };
 
-const struct action rename_action = {
-	KEY_F(6),  'B', "Ren",      "Rename",
-};
-const struct action delete_action = {
-	KEY_F(8),  'X', "Del",      "Delete",
-};
-const struct action mark_action = {
-	' ',       0,    NULL,      "Mark/unmark",
-};
-const struct action mark_pattern_action = {
-	KEY_F(9),  'G', "MarkPat",  "Mark pattern",
-};
-const struct action unmark_all_action = {
-	KEY_F(10), 'A', "UnmrkAll", "Unmark all",
-};
 */
