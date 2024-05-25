@@ -28,7 +28,6 @@ extern const struct action import_noconv_action;
 extern const struct action make_wad_action;
 extern const struct action make_wad_noconv_action;
 extern const struct action export_wad_action;
-extern const struct action export_wad_action;
 
 extern const struct action rename_action;
 extern const struct action delete_action;

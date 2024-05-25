@@ -228,10 +228,6 @@ const struct action export_wad_action = {
 	KEY_F(3), 'F', "ExpWAD",  "> Export as WAD",
 	CreateWadConvert,
 };
-const struct action export_wad_noconv_action = {
-	SHIFT_KEY_F(3), 0, "ExpWAD",  "> Export as WAD (no convert)",
-	CreateWadNoConvert,
-};
 
 static void PerformRename(struct directory_pane *active_pane,
                           struct directory_pane *other_pane)
