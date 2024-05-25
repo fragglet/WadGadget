@@ -38,6 +38,8 @@
 
 #define INFO_PANE_WIDTH 28
 
+static void SwitchToPane(unsigned int pane);
+
 struct search_pane {
 	struct pane pane;
 	struct text_input_box input;
@@ -129,16 +131,38 @@ static void SetWindowSizes(void)
 	}
 }
 
+static void PerformSwitchPane(struct directory_pane *a,
+                              struct directory_pane *b)
+{
+	SwitchToPane(!active_pane);
+}
+
 static const struct action other_pane_action = {
-        '\t', 0, "Other",  "> Other pane",
+	'\t', 0, "Other",  "> Other pane",
+	PerformSwitchPane,
 };
+
+static void ToggleCmdrMode(struct directory_pane *a,
+                           struct directory_pane *b)
+{
+	cmdr_mode = !cmdr_mode;
+	SetWindowSizes();
+}
 
 static const struct action cmdr_mode_action = {
-        0, 'D', "CmdrMode",  "CmdrMode",
+	0, 'D', "CmdrMode",  "CmdrMode",
+	ToggleCmdrMode,
 };
 
-static const struct action quit_action = {
-        0x1f, 'Q', "Quit",  "Quit",
+static void SearchAgain(struct directory_pane *active_pane,
+                        struct directory_pane *b)
+{
+	UI_DirectoryPaneSearchAgain(active_pane, search_pane.input.input);
+}
+
+static const struct action search_again_action = {
+	0, 'N', "Next", "Search again",
+	SearchAgain,
 };
 
 static const struct action *wad_actions[] = {
@@ -189,6 +213,9 @@ static const struct action *common_actions[] = {
 	&other_pane_action,
 	&cmdr_mode_action,
 	&quit_action,
+	&search_again_action,
+	&redraw_screen_action,
+	&reload_action,
 	NULL,
 };
 
@@ -340,29 +367,8 @@ static void HandleKeypress(void *pane, int key)
 	case KEY_RESIZE:
 		SetWindowSizes();
 		break;
-	case CTRL_('D'):  // ^D = display; toggle UI
-		cmdr_mode = !cmdr_mode;
-		SetWindowSizes();
-		break;
-	case CTRL_('L'):  // ^L = redraw whole screen
-		clearok(stdscr, TRUE);
-		wrefresh(stdscr);
-		break;
-	case CTRL_('R'):  // ^R = reload dir
-		VFS_Refresh(dirs[active_pane]);
-		break;
-	case CTRL_('N'):  // ^N = search again
-		UI_DirectoryPaneSearchAgain(panes[active_pane],
-		                            search_pane.input.input);
-		break;
 	case '\r':
 		OpenEntry();
-		break;
-	case '\t':
-		SwitchToPane(!active_pane);
-		break;
-	case 27:
-		UI_ExitMainLoop();
 		break;
 	default:
 		UI_PaneKeypress(panes[active_pane], key);

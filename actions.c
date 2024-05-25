@@ -16,6 +16,7 @@
 #include "import.h"
 #include "dialog.h"
 #include "export.h"
+#include "pane.h"
 #include "strings.h"
 #include "vfs.h"
 
@@ -371,6 +372,41 @@ const struct action mark_action = {
 	PerformMark,
 };
 
+static void PerformQuit(struct directory_pane *a,
+                        struct directory_pane *b)
+{
+	UI_ExitMainLoop();
+}
+
+const struct action quit_action = {
+	27, 'Q', "Quit",  "Quit",
+	PerformQuit,
+};
+
+static void RedrawScreen(struct directory_pane *a,
+                         struct directory_pane *b)
+{
+	clearok(stdscr, TRUE);
+	wrefresh(stdscr);
+}
+
+const struct action redraw_screen_action = {
+        0, 'L', "Redraw", "Redraw screen",
+	RedrawScreen,
+};
+
+static void PerformReload(struct directory_pane *active_pane,
+                          struct directory_pane *other_pane)
+{
+	VFS_Refresh(active_pane->dir);
+}
+
+const struct action reload_action = {
+	0, 'R', "Reload", "Reload",
+	PerformReload,
+};
+
+// TODO:
 const struct action view_action = {
 	KEY_ENTER, 0,   NULL,       "View/Edit",
 };
