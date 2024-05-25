@@ -43,6 +43,7 @@ struct search_pane {
 	struct text_input_box input;
 };
 
+static const struct action *actions[MAX_KEY_BINDINGS + 1];
 static struct actions_pane actions_pane;
 static struct actions_bar actions_bar;
 static struct pane header_pane, info_pane;
@@ -128,6 +129,104 @@ static void SetWindowSizes(void)
 	}
 }
 
+static const struct action other_pane_action = {
+        '\t', 0, "Other",  "> Other pane",
+};
+
+static const struct action cmdr_mode_action = {
+        0, 'D', "CmdrMode",  "CmdrMode",
+};
+
+static const struct action quit_action = {
+        0x1f, 'Q', "Quit",  "Quit",
+};
+
+static const struct action *wad_actions[] = {
+	&rearrange_action,
+	&new_lump_action,
+	NULL,
+};
+
+static const struct action *dir_actions[] = {
+	&make_wad_action,
+	&make_wad_noconv_action,
+	&mkdir_action,
+	NULL,
+};
+
+static const struct action *wad_to_wad[] = {
+	&update_action,
+	&copy_action,
+	NULL,
+};
+
+static const struct action *wad_to_dir[] = {
+	&export_wad_action,
+	&export_action,
+	&export_noconv_action,
+	NULL,
+};
+
+static const struct action *dir_to_wad[] = {
+	&update_action,
+	&import_action,
+	&import_noconv_action,
+	NULL,
+};
+
+static const struct action *dir_to_dir[] = {
+	&copy_action,
+	NULL,
+};
+
+static const struct action *common_actions[] = {
+	&view_action,
+	&rename_action,
+	&delete_action,
+	&mark_action,
+	&mark_pattern_action,
+	&unmark_all_action,
+	&other_pane_action,
+	&cmdr_mode_action,
+	&quit_action,
+	NULL,
+};
+
+static const struct action **type_actions[2] = {
+	dir_actions, wad_actions,
+};
+
+static const struct action **action_lists[2][2] = {
+	{dir_to_dir, dir_to_wad},
+	{wad_to_dir, wad_to_wad},
+};
+
+static void AddActionList(const struct action **list, int *idx)
+{
+	int i = 0;
+
+	for (i = 0; list[i] != NULL && *idx < MAX_KEY_BINDINGS; i++) {
+		actions[*idx] = list[i];
+		++*idx;
+	}
+}
+
+static void BuildActionsList(void)
+{
+	int active = panes[active_pane]->dir->type;
+	int other = panes[!active_pane]->dir->type;
+	int idx = 0;
+
+	memset(actions, 0, sizeof(struct action *) * MAX_KEY_BINDINGS);
+
+	AddActionList(common_actions, &idx);
+	AddActionList(type_actions[active == FILE_TYPE_WAD], &idx);
+	AddActionList(
+		action_lists[active == FILE_TYPE_WAD][other == FILE_TYPE_WAD],
+		&idx);
+	actions[idx] = NULL;
+}
+
 static void SwitchToPane(unsigned int pane)
 {
 	panes[active_pane]->pane.active = 0;
@@ -139,10 +238,9 @@ static void SwitchToPane(unsigned int pane)
 	// Search pane is always at the top to catch keypresses:
 	UI_RaisePaneToTop(&search_pane);
 
-	UI_ActionsBarSet(&actions_bar, dirs[active_pane]->type,
-	                 dirs[!active_pane]->type);
-	UI_ActionsPaneSet(&actions_pane, dirs[active_pane]->type,
-	                  dirs[!active_pane]->type, active_pane == 0);
+	BuildActionsList();
+	UI_ActionsPaneSet(&actions_pane, actions, active_pane == 0);
+	UI_ActionsBarSet(&actions_bar, actions);
 	SetWindowSizes();
 }
 
@@ -218,25 +316,14 @@ static void OpenEntry(void)
 	PerformView(pane->dir, &pane->dir->entries[selected]);
 }
 
-static const struct action *actions[] = {
-	&copy_action,
-	&copy_noconv_action,
-	&make_wad_action,
-	&make_wad_noconv_action,
-	&rename_action,
-	&delete_action,
-	&mark_pattern_action,
-	&unmark_all_action,
-	&mark_action,
-};
-
 static void HandleKeypress(void *pane, int key)
 {
 	int i;
 
-	for (i = 0; i < arrlen(actions); i++) {
-		if (key == actions[i]->key
-		 || key == CTRL_(actions[i]->ctrl_key)) {
+	for (i = 0; actions[i] != NULL; i++) {
+		if (actions[i]->callback != NULL
+		 && (key == actions[i]->key
+		  || key == CTRL_(actions[i]->ctrl_key))) {
 			actions[i]->callback(panes[active_pane],
 			                     panes[!active_pane]);
 			return;

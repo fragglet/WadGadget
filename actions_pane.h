@@ -12,23 +12,25 @@
 #include "pane.h"
 #include "vfs.h"
 
+#define MAX_KEY_BINDINGS 20
+
 struct actions_pane {
 	struct pane pane;
 	int left_to_right;
-	enum file_type active, other;
+	const struct action *actions[MAX_KEY_BINDINGS];
 };
 
 struct actions_bar {
 	struct pane pane;
 	const char *names[10];
 	int last_width, spacing;
-	enum file_type active, other;
+	const struct action **actions;
 };
 
 void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win);
-void UI_ActionsPaneSet(struct actions_pane *pane, enum file_type active,
-                       enum file_type other, int left_to_right);
+void UI_ActionsPaneSet(struct actions_pane *pane,
+                       const struct action **actions, int left_to_right);
 
 void UI_ActionsBarInit(struct actions_bar *pane, WINDOW *win);
-void UI_ActionsBarSet(struct actions_bar *pane, enum file_type active,
-                       enum file_type other);
+void UI_ActionsBarSet(struct actions_bar *pane,
+                      const struct action **actions);

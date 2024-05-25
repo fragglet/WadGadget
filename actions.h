@@ -35,6 +35,7 @@ extern const struct action delete_action;
 extern const struct action mark_pattern_action;
 extern const struct action unmark_all_action;
 extern const struct action mark_action;
+
 extern const struct action view_action;
 extern const struct action rearrange_action;
 extern const struct action new_lump_action;

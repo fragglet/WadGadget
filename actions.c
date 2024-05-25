@@ -371,7 +371,6 @@ const struct action mark_action = {
 	PerformMark,
 };
 
-/* TODO -
 const struct action view_action = {
 	KEY_ENTER, 0,   NULL,       "View/Edit",
 };
@@ -389,5 +388,3 @@ const struct action mkdir_action = {
 const struct action update_action = {
 	KEY_F(4), 'U', "Upd",     "> Update",
 };
-
-*/

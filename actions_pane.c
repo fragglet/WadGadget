@@ -17,70 +17,10 @@
 #include "strings.h"
 #include "ui.h"
 
-#define MAX_KEY_BINDINGS 20
-
 static const int key_ordering[] = {
 	KEY_ENTER, KEY_F(1), KEY_F(2), KEY_F(3), KEY_F(4), KEY_F(5), KEY_F(6),
 	KEY_F(7), KEY_F(8), ' ', KEY_F(9), KEY_F(10), 0, '\t',
 	CTRL_('D'), 0x1f,
-};
-
-static const struct action wad_actions[] = {
-	{ KEY_F(2), 'V', "Rearr",   "Move (rearrange)"},
-	{ KEY_F(7), 'K', "NewLump", "New lump"},
-	{ 0 },
-};
-
-static const struct action dir_actions[] = {
-	{ KEY_F(3), 'F', "MkWAD",  "Make WAD"},
-	{ KEY_F(7), 'K', "Mkdir",  "Mkdir"},
-	{ 0 },
-};
-
-static const struct action wad_to_wad[] = {
-	{ KEY_F(4), 'U', "Upd",     "> Update"},
-	{ KEY_F(5), 'O', "Copy",    "> Copy"},
-	{ 0 },
-};
-
-static const struct action wad_to_dir[] = {
-	{ KEY_F(3), 'F', "ExpWAD",  "> Export as WAD"},
-	{ KEY_F(5), 'O', "Export",  "> Export to files"},
-	{ 0 },
-};
-
-static const struct action dir_to_wad[] = {
-	{ KEY_F(4), 'U', "Upd",    "> Update"},
-	{ KEY_F(5), 'O', "Import", "> Import"},
-	{ 0 },
-};
-
-static const struct action dir_to_dir[] = {
-	{ KEY_F(5), 'O', "Copy",   "> Copy"},
-	{ 0 },
-};
-
-struct action common_actions[] = {
-	{ KEY_ENTER, 0,   NULL,       "View/Edit"},
-	{ KEY_F(6),  'B', "Ren",      "Rename"},
-	{ KEY_F(8),  'X', "Del",      "Delete"},
-	{ KEY_F(1),  'H', "?",        "Help"},
-	{ ' ',       0,    NULL,      "Mark/unmark"},
-	{ KEY_F(9),  'G', "MarkPat",  "Mark pattern"},
-	{ KEY_F(10), 'A', "UnmrkAll", "Unmark all"},
-	{ '\t',      '1', NULL,       "> Other pane"},
-	{ 0,         'D', NULL,       "CmdrMode"},
-	{ 0x1f,      'Q', NULL,       "Quit"},
-	{ 0 },
-};
-
-static const struct action *type_actions[2] = {
-	dir_actions, wad_actions,
-};
-
-static const struct action *action_lists[2][2] = {
-	{dir_to_dir, dir_to_wad},
-	{wad_to_dir, wad_to_wad},
 };
 
 static const char *KeyDescription(const struct action *a)
@@ -108,35 +48,6 @@ static const char *KeyDescription(const struct action *a)
 		return buf;
 	}
 	return "??";
-}
-
-static void AddActionList(const struct action **result,
-                          const struct action *list)
-{
-	int i, j;
-
-	for (i = 0; list[i].key != 0 || list[i].ctrl_key != 0; i++) {
-		for (j = 0; j < MAX_KEY_BINDINGS; j++) {
-			if (key_ordering[j] != 0
-			 && (list[i].key == key_ordering[j]
-			  || CTRL_(list[i].ctrl_key) == key_ordering[j])) {
-				break;
-			}
-		}
-		assert(j < MAX_KEY_BINDINGS);
-
-		result[j] = &list[i];
-	}
-}
-
-static void BuildActionsList(const struct action **result, int active, int other)
-{
-	memset(result, 0, sizeof(struct action *) * MAX_KEY_BINDINGS);
-
-	AddActionList(result, common_actions);
-	AddActionList(result, type_actions[active == FILE_TYPE_WAD]);
-	AddActionList(result, action_lists[active == FILE_TYPE_WAD]
-	                                  [other == FILE_TYPE_WAD]);
 }
 
 static void ShowAction(struct actions_pane *p, int y,
@@ -174,11 +85,9 @@ static void ShowAction(struct actions_pane *p, int y,
 static void DrawActionsPane(void *pane)
 {
 	struct actions_pane *p = pane;
-	const struct action *actions[MAX_KEY_BINDINGS], *a;
+	const struct action *a;
 	WINDOW *win = p->pane.window;
 	int i, y;
-
-	BuildActionsList(actions, p->active, p->other);
 
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);
@@ -186,7 +95,7 @@ static void DrawActionsPane(void *pane)
 	mvwaddstr(win, 0, 2, " Actions ");
 
 	for (i = 0, y = 1; i < MAX_KEY_BINDINGS; i++) {
-		a = actions[i];
+		a = p->actions[i];
 		if (a != NULL) {
 			ShowAction(p, y, a);
 		}
@@ -201,16 +110,29 @@ void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win)
 	pane->pane.window = win;
 	pane->pane.draw = DrawActionsPane;
 	pane->pane.keypress = NULL;
-	pane->active = FILE_TYPE_DIR;
-	pane->other = FILE_TYPE_DIR;
+	memset(pane->actions, 0, sizeof(pane->actions));
 }
 
-void UI_ActionsPaneSet(struct actions_pane *pane, enum file_type active,
-                       enum file_type other, int left_to_right)
+void UI_ActionsPaneSet(struct actions_pane *pane,
+                       const struct action **actions, int left_to_right)
 {
-	pane->active = active;
-	pane->other = other;
+	const struct action *a;
+	int i, j;
+
 	pane->left_to_right = left_to_right;
+	memset(pane->actions, 0, sizeof(pane->actions));
+
+	for (i = 0; actions[i] != NULL; i++) {
+		a = actions[i];
+		for (j = 0; j < arrlen(key_ordering); ++j) {
+			if (key_ordering[j] != 0
+			 && (key_ordering[j] == a->key
+			  || key_ordering[j] == CTRL_(a->ctrl_key))) {
+				pane->actions[j] = a;
+				break;
+			}
+		}
+	}
 }
 
 static int NumShortcuts(const struct action **cells)
@@ -286,14 +208,16 @@ static int SelectShortcutNames(const struct action **cells,
 
 static void RecalculateNames(struct actions_bar *p, int columns)
 {
-	const struct action *actions[MAX_KEY_BINDINGS], *a, *cells[10];
+	const struct action *a, *cells[10];
 	int i, num_cells = 0;
 
-	BuildActionsList(actions, p->active, p->other);
+	if (p->actions == NULL) {
+		return;
+	}
 
 	memset(cells, 0, sizeof(cells));
-	for (i = 0; i < MAX_KEY_BINDINGS; i++) {
-		a = actions[i];
+	for (i = 0; p->actions[i] != NULL; i++) {
+		a = p->actions[i];
 		if (a != NULL && a->key >= KEY_F(1) && a->key <= KEY_F(12)) {
 			cells[a->key - KEY_F(1)] = a;
 			++num_cells;
@@ -342,14 +266,12 @@ void UI_ActionsBarInit(struct actions_bar *pane, WINDOW *win)
 	pane->pane.window = win;
 	pane->pane.draw = DrawActionsBar;
 	pane->pane.keypress = NULL;
-	pane->active = FILE_TYPE_DIR;
-	pane->other = FILE_TYPE_DIR;
+	pane->actions = NULL;
 }
 
-void UI_ActionsBarSet(struct actions_bar *pane, enum file_type active,
-                      enum file_type other)
+void UI_ActionsBarSet(struct actions_bar *pane,
+                      const struct action **actions)
 {
-	pane->active = active;
-	pane->other = other;
+	pane->actions = actions;
 	RecalculateNames(pane, getmaxx(pane->pane.window));
 }
