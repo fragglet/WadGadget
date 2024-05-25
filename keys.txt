@@ -9,7 +9,7 @@ keys    mnemonic    type  function
 ^F  F3  wadFile     alt  Export WAD / Make WAD
 ^G  F9  Glob        alt  Mark pattern
 ^H  F1  -           std  Backspace; possibly usable for Help
-^I  F4  actualIzar  alt  Update (Spanish)
+^I
 ^J
 ^K  F7  maKe        alt  Mkdir/Make lump
 ^L                  std  Redraw screen
@@ -21,12 +21,12 @@ keys    mnemonic    type  function
 ^R      Reload      std  Reload directory
 ^S                  nwt  Setup
 ^T      Texture     nwt  Jump to TEXTURE1
-^U      Undo        res  Undo
+^U  F4  Update      alt  Update
 ^V  F2  moVe        alt  Move (rearrange) - also paste
 ^W      Word        std  Delete word (clear search)
 ^X  F8  -           std  Delete lump / file, like "Cut"
 ^Y      -           std  Redo
-^Z      -           trm  Terminal stop - maybe possible by catching SIGTSTP
+^Z      -           std  Undo. Need to catch SIGTSTP
 Spc                 nwt  Mark
 
 types:
