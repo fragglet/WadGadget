@@ -38,7 +38,7 @@
 
 #define INFO_PANE_WIDTH 28
 
-static void SwitchToPane(unsigned int pane);
+static void SwitchToPane(struct directory_pane *pane);
 
 struct search_pane {
 	struct pane pane;
@@ -132,9 +132,9 @@ static void SetWindowSizes(void)
 }
 
 static void PerformSwitchPane(struct directory_pane *a,
-                              struct directory_pane *b)
+                              struct directory_pane *other_pane)
 {
-	SwitchToPane(!active_pane);
+	SwitchToPane(other_pane);
 }
 
 static const struct action other_pane_action = {
@@ -254,12 +254,14 @@ static void BuildActionsList(void)
 	actions[idx] = NULL;
 }
 
-static void SwitchToPane(unsigned int pane)
+static void SwitchToPane(struct directory_pane *pane)
 {
+	unsigned int pane_num = pane != panes[0];
+
 	panes[active_pane]->pane.active = 0;
-	active_pane = pane;
-	UI_RaisePaneToTop(panes[pane]);
-	panes[active_pane]->pane.active = 1;
+	active_pane = pane_num;
+	UI_RaisePaneToTop(pane);
+	pane->pane.active = 1;
 	// Info pane always above dir panes to preserve its title:
 	UI_RaisePaneToTop(&info_pane);
 	// Search pane is always at the top to catch keypresses:
@@ -285,7 +287,7 @@ static void NavigateNew(void)
 	if (!strcmp(path, dirs[!active_pane]->path)
 	 && dirs[!active_pane]->type == FILE_TYPE_WAD) {
 		free(path);
-		SwitchToPane(!active_pane);
+		SwitchToPane(panes[!active_pane]);
 		return;
 	}
 
@@ -316,7 +318,7 @@ static void NavigateNew(void)
 		dirs[active_pane] = new_dir;
 		UI_PaneShow(new_pane);
 
-		SwitchToPane(active_pane);
+		SwitchToPane(new_pane);
 		UI_TextInputClear(&search_pane.input);
 	}
 }
@@ -359,10 +361,10 @@ static void HandleKeypress(void *pane, int key)
 
 	switch (key) {
 	case KEY_LEFT:
-		SwitchToPane(0);
+		SwitchToPane(panes[0]);
 		break;
 	case KEY_RIGHT:
-		SwitchToPane(1);
+		SwitchToPane(panes[1]);
 		break;
 	case KEY_RESIZE:
 		SetWindowSizes();
@@ -539,7 +541,7 @@ int main(int argc, char *argv[])
 	panes[1] = UI_NewDirectoryPane(pane_windows[1], dirs[1]);
 	UI_PaneShow(panes[1]);
 
-	SwitchToPane(0);
+	SwitchToPane(panes[0]);
 
 	SetWindowSizes();
 	UI_RunMainLoop();
