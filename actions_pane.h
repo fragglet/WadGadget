@@ -13,6 +13,7 @@
 
 struct action {
 	int key;
+	int ctrl_key;
 	char *shortname;
 	char *description;
 };

@@ -26,52 +26,51 @@ static const int key_ordering[] = {
 };
 
 static const struct action wad_actions[] = {
-	{ KEY_F(2),  "Rearr",   "Move (rearrange)"},
-	{ KEY_F(7),  "NewLump", "New lump"},
+	{ KEY_F(2), 'V', "Rearr",   "Move (rearrange)"},
+	{ KEY_F(7), 'K', "NewLump", "New lump"},
 	{ 0 },
 };
 
 static const struct action dir_actions[] = {
-	{ KEY_F(3),  "MkWAD",  "Make WAD"},
-	{ KEY_F(7),  "Mkdir",  "Mkdir"},
-	{ KEY_F(8),  "Del",    "Delete"},
+	{ KEY_F(3), 'F', "MkWAD",  "Make WAD"},
+	{ KEY_F(7), 'K', "Mkdir",  "Mkdir"},
 	{ 0 },
 };
 
 static const struct action wad_to_wad[] = {
-	{ KEY_F(4),  "Upd",     "> Update"},
-	{ KEY_F(5),  "Copy",    "> Copy"},
+	{ KEY_F(4), 'U', "Upd",     "> Update"},
+	{ KEY_F(5), 'O', "Copy",    "> Copy"},
 	{ 0 },
 };
 
 static const struct action wad_to_dir[] = {
-	{ KEY_F(3),  "ExpWAD",  "> Export as WAD"},
-	{ KEY_F(5),  "Export",  "> Export to files"},
+	{ KEY_F(3), 'F', "ExpWAD",  "> Export as WAD"},
+	{ KEY_F(5), 'O', "Export",  "> Export to files"},
 	{ 0 },
 };
 
 static const struct action dir_to_wad[] = {
-	{ KEY_F(4),  "Upd",    "> Update"},
-	{ KEY_F(5),  "Import", "> Import"},
+	{ KEY_F(4), 'U', "Upd",    "> Update"},
+	{ KEY_F(5), 'O', "Import", "> Import"},
 	{ 0 },
 };
 
 static const struct action dir_to_dir[] = {
-	{ KEY_F(5),  "Copy",   "> Copy"},
+	{ KEY_F(5), 'O', "Copy",   "> Copy"},
 	{ 0 },
 };
 
 struct action common_actions[] = {
-	{ KEY_ENTER,  NULL,       "View/Edit"},
-	{ KEY_F(6),   "Ren",      "Rename"},
-	{ KEY_F(8),   "Del",      "Delete"},
-	//{ 1, "F1",    "?",        "Help"},
-	{ ' ',        NULL,       "Mark/unmark"},
-	{ KEY_F(9),   "MarkPat",  "Mark pattern"},
-	{ KEY_F(10),  "UnmrkAll", "Unmark all"},
-	{ '\t',       NULL,       "> Other pane"},
-	{ 'D' & 0x1f, NULL,       "CmdrMode"},
-	{ 0x1f,       NULL,       "Quit"},
+	{ KEY_ENTER, 0,   NULL,       "View/Edit"},
+	{ KEY_F(6),  'B', "Ren",      "Rename"},
+	{ KEY_F(8),  'X', "Del",      "Delete"},
+	{ KEY_F(1),  'H', "?",        "Help"},
+	{ ' ',       0,    NULL,      "Mark/unmark"},
+	{ KEY_F(9),  'G', "MarkPat",  "Mark pattern"},
+	{ KEY_F(10), 'A', "UnmrkAll", "Unmark all"},
+	{ '\t',      '1', NULL,       "> Other pane"},
+	{ 0,         'D', NULL,       "CmdrMode"},
+	{ 0x1f,      'Q', NULL,       "Quit"},
 	{ 0 },
 };
 
@@ -84,10 +83,9 @@ static const struct action *action_lists[2][2] = {
 	{wad_to_dir, wad_to_wad},
 };
 
-static const char *KeyDescription(int key)
+static const char *KeyDescription(const struct action *a)
 {
-	static char buf[10];
-	switch (key) {
+	switch (a->key) {
 	case KEY_F(1): return "F1";
 	case KEY_F(2): return "F2";
 	case KEY_F(3): return "F3";
@@ -104,11 +102,12 @@ static const char *KeyDescription(int key)
 	case 0x1f: return "Esc";
 	default: break;
 	}
-	if (key < 0x1f) {
-		snprintf(buf, sizeof(buf), "^%c", 'A' + (key & 0x1f) - 1);
+	if (a->ctrl_key) {
+		static char buf[3];
+		snprintf(buf, sizeof(buf), "^%c", a->ctrl_key);
 		return buf;
 	}
-	return "?";
+	return "??";
 }
 
 static void AddActionList(const struct action **result,
@@ -116,10 +115,11 @@ static void AddActionList(const struct action **result,
 {
 	int i, j;
 
-	for (i = 0; list[i].key != 0; i++) {
+	for (i = 0; list[i].key != 0 || list[i].ctrl_key != 0; i++) {
 		for (j = 0; j < MAX_KEY_BINDINGS; j++) {
 			if (key_ordering[j] != 0
-			 && list[i].key == key_ordering[j]) {
+			 && (list[i].key == key_ordering[j]
+			  || (list[i].ctrl_key & 0x1f) == key_ordering[j])) {
 				break;
 			}
 		}
@@ -145,11 +145,11 @@ static void ShowAction(struct actions_pane *p, int y,
 	WINDOW *win = p->pane.window;
 	char *desc;
 
-	if (action->key == 0) {
+	if (action->key == 0 && action->ctrl_key == 0) {
 		return;
 	}
 	wattron(win, A_BOLD);
-	mvwaddstr(win, y, 2, KeyDescription(action->key));
+	mvwaddstr(win, y, 2, KeyDescription(action));
 	wattroff(win, A_BOLD);
 	waddstr(win, " - ");
 	desc = action->description;
