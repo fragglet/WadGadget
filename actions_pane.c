@@ -33,7 +33,6 @@ static const struct action wad_actions[] = {
 
 static const struct action dir_actions[] = {
 	{ KEY_F(3),  "MkWAD",  "Make WAD"},
-	{ KEY_F(6),  "Ren",    "Rename"},
 	{ KEY_F(7),  "Mkdir",  "Mkdir"},
 	{ KEY_F(8),  "Del",    "Delete"},
 	{ 0 },
