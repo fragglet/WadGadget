@@ -1,0 +1,37 @@
+
+keys    mnemonic    type  function
+
+^A F10  unm-All     alt  Unmark all
+^B  F6  nomBre      alt  Rename (Spanish)
+^C      -           trm  Terminal break
+^D      Display     res  Toggle display mode (Commander mode etc.)
+^E      Edit        nwt  Edit
+^F  F3  wadFile     alt  Export WAD / Make WAD
+^G  F9  Glob        alt  Mark pattern
+^H  F1  -           std  Backspace; possibly usable for Help
+^I  F4  actualIzar  alt  Update (Spanish)
+^J
+^K  F7  maKe        alt  Mkdir/Make lump
+^L                  std  Redraw screen
+^M      -           trm  Newline
+^N      Next        std  Search again
+^O  F5  {im,ex}pOrt alt  Copy / Import / Export
+^P      Pnames      nwt  Jump to PNAMES
+^Q Esc  Quit        res  Quit?
+^R      Reload      std  Reload directory
+^S                  nwt  Setup
+^T      Texture     nwt  Jump to TEXTURE1
+^U      Undo        res  Undo
+^V  F2  moVe        alt  Move (rearrange) - also paste
+^W      Word        std  Delete word (clear search)
+^X  F8  -           std  Delete lump / file, like "Cut"
+^Y      -           std  Redo
+^Z      -           trm  Terminal stop - maybe possible by catching SIGTSTP
+Spc                 nwt  Mark
+
+types:
+- nwt - key combo used in NWT
+- trm - standard terminal function - not usable
+- alt - alternative for when function keys not usable
+- std - standard keycombo used in other programs
+- res - reserved
