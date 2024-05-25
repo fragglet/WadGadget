@@ -8,15 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "actions.h"
 #include "pane.h"
 #include "vfs.h"
-
-struct action {
-	int key;
-	int ctrl_key;
-	char *shortname;
-	char *description;
-};
 
 struct actions_pane {
 	struct pane pane;

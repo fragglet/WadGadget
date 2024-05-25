@@ -218,154 +218,26 @@ static void OpenEntry(void)
 	PerformView(pane->dir, &pane->dir->entries[selected]);
 }
 
-static void PerformCopy(bool convert)
-{
-	struct directory *from = dirs[active_pane],
-	                 *to = dirs[!active_pane];
-	struct file_set result = EMPTY_FILE_SET;
-
-	// When we do an export or import, we create the new files/lumps
-	// in the destination, and then switch to the other pane where they
-	// are highlighted. The import/export functions both populate a
-	// result set that contains the serial numbers of the new files.
-	if (to->type == FILE_TYPE_DIR) {
-		struct file_set *export_set =
-			UI_DirectoryPaneTagged(panes[active_pane]);
-		if (export_set->num_entries < 1) {
-			UI_MessageBox(
-			    "You have not selected anything to export.");
-			VFS_FreeSet(&result);
-			return;
-		}
-		if (PerformExport(from, export_set, to, &result, convert)) {
-			UI_DirectoryPaneSetTagged(panes[!active_pane], &result);
-			SwitchToPane(!active_pane);
-		}
-		VFS_FreeSet(&result);
-		return;
-	}
-	if (to->type == FILE_TYPE_WAD) {
-		struct file_set *import_set =
-			UI_DirectoryPaneTagged(panes[active_pane]);
-		int to_point = UI_DirectoryPaneSelected(panes[!active_pane]) + 1;
-		if (import_set->num_entries < 1) {
-			UI_MessageBox(
-			    "You have not selected anything to import.");
-			VFS_FreeSet(&result);
-			return;
-		}
-		if (PerformImport(from, import_set, to, to_point,
-		                  &result, convert)) {
-			UI_DirectoryPaneSetTagged(panes[!active_pane], &result);
-			SwitchToPane(!active_pane);
-		}
-		VFS_FreeSet(&result);
-		return;
-	}
-
-	UI_MessageBox("Sorry, this isn't implemented yet.");
-}
-
-static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
-                            struct directory *to, bool convert)
-{
-	struct file_set result = EMPTY_FILE_SET;
-	struct directory *newfile;
-	char *filename, *filename2;
-
-	filename = UI_TextInputDialogBox(
-		"Make new WAD", 64,
-		"Enter name for new WAD file:");
-
-	if (filename == NULL) {
-		return NULL;
-	}
-
-	// Forgot to include .wad extension?
-	if (strchr(filename, '.') == NULL) {
-		filename2 = StringJoin("", filename, ".wad", NULL);
-		free(filename);
-		filename = filename2;
-	}
-
-	if (VFS_EntryByName(to, filename) != NULL
-	 && !UI_ConfirmDialogBox("Confirm Overwrite",
-	                         "Overwrite existing '%s'?", filename)) {
-		free(filename);
-		return NULL;
-	}
-
-	filename2 = StringJoin("", to->path, "/", filename, NULL);
-
-	if (!W_CreateFile(filename2)) {
-		UI_MessageBox("%s\nFailed to create new WAD file.", filename);
-		free(filename);
-		free(filename2);
-		return NULL;
-	}
-	newfile = VFS_OpenDir(filename2);
-	if (newfile == NULL) {
-		UI_MessageBox("%s\nFailed to open new file after creating.",
-		              filename);
-		free(filename);
-		free(filename2);
-		return NULL;
-	}
-
-	free(filename2);
-
-	if (!PerformImport(from, from_set, newfile, 0, &result, convert)) {
-		free(filename);
-		filename = NULL;
-	}
-	VFS_Refresh(to);
-	VFS_FreeSet(&result);
-	VFS_CloseDir(newfile);
-
-	return filename;
-}
-
-static void CreateWad(bool convert)
-{
-	struct directory_pane *from_pane, *to_pane;
-	struct file_set *import_set;
-	char *filename;
-
-	if (panes[active_pane]->dir->type == FILE_TYPE_WAD
-	 && panes[!active_pane]->dir->type == FILE_TYPE_DIR) {
-		// Export from existing WAD to new WAD
-		from_pane = panes[active_pane];
-		to_pane = panes[!active_pane];
-		if (from_pane->tagged.num_entries == 0) {
-			UI_MessageBox("You have not selected any "
-			              "lumps to export.");
-			return;
-		}
-	} else if (panes[active_pane]->dir->type == FILE_TYPE_DIR) {
-		// Create new WAD and import tagged files.
-		from_pane = panes[active_pane];
-		to_pane = panes[active_pane];
-		if (from_pane->tagged.num_entries == 0
-		 && !UI_ConfirmDialogBox("Create WAD",
-		                         "Create an empty WAD file?")) {
-			return;
-		}
-	} else {
-		return;
-	}
-
-	import_set = &from_pane->tagged;
-	filename = CreateWadInDir(from_pane->dir, import_set, to_pane->dir,
-	                          convert);
-	if (filename != NULL) {
-		UI_DirectoryPaneSearch(to_pane, filename);
-		free(filename);
-		SwitchToPane(panes[0] == to_pane ? 0 : 1);
-	}
-}
+static const struct action *actions[] = {
+	&copy_action,
+	&copy_noconv_action,
+	&make_wad_action,
+	&make_wad_noconv_action,
+};
 
 static void HandleKeypress(void *pane, int key)
 {
+	int i;
+
+	for (i = 0; i < arrlen(actions); i++) {
+		if (key == actions[i]->key
+		 || key == CTRL_(actions[i]->ctrl_key)) {
+			actions[i]->callback(panes[active_pane],
+			                     panes[!active_pane]);
+			return;
+		}
+	}
+
 	switch (key) {
 	case KEY_LEFT:
 		SwitchToPane(0);
@@ -375,18 +247,6 @@ static void HandleKeypress(void *pane, int key)
 		break;
 	case KEY_RESIZE:
 		SetWindowSizes();
-		break;
-	case KEY_F(5):
-		PerformCopy(true);
-		break;
-	case SHIFT_KEY_F(5):
-		PerformCopy(false);
-		break;
-	case KEY_F(3):
-		CreateWad(true);
-		break;
-	case SHIFT_KEY_F(3):
-		CreateWad(false);
 		break;
 	case CTRL_('D'):  // ^D = display; toggle UI
 		cmdr_mode = !cmdr_mode;
