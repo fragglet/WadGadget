@@ -167,6 +167,7 @@ static const struct action search_again_action = {
 static const struct action *wad_actions[] = {
 	&rearrange_action,
 	&new_lump_action,
+	&edit_action,
 	NULL,
 };
 
@@ -205,7 +206,6 @@ static const struct action *dir_to_dir[] = {
 static const struct action *common_actions[] = {
 	&view_action,
 	&hexdump_action,
-	&edit_action,
 	&rename_action,
 	&delete_action,
 	&mark_action,
