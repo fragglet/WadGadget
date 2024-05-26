@@ -333,8 +333,12 @@ static void HandleKeypress(void *pane, int key)
 static void DrawInfoPane(void *p)
 {
 	struct directory *dir;
+	struct directory_entry *ent;
 	struct pane *pane = p;
 	int idx = UI_DirectoryPaneSelected(panes[active_pane]);
+	const struct lump_type *lt;
+	struct wad_file *wf;
+	char buf[10], buf2[30];
 
 	wbkgdset(pane->window, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(pane->window);
@@ -345,12 +349,28 @@ static void DrawInfoPane(void *p)
 		return;
 	}
 	dir = panes[active_pane]->dir;
-	if (dir->entries[idx].type == FILE_TYPE_LUMP) {
-		struct wad_file *wf = VFS_WadFile(dir);
-		const struct lump_type *lt = LI_IdentifyLump(wf, idx);
+	ent = &dir->entries[idx];
+	switch (ent->type) {
+	case FILE_TYPE_LUMP:
+		wf = VFS_WadFile(dir);
+		lt = LI_IdentifyLump(wf, idx);
 		UI_PrintMultilineString(pane->window, 1, 2,
 		    LI_DescribeLump(lt, wf, idx));
-       }
+		break;
+
+	case FILE_TYPE_FILE:
+	case FILE_TYPE_WAD:
+		UI_PrintMultilineString(pane->window, 1, 2, "File\n");
+		VFS_DescribeSize(ent, buf, false);
+		snprintf(buf2, sizeof(buf2), "Size: %sB", buf);
+		UI_PrintMultilineString(pane->window, 2, 2, buf2);
+		break;
+
+	case FILE_TYPE_DIR:
+		UI_PrintMultilineString(pane->window, 1, 2,
+		    "Directory");
+		break;
+	}
 }
 
 static void DrawSearchPane(void *pane)
