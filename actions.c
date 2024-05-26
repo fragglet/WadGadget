@@ -87,15 +87,15 @@ static void PerformCopyNoConvert(struct directory_pane *active_pane,
 }
 
 const struct action copy_action = {
-	KEY_F(5), 'O', "Copy",    "> Copy",
+	KEY_F(5), 'O', "Copy", "> Copy",
 	PerformCopyConvert,
 };
 const struct action copy_noconv_action = {
-	SHIFT_KEY_F(5), 0, "Copy",   "> Copy (no convert)",
+	SHIFT_KEY_F(5), 0, "Copy", "> Copy (no convert)",
 	PerformCopyNoConvert,
 };
 const struct action export_action = {
-	KEY_F(5), 'O', "Export",  "> Export",
+	KEY_F(5), 'O', "Export", "> Export",
 	PerformCopyConvert,
 };
 const struct action export_noconv_action = {
@@ -118,7 +118,7 @@ static void PerformUpdate(struct directory_pane *active_pane,
 }
 
 const struct action update_action = {
-	KEY_F(3), 'U', "Upd",     "> Update",
+	KEY_F(3), 'U', "Upd", "> Update",
 	PerformUpdate,
 };
 
@@ -142,7 +142,7 @@ static void PerformMkdir(struct directory_pane *active_pane,
 }
 
 const struct action mkdir_action = {
-	KEY_F(7), 'K', "Mkdir",  "Mkdir",
+	KEY_F(7), 'K', "Mkdir", "Mkdir",
 	PerformMkdir,
 };
 
@@ -258,15 +258,15 @@ static void CreateWadNoConvert(struct directory_pane *active_pane,
 }
 
 const struct action make_wad_action = {
-	KEY_F(9), 'F', "MkWAD",  "Make WAD",
+	KEY_F(9), 'F', "MkWAD", "Make WAD",
 	CreateWadConvert,
 };
 const struct action make_wad_noconv_action = {
-	SHIFT_KEY_F(9), 0, "MkWAD",  "Make WAD (no convert)",
+	SHIFT_KEY_F(9), 0, "MkWAD", "Make WAD (no convert)",
 	CreateWadNoConvert,
 };
 const struct action export_wad_action = {
-	KEY_F(9), 'F', "ExpWAD",  "> Export as WAD",
+	KEY_F(9), 'F', "ExpWAD", "> Export as WAD",
 	CreateWadConvert,
 };
 
@@ -322,7 +322,7 @@ static void PerformRearrange(struct directory_pane *active_pane,
 }
 
 const struct action rearrange_action = {
-	KEY_F(2), 'V', "Rearr",   "Move (rearrange)",
+	KEY_F(2), 'V', "Rearr", "Move (rearrange)",
 	PerformRearrange,
 };
 
@@ -382,7 +382,7 @@ static void PerformRename(struct directory_pane *active_pane,
 }
 
 const struct action rename_action = {
-	KEY_F(6),  'B', "Ren",      "Rename",
+	KEY_F(6), 'B', "Ren", "Rename",
 	PerformRename,
 };
 
@@ -427,7 +427,7 @@ static void PerformDelete(struct directory_pane *active_pane,
 }
 
 const struct action delete_action = {
-	KEY_F(8),  'X', "Del",      "Delete",
+	KEY_F(8), 'X', "Del", "Delete",
 	PerformDelete,
 };
 
@@ -451,7 +451,7 @@ static void PerformMarkPattern(struct directory_pane *active_pane,
 }
 
 const struct action mark_pattern_action = {
-	0, 'G', "MarkPat",  "Mark pattern",
+	0, 'G', "MarkPat", "Mark pattern",
 	PerformMarkPattern,
 };
 
@@ -485,7 +485,7 @@ static void PerformMark(struct directory_pane *active_pane,
 }
 
 const struct action mark_action = {
-	' ',       0,    NULL,      "Mark/unmark",
+	' ', 0, NULL, "Mark/unmark",
 	PerformMark,
 };
 
@@ -496,7 +496,7 @@ static void PerformQuit(struct directory_pane *a,
 }
 
 const struct action quit_action = {
-	27, 'Q', "Quit",  "Quit",
+	27, 'Q', "Quit", "Quit",
 	PerformQuit,
 };
 
@@ -590,11 +590,11 @@ static void PerformView(struct directory_pane *active_pane,
 }
 
 const struct action view_action = {
-	'\r', 0,   NULL,       "View/Edit",
+	'\r', 0,  NULL, "View",
 	PerformView,
 };
 
 // TODO:
 const struct action edit_action = {
-	KEY_F(4), 'E', "Edit",       "Edit",
+	KEY_F(4), 'E', "Edit", "Edit",
 };

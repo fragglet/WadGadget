@@ -138,7 +138,7 @@ static void PerformSwitchPane(struct directory_pane *a,
 }
 
 static const struct action other_pane_action = {
-	'\t', 0, "Other",  "> Other pane",
+	'\t', 0, "Other", "> Other pane",
 	PerformSwitchPane,
 };
 
@@ -150,7 +150,7 @@ static void ToggleCmdrMode(struct directory_pane *a,
 }
 
 static const struct action cmdr_mode_action = {
-	0, 'D', "CmdrMode",  "CmdrMode",
+	0, 'D', "CmdrMode", "CmdrMode",
 	ToggleCmdrMode,
 };
 
