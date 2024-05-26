@@ -154,7 +154,7 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 	char *filename, *filename2;
 
 	filename = UI_TextInputDialogBox(
-		"Make new WAD", 64,
+		"Make new WAD", 30,
 		"Enter name for new WAD file:");
 
 	if (filename == NULL) {
