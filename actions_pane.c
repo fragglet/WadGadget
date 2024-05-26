@@ -25,9 +25,14 @@ static const int key_ordering[] = {
 	27, CTRL_('J'),
 };
 
-static const char *KeyDescription(const struct action *a)
+static const char *KeyDescription(const struct action *a, bool function_keys)
 {
-	switch (a->key) {
+	int key = a->key;
+	if (!function_keys && a->key >= KEY_F(1) && a->key <= KEY_F(10)
+	 && a->ctrl_key != 0) {
+		key = 0;
+	}
+	switch (key) {
 	case KEY_F(1): return "F1";
 	case KEY_F(2): return "F2";
 	case KEY_F(3): return "F3";
@@ -86,7 +91,7 @@ static int ShowAction(struct actions_pane *p, int y,
 	}
 
 	wattron(win, A_BOLD);
-	mvwaddstr(win, y, x, KeyDescription(action));
+	mvwaddstr(win, y, x, KeyDescription(action, p->function_keys));
 	wattroff(win, A_BOLD);
 	waddstr(win, " - ");
 
@@ -137,16 +142,19 @@ void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win)
 	pane->pane.window = win;
 	pane->pane.draw = DrawActionsPane;
 	pane->pane.keypress = NULL;
+	pane->function_keys = true;
 	memset(pane->actions, 0, sizeof(pane->actions));
 }
 
 void UI_ActionsPaneSet(struct actions_pane *pane,
-                       const struct action **actions, int left_to_right)
+                       const struct action **actions, bool left_to_right,
+                       bool function_keys)
 {
 	const struct action *a;
 	int i, j;
 
 	pane->left_to_right = left_to_right;
+	pane->function_keys = function_keys;
 	memset(pane->actions, 0, sizeof(pane->actions));
 
 	for (i = 0; actions[i] != NULL; i++) {

@@ -52,7 +52,7 @@ static struct pane header_pane, info_pane;
 static struct search_pane search_pane;
 static WINDOW *pane_windows[2];
 static struct directory_pane *panes[2];
-static bool cmdr_mode = false;
+static bool cmdr_mode = false, use_function_keys = true;
 static unsigned int active_pane = 0;
 
 static void SetNwtWindowSizes(int columns, int lines)
@@ -148,7 +148,16 @@ static const struct action other_pane_action = {
 static void ToggleCmdrMode(struct directory_pane *a,
                            struct directory_pane *b)
 {
-	cmdr_mode = !cmdr_mode;
+	if (cmdr_mode) {
+		cmdr_mode = false;
+		use_function_keys = false;
+	} else if (!use_function_keys) {
+		use_function_keys = true;
+	} else {
+		cmdr_mode = true;
+	}
+	UI_ActionsPaneSet(&actions_pane, actions, active_pane == 0,
+	                  use_function_keys);
 	SetWindowSizes();
 }
 
@@ -276,7 +285,8 @@ void SwitchToPane(struct directory_pane *pane)
 	pane->pane.active = 1;
 
 	BuildActionsList();
-	UI_ActionsPaneSet(&actions_pane, actions, active_pane == 0);
+	UI_ActionsPaneSet(&actions_pane, actions, active_pane == 0,
+	                  use_function_keys);
 	UI_ActionsBarSet(&actions_bar, actions);
 	SetWindowSizes();
 }

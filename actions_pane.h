@@ -16,7 +16,8 @@
 
 struct actions_pane {
 	struct pane pane;
-	int left_to_right;
+	bool left_to_right;
+	bool function_keys;
 	const struct action *actions[MAX_KEY_BINDINGS];
 };
 
@@ -29,7 +30,8 @@ struct actions_bar {
 
 void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win);
 void UI_ActionsPaneSet(struct actions_pane *pane,
-                       const struct action **actions, int left_to_right);
+                       const struct action **actions, bool left_to_right,
+                       bool function_keys);
 
 void UI_ActionsBarInit(struct actions_bar *pane, WINDOW *win);
 void UI_ActionsBarSet(struct actions_bar *pane,
