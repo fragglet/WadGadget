@@ -311,6 +311,13 @@ static void HandleKeypress(void *pane, int key)
 {
 	int i;
 
+	// A couple of hacks because actions only support two bindings.
+	if (key == KEY_IC) { // ins
+		key = KEY_F(7);
+	} else if (key == KEY_DC) { // del
+		key = KEY_F(8);
+	}
+
 	for (i = 0; actions[i] != NULL; i++) {
 		if (actions[i]->callback != NULL
 		 && (key == actions[i]->key
