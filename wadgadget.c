@@ -270,8 +270,9 @@ void SwitchToPane(struct directory_pane *pane)
 	active_pane = pane_num;
 	UI_RaisePaneToTop(pane);
 	pane->pane.active = 1;
-	// Info pane always above dir panes to preserve its title:
+	// Panes must be in order so that titles are shown.
 	UI_RaisePaneToTop(&info_pane);
+	UI_RaisePaneToTop(&actions_pane);
 	// Search pane is always at the top to catch keypresses:
 	UI_RaisePaneToTop(&search_pane);
 
