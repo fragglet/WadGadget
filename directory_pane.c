@@ -89,7 +89,11 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 				wattron(win, COLOR_PAIR(PAIR_WHITE_BLACK));
 				break;
 		}
-		SummarizeSize(ent->size, size, shorter);
+		// We only show size for lumps (like NWT); for files it
+		// is too cluttered (plus filenames can be much longer)
+		if (ent->type == FILE_TYPE_LUMP) {
+			SummarizeSize(ent->size, size, shorter);
+		}
 		snprintf(buf, w, "%c%-100s", prefix, ent->name);
 	}
 	if (dp->pane.active && idx == dp->pane.selected) {

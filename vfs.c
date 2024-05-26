@@ -186,20 +186,6 @@ static int OrderByName(const void *x, const void *y)
 	return strcasecmp(dx->name, dy->name);
 }
 
-static int FollowSymlink(struct directory *d, const char *filename)
-{
-	struct stat s;
-	char *path = StringJoin("/", d->path, filename, NULL);
-	int result = DT_REG;
-
-	if (stat(path, &s) == 0 && S_ISDIR(s.st_mode)) {
-		result = DT_DIR;
-	}
-
-	free(path);
-	return result;
-}
-
 static bool _RealDirRefresh(struct directory *d)
 {
 	DIR *dir;
@@ -214,18 +200,24 @@ static bool _RealDirRefresh(struct directory *d)
 	for (;;) {
 		struct dirent *dirent = readdir(dir);
 		struct directory_entry *ent;
+		struct stat s;
+		bool stat_ok;
 		char *path;
+
 		if (dirent == NULL) {
 			break;
 		}
 		if (dirent->d_name[0] == '.') {
 			continue;
 		}
+		path = StringJoin("/", d->path, dirent->d_name, NULL);
+		stat_ok = stat(path, &s) == 0;
 		// For symlinks, follow the link to get the actual file type.
 		// This ensures links to directories are handled properly.
-		if (dirent->d_type == DT_LNK) {
-			dirent->d_type = FollowSymlink(d, dirent->d_name);
+		if (stat_ok && dirent->d_type == DT_LNK) {
+			dirent->d_type = S_ISDIR(s.st_mode) ? DT_DIR : DT_REG;
 		}
+		free(path);
 		path = checked_strdup(dirent->d_name);
 
 		d->entries = checked_realloc(d->entries,
@@ -235,7 +227,8 @@ static bool _RealDirRefresh(struct directory *d)
 		ent->type = dirent->d_type == DT_DIR ? FILE_TYPE_DIR :
 		            HasWadExtension(ent->name) ? FILE_TYPE_WAD :
 		            FILE_TYPE_FILE;
-		ent->size = -1;
+		ent->size = stat_ok
+		         && ent->type != FILE_TYPE_DIR ? s.st_size : -1;
 		ent->serial_no = dirent->d_ino;
 		++d->num_entries;
 	}
