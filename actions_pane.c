@@ -54,6 +54,7 @@ static void ShowAction(struct actions_pane *p, int y,
                        const struct action *action)
 {
 	WINDOW *win = p->pane.window;
+	bool arrows = false, ellipsis = false;
 	char *desc;
 
 	if (action->key == 0 && action->ctrl_key == 0) {
@@ -63,22 +64,30 @@ static void ShowAction(struct actions_pane *p, int y,
 	mvwaddstr(win, y, 2, KeyDescription(action));
 	wattroff(win, A_BOLD);
 	waddstr(win, " - ");
-	desc = action->description;
-	if (action->description[0] == '>') {
-		if (!p->left_to_right) {
-			wattron(win, A_BOLD);
-			waddstr(win, "<<< ");
-			wattroff(win, A_BOLD);
+
+	for (desc = action->description;; ++desc) {
+		if (*desc == '>') {
+			arrows = true;
+		} else if (*desc == '.') {
+			ellipsis = true;
+		} else if (*desc != ' ') {
+			break;
 		}
-		desc += 2;
+	}
+
+	if (arrows && !p->left_to_right) {
+		wattron(win, A_BOLD);
+		waddstr(win, "<<< ");
+		wattroff(win, A_BOLD);
 	}
 	waddstr(win, desc);
-	if (action->description[0] == '>') {
-		if (p->left_to_right) {
-			wattron(win, A_BOLD);
-			waddstr(win, " >>>");
-			wattroff(win, A_BOLD);
-		}
+	if (ellipsis) {
+		waddstr(win, "...");
+	}
+	if (arrows && p->left_to_right) {
+		wattron(win, A_BOLD);
+		waddstr(win, " >>>");
+		wattroff(win, A_BOLD);
 	}
 }
 
@@ -150,8 +159,8 @@ static int NumShortcuts(const struct action **cells)
 static const char *LongName(const struct action *a)
 {
 	const char *result = a->description;
-	if (StringHasPrefix(result, "> ")) {
-		result += 2;
+	while (strchr(" >.", *result)) {
+		++result;
 	}
 	return result;
 }

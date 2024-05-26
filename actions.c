@@ -142,7 +142,7 @@ static void PerformMkdir(struct directory_pane *active_pane,
 }
 
 const struct action mkdir_action = {
-	KEY_F(7), 'K', "Mkdir", "Mkdir",
+	KEY_F(7), 'K', "Mkdir", ". Make directory",
 	PerformMkdir,
 };
 
@@ -258,15 +258,15 @@ static void CreateWadNoConvert(struct directory_pane *active_pane,
 }
 
 const struct action make_wad_action = {
-	KEY_F(9), 'F', "MkWAD", "Make WAD",
+	KEY_F(9), 'F', "MkWAD", ". Make WAD",
 	CreateWadConvert,
 };
 const struct action make_wad_noconv_action = {
-	SHIFT_KEY_F(9), 0, "MkWAD", "Make WAD (no convert)",
+	SHIFT_KEY_F(9), 0, "MkWAD", ". Make WAD (no convert)",
 	CreateWadNoConvert,
 };
 const struct action export_wad_action = {
-	KEY_F(9), 'F', "ExpWAD", "> Export as WAD",
+	KEY_F(9), 'F', "ExpWAD", ".> Export as WAD",
 	CreateWadConvert,
 };
 
@@ -346,7 +346,7 @@ static void PerformNewLump(struct directory_pane *active_pane,
 }
 
 const struct action new_lump_action = {
-	KEY_F(7), 'K', "NewLump", "New lump",
+	KEY_F(7), 'K', "NewLump", ". New lump",
 	PerformNewLump,
 };
 
@@ -382,7 +382,7 @@ static void PerformRename(struct directory_pane *active_pane,
 }
 
 const struct action rename_action = {
-	KEY_F(6), 'B', "Ren", "Rename",
+	KEY_F(6), 'B', "Ren", ". Rename",
 	PerformRename,
 };
 
@@ -451,7 +451,7 @@ static void PerformMarkPattern(struct directory_pane *active_pane,
 }
 
 const struct action mark_pattern_action = {
-	0, 'G', "MarkPat", "Mark pattern",
+	0, 'G', "MarkPat", ". Mark pattern",
 	PerformMarkPattern,
 };
 

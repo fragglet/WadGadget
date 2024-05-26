@@ -36,7 +36,7 @@
 "This is free software; see COPYING.md for copying conditions. There is NO\n" \
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 
-#define INFO_PANE_WIDTH 28
+#define INFO_PANE_WIDTH 29
 
 void SwitchToPane(struct directory_pane *pane);
 
