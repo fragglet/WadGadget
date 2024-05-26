@@ -31,7 +31,7 @@ struct file_set {
 struct directory_entry {
 	enum file_type type;
 	char *name;
-	ssize_t size;
+	int64_t size;
 	uint64_t serial_no;
 };
 
