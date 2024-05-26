@@ -205,6 +205,7 @@ static const struct action *dir_to_dir[] = {
 
 static const struct action *common_actions[] = {
 	&view_action,
+	&edit_action,
 	&rename_action,
 	&delete_action,
 	&mark_action,

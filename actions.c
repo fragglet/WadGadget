@@ -118,7 +118,7 @@ static void PerformUpdate(struct directory_pane *active_pane,
 }
 
 const struct action update_action = {
-	KEY_F(4), 'U', "Upd",     "> Update",
+	KEY_F(3), 'U', "Upd",     "> Update",
 	PerformUpdate,
 };
 
@@ -592,4 +592,9 @@ static void PerformView(struct directory_pane *active_pane,
 const struct action view_action = {
 	'\r', 0,   NULL,       "View/Edit",
 	PerformView,
+};
+
+// TODO:
+const struct action edit_action = {
+	KEY_F(4), 'E', "Edit",       "Edit",
 };
