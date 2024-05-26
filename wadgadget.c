@@ -52,7 +52,6 @@ static struct pane header_pane, info_pane;
 static struct search_pane search_pane;
 static WINDOW *pane_windows[2];
 static struct directory_pane *panes[2];
-static struct directory *dirs[2];
 static bool cmdr_mode = false;
 static unsigned int active_pane = 0;
 
@@ -296,7 +295,6 @@ void ReplacePane(struct directory_pane *old_pane,
 	// TODO UI_DirectoryPaneFree(old_pane);
 
 	panes[pane_num] = new_pane;
-	dirs[pane_num] = new_pane->dir;
 	UI_PaneShow(new_pane);
 
 	// TODO: Does this belong here?
@@ -335,6 +333,7 @@ static void HandleKeypress(void *pane, int key)
 
 static void DrawInfoPane(void *p)
 {
+	struct directory *dir;
 	struct pane *pane = p;
 	int idx = UI_DirectoryPaneSelected(panes[active_pane]);
 
@@ -346,8 +345,9 @@ static void DrawInfoPane(void *p)
 	if (idx < 0) {
 		return;
 	}
-	if (dirs[active_pane]->entries[idx].type == FILE_TYPE_LUMP) {
-		struct wad_file *wf = VFS_WadFile(dirs[active_pane]);
+	dir = panes[active_pane]->dir;
+	if (dir->entries[idx].type == FILE_TYPE_LUMP) {
+		struct wad_file *wf = VFS_WadFile(dir);
 		const struct lump_type *lt = LI_IdentifyLump(wf, idx);
 		UI_PrintMultilineString(pane->window, 1, 2,
 		    LI_DescribeLump(lt, wf, idx));
@@ -423,6 +423,7 @@ static void Shutdown(void)
 
 int main(int argc, char *argv[])
 {
+	struct directory *dir;
 	const char *start_path1 = ".", *start_path2 = ".";
 
 #ifdef SIGIO
@@ -471,29 +472,29 @@ int main(int argc, char *argv[])
 	UI_PaneShow(&actions_bar);
 
 	pane_windows[0] = newwin(24, 27, 1, 0);
-	dirs[0] = VFS_OpenDir(start_path1);
-	if (dirs[0] == NULL) {
+	dir = VFS_OpenDir(start_path1);
+	if (dir == NULL) {
 		Shutdown();
 		fprintf(stderr, "Failed to open '%s'.\n", start_path1);
 		exit(-1);
 	}
-	panes[0] = UI_NewDirectoryPane(pane_windows[0], dirs[0]);
+	panes[0] = UI_NewDirectoryPane(pane_windows[0], dir);
 	UI_PaneShow(panes[0]);
 
-	if (dirs[0]->type == FILE_TYPE_WAD
+	if (dir->type == FILE_TYPE_WAD
 	 && !strcmp(start_path1, start_path2)) {
 		Shutdown();
 		fprintf(stderr, "Can't open the same WAD in both panes.\n");
 		exit(-1);
 	}
 	pane_windows[1] = newwin(24, 27, 1, 53);
-	dirs[1] = VFS_OpenDir(start_path2);
-	if (dirs[1] == NULL) {
+	dir = VFS_OpenDir(start_path2);
+	if (dir == NULL) {
 		Shutdown();
 		fprintf(stderr, "Failed to open '%s'.\n", start_path2);
 		exit(-1);
 	}
-	panes[1] = UI_NewDirectoryPane(pane_windows[1], dirs[1]);
+	panes[1] = UI_NewDirectoryPane(pane_windows[1], dir);
 	UI_PaneShow(panes[1]);
 
 	SwitchToPane(panes[0]);
