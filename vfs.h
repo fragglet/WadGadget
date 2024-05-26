@@ -74,6 +74,8 @@ struct directory_entry *VFS_IterateSet(struct directory *dir,
                                        struct file_set *set, int *idx);
 void VFS_DescribeSet(struct directory *dir, struct file_set *set,
                      char *buf, size_t buf_len);
+void VFS_DescribeSize(const struct directory_entry *ent, char buf[10],
+                      bool shorter);
 
 void VFS_DirectoryRef(struct directory *dir);
 void VFS_DirectoryUnref(struct directory *dir);

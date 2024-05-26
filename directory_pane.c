@@ -21,30 +21,6 @@
 #include "ui.h"
 #include "directory_pane.h"
 
-#define KB(x) (x * 1000ULL)
-#define MB(x) (KB(x) * 1000ULL)
-#define GB(x) (MB(x) * 1000ULL)
-#define TB(x) (GB(x) * 1000ULL)
-
-static void SummarizeSize(int64_t len, char buf[10], bool shorter)
-{
-	int64_t adj_len = len * (shorter ? 100 : 1);
-
-	if (adj_len < 0) {
-		strncpy(buf, "", 10);
-	} else if (adj_len < KB(100)) {  // up to 99999
-		snprintf(buf, 10, " %d", (int) len);
-	} else if (adj_len < MB(10)) {  // up to 9999K
-		snprintf(buf, 10, " %dK", (int) (len / KB(1)));
-	} else if (adj_len < GB(10)) {  // up to 9999M
-		snprintf(buf, 10, " %dM", (int) (len / MB(1)));
-	} else if (adj_len < TB(10)) {  // up to 9999G
-		snprintf(buf, 10, " %dG", (int) (len / GB(1)));
-	} else {
-		snprintf(buf, 10, " big!");
-	}
-}
-
 static void DrawEntry(WINDOW *win, int idx, void *data)
 {
 	struct directory_pane *dp = data;
@@ -70,7 +46,7 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 
 	if (idx == 0) {
 		char *parent = PathDirName(dp->dir->path);
-		snprintf(buf, w, "^  Parent (%s)", PathBaseName(parent));
+		snprintf(buf, w, "^  Parent (%s) ", PathBaseName(parent));
 		free(parent);
 		wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
@@ -92,7 +68,7 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 		// We only show size for lumps (like NWT); for files it
 		// is too cluttered (plus filenames can be much longer)
 		if (ent->type == FILE_TYPE_LUMP) {
-			SummarizeSize(ent->size, size, shorter);
+			VFS_DescribeSize(ent, size, shorter);
 		}
 		snprintf(buf, w, "%c%-100s", prefix, ent->name);
 	}
@@ -104,12 +80,13 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 		wattron(win, COLOR_PAIR(PAIR_TAGGED));
 	}
 	mvwaddstr(win, 0, 0, buf);
-	waddstr(win, " ");
 	if (idx == 0) {
 		mvwaddch(win, 0, 0, ACS_LLCORNER);
 		mvwaddch(win, 0, 1, ACS_HLINE);
+	} else {
+		mvwaddstr(win, 0, w - strlen(size) - 1,  " ");
+		waddstr(win, size);
 	}
-	mvwaddstr(win, 0, w - strlen(size), size);
 	wattroff(win, A_REVERSE);
 	wattroff(win, A_BOLD);
 	wattroff(win, COLOR_PAIR(PAIR_WHITE_BLACK));

@@ -25,6 +25,12 @@
 #include "vfs.h"
 #include "wad_file.h"
 
+// Yes, Si units, not binary ones.
+#define KB(x) (x * 1000ULL)
+#define MB(x) (KB(x) * 1000ULL)
+#define GB(x) (MB(x) * 1000ULL)
+#define TB(x) (GB(x) * 1000ULL)
+
 struct wad_directory {
 	struct directory dir;
 	struct wad_file *wad_file;
@@ -556,6 +562,26 @@ void VFS_DescribeSet(struct directory *dir, struct file_set *set,
 		snprintf(buf, buf_len, "%d %s",
 		         (int) set->num_entries,
 		         dir->type == FILE_TYPE_WAD ? "lumps" : "files");
+	}
+}
+
+void VFS_DescribeSize(const struct directory_entry *ent, char buf[10],
+                      bool shorter)
+{
+	int64_t adj_len = ent->size * (shorter ? 100 : 1);
+
+	if (adj_len < 0) {
+		strncpy(buf, "", 10);
+	} else if (adj_len < KB(100)) {  // up to 99999
+		snprintf(buf, 10, "%d", (int) ent->size);
+	} else if (adj_len < MB(10)) {  // up to 9999K
+		snprintf(buf, 10, "%dK", (short) (ent->size / KB(1)));
+	} else if (adj_len < GB(10)) {  // up to 9999M
+		snprintf(buf, 10, "%dM", (short) (ent->size / MB(1)));
+	} else if (adj_len < TB(10)) {  // up to 9999G
+		snprintf(buf, 10, "%dG", (short) (ent->size / GB(1)));
+	} else {
+		snprintf(buf, 10, "big!");
 	}
 }
 
