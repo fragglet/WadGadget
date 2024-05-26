@@ -19,7 +19,7 @@
 
 static const int key_ordering[] = {
 	'\r', KEY_F(1), KEY_F(2), KEY_F(3), KEY_F(4), KEY_F(5), KEY_F(6),
-	KEY_F(7), KEY_F(8), ' ', KEY_F(9), KEY_F(10), 0, '\t',
+	KEY_F(7), KEY_F(8), KEY_F(9), ' ', CTRL_('G'), KEY_F(10), 0, '\t',
 	CTRL_('D'), 27,
 };
 

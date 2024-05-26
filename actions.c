@@ -95,7 +95,7 @@ const struct action copy_noconv_action = {
 	PerformCopyNoConvert,
 };
 const struct action export_action = {
-	KEY_F(5), 'O', "Export",  "> Export to files",
+	KEY_F(5), 'O', "Export",  "> Export",
 	PerformCopyConvert,
 };
 const struct action export_noconv_action = {
@@ -258,15 +258,15 @@ static void CreateWadNoConvert(struct directory_pane *active_pane,
 }
 
 const struct action make_wad_action = {
-	KEY_F(3), 'F', "MkWAD",  "Make WAD",
+	KEY_F(9), 'F', "MkWAD",  "Make WAD",
 	CreateWadConvert,
 };
 const struct action make_wad_noconv_action = {
-	SHIFT_KEY_F(3), 0, "MkWAD",  "Make WAD (no convert)",
+	SHIFT_KEY_F(9), 0, "MkWAD",  "Make WAD (no convert)",
 	CreateWadNoConvert,
 };
 const struct action export_wad_action = {
-	KEY_F(3), 'F', "ExpWAD",  "> Export as WAD",
+	KEY_F(9), 'F', "ExpWAD",  "> Export as WAD",
 	CreateWadConvert,
 };
 
@@ -451,7 +451,7 @@ static void PerformMarkPattern(struct directory_pane *active_pane,
 }
 
 const struct action mark_pattern_action = {
-	KEY_F(9),  'G', "MarkPat",  "Mark pattern",
+	0, 'G', "MarkPat",  "Mark pattern",
 	PerformMarkPattern,
 };
 
