@@ -150,7 +150,7 @@ static void ToggleCmdrMode(struct directory_pane *a,
 }
 
 static const struct action cmdr_mode_action = {
-	0, 'J', "CmdrMode", "CmdrMode",
+	0, 'J', "CmdrMode", "| CmdrMode",
 	ToggleCmdrMode,
 };
 

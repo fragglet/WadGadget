@@ -600,5 +600,5 @@ const struct action edit_action = {
 };
 
 const struct action hexdump_action = {
-	0, 'D', "Hexdump", "Hexdump",
+	0, 'D', "Hexdump", "| Hexdump",
 };

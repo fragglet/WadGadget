@@ -21,8 +21,8 @@ static const int key_ordering[] = {
 	KEY_F(1), KEY_F(2), KEY_F(3), KEY_F(4), KEY_F(5), KEY_F(6),
 	KEY_F(7), KEY_F(8), KEY_F(9), ' ', CTRL_('G'), KEY_F(10),
 	0,
-	'\r', CTRL_('D'),
-	'\t', 27, CTRL_('J'),
+	'\t', '\r', CTRL_('D'),
+	27, CTRL_('J'),
 };
 
 static const char *KeyDescription(const struct action *a)
@@ -52,30 +52,43 @@ static const char *KeyDescription(const struct action *a)
 	return "??";
 }
 
-static void ShowAction(struct actions_pane *p, int y,
-                       const struct action *action)
+static int ShowAction(struct actions_pane *p, int y,
+                      const struct action *action, bool right_ok)
 {
 	WINDOW *win = p->pane.window;
-	bool arrows = false, ellipsis = false;
+	bool arrows = false, ellipsis = false, right_side = false;
+	int x, result;
 	char *desc;
 
 	if (action->key == 0 && action->ctrl_key == 0) {
-		return;
+		return 0;
 	}
-	wattron(win, A_BOLD);
-	mvwaddstr(win, y, 2, KeyDescription(action));
-	wattroff(win, A_BOLD);
-	waddstr(win, " - ");
 
 	for (desc = action->description;; ++desc) {
 		if (*desc == '>') {
 			arrows = true;
+		} else if (*desc == '|') {
+			right_side = true;
 		} else if (*desc == '.') {
 			ellipsis = true;
 		} else if (*desc != ' ') {
 			break;
 		}
 	}
+
+	if (right_side && right_ok) {
+		x = 14;
+		--y;
+		result = 0;
+	} else {
+		x = 2;
+		result = 1;
+	}
+
+	wattron(win, A_BOLD);
+	mvwaddstr(win, y, x, KeyDescription(action));
+	wattroff(win, A_BOLD);
+	waddstr(win, " - ");
 
 	if (arrows && !p->left_to_right) {
 		wattron(win, A_BOLD);
@@ -91,6 +104,8 @@ static void ShowAction(struct actions_pane *p, int y,
 		waddstr(win, " >>>");
 		wattroff(win, A_BOLD);
 	}
+
+	return result;
 }
 
 static void DrawActionsPane(void *pane)
@@ -98,7 +113,7 @@ static void DrawActionsPane(void *pane)
 	struct actions_pane *p = pane;
 	const struct action *a;
 	WINDOW *win = p->pane.window;
-	int i, y;
+	int i, y, last_idx = -1;
 
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);
@@ -108,11 +123,12 @@ static void DrawActionsPane(void *pane)
 	for (i = 0, y = 1; i < MAX_KEY_BINDINGS; i++) {
 		a = p->actions[i];
 		if (a != NULL) {
-			ShowAction(p, y, a);
+			y += ShowAction(p, y, a, last_idx == i - 1);
 		}
-		if (key_ordering[i] == 0 || a != NULL) {
+		if (key_ordering[i] == 0) {
 			y++;
 		}
+		last_idx = i;
 	}
 }
 
@@ -161,7 +177,7 @@ static int NumShortcuts(const struct action **cells)
 static const char *LongName(const struct action *a)
 {
 	const char *result = a->description;
-	while (strchr(" >.", *result)) {
+	while (strchr(" >|.", *result)) {
 		++result;
 	}
 	return result;
