@@ -72,9 +72,8 @@ static void SetNwtWindowSizes(int columns, int lines)
 	mvwin(search_pane.pane.window, lines - 3,
 	      left_width - 1);
 
-	// Disabled.
-	wresize(actions_bar.pane.window, 1, 1);
-	mvwin(actions_bar.pane.window, 1, 1);
+	UI_PaneHide(&actions_bar);
+	UI_PaneShow(&actions_pane);
 
 	wresize(pane_windows[0], lines - 1, left_width);
 	mvwin(pane_windows[0], 1, 0);
@@ -95,9 +94,8 @@ static void SetCmdrWindowSizes(int columns, int lines)
 	mvwin(info_pane.window, lines - 7,
 	      active_pane != 0 ? left_width - 1 : 0);
 
-	// This is a hack: shrink these to effectively "hide" them.
-	wresize(actions_pane.pane.window, 1, 1);
-	mvwin(actions_pane.pane.window, 1, 1);
+	UI_PaneHide(&actions_pane);
+	UI_PaneShow(&actions_bar);
 
 	// Search pane fits along bottom of screen.
 	wresize(search_pane.pane.window, 1, columns);
@@ -128,6 +126,12 @@ static void SetWindowSizes(void)
 	} else {
 		SetCmdrWindowSizes(columns, lines);
 	}
+
+	// Panes must be in order so that titles are shown.
+	UI_RaisePaneToTop(&info_pane);
+	UI_RaisePaneToTop(&actions_pane);
+	// Search pane is always at the top to catch keypresses:
+	UI_RaisePaneToTop(&search_pane);
 }
 
 static void PerformSwitchPane(struct directory_pane *a,
@@ -270,11 +274,6 @@ void SwitchToPane(struct directory_pane *pane)
 	active_pane = pane_num;
 	UI_RaisePaneToTop(pane);
 	pane->pane.active = 1;
-	// Panes must be in order so that titles are shown.
-	UI_RaisePaneToTop(&info_pane);
-	UI_RaisePaneToTop(&actions_pane);
-	// Search pane is always at the top to catch keypresses:
-	UI_RaisePaneToTop(&search_pane);
 
 	BuildActionsList();
 	UI_ActionsPaneSet(&actions_pane, actions, active_pane == 0);

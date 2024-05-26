@@ -29,8 +29,25 @@ void UI_PaneKeypress(void *pane, int key)
 	}
 }
 
+static int GetPaneIndex(void *pane)
+{
+	unsigned int i;
+
+	for (i = 0; i < num_screen_panes; i++) {
+		if (screen_panes[i] == pane) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
 void UI_PaneShow(void *pane)
 {
+	// In case already shown, remove first; we will add it back
+	// at the top of the stack.
+	UI_PaneHide(pane);
+
 	assert(num_screen_panes < MAX_SCREEN_PANES);
 
 	screen_panes[num_screen_panes] = pane;
@@ -39,20 +56,16 @@ void UI_PaneShow(void *pane)
 
 int UI_PaneHide(void *pane)
 {
-	struct pane *p = pane;
-	unsigned int i;
+	int idx = GetPaneIndex(pane);
 
-	for (i = 0; i < num_screen_panes; i++) {
-		if (screen_panes[i] == p) {
-			memmove(&screen_panes[i], &screen_panes[i+1],
-			        (num_screen_panes - i - 1)
-			            * sizeof(struct pane *));
-			--num_screen_panes;
-			return 1;
-		}
+	if (idx < 0) {
+		return 0;
 	}
 
-	return 0;
+	memmove(&screen_panes[idx], &screen_panes[idx + 1],
+	        (num_screen_panes - idx - 1) * sizeof(struct pane *));
+	--num_screen_panes;
+	return 1;
 }
 
 void UI_DrawAllPanes(void)
