@@ -150,7 +150,7 @@ static void ToggleCmdrMode(struct directory_pane *a,
 }
 
 static const struct action cmdr_mode_action = {
-	0, 'D', "CmdrMode", "CmdrMode",
+	0, 'J', "CmdrMode", "CmdrMode",
 	ToggleCmdrMode,
 };
 
@@ -205,6 +205,7 @@ static const struct action *dir_to_dir[] = {
 
 static const struct action *common_actions[] = {
 	&view_action,
+	&hexdump_action,
 	&edit_action,
 	&rename_action,
 	&delete_action,

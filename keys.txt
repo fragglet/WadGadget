@@ -4,22 +4,22 @@ keys    mnemonic    type  function
 ^A F10  unm-All     alt  Unmark all
 ^B  F6  nomBre      alt  Rename (Spanish)
 ^C      -           trm  Terminal break
-^D      Display     res  Toggle display mode (Commander mode etc.)
+^D      hexDump     res  Hexdump
 ^E  F4  Edit        nwt  Edit
 ^F  F9  wadFile     alt  Export WAD / Make WAD
 ^G      Glob        alt  Mark pattern
 ^H  F1  -           std  Backspace; possibly usable for Help
-^I
-^J
+^I      -           trm  Tab; switch panes
+^J      -           res  Toggle Commander Mode
 ^K  F7  maKe        alt  Mkdir/Make lump
 ^L                  std  Redraw screen
 ^M      -           trm  Newline
 ^N      Next        std  Search again
 ^O  F5  {im,ex}pOrt alt  Copy / Import / Export
 ^P      Pnames      nwt  Jump to PNAMES
-^Q Esc  Quit        res  Quit?
+^Q      -           trm  XOFF
 ^R      Reload      std  Reload directory
-^S                  nwt  Setup
+^S      -           trm  XON
 ^T      Texture     nwt  Jump to TEXTURE1
 ^U  F3  Update      alt  Update
 ^V  F2  moVe        alt  Move (rearrange) - also paste
@@ -27,6 +27,7 @@ keys    mnemonic    type  function
 ^X  F8  -           std  Delete lump / file, like "Cut"
 ^Y      -           std  Redo
 ^Z      -           std  Undo. Need to catch SIGTSTP
+Esc     Quit        res  Quit
 Spc                 nwt  Mark
 
 types:

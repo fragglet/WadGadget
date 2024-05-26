@@ -598,3 +598,7 @@ const struct action view_action = {
 const struct action edit_action = {
 	KEY_F(4), 'E', "Edit", "Edit",
 };
+
+const struct action hexdump_action = {
+	0, 'D', "Hexdump", "Hexdump",
+};

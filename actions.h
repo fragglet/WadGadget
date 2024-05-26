@@ -45,4 +45,5 @@ extern const struct action mkdir_action;
 extern const struct action update_action;
 
 extern const struct action view_action;
+extern const struct action hexdump_action;
 extern const struct action edit_action;

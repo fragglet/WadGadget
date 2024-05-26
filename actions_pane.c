@@ -18,9 +18,11 @@
 #include "ui.h"
 
 static const int key_ordering[] = {
-	'\r', KEY_F(1), KEY_F(2), KEY_F(3), KEY_F(4), KEY_F(5), KEY_F(6),
-	KEY_F(7), KEY_F(8), KEY_F(9), ' ', CTRL_('G'), KEY_F(10), 0, '\t',
-	CTRL_('D'), 27,
+	KEY_F(1), KEY_F(2), KEY_F(3), KEY_F(4), KEY_F(5), KEY_F(6),
+	KEY_F(7), KEY_F(8), KEY_F(9), ' ', CTRL_('G'), KEY_F(10),
+	0,
+	'\r', CTRL_('D'),
+	'\t', 27, CTRL_('J'),
 };
 
 static const char *KeyDescription(const struct action *a)
