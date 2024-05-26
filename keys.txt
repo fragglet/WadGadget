@@ -5,9 +5,9 @@ keys    mnemonic    type  function
 ^B  F6  nomBre      alt  Rename (Spanish)
 ^C      -           trm  Terminal break
 ^D      Display     res  Toggle display mode (Commander mode etc.)
-^E      Edit        nwt  Edit
-^F  F3  wadFile     alt  Export WAD / Make WAD
-^G  F9  Glob        alt  Mark pattern
+^E  F4  Edit        nwt  Edit
+^F  F9  wadFile     alt  Export WAD / Make WAD
+^G      Glob        alt  Mark pattern
 ^H  F1  -           std  Backspace; possibly usable for Help
 ^I
 ^J
@@ -21,7 +21,7 @@ keys    mnemonic    type  function
 ^R      Reload      std  Reload directory
 ^S                  nwt  Setup
 ^T      Texture     nwt  Jump to TEXTURE1
-^U  F4  Update      alt  Update
+^U  F3  Update      alt  Update
 ^V  F2  moVe        alt  Move (rearrange) - also paste
 ^W      Word        std  Delete word (clear search)
 ^X  F8  -           std  Delete lump / file, like "Cut"
