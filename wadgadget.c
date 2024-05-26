@@ -254,9 +254,16 @@ static void BuildActionsList(void)
 	actions[idx] = NULL;
 }
 
+static int PaneNum(struct directory_pane *p)
+{
+	unsigned int result = p == panes[0] ? 0 : 1;
+	assert(panes[result] == p);
+	return result;
+}
+
 void SwitchToPane(struct directory_pane *pane)
 {
-	unsigned int pane_num = pane != panes[0];
+	unsigned int pane_num = PaneNum(pane);
 
 	panes[active_pane]->pane.active = 0;
 	active_pane = pane_num;
@@ -273,76 +280,24 @@ void SwitchToPane(struct directory_pane *pane)
 	SetWindowSizes();
 }
 
-static void NavigateNew(void)
+void ReplacePane(struct directory_pane *old_pane,
+                 struct directory_pane *new_pane)
 {
-	struct directory_pane *pane = panes[active_pane];
-	struct directory_pane *new_pane = NULL;
-	struct directory *new_dir;
-	const char *old_path;
-	char *path;
+	int pane_num = PaneNum(old_pane);
 
-	path = UI_DirectoryPaneEntryPath(pane);
+	// New pane gets old pane's window.
+	new_pane->pane.pane.window = old_pane->pane.pane.window;
 
-	// Don't allow the same WAD to be opened twice.
-	if (!strcmp(path, dirs[!active_pane]->path)
-	 && dirs[!active_pane]->type == FILE_TYPE_WAD) {
-		free(path);
-		SwitchToPane(panes[!active_pane]);
-		return;
-	}
+	VFS_CloseDir(old_pane->dir);
+	UI_PaneHide(old_pane);
+	// TODO UI_DirectoryPaneFree(old_pane);
 
-	new_dir = VFS_OpenDir(path);
-	if (new_dir == NULL) {
-		int idx = UI_DirectoryPaneSelected(pane);
-		free(path);
-		UI_MessageBox("Error when opening '%s'.",
-		              dirs[active_pane]->entries[idx].name);
-		return;
-	}
+	panes[pane_num] = new_pane;
+	dirs[pane_num] = new_pane->dir;
+	UI_PaneShow(new_pane);
 
-	new_pane = UI_NewDirectoryPane(pane_windows[active_pane], new_dir);
-
-	// Select subfolder we just navigated out of?
-	old_path = dirs[active_pane]->path;
-	if (strlen(path) < strlen(old_path)) {
-		UI_DirectoryPaneSearch(new_pane, PathBaseName(old_path));
-	}
-
-	free(path);
-
-	if (new_pane != NULL) {
-		VFS_CloseDir(dirs[active_pane]);
-		UI_PaneHide(pane);
-		// TODO UI_DirectoryPaneFree(pane);
-		panes[active_pane] = new_pane;
-		dirs[active_pane] = new_dir;
-		UI_PaneShow(new_pane);
-
-		SwitchToPane(new_pane);
-		UI_TextInputClear(&search_pane.input);
-	}
-}
-
-static void OpenEntry(void)
-{
-	struct directory_pane *pane = panes[active_pane];
-	enum file_type typ;
-	int selected;
-
-	typ = UI_DirectoryPaneEntryType(pane);
-
-	// Change directory?
-	if (typ == FILE_TYPE_WAD || typ == FILE_TYPE_DIR) {
-		NavigateNew();
-		return;
-	}
-
-	selected = UI_DirectoryPaneSelected(pane);
-	if (selected < 0) {
-		return;
-	}
-
-	PerformView(pane->dir, &pane->dir->entries[selected]);
+	// TODO: Does this belong here?
+	UI_TextInputClear(&search_pane.input);
 }
 
 static void HandleKeypress(void *pane, int key)
@@ -368,9 +323,6 @@ static void HandleKeypress(void *pane, int key)
 		break;
 	case KEY_RESIZE:
 		SetWindowSizes();
-		break;
-	case '\r':
-		OpenEntry();
 		break;
 	default:
 		UI_PaneKeypress(panes[active_pane], key);

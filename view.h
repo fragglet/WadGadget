@@ -10,5 +10,4 @@
 
 #include "vfs.h"
 
-void PerformView(struct directory *dir, struct directory_entry *ent);
-
+void OpenDirent(struct directory *dir, struct directory_entry *ent);

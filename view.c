@@ -263,7 +263,7 @@ static void TempCleanup(struct temp_edit_context *ctx)
 	// ctx->filename will be freed by OpenEntry().
 }
 
-void PerformView(struct directory *dir, struct directory_entry *ent)
+void OpenDirent(struct directory *dir, struct directory_entry *ent)
 {
 	struct temp_edit_context temp_ctx = {NULL};
 	bool edit_success = false;
@@ -339,4 +339,3 @@ void PerformView(struct directory *dir, struct directory_entry *ent)
 		              "or program exited with an error.");
 	}
 }
-

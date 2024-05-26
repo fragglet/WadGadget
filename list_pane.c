@@ -38,6 +38,10 @@ static void Draw(void *p)
 	WINDOW *win = lp->pane.window;
 	unsigned int y, idx, num_entries;
 
+	if (lp->subwin == NULL) {
+		lp->subwin = derwin(win, 1, 20, 0, 0);
+	}
+
 	werase(win);
 	wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	UI_DrawWindowBox(win);
@@ -148,7 +152,7 @@ void UI_ListPaneInit(struct list_pane *p, WINDOW *w,
 	p->pane.window = w;
 	p->pane.draw = Draw;
 	p->pane.keypress = UI_ListPaneKeypress;
-	p->subwin = derwin(w, 1, 20, 0, 0);
+	p->subwin = NULL;
 	p->funcs = funcs;
 	p->data = data;
 }

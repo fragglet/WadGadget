@@ -20,8 +20,11 @@
 #include "pane.h"
 #include "strings.h"
 #include "vfs.h"
+#include "view.h"
 
 extern void SwitchToPane(struct directory_pane *pane); // in wadgadget.c
+extern void ReplacePane(struct directory_pane *old_pane,
+                        struct directory_pane *new_pane);
 
 static void PerformCopy(struct directory_pane *active_pane,
                         struct directory_pane *other_pane, bool convert)
@@ -520,7 +523,73 @@ const struct action reload_action = {
 	PerformReload,
 };
 
-// TODO:
+
+static void NavigateNew(struct directory_pane *active_pane,
+                        struct directory_pane *other_pane)
+{
+	struct directory_pane *new_pane = NULL;
+	struct directory *new_dir;
+	const char *old_path;
+	char *path;
+
+	path = UI_DirectoryPaneEntryPath(active_pane);
+
+	// Don't allow the same WAD to be opened twice.
+	if (!strcmp(path, other_pane->dir->path)
+	 && other_pane->dir->type == FILE_TYPE_WAD) {
+		free(path);
+		SwitchToPane(other_pane);
+		return;
+	}
+
+	new_dir = VFS_OpenDir(path);
+	if (new_dir == NULL) {
+		int idx = UI_DirectoryPaneSelected(active_pane);
+		free(path);
+		UI_MessageBox("Error when opening '%s'.",
+		              active_pane->dir->entries[idx].name);
+		return;
+	}
+
+	new_pane = UI_NewDirectoryPane(NULL, new_dir);
+
+	// Select subfolder we just navigated out of?
+	old_path = active_pane->dir->path;
+	if (strlen(path) < strlen(old_path)) {
+		UI_DirectoryPaneSearch(new_pane, PathBaseName(old_path));
+	}
+
+	free(path);
+
+	if (new_pane != NULL) {
+		ReplacePane(active_pane, new_pane);
+		SwitchToPane(new_pane);
+	}
+}
+
+static void PerformView(struct directory_pane *active_pane,
+                        struct directory_pane *other_pane)
+{
+	enum file_type typ;
+	int selected;
+
+	typ = UI_DirectoryPaneEntryType(active_pane);
+
+	// Change directory?
+	if (typ == FILE_TYPE_WAD || typ == FILE_TYPE_DIR) {
+		NavigateNew(active_pane, other_pane);
+		return;
+	}
+
+	selected = UI_DirectoryPaneSelected(active_pane);
+	if (selected < 0) {
+		return;
+	}
+
+	OpenDirent(active_pane->dir, &active_pane->dir->entries[selected]);
+}
+
 const struct action view_action = {
-	KEY_ENTER, 0,   NULL,       "View/Edit",
+	'\r', 0,   NULL,       "View/Edit",
+	PerformView,
 };
