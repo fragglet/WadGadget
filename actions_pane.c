@@ -191,20 +191,31 @@ static const char *LongName(const struct action *a)
 	return result;
 }
 
-static int SelectShortcutNames(const struct action **cells,
-                               const char **names, int columns)
+static int SetAccelerators(struct actions_bar *p, const struct action **cells,
+                           int columns)
 {
+	const struct action *a;
 	int i;
 	int spacing = columns - 2;
 	int num_shortcuts = NumShortcuts(cells);
 
-	memset(names, 0, 10 * sizeof(char *));
+	memset(p->accels, 0, 10 * sizeof(struct actions_accel));
 
 	for (i = 0; i < 10; ++i) {
-		if (cells[i] != NULL) {
-			names[i] = cells[i]->shortname;
-			spacing -= 1 + strlen(names[i]);
+		a = cells[i];
+		if (a == NULL) {
+			continue;
 		}
+		p->accels[i].name = a->shortname;
+		if (p->function_keys) {
+			snprintf(p->accels[i].key, sizeof(p->accels[i].key),
+			         "%d", i + 1);
+		} else {
+			snprintf(p->accels[i].key, sizeof(p->accels[i].key),
+			         "%s", KeyDescription(a, p->function_keys));
+		}
+		spacing -= strlen(p->accels[i].key)
+		         + strlen(p->accels[i].name);
 	}
 
 	if (spacing < 0) {
@@ -222,7 +233,7 @@ static int SelectShortcutNames(const struct action **cells,
 				continue;
 			}
 			longname = LongName(cells[i]);
-			diff = strlen(longname) - strlen(names[i]);
+			diff = strlen(longname) - strlen(p->accels[i].name);
 			if (diff > 0 && diff < best_diff
 			 && spacing - diff >= num_shortcuts) {
 				best_diff = diff;
@@ -234,7 +245,7 @@ static int SelectShortcutNames(const struct action **cells,
 			break;
 		}
 
-		names[best] = LongName(cells[best]);
+		p->accels[best].name = LongName(cells[best]);
 		spacing -= best_diff;
 	}
 
@@ -259,7 +270,7 @@ static void RecalculateNames(struct actions_bar *p, int columns)
 		}
 	}
 
-	p->spacing = SelectShortcutNames(cells, p->names, columns);
+	p->spacing = SetAccelerators(p, cells, columns);
 	p->last_width = columns;
 }
 
@@ -279,8 +290,7 @@ static void DrawActionsBar(void *pane)
 	mvwaddstr(win, 0, 0, "");
 
 	for (i = 0; i < 10; ++i) {
-		char buf[10];
-		if (p->names[i] == NULL) {
+		if (p->accels[i].name == NULL) {
 			continue;
 		}
 		wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
@@ -288,11 +298,10 @@ static void DrawActionsBar(void *pane)
 			waddstr(win, " ");
 		}
 		wattron(win, A_BOLD);
-		snprintf(buf, sizeof(buf), "%d", i + 1);
-		waddstr(win, buf);
+		waddstr(win, p->accels[i].key);
 		wattroff(win, A_BOLD);
 		wattron(win, COLOR_PAIR(PAIR_HEADER));
-		waddstr(win, p->names[i]);
+		waddstr(win, p->accels[i].name);
 	}
 }
 
@@ -302,11 +311,14 @@ void UI_ActionsBarInit(struct actions_bar *pane, WINDOW *win)
 	pane->pane.draw = DrawActionsBar;
 	pane->pane.keypress = NULL;
 	pane->actions = NULL;
+	pane->function_keys = true;
 }
 
 void UI_ActionsBarSet(struct actions_bar *pane,
-                      const struct action **actions)
+                      const struct action **actions,
+                      bool function_keys)
 {
 	pane->actions = actions;
+	pane->function_keys = function_keys;
 	RecalculateNames(pane, getmaxx(pane->pane.window));
 }
