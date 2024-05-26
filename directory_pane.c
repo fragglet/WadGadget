@@ -21,18 +21,25 @@
 #include "ui.h"
 #include "directory_pane.h"
 
-static void SummarizeSize(int64_t len, char buf[10])
+#define KB(x) (x * 1000ULL)
+#define MB(x) (KB(x) * 1000ULL)
+#define GB(x) (MB(x) * 1000ULL)
+#define TB(x) (GB(x) * 1000ULL)
+
+static void SummarizeSize(int64_t len, char buf[10], bool shorter)
 {
-	if (len < 0) {
+	int64_t adj_len = len * (shorter ? 100 : 1);
+
+	if (adj_len < 0) {
 		strncpy(buf, "", 10);
-	} else if (len < 1000000) {
+	} else if (adj_len < KB(100)) {  // up to 99999
 		snprintf(buf, 10, " %d", (int) len);
-	} else if (len < 1000000000) {
-		snprintf(buf, 10, " %dK", (int) (len / 1000));
-	} else if (len < 1000000000000) {
-		snprintf(buf, 10, " %dM", (int) (len / 1000000));
-	} else if (len < 1000000000000000) {
-		snprintf(buf, 10, " %dG", (int) (len / 1000000000));
+	} else if (adj_len < MB(10)) {  // up to 9999K
+		snprintf(buf, 10, " %dK", (int) (len / KB(1)));
+	} else if (adj_len < GB(10)) {  // up to 9999M
+		snprintf(buf, 10, " %dM", (int) (len / MB(1)));
+	} else if (adj_len < TB(10)) {  // up to 9999G
+		snprintf(buf, 10, " %dG", (int) (len / GB(1)));
 	} else {
 		snprintf(buf, 10, " big!");
 	}
@@ -45,12 +52,14 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	static char buf[128];
 	unsigned int w, h;
 	char size[10] = "";
+	bool shorter;
 
 	getmaxyx(win, h, w);
 	w -= 2; h = h;
 	if (w > sizeof(buf)) {
 		w = sizeof(buf);
 	}
+	shorter = w < 16;
 
 	if (idx == LIST_PANE_END_MARKER) {
 		if (dp->dir->num_entries == 0) {
@@ -80,7 +89,7 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 				wattron(win, COLOR_PAIR(PAIR_WHITE_BLACK));
 				break;
 		}
-		SummarizeSize(ent->size, size);
+		SummarizeSize(ent->size, size, shorter);
 		snprintf(buf, w, "%c%-100s", prefix, ent->name);
 	}
 	if (dp->pane.active && idx == dp->pane.selected) {
