@@ -12,7 +12,7 @@
 #include "pane.h"
 #include "vfs.h"
 
-#define MAX_KEY_BINDINGS 20
+#define MAX_KEY_BINDINGS 30
 
 struct actions_pane {
 	struct pane pane;
@@ -24,11 +24,12 @@ struct actions_pane {
 struct actions_accel {
 	const char *name;
 	char key[8];
+	const struct action *action;
 };
 
 struct actions_bar {
 	struct pane pane;
-	struct actions_accel accels[10];
+	struct actions_accel accels[MAX_KEY_BINDINGS];
 	int last_width, spacing;
 	const struct action **actions;
 	bool function_keys;

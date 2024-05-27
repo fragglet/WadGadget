@@ -11,9 +11,15 @@
 #include "directory_pane.h"
 
 struct action {
+	// If non-zero, key that when pressed invokes the callback.
 	int key;
+	// If non-zero, ctrl-[this] invokes the callback.
 	int ctrl_key;
+	// Abbreviated name shown on the actions bar in Commander Mode.
+	// If NULL, this action is never shown on the actions bar.
 	char *shortname;
+	// Long name shown on the actions pane in Normal Mode , or in
+	// Commander Mode if there is space.
 	char *description;
 	void (*callback)(struct directory_pane *active,
 	                 struct directory_pane *other);

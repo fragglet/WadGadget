@@ -191,31 +191,37 @@ static const char *LongName(const struct action *a)
 	return result;
 }
 
+static bool HasFunctionKey(const struct action *a)
+{
+	return a->key >= KEY_F(1) && a->key <= KEY_F(10);
+}
+
 static int SetAccelerators(struct actions_bar *p, const struct action **cells,
                            int columns)
 {
 	const struct action *a;
-	int i;
+	struct actions_accel *accel;
+	int i, add_index, diff;
 	int spacing = columns - 2;
 	int num_shortcuts = NumShortcuts(cells);
 
-	memset(p->accels, 0, 10 * sizeof(struct actions_accel));
+	memset(p->accels, 0, sizeof(p->accels));
 
 	for (i = 0; i < 10; ++i) {
 		a = cells[i];
-		if (a == NULL) {
+		if (a == NULL || a->shortname == NULL) {
 			continue;
 		}
-		p->accels[i].name = a->shortname;
+		accel = &p->accels[i];
+		accel->action = a;
+		accel->name = a->shortname;
 		if (p->function_keys) {
-			snprintf(p->accels[i].key, sizeof(p->accels[i].key),
-			         "%d", i + 1);
+			snprintf(accel->key, sizeof(accel->key), "%d", i + 1);
 		} else {
-			snprintf(p->accels[i].key, sizeof(p->accels[i].key),
-			         "%s", KeyDescription(a, p->function_keys));
+			snprintf(accel->key, sizeof(accel->key), "%s",
+			         KeyDescription(a, p->function_keys));
 		}
-		spacing -= strlen(p->accels[i].key)
-		         + strlen(p->accels[i].name);
+		spacing -= strlen(accel->key) + strlen(accel->name);
 	}
 
 	if (spacing < 0) {
@@ -225,7 +231,7 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 	// Expand some to longer names where possible, but always keep
 	// at least one space between shortcuts.
 	while (spacing >= num_shortcuts) {
-		int best = -1, best_diff = INT_MAX, diff;
+		int best = -1, best_diff = INT_MAX;
 		const char *longname;
 
 		for (i = 0; i < 10; i++) {
@@ -240,13 +246,38 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 				best = i;
 			}
 		}
-
 		if (best < 0) {
 			break;
 		}
 
 		p->accels[best].name = LongName(cells[best]);
 		spacing -= best_diff;
+	}
+
+	// Can we fit any more shortcuts in?
+	i = 0;
+	add_index = 10;
+	while (p->actions[i] != NULL && add_index < MAX_KEY_BINDINGS) {
+		a = p->actions[i];
+		// Don't add any function key actions; we already have them.
+		if (a == NULL || a->shortname == NULL || HasFunctionKey(a)) {
+			i++;
+			continue;
+		}
+		accel = &p->accels[add_index];
+		snprintf(accel->key, sizeof(accel->key), "%s",
+		         KeyDescription(a, false));
+		// Only add the action if it fits and will still leave at
+		// least one space between accelerators.
+		diff = strlen(a->shortname) + strlen(accel->key);
+		if (diff < spacing - num_shortcuts) {
+			accel->name = a->shortname;
+			accel->action = a;
+			spacing -= diff;
+			++add_index;
+			++num_shortcuts;
+		}
+		i++;
 	}
 
 	return spacing / num_shortcuts;
@@ -264,7 +295,7 @@ static void RecalculateNames(struct actions_bar *p, int columns)
 	memset(cells, 0, sizeof(cells));
 	for (i = 0; p->actions[i] != NULL; i++) {
 		a = p->actions[i];
-		if (a != NULL && a->key >= KEY_F(1) && a->key <= KEY_F(12)) {
+		if (a != NULL && HasFunctionKey(a)) {
 			cells[a->key - KEY_F(1)] = a;
 			++num_cells;
 		}
@@ -289,8 +320,8 @@ static void DrawActionsBar(void *pane)
 	werase(win);
 	mvwaddstr(win, 0, 0, "");
 
-	for (i = 0; i < 10; ++i) {
-		if (p->accels[i].name == NULL) {
+	for (i = 0; i < MAX_KEY_BINDINGS; ++i) {
+		if (p->accels[i].action == NULL) {
 			continue;
 		}
 		wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));

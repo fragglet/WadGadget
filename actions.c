@@ -91,7 +91,7 @@ const struct action copy_action = {
 	PerformCopyConvert,
 };
 const struct action copy_noconv_action = {
-	SHIFT_KEY_F(5), 0, "Copy", "> Copy (no convert)",
+	SHIFT_KEY_F(5), 0, NULL, "> Copy (no convert)",
 	PerformCopyNoConvert,
 };
 const struct action export_action = {
@@ -99,7 +99,7 @@ const struct action export_action = {
 	PerformCopyConvert,
 };
 const struct action export_noconv_action = {
-	SHIFT_KEY_F(5), 0, "Export", "> Export (no convert)",
+	SHIFT_KEY_F(5), 0, NULL, "> Export (no convert)",
 	PerformCopyNoConvert,
 };
 const struct action import_action = {
@@ -107,7 +107,7 @@ const struct action import_action = {
 	PerformCopyConvert,
 };
 const struct action import_noconv_action = {
-	SHIFT_KEY_F(5), 0, "Import", "> Import (no convert)",
+	SHIFT_KEY_F(5), 0, NULL, "> Import (no convert)",
 	PerformCopyNoConvert,
 };
 
@@ -262,7 +262,7 @@ const struct action make_wad_action = {
 	CreateWadConvert,
 };
 const struct action make_wad_noconv_action = {
-	SHIFT_KEY_F(9), 0, "MkWAD", ". Make WAD (no convert)",
+	SHIFT_KEY_F(9), 0, NULL, ". Make WAD (no convert)",
 	CreateWadNoConvert,
 };
 const struct action export_wad_action = {
@@ -485,7 +485,7 @@ static void PerformMark(struct directory_pane *active_pane,
 }
 
 const struct action mark_action = {
-	' ', 0, NULL, "Mark/unmark",
+	' ', 0, "Un/mark", "Mark/unmark",
 	PerformMark,
 };
 
@@ -590,7 +590,7 @@ static void PerformView(struct directory_pane *active_pane,
 }
 
 const struct action view_action = {
-	'\r', 0,  NULL, "View",
+	'\r', 0,  "View", "View",
 	PerformView,
 };
 
