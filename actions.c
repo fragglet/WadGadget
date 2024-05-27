@@ -673,3 +673,25 @@ const struct action edit_action = {
 const struct action hexdump_action = {
 	0, 'D', "Hexdump", "| Hexdump",
 };
+
+static void PerformUndo(struct directory_pane *active_pane,
+                        struct directory_pane *other_pane)
+{
+	struct wad_file *wf = VFS_WadFile(active_pane->dir);
+
+	if (W_CanUndo(wf) == 0) {
+		UI_MessageBox("There is nothing to undo.");
+		return;
+	}
+
+	if (!W_Undo(wf, 1)) {
+		UI_MessageBox("Undo failed.");
+		return;
+	}
+	VFS_Refresh(active_pane->dir);
+}
+
+const struct action undo_action = {
+	0, 'Z', "Undo", "Undo",
+	PerformUndo,
+};

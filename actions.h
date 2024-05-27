@@ -54,3 +54,5 @@ extern const struct action view_action;
 extern const struct action hexdump_action;
 extern const struct action edit_action;
 extern const struct action compact_action;
+
+extern const struct action undo_action;

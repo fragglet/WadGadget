@@ -22,6 +22,7 @@ static const int key_ordering[] = {
 	KEY_F(7), KEY_F(8), KEY_F(9), ' ', CTRL_('G'), KEY_F(10),
 	0,
 	'\t', '\r', CTRL_('D'),
+	CTRL_('Z'), CTRL_('Y'),
 	27, CTRL_('J'),
 };
 

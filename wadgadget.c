@@ -178,6 +178,7 @@ static const struct action *wad_actions[] = {
 	&rearrange_action,
 	&new_lump_action,
 	&edit_action,
+	&undo_action,
 	NULL,
 };
 
@@ -455,11 +456,28 @@ static void Shutdown(void)
 	endwin();
 }
 
+// We set a custom handler for SIGTSTP. This is the signal that is sent when
+// the user types a Ctrl-Z. This allows us to use this key combo (for Undo).
+static void TermStopHandler(int)
+{
+	ungetch(CTRL_('Z'));
+}
+
+static void SetTermStopHandler(void)
+{
+	struct sigaction sa;
+	sigaction(SIGTSTP, NULL, &sa);
+	sa.sa_handler = TermStopHandler;
+	sa.sa_flags = sa.sa_flags & ~SA_RESTART;
+	sigaction(SIGTSTP, &sa, NULL);
+}
+
 int main(int argc, char *argv[])
 {
 	struct directory *dir;
 	const char *start_path1 = ".", *start_path2 = ".";
 
+	SetTermStopHandler();
 #ifdef SIGIO
 	signal(SIGIO, SIG_IGN);
 #endif
