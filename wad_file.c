@@ -515,10 +515,27 @@ int W_CanUndo(struct wad_file *wf)
 
 bool W_Undo(struct wad_file *wf, unsigned int levels)
 {
-	assert(levels <= wf->current_header);
+	assert(levels <= W_CanUndo(wf));
 	wf->current_header -= levels;
 	if (!ReadDirectory(wf)) {
 		wf->current_header += levels;
+		return false;
+	}
+	WriteHeader(wf);
+	return true;
+}
+
+int W_CanRedo(struct wad_file *wf)
+{
+	return wf->num_headers - wf->current_header - 1;
+}
+
+bool W_Redo(struct wad_file *wf, unsigned int levels)
+{
+	assert(levels <= W_CanRedo(wf));
+	wf->current_header += levels;
+	if (!ReadDirectory(wf)) {
+		wf->current_header -= levels;
 		return false;
 	}
 	WriteHeader(wf);

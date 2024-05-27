@@ -54,6 +54,8 @@ bool W_CompactWAD(struct wad_file *f);
 
 int W_CanUndo(struct wad_file *wf);
 bool W_Undo(struct wad_file *wf, unsigned int levels);
+int W_CanRedo(struct wad_file *wf);
+bool W_Redo(struct wad_file *wf, unsigned int levels);
 
 #endif /* #ifndef WAD_FILE_INCLUDED */
 

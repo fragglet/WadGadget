@@ -179,6 +179,7 @@ static const struct action *wad_actions[] = {
 	&new_lump_action,
 	&edit_action,
 	&undo_action,
+	&redo_action,
 	NULL,
 };
 

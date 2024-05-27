@@ -695,3 +695,25 @@ const struct action undo_action = {
 	0, 'Z', "Undo", "Undo",
 	PerformUndo,
 };
+
+static void PerformRedo(struct directory_pane *active_pane,
+                        struct directory_pane *other_pane)
+{
+	struct wad_file *wf = VFS_WadFile(active_pane->dir);
+
+	if (W_CanRedo(wf) == 0) {
+		UI_MessageBox("There is nothing to redo.");
+		return;
+	}
+
+	if (!W_Redo(wf, 1)) {
+		UI_MessageBox("Redo failed.");
+		return;
+	}
+	VFS_Refresh(active_pane->dir);
+}
+
+const struct action redo_action = {
+	0, 'Y', "Redo", "| Redo",
+	PerformRedo,
+};
