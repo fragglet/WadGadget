@@ -95,11 +95,12 @@ static void SwapEntry(struct wad_file_entry *entry)
 
 // Read WAD directory based on index in wf->headers[wf->current_header].
 // If there is a current directory, it is replaced.
+#define LOOKAHEAD 10
 static bool ReadDirectory(struct wad_file *wf)
 {
 	struct wad_file_entry *new_directory;
 	size_t new_num_lumps;
-	int i;
+	int i, j, k, old_lump_index;
 
 	new_num_lumps = wf->headers[wf->current_header].num_lumps;
 	assert(vfseek(wf->vfs, wf->headers[wf->current_header].table_offset,
@@ -107,8 +108,8 @@ static bool ReadDirectory(struct wad_file *wf)
 	new_directory = checked_calloc(
 		new_num_lumps, sizeof(struct wad_file_entry));
 
-	for (i = 0; i < new_num_lumps; i++) {
-		struct wad_file_entry *ent = &new_directory[i];
+	for (i = 0, j = 0; i < new_num_lumps; i++) {
+		struct wad_file_entry *ent = &new_directory[i], *oldent;
 		if (vfread(&ent->position, 4, 1, wf->vfs) != 1
 		 || vfread(&ent->size, 4, 1, wf->vfs) != 1
 		 || vfread(&ent->name, 8, 1, wf->vfs) != 1) {
@@ -116,19 +117,37 @@ static bool ReadDirectory(struct wad_file *wf)
 			return false;
 		}
 		SwapEntry(ent);
-		// TODO: We should try to match up serial number against
-		// the old directory.
-		ent->serial_no = NewSerialNo();
+
+		// Try to map to a map in the old directory; if found,
+		// we preserve the serial number and do not re-read
+		// the header bytes. We only look several lumps ahead;
+		// in the worst case, we lose all serial numbers and
+		// have to re-read all lump headers.
+		old_lump_index = -1;
+		oldent = NULL;
+		for (k = j; k < min(j + LOOKAHEAD, wf->num_lumps); k++) {
+			oldent = &wf->directory[k];
+			if (ent->position == oldent->position
+			 && ent->size == oldent->size
+			 && !strncmp(ent->name, oldent->name, 8)) {
+				old_lump_index = k;
+				break;
+			}
+		}
+		if (old_lump_index == -1) {
+			long old_pos = vftell(wf->vfs);
+			ent->serial_no = NewSerialNo();
+			ReadLumpHeader(wf, ent);
+			vfseek(wf->vfs, old_pos, SEEK_SET);
+		} else {
+			// We got a match!
+			ent->serial_no = oldent->serial_no;
+			memcpy(ent->lump_header, oldent->lump_header,
+			       LUMP_HEADER_LEN);
+			j = old_lump_index + 1;
+		}
 	}
 
-	// Read and save the first few bytes of every lump. This contains
-	// enough information that we can give a basic summary of several
-	// common lump types, eg. demos, graphics, MID/MUS.
-	// TODO: If we are re-reading the directory, don't re-read the
-	// same header again.
-	for (i = 0; i < new_num_lumps; i++) {
-		ReadLumpHeader(wf, &new_directory[i]);
-	}
 	free(wf->directory);
 	wf->directory = new_directory;
 	wf->num_lumps = new_num_lumps;
