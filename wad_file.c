@@ -21,11 +21,11 @@
 #include "vfile.h"
 #include "wad_file.h"
 
+#define UNDO_LEVELS         50
 #define WAD_FILE_ENTRY_LEN  16
 
 struct wad_file {
 	VFILE *vfs;
-	struct wad_file_header header;
 	struct wad_file_entry *directory;
 	int num_lumps;
 
@@ -33,29 +33,18 @@ struct wad_file {
 	VFILE *current_lump;
 	unsigned int current_lump_index;
 
-	// Location of old WAD directory that we can roll back to
-	// while writing a new lump, to keep the WAD in a consistent
-	// state. If rollback_header.table_offset=0 then there is
-	// no old directory.
-	struct wad_file_header rollback_header;
-
-	// File offset of the most recently written lump. If this is zero then
-	// no lump has been written since the WAD was opened. This is used for
-	// an optimization where if we write the same lump repeatedly then we
-	// overwrite the previous data.
-	unsigned int last_lump_pos;
+	struct wad_file_header headers[UNDO_LEVELS];
+	int current_header, num_headers;
 
 	// Call to W_WriteDirectory needed.
 	bool dirty;
 };
 
-static void ReadLumpHeader(struct wad_file *wad, unsigned int lump_index)
+static void ReadLumpHeader(struct wad_file *wad, struct wad_file_entry *ent)
 {
-	size_t bytes = min(wad->directory[lump_index].size, LUMP_HEADER_LEN);
-	assert(vfseek(wad->vfs, wad->directory[lump_index].position,
-	              SEEK_SET) == 0);
-	assert(vfread(&wad->directory[lump_index].lump_header,
-	              1, bytes, wad->vfs) == bytes);
+	size_t bytes = min(ent->size, LUMP_HEADER_LEN);
+	assert(vfseek(wad->vfs, ent->position, SEEK_SET) == 0);
+	assert(vfread(&ent->lump_header, 1, bytes, wad->vfs) == bytes);
 }
 
 static uint64_t NewSerialNo(void)
@@ -83,7 +72,9 @@ bool W_CreateFile(const char *filename)
 	wf = checked_calloc(1, sizeof(struct wad_file));
 	wf->vfs = vfwrapfile(fs);
 	wf->dirty = true;
-	memcpy(wf->header.id, "PWAD", 4);
+	wf->num_headers = 1;
+	wf->current_header = 0;
+	memcpy(wf->headers[0].id, "PWAD", 4);
 	W_WriteDirectory(wf);
 	W_CloseFile(wf);
 
@@ -102,11 +93,52 @@ static void SwapEntry(struct wad_file_entry *entry)
 	SwapLE32(&entry->size);
 }
 
+// Read WAD directory based on index in wf->headers[wf->current_header].
+// If there is a current directory, it is replaced.
+static bool ReadDirectory(struct wad_file *wf)
+{
+	struct wad_file_entry *new_directory;
+	size_t new_num_lumps;
+	int i;
+
+	new_num_lumps = wf->headers[wf->current_header].num_lumps;
+	assert(vfseek(wf->vfs, wf->headers[wf->current_header].table_offset,
+	              SEEK_SET) == 0);
+	new_directory = checked_calloc(
+		new_num_lumps, sizeof(struct wad_file_entry));
+
+	for (i = 0; i < new_num_lumps; i++) {
+		struct wad_file_entry *ent = &new_directory[i];
+		if (vfread(&ent->position, 4, 1, wf->vfs) != 1
+		 || vfread(&ent->size, 4, 1, wf->vfs) != 1
+		 || vfread(&ent->name, 8, 1, wf->vfs) != 1) {
+			free(new_directory);
+			return false;
+		}
+		SwapEntry(ent);
+		// TODO: We should try to match up serial number against
+		// the old directory.
+		ent->serial_no = NewSerialNo();
+	}
+
+	// Read and save the first few bytes of every lump. This contains
+	// enough information that we can give a basic summary of several
+	// common lump types, eg. demos, graphics, MID/MUS.
+	// TODO: If we are re-reading the directory, don't re-read the
+	// same header again.
+	for (i = 0; i < new_num_lumps; i++) {
+		ReadLumpHeader(wf, &new_directory[i]);
+	}
+	free(wf->directory);
+	wf->directory = new_directory;
+	wf->num_lumps = new_num_lumps;
+	return true;
+}
+
 struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;
 	FILE *fs;
-	int i;
 	VFILE *vfs;
 
 	fs = fopen(filename, "r+");
@@ -118,40 +150,24 @@ struct wad_file *W_OpenFile(const char *filename)
 
 	result = checked_calloc(1, sizeof(struct wad_file));
 	result->vfs = vfs;
-	result->rollback_header.table_offset = 0;
-	result->last_lump_pos = 0;
+	result->directory = NULL;
+	result->num_lumps = 0;
+	result->num_headers = 1;
+	result->current_header = 0;
 
-	if (vfread(&result->header,
+	if (vfread(&result->headers[0],
 	           sizeof(struct wad_file_header), 1, vfs) != 1
-	 || (strncmp(result->header.id, "IWAD", 4) != 0
-	  && strncmp(result->header.id, "PWAD", 4) != 0)) {
+	 || (strncmp(result->headers[0].id, "IWAD", 4) != 0
+	  && strncmp(result->headers[0].id, "PWAD", 4) != 0)) {
 		W_CloseFile(result);
 		return NULL;
 	}
 
-	SwapHeader(&result->header);
+	SwapHeader(&result->headers[0]);
 
-	result->num_lumps = result->header.num_lumps;
-	assert(vfseek(vfs, result->header.table_offset, SEEK_SET) == 0);
-	result->directory = checked_calloc(
-		result->num_lumps, sizeof(struct wad_file_entry));
-	for (i = 0; i < result->num_lumps; i++) {
-		struct wad_file_entry *ent = &result->directory[i];
-		if (vfread(&ent->position, 4, 1, vfs) != 1
-		 || vfread(&ent->size, 4, 1, vfs) != 1
-		 || vfread(&ent->name, 8, 1, vfs) != 1) {
-			W_CloseFile(result);
-			return NULL;
-		}
-		SwapEntry(ent);
-		ent->serial_no = NewSerialNo();
-	}
-
-	// Read and save the first few bytes of every lump. This contains
-	// enough information that we can give a basic summary of several
-	// common lump types, eg. demos, graphics, MID/MUS.
-	for (i = 0; i < result->num_lumps; i++) {
-		ReadLumpHeader(result, i);
+	if (!ReadDirectory(result)) {
+		W_CloseFile(result);
+		result = NULL;
 	}
 
 	return result;
@@ -239,35 +255,10 @@ size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
 
 static void WriteHeader(struct wad_file *f)
 {
-	struct wad_file_header hdr = f->header;
+	struct wad_file_header hdr = f->headers[f->current_header];
 	SwapHeader(&hdr);
 	assert(!vfseek(f->vfs, 0, SEEK_SET));
 	assert(vfwrite(&hdr, sizeof(struct wad_file_header), 1, f->vfs) == 1);
-}
-
-// MaybeRollbackDirectory rolls back the last write of the WAD header to point
-// to the previous directory, if there is such a directory. Returns 1 if a
-// rollback was performed.
-static int MaybeRollbackDirectory(struct wad_file *f)
-{
-	unsigned int truncate_at;
-
-	if (f->rollback_header.table_offset == 0) {
-		return 0;
-	}
-
-	truncate_at = f->header.table_offset;
-
-	f->header = f->rollback_header;
-	WriteHeader(f);
-	vfsync(f->vfs);
-	f->rollback_header.table_offset = 0;
-
-	// Truncate off the new directory now that we no longer point at it.
-	vfseek(f->vfs, truncate_at, SEEK_SET);
-	vftruncate(f->vfs);
-
-	return 1;
 }
 
 static void LumpClosed(VFILE *fs, void *data)
@@ -312,47 +303,25 @@ static void WriteLumpClosed(VFILE *fs, void *data)
 
 	f->dirty = true;
 
-	ReadLumpHeader(f, f->current_lump_index);
+	ReadLumpHeader(f, &f->directory[f->current_lump_index]);
 }
 
 VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
 {
 	VFILE *result;
-	struct wad_file_entry *wadent;
 	long start;
 
 	assert(lump_index < f->num_lumps);
 	assert(f->current_lump == NULL);
-	wadent = &f->directory[lump_index];
 
-	// Every time we write a lump we write the new data to the EOF, then
-	// the new directory, then update the WAD header. As an optimization,
-	// if we write multiple lumps, each time we roll back the directory to
-	// point to the old directory and truncate the new directory off the
-	// EOF. This optimization ensures that after writing N lumps, the WAD
-	// file will only have one new directory written to it, rather than N
-	// copies of the directory. But at each stage the WAD file is always
-	// consistent.
-	if (MaybeRollbackDirectory(f)
-	 && f->last_lump_pos > 0 && wadent->size > 0
-	 && f->last_lump_pos == wadent->position) {
-		// We performed a rollback. But there's an additional
-		// optimization we can still perform. At the tail of the file
-		// is now the lump data for the last lump we wrote. If we're
-		// writing the same lump again then we can overwrite that, too.
-		start = f->last_lump_pos;
-		assert(!vfseek(f->vfs, start, SEEK_SET));
-	} else {
-		assert(!vfseek(f->vfs, 0, SEEK_END));
-		start = vftell(f->vfs);
-	}
+	assert(!vfseek(f->vfs, 0, SEEK_END));
+	start = vftell(f->vfs);
 
 	f->directory[lump_index].position = (unsigned int) start;
 
 	result = vfrestrict(f->vfs, start, -1, 0);
 	f->current_lump = result;
 	f->current_lump_index = lump_index;
-	f->last_lump_pos = start;
 
 	vfonclose(result, WriteLumpClosed, f);
 
@@ -363,12 +332,23 @@ static void WriteDirectoryCurrentPos(struct wad_file *f)
 {
 	int i;
 
-	// Save the current directory pointer so we can roll back to it later
-	// if we want to overwrite this new directory with an updated one.
-	f->rollback_header = f->header;
+	// Writing the new directory will create a new undo level.
+	// Check we don't overflow.
+	if (f->current_header + 1 >= UNDO_LEVELS) {
+		memmove(&f->headers[0], &f->headers[1],
+		        sizeof(struct wad_file_header) * (UNDO_LEVELS - 1));
+		f->current_header = UNDO_LEVELS - 1;
+		--f->num_headers;
+	}
+	++f->current_header;
+	f->headers[f->current_header] = f->headers[f->current_header - 1];
+	f->headers[f->current_header].table_offset =
+		(unsigned int) vftell(f->vfs);
+	f->headers[f->current_header].num_lumps = f->num_lumps;
 
-	f->header.table_offset = (unsigned int) vftell(f->vfs);
-	f->header.num_lumps = f->num_lumps;
+	// Any "redo" is impossible now.
+	f->num_headers = f->current_header + 1;
+
 	for (i = 0; i < f->num_lumps; i++) {
 		struct wad_file_entry ent = f->directory[i];
 		SwapEntry(&ent);
@@ -387,11 +367,6 @@ void W_WriteDirectory(struct wad_file *f)
 	if (!f->dirty) {
 		return;
 	}
-
-	// See comment in W_OpenLumpRewrite above. If we are writing a new
-	// lump (as opposed to directory modification) then this has already
-	// taken place.
-	MaybeRollbackDirectory(f);
 
 	// We always write the directory to the end of file.
 	assert(vfseek(f->vfs, 0, SEEK_END) == 0);
@@ -456,6 +431,7 @@ bool W_CompactWAD(struct wad_file *f)
 {
 	struct progress_window progress;
 	uint32_t min_size = MinimumWADSize(f);
+	uint32_t new_eof;
 
 	// Is file length shorter than the minimum size already? (This
 	// can happen if the file was compressed with wadptr)
@@ -491,11 +467,17 @@ bool W_CompactWAD(struct wad_file *f)
 	}
 
 	// Seek to new EOF, truncate, and we're done.
-	if (vfseek(f->vfs,
-	           f->header.table_offset + f->num_lumps * WAD_FILE_ENTRY_LEN,
-	           SEEK_SET) != 0) {
+	new_eof = f->headers[f->current_header].table_offset
+	        + f->num_lumps * WAD_FILE_ENTRY_LEN;
+	if (vfseek(f->vfs, new_eof, SEEK_SET) != 0) {
 		return false;
 	}
 	vftruncate(f->vfs);
+
+	// We cannot undo any more.
+	memmove(&f->headers[0], &f->headers[f->current_header],
+	        sizeof(struct wad_file_header));
+	f->current_header = 0;
+	f->num_headers = 1;
 	return true;
 }
