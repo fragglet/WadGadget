@@ -22,6 +22,8 @@
 #include "vfs.h"
 #include "view.h"
 
+#define WAD_JUNK_THRESHOLD_KB  500
+
 extern void SwitchToPane(struct directory_pane *pane); // in wadgadget.c
 extern void ReplacePane(struct directory_pane *old_pane,
                         struct directory_pane *new_pane);
@@ -489,9 +491,44 @@ const struct action mark_action = {
 	PerformMark,
 };
 
-static void PerformQuit(struct directory_pane *a,
-                        struct directory_pane *b)
+// Called when closing a file to check if it needs cleaning out.
+static void CheckCompactWad(struct directory_pane *pane)
 {
+	struct wad_file *wf = VFS_WadFile(pane->dir);
+	const char *filename;
+	uint32_t junk_bytes_kb;
+
+	if (wf == NULL) {
+		return;
+	}
+
+	// Has file been changed?
+	if (W_CanUndo(wf) == 0 && W_CanRedo(wf) == 0) {
+		return;
+	}
+	// Insignificant amount of junk?
+	junk_bytes_kb = W_NumJunkBytes(wf) / 1000;
+	if (junk_bytes_kb < WAD_JUNK_THRESHOLD_KB) {
+		return;
+	}
+	filename = PathBaseName(pane->dir->path);
+	if (!UI_ConfirmDialogBox("Compact WAD",
+	                         "'%s' contains %dKB of junk data.\n"
+	                         "Compact now?", filename, junk_bytes_kb)) {
+		return;
+	}
+	if (!W_CompactWAD(wf)) {
+		UI_MessageBox("Error when compacting '%s'.", filename);
+	}
+}
+
+static void PerformQuit(struct directory_pane *active_pane,
+                        struct directory_pane *other_pane)
+{
+	// Editing may have left some junk data. Prompt to see if
+	// the user wants to clean it out.
+	CheckCompactWad(active_pane);
+	CheckCompactWad(other_pane);
 	UI_ExitMainLoop();
 }
 
@@ -522,7 +559,6 @@ const struct action reload_action = {
 	0, 'R', "Reload", "Reload",
 	PerformReload,
 };
-
 
 static void NavigateNew(struct directory_pane *active_pane,
                         struct directory_pane *other_pane)
@@ -562,6 +598,9 @@ static void NavigateNew(struct directory_pane *active_pane,
 	free(path);
 
 	if (new_pane != NULL) {
+		// We're closing the current pane; if it is a WAD we might
+		// want to clean out any junk data we left behind.
+		CheckCompactWad(active_pane);
 		ReplacePane(active_pane, new_pane);
 		SwitchToPane(new_pane);
 	}
