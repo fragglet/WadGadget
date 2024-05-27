@@ -52,5 +52,8 @@ size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
 uint32_t W_NumJunkBytes(struct wad_file *f);
 bool W_CompactWAD(struct wad_file *f);
 
+int W_CanUndo(struct wad_file *wf);
+bool W_Undo(struct wad_file *wf, unsigned int levels);
+
 #endif /* #ifndef WAD_FILE_INCLUDED */
 

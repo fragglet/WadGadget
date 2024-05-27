@@ -33,6 +33,13 @@ struct wad_file {
 	VFILE *current_lump;
 	unsigned int current_lump_index;
 
+	// We support Undo by keeping multiple copies of the WAD header.
+	// Every time anything in the file changes, we write a new WAD
+	// directory. To undo, we simply revert the WAD header to point
+	// back to the old directory. Redo is implemented in the same way.
+	// This does mean that a WAD can become very fragmented over time
+	// as we keep writing new directories. When this happens, the
+	// user can use W_CompactWAD() to remove them.
 	struct wad_file_header headers[UNDO_LEVELS];
 	int current_header, num_headers;
 
@@ -498,5 +505,22 @@ bool W_CompactWAD(struct wad_file *f)
 	        sizeof(struct wad_file_header));
 	f->current_header = 0;
 	f->num_headers = 1;
+	return true;
+}
+
+int W_CanUndo(struct wad_file *wf)
+{
+	return wf->current_header;
+}
+
+bool W_Undo(struct wad_file *wf, unsigned int levels)
+{
+	assert(levels <= wf->current_header);
+	wf->current_header -= levels;
+	if (!ReadDirectory(wf)) {
+		wf->current_header += levels;
+		return false;
+	}
+	WriteHeader(wf);
 	return true;
 }
