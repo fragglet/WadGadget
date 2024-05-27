@@ -17,6 +17,7 @@ keys    mnemonic    type  function
 ^N      Next        std  Search again
 ^O  F5  {im,ex}pOrt alt  Copy / Import / Export
 ^P      Pnames      nwt  Jump to PNAMES
+^P  F2  comPact     res  Compact WAD (directory view only)
 ^Q      -           trm  XOFF
 ^R      Reload      std  Reload directory
 ^S      -           trm  XON

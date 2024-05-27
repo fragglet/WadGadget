@@ -49,6 +49,8 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index);
 void W_SetLumpName(struct wad_file *f, unsigned int index, const char *name);
 size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
                         uint8_t *buf, size_t buf_len);
+uint32_t W_NumJunkBytes(struct wad_file *f);
+bool W_CompactWAD(struct wad_file *f);
 
 #endif /* #ifndef WAD_FILE_INCLUDED */
 

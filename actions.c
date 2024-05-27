@@ -594,6 +594,77 @@ const struct action view_action = {
 	PerformView,
 };
 
+static void PerformCompact(struct directory_pane *active_pane,
+                           struct directory_pane *other_pane)
+{
+	const struct directory_entry *ent;
+	struct wad_file *wf;
+	bool already_open;
+	char *path;
+	enum file_type typ;
+	uint32_t junk_bytes;
+	int selected;
+
+	selected = UI_DirectoryPaneSelected(active_pane);
+	if (selected < 0) {
+		return;
+	}
+
+	ent = &active_pane->dir->entries[selected];
+	typ = UI_DirectoryPaneEntryType(active_pane);
+
+	// Change directory?
+	if (typ != FILE_TYPE_WAD) {
+		UI_MessageBox("Can't compact; '%s' is not a WAD file.",
+		              ent->name);
+		return;
+	}
+
+	path = UI_DirectoryPaneEntryPath(active_pane);
+
+	// WAD file may be open in the other pane; don't open twice.
+	already_open = other_pane->dir->type == FILE_TYPE_WAD
+	            && !strcmp(path, other_pane->dir->path);
+	if (already_open) {
+		wf = VFS_WadFile(other_pane->dir);
+	} else {
+		wf = W_OpenFile(path);
+	}
+	free(path);
+
+	if (wf == NULL) {
+		UI_MessageBox("Failed to open '%s'.", ent->name);
+		return;
+	}
+
+	junk_bytes = W_NumJunkBytes(wf);
+	if (junk_bytes == 0) {
+		UI_MessageBox("'%s' cannot be made any smaller.", ent->name);
+		goto fail;
+	} else if (!UI_ConfirmDialogBox("Compact WAD",
+		"'%s' contains %d junk bytes.\nCompact WAD?",
+		ent->name, junk_bytes)) {
+		goto fail;
+	}
+
+	if (!W_CompactWAD(wf)) {
+		UI_MessageBox("Failed to compact '%s'.", ent->name);
+	}
+
+	VFS_Refresh(active_pane->dir);
+	VFS_Refresh(other_pane->dir);
+
+fail:
+	if (!already_open) {
+		W_CloseFile(wf);
+	}
+}
+
+const struct action compact_action = {
+	KEY_F(2), 'P',  "Compact", "Compact WAD file",
+	PerformCompact,
+};
+
 // TODO:
 const struct action edit_action = {
 	KEY_F(4), 'E', "Edit", "Edit",

@@ -38,7 +38,7 @@ The following table gives a brief summary of the current state:
 | Quick search within WAD        | ✓                    | ✓                                           |                                      |
 | Open/edit via external editors |                      | ✓                                           |                                      |
 | Quick summary of lump contents | ✓ (graphics, demos)  | ✓ (graphics, demos, SFX, PC speaker sounds) | ✓ (almost everything)                |
-| WAD clean/compact              | ✓ (via command line) | fragglet/WadGadget#5                        | ✓                                    |
+| WAD clean/compact              | ✓ (via command line) | ✓                                           | ✓                                    |
 | Undo                           |                      | fragglet/WadGadget#6                        | ✓ (multi-level, plus redo)           |
 | Hexdump view                   | ✓                    | fragglet/WadGadget#7                        | ✓                                    |
 | View ENDOOM                    | ✓                    | ✓                                           | ✓                                    |

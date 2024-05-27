@@ -17,8 +17,11 @@
 #include <stdbool.h>
 
 #include "common.h"
+#include "dialog.h"
 #include "vfile.h"
 #include "wad_file.h"
+
+#define WAD_FILE_ENTRY_LEN  16
 
 struct wad_file {
 	VFILE *vfs;
@@ -356,25 +359,14 @@ VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
 	return result;
 }
 
-void W_WriteDirectory(struct wad_file *f)
+static void WriteDirectoryCurrentPos(struct wad_file *f)
 {
 	int i;
-
-	if (!f->dirty) {
-		return;
-	}
-
-	// See comment in W_OpenLumpRewrite above. If we are writing a new
-	// lump (as opposed to directory modification) then this has already
-	// taken place.
-	MaybeRollbackDirectory(f);
 
 	// Save the current directory pointer so we can roll back to it later
 	// if we want to overwrite this new directory with an updated one.
 	f->rollback_header = f->header;
 
-	// We always write the directory to the end of file.
-	assert(!vfseek(f->vfs, 0, SEEK_END));
 	f->header.table_offset = (unsigned int) vftell(f->vfs);
 	f->header.num_lumps = f->num_lumps;
 	for (i = 0; i < f->num_lumps; i++) {
@@ -386,8 +378,124 @@ void W_WriteDirectory(struct wad_file *f)
 
 	}
 	vfsync(f->vfs);
-
 	WriteHeader(f);
-
 	f->dirty = false;
+}
+
+void W_WriteDirectory(struct wad_file *f)
+{
+	if (!f->dirty) {
+		return;
+	}
+
+	// See comment in W_OpenLumpRewrite above. If we are writing a new
+	// lump (as opposed to directory modification) then this has already
+	// taken place.
+	MaybeRollbackDirectory(f);
+
+	// We always write the directory to the end of file.
+	assert(vfseek(f->vfs, 0, SEEK_END) == 0);
+	WriteDirectoryCurrentPos(f);
+}
+
+static uint32_t MinimumWADSize(struct wad_file *f)
+{
+	size_t result = sizeof(struct wad_file_header)
+	              + WAD_FILE_ENTRY_LEN * f->num_lumps;
+	int i;
+
+	for (i = 0; i < f->num_lumps; i++) {
+		result += f->directory[i].size;
+	}
+
+	return result;
+}
+
+uint32_t W_NumJunkBytes(struct wad_file *f)
+{
+	uint32_t min_size = MinimumWADSize(f);
+	long curr_size;
+
+	if (vfseek(f->vfs, 0, SEEK_END) != 0) {
+		return 0;
+	}
+
+	curr_size = vftell(f->vfs);
+	if (curr_size < min_size) {
+		return 0;
+	} else {
+		return curr_size - min_size;
+	}
+}
+
+static bool RewriteAllLumps(struct progress_window *progress, struct wad_file *f)
+{
+	VFILE *lump;
+	uint32_t new_pos;
+	int i;
+
+	for (i = 0; i < f->num_lumps; i++) {
+		new_pos = vftell(f->vfs);
+		lump = W_OpenLump(f, i);
+		if (lump == NULL) {
+			return false;
+		}
+		if (vfcopy(lump, f->vfs) != 0) {
+			return false;
+		}
+		vfclose(lump);
+		f->directory[i].position = new_pos;
+		UI_UpdateProgressWindow(progress, "");
+	}
+
+	WriteDirectoryCurrentPos(f);
+	return true;
+}
+
+bool W_CompactWAD(struct wad_file *f)
+{
+	struct progress_window progress;
+	uint32_t min_size = MinimumWADSize(f);
+
+	// Is file length shorter than the minimum size already? (This
+	// can happen if the file was compressed with wadptr)
+	if (vfseek(f->vfs, 0, SEEK_END) != 0 || vftell(f->vfs) <= min_size) {
+		return false;
+	}
+
+	// In compacting the WAD the end goal is to have all lumps at the
+	// start of the file (with no gaps), followed by the WAD directory,
+	// then the EOF. Step 1 is that we move all the existing data to the
+	// end of the file so that it is out of the way. Once this is
+	// complete and the directory has been updated to point to the new
+	// locations, step 2 is that we move all the data back again to the
+	// beginning of the file, then truncate it to the minimum size.
+
+	// TODO: Compacting could be made more effective by reusing the code
+	// from wadptr.
+
+	UI_InitProgressWindow(&progress, f->num_lumps * 2, "Compacting WAD");
+
+	// Rewrite the whole file's contents to its end.
+	if (!RewriteAllLumps(&progress, f)) {
+		return false;
+	}
+
+	// Now seek back to the start of file and rewrite everything again.
+	if (vfseek(f->vfs, sizeof(struct wad_file_header), SEEK_SET) != 0) {
+		return false;
+	}
+
+	if (!RewriteAllLumps(&progress, f)) {
+		return false;
+	}
+
+	// Seek to new EOF, truncate, and we're done.
+	if (vfseek(f->vfs,
+	           f->header.table_offset + f->num_lumps * WAD_FILE_ENTRY_LEN,
+	           SEEK_SET) != 0) {
+		return false;
+	}
+	vftruncate(f->vfs);
+	return true;
 }
