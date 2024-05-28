@@ -522,6 +522,7 @@ bool W_Undo(struct wad_file *wf, unsigned int levels)
 		return false;
 	}
 	WriteHeader(wf);
+	wf->dirty = false;
 	return true;
 }
 
@@ -539,5 +540,6 @@ bool W_Redo(struct wad_file *wf, unsigned int levels)
 		return false;
 	}
 	WriteHeader(wf);
+	wf->dirty = false;
 	return true;
 }
