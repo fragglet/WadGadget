@@ -245,11 +245,14 @@ static void TempMaybeImport(struct temp_edit_context *ctx)
 	if (from_file == NULL) {
 		UI_MessageBox("Import failed when opening temp file.\n%s",
 		              ctx->filename);
-	} else if (!ImportFromFile(from_file, ctx->filename,
-	                           VFS_WadFile(ctx->from), ctx->lumpnum,
-	                           flats_section, true)) {
+	} else if (ImportFromFile(from_file, ctx->filename,
+	                          VFS_WadFile(ctx->from), ctx->lumpnum,
+	                          flats_section, true)) {
+		VFS_CommitChanges(ctx->from);
+	} else {
 		UI_MessageBox("Import failed when importing back to WAD.");
 	}
+	VFS_Refresh(ctx->from);
 }
 
 static void TempCleanup(struct temp_edit_context *ctx)

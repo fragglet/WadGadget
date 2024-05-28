@@ -68,6 +68,7 @@ static void PerformCopy(struct directory_pane *active_pane,
 		                  &result, convert)) {
 			UI_DirectoryPaneSetTagged(other_pane, &result);
 			SwitchToPane(other_pane);
+			VFS_CommitChanges(to);
 		}
 		VFS_FreeSet(&result);
 		return;
@@ -196,7 +197,9 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 
 	free(filename2);
 
-	if (!PerformImport(from, from_set, newfile, 0, &result, convert)) {
+	if (PerformImport(from, from_set, newfile, 0, &result, convert)) {
+		VFS_CommitChanges(newfile);
+	} else {
 		free(filename);
 		filename = NULL;
 	}
@@ -282,6 +285,7 @@ static void MoveLumps(struct directory_pane *p, struct wad_file *wf)
 	insert_end = insert_start + p->tagged.num_entries;
 	insert_point = insert_start;
 
+	// TODO: Should this be done through VFS?
 	W_AddEntries(wf, insert_start, p->tagged.num_entries);
 	dir = W_GetDirectory(wf);
 	numlumps = W_NumLumps(wf);
@@ -308,6 +312,8 @@ static void MoveLumps(struct directory_pane *p, struct wad_file *wf)
 		--i;
 		dir = W_GetDirectory(wf);
 	}
+
+	W_CommitChanges(wf);
 
 	UI_ListPaneSelect(&p->pane, insert_start + 1);
 	VFS_Refresh(p->dir);
@@ -340,9 +346,11 @@ static void PerformNewLump(struct directory_pane *active_pane,
 	if (name == NULL) {
 		return;
 	}
+	// TODO: Should we be creating through VFS?
 	W_AddEntries(f, selected + 1, 1);
 	W_SetLumpName(f, selected + 1, name);
 	free(name);
+	W_CommitChanges(f);
 	VFS_Refresh(active_pane->dir);
 	UI_ListPaneKeypress(active_pane, KEY_DOWN);
 }
@@ -378,6 +386,7 @@ static void PerformRename(struct directory_pane *active_pane,
 	}
 	VFS_Rename(active_pane->dir, &active_pane->dir->entries[selected],
 		   input_filename);
+	VFS_CommitChanges(active_pane->dir);
 	VFS_Refresh(active_pane->dir);
 	free(input_filename);
 	UI_DirectoryPaneSelectBySerial(active_pane, serial_no);
@@ -420,6 +429,7 @@ static void PerformDelete(struct directory_pane *active_pane,
 		}
 		VFS_Remove(active_pane->dir, ent);
 	}
+	VFS_CommitChanges(active_pane->dir);
 	VFS_ClearSet(&active_pane->tagged);
 	VFS_Refresh(active_pane->dir);
 	if (UI_DirectoryPaneSelected(active_pane)
