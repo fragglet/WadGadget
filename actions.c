@@ -19,6 +19,7 @@
 #include "export.h"
 #include "pane.h"
 #include "strings.h"
+#include "ui.h"
 #include "vfs.h"
 #include "view.h"
 
@@ -550,6 +551,7 @@ static void PerformDelete(struct directory_pane *active_pane,
 		VFS_Remove(active_pane->dir, ent);
 	}
 	VFS_CommitChanges(active_pane->dir);
+	UI_ShowNotice("%d deleted.", tagged->num_entries);
 	VFS_ClearSet(&active_pane->tagged);
 	VFS_Refresh(active_pane->dir);
 	if (UI_DirectoryPaneSelected(active_pane)

@@ -11,11 +11,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <curses.h>
+#include <time.h>
 
 #include "colors.h"
 #include "common.h"
 #include "pane.h"
 #include "ui.h"
+
+#define MAX_NOTICE_LEN    100
+#define NOTICE_TIME_SECS    2
+
+static char notice_buf[MAX_NOTICE_LEN + 1];
+static time_t last_notice_time;
 
 int UI_StringWidth(char *s)
 {
@@ -80,6 +87,13 @@ static void DrawHeaderPane(void *p)
 	int w, h, x, y;
 	int i, count_extra;
 
+	if (time(NULL) - last_notice_time < NOTICE_TIME_SECS) {
+		wbkgdset(pane->window, COLOR_PAIR(PAIR_HEADER));
+		werase(pane->window);
+		mvwaddstr(pane->window, 0, 1, notice_buf);
+		return;
+	}
+
 	getmaxyx(pane->window, h, w);
 	h = h;
 
@@ -127,6 +141,17 @@ void UI_InitHeaderPane(struct pane *pane, WINDOW *win)
 	pane->window = win;
 	pane->draw = DrawHeaderPane;
 	pane->keypress = NULL;
+}
+
+void UI_ShowNotice(const char *msg, ...)
+{
+	va_list args;
+
+	va_start(args, msg);
+	vsnprintf(notice_buf, sizeof(notice_buf), msg, args);
+	va_end(args);
+
+	last_notice_time = time(NULL);
 }
 
 // These are clock hand directions. Imagine all the border characters as a
