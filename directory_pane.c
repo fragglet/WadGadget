@@ -265,6 +265,31 @@ char *UI_DirectoryPaneEntryPath(struct directory_pane *p)
 	}
 }
 
+static void DrawPane(void *p)
+{
+	struct directory_pane *dp = p;
+	WINDOW *win = dp->pane.pane.window;
+	int w, h, y;
+	UI_ListPaneDraw(p);
+
+	if (dp->tagged.num_entries != 0) {
+		char buf[16];
+		snprintf(buf, sizeof(buf), "[%d marked]",
+		         dp->tagged.num_entries);
+
+		getmaxyx(win, h, w);
+		if (w - strlen(dp->pane.title) - strlen(buf) > 10) {
+			y = 0;
+		} else {
+			y = h - 1;
+		}
+
+		wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
+		mvwaddstr(win, y, w - strlen(buf) - 3, buf);
+		wattroff(win, COLOR_PAIR(PAIR_PANE_COLOR));
+	}
+}
+
 struct directory_pane *UI_NewDirectoryPane(
 	WINDOW *w, struct directory *dir)
 {
@@ -272,6 +297,7 @@ struct directory_pane *UI_NewDirectoryPane(
 
 	p = calloc(1, sizeof(struct directory_pane));
 	UI_ListPaneInit(&p->pane, w, &directory_pane_funcs, p);
+	p->pane.pane.draw = DrawPane;
 	// TODO: Free
 	UI_ListPaneSetTitle(&p->pane, PathBaseName(dir->path));
 	p->dir = dir;

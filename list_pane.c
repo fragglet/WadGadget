@@ -32,7 +32,7 @@ unsigned int UI_ListPaneLines(struct list_pane *lp)
 	return y - 2;
 }
 
-static void Draw(void *p)
+void UI_ListPaneDraw(void *p)
 {
 	struct list_pane *lp = p;
 	WINDOW *win = lp->pane.window;
@@ -150,7 +150,7 @@ void UI_ListPaneInit(struct list_pane *p, WINDOW *w,
                      const struct list_pane_funcs *funcs, void *data)
 {
 	p->pane.window = w;
-	p->pane.draw = Draw;
+	p->pane.draw = UI_ListPaneDraw;
 	p->pane.keypress = UI_ListPaneKeypress;
 	p->subwin = NULL;
 	p->funcs = funcs;

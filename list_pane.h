@@ -34,6 +34,7 @@ struct list_pane {
 
 void UI_ListPaneInit(struct list_pane *p, WINDOW *w,
                      const struct list_pane_funcs *funcs, void *data);
+void UI_ListPaneDraw(void *p);
 void UI_ListPaneKeypress(void *p, int key);
 void UI_ListPaneFree(struct list_pane *p);
 int UI_ListPaneSelected(struct list_pane *p);
