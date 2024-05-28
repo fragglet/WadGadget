@@ -356,7 +356,12 @@ static void SortLumps(struct wad_file *wf, struct wad_file_entry *dir,
 		return;
 	}
 
+	// Pick pivot from middle (to avoid degenerate case if already sorted,
+	// and swap it to the start.
+	pivot = count / 2;
+	W_SwapEntries(wf, indexes[pivot], indexes[0]);
 	pivot = 0;
+
 	for (i = 1; i < count; i++) {
 		if (CompareLumps(dir, indexes[i], indexes[pivot]) < 0) {
 			// This belongs before the pivot.
