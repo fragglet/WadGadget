@@ -50,6 +50,7 @@ void W_SetLumpName(struct wad_file *f, unsigned int index, const char *name);
 size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
                         uint8_t *buf, size_t buf_len);
 uint32_t W_NumJunkBytes(struct wad_file *f);
+void W_SwapEntries(struct wad_file *f, unsigned int l1, unsigned int l2);
 
 // Must be called after any change to the file by above functions
 // (W_AddEntries, W_OpenLumpRewrite, etc.), otherwise the directory will

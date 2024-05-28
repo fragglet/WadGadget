@@ -395,6 +395,21 @@ static void WriteDirectoryCurrentPos(struct wad_file *f)
 	f->dirty = false;
 }
 
+void W_SwapEntries(struct wad_file *f, unsigned int l1, unsigned int l2)
+{
+	struct wad_file_entry tmp;
+
+	if (l1 == l2) {
+		return;
+	}
+	assert(l1 < f->num_lumps);
+	assert(l2 < f->num_lumps);
+	tmp = f->directory[l1];
+	f->directory[l1] = f->directory[l2];
+	f->directory[l2] = tmp;
+	f->dirty = true;
+}
+
 void W_CommitChanges(struct wad_file *f)
 {
 	if (!f->dirty) {
