@@ -334,6 +334,77 @@ const struct action rearrange_action = {
 	PerformRearrange,
 };
 
+static int CompareLumps(struct wad_file_entry *dir, unsigned int i1,
+                        unsigned int i2)
+{
+	int cmp = strncmp(dir[i1].name, dir[i2].name, 8);
+
+	// Fallback comparison preserves existing lump order.
+	if (cmp == 0) {
+		return i1 - i2;
+	} else {
+		return cmp;
+	}
+}
+
+static void SortLumps(struct wad_file *wf, struct wad_file_entry *dir,
+                      unsigned int *indexes, unsigned int count)
+{
+	unsigned int i, pivot;
+
+	if (count < 2) {
+		return;
+	}
+
+	pivot = 0;
+	for (i = 1; i < count; i++) {
+		if (CompareLumps(dir, indexes[i], indexes[pivot]) < 0) {
+			// This belongs before the pivot.
+			W_SwapEntries(wf, indexes[i], indexes[pivot]);
+			++pivot;
+			// Swap back pivot into place
+			W_SwapEntries(wf, indexes[i], indexes[pivot]);
+		}
+	}
+
+	SortLumps(wf, dir, indexes, pivot);
+	SortLumps(wf, dir, indexes + pivot + 1, count - pivot - 1);
+}
+
+static void PerformSortLumps(struct directory_pane *active_pane,
+                             struct directory_pane *other_pane)
+{
+	struct wad_file *wf;
+	struct wad_file_entry *dir;
+	unsigned int *indexes;
+	int i, j, num_lumps;
+
+	wf = VFS_WadFile(active_pane->dir);
+	num_lumps = W_NumLumps(wf);
+	dir = W_GetDirectory(wf);
+
+	// Build array of lump indexes for each tagged item.
+	indexes = checked_calloc(active_pane->tagged.num_entries, sizeof(int));
+	for (i = 0, j = 0; i < num_lumps; i++) {
+		if (VFS_SetHas(&active_pane->tagged, dir[i].serial_no)) {
+			indexes[j] = i;
+			++j;
+		}
+	}
+
+	SortLumps(wf, dir, indexes, active_pane->tagged.num_entries);
+
+	free(indexes);
+
+	W_CommitChanges(wf);
+	VFS_Refresh(active_pane->dir);
+}
+
+const struct action sort_lumps_action = {
+	SHIFT_KEY_F(2), 0, "Sort", "Sort lumps",
+	PerformSortLumps,
+};
+
 static void PerformNewLump(struct directory_pane *active_pane,
                            struct directory_pane *other_pane)
 {

@@ -176,6 +176,7 @@ static const struct action search_again_action = {
 
 static const struct action *wad_actions[] = {
 	&rearrange_action,
+	&sort_lumps_action,
 	&new_lump_action,
 	&edit_action,
 	&undo_action,
