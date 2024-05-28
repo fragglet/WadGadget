@@ -403,7 +403,26 @@ static void PerformSortLumps(struct directory_pane *active_pane,
 		}
 	}
 
-	SortLumps(wf, dir, indexes, active_pane->tagged.num_entries);
+	// Check if already sorted.
+	for (i = 0; i < num_tagged - 1; i++) {
+		if (CompareLumps(dir, indexes[i], indexes[i + 1]) > 0) {
+			break;
+		}
+	}
+
+	if (i < num_tagged - 1) {
+		SortLumps(wf, dir, indexes, num_tagged);
+	} else if (UI_ConfirmDialogBox("Sort lumps", "Sort", "Cancel",
+	                               "Lumps already sorted.\n"
+	                               "Sort into reverse order?")) {
+		// Reverse sort doesn't even require using SortLumps(). The
+		// lumps are already sorted, so we just need to reverse
+		// them.
+		for (i = 0; i < num_tagged / 2; i++) {
+			W_SwapEntries(wf, indexes[i],
+			              indexes[num_tagged - i - 1]);
+		}
+	}
 
 	free(indexes);
 
