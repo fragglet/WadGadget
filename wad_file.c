@@ -43,7 +43,7 @@ struct wad_file {
 	struct wad_file_header headers[UNDO_LEVELS];
 	int current_header, num_headers;
 
-	// Call to W_WriteDirectory needed.
+	// Call to W_CommitChanges needed.
 	bool dirty;
 };
 
@@ -82,7 +82,7 @@ bool W_CreateFile(const char *filename)
 	wf->num_headers = 1;
 	wf->current_header = 0;
 	memcpy(wf->headers[0].id, "PWAD", 4);
-	W_WriteDirectory(wf);
+	W_CommitChanges(wf);
 	W_CloseFile(wf);
 
 	return true;
@@ -388,7 +388,7 @@ static void WriteDirectoryCurrentPos(struct wad_file *f)
 	f->dirty = false;
 }
 
-void W_WriteDirectory(struct wad_file *f)
+void W_CommitChanges(struct wad_file *f)
 {
 	if (!f->dirty) {
 		return;

@@ -38,7 +38,6 @@ struct wad_file_entry *W_GetDirectory(struct wad_file *f);
 unsigned int W_NumLumps(struct wad_file *f);
 VFILE *W_OpenLump(struct wad_file *f, unsigned int lump_index);
 VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index);
-void W_WriteDirectory(struct wad_file *f);
 
 // Insert new WAD entries before the lump at the given index. If
 // `before_index == W_NumLumps()` then the new lumps are inserted at the
@@ -50,6 +49,15 @@ void W_SetLumpName(struct wad_file *f, unsigned int index, const char *name);
 size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
                         uint8_t *buf, size_t buf_len);
 uint32_t W_NumJunkBytes(struct wad_file *f);
+
+// Must be called after any change to the file by above functions
+// (W_AddEntries, W_OpenLumpRewrite, etc.), otherwise the directory will
+// not be updated and the changes will be lost.
+void W_CommitChanges(struct wad_file *f);
+
+// Functions below this point take effect immediately and do not require
+// callint W_CommitChanges().
+
 bool W_CompactWAD(struct wad_file *f);
 
 int W_CanUndo(struct wad_file *wf);
