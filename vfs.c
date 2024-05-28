@@ -302,7 +302,6 @@ static void WadDirectoryRefresh(void *_dir)
 	unsigned int i, num_lumps = W_NumLumps(dir->wad_file);
 	struct directory_entry *ent;
 
-	W_CommitChanges(dir->wad_file);
 	FreeEntries(&dir->dir);
 
 	dir->dir.num_entries = num_lumps;
