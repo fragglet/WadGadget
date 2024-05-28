@@ -41,6 +41,7 @@ struct directory_funcs {
 	void (*remove)(void *dir, struct directory_entry *entry);
 	void (*rename)(void *dir, struct directory_entry *entry,
 	               const char *new_name);
+	void (*commit)(void *dir);
 	// TODO: insert
 	void (*free)(void *dir);
 };
@@ -63,6 +64,7 @@ VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry);
 void VFS_Remove(struct directory *dir, struct directory_entry *entry);
 void VFS_Rename(struct directory *dir, struct directory_entry *entry,
                 const char *new_name);
+void VFS_CommitChanges(struct directory *dir);
 void VFS_Refresh(struct directory *dir);
 struct wad_file *VFS_WadFile(struct directory *dir);
 char *VFS_EntryPath(struct directory *dir, struct directory_entry *entry);

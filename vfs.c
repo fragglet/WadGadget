@@ -292,6 +292,7 @@ static const struct directory_funcs realdir_funcs = {
 	RealDirRemove,
 	RealDirRename,
 	NULL,
+	NULL,
 };
 
 static void WadDirectoryRefresh(void *_dir)
@@ -344,6 +345,12 @@ static void WadDirRename(void *_dir, struct directory_entry *entry,
 	W_SetLumpName(dir->wad_file, entry - dir->dir.entries, new_name);
 }
 
+static void WadDirCommit(void *_dir)
+{
+	struct wad_directory *dir = _dir;
+	W_CommitChanges(dir->wad_file);
+}
+
 static void WadDirFree(void *_dir)
 {
 	struct wad_directory *dir = _dir;
@@ -357,6 +364,7 @@ static const struct directory_funcs waddir_funcs = {
 	WadDirOpen,
 	WadDirRemove,
 	WadDirRename,
+	WadDirCommit,
 	WadDirFree,
 };
 
@@ -488,6 +496,13 @@ struct directory_entry *VFS_IterateSet(struct directory *dir,
 	}
 
 	return NULL;
+}
+
+void VFS_CommitChanges(struct directory *dir)
+{
+	if (dir->directory_funcs->commit != NULL) {
+		dir->directory_funcs->commit(dir);
+	}
 }
 
 void VFS_Refresh(struct directory *dir)
