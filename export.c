@@ -116,7 +116,8 @@ static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
 	}
 
 	VFS_DescribeSet(to, &overwrite_set, buf, sizeof(buf));
-	result = UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite %s?", buf);
+	result = UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite",
+	                             "Cancel", "Overwrite %s?", buf);
 	VFS_FreeSet(&overwrite_set);
 	return result;
 }

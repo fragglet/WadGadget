@@ -171,7 +171,7 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 	}
 
 	if (VFS_EntryByName(to, filename) != NULL
-	 && !UI_ConfirmDialogBox("Confirm Overwrite",
+	 && !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
 	                         "Overwrite existing '%s'?", filename)) {
 		free(filename);
 		return NULL;
@@ -229,7 +229,7 @@ static void CreateWad(struct directory_pane *active_pane,
 		from_pane = active_pane;
 		to_pane = active_pane;
 		if (from_pane->tagged.num_entries == 0
-		 && !UI_ConfirmDialogBox("Create WAD",
+		 && !UI_ConfirmDialogBox("Create WAD", "Create", "Cancel",
 		                         "Create an empty WAD file?")) {
 			return;
 		}
@@ -402,7 +402,8 @@ static void PerformDelete(struct directory_pane *active_pane,
 	}
 
 	VFS_DescribeSet(active_pane->dir, tagged, buf, sizeof(buf));
-	if (!UI_ConfirmDialogBox("Confirm Delete", "Delete %s?", buf)) {
+	if (!UI_ConfirmDialogBox("Confirm Delete", "Delete", "Cancel",
+	                         "Delete %s?", buf)) {
 		return;
 	}
 	// Note that there's a corner-case gotcha here. VFS serial
@@ -512,9 +513,10 @@ static void CheckCompactWad(struct directory_pane *pane)
 		return;
 	}
 	filename = PathBaseName(pane->dir->path);
-	if (!UI_ConfirmDialogBox("Compact WAD",
-	                         "'%s' contains %dKB of junk data.\n"
-	                         "Compact now?", filename, junk_bytes_kb)) {
+	if (!UI_ConfirmDialogBox(
+		"Compact WAD", "Compact", "Ignore",
+		"'%s' contains %dKB of junk data.\nCompact now?",
+		filename, junk_bytes_kb)) {
 		return;
 	}
 	if (!W_CompactWAD(wf)) {
@@ -681,6 +683,7 @@ static void PerformCompact(struct directory_pane *active_pane,
 		UI_MessageBox("'%s' cannot be made any smaller.", ent->name);
 		goto fail;
 	} else if (!UI_ConfirmDialogBox("Compact WAD",
+		"Compact", "Cancel",
 		"'%s' contains %d junk bytes.\nCompact WAD?",
 		ent->name, junk_bytes)) {
 		goto fail;

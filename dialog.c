@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <curses.h>
+#include <string.h>
 
 #include "colors.h"
 #include "common.h"
@@ -88,12 +89,18 @@ void UI_UpdateProgressWindow(struct progress_window *win, const char *ctx)
 	}
 }
 
+struct dialog_button {
+	char key_label[8];
+	const char *label;
+	int key;
+};
+
 struct confirm_dialog_box {
 	struct pane pane;
 	const char *title;
+	struct dialog_button left, right;
 	char msg[128];
 	int result;
-	bool has_confirm;
 };
 
 static void DrawConfirmDialog(void *pane)
@@ -115,11 +122,21 @@ static void DrawConfirmDialog(void *pane)
 	}
 
 	UI_PrintMultilineString(win, 1, 2, dialog->msg);
-	if (dialog->has_confirm) {
-		mvwaddstr(win, h - 2, 1, " ESC - Cancel ");
-		mvwaddstr(win, h - 2, w - 14, " Y - Confirm ");
-	} else {
-		mvwaddstr(win, h - 2, w - 14, " ESC - Close ");
+	if (dialog->left.label != NULL) {
+		mvwaddstr(win, h - 2, 1, " ");
+		waddstr(win, dialog->left.key_label);
+		waddstr(win, " - ");
+		waddstr(win, dialog->left.label);
+		waddstr(win, " ");
+	}
+	if (dialog->right.label != NULL) {
+		int x = w - strlen(dialog->right.label)
+		      - strlen(dialog->right.key_label) - 6;
+		mvwaddstr(win, h - 2, x, " ");
+		waddstr(win, dialog->right.key_label);
+		waddstr(win, " - ");
+		waddstr(win, dialog->right.label);
+		waddstr(win, " ");
 	}
 	wattroff(win, A_BOLD);
 }
@@ -128,11 +145,11 @@ static void ConfirmDialogKeypress(void *dialog, int key)
 {
 	struct confirm_dialog_box *d = dialog;
 
-	if (key == 27) {
+	if (d->left.key != 0 && key == d->left.key) {
 		d->result = 0;
 		UI_ExitMainLoop();
 	}
-	if (key == 'Y' || key == 'y') {
+	if (d->right.key != 0 && key == d->right.key) {
 		d->result = 1;
 		UI_ExitMainLoop();
 	}
@@ -151,9 +168,12 @@ static void InitDialogBox(struct confirm_dialog_box *dialog,
 	dialog->pane.draw = DrawConfirmDialog;
 	dialog->pane.keypress = ConfirmDialogKeypress;
 	dialog->title = title;
+	dialog->left.label = NULL;
+	dialog->right.label = NULL;
 }
 
-int UI_ConfirmDialogBox(const char *title, const char *msg, ...)
+int UI_ConfirmDialogBox(const char *title, const char *yes,
+                        const char *no, const char *msg, ...)
 {
 	struct confirm_dialog_box dialog;
 	va_list args;
@@ -163,7 +183,14 @@ int UI_ConfirmDialogBox(const char *title, const char *msg, ...)
 	va_end(args);
 
 	InitDialogBox(&dialog, title, msg);
-	dialog.has_confirm = true;
+
+	dialog.left.label = no;
+	snprintf(dialog.left.key_label, sizeof(dialog.left.key_label), "Esc");
+	dialog.left.key = 27;
+
+	dialog.right.label = yes;
+	snprintf(dialog.right.key_label, sizeof(dialog.right.key_label), "Y");
+	dialog.right.key = 'Y';
 
 	UI_PaneShow(&dialog);
 	UI_RunMainLoop();
@@ -182,7 +209,9 @@ void UI_MessageBox(const char *msg, ...)
 	va_end(args);
 
 	InitDialogBox(&dialog, NULL, msg);
-	dialog.has_confirm = false;
+	dialog.right.label = "Close";
+	snprintf(dialog.right.key_label, sizeof(dialog.right.key_label), "Esc");
+	dialog.right.key = 27;
 
 	UI_PaneShow(&dialog);
 	UI_RunMainLoop();

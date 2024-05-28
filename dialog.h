@@ -21,7 +21,8 @@ void UI_InitProgressWindow(struct progress_window *win, int total,
 void UI_UpdateProgressWindow(struct progress_window *win, const char *ctx);
 
 void UI_ShowNonblockingWindow(const char *msg, ...);
-int UI_ConfirmDialogBox(const char *title, const char *msg, ...);
+int UI_ConfirmDialogBox(const char *title, const char *yes,
+                        const char *no, const char *msg, ...);
 
 void UI_MessageBox(const char *msg, ...);
 
