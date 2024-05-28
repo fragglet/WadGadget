@@ -377,14 +377,20 @@ static void PerformSortLumps(struct directory_pane *active_pane,
 	struct wad_file *wf;
 	struct wad_file_entry *dir;
 	unsigned int *indexes;
-	int i, j, num_lumps;
+	int i, j, num_lumps, num_tagged;
+
+	num_tagged = active_pane->tagged.num_entries;
+	if (num_tagged ==  0) {
+		UI_MessageBox("You have not selected anything to sort.");
+		return;
+	}
 
 	wf = VFS_WadFile(active_pane->dir);
 	num_lumps = W_NumLumps(wf);
 	dir = W_GetDirectory(wf);
 
 	// Build array of lump indexes for each tagged item.
-	indexes = checked_calloc(active_pane->tagged.num_entries, sizeof(int));
+	indexes = checked_calloc(num_tagged, sizeof(int));
 	for (i = 0, j = 0; i < num_lumps; i++) {
 		if (VFS_SetHas(&active_pane->tagged, dir[i].serial_no)) {
 			indexes[j] = i;
