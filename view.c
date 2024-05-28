@@ -301,6 +301,7 @@ void OpenDirent(struct directory *dir, struct directory_entry *ent)
 		have_xdg_utils = have_xdg_utils || CheckHaveXdgUtils();
 
 		if (result != 0 && !have_xdg_utils) {
+			TF_SetCursesModes();
 			UI_MessageBox("Sorry, can't open files; xdg-open "
 			              "command not found.\nYou should install "
 			              "the xdg-utils package.");
