@@ -221,6 +221,7 @@ void UI_MessageBox(const char *msg, ...)
 struct text_input_dialog_box {
 	struct pane pane;
 	char *title;
+	const char *action;
 	char msg[128];
 	int result;
 	struct text_input_box input;
@@ -248,8 +249,10 @@ static void DrawTextInputDialog(void *pane)
 
 	UI_PrintMultilineString(win, 1, 2, dialog->msg);
 
-	mvwaddstr(win, h - 2, 1, " ESC - Cancel ");
-	mvwaddstr(win, h - 2, w - 16, " ENT - Confirm ");
+	mvwaddstr(win, h - 2, 1, " Esc - Cancel ");
+	mvwaddstr(win, h - 2, w - strlen(dialog->action) - 9, " Ent - ");
+	waddstr(win, dialog->action);
+	waddstr(win, " ");
 
 	wattroff(win, A_BOLD);
 	UI_TextInputDraw(&dialog->input);
@@ -271,7 +274,8 @@ static void TextInputDialogKeypress(void *dialog, int key)
 	UI_TextInputKeypress(&d->input, key);
 }
 
-char *UI_TextInputDialogBox(char *title, size_t max_chars, char *msg, ...)
+char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
+                            char *msg, ...)
 {
 	struct text_input_dialog_box dialog;
 	int scrh, scrw;
@@ -289,6 +293,7 @@ char *UI_TextInputDialogBox(char *title, size_t max_chars, char *msg, ...)
 	dialog.pane.draw = DrawTextInputDialog;
 	dialog.pane.keypress = TextInputDialogKeypress;
 	dialog.title = title;
+	dialog.action = action;
 	dialog.result = 0;
 	UI_TextInputInit(&dialog.input, dialog.pane.window, max_chars);
 	mvderwin(dialog.input.win, h - 4, 2);

@@ -130,7 +130,7 @@ static void PerformMkdir(struct directory_pane *active_pane,
 	char *input_filename, *filename;
 
 	input_filename = UI_TextInputDialogBox(
-	    "Make directory", 30, "Name for new directory?");
+	    "Make directory", "Create", 30, "Name for new directory?");
 	if (input_filename == NULL) {
 		return;
 	}
@@ -156,7 +156,7 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 	char *filename, *filename2;
 
 	filename = UI_TextInputDialogBox(
-		"Make new WAD", 30,
+		"Make new WAD", "Create", 30,
 		"Enter name for new WAD file:");
 
 	if (filename == NULL) {
@@ -335,7 +335,7 @@ static void PerformNewLump(struct directory_pane *active_pane,
 	struct wad_file *f = VFS_WadFile(active_pane->dir);
 
 	char *name = UI_TextInputDialogBox(
-		"New lump", 8,
+		"New lump", "Create", 8,
 		"Enter name for new lump:");
 	if (name == NULL) {
 		return;
@@ -372,7 +372,7 @@ static void PerformRename(struct directory_pane *active_pane,
 	}
 
 	input_filename = UI_TextInputDialogBox(
-	    "Rename", 30, "New name for '%s'?", old_name);
+	    "Rename", "Rename", 30, "New name for '%s'?", old_name);
 	if (input_filename == NULL) {
 		return;
 	}
@@ -439,7 +439,7 @@ static void PerformMarkPattern(struct directory_pane *active_pane,
 {
 	int first_match;
 	char *glob = UI_TextInputDialogBox(
-		"Mark pattern", 15,
+		"Mark pattern", "Mark", 15,
 		"Enter a wildcard pattern (eg. *.png):");
 	if (glob == NULL) {
 		return;
