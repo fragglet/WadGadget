@@ -406,6 +406,22 @@ static void PerformSortLumps(struct directory_pane *active_pane,
 	// It's possible we didn't fill the entire array.
 	num_tagged = j;
 
+	// Sanity check; it usually doesn't make sense to sort if they're
+	// not a contiguous sequence.
+	for (i = 0; i < num_tagged - 1; i++) {
+		if (indexes[i + 1] != indexes[i] + 1) {
+			break;
+		}
+	}
+
+	if (i < num_tagged - 1
+	 && !UI_ConfirmDialogBox("Sort lumps", "Continue", "Cancel",
+	                         "Tagged lumps are not contiguous.\n"
+	                         "Continue?")) {
+		free(indexes);
+		return;
+	}
+
 	// Check if already sorted.
 	for (i = 0; i < num_tagged - 1; i++) {
 		if (CompareLumps(dir, indexes[i], indexes[i + 1]) > 0) {
