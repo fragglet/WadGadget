@@ -88,7 +88,7 @@ static void DrawHeaderPane(void *p)
 	int i, count_extra;
 
 	if (time(NULL) - last_notice_time < NOTICE_TIME_SECS) {
-		wbkgdset(pane->window, COLOR_PAIR(PAIR_HEADER));
+		wbkgdset(pane->window, COLOR_PAIR(PAIR_NOTICE));
 		werase(pane->window);
 		mvwaddstr(pane->window, 0, 1, notice_buf);
 		return;

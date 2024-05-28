@@ -61,6 +61,7 @@ static const struct {
 	{PAIR_WAD_FILE,    COLOR_RED,          COLOR_BLACK},
 	{PAIR_DIALOG_BOX,  COLORX_BRIGHTWHITE, COLOR_MAGENTA},
 	{PAIR_TAGGED,      COLORX_BRIGHTWHITE, COLOR_RED},
+	{PAIR_NOTICE,      COLOR_BLACK,        COLOR_YELLOW},
 };
 
 // Old palette we saved and restore on quit.

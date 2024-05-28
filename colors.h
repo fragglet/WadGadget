@@ -15,4 +15,5 @@
 #define PAIR_DIALOG_BOX  5
 #define PAIR_WHITE_BLACK 6
 #define PAIR_TAGGED      7
+#define PAIR_NOTICE      8
 
