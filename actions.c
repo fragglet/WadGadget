@@ -385,7 +385,7 @@ static void PerformSortLumps(struct directory_pane *active_pane,
 	int i, j, num_lumps, num_tagged;
 
 	num_tagged = active_pane->tagged.num_entries;
-	if (num_tagged ==  0) {
+	if (num_tagged == 0) {
 		UI_MessageBox("You have not selected anything to sort.");
 		return;
 	}
@@ -402,6 +402,9 @@ static void PerformSortLumps(struct directory_pane *active_pane,
 			++j;
 		}
 	}
+
+	// It's possible we didn't fill the entire array.
+	num_tagged = j;
 
 	// Check if already sorted.
 	for (i = 0; i < num_tagged - 1; i++) {
