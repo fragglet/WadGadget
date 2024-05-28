@@ -13,6 +13,7 @@
 #include <stdarg.h>
 #include <curses.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "colors.h"
 #include "common.h"
@@ -145,11 +146,11 @@ static void ConfirmDialogKeypress(void *dialog, int key)
 {
 	struct confirm_dialog_box *d = dialog;
 
-	if (d->left.key != 0 && key == d->left.key) {
+	if (d->left.key != 0 && toupper(key) == toupper(d->left.key)) {
 		d->result = 0;
 		UI_ExitMainLoop();
 	}
-	if (d->right.key != 0 && key == d->right.key) {
+	if (d->right.key != 0 && toupper(key) == toupper(d->right.key)) {
 		d->result = 1;
 		UI_ExitMainLoop();
 	}
