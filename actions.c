@@ -842,6 +842,9 @@ static void PerformUndo(struct directory_pane *active_pane,
 		return;
 	}
 	VFS_Refresh(active_pane->dir);
+
+	// Undo screws up serial numbers.
+	VFS_ClearSet(&active_pane->tagged);
 }
 
 const struct action undo_action = {
@@ -864,6 +867,9 @@ static void PerformRedo(struct directory_pane *active_pane,
 		return;
 	}
 	VFS_Refresh(active_pane->dir);
+
+	// Undo screws up serial numbers.
+	VFS_ClearSet(&active_pane->tagged);
 }
 
 const struct action redo_action = {
