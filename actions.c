@@ -278,7 +278,7 @@ const struct action export_wad_action = {
 static void MoveLumps(struct directory_pane *p, struct wad_file *wf)
 {
 	struct wad_file_entry *dir;
-	int i, numlumps;
+	int i, j, numlumps;
 	int insert_start, insert_end, insert_point;
 
 	insert_start = UI_DirectoryPaneSelected(p) + 1;
@@ -290,29 +290,29 @@ static void MoveLumps(struct directory_pane *p, struct wad_file *wf)
 	dir = W_GetDirectory(wf);
 	numlumps = W_NumLumps(wf);
 
-	for (i = 0; i < numlumps; i++) {
-		if (i >= insert_start && i < insert_end) {
-			continue;
+	for (i = 0, j = 0; i < numlumps; i++) {
+		if ((i < insert_start || i >= insert_end)
+		 && VFS_SetHas(&p->tagged, dir[i].serial_no)) {
+			// This is a lump we want to move. Swap it into its
+			// new position.
+			W_SwapEntries(wf, i, insert_point);
+			++insert_point;
+			// There is now an empty "unnamed" lump in the old
+			// position, but it will be replaced the code below
+			// that moves lumps back.
+		} else {
+			W_SwapEntries(wf, i, j);
+			if (i == insert_point) {
+				insert_point = j;
+			}
+			j++;
 		}
-		if (!VFS_SetHas(&p->tagged, dir[i].serial_no)) {
-			continue;
-		}
-		// This is a lump we want to move.
-		memcpy(&dir[insert_point], &dir[i],
-		       sizeof(struct wad_file_entry));
-		++insert_point;
-
-		W_DeleteEntry(wf, i);
-		if (i <= insert_start) {
-			--insert_start;
-			--insert_end;
-			--insert_point;
-		}
-		--numlumps;
-		--i;
-		dir = W_GetDirectory(wf);
 	}
 
+	// All of the empty unnamed lumps are now at the end of the directory,
+	// and we can delete them.
+	W_DeleteEntries(wf, numlumps - p->tagged.num_entries,
+	                p->tagged.num_entries);
 	W_CommitChanges(wf);
 
 	UI_ListPaneSelect(&p->pane, insert_start + 1);
