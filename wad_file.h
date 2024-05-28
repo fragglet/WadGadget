@@ -44,6 +44,7 @@ VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index);
 // end of the directory.
 void W_AddEntries(struct wad_file *f, unsigned int before_index,
                   unsigned int count);
+void W_DeleteEntries(struct wad_file *f, unsigned int index, unsigned int cnt);
 void W_DeleteEntry(struct wad_file *f, unsigned int index);
 void W_SetLumpName(struct wad_file *f, unsigned int index, const char *name);
 size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,

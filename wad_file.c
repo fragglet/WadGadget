@@ -250,10 +250,17 @@ void W_AddEntries(struct wad_file *f, unsigned int before_index,
 
 void W_DeleteEntry(struct wad_file *f, unsigned int index)
 {
-	assert(index < f->num_lumps);
-	memmove(&f->directory[index], &f->directory[index + 1],
-	        (f->num_lumps - index - 1) * sizeof(struct wad_file_entry));
-	--f->num_lumps;
+	W_DeleteEntries(f, index, 1);
+}
+
+void W_DeleteEntries(struct wad_file *f, unsigned int index, unsigned int cnt)
+{
+	assert(index <= f->num_lumps);
+	assert(cnt <= f->num_lumps);
+	assert(index + cnt <= f->num_lumps);
+	memmove(&f->directory[index], &f->directory[index + cnt],
+	        (f->num_lumps - index - cnt) * sizeof(struct wad_file_entry));
+	f->num_lumps -= cnt;
 	f->dirty = true;
 }
 
