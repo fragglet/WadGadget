@@ -552,7 +552,6 @@ bool W_CompactWAD(struct wad_file *f)
 {
 	struct progress_window progress;
 	uint32_t min_size = MinimumWADSize(f);
-	uint32_t new_eof;
 
 	// Is file length shorter than the minimum size already? (This
 	// can happen if the file was compressed with wadptr)
@@ -585,9 +584,7 @@ bool W_CompactWAD(struct wad_file *f)
 	}
 
 	// Seek to new EOF, truncate, and we're done.
-	new_eof = CURR_HEADER(f)->table_offset
-	        + f->num_lumps * WAD_FILE_ENTRY_LEN;
-	if (vfseek(f->vfs, new_eof, SEEK_SET) != 0) {
+	if (vfseek(f->vfs, f->write_pos, SEEK_SET) != 0) {
 		return false;
 	}
 	vftruncate(f->vfs);
@@ -595,8 +592,6 @@ bool W_CompactWAD(struct wad_file *f)
 	// We cannot undo any more.
 	FreeRevisionChainBackward(f->curr_revision->prev);
 	f->curr_revision->prev = NULL;
-	FreeRevisionChainForward(f->curr_revision->next);
-	f->curr_revision->next = NULL;
 	return true;
 }
 
