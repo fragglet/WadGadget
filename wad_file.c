@@ -24,6 +24,13 @@
 #define UNDO_LEVELS         50
 #define WAD_FILE_ENTRY_LEN  16
 
+#define CURR_HEADER(wf) \
+	(&(wf)->revisions[(wf)->current_revision].header)
+
+struct wad_revision {
+	struct wad_file_header header;
+};
+
 struct wad_file {
 	VFILE *vfs;
 	struct wad_file_entry *directory;
@@ -38,10 +45,10 @@ struct wad_file {
 	// directory. To undo, we simply revert the WAD header to point
 	// back to the old directory. Redo is implemented in the same way.
 	// This does mean that a WAD can become very fragmented over time
-	// as we keep writing new directories. When this happens, the
-	// user can use W_CompactWAD() to remove them.
-	struct wad_file_header headers[UNDO_LEVELS];
-	int current_header, num_headers;
+	// as we keep writing new directories. When this happens, the user
+	// can use W_CompactWAD() to remove them.
+	struct wad_revision revisions[UNDO_LEVELS];
+	int current_revision, num_revisions;
 
 	// Call to W_CommitChanges needed.
 	bool dirty;
@@ -79,9 +86,9 @@ bool W_CreateFile(const char *filename)
 	wf = checked_calloc(1, sizeof(struct wad_file));
 	wf->vfs = vfwrapfile(fs);
 	wf->dirty = true;
-	wf->num_headers = 1;
-	wf->current_header = 0;
-	memcpy(wf->headers[0].id, "PWAD", 4);
+	wf->num_revisions = 1;
+	wf->current_revision = 0;
+	memcpy(CURR_HEADER(wf)->id, "PWAD", 4);
 	W_CommitChanges(wf);
 	W_CloseFile(wf);
 
@@ -100,7 +107,7 @@ static void SwapEntry(struct wad_file_entry *entry)
 	SwapLE32(&entry->size);
 }
 
-// Read WAD directory based on index in wf->headers[wf->current_header].
+// Read WAD directory based on CURR_HEADER(wf)->tablet_offet.
 // If there is a current directory, it is replaced.
 #define LOOKAHEAD 10
 static bool ReadDirectory(struct wad_file *wf)
@@ -109,8 +116,8 @@ static bool ReadDirectory(struct wad_file *wf)
 	size_t new_num_lumps;
 	int i, j, k, old_lump_index;
 
-	new_num_lumps = wf->headers[wf->current_header].num_lumps;
-	assert(vfseek(wf->vfs, wf->headers[wf->current_header].table_offset,
+	new_num_lumps = CURR_HEADER(wf)->num_lumps;
+	assert(vfseek(wf->vfs, CURR_HEADER(wf)->table_offset,
 	              SEEK_SET) == 0);
 	new_directory = checked_calloc(
 		new_num_lumps, sizeof(struct wad_file_entry));
@@ -178,18 +185,18 @@ struct wad_file *W_OpenFile(const char *filename)
 	result->vfs = vfs;
 	result->directory = NULL;
 	result->num_lumps = 0;
-	result->num_headers = 1;
-	result->current_header = 0;
+	result->num_revisions = 1;
+	result->current_revision = 0;
 
-	if (vfread(&result->headers[0],
+	if (vfread(CURR_HEADER(result),
 	           sizeof(struct wad_file_header), 1, vfs) != 1
-	 || (strncmp(result->headers[0].id, "IWAD", 4) != 0
-	  && strncmp(result->headers[0].id, "PWAD", 4) != 0)) {
+	 || (strncmp(CURR_HEADER(result)->id, "IWAD", 4) != 0
+	  && strncmp(CURR_HEADER(result)->id, "PWAD", 4) != 0)) {
 		W_CloseFile(result);
 		return NULL;
 	}
 
-	SwapHeader(&result->headers[0]);
+	SwapHeader(CURR_HEADER(result));
 
 	if (!ReadDirectory(result)) {
 		W_CloseFile(result);
@@ -288,7 +295,7 @@ size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
 
 static void WriteHeader(struct wad_file *f)
 {
-	struct wad_file_header hdr = f->headers[f->current_header];
+	struct wad_file_header hdr = *CURR_HEADER(f);
 	SwapHeader(&hdr);
 	assert(!vfseek(f->vfs, 0, SEEK_SET));
 	assert(vfwrite(&hdr, sizeof(struct wad_file_header), 1, f->vfs) == 1);
@@ -367,20 +374,20 @@ static void WriteDirectoryCurrentPos(struct wad_file *f)
 
 	// Writing the new directory will create a new undo level.
 	// Check we don't overflow.
-	if (f->current_header + 1 >= UNDO_LEVELS) {
-		memmove(&f->headers[0], &f->headers[1],
-		        sizeof(struct wad_file_header) * (UNDO_LEVELS - 1));
-		f->current_header = UNDO_LEVELS - 1;
-		--f->num_headers;
+	if (f->current_revision + 1 >= UNDO_LEVELS) {
+		memmove(&f->revisions[0], &f->revisions[1],
+		        sizeof(struct wad_revision) * (UNDO_LEVELS - 1));
+		f->current_revision = UNDO_LEVELS - 1;
+		--f->num_revisions;
 	}
-	++f->current_header;
-	f->headers[f->current_header] = f->headers[f->current_header - 1];
-	f->headers[f->current_header].table_offset =
-		(unsigned int) vftell(f->vfs);
-	f->headers[f->current_header].num_lumps = f->num_lumps;
+	++f->current_revision;
+	f->revisions[f->current_revision] =
+		f->revisions[f->current_revision - 1];
+	CURR_HEADER(f)->table_offset = (unsigned int) vftell(f->vfs);
+	CURR_HEADER(f)->num_lumps = f->num_lumps;
 
 	// Any "redo" is impossible now.
-	f->num_headers = f->current_header + 1;
+	f->num_revisions = f->current_revision + 1;
 
 	for (i = 0; i < f->num_lumps; i++) {
 		struct wad_file_entry ent = f->directory[i];
@@ -451,7 +458,8 @@ uint32_t W_NumJunkBytes(struct wad_file *f)
 	}
 }
 
-static bool RewriteAllLumps(struct progress_window *progress, struct wad_file *f)
+static bool RewriteAllLumps(struct progress_window *progress,
+                            struct wad_file *f)
 {
 	VFILE *lump;
 	uint32_t new_pos;
@@ -515,7 +523,7 @@ bool W_CompactWAD(struct wad_file *f)
 	}
 
 	// Seek to new EOF, truncate, and we're done.
-	new_eof = f->headers[f->current_header].table_offset
+	new_eof = CURR_HEADER(f)->table_offset
 	        + f->num_lumps * WAD_FILE_ENTRY_LEN;
 	if (vfseek(f->vfs, new_eof, SEEK_SET) != 0) {
 		return false;
@@ -523,24 +531,24 @@ bool W_CompactWAD(struct wad_file *f)
 	vftruncate(f->vfs);
 
 	// We cannot undo any more.
-	memmove(&f->headers[0], &f->headers[f->current_header],
-	        sizeof(struct wad_file_header));
-	f->current_header = 0;
-	f->num_headers = 1;
+	memmove(&f->revisions[0], &f->revisions[f->current_revision],
+	        sizeof(struct wad_revision));
+	f->current_revision = 0;
+	f->num_revisions = 1;
 	return true;
 }
 
 int W_CanUndo(struct wad_file *wf)
 {
-	return wf->current_header;
+	return wf->current_revision;
 }
 
 bool W_Undo(struct wad_file *wf, unsigned int levels)
 {
 	assert(levels <= W_CanUndo(wf));
-	wf->current_header -= levels;
+	wf->current_revision -= levels;
 	if (!ReadDirectory(wf)) {
-		wf->current_header += levels;
+		wf->current_revision += levels;
 		return false;
 	}
 	WriteHeader(wf);
@@ -550,15 +558,15 @@ bool W_Undo(struct wad_file *wf, unsigned int levels)
 
 int W_CanRedo(struct wad_file *wf)
 {
-	return wf->num_headers - wf->current_header - 1;
+	return wf->num_revisions - wf->current_revision - 1;
 }
 
 bool W_Redo(struct wad_file *wf, unsigned int levels)
 {
 	assert(levels <= W_CanRedo(wf));
-	wf->current_header += levels;
+	wf->current_revision += levels;
 	if (!ReadDirectory(wf)) {
-		wf->current_header -= levels;
+		wf->current_revision -= levels;
 		return false;
 	}
 	WriteHeader(wf);
