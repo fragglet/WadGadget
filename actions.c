@@ -42,6 +42,7 @@ static void PerformCopy(struct directory_pane *active_pane,
 	if (to->type == FILE_TYPE_DIR) {
 		struct file_set *export_set =
 			UI_DirectoryPaneTagged(active_pane);
+
 		if (export_set->num_entries < 1) {
 			UI_MessageBox(
 			    "You have not selected anything to export.");
@@ -51,6 +52,13 @@ static void PerformCopy(struct directory_pane *active_pane,
 		if (PerformExport(from, export_set, to, &result, convert)) {
 			UI_DirectoryPaneSetTagged(other_pane, &result);
 			SwitchToPane(other_pane);
+			if (from->type == FILE_TYPE_WAD) {
+				UI_ShowNotice("%d file(s) exported.",
+				              result.num_entries);
+			} else {
+				UI_ShowNotice("%d file(s) copied.",
+				              result.num_entries);
+			}
 		}
 		VFS_FreeSet(&result);
 		return;
@@ -59,6 +67,7 @@ static void PerformCopy(struct directory_pane *active_pane,
 		struct file_set *import_set =
 			UI_DirectoryPaneTagged(active_pane);
 		int to_point = UI_DirectoryPaneSelected(other_pane) + 1;
+
 		if (import_set->num_entries < 1) {
 			UI_MessageBox(
 			    "You have not selected anything to import.");
@@ -70,6 +79,13 @@ static void PerformCopy(struct directory_pane *active_pane,
 			UI_DirectoryPaneSetTagged(other_pane, &result);
 			SwitchToPane(other_pane);
 			VFS_CommitChanges(to);
+			if (from->type == FILE_TYPE_WAD) {
+				UI_ShowNotice("%d lump(s) copied.",
+				              result.num_entries);
+			} else {
+				UI_ShowNotice("%d file(s) imported.",
+				              result.num_entries);
+			}
 		}
 		VFS_FreeSet(&result);
 		return;
@@ -200,6 +216,8 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 
 	if (PerformImport(from, from_set, newfile, 0, &result, convert)) {
 		VFS_CommitChanges(newfile);
+		UI_ShowNotice("New WAD contains %d lumps.",
+		              result.num_entries);
 	} else {
 		free(filename);
 		filename = NULL;
