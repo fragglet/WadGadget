@@ -594,17 +594,23 @@ static void PerformMarkPattern(struct directory_pane *active_pane,
                                struct directory_pane *other_pane)
 {
 	int first_match;
+	size_t old_cnt;
+
 	char *glob = UI_TextInputDialogBox(
 		"Mark pattern", "Mark", 15,
 		"Enter a wildcard pattern (eg. *.png):");
 	if (glob == NULL) {
 		return;
 	}
-	first_match = VFS_AddGlobToSet(active_pane->dir, &active_pane->tagged, glob);
+	old_cnt = active_pane->tagged.num_entries;
+	first_match = VFS_AddGlobToSet(active_pane->dir,
+	                               &active_pane->tagged, glob);
 	if (first_match < 0) {
-		UI_MessageBox("No matches found.");
+		UI_ShowNotice("No matches found.");
 	} else {
 		UI_ListPaneSelect(&active_pane->pane, first_match + 1);
+		UI_ShowNotice("%d marked.",
+		              active_pane->tagged.num_entries - old_cnt);
 	}
 	free(glob);
 }
