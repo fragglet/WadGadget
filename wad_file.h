@@ -59,7 +59,7 @@ void W_CommitChanges(struct wad_file *f);
 #define W_Rollback(f)  W_Undo(f, 0)
 
 // Functions below this point take effect immediately and do not require
-// callint W_CommitChanges().
+// calling W_CommitChanges().
 
 bool W_CompactWAD(struct wad_file *f);
 
