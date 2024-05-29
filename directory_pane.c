@@ -69,7 +69,11 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 		// Show insert point for where we'll import into the WAD:
 		if (!dp->pane.active && idx == dp->pane.selected
 		 && dp->dir->type != FILE_TYPE_DIR) {
-			prefix = '_';
+			if ((termattrs() & A_UNDERLINE) != 0) {
+				wattron(win, A_UNDERLINE);
+			} else {
+				prefix = '_';
+			}
 		}
 
 		// We only show size for lumps (like NWT); for files it
@@ -94,7 +98,9 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	} else {
 		mvwaddstr(win, 0, w - strlen(size) - 1, " ");
 		waddstr(win, size);
+		waddstr(win, " ");
 	}
+	wattroff(win, A_UNDERLINE);
 	wattroff(win, A_REVERSE);
 	wattroff(win, A_BOLD);
 	wattroff(win, COLOR_PAIR(PAIR_WHITE_BLACK));
