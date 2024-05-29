@@ -318,6 +318,8 @@ static void MoveLumps(struct directory_pane *p, struct wad_file *wf)
 
 	UI_ListPaneSelect(&p->pane, insert_start + 1);
 	VFS_Refresh(p->dir);
+
+	UI_ShowNotice("%d lumps moved.", p->tagged.num_entries);
 }
 
 static void PerformRearrange(struct directory_pane *active_pane,
@@ -432,6 +434,7 @@ static void PerformSortLumps(struct directory_pane *active_pane,
 
 	if (i < num_tagged - 1) {
 		SortLumps(wf, dir, indexes, num_tagged);
+		UI_ShowNotice("%d lumps sorted.", num_tagged);
 	} else if (UI_ConfirmDialogBox("Sort lumps", "Sort", "Cancel",
 	                               "Lumps already sorted.\n"
 	                               "Sort into reverse order?")) {
@@ -442,6 +445,7 @@ static void PerformSortLumps(struct directory_pane *active_pane,
 			W_SwapEntries(wf, indexes[i],
 			              indexes[num_tagged - i - 1]);
 		}
+		UI_ShowNotice("%d lumps reverse sorted.", num_tagged);
 	}
 
 	free(indexes);
@@ -651,7 +655,9 @@ static void CheckCompactWad(struct directory_pane *pane)
 		filename, junk_bytes_kb)) {
 		return;
 	}
-	if (!W_CompactWAD(wf)) {
+	if (W_CompactWAD(wf)) {
+		UI_ShowNotice("WAD compacted; %dKB saved.", junk_bytes_kb);
+	} else {
 		UI_MessageBox("Error when compacting '%s'.", filename);
 	}
 }
@@ -821,7 +827,9 @@ static void PerformCompact(struct directory_pane *active_pane,
 		goto fail;
 	}
 
-	if (!W_CompactWAD(wf)) {
+	if (W_CompactWAD(wf)) {
+		UI_ShowNotice("WAD compacted; %dKB saved.", junk_bytes / 1000);
+	} else {
 		UI_MessageBox("Failed to compact '%s'.", ent->name);
 	}
 
@@ -873,6 +881,8 @@ static void PerformUndo(struct directory_pane *active_pane,
 
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
+
+	UI_ShowNotice("Change undone.");
 }
 
 const struct action undo_action = {
@@ -898,6 +908,8 @@ static void PerformRedo(struct directory_pane *active_pane,
 
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
+
+	UI_ShowNotice("Change restored.");
 }
 
 const struct action redo_action = {

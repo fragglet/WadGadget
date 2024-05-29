@@ -249,6 +249,7 @@ static void TempMaybeImport(struct temp_edit_context *ctx)
 	                          VFS_WadFile(ctx->from), ctx->lumpnum,
 	                          flats_section, true)) {
 		VFS_CommitChanges(ctx->from);
+		UI_ShowNotice("'%s' updated.", ctx->ent->name);
 	} else {
 		UI_MessageBox("Import failed when importing back to WAD.");
 	}
