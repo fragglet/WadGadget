@@ -51,6 +51,11 @@ struct wad_file {
 	struct wad_revision revisions[UNDO_LEVELS];
 	int current_revision, num_revisions;
 
+	// Current position to start writing any new data. This is usually
+	// at the EOF, but if we undid a previous change we may be
+	// overwriting previously written data.
+	long write_pos;
+
 	// Call to W_CommitChanges needed.
 	bool dirty;
 };
@@ -91,6 +96,7 @@ bool W_CreateFile(const char *filename)
 	wf->current_revision = 0;
 	memcpy(CURR_HEADER(wf)->id, "PWAD", 4);
 	wf->revisions[0].eof = sizeof(struct wad_file_header);
+	wf->write_pos = sizeof(struct wad_file_header);
 	W_CommitChanges(wf);
 	W_CloseFile(wf);
 
@@ -210,6 +216,7 @@ struct wad_file *W_OpenFile(const char *filename)
 		return NULL;
 	}
 	result->revisions[0].eof = vftell(result->vfs);
+	result->write_pos = result->revisions[0].eof;
 
 	return result;
 }
@@ -229,6 +236,7 @@ void W_CloseFile(struct wad_file *f)
 	if (f->current_lump != NULL) {
 		vfclose(f->current_lump);
 	}
+	// TODO: Truncate at current revision's EOF
 	vfclose(f->vfs);
 	free(f->directory);
 	free(f);
@@ -338,6 +346,7 @@ VFILE *W_OpenLump(struct wad_file *f, unsigned int lump_index)
 
 static void WriteLumpClosed(VFILE *fs, void *data)
 {
+	struct wad_file_entry *ent;
 	struct wad_file *f = data;
 	long size;
 
@@ -347,27 +356,25 @@ static void WriteLumpClosed(VFILE *fs, void *data)
 	// New size of lump is the offset within the restricted VFILE.
 	size = vftell(fs);
 	assert(f->current_lump_index < f->num_lumps);
-	f->directory[f->current_lump_index].size = (unsigned int) size;
-
+	ent = &f->directory[f->current_lump_index];
+	ent->size = (unsigned int) size;
+	f->write_pos = ent->position + ent->size;
 	f->dirty = true;
 
-	ReadLumpHeader(f, &f->directory[f->current_lump_index]);
+	ReadLumpHeader(f, ent);
 }
 
 VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
 {
 	VFILE *result;
-	long start;
 
 	assert(lump_index < f->num_lumps);
 	assert(f->current_lump == NULL);
 
-	assert(!vfseek(f->vfs, 0, SEEK_END));
-	start = vftell(f->vfs);
+	assert(!vfseek(f->vfs, f->write_pos, SEEK_SET));
+	f->directory[lump_index].position = (unsigned int) f->write_pos;
 
-	f->directory[lump_index].position = (unsigned int) start;
-
-	result = vfrestrict(f->vfs, start, -1, 0);
+	result = vfrestrict(f->vfs, f->write_pos, -1, 0);
 	f->current_lump = result;
 	f->current_lump_index = lump_index;
 
@@ -376,7 +383,7 @@ VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
 	return result;
 }
 
-static void WriteDirectoryCurrentPos(struct wad_file *f)
+static void WriteDirectory(struct wad_file *f)
 {
 	int i;
 
@@ -388,14 +395,8 @@ static void WriteDirectoryCurrentPos(struct wad_file *f)
 		f->current_revision = UNDO_LEVELS - 1;
 		--f->num_revisions;
 	}
-	++f->current_revision;
-	f->revisions[f->current_revision] =
-		f->revisions[f->current_revision - 1];
-	CURR_HEADER(f)->table_offset = (unsigned int) vftell(f->vfs);
-	CURR_HEADER(f)->num_lumps = f->num_lumps;
 
-	// Any "redo" is impossible now.
-	f->num_revisions = f->current_revision + 1;
+	assert(vfseek(f->vfs, f->write_pos, SEEK_SET) == 0);
 
 	for (i = 0; i < f->num_lumps; i++) {
 		struct wad_file_entry ent = f->directory[i];
@@ -405,13 +406,24 @@ static void WriteDirectoryCurrentPos(struct wad_file *f)
 		       vfwrite(&ent.name, 8, 1, f->vfs) == 1);
 
 	}
+
+	++f->current_revision;
+	f->revisions[f->current_revision] =
+		f->revisions[f->current_revision - 1];
+	CURR_HEADER(f)->table_offset = f->write_pos;
+	CURR_HEADER(f)->num_lumps = f->num_lumps;
+	f->write_pos = vftell(f->vfs);
+
+	// Save the current EOF. If we roll back to this revision later,
+	// we can truncate the file here.
+	f->revisions[f->current_revision].eof = f->write_pos;
+
 	vfsync(f->vfs);
 	WriteHeader(f);
 	f->dirty = false;
 
-	// Save the current EOF. If we roll back to this revision later,
-	// we can truncate the file here.
-	f->revisions[f->current_revision].eof = vftell(f->vfs);
+	// Any "redo" is impossible now.
+	f->num_revisions = f->current_revision + 1;
 }
 
 void W_SwapEntries(struct wad_file *f, unsigned int l1, unsigned int l2)
@@ -435,9 +447,7 @@ void W_CommitChanges(struct wad_file *f)
 		return;
 	}
 
-	// We always write the directory to the end of file.
-	assert(vfseek(f->vfs, 0, SEEK_END) == 0);
-	WriteDirectoryCurrentPos(f);
+	WriteDirectory(f);
 }
 
 static uint32_t MinimumWADSize(struct wad_file *f)
@@ -477,6 +487,10 @@ static bool RewriteAllLumps(struct progress_window *progress,
 	uint32_t new_pos;
 	int i;
 
+	if (vfseek(f->vfs, f->write_pos, SEEK_SET) != 0) {
+		return false;
+	}
+
 	for (i = 0; i < f->num_lumps; i++) {
 		new_pos = vftell(f->vfs);
 		lump = W_OpenLump(f, i);
@@ -491,7 +505,8 @@ static bool RewriteAllLumps(struct progress_window *progress,
 		UI_UpdateProgressWindow(progress, "");
 	}
 
-	WriteDirectoryCurrentPos(f);
+	f->write_pos = vftell(f->vfs);
+	WriteDirectory(f);
 	return true;
 }
 
@@ -526,10 +541,7 @@ bool W_CompactWAD(struct wad_file *f)
 	}
 
 	// Now seek back to the start of file and rewrite everything again.
-	if (vfseek(f->vfs, sizeof(struct wad_file_header), SEEK_SET) != 0) {
-		return false;
-	}
-
+	f->write_pos = sizeof(struct wad_file_header);
 	if (!RewriteAllLumps(&progress, f)) {
 		return false;
 	}
@@ -565,6 +577,7 @@ bool W_Undo(struct wad_file *wf, unsigned int levels)
 		return false;
 	}
 	WriteHeader(wf);
+	wf->write_pos = wf->revisions[wf->current_revision].eof;
 	wf->dirty = false;
 	return true;
 }
@@ -583,6 +596,7 @@ bool W_Redo(struct wad_file *wf, unsigned int levels)
 		return false;
 	}
 	WriteHeader(wf);
+	wf->write_pos = wf->revisions[wf->current_revision].eof;
 	wf->dirty = false;
 	return true;
 }
