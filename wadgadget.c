@@ -176,11 +176,11 @@ static const struct action search_again_action = {
 
 static const struct action *wad_actions[] = {
 	&rearrange_action,
-	&sort_lumps_action,
 	&new_lump_action,
 	&edit_action,
 	&undo_action,
 	&redo_action,
+	&sort_lumps_action,
 	NULL,
 };
 
@@ -261,11 +261,11 @@ static void BuildActionsList(void)
 
 	memset(actions, 0, sizeof(struct action *) * MAX_KEY_BINDINGS);
 
-	AddActionList(common_actions, &idx);
 	AddActionList(type_actions[active == FILE_TYPE_WAD], &idx);
 	AddActionList(
 		action_lists[active == FILE_TYPE_WAD][other == FILE_TYPE_WAD],
 		&idx);
+	AddActionList(common_actions, &idx);
 	actions[idx] = NULL;
 }
 
