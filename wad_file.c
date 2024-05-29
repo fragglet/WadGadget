@@ -24,8 +24,9 @@
 #define UNDO_LEVELS         50
 #define WAD_FILE_ENTRY_LEN  16
 
-#define CURR_HEADER(wf) \
-	(&(wf)->revisions[(wf)->current_revision].header)
+#define CURR_REVISION(wf) \
+	(&(wf)->revisions[(wf)->current_revision])
+#define CURR_HEADER(wf) (&CURR_REVISION(wf)->header)
 
 struct wad_revision {
 	struct wad_file_header header;
@@ -408,15 +409,14 @@ static void WriteDirectory(struct wad_file *f)
 	}
 
 	++f->current_revision;
-	f->revisions[f->current_revision] =
-		f->revisions[f->current_revision - 1];
+	*CURR_REVISION(f) = f->revisions[f->current_revision - 1];
 	CURR_HEADER(f)->table_offset = f->write_pos;
 	CURR_HEADER(f)->num_lumps = f->num_lumps;
 	f->write_pos = vftell(f->vfs);
 
 	// Save the current EOF. If we roll back to this revision later,
 	// we can truncate the file here.
-	f->revisions[f->current_revision].eof = f->write_pos;
+	CURR_REVISION(f)->eof = f->write_pos;
 
 	vfsync(f->vfs);
 	WriteHeader(f);
@@ -555,11 +555,12 @@ bool W_CompactWAD(struct wad_file *f)
 	vftruncate(f->vfs);
 
 	// We cannot undo any more.
-	memmove(&f->revisions[0], &f->revisions[f->current_revision],
+	f->revisions[0] = *CURR_REVISION(f);
+	memmove(&f->revisions[0], CURR_REVISION(f),
 	        sizeof(struct wad_revision));
-	f->revisions[0].eof = new_eof;
 	f->current_revision = 0;
 	f->num_revisions = 1;
+	CURR_REVISION(f)->eof = new_eof;
 	return true;
 }
 
@@ -577,7 +578,7 @@ bool W_Undo(struct wad_file *wf, unsigned int levels)
 		return false;
 	}
 	WriteHeader(wf);
-	wf->write_pos = wf->revisions[wf->current_revision].eof;
+	wf->write_pos = CURR_REVISION(wf)->eof;
 	wf->dirty = false;
 	return true;
 }
@@ -596,7 +597,7 @@ bool W_Redo(struct wad_file *wf, unsigned int levels)
 		return false;
 	}
 	WriteHeader(wf);
-	wf->write_pos = wf->revisions[wf->current_revision].eof;
+	wf->write_pos = CURR_REVISION(wf)->eof;
 	wf->dirty = false;
 	return true;
 }
