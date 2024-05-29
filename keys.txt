@@ -28,6 +28,7 @@ keys    mnemonic    type  function
 ^X  F8  -           std  Delete lump / file, like "Cut"
 ^Y      -           std  Redo
 ^Z      -           std  Undo. Need to catch SIGTSTP
+^] S-F2 Sort        res  Sort lumps by name
 Esc     Quit        res  Quit
 Spc                 nwt  Mark
 

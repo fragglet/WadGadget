@@ -474,7 +474,7 @@ static void PerformSortLumps(struct directory_pane *active_pane,
 }
 
 const struct action sort_lumps_action = {
-	SHIFT_KEY_F(2), 0, "Sort", "Sort lumps",
+	SHIFT_KEY_F(2), ']', "Sort", "Sort lumps",
 	PerformSortLumps,
 };
 
