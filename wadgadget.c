@@ -453,6 +453,12 @@ static void InitSearchPane(WINDOW *win)
 static void Shutdown(void)
 {
 	TF_RestoreOldPalette();
+	if (panes[0] != NULL) {
+		VFS_CloseDir(panes[0]->dir);
+	}
+	if (panes[1] != NULL) {
+		VFS_CloseDir(panes[1]->dir);
+	}
 	clear();
 	refresh();
 	endwin();
