@@ -29,6 +29,7 @@
 
 struct wad_revision {
 	struct wad_file_header header;
+	long eof;
 };
 
 struct wad_file {
@@ -89,6 +90,7 @@ bool W_CreateFile(const char *filename)
 	wf->num_revisions = 1;
 	wf->current_revision = 0;
 	memcpy(CURR_HEADER(wf)->id, "PWAD", 4);
+	wf->revisions[0].eof = sizeof(struct wad_file_header);
 	W_CommitChanges(wf);
 	W_CloseFile(wf);
 
@@ -200,8 +202,14 @@ struct wad_file *W_OpenFile(const char *filename)
 
 	if (!ReadDirectory(result)) {
 		W_CloseFile(result);
-		result = NULL;
+		return NULL;
 	}
+
+	if (vfseek(result->vfs, 0, SEEK_END) != 0) {
+		W_CloseFile(result);
+		return NULL;
+	}
+	result->revisions[0].eof = vftell(result->vfs);
 
 	return result;
 }
@@ -400,6 +408,10 @@ static void WriteDirectoryCurrentPos(struct wad_file *f)
 	vfsync(f->vfs);
 	WriteHeader(f);
 	f->dirty = false;
+
+	// Save the current EOF. If we roll back to this revision later,
+	// we can truncate the file here.
+	f->revisions[f->current_revision].eof = vftell(f->vfs);
 }
 
 void W_SwapEntries(struct wad_file *f, unsigned int l1, unsigned int l2)
@@ -533,6 +545,7 @@ bool W_CompactWAD(struct wad_file *f)
 	// We cannot undo any more.
 	memmove(&f->revisions[0], &f->revisions[f->current_revision],
 	        sizeof(struct wad_revision));
+	f->revisions[0].eof = new_eof;
 	f->current_revision = 0;
 	f->num_revisions = 1;
 	return true;
