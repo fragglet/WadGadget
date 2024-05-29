@@ -27,6 +27,7 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	const struct directory_entry *ent;
 	static char buf[128];
 	unsigned int w, h;
+	int prefix = ' ';
 	char size[10] = "";
 	bool shorter;
 
@@ -46,12 +47,11 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 
 	if (idx == 0) {
 		char *parent = PathDirName(dp->dir->path);
-		snprintf(buf, w, "^  Parent (%s) ", PathBaseName(parent));
+		prefix = '^';
+		snprintf(buf, w, " Parent (%s) ", PathBaseName(parent));
 		free(parent);
 		wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
-		char prefix = ' ';
-
 		ent = &dp->dir->entries[idx - 1];
 		switch (ent->type) {
 			case FILE_TYPE_DIR:
@@ -65,12 +65,19 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 				wattron(win, COLOR_PAIR(PAIR_WHITE_BLACK));
 				break;
 		}
+
+		// Show insert point for where we'll import into the WAD:
+		if (!dp->pane.active && idx == dp->pane.selected
+		 && dp->dir->type != FILE_TYPE_DIR) {
+			prefix = '_';
+		}
+
 		// We only show size for lumps (like NWT); for files it
 		// is too cluttered (plus filenames can be much longer)
 		if (ent->type == FILE_TYPE_LUMP) {
 			VFS_DescribeSize(ent, size, shorter);
 		}
-		snprintf(buf, w, "%c%-100s", prefix, ent->name);
+		snprintf(buf, w, "%-100s", ent->name);
 	}
 	if (dp->pane.active && idx == dp->pane.selected) {
 		wattron(win, A_REVERSE);
@@ -79,12 +86,13 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	                      dp->dir->entries[idx - 1].serial_no)) {
 		wattron(win, COLOR_PAIR(PAIR_TAGGED));
 	}
-	mvwaddstr(win, 0, 0, buf);
+	mvwaddch(win, 0, 0, prefix);
+	waddstr(win, buf);
 	if (idx == 0) {
 		mvwaddch(win, 0, 0, ACS_LLCORNER);
 		mvwaddch(win, 0, 1, ACS_HLINE);
 	} else {
-		mvwaddstr(win, 0, w - strlen(size) - 1,  " ");
+		mvwaddstr(win, 0, w - strlen(size) - 1, " ");
 		waddstr(win, size);
 	}
 	wattroff(win, A_REVERSE);
