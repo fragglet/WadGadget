@@ -56,6 +56,7 @@ void W_SwapEntries(struct wad_file *f, unsigned int l1, unsigned int l2);
 // (W_AddEntries, W_OpenLumpRewrite, etc.), otherwise the directory will
 // not be updated and the changes will be lost.
 void W_CommitChanges(struct wad_file *f);
+#define W_Rollback(f)  W_Undo(f, 0)
 
 // Functions below this point take effect immediately and do not require
 // callint W_CommitChanges().
