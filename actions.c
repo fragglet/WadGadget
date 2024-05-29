@@ -559,6 +559,9 @@ static void PerformDelete(struct directory_pane *active_pane,
 	                         "Delete %s?", buf)) {
 		return;
 	}
+	// We must build the description for the popup here, before
+	// we delete the files.
+	VFS_DescribeSet(active_pane->dir, tagged, buf, sizeof(buf));
 	// Note that there's a corner-case gotcha here. VFS serial
 	// numbers for files are inode numbers, and through hardlinks
 	// multiple files can have the same inode number. However,
@@ -574,7 +577,6 @@ static void PerformDelete(struct directory_pane *active_pane,
 		VFS_Remove(active_pane->dir, ent);
 	}
 	VFS_CommitChanges(active_pane->dir);
-	VFS_DescribeSet(active_pane->dir, tagged, buf, sizeof(buf));
 	UI_ShowNotice("%s deleted.", buf);
 	VFS_ClearSet(&active_pane->tagged);
 	VFS_Refresh(active_pane->dir);
