@@ -34,6 +34,7 @@ static void PerformCopy(struct directory_pane *active_pane,
 {
 	struct directory *from = active_pane->dir, *to = other_pane->dir;
 	struct file_set result = EMPTY_FILE_SET;
+	char buf[32];
 
 	// When we do an export or import, we create the new files/lumps
 	// in the destination, and then switch to the other pane where they
@@ -52,12 +53,11 @@ static void PerformCopy(struct directory_pane *active_pane,
 		if (PerformExport(from, export_set, to, &result, convert)) {
 			UI_DirectoryPaneSetTagged(other_pane, &result);
 			SwitchToPane(other_pane);
-			if (from->type == FILE_TYPE_WAD) {
-				UI_ShowNotice("%d file(s) exported.",
-				              result.num_entries);
+			VFS_DescribeSet(to, &result, buf, sizeof(buf));
+			if (from->type == to->type) {
+				UI_ShowNotice("%s copied.", buf);
 			} else {
-				UI_ShowNotice("%d file(s) copied.",
-				              result.num_entries);
+				UI_ShowNotice("%s exported.", buf);
 			}
 		}
 		VFS_FreeSet(&result);
@@ -76,15 +76,16 @@ static void PerformCopy(struct directory_pane *active_pane,
 		}
 		if (PerformImport(from, import_set, to, to_point,
 		                  &result, convert)) {
+			char buf[32];
+
 			UI_DirectoryPaneSetTagged(other_pane, &result);
 			SwitchToPane(other_pane);
 			VFS_CommitChanges(to);
-			if (from->type == FILE_TYPE_WAD) {
-				UI_ShowNotice("%d lump(s) copied.",
-				              result.num_entries);
+			VFS_DescribeSet(to, &result, buf, sizeof(buf));
+			if (from->type == to->type) {
+				UI_ShowNotice("%s copied.", buf);
 			} else {
-				UI_ShowNotice("%d file(s) imported.",
-				              result.num_entries);
+				UI_ShowNotice("%s imported.", buf);
 			}
 		}
 		VFS_FreeSet(&result);
@@ -573,11 +574,8 @@ static void PerformDelete(struct directory_pane *active_pane,
 		VFS_Remove(active_pane->dir, ent);
 	}
 	VFS_CommitChanges(active_pane->dir);
-	if (active_pane->dir->type == FILE_TYPE_WAD) {
-		UI_ShowNotice("%d lumps deleted.", tagged->num_entries);
-	} else {
-		UI_ShowNotice("%d files deleted.", tagged->num_entries);
-	}
+	VFS_DescribeSet(active_pane->dir, tagged, buf, sizeof(buf));
+	UI_ShowNotice("%s deleted.", buf);
 	VFS_ClearSet(&active_pane->tagged);
 	VFS_Refresh(active_pane->dir);
 	if (UI_DirectoryPaneSelected(active_pane)
