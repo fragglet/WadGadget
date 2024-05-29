@@ -237,7 +237,15 @@ void W_CloseFile(struct wad_file *f)
 	if (f->current_lump != NULL) {
 		vfclose(f->current_lump);
 	}
-	// TODO: Truncate at current revision's EOF
+	// After closing the file we lose all ability to redo (or undo, for
+	// that matter). Any data after the EOF for the current revision
+	// can therefore be safely discarded. The most important reason for
+	// doing this is that if we open a file, make some changes and then
+	// undo them all, the file will be precisely restored to its
+	// original contents.
+	if (vfseek(f->vfs, CURR_REVISION(f)->eof, SEEK_SET) == 0) {
+		vftruncate(f->vfs);
+	}
 	vfclose(f->vfs);
 	free(f->directory);
 	free(f);
@@ -468,11 +476,11 @@ uint32_t W_NumJunkBytes(struct wad_file *f)
 	uint32_t min_size = MinimumWADSize(f);
 	long curr_size;
 
-	if (vfseek(f->vfs, 0, SEEK_END) != 0) {
-		return 0;
-	}
+	// Note that we do not use he actual current file size. All
+	// data past the EOF of the current revision will be truncated
+	// when the file is closed anyway, so they don't count.
+	curr_size = CURR_REVISION(f)->eof;
 
-	curr_size = vftell(f->vfs);
 	if (curr_size < min_size) {
 		return 0;
 	} else {
