@@ -844,7 +844,7 @@ static void PerformCompact(struct directory_pane *active_pane,
 
 	junk_bytes = W_NumJunkBytes(wf);
 	if (junk_bytes == 0) {
-		UI_MessageBox("'%s' cannot be made any smaller.", ent->name);
+		UI_ShowNotice("'%s' cannot be made any smaller.", ent->name);
 		goto fail;
 	} else if (!UI_ConfirmDialogBox("Compact WAD",
 		"Compact", "Cancel",
@@ -889,12 +889,12 @@ static void PerformUndo(struct directory_pane *active_pane,
 
 	if (W_CanUndo(wf) == 0) {
 		if (W_CanRedo(wf) == 0) {
-			UI_MessageBox("There is nothing to undo.");
+			UI_ShowNotice("There is nothing to undo.");
 		} else {
 			// User has either undone every change, or has
 			// exceeded the undo history maintained by the
 			// WAD file code.
-			UI_MessageBox("Cannot undo any further.");
+			UI_ShowNotice("Cannot undo any further.");
 		}
 		return;
 	}
@@ -922,7 +922,7 @@ static void PerformRedo(struct directory_pane *active_pane,
 	struct wad_file *wf = VFS_WadFile(active_pane->dir);
 
 	if (W_CanRedo(wf) == 0) {
-		UI_MessageBox("There is nothing to redo.");
+		UI_ShowNotice("There is nothing to redo.");
 		return;
 	}
 
