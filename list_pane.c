@@ -37,31 +37,33 @@ void UI_ListPaneDraw(void *p)
 	struct list_pane *lp = p;
 	WINDOW *win = lp->pane.window;
 	unsigned int y, idx, num_entries;
+	int wx;
+
+	wx = getmaxx(lp->pane.window);
 
 	if (lp->subwin == NULL) {
-		lp->subwin = derwin(win, 1, 20, 0, 0);
+		lp->subwin = derwin(win, 1, wx - 1, 0, 0);
 	}
+	wresize(lp->subwin, 1, wx - 1);
 
 	werase(win);
 	wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	UI_DrawWindowBox(win);
 	if (lp->title != NULL) {
+		wattron(lp->subwin, COLOR_PAIR(PAIR_PANE_COLOR));
+		mvderwin(lp->subwin, 0, 0);
 		if (lp->active) {
-			wattron(win, A_REVERSE);
+			wattron(lp->subwin, A_REVERSE);
 		}
-		mvwaddstr(win, 0, 3, " ");
-		waddstr(win, lp->title);
-		waddstr(win, " ");
-		wattroff(win, A_REVERSE);
+		mvwaddstr(lp->subwin, 0, 3, " ");
+		waddstr(lp->subwin, lp->title);
+		waddstr(lp->subwin, " ");
+		wattroff(lp->subwin, A_REVERSE);
+		wattroff(lp->subwin, COLOR_PAIR(PAIR_PANE_COLOR));
 	}
 	wattroff(win, COLOR_PAIR(PAIR_PANE_COLOR));
 
-	{
-		int wx, wy;
-		getmaxyx(lp->pane.window, wy, wx);
-		wy = wy;
-		wresize(lp->subwin, 1, wx - 1);
-	}
+	wresize(lp->subwin, 1, wx - 1);
 
 	// Each list element gets drawn inside a subwindow of the main
 	// window. We move the subwindow line by line before drawing.
