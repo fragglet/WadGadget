@@ -42,6 +42,7 @@ struct directory_funcs {
 	void (*rename)(void *dir, struct directory_entry *entry,
 	               const char *new_name);
 	void (*commit)(void *dir);
+	void (*describe_entries)(char *buf, size_t buf_len, int cnt);
 	// TODO: insert
 	void (*free)(void *dir);
 };

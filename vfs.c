@@ -286,12 +286,22 @@ static void RealDirRename(void *_dir, struct directory_entry *entry,
 	free(full_new_name);
 }
 
+static void RealDirDescribeEntries(char *buf, size_t buf_len, int cnt)
+{
+	if (cnt == 1) {
+		snprintf(buf, buf_len, "1 file");
+	} else {
+		snprintf(buf, buf_len, "%d files", cnt);
+	}
+}
+
 static const struct directory_funcs realdir_funcs = {
 	RealDirRefresh,
 	RealDirOpen,
 	RealDirRemove,
 	RealDirRename,
 	NULL,
+	RealDirDescribeEntries,
 	NULL,
 };
 
@@ -350,6 +360,15 @@ static void WadDirCommit(void *_dir)
 	W_CommitChanges(dir->wad_file);
 }
 
+static void WadDirDescribeEntries(char *buf, size_t buf_len, int cnt)
+{
+	if (cnt == 1) {
+		snprintf(buf, buf_len, "1 lump");
+	} else {
+		snprintf(buf, buf_len, "%d lumps", cnt);
+	}
+}
+
 static void WadDirFree(void *_dir)
 {
 	struct wad_directory *dir = _dir;
@@ -364,6 +383,7 @@ static const struct directory_funcs waddir_funcs = {
 	WadDirRemove,
 	WadDirRename,
 	WadDirCommit,
+	WadDirDescribeEntries,
 	WadDirFree,
 };
 
@@ -572,9 +592,9 @@ void VFS_DescribeSet(struct directory *dir, struct file_set *set,
 		}
 		snprintf(buf, buf_len, "'%s'", ent->name);
 	} else {
-		snprintf(buf, buf_len, "%d %s",
-		         (int) set->num_entries,
-		         dir->type == FILE_TYPE_WAD ? "lumps" : "files");
+		assert(dir->directory_funcs->describe_entries != NULL);
+		dir->directory_funcs->describe_entries(
+			buf, buf_len, set->num_entries);
 	}
 }
 
