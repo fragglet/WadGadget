@@ -43,7 +43,7 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 		}
 		break;
 	default:
-		UI_MessageBox("%s\nCan't import this file type.",
+		UI_MessageBox("'%s' has a file type that\ncan't be imported.",
 		              ent->name);
 		return;
 	}
