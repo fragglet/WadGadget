@@ -225,6 +225,7 @@ static void TempMaybeImport(struct temp_edit_context *ctx)
 	}
 	timeout(-1);
 
+	TF_SendRaiseWindowOp();
 	RedrawScreen();
 	do_import = UI_ConfirmDialogBox(
 		"Update WAD?", "Import", "Ignore",

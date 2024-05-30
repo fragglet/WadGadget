@@ -21,6 +21,7 @@
 #include "termfuncs.h"
 
 #define CLEAR_SCREEN_ESCAPE "\x1b[H\x1b[2J"
+#define XTERM_RAISE_ESCAPE  "\x1b[5t"  /* xterm WindowOp to raise window */
 #define RESPONSE_TIMEOUT 1000 /* ms */
 
 // We use the curses init_color() function to set a custom color palette
@@ -207,4 +208,9 @@ int TF_PollingReadChar(struct timeval *start)
 void TF_ClearScreen(void)
 {
 	write(1, CLEAR_SCREEN_ESCAPE, strlen(CLEAR_SCREEN_ESCAPE));
+}
+
+void TF_SendRaiseWindowOp(void)
+{
+	write(1, XTERM_RAISE_ESCAPE, strlen(XTERM_RAISE_ESCAPE));
 }

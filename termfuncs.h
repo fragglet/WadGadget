@@ -44,4 +44,5 @@ void TF_SetRawMode(struct saved_flags *f, bool blocking);
 void TF_RestoreNormalMode(struct saved_flags *f);
 int TF_PollingReadChar(struct timeval *start);
 
-void TF_ClearScreen();
+void TF_ClearScreen(void);
+void TF_SendRaiseWindowOp(void);
