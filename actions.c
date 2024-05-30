@@ -291,6 +291,40 @@ const struct action export_wad_action = {
 	CreateWadConvert,
 };
 
+static unsigned int *IndexesForTagged(struct directory *dir,
+                                      struct file_set *set, size_t *cnt)
+{
+	struct directory_entry *ent;
+	unsigned int *result;
+	int i;
+
+	// Build array of lump indexes for each tagged item.
+	result = checked_calloc(set->num_entries, sizeof(int));
+
+	i = 0;
+	*cnt = 0;
+	while ((ent = VFS_IterateSet(dir, set, &i)) != NULL) {
+		assert(*cnt < set->num_entries);
+		result[*cnt] = ent - dir->entries;
+		++*cnt;
+	}
+
+	return result;
+}
+
+static bool IndexesAreContiguous(unsigned int *indexes, size_t cnt)
+{
+	int i;
+
+	for (i = 0; i < cnt - 1; i++) {
+		if (indexes[i + 1] != indexes[i] + 1) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 static void MoveLumps(struct directory_pane *p, struct wad_file *wf)
 {
 	struct wad_file_entry *dir;
@@ -340,11 +374,29 @@ static void MoveLumps(struct directory_pane *p, struct wad_file *wf)
 static void PerformRearrange(struct directory_pane *active_pane,
                              struct directory_pane *other_pane)
 {
+	unsigned int *indexes;
+	bool noop;
+	int insert_point;
+	size_t cnt;
+
 	if (active_pane->tagged.num_entries == 0) {
 		UI_MessageBox("You have not selected any lumps to move.");
 		return;
 	}
-	MoveLumps(active_pane, VFS_WadFile(active_pane->dir));
+
+	indexes = IndexesForTagged(active_pane->dir, &active_pane->tagged,
+	                           &cnt);
+	insert_point = UI_DirectoryPaneSelected(active_pane) + 1;
+	noop = IndexesAreContiguous(indexes, cnt)
+	    && insert_point >= indexes[0]
+	    && insert_point <= indexes[cnt - 1] + 1;
+	free(indexes);
+
+	if (noop) {
+		UI_ShowNotice("They're all in that position already!");
+	} else {
+		MoveLumps(active_pane, VFS_WadFile(active_pane->dir));
+	}
 }
 
 const struct action rearrange_action = {
@@ -400,39 +452,23 @@ static void PerformSortLumps(struct directory_pane *active_pane,
 	struct wad_file *wf;
 	struct wad_file_entry *dir;
 	unsigned int *indexes;
-	int i, j, num_lumps, num_tagged;
+	int i;
+	size_t num_tagged = active_pane->tagged.num_entries;
 
-	num_tagged = active_pane->tagged.num_entries;
 	if (num_tagged == 0) {
 		UI_MessageBox("You have not selected anything to sort.");
 		return;
 	}
 
 	wf = VFS_WadFile(active_pane->dir);
-	num_lumps = W_NumLumps(wf);
 	dir = W_GetDirectory(wf);
 
-	// Build array of lump indexes for each tagged item.
-	indexes = checked_calloc(num_tagged, sizeof(int));
-	for (i = 0, j = 0; i < num_lumps; i++) {
-		if (VFS_SetHas(&active_pane->tagged, dir[i].serial_no)) {
-			indexes[j] = i;
-			++j;
-		}
-	}
-
-	// It's possible we didn't fill the entire array.
-	num_tagged = j;
+	indexes = IndexesForTagged(active_pane->dir, &active_pane->tagged,
+	                           &num_tagged);
 
 	// Sanity check; it usually doesn't make sense to sort if they're
 	// not a contiguous sequence.
-	for (i = 0; i < num_tagged - 1; i++) {
-		if (indexes[i + 1] != indexes[i] + 1) {
-			break;
-		}
-	}
-
-	if (i < num_tagged - 1
+	if (!IndexesAreContiguous(indexes, num_tagged)
 	 && !UI_ConfirmDialogBox("Sort lumps", "Continue", "Cancel",
 	                         "Tagged lumps are not contiguous.\n"
 	                         "Continue?")) {
