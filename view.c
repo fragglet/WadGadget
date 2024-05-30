@@ -190,6 +190,46 @@ static bool TempFileChanged(struct temp_edit_context *ctx)
 	return modtime != 0 && ctx->orig_time != 0 && modtime > ctx->orig_time;
 }
 
+static void RaiseUsToTop(void)
+{
+#ifdef __APPLE__
+	static const struct {
+		const char *env;
+		const char *appname;
+	} terms[] = {
+		{"iTerm",            "iTerm"},
+		{"Apple_Terminal",   "Terminal"},
+		{"Hyper",            "Hyper"},
+		{"Tabby",            "Tabby"},
+		{"rio",              "rio"},
+		// Add your favorite terminal here. Not Warp though.
+	};
+	const char *termprog = getenv("TERM_PROGRAM");
+	const char *appname = NULL;
+	int i;
+
+	for (i = 0; termprog != NULL && i < arrlen(terms); i++) {
+		if (strstr(termprog, terms[i].env) != NULL) {
+			appname = terms[i].appname;
+		}
+	}
+
+	// This is a rather gross hack, but it works. We use AppleScript to
+	// bring the terminal back to the foreground.
+	if (appname != NULL) {
+		char buf[100];
+		snprintf(buf, sizeof(buf), "osascript -e 'tell "
+		         "application \"%s\" to activate' "
+		         ">/dev/null 2>/dev/null", appname);
+		system(buf);
+		return;
+	}
+#endif
+
+	// Otherwise, we can try the xterm method.
+	TF_SendRaiseWindowOp();
+}
+
 // Called after a successful edit to (if appropriate) import the changed
 // file back into the WAD.
 static void TempMaybeImport(struct temp_edit_context *ctx)
@@ -225,7 +265,7 @@ static void TempMaybeImport(struct temp_edit_context *ctx)
 	}
 	timeout(-1);
 
-	TF_SendRaiseWindowOp();
+	RaiseUsToTop();
 	RedrawScreen();
 	do_import = UI_ConfirmDialogBox(
 		"Update WAD?", "Import", "Ignore",
