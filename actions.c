@@ -175,8 +175,9 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 	char *filename, *filename2;
 
 	filename = UI_TextInputDialogBox(
-		"Make new WAD", "Create", 30,
-		"Enter name for new WAD file:");
+		from_set->num_entries > 0 ? "Make new WAD"
+		                          : "Make new empty WAD",
+		"Create", 30, "Enter name for new WAD file:");
 
 	if (filename == NULL) {
 		return NULL;
@@ -251,11 +252,6 @@ static void CreateWad(struct directory_pane *active_pane,
 		// Create new WAD and import tagged files.
 		from_pane = active_pane;
 		to_pane = active_pane;
-		if (from_pane->tagged.num_entries == 0
-		 && !UI_ConfirmDialogBox("Create WAD", "Create", "Cancel",
-		                         "Create an empty WAD file?")) {
-			return;
-		}
 	} else {
 		return;
 	}
