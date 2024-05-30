@@ -114,10 +114,12 @@ static intptr_t _spawnv(int mode, const char *cmdname, char **argv)
 }
 #endif
 
+#ifndef __APPLE__
 static bool CheckHaveXdgUtils(void)
 {
 	return system("xdg-open --version >/dev/null 2>&1") == 0;
 }
+#endif
 
 struct temp_edit_context {
 	char *temp_dir;
