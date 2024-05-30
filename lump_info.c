@@ -392,6 +392,22 @@ const struct lump_type lump_type_pcspeaker = {
 	PcSpeakerLumpFormat,
 };
 
+static bool DehackedLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return !strncasecmp(ent->name, "DEHACKED", 8);
+}
+
+static void DehackedLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                               char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "Dehacked patch");
+}
+
+const struct lump_type lump_type_dehacked = {
+	DehackedLumpCheck,
+	DehackedLumpFormat,
+};
+
 // Lump types identified by fixed size. This type is last in the identification
 // list before "unknown" because it uses the least information to make the
 // identification.
@@ -483,6 +499,7 @@ const struct lump_type lump_type_unknown = {
 };
 
 static const struct lump_type *lump_types[] = {
+	&lump_type_dehacked,
 	&lump_type_level,
 	&lump_type_special,
 	&lump_type_sound,
@@ -550,6 +567,8 @@ const char *LI_GetExtension(const struct lump_type *lt, bool convert)
 		} else {
 			return ".lmp";
 		}
+	} else if (lt == &lump_type_dehacked) {
+		return ".deh";
 	} else if (lt == &lump_type_sound) {
 		return ".wav";
 	} else if (lt == &lump_type_mus || lt == &lump_type_midi) {
