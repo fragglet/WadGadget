@@ -645,6 +645,8 @@ static void PerformMark(struct directory_pane *active_pane,
 	ent = &active_pane->dir->entries[selected];
 	if (VFS_SetHas(&active_pane->tagged, ent->serial_no)) {
 		VFS_RemoveFromSet(&active_pane->tagged, ent->serial_no);
+	} else if (ent->type == FILE_TYPE_DIR) {
+		UI_ShowNotice("Directories cannot be marked.");
 	} else {
 		VFS_AddToSet(&active_pane->tagged, ent->serial_no);
 	}
