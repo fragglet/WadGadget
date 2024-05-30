@@ -174,6 +174,25 @@ static const struct action search_again_action = {
 	SearchAgain,
 };
 
+static void SwapPanes(struct directory_pane *active_pane,
+                      struct directory_pane *b)
+{
+	struct directory_pane *tmp = panes[0];
+	WINDOW *wintmp = pane_windows[0];
+
+	panes[0] = panes[1];
+	panes[1] = tmp;
+	pane_windows[0] = pane_windows[1];
+	pane_windows[1] = wintmp;
+
+	SwitchToPane(active_pane);
+}
+
+static const struct action swap_panes_action = {
+	0, '_', "Swap panes", "Swap panes",
+	SwapPanes,
+};
+
 static const struct action *wad_actions[] = {
 	&rearrange_action,
 	&new_lump_action,
@@ -220,6 +239,7 @@ static const struct action *dir_to_dir[] = {
 static const struct action *common_actions[] = {
 	&rename_action,
 	&delete_action,
+	&swap_panes_action,
 	&mark_action,
 	&mark_pattern_action,
 	&unmark_all_action,

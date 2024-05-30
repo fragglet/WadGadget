@@ -29,6 +29,7 @@ keys    mnemonic    type  function
 ^Y      -           std  Redo
 ^Z      -           std  Undo. Need to catch SIGTSTP
 ^] S-F2 Sort        res  Sort lumps by name
+^_      -           res  Swap panes
 Esc     Quit        res  Quit
 Spc                 nwt  Mark
 
