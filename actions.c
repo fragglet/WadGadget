@@ -331,8 +331,8 @@ static void MoveLumps(struct directory_pane *p, struct wad_file *wf)
 	                p->tagged.num_entries);
 	W_CommitChanges(wf);
 
-	UI_ListPaneSelect(&p->pane, insert_start + 1);
 	VFS_Refresh(p->dir);
+	UI_DirectoryPaneSelectEntry(p, &p->dir->entries[insert_point]);
 
 	UI_ShowNotice("%d lumps moved.", p->tagged.num_entries);
 }
@@ -540,6 +540,7 @@ const struct action rename_action = {
 static void PerformDelete(struct directory_pane *active_pane,
                           struct directory_pane *other_pane)
 {
+	struct directory *dir;
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
 	char buf[64];
 	int i;
@@ -550,14 +551,15 @@ static void PerformDelete(struct directory_pane *active_pane,
 		return;
 	}
 
-	VFS_DescribeSet(active_pane->dir, tagged, buf, sizeof(buf));
+	dir = active_pane->dir;
+	VFS_DescribeSet(dir, tagged, buf, sizeof(buf));
 	if (!UI_ConfirmDialogBox("Confirm Delete", "Delete", "Cancel",
 	                         "Delete %s?", buf)) {
 		return;
 	}
 	// We must build the description for the popup here, before
 	// we delete the files.
-	VFS_DescribeSet(active_pane->dir, tagged, buf, sizeof(buf));
+	VFS_DescribeSet(dir, tagged, buf, sizeof(buf));
 	// Note that there's a corner-case gotcha here. VFS serial
 	// numbers for files are inode numbers, and through hardlinks
 	// multiple files can have the same inode number. However,
@@ -566,20 +568,19 @@ static void PerformDelete(struct directory_pane *active_pane,
 	// deleted, but we'll never delete both.
 	for (i = 0; i < tagged->num_entries; i++) {
 		struct directory_entry *ent;
-		ent = VFS_EntryBySerial(active_pane->dir, tagged->entries[i]);
+		ent = VFS_EntryBySerial(dir, tagged->entries[i]);
 		if (ent == NULL) {
 			continue;
 		}
-		VFS_Remove(active_pane->dir, ent);
+		VFS_Remove(dir, ent);
 	}
-	VFS_CommitChanges(active_pane->dir);
+	VFS_CommitChanges(dir);
 	UI_ShowNotice("%s deleted.", buf);
 	VFS_ClearSet(&active_pane->tagged);
-	VFS_Refresh(active_pane->dir);
-	if (UI_DirectoryPaneSelected(active_pane)
-	    >= active_pane->dir->num_entries) {
-		UI_ListPaneSelect(&active_pane->pane,
-		                  active_pane->dir->num_entries);
+	VFS_Refresh(dir);
+	if (UI_DirectoryPaneSelected(active_pane) >= dir->num_entries) {
+		UI_DirectoryPaneSelectEntry(
+			active_pane, &dir->entries[dir->num_entries - 1]);
 	}
 }
 
@@ -591,7 +592,7 @@ const struct action delete_action = {
 static void PerformMarkPattern(struct directory_pane *active_pane,
                                struct directory_pane *other_pane)
 {
-	int first_match;
+	struct directory_entry *first_match;
 	size_t old_cnt;
 
 	char *glob = UI_TextInputDialogBox(
@@ -603,10 +604,10 @@ static void PerformMarkPattern(struct directory_pane *active_pane,
 	old_cnt = active_pane->tagged.num_entries;
 	first_match = VFS_AddGlobToSet(active_pane->dir,
 	                               &active_pane->tagged, glob);
-	if (first_match < 0) {
+	if (first_match == NULL) {
 		UI_ShowNotice("No matches found.");
 	} else {
-		UI_ListPaneSelect(&active_pane->pane, first_match + 1);
+		UI_DirectoryPaneSelectEntry(active_pane, first_match);
 		UI_ShowNotice("%d marked.",
 		              active_pane->tagged.num_entries - old_cnt);
 	}

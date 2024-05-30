@@ -115,11 +115,21 @@ static unsigned int NumEntries(void *data)
 	return dp->dir->num_entries + 1;
 }
 
+void UI_DirectoryPaneSelectEntry(struct directory_pane *p,
+                                 struct directory_entry *ent)
+{
+	unsigned int idx = ent - p->dir->entries;
+	if (idx >= p->dir->num_entries) {
+		return;
+	}
+	UI_ListPaneSelect(&p->pane, idx + 1);
+}
+
 void UI_DirectoryPaneSelectByName(struct directory_pane *p, const char *name)
 {
 	struct directory_entry *entry = VFS_EntryByName(p->dir, name);
 	if (entry != NULL) {
-		UI_ListPaneSelect(&p->pane, entry - p->dir->entries + 1);
+		UI_DirectoryPaneSelectEntry(p, entry);
 	}
 }
 
@@ -128,7 +138,7 @@ void UI_DirectoryPaneSelectBySerial(struct directory_pane *p,
 {
 	struct directory_entry *entry = VFS_EntryBySerial(p->dir, serial_no);
 	if (entry != NULL) {
-		UI_ListPaneSelect(&p->pane, entry - p->dir->entries + 1);
+		UI_DirectoryPaneSelectEntry(p, entry);
 	}
 }
 
