@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <curses.h>
+#include <sys/time.h>
 
 #include "common.h"
 #include "endoom.h"
@@ -161,7 +162,7 @@ void ENDOOM_ShowFile(const char *filename)
 		PrintEndoom(buf, HaveUTF8());
 	} else {
 		fprintf(stderr, "Error: Only read %d bytes from %s\n",
-		        cnt, filename);
+		        (int) cnt, filename);
 	}
 
 	free(buf);

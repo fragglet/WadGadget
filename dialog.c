@@ -235,7 +235,6 @@ static void DrawTextInputDialog(void *pane)
 	int w, h;
 
 	getmaxyx(win, h, w);
-	w = w;
 
 	wbkgdset(win, COLOR_PAIR(PAIR_DIALOG_BOX));
 	wattron(win, A_BOLD);
