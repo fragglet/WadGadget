@@ -26,10 +26,7 @@ static unsigned int NumEntries(struct list_pane *lp)
 
 unsigned int UI_ListPaneLines(struct list_pane *lp)
 {
-	int x, y;
-	getmaxyx(lp->pane.window, y, x);
-	x = x;
-	return y - 2;
+	return getmaxy(lp->pane.window) - 2;
 }
 
 void UI_ListPaneDraw(void *p)

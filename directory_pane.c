@@ -26,13 +26,12 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	struct directory_pane *dp = data;
 	const struct directory_entry *ent;
 	static char buf[128];
-	unsigned int w, h;
+	unsigned int w;
 	int prefix = ' ';
 	char size[10] = "";
 	bool shorter;
 
-	getmaxyx(win, h, w);
-	w -= 2; h = h;
+	w = getmaxx(win) - 2;
 	if (w > sizeof(buf)) {
 		w = sizeof(buf);
 	}
@@ -302,10 +301,10 @@ static void DrawPane(void *p)
 		w = getmaxx(win);
 		if (w - strlen(dp->pane.title) > 22) {
 			snprintf(buf, sizeof(buf), "[%d marked]",
-			         dp->tagged.num_entries);
+			         (int) dp->tagged.num_entries);
 		} else {
 			snprintf(buf, sizeof(buf), "[%d]",
-			         dp->tagged.num_entries);
+			         (int) dp->tagged.num_entries);
 		}
 
 		wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));

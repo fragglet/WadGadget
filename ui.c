@@ -84,7 +84,7 @@ static const char *games[] = {
 static void DrawHeaderPane(void *p)
 {
 	struct pane *pane = p;
-	int w, h, x, y;
+	int w, x;
 	int i, count_extra;
 
 	if (time(NULL) - last_notice_time < NOTICE_TIME_SECS) {
@@ -94,8 +94,7 @@ static void DrawHeaderPane(void *p)
 		return;
 	}
 
-	getmaxyx(pane->window, h, w);
-	h = h;
+	w = getmaxx(pane->window);
 
 	wbkgdset(pane->window, COLOR_PAIR(PAIR_HEADER));
 	werase(pane->window);
@@ -128,8 +127,7 @@ static void DrawHeaderPane(void *p)
 			waddstr(pane->window, ", ");
 			--count_extra;
 		}
-		getyx(pane->window, y, x);
-		y = y;
+		x = getcurx(pane->window);
 	}
 
 	waddstr(pane->window, END_STR);
