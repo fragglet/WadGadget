@@ -17,10 +17,11 @@ other.
 
 ## Features
 
-WadGadget aims at minimum for feature parity with NWT; this goal has not
-yet been met. It also adds new features and a more logical GUI, but is
-likely never going to include as many features as other tools like
-the excellent [SLADE](https://slade.mancubus.net/).
+WadGadget aims at minimum for feature parity with NWT; [this goal has not yet
+been met](https://github.com/fragglet/WadGadget/milestone/1). It also adds new
+features and a more logical GUI, but is likely never going to include as many
+features as other tools like the excellent
+[SLADE](https://slade.mancubus.net/).
 
 The following table gives a brief summary of the current state:
 
@@ -47,10 +48,10 @@ The following table gives a brief summary of the current state:
 | Graphics export                | ✓ (GIF, PCX)         | ✓ (PNG)                                     | ✓ (many formats)                     |
 | Edit graphic offsets           | ✓                    | fragglet/WadGadget#11                       | ✓                                    |
 | PNG grAb chunk support         |                      | ✓                                           | ✓                                    |
-| Audio playback                 | ✓                    |                                             | ✓                                    |
+| Audio playback                 | ✓                    | fragglet/WadGadget#13                       | ✓                                    |
 | Audio import                   | ✓ (WAV, VOC)         | ✓ (WAV, VOC, FLAC, others)                  | ✓ (many formats)                     |
 | Audio export                   | ✓ (WAV, VOC)         | ✓ (WAV)                                     | ✓ (many formats)                     |
-| Music playback                 | ✓                    |                                             | ✓                                    |
+| Music playback                 | ✓                    | fragglet/WadGadget#14                       | ✓                                    |
 | Music import                   | ✓                    | ✓                                           | ✓ (many formats)                     |
 | Music export                   | ✓ (MUS)              | ✓ (converts MUS to MID)                     | ✓ (many formats)                     |
 | Texture editor                 | ✓                    | fragglet/WadGadget#9                        | ✓                                    |
