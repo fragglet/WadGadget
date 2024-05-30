@@ -703,7 +703,7 @@ static void CheckCompactWad(struct directory_pane *pane)
 	}
 
 	// Has file been changed?
-	if (W_CanUndo(wf) == 0 && W_CanRedo(wf) == 0) {
+	if (W_CanUndo(wf) == 0) {
 		return;
 	}
 	// Insignificant amount of junk?
