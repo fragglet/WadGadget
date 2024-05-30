@@ -886,7 +886,9 @@ const struct action hexdump_action = {
 static void PerformUndo(struct directory_pane *active_pane,
                         struct directory_pane *other_pane)
 {
-	struct wad_file *wf = VFS_WadFile(active_pane->dir);
+	struct directory *dir = active_pane->dir;
+	struct wad_file *wf = VFS_WadFile(dir);
+	int first_change;
 
 	if (W_CanUndo(wf) == 0) {
 		if (W_CanRedo(wf) == 0) {
@@ -900,11 +902,15 @@ static void PerformUndo(struct directory_pane *active_pane,
 		return;
 	}
 
-	if (!W_Undo(wf, 1)) {
+	first_change = W_Undo(wf, 1);
+	if (first_change < 0) {
 		UI_MessageBox("Undo failed.");
 		return;
 	}
-	VFS_Refresh(active_pane->dir);
+	VFS_Refresh(dir);
+
+	// Move the cursor to the first lump identified as having changed:
+	UI_DirectoryPaneSelectEntry(active_pane, &dir->entries[first_change]);
 
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
@@ -920,18 +926,25 @@ const struct action undo_action = {
 static void PerformRedo(struct directory_pane *active_pane,
                         struct directory_pane *other_pane)
 {
-	struct wad_file *wf = VFS_WadFile(active_pane->dir);
+	struct directory *dir = active_pane->dir;
+	struct wad_file *wf = VFS_WadFile(dir);
+	int first_change;
 
 	if (W_CanRedo(wf) == 0) {
 		UI_ShowNotice("There is nothing to redo.");
 		return;
 	}
 
-	if (!W_Redo(wf, 1)) {
+	first_change = W_Redo(wf, 1);
+	if (first_change < 0) {
 		UI_MessageBox("Redo failed.");
 		return;
 	}
-	VFS_Refresh(active_pane->dir);
+
+	VFS_Refresh(dir);
+
+	// Move the cursor to the first lump identified as having changed:
+	UI_DirectoryPaneSelectEntry(active_pane, &dir->entries[first_change]);
 
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);

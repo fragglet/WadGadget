@@ -152,13 +152,14 @@ static void SwapEntry(struct wad_file_entry *entry)
 // Read WAD directory based on CURR_HEADER(wf)->tablet_offet.
 // If there is a current directory, it is replaced.
 #define LOOKAHEAD 10
-static bool ReadDirectory(struct wad_file *wf)
+static int ReadDirectory(struct wad_file *wf)
 {
 	struct wad_file_entry *new_directory;
 	size_t new_num_lumps;
-	int i, j, k, old_lump_index;
+	int i, j, k, old_lump_index, first_change;
 
 	new_num_lumps = CURR_HEADER(wf)->num_lumps;
+	first_change = new_num_lumps;
 	assert(vfseek(wf->vfs, CURR_HEADER(wf)->table_offset,
 	              SEEK_SET) == 0);
 	new_directory = checked_calloc(
@@ -170,7 +171,7 @@ static bool ReadDirectory(struct wad_file *wf)
 		 || vfread(&ent->size, 4, 1, wf->vfs) != 1
 		 || vfread(&ent->name, 8, 1, wf->vfs) != 1) {
 			free(new_directory);
-			return false;
+			return -1;
 		}
 		SwapEntry(ent);
 
@@ -188,6 +189,9 @@ static bool ReadDirectory(struct wad_file *wf)
 			 && !strncmp(ent->name, oldent->name, 8)) {
 				old_lump_index = k;
 				break;
+			}
+			if (first_change == new_num_lumps) {
+				first_change = k;
 			}
 		}
 		if (old_lump_index == -1) {
@@ -207,7 +211,7 @@ static bool ReadDirectory(struct wad_file *wf)
 	free(wf->directory);
 	wf->directory = new_directory;
 	wf->num_lumps = new_num_lumps;
-	return true;
+	return first_change;
 }
 
 struct wad_file *W_OpenFile(const char *filename)
@@ -608,10 +612,10 @@ int W_CanUndo(struct wad_file *wf)
 	return result;
 }
 
-bool W_Undo(struct wad_file *wf, unsigned int levels)
+int W_Undo(struct wad_file *wf, unsigned int levels)
 {
 	struct wad_revision *r = wf->curr_revision;
-	int i;
+	int i, result;
 
 	for (i = 0; i < levels; i++) {
 		assert(r->prev != NULL);
@@ -619,13 +623,14 @@ bool W_Undo(struct wad_file *wf, unsigned int levels)
 	}
 	wf->curr_revision = r;
 
-	if (!ReadDirectory(wf)) {
-		return false;
+	result = ReadDirectory(wf);
+	if (result < 0) {
+		return -1;
 	}
 	WriteHeader(wf);
 	wf->write_pos = r->eof;
 	wf->dirty = false;
-	return true;
+	return result;
 }
 
 int W_CanRedo(struct wad_file *wf)
@@ -641,10 +646,10 @@ int W_CanRedo(struct wad_file *wf)
 	return result;
 }
 
-bool W_Redo(struct wad_file *wf, unsigned int levels)
+int W_Redo(struct wad_file *wf, unsigned int levels)
 {
 	struct wad_revision *r = wf->curr_revision;
-	int i;
+	int i, result;
 
 	for (i = 0; i < levels; i++) {
 		assert(r->next != NULL);
@@ -652,11 +657,12 @@ bool W_Redo(struct wad_file *wf, unsigned int levels)
 	}
 	wf->curr_revision = r;
 
-	if (!ReadDirectory(wf)) {
-		return false;
+	result = ReadDirectory(wf);
+	if (result < 0) {
+		return -1;
 	}
 	WriteHeader(wf);
 	wf->write_pos = r->eof;
 	wf->dirty = false;
-	return true;
+	return result;
 }
