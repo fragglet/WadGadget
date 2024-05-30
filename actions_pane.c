@@ -289,7 +289,7 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 static void RecalculateNames(struct actions_bar *p, int columns)
 {
 	const struct action *a, *cells[10];
-	int i, num_cells = 0;
+	int i;
 
 	if (p->actions == NULL) {
 		return;
@@ -300,7 +300,6 @@ static void RecalculateNames(struct actions_bar *p, int columns)
 		a = p->actions[i];
 		if (a != NULL && HasFunctionKey(a)) {
 			cells[a->key - KEY_F(1)] = a;
-			++num_cells;
 		}
 	}
 
