@@ -229,9 +229,11 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 		return 0;
 	}
 
-	// Expand some to longer names where possible, but always keep
-	// at least one space between shortcuts.
-	while (spacing >= num_shortcuts) {
+	// Expand some to longer names where possible, but always keep at
+	// least one space between shortcuts. In non-shortcut mode, we
+	// always use short names so we can cram in as many shortcuts as
+	// possible.
+	while (p->function_keys && spacing >= num_shortcuts) {
 		int best = -1, best_diff = INT_MAX;
 		const char *longname;
 

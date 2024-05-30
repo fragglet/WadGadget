@@ -189,7 +189,7 @@ static void SwapPanes(struct directory_pane *active_pane,
 }
 
 static const struct action swap_panes_action = {
-	0, '_', "Swap panes", "Swap panes",
+	0, '_', "Swap", "Swap panes",
 	SwapPanes,
 };
 
