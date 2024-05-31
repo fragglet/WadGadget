@@ -1,3 +1,5 @@
+![WadGadget icon](wadgadget.png)
+
 WadGadget is a love letter to TiC's [New WAD
 Tool](https://doomwiki.org/wiki/New_WAD_Tool), a '90s WAD editing tool
 that I continue to find useful even two decades after its last release.
