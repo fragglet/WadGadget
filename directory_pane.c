@@ -114,6 +114,13 @@ static unsigned int NumEntries(void *data)
 	return dp->dir->num_entries + 1;
 }
 
+void UI_DirectoryPaneReselect(struct directory_pane *p)
+{
+	if (p->pane.selected > p->dir->num_entries) {
+		p->pane.selected = p->dir->num_entries;
+	}
+}
+
 void UI_DirectoryPaneSelectEntry(struct directory_pane *p,
                                  struct directory_entry *ent)
 {

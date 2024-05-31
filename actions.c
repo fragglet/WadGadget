@@ -614,10 +614,7 @@ static void PerformDelete(struct directory_pane *active_pane,
 	UI_ShowNotice("%s deleted.", buf);
 	VFS_ClearSet(&active_pane->tagged);
 	VFS_Refresh(dir);
-	if (UI_DirectoryPaneSelected(active_pane) >= dir->num_entries) {
-		UI_DirectoryPaneSelectEntry(
-			active_pane, &dir->entries[dir->num_entries - 1]);
-	}
+	UI_DirectoryPaneReselect(active_pane);
 }
 
 const struct action delete_action = {
