@@ -57,8 +57,6 @@ static const struct lump_description special_lumps[] = {
 	{"XLATAB",    "Translucency table"},
 	{"AUTOPAGE",  "Map background texture"},
 	{"GENMIDI",   "OPL FM synth instrs."},
-	{"TEXTURE1",  "Texture table"},
-	{"TEXTURE2",  "Texture table (reg.)"},
 	{"PNAMES",    "Wall patch list"},
 	{NULL, NULL},
 };
@@ -493,6 +491,24 @@ const struct lump_type lump_type_plaintext = {
 	PlainTextLumpFormat,
 };
 
+// TEXTURE1 etc.
+static bool TexturesCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return StringHasPrefix(ent->name, "TEXTURE");
+}
+
+static void TexturesFormat(struct wad_file_entry *ent, uint8_t *buf,
+                           char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "Texture directory%s",
+	         !strncmp(ent->name, "TEXTURE2", 8) ? " (reg.)" : "");
+}
+
+const struct lump_type lump_type_textures = {
+	TexturesCheck,
+	TexturesFormat,
+};
+
 // Fallback, "generic lump"
 
 static bool UnknownLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
@@ -519,6 +535,7 @@ static const struct lump_type *lump_types[] = {
 	&lump_type_level,
 	&lump_type_special,
 	&lump_type_sound,
+	&lump_type_textures,
 	&lump_type_graphic,
 	&lump_type_mus,
 	&lump_type_dmxgus,
@@ -584,6 +601,8 @@ const char *LI_GetExtension(const struct lump_type *lt, bool convert)
 		} else {
 			return ".lmp";
 		}
+	} else if (lt == &lump_type_textures) {
+		return ".txt";
 	} else if (lt == &lump_type_dehacked) {
 		return ".deh";
 	} else if (lt == &lump_type_sound) {

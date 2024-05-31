@@ -25,6 +25,7 @@ extern const struct lump_type lump_type_pcspeaker;
 extern const struct lump_type lump_type_dehacked;
 extern const struct lump_type lump_type_sized;
 extern const struct lump_type lump_type_plaintext;
+extern const struct lump_type lump_type_textures;
 extern const struct lump_type lump_type_unknown;
 
 extern const struct lump_section lump_section_sprites;
