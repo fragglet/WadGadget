@@ -28,6 +28,7 @@ struct lump_type {
 	bool (*check)(struct wad_file_entry *ent, uint8_t *buf);
 	void (*format)(struct wad_file_entry *ent, uint8_t *buf,
 	               char *descr_buf, size_t descr_buf_len);
+	const char *extension;
 };
 
 struct lump_description {
@@ -199,6 +200,7 @@ static void SoundLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_sound = {
 	SoundLumpCheck,
 	SoundLumpFormat,
+	".wav",
 };
 
 // Graphic lump (sprite, texture, etc.)
@@ -229,6 +231,7 @@ static void GraphicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_graphic = {
 	GraphicLumpCheck,
 	GraphicLumpFormat,
+	".png",
 };
 
 // Floor/ceiling texture.
@@ -249,6 +252,7 @@ static void FlatLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_flat = {
 	FlatLumpCheck,
 	FlatLumpFormat,
+	".png",
 };
 
 // DMX .MUS format.
@@ -267,6 +271,7 @@ static void MusLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_mus = {
 	MusLumpCheck,
 	MusLumpFormat,
+	".mid",
 };
 
 // Embedded MIDI file (also supported by DMX)
@@ -285,6 +290,7 @@ static void MidiLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_midi = {
 	MidiLumpCheck,
 	MidiLumpFormat,
+	".mid",
 };
 
 // DMX GUS instrument mappings.
@@ -302,6 +308,7 @@ static void DmxGusFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_dmxgus = {
 	DmxGusCheck,
 	DmxGusFormat,
+	".ini",
 };
 
 static const struct {
@@ -419,6 +426,7 @@ static void DehackedLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_dehacked = {
 	DehackedLumpCheck,
 	DehackedLumpFormat,
+	".deh",
 };
 
 // Lump types identified by fixed size. This type is last in the identification
@@ -488,6 +496,7 @@ static void PlainTextLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_plaintext = {
 	PlainTextLumpCheck,
 	PlainTextLumpFormat,
+	".txt",
 };
 
 // TEXTURE1 etc.
@@ -506,6 +515,7 @@ static void TexturesFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_textures = {
 	TexturesCheck,
 	TexturesFormat,
+	".txt",
 };
 
 // Patch names list lump
@@ -523,6 +533,7 @@ static void PnamesFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_pnames = {
 	PnamesCheck,
 	PnamesFormat,
+	".txt",
 };
 
 // Fallback, "generic lump"
@@ -612,27 +623,14 @@ const char *LI_DescribeLump(const struct lump_type *t, struct wad_file *f,
 
 const char *LI_GetExtension(const struct lump_type *lt, bool convert)
 {
-	if (!convert) {
-		if (lt == &lump_type_mus) {
-			return ".mus";
-		} else {
-			return ".lmp";
-		}
-	} else if (lt == &lump_type_textures || lt == &lump_type_pnames) {
-		return ".txt";
-	} else if (lt == &lump_type_dehacked) {
-		return ".deh";
-	} else if (lt == &lump_type_sound) {
-		return ".wav";
-	} else if (lt == &lump_type_mus || lt == &lump_type_midi) {
-		return ".mid";
-	} else if (lt == &lump_type_graphic || lt == &lump_type_flat) {
-		return ".png";
-	} else if (lt == &lump_type_dmxgus) {
-		return ".ini";
-	} else if (lt == &lump_type_plaintext) {
-		return ".txt";
-	} else {
-		return ".lmp";
+	if (convert && lt->extension != NULL) {
+		return lt->extension;
 	}
+
+	// A special case.
+	if (lt == &lump_type_mus) {
+		return ".mus";
+	}
+
+	return ".lmp";
 }
