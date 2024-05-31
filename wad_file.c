@@ -216,6 +216,7 @@ static int ReadDirectory(struct wad_file *wf)
 
 struct wad_file *W_OpenFile(const char *filename)
 {
+	struct wad_revision *rev;
 	struct wad_file *result;
 	FILE *fs;
 	VFILE *vfs;
@@ -231,29 +232,33 @@ struct wad_file *W_OpenFile(const char *filename)
 	result->vfs = vfs;
 	result->directory = NULL;
 	result->num_lumps = 0;
-	result->curr_revision = MakeRevision(NULL);
 
-	if (vfread(CURR_HEADER(result),
-	           sizeof(struct wad_file_header), 1, vfs) != 1
-	 || (strncmp(CURR_HEADER(result)->id, "IWAD", 4) != 0
-	  && strncmp(CURR_HEADER(result)->id, "PWAD", 4) != 0)) {
+	// Read the WAD file header and build the initial revision.
+	rev = MakeRevision(NULL);
+
+	if (vfread(rev, sizeof(struct wad_file_header), 1, vfs) != 1
+	 || (strncmp(rev->header.id, "IWAD", 4) != 0
+	  && strncmp(rev->header.id, "PWAD", 4) != 0)) {
 		W_CloseFile(result);
 		return NULL;
 	}
 
-	SwapHeader(CURR_HEADER(result));
-
-	if (!ReadDirectory(result)) {
-		W_CloseFile(result);
-		return NULL;
-	}
+	SwapHeader(&rev->header);
 
 	if (vfseek(result->vfs, 0, SEEK_END) != 0) {
 		W_CloseFile(result);
 		return NULL;
 	}
+	rev->eof = result->write_pos;
+
+	// The first revision has now been initialized.
+	result->curr_revision = rev;
 	result->write_pos = vftell(result->vfs);
-	result->curr_revision->eof = result->write_pos;
+
+	if (!ReadDirectory(result)) {
+		W_CloseFile(result);
+		return NULL;
+	}
 
 	return result;
 }
@@ -279,7 +284,8 @@ void W_CloseFile(struct wad_file *f)
 	// doing this is that if we open a file, make some changes and then
 	// undo them all, the file will be precisely restored to its
 	// original contents.
-	if (vfseek(f->vfs, f->curr_revision->eof, SEEK_SET) == 0) {
+	if (f->curr_revision != NULL && f->curr_revision->eof > 0
+	 && vfseek(f->vfs, f->curr_revision->eof, SEEK_SET) == 0) {
 		vftruncate(f->vfs);
 	}
 	FreeRevisionChainBackward(f->curr_revision->prev);
