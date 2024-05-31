@@ -255,7 +255,7 @@ struct wad_file *W_OpenFile(const char *filename)
 	result->curr_revision = rev;
 	result->write_pos = vftell(result->vfs);
 
-	if (!ReadDirectory(result)) {
+	if (ReadDirectory(result) < 0) {
 		W_CloseFile(result);
 		return NULL;
 	}
