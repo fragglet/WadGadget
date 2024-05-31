@@ -15,10 +15,12 @@ beta](https://doomwiki.org/wiki/New_WAD_Tool#NWT_pro_beta_release) release of
 NWT which was going to have a two-pane interface for viewing two WAD files
 simultaneously.
 
-The advantage of a two-pane WAD editing tool is simple: when editing Doom WAD
-files, one develops PWADs as a patch against the original IWAD file. The
-result is a merger between the two, and it's helpful to be able to explore
-this and see the effect of one on the other.
+A two-pane WAD editing tool has several advantages. Firstly, when editing Doom
+WAD files, one develops PWADs as a patch against the original IWAD file. The
+result is a merger between the two, and it's helpful to be able to explore this
+and see the effect of one on the other. Secondly, WadGadget fully
+integrates both the filesystem and WAD views; the actions of importing,
+exporting or copying between WADs all take place through a consistent interface.
 
 ## Features
 
