@@ -19,6 +19,7 @@
 #include "textures.h"
 
 #define TEXTURE_CONFIG_HEADER "; deutex format texture lump configuration\n\n"
+#define PNAMES_CONFIG_HEADER "; patch names lump configuration\n\n"
 
 typedef char pname[8];
 
@@ -242,6 +243,25 @@ static VFILE *FormatTextureConfig(struct textures *txs)
 	return result;
 }
 
+static VFILE *FormatPnamesConfig(struct pnames *p)
+{
+	VFILE *result = vfopenmem(NULL, 0);
+	char buf[32];
+	int i;
+
+	assert(vfwrite(PNAMES_CONFIG_HEADER,
+	               strlen(PNAMES_CONFIG_HEADER), 1, result) == 1);
+
+	for (i = 0; i < p->num_pnames; i++) {
+		snprintf(buf, sizeof(buf), "%.8s\n", p->pnames[i]);
+		assert(vfwrite(buf, strlen(buf), 1, result) == 1);
+	}
+
+	assert(vfseek(result, 0, SEEK_SET) == 0);
+
+	return result;
+}
+
 VFILE *TX_ToTexturesConfig(VFILE *input, VFILE *pnames_input)
 {
 	struct textures *txs = ReadTextures(input);
@@ -260,5 +280,19 @@ VFILE *TX_ToTexturesConfig(VFILE *input, VFILE *pnames_input)
 	result = FormatTextureConfig(txs);
 
 	FreeTextures(txs);
+	return result;
+}
+
+VFILE *TX_ToPnamesConfig(VFILE *input)
+{
+	struct pnames *p = ReadPnames(input);
+	VFILE *result;
+
+	if (p == NULL) {
+		return NULL;
+	}
+
+	result = FormatPnamesConfig(p);
+	FreePnames(p);
 	return result;
 }

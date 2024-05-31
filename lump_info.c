@@ -57,7 +57,6 @@ static const struct lump_description special_lumps[] = {
 	{"XLATAB",    "Translucency table"},
 	{"AUTOPAGE",  "Map background texture"},
 	{"GENMIDI",   "OPL FM synth instrs."},
-	{"PNAMES",    "Wall patch list"},
 	{NULL, NULL},
 };
 
@@ -509,6 +508,23 @@ const struct lump_type lump_type_textures = {
 	TexturesFormat,
 };
 
+// Patch names list lump
+static bool PnamesCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return !strcmp(ent->name, "PNAMES");
+}
+
+static void PnamesFormat(struct wad_file_entry *ent, uint8_t *buf,
+                         char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "Wall patch list");
+}
+
+const struct lump_type lump_type_pnames = {
+	PnamesCheck,
+	PnamesFormat,
+};
+
 // Fallback, "generic lump"
 
 static bool UnknownLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
@@ -536,6 +552,7 @@ static const struct lump_type *lump_types[] = {
 	&lump_type_special,
 	&lump_type_sound,
 	&lump_type_textures,
+	&lump_type_pnames,
 	&lump_type_graphic,
 	&lump_type_mus,
 	&lump_type_dmxgus,
@@ -601,7 +618,7 @@ const char *LI_GetExtension(const struct lump_type *lt, bool convert)
 		} else {
 			return ".lmp";
 		}
-	} else if (lt == &lump_type_textures) {
+	} else if (lt == &lump_type_textures || lt == &lump_type_pnames) {
 		return ".txt";
 	} else if (lt == &lump_type_dehacked) {
 		return ".deh";

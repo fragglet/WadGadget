@@ -51,6 +51,8 @@ static VFILE *PerformConversion(struct directory *from, VFILE *input,
 		return V_ToImageFile(input);
 	} else if (lt == &lump_type_textures) {
 		return ConvertTextures(from, input);
+	} else if (lt == &lump_type_pnames) {
+		return TX_ToPnamesConfig(input);
 	} else if (lt == &lump_type_mus) {
 		VFILE *result = vfopenmem(NULL, 0);
 		if (mus2mid(input, result)) {
