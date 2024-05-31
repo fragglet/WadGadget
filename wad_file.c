@@ -36,9 +36,10 @@ struct wad_file {
 	struct wad_file_entry *directory;
 	int num_lumps;
 
-	// We can only read/write a single lump at once.
-	VFILE *current_lump;
-	unsigned int current_lump_index;
+	// We can read as many lumps as we like, but only write one.
+	int lump_open_count;
+	VFILE *current_write_lump;
+	unsigned int current_write_index;
 
 	// We support Undo by keeping multiple copies of the WAD header.
 	// Every time anything in the file changes, we write a new WAD
@@ -275,9 +276,9 @@ unsigned int W_NumLumps(struct wad_file *f)
 
 void W_CloseFile(struct wad_file *f)
 {
-	if (f->current_lump != NULL) {
-		vfclose(f->current_lump);
-	}
+	// All lumps must be closed first.
+	assert(f->lump_open_count == 0);
+
 	// After closing the file we lose all ability to redo (or undo, for
 	// that matter). Any data after the EOF for the current revision
 	// can therefore be safely discarded. The most important reason for
@@ -374,8 +375,8 @@ static void LumpClosed(VFILE *fs, void *data)
 {
 	struct wad_file *f = data;
 
-	assert(f->current_lump == fs);
-	f->current_lump = NULL;
+	assert(f->lump_open_count > 0);
+	--f->lump_open_count;
 }
 
 VFILE *W_OpenLump(struct wad_file *f, unsigned int lump_index)
@@ -384,14 +385,12 @@ VFILE *W_OpenLump(struct wad_file *f, unsigned int lump_index)
 	long start, end;
 
 	assert(lump_index < f->num_lumps);
-	assert(f->current_lump == NULL);
 
 	start = f->directory[lump_index].position;
 	end = start + f->directory[lump_index].size;
 	result = vfrestrict(f->vfs, start, end, 1);
 
-	f->current_lump = result;
-	f->current_lump_index = lump_index;
+	++f->lump_open_count;
 	vfonclose(result, LumpClosed, f);
 
 	return result;
@@ -403,13 +402,15 @@ static void WriteLumpClosed(VFILE *fs, void *data)
 	struct wad_file *f = data;
 	long size;
 
-	assert(f->current_lump == fs);
-	f->current_lump = NULL;
+	assert(f->current_write_lump == fs);
+	assert(f->lump_open_count > 0);
+	f->current_write_lump = NULL;
+	--f->lump_open_count;
 
 	// New size of lump is the offset within the restricted VFILE.
 	size = vftell(fs);
-	assert(f->current_lump_index < f->num_lumps);
-	ent = &f->directory[f->current_lump_index];
+	assert(f->current_write_index < f->num_lumps);
+	ent = &f->directory[f->current_write_index];
 	ent->size = (unsigned int) size;
 	f->write_pos = ent->position + ent->size;
 	f->dirty = true;
@@ -422,14 +423,15 @@ VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
 	VFILE *result;
 
 	assert(lump_index < f->num_lumps);
-	assert(f->current_lump == NULL);
+	assert(f->current_write_lump == NULL);
 
-	assert(!vfseek(f->vfs, f->write_pos, SEEK_SET));
+	assert(vfseek(f->vfs, f->write_pos, SEEK_SET) == 0);
 	f->directory[lump_index].position = (unsigned int) f->write_pos;
 
 	result = vfrestrict(f->vfs, f->write_pos, -1, 0);
-	f->current_lump = result;
-	f->current_lump_index = lump_index;
+	f->current_write_lump = result;
+	f->current_write_index = lump_index;
+	++f->lump_open_count;
 
 	vfonclose(result, WriteLumpClosed, f);
 
