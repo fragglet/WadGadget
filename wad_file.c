@@ -302,6 +302,7 @@ void W_AddEntries(struct wad_file *f, unsigned int before_index,
 	unsigned int i;
 	struct wad_file_entry *ent;
 
+	assert(f->current_write_lump == NULL);
 	assert(before_index <= f->num_lumps);
 
 	// We need to rearrange both the WAD directory and the lump headers
@@ -332,6 +333,7 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index)
 
 void W_DeleteEntries(struct wad_file *f, unsigned int index, unsigned int cnt)
 {
+	assert(f->current_write_lump == NULL);
 	assert(index <= f->num_lumps);
 	assert(cnt <= f->num_lumps);
 	assert(index + cnt <= f->num_lumps);
@@ -483,6 +485,8 @@ void W_SwapEntries(struct wad_file *f, unsigned int l1, unsigned int l2)
 	if (l1 == l2) {
 		return;
 	}
+
+	assert(f->current_write_lump == NULL);
 	assert(l1 < f->num_lumps);
 	assert(l2 < f->num_lumps);
 	tmp = f->directory[l1];
@@ -565,6 +569,8 @@ bool W_CompactWAD(struct wad_file *f)
 	struct progress_window progress;
 	uint32_t min_size = MinimumWADSize(f);
 
+	assert(f->current_write_lump == NULL);
+
 	// Is file length shorter than the minimum size already? (This
 	// can happen if the file was compressed with wadptr)
 	if (vfseek(f->vfs, 0, SEEK_END) != 0 || vftell(f->vfs) <= min_size) {
@@ -625,6 +631,8 @@ int W_Undo(struct wad_file *wf, unsigned int levels)
 	struct wad_revision *r = wf->curr_revision;
 	int i, result;
 
+	assert(wf->current_write_lump == NULL);
+
 	for (i = 0; i < levels; i++) {
 		assert(r->prev != NULL);
 		r = r->prev;
@@ -658,6 +666,8 @@ int W_Redo(struct wad_file *wf, unsigned int levels)
 {
 	struct wad_revision *r = wf->curr_revision;
 	int i, result;
+
+	assert(wf->current_write_lump == NULL);
 
 	for (i = 0; i < levels; i++) {
 		assert(r->next != NULL);
