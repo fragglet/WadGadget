@@ -20,8 +20,28 @@
 #include "lump_info.h"
 #include "mus2mid.h"
 #include "strings.h"
+#include "textures.h"
 
-static VFILE *PerformConversion(VFILE *input, const struct lump_type *lt)
+static VFILE *ConvertTextures(struct directory *from, VFILE *input)
+{
+	struct directory_entry *ent = VFS_EntryByName(from, "PNAMES");
+	VFILE *pnames;
+	if (ent == NULL) {
+		UI_MessageBox("To export a texture config, your WAD\n"
+		              "must contain a PNAMES lump.");
+		vfclose(input);
+		return NULL;
+	}
+	pnames = VFS_OpenByEntry(from, ent);
+	if (pnames == NULL) {
+		vfclose(input);
+		return NULL;
+	}
+	return TX_ToTexturesConfig(input, pnames);
+}
+
+static VFILE *PerformConversion(struct directory *from, VFILE *input,
+                                const struct lump_type *lt)
 {
 	if (lt == &lump_type_sound) {
 		return S_ToAudioFile(input);
@@ -29,6 +49,8 @@ static VFILE *PerformConversion(VFILE *input, const struct lump_type *lt)
 		return V_FlatToImageFile(input);
 	} else if (lt == &lump_type_graphic) {
 		return V_ToImageFile(input);
+	} else if (lt == &lump_type_textures) {
+		return ConvertTextures(from, input);
 	} else if (lt == &lump_type_mus) {
 		VFILE *result = vfopenmem(NULL, 0);
 		if (mus2mid(input, result)) {
@@ -131,7 +153,7 @@ bool ExportToFile(struct directory *from, struct directory_entry *ent,
 
 	fromlump = VFS_OpenByEntry(from, ent);
 	if (convert) {
-		fromlump = PerformConversion(fromlump, lt);
+		fromlump = PerformConversion(from, fromlump, lt);
 	}
 	if (fromlump == NULL) {
 		// TODO: Print an error message on failed conversion
