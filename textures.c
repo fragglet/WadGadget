@@ -129,7 +129,7 @@ static struct texture *DupTexture(struct texture *t)
 }
 */
 
-static struct texture *ReadTexture(const uint8_t *start, size_t max_len)
+static struct texture *UnmarshalTexture(const uint8_t *start, size_t max_len)
 {
 	struct texture *result;
 	size_t sz;
@@ -183,7 +183,7 @@ static void AddSerialNos(struct textures *txs)
 	}
 }
 
-static struct textures *ReadTextures(VFILE *input)
+static struct textures *UnmarshalTextures(VFILE *input)
 {
 	VFILE *sink = vfopenmem(NULL, 0);
 	struct textures *result = NULL;
@@ -222,8 +222,8 @@ static struct textures *ReadTextures(VFILE *input)
 			goto fail;
 		}
 
-		result->textures[i] = ReadTexture(lump + start,
-		                                  lump_len - start);
+		result->textures[i] =
+			UnmarshalTexture(lump + start, lump_len - start);
 		if (result->textures[i] == NULL) {
 			FreeTextures(result);
 			result = NULL;
@@ -235,6 +235,38 @@ static struct textures *ReadTextures(VFILE *input)
 
 fail:
 	vfclose(sink);
+	return result;
+}
+
+static VFILE *MarshalTextures(struct textures *txs)
+{
+	VFILE *result = vfopenmem(NULL, 0);
+	uint32_t *offsets =
+		checked_calloc(txs->num_textures, sizeof(uint32_t));
+	uint32_t num_textures = txs->num_textures;
+	size_t lump_len = 4 + 4 * txs->num_textures;
+	int i;
+
+	for (i = 0; i < txs->num_textures; i++) {
+		offsets[i] = lump_len;
+		SwapLE32(&offsets[i]);
+		lump_len += TextureLen(txs->textures[i]->patchcount);
+	}
+
+	SwapLE32(&num_textures);
+	assert(vfwrite(&num_textures, sizeof(uint32_t), 1, result) == 1);
+	assert(vfwrite(offsets, sizeof(uint32_t),
+	               txs->num_textures, result) == txs->num_textures);
+
+	for (i = 0; i < txs->num_textures; i++) {
+		struct texture *swapped = DupTexture(txs->textures[i]);
+		size_t len = TextureLen(txs->textures[i]->patchcount);
+		SwapTexture(swapped);
+		assert(vfwrite(swapped, 1, len, result) == len);
+		free(swapped);
+	}
+
+	vfseek(result, 0, SEEK_SET);
 	return result;
 }
 
@@ -308,7 +340,7 @@ static VFILE *FormatPnamesConfig(struct pnames *p)
 
 VFILE *TX_ToTexturesConfig(VFILE *input, VFILE *pnames_input)
 {
-	struct textures *txs = ReadTextures(input);
+	struct textures *txs = UnmarshalTextures(input);
 	VFILE *result;
 
 	if (txs == NULL) {
@@ -607,7 +639,7 @@ struct directory *OpenTextureDir(void)
 	dir->dir.directory_funcs = &texture_dir_funcs;
 
 	// TODO
-	dir->txs = ReadTextures(VFS_Open("TEXTURE1.lmp"));
+	dir->txs = UnmarshalTextures(VFS_Open("TEXTURE1.lmp"));
 
 	TextureDirRefresh(dir);
 
