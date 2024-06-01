@@ -18,7 +18,7 @@
 #include "dialog.h"
 #include "export.h"
 #include "pane.h"
-#include "strings.h"
+#include "stringlib.h"
 #include "ui.h"
 #include "vfs.h"
 #include "view.h"

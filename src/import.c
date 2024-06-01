@@ -19,7 +19,7 @@
 #include "import.h"
 #include "graphic.h"
 #include "lump_info.h"
-#include "strings.h"
+#include "stringlib.h"
 #include "textures.h"
 
 static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)

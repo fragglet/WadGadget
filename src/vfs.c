@@ -21,7 +21,7 @@
 #include <dirent.h>
 
 #include "common.h"
-#include "strings.h"
+#include "stringlib.h"
 #include "vfs.h"
 #include "wad_file.h"
 

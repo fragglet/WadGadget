@@ -19,7 +19,7 @@
 #include "graphic.h"
 #include "lump_info.h"
 #include "mus2mid.h"
-#include "strings.h"
+#include "stringlib.h"
 #include "textures.h"
 
 static VFILE *ConvertTextures(struct directory *from, VFILE *input)

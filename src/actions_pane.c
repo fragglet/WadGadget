@@ -14,7 +14,7 @@
 #include "actions_pane.h"
 #include "colors.h"
 #include "common.h"
-#include "strings.h"
+#include "stringlib.h"
 #include "ui.h"
 
 static const int key_ordering[] = {

@@ -16,7 +16,7 @@
 #include "common.h"
 #include "audio.h"
 #include "graphic.h"
-#include "strings.h"
+#include "stringlib.h"
 #include "wad_file.h"
 
 struct lump_section {

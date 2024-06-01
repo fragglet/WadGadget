@@ -17,7 +17,7 @@
 #include "colors.h"
 #include "common.h"
 #include "dialog.h"
-#include "strings.h"
+#include "stringlib.h"
 #include "ui.h"
 #include "directory_pane.h"
 

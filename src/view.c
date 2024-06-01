@@ -24,7 +24,7 @@
 #include "import.h"
 #include "lump_info.h"
 #include "sixel_display.h"
-#include "strings.h"
+#include "stringlib.h"
 #include "termfuncs.h"
 #include "ui.h"
 #include "vfile.h"
