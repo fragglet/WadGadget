@@ -289,8 +289,10 @@ void W_CloseFile(struct wad_file *f)
 	 && vfseek(f->vfs, f->curr_revision->eof, SEEK_SET) == 0) {
 		vftruncate(f->vfs);
 	}
-	FreeRevisionChainBackward(f->curr_revision->prev);
-	FreeRevisionChainForward(f->curr_revision);
+	if (f->curr_revision != NULL) {
+		FreeRevisionChainBackward(f->curr_revision->prev);
+		FreeRevisionChainForward(f->curr_revision);
+	}
 	vfclose(f->vfs);
 	free(f->directory);
 	free(f);
