@@ -10,7 +10,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 #include <assert.h>
 
 #include "common.h"
@@ -112,7 +114,7 @@ static size_t TextureLen(size_t patchcount)
 
 static struct texture *AllocTexture(size_t patchcount)
 {
-	struct texture *result = checked_malloc(TextureLen(patchcount));
+	struct texture *result = checked_calloc(1, TextureLen(patchcount));
 	result->patchcount = patchcount;
 	return result;
 }
@@ -170,6 +172,17 @@ static uint64_t NewSerialNo(void)
 	return result;
 }
 
+static void AddSerialNos(struct textures *txs)
+{
+	int i;
+
+	txs->serial_nos = checked_calloc(txs->num_textures, sizeof(uint64_t));
+
+	for (i = 0; i < txs->num_textures; i++) {
+		txs->serial_nos[i] = NewSerialNo();
+	}
+}
+
 static struct textures *ReadTextures(VFILE *input)
 {
 	VFILE *sink = vfopenmem(NULL, 0);
@@ -196,7 +209,6 @@ static struct textures *ReadTextures(VFILE *input)
 	result->textures =
 		checked_calloc(num_textures, sizeof(struct texture *));
 	result->num_textures = num_textures;
-	result->serial_nos = checked_calloc(num_textures, sizeof(uint64_t));
 
 	for (i = 0; i < num_textures; i++) {
 		uint32_t start;
@@ -210,7 +222,6 @@ static struct textures *ReadTextures(VFILE *input)
 			goto fail;
 		}
 
-		result->serial_nos[i] = NewSerialNo();
 		result->textures[i] = ReadTexture(lump + start,
 		                                  lump_len - start);
 		if (result->textures[i] == NULL) {
@@ -219,6 +230,8 @@ static struct textures *ReadTextures(VFILE *input)
 			goto fail;
 		}
 	}
+
+	AddSerialNos(result);
 
 fail:
 	vfclose(sink);
@@ -325,6 +338,152 @@ VFILE *TX_ToPnamesConfig(VFILE *input)
 
 	result = FormatPnamesConfig(p);
 	FreePnames(p);
+	return result;
+}
+
+static char *ReadLine(uint8_t *buf, size_t buf_len, unsigned int *offset)
+{
+	char *result, *p;
+	unsigned int start, len;
+
+	if (*offset >= buf_len) {
+		return NULL;
+	}
+
+	// Skip leading spaces.
+	while (*offset < buf_len && buf[*offset] != '\n'
+	    && isspace(buf[*offset])) {
+		++*offset;
+	}
+
+	start = *offset;
+	while (*offset < buf_len && buf[*offset] != '\n') {
+		++*offset;
+	}
+
+	len = *offset - start + 1;
+	result = checked_calloc(len, 1);
+	memcpy(result, &buf[start], len);
+	result[len] = '\0';
+	++*offset;
+
+	// Strip out comments.
+	p = strchr(result, ';');
+	if (p != NULL) {
+		*p = '\0';
+	}
+
+	return result;
+}
+
+static int ScanLine(char *line, const char *fmt, char *name,
+                    int *x, int *y)
+{
+	int nfields;
+
+	*x = 0;
+	*y = 0;
+	nfields = sscanf(line, fmt, name, x, y);
+	if (nfields < 1) {
+		return 0;
+	}
+
+	// We only allow 8 characters, but parse up to 9 to see if
+	// the limit was exceeded.
+	name[9] = '\0';
+	if (strlen(name) > 8) {
+		return 0;
+	}
+
+	return nfields;
+}
+
+static bool MaybeAddTexture(struct textures *txs, char *line)
+{
+	struct texture *t;
+	char namebuf[10];
+	int w, h, n;
+
+	n = ScanLine(line, "%9s %d %d", namebuf, &w, &h);
+	if (n < 3) {
+		return false;
+	}
+
+	t = AllocTexture(0);
+	memcpy(t->name, namebuf, 8);
+	t->width = w;
+	t->height = h;
+	t->patchcount = 0;
+
+	txs->textures = checked_realloc(txs->textures,
+		(txs->num_textures + 1) * sizeof(struct texture *));
+	txs->textures[txs->num_textures] = t;
+	++txs->num_textures;
+
+	return true;
+}
+
+static bool MaybeAddPatch(struct textures *txs, char *line)
+{
+	char namebuf[10];
+	struct texture *t;
+	struct patch *p;
+	int x, y, n;
+
+	if (txs->num_textures <= 0) {
+		return false;
+	}
+
+	n = ScanLine(line, "* %9s %d %d", namebuf, &x, &y);
+	if (n < 1) {
+		return false;
+	}
+
+	// As long as we have the name, we can append the patch
+	// (X/Y offsets are assumed to be zero)
+	t = txs->textures[txs->num_textures - 1];
+	t = checked_realloc(t, TextureLen(t->patchcount + 1));
+	txs->textures[txs->num_textures - 1] = t;
+	p = &t->patches[t->patchcount];
+	++t->patchcount;
+
+	p->originx = x;
+	p->originy = y;
+	p->patch = 99; // TODO
+	p->stepdir = 0;
+	p->colormap = 0;
+
+	return true;
+}
+
+static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len)
+{
+	struct textures *result;
+	unsigned int offset = 0;
+	bool fail;
+
+	result = calloc(1, sizeof(struct textures));
+
+	for (;;) {
+		char *line = ReadLine(buf, buf_len, &offset);
+		if (line == NULL) {
+			break;
+		}
+
+		fail = strlen(line) > 0
+		    && !MaybeAddPatch(result, line)
+		    && !MaybeAddTexture(result, line);
+		free(line);
+
+		if (fail) {
+			// error
+			FreeTextures(result);
+			return NULL;
+		}
+	}
+
+	AddSerialNos(result);
+
 	return result;
 }
 
