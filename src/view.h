@@ -8,6 +8,6 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include "vfs.h"
+#include "fs/vfs.h"
 
 void OpenDirent(struct directory *dir, struct directory_entry *ent);

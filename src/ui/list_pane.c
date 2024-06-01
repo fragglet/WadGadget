@@ -14,10 +14,10 @@
 #include <string.h>
 #include <assert.h>
 
-#include "colors.h"
+#include "ui/colors.h"
 #include "common.h"
-#include "ui.h"
-#include "list_pane.h"
+#include "ui/ui.h"
+#include "ui/list_pane.h"
 
 static unsigned int NumEntries(struct list_pane *lp)
 {

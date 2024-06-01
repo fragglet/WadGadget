@@ -18,7 +18,7 @@
 #include <sys/time.h>
 
 #include "common.h"
-#include "endoom.h"
+#include "conv/endoom.h"
 #include "termfuncs.h"
 
 static const char *cp437_to_utf8[256] = {

@@ -11,8 +11,8 @@
 #ifndef INCLUDE_DIRECTORY_PANE_H
 #define INCLUDE_DIRECTORY_PANE_H
 
-#include "list_pane.h"
-#include "vfs.h"
+#include "ui/list_pane.h"
+#include "fs/vfs.h"
 
 struct directory_pane {
 	struct list_pane pane;

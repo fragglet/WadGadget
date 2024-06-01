@@ -8,12 +8,12 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include "vfs.h"
+#include "lump_info.h"
+#include "fs/vfs.h"
 
-bool ImportFromFile(VFILE *fromfile, const char *src_name,
-                    struct wad_file *to_wad, int lumpnum,
-                    bool flats_section, bool convert);
-bool PerformImport(struct directory *from, struct file_set *from_set,
-                   struct directory *to, int to_index,
-                   struct file_set *result, bool convert);
+bool ExportToFile(struct directory *from, struct directory_entry *ent,
+                  const struct lump_type *lt, const char *to_filename,
+                  bool convert);
+bool PerformExport(struct directory *from, struct file_set *from_set,
+                   struct directory *to, struct file_set *result, bool convert);
 

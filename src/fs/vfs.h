@@ -11,8 +11,8 @@
 #ifndef INCLUDED_VFS_H
 #define INCLUDED_VFS_H
 
-#include "vfile.h"
-#include "wad_file.h"
+#include "fs/vfile.h"
+#include "fs/wad_file.h"
 
 enum file_type {
 	FILE_TYPE_FILE,

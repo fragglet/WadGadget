@@ -13,10 +13,10 @@
 #include <curses.h>
 #include <time.h>
 
-#include "colors.h"
+#include "ui/colors.h"
 #include "common.h"
-#include "pane.h"
-#include "ui.h"
+#include "ui/pane.h"
+#include "ui/ui.h"
 
 #define MAX_NOTICE_LEN    100
 #define NOTICE_TIME_SECS    2

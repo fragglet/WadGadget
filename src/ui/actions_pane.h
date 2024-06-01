@@ -9,8 +9,8 @@
 //
 
 #include "actions.h"
-#include "pane.h"
-#include "vfs.h"
+#include "ui/pane.h"
+#include "fs/vfs.h"
 
 #define MAX_KEY_BINDINGS 30
 

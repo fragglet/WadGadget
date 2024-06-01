@@ -13,14 +13,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "audio.h"
-#include "dialog.h"
-#include "export.h"
-#include "graphic.h"
+#include "conv/audio.h"
+#include "ui/dialog.h"
+#include "conv/export.h"
+#include "conv/graphic.h"
 #include "lump_info.h"
-#include "mus2mid.h"
+#include "conv/mus2mid.h"
 #include "stringlib.h"
-#include "textures.h"
+#include "textures/textures.h"
 
 static VFILE *ConvertTextures(struct directory *from, VFILE *input)
 {

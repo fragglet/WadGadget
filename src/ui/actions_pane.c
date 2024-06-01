@@ -11,11 +11,11 @@
 #include <string.h>
 #include <limits.h>
 
-#include "actions_pane.h"
-#include "colors.h"
+#include "ui/actions_pane.h"
+#include "ui/colors.h"
 #include "common.h"
 #include "stringlib.h"
-#include "ui.h"
+#include "ui/ui.h"
 
 static const int key_ordering[] = {
 	KEY_F(1), KEY_F(2), KEY_F(3), KEY_F(4), KEY_F(5), KEY_F(6),

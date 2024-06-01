@@ -17,9 +17,9 @@
 #include <stdbool.h>
 
 #include "common.h"
-#include "dialog.h"
-#include "vfile.h"
-#include "wad_file.h"
+#include "ui/dialog.h"
+#include "fs/vfile.h"
+#include "fs/wad_file.h"
 
 #define WAD_FILE_ENTRY_LEN  16
 

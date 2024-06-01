@@ -12,7 +12,7 @@
 #include <audiofile.h>
 #include <assert.h>
 
-#include "audio.h"
+#include "conv/audio.h"
 #include "common.h"
 
 void S_SwapSoundHeader(struct sound_header *hdr)

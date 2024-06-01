@@ -8,7 +8,7 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include "vfile.h"
+#include "fs/vfile.h"
 
 struct patch_header {
 	uint16_t width, height;

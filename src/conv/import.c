@@ -14,13 +14,13 @@
 #include <stdint.h>
 #include <limits.h>
 
-#include "audio.h"
-#include "dialog.h"
-#include "import.h"
-#include "graphic.h"
+#include "conv/audio.h"
+#include "ui/dialog.h"
+#include "conv/import.h"
+#include "conv/graphic.h"
 #include "lump_info.h"
 #include "stringlib.h"
-#include "textures.h"
+#include "textures/textures.h"
 
 static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 {

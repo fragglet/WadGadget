@@ -22,8 +22,8 @@
 
 #include "common.h"
 #include "stringlib.h"
-#include "vfs.h"
-#include "wad_file.h"
+#include "fs/vfs.h"
+#include "fs/wad_file.h"
 
 // Yes, Si units, not binary ones.
 #define KB(x) (x * 1000ULL)

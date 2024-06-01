@@ -12,9 +12,9 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "colors.h"
+#include "ui/colors.h"
 #include "common.h"
-#include "text_input.h"
+#include "ui/text_input.h"
 
 void UI_TextInputInit(struct text_input_box *input, WINDOW *win,
                       size_t max_chars)

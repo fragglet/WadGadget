@@ -14,10 +14,10 @@
 #include <string.h>
 
 #include "common.h"
-#include "audio.h"
-#include "graphic.h"
+#include "conv/audio.h"
+#include "conv/graphic.h"
 #include "stringlib.h"
-#include "wad_file.h"
+#include "fs/wad_file.h"
 
 struct lump_section {
 	const char *start1, *start2;

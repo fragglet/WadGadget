@@ -14,12 +14,12 @@
 #include <string.h>
 #include <assert.h>
 
-#include "colors.h"
+#include "ui/colors.h"
 #include "common.h"
-#include "dialog.h"
+#include "ui/dialog.h"
 #include "stringlib.h"
-#include "ui.h"
-#include "directory_pane.h"
+#include "ui/ui.h"
+#include "ui/directory_pane.h"
 
 static void DrawEntry(WINDOW *win, int idx, void *data)
 {

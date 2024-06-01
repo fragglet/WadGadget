@@ -16,10 +16,10 @@
 #include <assert.h>
 
 #include "common.h"
-#include "vfile.h"
-#include "vfs.h"
+#include "fs/vfile.h"
+#include "fs/vfs.h"
 
-#include "textures.h"
+#include "textures/textures.h"
 
 #define TEXTURE_CONFIG_HEADER "; deutex format texture lump configuration\n\n"
 #define PNAMES_CONFIG_HEADER "; patch names lump configuration\n\n"

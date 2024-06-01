@@ -15,11 +15,11 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "colors.h"
+#include "ui/colors.h"
 #include "common.h"
-#include "dialog.h"
-#include "pane.h"
-#include "ui.h"
+#include "ui/dialog.h"
+#include "ui/pane.h"
+#include "ui/ui.h"
 
 struct nonblocking_window {
 	struct pane pane;

@@ -8,12 +8,15 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include "lump_info.h"
-#include "vfs.h"
+#include "fs/vfile.h"
 
-bool ExportToFile(struct directory *from, struct directory_entry *ent,
-                  const struct lump_type *lt, const char *to_filename,
-                  bool convert);
-bool PerformExport(struct directory *from, struct file_set *from_set,
-                   struct directory *to, struct file_set *result, bool convert);
+struct sound_header {
+	uint16_t format;
+	uint16_t sample_rate;
+	uint32_t num_samples;
+};
+
+VFILE *S_FromAudioFile(VFILE *input);
+VFILE *S_ToAudioFile(VFILE *input);
+void S_SwapSoundHeader(struct sound_header *hdr);
 

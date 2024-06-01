@@ -14,8 +14,8 @@
 #include <png.h>
 
 #include "common.h"
-#include "vfile.h"
-#include "graphic.h"
+#include "fs/vfile.h"
+#include "conv/graphic.h"
 
 #define OFFSET_CHUNK_NAME  "grAb"
 

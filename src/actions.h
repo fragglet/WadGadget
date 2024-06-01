@@ -8,7 +8,7 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include "directory_pane.h"
+#include "ui/directory_pane.h"
 
 struct action {
 	// If non-zero, key that when pressed invokes the callback.

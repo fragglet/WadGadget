@@ -18,17 +18,17 @@
 #include <sys/wait.h>
 
 #include "common.h"
-#include "dialog.h"
-#include "endoom.h"
-#include "export.h"
-#include "import.h"
+#include "ui/dialog.h"
+#include "conv/endoom.h"
+#include "conv/export.h"
+#include "conv/import.h"
 #include "lump_info.h"
 #include "sixel_display.h"
 #include "stringlib.h"
 #include "termfuncs.h"
-#include "ui.h"
-#include "vfile.h"
-#include "vfs.h"
+#include "ui/ui.h"
+#include "fs/vfile.h"
+#include "fs/vfs.h"
 
 #ifndef _WIN32
 

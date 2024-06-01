@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include "pane.h"
-#include "text_input.h"
+#include "ui/pane.h"
+#include "ui/text_input.h"
 
 #define FILE_PANE_WIDTH  27
 #define FILE_PANE_HEIGHT 24

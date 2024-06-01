@@ -13,18 +13,18 @@
 #include <signal.h>
 #include <string.h>
 
-#include "actions_pane.h"
-#include "colors.h"
+#include "ui/actions_pane.h"
+#include "ui/colors.h"
 #include "common.h"
-#include "dialog.h"
-#include "directory_pane.h"
-#include "export.h"
-#include "import.h"
+#include "ui/dialog.h"
+#include "ui/directory_pane.h"
+#include "conv/export.h"
+#include "conv/import.h"
 #include "lump_info.h"
 #include "sixel_display.h"
 #include "stringlib.h"
 #include "termfuncs.h"
-#include "ui.h"
+#include "ui/ui.h"
 #include "view.h"
 
 #define VERSION_OUTPUT \

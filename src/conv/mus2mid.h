@@ -16,7 +16,7 @@
 #ifndef MUS2MID_H
 #define MUS2MID_H
 
-#include "vfile.h"
+#include "fs/vfile.h"
 
 bool mus2mid(VFILE *musinput, VFILE *midioutput);
 

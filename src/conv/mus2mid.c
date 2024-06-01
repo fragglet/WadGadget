@@ -18,8 +18,8 @@
 #include <stdbool.h>
 
 #include "common.h"
-#include "mus2mid.h"
-#include "vfile.h"
+#include "conv/mus2mid.h"
+#include "fs/vfile.h"
 
 // TODO
 #define SHORT(x) (x)

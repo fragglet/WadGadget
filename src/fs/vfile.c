@@ -15,7 +15,7 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "vfile.h"
+#include "fs/vfile.h"
 
 struct _VFILE {
 	const struct vfile_functions *functions;

@@ -14,13 +14,13 @@
 
 #include "actions.h"
 #include "common.h"
-#include "import.h"
-#include "dialog.h"
-#include "export.h"
-#include "pane.h"
+#include "conv/import.h"
+#include "ui/dialog.h"
+#include "conv/export.h"
+#include "ui/pane.h"
 #include "stringlib.h"
-#include "ui.h"
-#include "vfs.h"
+#include "ui/ui.h"
+#include "fs/vfs.h"
 #include "view.h"
 
 #define WAD_JUNK_THRESHOLD_KB  500

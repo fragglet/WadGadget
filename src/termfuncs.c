@@ -16,7 +16,7 @@
 #include <string.h>
 #include <sys/time.h>
 
-#include "colors.h"
+#include "ui/colors.h"
 #include "common.h"
 #include "termfuncs.h"
 

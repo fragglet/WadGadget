@@ -12,7 +12,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "pane.h"
+#include "ui/pane.h"
 
 #define MAX_SCREEN_PANES 10
 

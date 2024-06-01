@@ -8,7 +8,7 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include "wad_file.h"
+#include "fs/wad_file.h"
 
 struct lump_type;
 struct lump_section;

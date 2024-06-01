@@ -11,7 +11,7 @@
 #ifndef WAD_FILE_INCLUDED
 #define WAD_FILE_INCLUDED
 
-#include "vfile.h"
+#include "fs/vfile.h"
 
 #define LUMP_HEADER_LEN 8
 

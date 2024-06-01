@@ -6,15 +6,36 @@ LIBSIXEL_LDFLAGS = \
     $(shell pkg-config --silence-errors --libs libsixel)
 
 REQUIRED_PKGS = audiofile ncurses libpng
-CFLAGS = -g -Wall -O0 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
+CFLAGS = -g -Wall -I. -O0 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
          $(LIBSIXEL_CFLAGS)
 LDFLAGS = $(shell pkg-config --libs $(REQUIRED_PKGS)) $(LIBSIXEL_LDFLAGS)
 
-OBJS = wadgadget.o wad_file.o vfile.o pane.o ui.o dialog.o text_input.o \
-       lump_info.o stringlib.o import.o struct.o list_pane.o vfs.o \
-       directory_pane.o actions_pane.o export.o audio.o mus2mid.o \
-       sixel_display.o graphic.o view.o endoom.o termfuncs.o actions.o \
-       textures.o
+OBJS =                   \
+    conv/audio.o         \
+    conv/endoom.o        \
+    conv/export.o        \
+    conv/graphic.o       \
+    conv/import.o        \
+    conv/mus2mid.o       \
+    fs/vfile.o           \
+    fs/vfs.o             \
+    fs/wad_file.o        \
+    textures/textures.o  \
+    ui/actions_pane.o    \
+    ui/dialog.o          \
+    ui/directory_pane.o  \
+    ui/list_pane.o       \
+    ui/pane.o            \
+    ui/text_input.o      \
+    ui/ui.o              \
+    actions.o            \
+    lump_info.o          \
+    sixel_display.o      \
+    stringlib.o          \
+    struct.o             \
+    termfuncs.o          \
+    view.o               \
+    wadgadget.o
 
 wadgadget : $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS)
