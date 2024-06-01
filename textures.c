@@ -243,6 +243,23 @@ static VFILE *FormatTextureConfig(struct textures *txs)
 	return result;
 }
 
+static bool CheckTextureConfig(struct textures *txs)
+{
+	int i, j;
+
+	for (i = 0; i < txs->num_textures; i++) {
+		struct texture *t = txs->textures[i];
+
+		for (j = 0; j < t->patchcount; j++) {
+			if (t->patches[j].patch >= txs->pnames->num_pnames) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
 static VFILE *FormatPnamesConfig(struct pnames *p)
 {
 	VFILE *result = vfopenmem(NULL, 0);
@@ -272,8 +289,8 @@ VFILE *TX_ToTexturesConfig(VFILE *input, VFILE *pnames_input)
 	}
 
 	txs->pnames = ReadPnames(pnames_input);
-	// TODO: Sanity check patch indexes
-	if (txs->pnames == NULL) {
+	if (txs->pnames == NULL || !CheckTextureConfig(txs)) {
+		FreeTextures(txs);
 		return NULL;
 	}
 
