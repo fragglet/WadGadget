@@ -74,6 +74,8 @@ static bool HasExtension(const char *filename, const char **exts)
 static VFILE *PerformConversion(VFILE *input, const char *src_name,
                                 bool flats_section)
 {
+	src_name = PathBaseName(src_name);
+
 	if (HasExtension(src_name, lump_extensions)) {
 		return input;
 	} else if (HasExtension(src_name, audio_extensions)) {
