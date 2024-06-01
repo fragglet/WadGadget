@@ -30,7 +30,7 @@ struct pnames {
 };
 
 struct patch {
-	uint16_t originx, originy;
+	int16_t originx, originy;
 	uint16_t patch;
 	uint16_t stepdir;  // unused
 	uint16_t colormap;  // unused
@@ -96,8 +96,8 @@ static void SwapTexture(struct texture *t)
 	SwapLE16(&t->patchcount);
 
 	for (i = 0; i < t->patchcount; i++) {
-		SwapLE16(&t->patches[i].originx);
-		SwapLE16(&t->patches[i].originy);
+		SwapLE16((uint16_t *) &t->patches[i].originx);
+		SwapLE16((uint16_t *) &t->patches[i].originy);
 		SwapLE16(&t->patches[i].patch);
 		SwapLE16(&t->patches[i].stepdir);
 		SwapLE16(&t->patches[i].colormap);
