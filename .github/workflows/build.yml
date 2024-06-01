@@ -18,7 +18,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: make
-      run: make -j8 -k
+      run: make -C src -j8 -k
 
   build_nosixel:
     name: Build (no libsixel)
@@ -35,4 +35,4 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: make
-      run: make -j8 -k
+      run: make -C src -j8 -k
