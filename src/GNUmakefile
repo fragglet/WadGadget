@@ -10,34 +10,36 @@ CFLAGS = -g -Wall -I. -O0 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
          $(LIBSIXEL_CFLAGS)
 LDFLAGS = $(shell pkg-config --libs $(REQUIRED_PKGS)) $(LIBSIXEL_LDFLAGS)
 
-OBJS =                   \
-    conv/audio.o         \
-    conv/endoom.o        \
-    conv/export.o        \
-    conv/graphic.o       \
-    conv/import.o        \
-    conv/mus2mid.o       \
-    fs/file_set.o        \
-    fs/real_dir.o        \
-    fs/vfile.o           \
-    fs/vfs.o             \
-    fs/wad_dir.o         \
-    fs/wad_file.o        \
-    textures/textures.o  \
-    ui/actions_pane.o    \
-    ui/dialog.o          \
-    ui/directory_pane.o  \
-    ui/list_pane.o       \
-    ui/pane.o            \
-    ui/text_input.o      \
-    ui/ui.o              \
-    actions.o            \
-    lump_info.o          \
-    sixel_display.o      \
-    stringlib.o          \
-    struct.o             \
-    termfuncs.o          \
-    view.o               \
+OBJS =                      \
+    conv/audio.o            \
+    conv/endoom.o           \
+    conv/export.o           \
+    conv/graphic.o          \
+    conv/import.o           \
+    conv/mus2mid.o          \
+    fs/file_set.o           \
+    fs/real_dir.o           \
+    fs/vfile.o              \
+    fs/vfs.o                \
+    fs/wad_dir.o            \
+    fs/wad_file.o           \
+    textures/config.o       \
+    textures/texture_dir.o  \
+    textures/textures.o     \
+    ui/actions_pane.o       \
+    ui/dialog.o             \
+    ui/directory_pane.o     \
+    ui/list_pane.o          \
+    ui/pane.o               \
+    ui/text_input.o         \
+    ui/ui.o                 \
+    actions.o               \
+    lump_info.o             \
+    sixel_display.o         \
+    stringlib.o             \
+    struct.o                \
+    termfuncs.o             \
+    view.o                  \
     wadgadget.o
 
 wadgadget : $(OBJS)
