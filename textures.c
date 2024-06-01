@@ -48,6 +48,7 @@ struct texture {
 struct textures {
 	struct texture **textures;
 	size_t num_textures;
+	uint64_t *serial_nos;
 	struct pnames *pnames;
 };
 
@@ -157,7 +158,16 @@ static void FreeTextures(struct textures *t)
 	if (t->pnames != NULL) {
 		FreePnames(t->pnames);
 	}
+	free(t->serial_nos);
 	free(t);
+}
+
+static uint64_t NewSerialNo(void)
+{
+	static uint64_t counter = 0x800000;
+	uint64_t result = counter;
+	++counter;
+	return result;
 }
 
 static struct textures *ReadTextures(VFILE *input)
@@ -186,6 +196,7 @@ static struct textures *ReadTextures(VFILE *input)
 	result->textures =
 		checked_calloc(num_textures, sizeof(struct texture *));
 	result->num_textures = num_textures;
+	result->serial_nos = checked_calloc(num_textures, sizeof(uint64_t));
 
 	for (i = 0; i < num_textures; i++) {
 		uint32_t start;
@@ -199,6 +210,7 @@ static struct textures *ReadTextures(VFILE *input)
 			goto fail;
 		}
 
+		result->serial_nos[i] = NewSerialNo();
 		result->textures[i] = ReadTexture(lump + start,
 		                                  lump_len - start);
 		if (result->textures[i] == NULL) {
@@ -207,6 +219,7 @@ static struct textures *ReadTextures(VFILE *input)
 			goto fail;
 		}
 	}
+
 fail:
 	vfclose(sink);
 	return result;
@@ -353,7 +366,7 @@ static void TextureDirRefresh(void *_dir)
 		memcpy(ent->name, dir->txs->textures[i]->name, 8);
 		ent->name[8] = '\0';
 		ent->size = 0;
-		ent->serial_no = 0;  // TODO
+		ent->serial_no = dir->txs->serial_nos[i];
 	}
 }
 
@@ -371,8 +384,11 @@ static void TextureDirRemove(void *_dir, struct directory_entry *entry)
 		return;
 	}
 
+	free(dir->txs->textures[idx]);
 	memmove(&dir->txs->textures[idx], &dir->txs->textures[idx + 1],
 	        (dir->dir.num_entries - idx - 1) * sizeof(struct texture *));
+	memmove(&dir->txs->serial_nos[idx], &dir->txs->serial_nos[idx + 1],
+	        (dir->dir.num_entries - idx - 1) * sizeof(uint64_t));
 	--dir->txs->num_textures;
 }
 
