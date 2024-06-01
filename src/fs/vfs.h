@@ -82,6 +82,7 @@ void VFS_DescribeSize(const struct directory_entry *ent, char buf[10],
 
 void VFS_DirectoryRef(struct directory *dir);
 void VFS_DirectoryUnref(struct directory *dir);
+#define VFS_CloseDir VFS_DirectoryUnref
 
 void VFS_ClearSet(struct file_set *l);
 void VFS_AddToSet(struct file_set *l, unsigned int serial_no);
@@ -92,6 +93,7 @@ int VFS_SetHas(struct file_set *l, unsigned int serial_no);
 void VFS_CopySet(struct file_set *to, struct file_set *from);
 void VFS_FreeSet(struct file_set *set);
 
-#define VFS_CloseDir VFS_DirectoryUnref
+// For use by implementations of struct directory.
+void VFS_FreeEntries(struct directory *d);
 
 #endif /* #ifndef INCLUDED_VFS_H */

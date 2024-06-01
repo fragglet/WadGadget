@@ -551,25 +551,13 @@ struct texture_dir {
 	struct textures *txs;
 };
 
-static void FreeEntries(struct directory *d)
-{
-	int i;
-
-	for (i = 0; i < d->num_entries; i++) {
-		free(d->entries[i].name);
-	}
-	free(d->entries);
-	d->entries = NULL;
-	d->num_entries = 0;
-}
-
 static void TextureDirRefresh(void *_dir)
 {
 	struct texture_dir *dir = _dir;
 	unsigned int i;
 	struct directory_entry *ent;
 
-	FreeEntries(&dir->dir);
+	VFS_FreeEntries(&dir->dir);
 
 	dir->dir.num_entries = dir->txs->num_textures;
 	dir->dir.entries = checked_calloc(

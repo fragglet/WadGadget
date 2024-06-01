@@ -158,7 +158,7 @@ void VFS_FreeSet(struct file_set *set)
 	set->num_entries = 0;
 }
 
-static void FreeEntries(struct directory *d)
+void VFS_FreeEntries(struct directory *d)
 {
 	int i;
 
@@ -196,7 +196,7 @@ static bool _RealDirRefresh(struct directory *d)
 {
 	DIR *dir;
 
-	FreeEntries(d);
+	VFS_FreeEntries(d);
 
 	dir = opendir(d->path);
 	if (dir == NULL) {
@@ -312,7 +312,7 @@ static void WadDirectoryRefresh(void *_dir)
 	unsigned int i, num_lumps = W_NumLumps(dir->wad_file);
 	struct directory_entry *ent;
 
-	FreeEntries(&dir->dir);
+	VFS_FreeEntries(&dir->dir);
 
 	dir->dir.num_entries = num_lumps;
 	dir->dir.entries = checked_calloc(
@@ -560,7 +560,7 @@ void VFS_DirectoryUnref(struct directory *dir)
 		if (dir->directory_funcs->free != NULL) {
 			dir->directory_funcs->free(dir);
 		}
-		FreeEntries(dir);
+		VFS_FreeEntries(dir);
 		free(dir->path);
 		free(dir);
 	}
