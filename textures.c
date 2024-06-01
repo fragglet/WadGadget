@@ -361,8 +361,8 @@ static char *ReadLine(uint8_t *buf, size_t buf_len, unsigned int *offset)
 		++*offset;
 	}
 
-	len = *offset - start + 1;
-	result = checked_calloc(len, 1);
+	len = *offset - start;
+	result = checked_calloc(len + 1, 1);
 	memcpy(result, &buf[start], len);
 	result[len] = '\0';
 	++*offset;
