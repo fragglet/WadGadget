@@ -17,8 +17,11 @@ OBJS =                   \
     conv/graphic.o       \
     conv/import.o        \
     conv/mus2mid.o       \
+    fs/file_set.o        \
+    fs/real_dir.o        \
     fs/vfile.o           \
     fs/vfs.o             \
+    fs/wad_dir.o         \
     fs/wad_file.o        \
     textures/textures.o  \
     ui/actions_pane.o    \

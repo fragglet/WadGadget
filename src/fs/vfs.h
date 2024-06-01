@@ -59,6 +59,7 @@ struct directory {
 struct directory *VFS_OpenDir(const char *path);
 struct directory *VFS_OpenDirByEntry(struct directory *dir,
                                      struct directory_entry *entry);
+struct directory *VFS_OpenWadAsDirectory(const char *path);
 
 VFILE *VFS_Open(const char *path);
 VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry);
@@ -94,6 +95,7 @@ void VFS_CopySet(struct file_set *to, struct file_set *from);
 void VFS_FreeSet(struct file_set *set);
 
 // For use by implementations of struct directory.
+void VFS_InitDirectory(struct directory *d, const char *path);
 void VFS_FreeEntries(struct directory *d);
 
 #endif /* #ifndef INCLUDED_VFS_H */
