@@ -53,6 +53,10 @@ static const char *audio_extensions[] = {
 	".aiff", ".wav", ".voc", ".flac", NULL,
 };
 
+static const char *lump_extensions[] = {
+	".lmp", ".mus", NULL,
+};
+
 static bool HasExtension(const char *filename, const char **exts)
 {
 	int i;
@@ -69,7 +73,9 @@ static bool HasExtension(const char *filename, const char **exts)
 static VFILE *PerformConversion(VFILE *input, const char *src_name,
                                 bool flats_section)
 {
-	if (HasExtension(src_name, audio_extensions)) {
+	if (HasExtension(src_name, lump_extensions)) {
+		return input;
+	} else if (HasExtension(src_name, audio_extensions)) {
 		return S_FromAudioFile(input);
 	} else if (StringHasSuffix(src_name, ".png")) {
 		if (flats_section) {
