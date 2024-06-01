@@ -20,6 +20,7 @@
 #include "graphic.h"
 #include "lump_info.h"
 #include "strings.h"
+#include "textures.h"
 
 static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 {
@@ -83,6 +84,8 @@ static VFILE *PerformConversion(VFILE *input, const char *src_name,
 		} else {
 			return V_FromImageFile(input);
 		}
+	} else if (!strncasecmp(src_name, "TEXTURE", 7)) {
+		return TX_FromTexturesConfig(input);
 	}
 
 	return input;

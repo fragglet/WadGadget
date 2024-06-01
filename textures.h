@@ -10,3 +10,4 @@
 
 VFILE *TX_ToTexturesConfig(VFILE *input, VFILE *pnames_input);
 VFILE *TX_ToPnamesConfig(VFILE *input);
+VFILE *TX_FromTexturesConfig(VFILE *input);

@@ -119,7 +119,6 @@ static struct texture *AllocTexture(size_t patchcount)
 	return result;
 }
 
-/*
 static struct texture *DupTexture(struct texture *t)
 {
 	size_t sz = TextureLen(t->patchcount);
@@ -127,7 +126,6 @@ static struct texture *DupTexture(struct texture *t)
 	memcpy(result, t, sz);
 	return result;
 }
-*/
 
 static struct texture *UnmarshalTexture(const uint8_t *start, size_t max_len)
 {
@@ -515,6 +513,33 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len)
 	}
 
 	AddSerialNos(result);
+
+	return result;
+}
+
+VFILE *TX_FromTexturesConfig(VFILE *input)
+{
+	VFILE *result, *sink = vfopenmem(NULL, 0);
+	struct textures *txs;
+	void *lump;
+	size_t lump_len;
+
+	vfcopy(input, sink);
+	vfclose(input);
+
+	if (!vfgetbuf(sink, &lump, &lump_len)) {
+		vfclose(sink);
+		return NULL;
+	}
+
+	txs = ParseTextureConfig(lump, lump_len);
+	vfclose(sink);
+	if (txs == NULL) {
+		return NULL;
+	}
+
+	result = MarshalTextures(txs);
+	FreeTextures(txs);
 
 	return result;
 }
