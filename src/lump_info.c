@@ -91,7 +91,6 @@ static const struct lump_description level_lumps[] = {
 
 static const struct sized_lump lumps_by_size[] = {
 	{8704,   "Light translation map"},
-	{64000,  "Fullscreen image"},
 	{4000,   "Text mode screen"},
 	{256,    "Color translation table"},
 	{0,      "Empty"},
@@ -543,6 +542,26 @@ const struct lump_type lump_type_pnames = {
 	".txt",
 };
 
+// Hexen fullscreen imag.e
+static bool FullscreenImageCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return ent->size == 64000;
+}
+
+static void FullscreenImageFormat(struct wad_file_entry *ent, uint8_t *buf,
+                         char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len,
+	         "Hexen fullscreen image\nDimensions: 320x200");
+}
+
+const struct lump_type lump_type_fullscreen_image = {
+	FullscreenImageCheck,
+	FullscreenImageFormat,
+	".png",
+};
+
+
 // Fallback, "generic lump"
 
 static bool UnknownLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
@@ -577,6 +596,7 @@ static const struct lump_type *lump_types[] = {
 	&lump_type_midi,
 	&lump_type_demo,
 	&lump_type_pcspeaker,
+	&lump_type_fullscreen_image,
 	&lump_type_sized,
 	&lump_type_plaintext,
 	&lump_type_unknown,

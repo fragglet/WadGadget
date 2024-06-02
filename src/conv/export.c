@@ -79,6 +79,8 @@ static VFILE *PerformConversion(struct directory *from, VFILE *input,
 		return V_FlatToImageFile(input);
 	} else if (lt == &lump_type_graphic) {
 		return V_ToImageFile(input);
+	} else if (lt == &lump_type_fullscreen_image) {
+		return V_FullscreenToImageFile(input);
 	} else if (lt == &lump_type_textures) {
 		return ConvertTextures(from, input);
 	} else if (lt == &lump_type_pnames) {

@@ -629,3 +629,31 @@ fail:
 
 	return result;
 }
+
+// For Hexen fullscreen images.
+VFILE *V_FullscreenToImageFile(VFILE *input)
+{
+	uint8_t *buf;
+	struct patch_header hdr;
+	size_t buf_len;
+	VFILE *bufreader, *result = NULL;
+
+	bufreader = vfopenmem(NULL, 0);
+	vfcopy(input, bufreader);
+	vfclose(input);
+
+	if (!vfgetbuf(bufreader, (void **) &buf, &buf_len)) {
+		goto fail;
+	}
+	assert(buf_len == 64000);
+
+	hdr.width = 320;
+	hdr.height = 200;
+	hdr.topoffset = 0;
+	hdr.leftoffset = 0;
+	result = WritePNG(&hdr, buf);
+fail:
+	vfclose(bufreader);
+
+	return result;
+}
