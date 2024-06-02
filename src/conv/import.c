@@ -102,7 +102,8 @@ static VFILE *PerformConversion(VFILE *input, struct wad_file *to_wad,
 		}
 	} else if (!strcasecmp(src_name, "PNAMES.txt")) {
 		return TX_FromPnamesConfig(input);
-	} else if (!strncasecmp(src_name, "TEXTURE", 7)) {
+	} else if (!strncasecmp(src_name, "TEXTURE", 7)
+	        && StringHasSuffix(src_name, ".txt")) {
 		return ImportTextures(input, to_wad);
 	}
 
