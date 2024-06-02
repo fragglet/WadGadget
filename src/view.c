@@ -234,14 +234,14 @@ static void RaiseUsToTop(void)
 
 // Called after a successful edit to (if appropriate) import the changed
 // file back into the WAD.
-static void TempMaybeImport(struct temp_edit_context *ctx)
+static bool TempMaybeImport(struct temp_edit_context *ctx)
 {
 	VFILE *from_file;
 	bool flats_section;
 	int do_import;
 
 	if (ctx->temp_dir == NULL) {
-		return;
+		return true;
 	}
 
 	// If the edit command succeeded, there are two possibilities. One is
@@ -262,7 +262,7 @@ static void TempMaybeImport(struct temp_edit_context *ctx)
 			ungetch(c);
 			timeout(-1);
 			RedrawScreen();
-			return;
+			return true;
 		}
 	}
 	timeout(-1);
@@ -273,7 +273,7 @@ static void TempMaybeImport(struct temp_edit_context *ctx)
 		"Update WAD?", "Import", "Ignore",
 		"File was changed. Import back into WAD?");
 	if (!do_import) {
-		return;
+		return true;
 	}
 
 	// Things can be a bit confusing here because we reversed directions
@@ -293,10 +293,13 @@ static void TempMaybeImport(struct temp_edit_context *ctx)
 	                          flats_section, true)) {
 		VFS_CommitChanges(ctx->from);
 		UI_ShowNotice("'%s' updated.", ctx->ent->name);
-	} else {
-		UI_MessageBox("Import failed when importing back to WAD.");
+	} else if (UI_ConfirmDialogBox("Error", "Edit", "Abort", "Import "
+	                               "failed. Edit file again?")) {
+		return false;
 	}
 	VFS_Refresh(ctx->from);
+
+	return true;
 }
 
 static void TempCleanup(struct temp_edit_context *ctx)
@@ -326,6 +329,7 @@ void OpenDirent(struct directory *dir, struct directory_entry *ent)
 		}
 	}
 
+try_again:
 	// Temporarily suspend curses until the subprogram returns.
 	TF_SuspendCursesMode();
 
@@ -375,8 +379,8 @@ void OpenDirent(struct directory *dir, struct directory_entry *ent)
 	TF_SetCursesModes();
 	RedrawScreen();
 
-	if (edit_success) {
-		TempMaybeImport(&temp_ctx);
+	if (edit_success && !TempMaybeImport(&temp_ctx)) {
+		goto try_again;
 	}
 
 	TempCleanup(&temp_ctx);
