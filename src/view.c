@@ -237,7 +237,6 @@ static void RaiseUsToTop(void)
 static bool TempMaybeImport(struct temp_edit_context *ctx)
 {
 	VFILE *from_file;
-	bool flats_section;
 	int do_import;
 
 	if (ctx->temp_dir == NULL) {
@@ -281,16 +280,13 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 	// originally exported from, but now it becomes the 'to' that we're
 	// importing back to.
 
-	flats_section = LI_LumpInSection(VFS_WadFile(ctx->from), ctx->lumpnum,
-                                         &lump_section_flats);
-
 	from_file = VFS_Open(ctx->filename);
 	if (from_file == NULL) {
 		UI_MessageBox("Import failed when opening temp file.\n%s",
 		              ctx->filename);
 	} else if (ImportFromFile(from_file, ctx->filename,
 	                          VFS_WadFile(ctx->from), ctx->lumpnum,
-	                          flats_section, true)) {
+	                          true)) {
 		VFS_CommitChanges(ctx->from);
 		UI_ShowNotice("'%s' updated.", ctx->ent->name);
 	} else if (UI_ConfirmDialogBox("Error", "Edit", "Abort", "Import "

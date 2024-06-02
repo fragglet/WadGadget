@@ -23,35 +23,6 @@
 #include "textures/textures.h"
 #include "ui/dialog.h"
 
-// These lumps get converted to the special Heretic/Hexen raw 320x200 format.
-// Note that some of these names are also found in Doom IWADs, so we are very
-// careful to check it's one of the Raven IWADs before using raw format.
-static const char *raven_fullscreen_lumps[] = {
-	// Common
-	"TITLE", "CREDIT", "HELP1", "HELP2", "CREDIT",
-	// Heretic:
-	"E2END", "FINAL1", "FINAL2",
-	// Hexen
-	"FINALE1", "FINALE2", "FINALE3", "INTERPIC",
-};
-
-static bool IsRavenFullscreen(const char *name)
-{
-	char tmpname[13];
-	int i;
-
-	for (i = 0; i < arrlen(raven_fullscreen_lumps); i++) {
-		snprintf(tmpname, sizeof(tmpname), "%s.png",
-		         raven_fullscreen_lumps[i]);
-
-		if (!strcasecmp(tmpname, name)) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
 static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 {
 	char *p;
@@ -163,7 +134,7 @@ fail:
 }
 
 static VFILE *PerformConversion(VFILE *input, struct wad_file *to_wad,
-                                const char *src_name, bool flats_section)
+                                const char *src_name)
 {
 	src_name = PathBaseName(src_name);
 
@@ -171,21 +142,12 @@ static VFILE *PerformConversion(VFILE *input, struct wad_file *to_wad,
 		return input;
 	} else if (HasExtension(src_name, audio_extensions)) {
 		return S_FromAudioFile(input);
+	} else if (StringHasSuffix(src_name, ".flat.png")) {
+		return V_FlatFromImageFile(input);
+	} else if (StringHasSuffix(src_name, ".fullscreen.png")) {
+		return V_FullscreenFromImageFile(input);
 	} else if (StringHasSuffix(src_name, ".png")) {
-		// We only do the raw format import if this looks like a
-		// WAD file for one of the Raven games. Check for the
-		// "RSAC advisory" graphic; the user can also add an XXTIC
-		// lump to signal if they're making a Raven PWAD.
-		bool is_raven = W_GetNumForName(to_wad, "XXTIC") >= 0
-		             || W_GetNumForName(to_wad, "ADVISOR") >= 0;
-
-		if (is_raven && IsRavenFullscreen(src_name)) {
-			return V_FullscreenFromImageFile(input);
-		} else if (flats_section) {
-			return V_FlatFromImageFile(input);
-		} else {
-			return V_FromImageFile(input);
-		}
+		return V_FromImageFile(input);
 	} else if (!strcasecmp(src_name, "PNAMES.txt")) {
 		return ConvertPnames(input);
 	} else if (!strncasecmp(src_name, "TEXTURE", 7)
@@ -197,14 +159,12 @@ static VFILE *PerformConversion(VFILE *input, struct wad_file *to_wad,
 }
 
 bool ImportFromFile(VFILE *from_file, const char *src_name,
-                    struct wad_file *to_wad, int lumpnum,
-                    bool flats_section, bool convert)
+                    struct wad_file *to_wad, int lumpnum, bool convert)
 {
 	VFILE *to_lump;
 
 	if (convert) {
-		from_file = PerformConversion(from_file, to_wad, src_name,
-		                              flats_section);
+		from_file = PerformConversion(from_file, to_wad, src_name);
 	}
 	if (from_file == NULL) {
 		return false;
@@ -228,7 +188,6 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	struct progress_window progress;
 	char namebuf[9];
 	int idx, lumpnum;
-	bool flats_section;
 
 	UI_InitProgressWindow(
 		&progress, from_set->num_entries,
@@ -244,8 +203,6 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 
 	// We only ever do conversions when importing from files.
 	convert = convert && from->type == FILE_TYPE_DIR;
-	flats_section = LI_LumpInSection(to_wad, to_index,
-	                                 &lump_section_flats);
 
 	idx = 0;
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
@@ -256,7 +213,7 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 		from_file = VFS_OpenByEntry(from, ent);
 
 		if (!ImportFromFile(from_file, ent->name, to_wad, lumpnum,
-		                    flats_section, convert)) {
+		                    convert)) {
 			// TODO: Delete the new entries we added?
 			// TODO: Show an error message
 			return false;

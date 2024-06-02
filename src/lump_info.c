@@ -251,7 +251,7 @@ static void FlatLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_flat = {
 	FlatLumpCheck,
 	FlatLumpFormat,
-	".png",
+	".flat.png",
 };
 
 // DMX .MUS format.
@@ -558,7 +558,7 @@ static void FullscreenImageFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_fullscreen_image = {
 	FullscreenImageCheck,
 	FullscreenImageFormat,
-	".png",
+	".fullscreen.png",
 };
 
 
