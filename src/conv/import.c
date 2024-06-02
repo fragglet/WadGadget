@@ -90,7 +90,7 @@ static VFILE *ImportTextures(VFILE *input, struct wad_file *to_wad)
 	int pnames_lump_index = W_GetNumForName(to_wad, "PNAMES");
 	struct textures *txs;
 	struct pnames *pn;
-	VFILE *pnames_input, *result;
+	VFILE *pnames_input, *result, *lump, *marshaled;
 
 	if (pnames_lump_index < 0) {
 		UI_MessageBox("To import a texture config, your WAD\n"
@@ -103,13 +103,32 @@ static VFILE *ImportTextures(VFILE *input, struct wad_file *to_wad)
 	pn = TX_UnmarshalPnames(pnames_input);
 
 	txs = TX_ParseTextureConfig(input, pn);
-	TX_FreePnames(pn);
 	if (txs == NULL) {
+		TX_FreePnames(pn);
 		return NULL;
 	}
 
+	if (pn->modified) {
+		if (!UI_ConfirmDialogBox("Update PNAMES?", "Update", "Cancel",
+		                         "Some patch names need to be added "
+		                         "to PNAMES.\nProceed?")) {
+			result = NULL;
+			goto fail;
+		}
+
+		lump = W_OpenLumpRewrite(to_wad, pnames_lump_index);
+		marshaled = TX_MarshalPnames(pn);
+		vfcopy(marshaled, lump);
+		vfclose(lump);
+		vfclose(marshaled);
+	}
+
 	result = TX_MarshalTextures(txs);
+
+fail:
 	TX_FreeTextures(txs);
+	TX_FreePnames(pn);
+
 	return result;
 }
 

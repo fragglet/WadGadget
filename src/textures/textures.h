@@ -13,6 +13,7 @@ typedef char pname[8];
 struct pnames {
 	pname *pnames;
 	size_t num_pnames;
+	bool modified;
 };
 
 struct patch {
@@ -48,7 +49,7 @@ void TX_FreeTextures(struct textures *t);
 
 VFILE *TX_MarshalPnames(struct pnames *pn);
 struct pnames *TX_UnmarshalPnames(VFILE *f);
-void TX_AppendPname(struct pnames *pn, const char *name);
+int TX_AppendPname(struct pnames *pn, const char *name);
 int TX_GetPnameIndex(struct pnames *pn, const char *name);
 
 VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn);

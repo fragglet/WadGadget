@@ -203,7 +203,9 @@ static bool MaybeAddPatch(struct textures *txs, char *line,
 	p.originx = x;
 	p.originy = y;
 	n = TX_GetPnameIndex(pnames, namebuf);
-	assert(n >= 0);  // TODO
+	if (n < 0) {
+		n = TX_AppendPname(pnames, namebuf);
+	}
 	p.patch = n;
 	p.stepdir = 0;
 	p.colormap = 0;
@@ -301,6 +303,8 @@ static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
 
 		free(line);
 	}
+
+	result->modified = false;
 
 	return result;
 }

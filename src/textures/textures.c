@@ -40,7 +40,7 @@ struct pnames *TX_UnmarshalPnames(VFILE *f)
 
 	SwapLE32(&cnt);
 	pnames->num_pnames = cnt;
-
+	pnames->modified = false;
 	pnames->pnames = checked_calloc(cnt, sizeof(pname));
 
 	if (vfread(pnames->pnames, sizeof(pname), cnt, f) != cnt) {
@@ -73,12 +73,17 @@ VFILE *TX_MarshalPnames(struct pnames *pn)
 	return result;
 }
 
-void TX_AppendPname(struct pnames *pn, const char *name)
+int TX_AppendPname(struct pnames *pn, const char *name)
 {
+	int result;
+
 	pn->pnames = checked_realloc(pn->pnames,
 	                             sizeof(pname) * (pn->num_pnames + 1));
 	strncpy(pn->pnames[pn->num_pnames], name, 8);
+	result = pn->num_pnames;
 	++pn->num_pnames;
+	pn->modified = true;
+	return result;
 }
 
 int TX_GetPnameIndex(struct pnames *pn, const char *name)
