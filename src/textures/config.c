@@ -294,7 +294,7 @@ static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
 			*p = '\0';
 		}
 
-		if (strlen(p) > 8) {
+		if (strlen(line) > 8) {
 			TX_FreePnames(result);
 			return NULL;
 		} else if (strlen(p) > 0) {
