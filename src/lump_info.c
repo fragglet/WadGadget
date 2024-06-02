@@ -508,8 +508,11 @@ static bool TexturesCheck(struct wad_file_entry *ent, uint8_t *buf)
 static void TexturesFormat(struct wad_file_entry *ent, uint8_t *buf,
                            char *descr_buf, size_t descr_buf_len)
 {
-	snprintf(descr_buf, descr_buf_len, "Texture directory%s",
-	         !strncmp(ent->name, "TEXTURE2", 8) ? " (reg.)" : "");
+	uint32_t cnt;
+	memcpy(&cnt, buf, sizeof(uint32_t));
+	SwapLE32(&cnt);
+	snprintf(descr_buf, descr_buf_len, "Texture directory%s\n%d textures",
+	         !strncmp(ent->name, "TEXTURE2", 8) ? " (reg.)" : "", cnt);
 }
 
 const struct lump_type lump_type_textures = {
@@ -527,7 +530,11 @@ static bool PnamesCheck(struct wad_file_entry *ent, uint8_t *buf)
 static void PnamesFormat(struct wad_file_entry *ent, uint8_t *buf,
                          char *descr_buf, size_t descr_buf_len)
 {
-	snprintf(descr_buf, descr_buf_len, "Wall patch list");
+	uint32_t cnt;
+	memcpy(&cnt, buf, sizeof(uint32_t));
+	SwapLE32(&cnt);
+	snprintf(descr_buf, descr_buf_len, "Wall patch list\n%d patch names",
+	         cnt);
 }
 
 const struct lump_type lump_type_pnames = {
