@@ -50,6 +50,7 @@ void vftruncate(VFILE *stream);
 // Read/write to memory buffer.
 VFILE *vfopenmem(void *buf, size_t buf_len);
 bool vfgetbuf(VFILE *f, void **buf, size_t *buf_len);
+void *vfreadall(VFILE *input, size_t *len);
 
 int vfseek(VFILE *stream, long offset, int whence);
 long vftell(VFILE *stream);

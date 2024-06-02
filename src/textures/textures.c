@@ -193,17 +193,14 @@ void TX_AddSerialNos(struct textures *txs)
 
 struct textures *TX_UnmarshalTextures(VFILE *input)
 {
-	VFILE *sink = vfopenmem(NULL, 0);
 	struct textures *result = NULL;
 	uint8_t *lump;
 	size_t lump_len;
 	uint32_t num_textures;
 	int i;
 
-	vfcopy(input, sink);
-	vfclose(input);
-
-	if (!vfgetbuf(sink, (void **) &lump, &lump_len) || lump_len < 4) {
+	lump = vfreadall(input, &lump_len);
+	if (lump_len < 4) {
 		goto fail;
 	}
 
@@ -242,7 +239,7 @@ struct textures *TX_UnmarshalTextures(VFILE *input)
 	TX_AddSerialNos(result);
 
 fail:
-	vfclose(sink);
+	free(lump);
 	return result;
 }
 

@@ -451,3 +451,21 @@ int vfcopy(VFILE *from, VFILE *to)
 	}
 }
 
+void *vfreadall(VFILE *input, size_t *len)
+{
+	VFILE *tmp = vfopenmem(NULL, 0);
+	struct memory_vfile *memfile;
+	void *result;
+
+	vfcopy(input, tmp);
+	memfile	= tmp->handle;
+	result = memfile->buf;
+	if (len != NULL) {
+		*len = memfile->buf_len;
+	}
+	memfile->buf = NULL;
+	memfile->buf_len = 0;
+	vfclose(tmp);
+
+	return result;
+}

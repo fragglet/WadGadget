@@ -620,13 +620,10 @@ VFILE *V_ToImageFile(VFILE *input)
 	uint8_t *buf, *imgbuf = NULL;
 	struct patch_header hdr;
 	size_t buf_len;
-	VFILE *bufreader, *result = NULL;
+	VFILE *result = NULL;
 
-	bufreader = vfopenmem(NULL, 0);
-	vfcopy(input, bufreader);
-	vfclose(input);
-
-	if (!vfgetbuf(bufreader, (void **) &buf, &buf_len) || buf_len < 6) {
+	buf = vfreadall(input, &buf_len);
+	if (buf_len < 6) {
 		goto fail;
 	}
 
@@ -641,7 +638,7 @@ VFILE *V_ToImageFile(VFILE *input)
 
 fail:
 	free(imgbuf);
-	vfclose(bufreader);
+	free(buf);
 
 	return result;
 }
@@ -651,14 +648,12 @@ VFILE *V_FlatToImageFile(VFILE *input)
 	uint8_t *buf;
 	struct patch_header hdr;
 	size_t buf_len;
-	VFILE *bufreader, *result = NULL;
+	VFILE *result = NULL;
 
-	bufreader = vfopenmem(NULL, 0);
-	vfcopy(input, bufreader);
-	vfclose(input);
+	buf = vfreadall(input, &buf_len);
 
 	// Lump must be exactly 4096 bytes.
-	if (!vfgetbuf(bufreader, (void **) &buf, &buf_len) || buf_len != 4096) {
+	if (buf_len != 4096) {
 		goto fail;
 	}
 
@@ -669,7 +664,7 @@ VFILE *V_FlatToImageFile(VFILE *input)
 	result = WritePNG(&hdr, buf);
 
 fail:
-	vfclose(bufreader);
+	free(buf);
 
 	return result;
 }
@@ -680,15 +675,9 @@ VFILE *V_FullscreenToImageFile(VFILE *input)
 	uint8_t *buf;
 	struct patch_header hdr;
 	size_t buf_len;
-	VFILE *bufreader, *result = NULL;
+	VFILE *result = NULL;
 
-	bufreader = vfopenmem(NULL, 0);
-	vfcopy(input, bufreader);
-	vfclose(input);
-
-	if (!vfgetbuf(bufreader, (void **) &buf, &buf_len)) {
-		goto fail;
-	}
+	buf = vfreadall(input, &buf_len);
 	assert(buf_len == FULLSCREEN_SZ);
 
 	hdr.width = FULLSCREEN_W;
@@ -696,8 +685,7 @@ VFILE *V_FullscreenToImageFile(VFILE *input)
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
 	result = WritePNG(&hdr, buf);
-fail:
-	vfclose(bufreader);
+	free(buf);
 
 	return result;
 }

@@ -273,19 +273,11 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len,
 
 struct textures *TX_ParseTextureConfig(VFILE *input, struct pnames *pn)
 {
-	VFILE *sink = vfopenmem(NULL, 0);
 	struct textures *result;
 	void *lump;
 	size_t lump_len;
 
-	vfcopy(input, sink);
-	vfclose(input);
-
-	if (!vfgetbuf(sink, &lump, &lump_len)) {
-		vfclose(sink);
-		return NULL;
-	}
-
+	lump = vfreadall(input, &lump_len);
 	result = ParseTextureConfig(lump, lump_len, pn);
 	vfclose(sink);
 
@@ -324,18 +316,11 @@ static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
 
 struct pnames *TX_ParsePnamesConfig(VFILE *input)
 {
-	VFILE *sink = vfopenmem(NULL, 0);
 	struct pnames *result;
 	void *cfg;
 	size_t cfg_len;
 
-	vfcopy(input, sink);
-	vfclose(input);
-
-	if (!vfgetbuf(sink, &cfg, &cfg_len)) {
-		return NULL;
-	}
-
+	cfg = vfreadall(input, &cfg_len);
 	result = ParsePnamesConfig(cfg, cfg_len);
 	vfclose(sink);
 	return result;
