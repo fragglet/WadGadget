@@ -27,7 +27,7 @@ void TX_FreePnames(struct pnames *pnames)
 	free(pnames);
 }
 
-struct pnames *TX_ReadPnames(VFILE *f)
+struct pnames *TX_UnmarshalPnames(VFILE *f)
 {
 	struct pnames *pnames = checked_calloc(1, sizeof(struct pnames));
 	uint32_t cnt;
@@ -51,6 +51,26 @@ struct pnames *TX_ReadPnames(VFILE *f)
 
 	vfclose(f);
 	return pnames;
+}
+
+VFILE *TX_MarshalPnames(struct pnames *pn)
+{
+	VFILE *result = vfopenmem(NULL, 0);
+	uint32_t cnt = pn->num_pnames;
+
+	SwapLE32(&cnt);
+	if (vfwrite(&cnt, sizeof(uint32_t), 1, result) != 1) {
+		vfclose(result);
+		return NULL;
+	}
+
+	if (vfwrite(pn->pnames, sizeof(pname),
+	            pn->num_pnames, result) != pn->num_pnames) {
+		vfclose(result);
+		return NULL;
+	}
+	vfseek(result, 0, SEEK_SET);
+	return result;
 }
 
 int TX_GetPnameIndex(struct pnames *pn, const char *name)

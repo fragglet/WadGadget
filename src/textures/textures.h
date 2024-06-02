@@ -47,7 +47,8 @@ struct textures *TX_UnmarshalTextures(VFILE *input);
 void TX_FreePnames(struct pnames *t);
 void TX_FreeTextures(struct textures *t);
 
-struct pnames *TX_ReadPnames(VFILE *f);
+VFILE *TX_MarshalPnames(struct pnames *pn);
+struct pnames *TX_UnmarshalPnames(VFILE *f);
 int TX_GetPnameIndex(struct pnames *pn, const char *name);
 
 VFILE *TX_ToTexturesConfig(VFILE *input, VFILE *pnames_input);

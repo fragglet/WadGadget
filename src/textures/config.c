@@ -104,7 +104,7 @@ VFILE *TX_ToTexturesConfig(VFILE *input, VFILE *pnames_input)
 		return NULL;
 	}
 
-	txs->pnames = TX_ReadPnames(pnames_input);
+	txs->pnames = TX_UnmarshalPnames(pnames_input);
 	if (txs->pnames == NULL || !CheckTextureConfig(txs)) {
 		TX_FreeTextures(txs);
 		return NULL;
@@ -118,7 +118,7 @@ VFILE *TX_ToTexturesConfig(VFILE *input, VFILE *pnames_input)
 
 VFILE *TX_ToPnamesConfig(VFILE *input)
 {
-	struct pnames *p = TX_ReadPnames(input);
+	struct pnames *p = TX_UnmarshalPnames(input);
 	VFILE *result;
 
 	if (p == NULL) {
@@ -295,9 +295,8 @@ VFILE *TX_FromTexturesConfig(VFILE *input, VFILE *pnames_input)
 		return NULL;
 	}
 
-	pn = TX_ReadPnames(pnames_input);
+	pn = TX_UnmarshalPnames(pnames_input);
 	if (pn == NULL) {
-		vfclose(input);
 		vfclose(sink);
 		return NULL;
 	}
