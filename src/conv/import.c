@@ -71,8 +71,22 @@ static bool HasExtension(const char *filename, const char **exts)
 	return false;
 }
 
-static VFILE *PerformConversion(VFILE *input, const char *src_name,
-                                bool flats_section)
+static VFILE *ImportTextures(VFILE *input, struct wad_file *to_wad)
+{
+	int pnames_lump_index = W_GetNumForName(to_wad, "PNAMES");
+	VFILE *pnames;
+	if (pnames_lump_index < 0) {
+		UI_MessageBox("To import a texture config, your WAD\n"
+		              "must contain a PNAMES lump.");
+		vfclose(input);
+		return NULL;
+	}
+	pnames = W_OpenLump(to_wad, pnames_lump_index);
+	return TX_FromTexturesConfig(input, pnames);
+}
+
+static VFILE *PerformConversion(VFILE *input, struct wad_file *to_wad,
+                                const char *src_name, bool flats_section)
 {
 	src_name = PathBaseName(src_name);
 
@@ -87,7 +101,7 @@ static VFILE *PerformConversion(VFILE *input, const char *src_name,
 			return V_FromImageFile(input);
 		}
 	} else if (!strncasecmp(src_name, "TEXTURE", 7)) {
-		return TX_FromTexturesConfig(input);
+		return ImportTextures(input, to_wad);
 	}
 
 	return input;
@@ -100,7 +114,7 @@ bool ImportFromFile(VFILE *from_file, const char *src_name,
 	VFILE *to_lump;
 
 	if (convert) {
-		from_file = PerformConversion(from_file, src_name,
+		from_file = PerformConversion(from_file, to_wad, src_name,
 		                              flats_section);
 	}
 	if (from_file == NULL) {

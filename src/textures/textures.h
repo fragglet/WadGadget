@@ -48,9 +48,10 @@ void TX_FreePnames(struct pnames *t);
 void TX_FreeTextures(struct textures *t);
 
 struct pnames *TX_ReadPnames(VFILE *f);
+int TX_GetPnameIndex(struct pnames *pn, const char *name);
 
 VFILE *TX_ToTexturesConfig(VFILE *input, VFILE *pnames_input);
 VFILE *TX_ToPnamesConfig(VFILE *input);
-VFILE *TX_FromTexturesConfig(VFILE *input);
+VFILE *TX_FromTexturesConfig(VFILE *input, VFILE *pnames_input);
 
 void TX_AddSerialNos(struct textures *txs);

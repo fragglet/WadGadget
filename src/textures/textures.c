@@ -53,6 +53,19 @@ struct pnames *TX_ReadPnames(VFILE *f)
 	return pnames;
 }
 
+int TX_GetPnameIndex(struct pnames *pn, const char *name)
+{
+	int i;
+
+	for (i = 0; i < pn->num_pnames; i++) {
+		if (!strncasecmp(pn->pnames[i], name, 8)) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
 static void SwapTexture(struct texture *t)
 {
 	int i;

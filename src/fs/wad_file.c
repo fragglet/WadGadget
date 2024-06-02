@@ -269,6 +269,19 @@ struct wad_file_entry *W_GetDirectory(struct wad_file *f)
 	return f->directory;
 }
 
+int W_GetNumForName(struct wad_file *f, const char *name)
+{
+	int i;
+
+	for (i = f->num_lumps - 1; i >= 0; i--) {
+		if (!strncasecmp(f->directory[i].name, name, 8)) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
 unsigned int W_NumLumps(struct wad_file *f)
 {
 	return f->num_lumps;

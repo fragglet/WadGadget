@@ -212,7 +212,8 @@ static bool MaybeAddTexture(struct textures *txs, char *line)
 	return true;
 }
 
-static bool MaybeAddPatch(struct textures *txs, char *line)
+static bool MaybeAddPatch(struct textures *txs, char *line,
+                          struct pnames *pnames)
 {
 	char namebuf[10];
 	struct texture **t;
@@ -232,7 +233,9 @@ static bool MaybeAddPatch(struct textures *txs, char *line)
 
 	p.originx = x;
 	p.originy = y;
-	p.patch = 99; // TODO
+	n = TX_GetPnameIndex(pnames, namebuf);
+	assert(n >= 0);  // TODO
+	p.patch = n;
 	p.stepdir = 0;
 	p.colormap = 0;
 
@@ -242,13 +245,15 @@ static bool MaybeAddPatch(struct textures *txs, char *line)
 	return true;
 }
 
-static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len)
+static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len,
+                                           struct pnames *pnames)
 {
 	struct textures *result;
 	unsigned int offset = 0;
 	bool fail;
 
 	result = calloc(1, sizeof(struct textures));
+	result->pnames = pnames;
 
 	for (;;) {
 		char *line = ReadLine(buf, buf_len, &offset);
@@ -257,7 +262,7 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len)
 		}
 
 		fail = strlen(line) > 0
-		    && !MaybeAddPatch(result, line)
+		    && !MaybeAddPatch(result, line, pnames)
 		    && !MaybeAddTexture(result, line);
 		free(line);
 
@@ -273,9 +278,10 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len)
 	return result;
 }
 
-VFILE *TX_FromTexturesConfig(VFILE *input)
+VFILE *TX_FromTexturesConfig(VFILE *input, VFILE *pnames_input)
 {
 	VFILE *result, *sink = vfopenmem(NULL, 0);
+	struct pnames *pn;
 	struct textures *txs;
 	void *lump;
 	size_t lump_len;
@@ -285,17 +291,27 @@ VFILE *TX_FromTexturesConfig(VFILE *input)
 
 	if (!vfgetbuf(sink, &lump, &lump_len)) {
 		vfclose(sink);
+		vfclose(pnames_input);
 		return NULL;
 	}
 
-	txs = ParseTextureConfig(lump, lump_len);
+	pn = TX_ReadPnames(pnames_input);
+	if (pn == NULL) {
+		vfclose(input);
+		vfclose(sink);
+		return NULL;
+	}
+
+	txs = ParseTextureConfig(lump, lump_len, pn);
 	vfclose(sink);
-	if (txs == NULL) {
-		return NULL;
-	}
 
-	result = TX_MarshalTextures(txs);
-	TX_FreeTextures(txs);
+	if (txs != NULL) {
+		result = TX_MarshalTextures(txs);
+		TX_FreeTextures(txs);
+	} else {
+		result = NULL;
+		TX_FreePnames(pn);
+	}
 
 	return result;
 }

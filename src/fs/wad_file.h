@@ -35,6 +35,7 @@ bool W_CreateFile(const char *filename);
 struct wad_file *W_OpenFile(const char *filename);
 void W_CloseFile(struct wad_file *f);
 struct wad_file_entry *W_GetDirectory(struct wad_file *f);
+int W_GetNumForName(struct wad_file *f, const char *name);
 unsigned int W_NumLumps(struct wad_file *f);
 VFILE *W_OpenLump(struct wad_file *f, unsigned int lump_index);
 VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index);
