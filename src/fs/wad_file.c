@@ -250,11 +250,11 @@ struct wad_file *W_OpenFile(const char *filename)
 		W_CloseFile(result);
 		return NULL;
 	}
-	rev->eof = result->write_pos;
+	rev->eof = vftell(result->vfs);
 
 	// The first revision has now been initialized.
 	result->curr_revision = rev;
-	result->write_pos = vftell(result->vfs);
+	result->write_pos = rev->eof;
 
 	if (ReadDirectory(result) < 0) {
 		W_CloseFile(result);
@@ -468,7 +468,6 @@ static void WriteDirectory(struct wad_file *f)
 		assert(vfwrite(&ent.position, 4, 1, f->vfs) == 1 &&
 		       vfwrite(&ent.size, 4, 1, f->vfs) == 1 &&
 		       vfwrite(&ent.name, 8, 1, f->vfs) == 1);
-
 	}
 
 	// Any "redo" is going to become impossible now.
