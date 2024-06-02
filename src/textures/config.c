@@ -27,13 +27,34 @@
 #define TEXTURE_CONFIG_HEADER "; deutex format texture lump configuration\n\n"
 #define PNAMES_CONFIG_HEADER "; patch names lump configuration\n\n"
 
-static VFILE *FormatTextureConfig(struct textures *txs)
+static bool CheckTextureConfig(struct textures *txs, struct pnames *pn)
+{
+	int i, j;
+
+	for (i = 0; i < txs->num_textures; i++) {
+		struct texture *t = txs->textures[i];
+
+		for (j = 0; j < t->patchcount; j++) {
+			if (t->patches[j].patch >= pn->num_pnames) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn)
 {
 	struct texture *t;
-	struct pnames *pnames = txs->pnames;
 	VFILE *result = vfopenmem(NULL, 0);
 	char buf[32];
 	int i, j;
+
+	if (!CheckTextureConfig(txs, pn)) {
+		vfclose(result);
+		return NULL;
+	}
 
 	assert(vfwrite(TEXTURE_CONFIG_HEADER,
 	               strlen(TEXTURE_CONFIG_HEADER), 1, result) == 1);
@@ -48,7 +69,7 @@ static VFILE *FormatTextureConfig(struct textures *txs)
 		for (j = 0; j < t->patchcount; j++) {
 			const struct patch *p = &t->patches[j];
 			snprintf(buf, sizeof(buf), "* %-8.8s %6d %8d\n",
-			         pnames->pnames[p->patch], p->originx,
+			         pn->pnames[p->patch], p->originx,
 			         p->originy);
 			assert(vfwrite(buf, strlen(buf), 1, result) == 1);
 		}
@@ -59,24 +80,7 @@ static VFILE *FormatTextureConfig(struct textures *txs)
 	return result;
 }
 
-static bool CheckTextureConfig(struct textures *txs)
-{
-	int i, j;
-
-	for (i = 0; i < txs->num_textures; i++) {
-		struct texture *t = txs->textures[i];
-
-		for (j = 0; j < t->patchcount; j++) {
-			if (t->patches[j].patch >= txs->pnames->num_pnames) {
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-
-static VFILE *FormatPnamesConfig(struct pnames *p)
+VFILE *TX_FormatPnamesConfig(struct pnames *p)
 {
 	VFILE *result = vfopenmem(NULL, 0);
 	char buf[32];
@@ -92,41 +96,6 @@ static VFILE *FormatPnamesConfig(struct pnames *p)
 
 	assert(vfseek(result, 0, SEEK_SET) == 0);
 
-	return result;
-}
-
-VFILE *TX_ToTexturesConfig(VFILE *input, VFILE *pnames_input)
-{
-	struct textures *txs = TX_UnmarshalTextures(input);
-	VFILE *result;
-
-	if (txs == NULL) {
-		return NULL;
-	}
-
-	txs->pnames = TX_UnmarshalPnames(pnames_input);
-	if (txs->pnames == NULL || !CheckTextureConfig(txs)) {
-		TX_FreeTextures(txs);
-		return NULL;
-	}
-
-	result = FormatTextureConfig(txs);
-
-	TX_FreeTextures(txs);
-	return result;
-}
-
-VFILE *TX_ToPnamesConfig(VFILE *input)
-{
-	struct pnames *p = TX_UnmarshalPnames(input);
-	VFILE *result;
-
-	if (p == NULL) {
-		return NULL;
-	}
-
-	result = FormatPnamesConfig(p);
-	TX_FreePnames(p);
 	return result;
 }
 
@@ -253,7 +222,6 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len,
 	bool fail;
 
 	result = calloc(1, sizeof(struct textures));
-	result->pnames = pnames;
 
 	for (;;) {
 		char *line = ReadLine(buf, buf_len, &offset);
@@ -278,11 +246,10 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len,
 	return result;
 }
 
-VFILE *TX_FromTexturesConfig(VFILE *input, VFILE *pnames_input)
+struct textures *TX_ParseTextureConfig(VFILE *input, struct pnames *pn)
 {
-	VFILE *result, *sink = vfopenmem(NULL, 0);
-	struct pnames *pn;
-	struct textures *txs;
+	VFILE *sink = vfopenmem(NULL, 0);
+	struct textures *result;
 	void *lump;
 	size_t lump_len;
 
@@ -291,26 +258,11 @@ VFILE *TX_FromTexturesConfig(VFILE *input, VFILE *pnames_input)
 
 	if (!vfgetbuf(sink, &lump, &lump_len)) {
 		vfclose(sink);
-		vfclose(pnames_input);
 		return NULL;
 	}
 
-	pn = TX_UnmarshalPnames(pnames_input);
-	if (pn == NULL) {
-		vfclose(sink);
-		return NULL;
-	}
-
-	txs = ParseTextureConfig(lump, lump_len, pn);
+	result = ParseTextureConfig(lump, lump_len, pn);
 	vfclose(sink);
-
-	if (txs != NULL) {
-		result = TX_MarshalTextures(txs);
-		TX_FreeTextures(txs);
-	} else {
-		result = NULL;
-		TX_FreePnames(pn);
-	}
 
 	return result;
 }
@@ -353,10 +305,10 @@ static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
 	return result;
 }
 
-VFILE *TX_FromPnamesConfig(VFILE *input)
+struct pnames *TX_ParsePnamesConfig(VFILE *input)
 {
-	VFILE *result, *sink = vfopenmem(NULL, 0);
-	struct pnames *pn;
+	VFILE *sink = vfopenmem(NULL, 0);
+	struct pnames *result;
 	void *cfg;
 	size_t cfg_len;
 
@@ -367,14 +319,7 @@ VFILE *TX_FromPnamesConfig(VFILE *input)
 		return NULL;
 	}
 
-	pn = ParsePnamesConfig(cfg, cfg_len);
+	result = ParsePnamesConfig(cfg, cfg_len);
 	vfclose(sink);
-
-	if (pn == NULL) {
-		return NULL;
-	}
-
-	result = TX_MarshalPnames(pn);
-	TX_FreePnames(pn);
 	return result;
 }

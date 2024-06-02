@@ -71,18 +71,46 @@ static bool HasExtension(const char *filename, const char **exts)
 	return false;
 }
 
+static VFILE *ConvertPnames(VFILE *input)
+{
+	VFILE *result;
+	struct pnames *pn = TX_ParsePnamesConfig(input);
+
+	if (pn == NULL) {
+		return NULL;
+	}
+
+	result = TX_MarshalPnames(pn);
+	TX_FreePnames(pn);
+	return result;
+}
+
 static VFILE *ImportTextures(VFILE *input, struct wad_file *to_wad)
 {
 	int pnames_lump_index = W_GetNumForName(to_wad, "PNAMES");
-	VFILE *pnames;
+	struct textures *txs;
+	struct pnames *pn;
+	VFILE *pnames_input, *result;
+
 	if (pnames_lump_index < 0) {
 		UI_MessageBox("To import a texture config, your WAD\n"
 		              "must contain a PNAMES lump.");
 		vfclose(input);
 		return NULL;
 	}
-	pnames = W_OpenLump(to_wad, pnames_lump_index);
-	return TX_FromTexturesConfig(input, pnames);
+
+	pnames_input = W_OpenLump(to_wad, pnames_lump_index);
+	pn = TX_UnmarshalPnames(pnames_input);
+
+	txs = TX_ParseTextureConfig(input, pn);
+	TX_FreePnames(pn);
+	if (txs == NULL) {
+		return NULL;
+	}
+
+	result = TX_MarshalTextures(txs);
+	TX_FreeTextures(txs);
+	return result;
 }
 
 static VFILE *PerformConversion(VFILE *input, struct wad_file *to_wad,
@@ -101,7 +129,7 @@ static VFILE *PerformConversion(VFILE *input, struct wad_file *to_wad,
 			return V_FromImageFile(input);
 		}
 	} else if (!strcasecmp(src_name, "PNAMES.txt")) {
-		return TX_FromPnamesConfig(input);
+		return ConvertPnames(input);
 	} else if (!strncasecmp(src_name, "TEXTURE", 7)
 	        && StringHasSuffix(src_name, ".txt")) {
 		return ImportTextures(input, to_wad);

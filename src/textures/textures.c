@@ -163,9 +163,6 @@ void TX_FreeTextures(struct textures *t)
 	for (i = 0; i < t->num_textures; i++) {
 		free(t->textures[i]);
 	}
-	if (t->pnames != NULL) {
-		TX_FreePnames(t->pnames);
-	}
 	free(t->serial_nos);
 	free(t);
 }

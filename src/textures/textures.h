@@ -35,7 +35,6 @@ struct textures {
 	struct texture **textures;
 	size_t num_textures;
 	uint64_t *serial_nos;
-	struct pnames *pnames;
 };
 
 struct texture *TX_AllocTexture(size_t patchcount);
@@ -52,9 +51,9 @@ struct pnames *TX_UnmarshalPnames(VFILE *f);
 void TX_AppendPname(struct pnames *pn, const char *name);
 int TX_GetPnameIndex(struct pnames *pn, const char *name);
 
-VFILE *TX_ToTexturesConfig(VFILE *input, VFILE *pnames_input);
-VFILE *TX_ToPnamesConfig(VFILE *input);
-VFILE *TX_FromTexturesConfig(VFILE *input, VFILE *pnames_input);
-VFILE *TX_FromPnamesConfig(VFILE *input);
+VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn);
+VFILE *TX_FormatPnamesConfig(struct pnames *p);
+struct textures *TX_ParseTextureConfig(VFILE *input, struct pnames *pn);
+struct pnames *TX_ParsePnamesConfig(VFILE *input);
 
 void TX_AddSerialNos(struct textures *txs);

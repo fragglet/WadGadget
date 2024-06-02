@@ -22,22 +22,52 @@
 #include "stringlib.h"
 #include "textures/textures.h"
 
+static VFILE *ConvertPnames(VFILE *input)
+{
+	VFILE *result;
+	struct pnames *pn = TX_UnmarshalPnames(input);
+
+	if (pn == NULL) {
+		return NULL;
+	}
+
+	result = TX_FormatPnamesConfig(pn);
+	TX_FreePnames(pn);
+	return result;
+}
+
 static VFILE *ConvertTextures(struct directory *from, VFILE *input)
 {
 	struct directory_entry *ent = VFS_EntryByName(from, "PNAMES");
-	VFILE *pnames;
+	VFILE *pnames_input, *result;
+	struct pnames *pn;
+	struct textures *txs;
+
 	if (ent == NULL) {
 		UI_MessageBox("To export a texture config, your WAD\n"
 		              "must contain a PNAMES lump.");
 		vfclose(input);
 		return NULL;
 	}
-	pnames = VFS_OpenByEntry(from, ent);
-	if (pnames == NULL) {
+	pnames_input = VFS_OpenByEntry(from, ent);
+	if (pnames_input == NULL) {
 		vfclose(input);
 		return NULL;
 	}
-	return TX_ToTexturesConfig(input, pnames);
+	pn = TX_UnmarshalPnames(pnames_input);
+	if (pn == NULL) {
+		vfclose(input);
+		return NULL;
+	}
+	txs = TX_UnmarshalTextures(input);
+	if (txs == NULL) {
+		TX_FreePnames(pn);
+		return NULL;
+	}
+	result = TX_FormatTexturesConfig(txs, pn);
+	TX_FreeTextures(txs);
+	TX_FreePnames(pn);
+	return result;
 }
 
 static VFILE *PerformConversion(struct directory *from, VFILE *input,
@@ -52,7 +82,7 @@ static VFILE *PerformConversion(struct directory *from, VFILE *input,
 	} else if (lt == &lump_type_textures) {
 		return ConvertTextures(from, input);
 	} else if (lt == &lump_type_pnames) {
-		return TX_ToPnamesConfig(input);
+		return ConvertPnames(input);
 	} else if (lt == &lump_type_mus) {
 		VFILE *result = vfopenmem(NULL, 0);
 		if (mus2mid(input, result)) {
