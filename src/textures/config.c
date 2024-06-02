@@ -99,6 +99,26 @@ VFILE *TX_FormatPnamesConfig(struct pnames *p)
 	return result;
 }
 
+static void StripTrailingSpaces(char *line)
+{
+	char *p = line + strlen(line);
+	while (p > line) {
+		--p;
+		if (!isspace(*p)) {
+			break;
+		}
+		*p = '\0';
+	}
+}
+
+static void StringUpper(char *line)
+{
+	char *p;
+	for (p = line; *p != '\0'; ++p) {
+		*p = toupper(*p);
+	}
+}
+
 static char *ReadLine(uint8_t *buf, size_t buf_len, unsigned int *offset)
 {
 	char *result, *p;
@@ -130,6 +150,9 @@ static char *ReadLine(uint8_t *buf, size_t buf_len, unsigned int *offset)
 	if (p != NULL) {
 		*p = '\0';
 	}
+
+	StripTrailingSpaces(result);
+	StringUpper(result);
 
 	return result;
 }
@@ -279,25 +302,15 @@ static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
 	result->num_pnames = 0;
 
 	for (;;) {
-		char *line = ReadLine(buf, buf_len, &offset), *p;
+		char *line = ReadLine(buf, buf_len, &offset);
 		if (line == NULL) {
 			break;
-		}
-
-		// Strip trailing spaces.
-		p = line + strlen(line);
-		while (p > line) {
-			--p;
-			if (!isspace(*p)) {
-				break;
-			}
-			*p = '\0';
 		}
 
 		if (strlen(line) > 8) {
 			TX_FreePnames(result);
 			return NULL;
-		} else if (strlen(p) > 0) {
+		} else if (strlen(line) > 0) {
 			TX_AppendPname(result, line);
 		}
 
