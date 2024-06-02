@@ -49,10 +49,12 @@ void TX_FreeTextures(struct textures *t);
 
 VFILE *TX_MarshalPnames(struct pnames *pn);
 struct pnames *TX_UnmarshalPnames(VFILE *f);
+void TX_AppendPname(struct pnames *pn, const char *name);
 int TX_GetPnameIndex(struct pnames *pn, const char *name);
 
 VFILE *TX_ToTexturesConfig(VFILE *input, VFILE *pnames_input);
 VFILE *TX_ToPnamesConfig(VFILE *input);
 VFILE *TX_FromTexturesConfig(VFILE *input, VFILE *pnames_input);
+VFILE *TX_FromPnamesConfig(VFILE *input);
 
 void TX_AddSerialNos(struct textures *txs);

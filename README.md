@@ -62,7 +62,7 @@ The following table gives a brief summary of the current state:
 | Music import                   | ✓                    | ✓                                           | ✓ (many formats)                     |
 | Music export                   | ✓ (MUS)              | ✓ (converts MUS to MID)                     | ✓ (many formats)                     |
 | Texture editor                 | ✓                    | fragglet/WadGadget#9 ; can be edited as text as a stopgap | ✓                      |
-| PNAMES editor                  | ✓                    | fragglet/WadGadget#10                       | ✓                                    |
+| PNAMES editor                  | ✓                    | fragglet/WadGadget#10 ; can be edited as text as a stopgap | ✓                     |
 | Online help                    |                      |                                             | ✓ (browser tabs to access help/wiki) |
 | View/edit levels               |                      |                                             | ✓                                    |
 | Edit ACS scripts               |                      |                                             | ✓                                    |

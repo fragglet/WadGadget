@@ -73,6 +73,14 @@ VFILE *TX_MarshalPnames(struct pnames *pn)
 	return result;
 }
 
+void TX_AppendPname(struct pnames *pn, const char *name)
+{
+	pn->pnames = checked_realloc(pn->pnames,
+	                             sizeof(pname) * (pn->num_pnames + 1));
+	strncpy(pn->pnames[pn->num_pnames], name, 8);
+	++pn->num_pnames;
+}
+
 int TX_GetPnameIndex(struct pnames *pn, const char *name)
 {
 	int i;

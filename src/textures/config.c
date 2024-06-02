@@ -314,3 +314,67 @@ VFILE *TX_FromTexturesConfig(VFILE *input, VFILE *pnames_input)
 
 	return result;
 }
+
+static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
+{
+	struct pnames *result;
+	unsigned int offset = 0;
+
+	result = calloc(1, sizeof(struct pnames));
+	result->pnames = NULL;
+	result->num_pnames = 0;
+
+	for (;;) {
+		char *line = ReadLine(buf, buf_len, &offset), *p;
+		if (line == NULL) {
+			break;
+		}
+
+		// Strip trailing spaces.
+		p = line + strlen(line);
+		while (p > line) {
+			--p;
+			if (!isspace(*p)) {
+				break;
+			}
+			*p = '\0';
+		}
+
+		if (strlen(p) > 8) {
+			TX_FreePnames(result);
+			return NULL;
+		} else if (strlen(p) > 0) {
+			TX_AppendPname(result, line);
+		}
+
+		free(line);
+	}
+
+	return result;
+}
+
+VFILE *TX_FromPnamesConfig(VFILE *input)
+{
+	VFILE *result, *sink = vfopenmem(NULL, 0);
+	struct pnames *pn;
+	void *cfg;
+	size_t cfg_len;
+
+	vfcopy(input, sink);
+	vfclose(input);
+
+	if (!vfgetbuf(sink, &cfg, &cfg_len)) {
+		return NULL;
+	}
+
+	pn = ParsePnamesConfig(cfg, cfg_len);
+	vfclose(sink);
+
+	if (pn == NULL) {
+		return NULL;
+	}
+
+	result = TX_MarshalPnames(pn);
+	TX_FreePnames(pn);
+	return result;
+}
