@@ -17,6 +17,10 @@
 #include "fs/vfile.h"
 #include "conv/graphic.h"
 
+#define FULLSCREEN_W  320
+#define FULLSCREEN_H  200
+#define FULLSCREEN_SZ (320 * 200)
+
 #define OFFSET_CHUNK_NAME  "grAb"
 
 #define TRANSPARENT   247
@@ -429,6 +433,32 @@ fail1:
 	return imgbuf;
 }
 
+static VFILE *BufferToRaw(uint8_t *imgbuf, int rowstep,
+                          struct patch_header *hdr)
+{
+	uint8_t *rowdata = NULL, *pixel;
+	VFILE *result = NULL;
+	int x, y;
+
+	result = vfopenmem(NULL, 0);
+
+	rowdata = checked_malloc(hdr->width);
+	for (y = 0; y < hdr->height; ++y) {
+		for (x = 0; x < hdr->width; ++x) {
+			pixel = &imgbuf[y * rowstep + x * 4];
+			rowdata[x] = FindColor(
+				doom_palette, pixel[0], pixel[1], pixel[2]);
+		}
+		vfwrite(rowdata, 1, hdr->width, result);
+	}
+
+	// Rewind so that the caller can read from the stream.
+	vfseek(result, 0, SEEK_SET);
+
+	free(rowdata);
+	return result;
+}
+
 VFILE *V_FromImageFile(VFILE *input)
 {
 	VFILE *result = NULL;
@@ -448,12 +478,37 @@ fail:
 	return result;
 }
 
+VFILE *V_FullscreenFromImageFile(VFILE *input)
+{
+	struct patch_header hdr;
+	VFILE *result = NULL;
+	uint8_t *imgbuf;
+	int rowstep;
+
+	imgbuf = ReadPNG(input, &hdr, &rowstep);
+	if (imgbuf == NULL) {
+		goto fail;
+	}
+
+	// Do something sensible as a fallback.
+	if (hdr.width != FULLSCREEN_W || hdr.height != FULLSCREEN_H) {
+		vfseek(input, 0, SEEK_SET);
+		return V_FromImageFile(input);
+	}
+
+	result = BufferToRaw(imgbuf, rowstep, &hdr);
+fail:
+	free(imgbuf);
+	vfclose(input);
+	return result;
+}
+
 VFILE *V_FlatFromImageFile(VFILE *input)
 {
 	VFILE *result = NULL;
 	struct patch_header hdr;
-	uint8_t *imgbuf = NULL, *rowdata = NULL, *pixel;
-	int x, y, rowstep;
+	uint8_t *imgbuf = NULL;
+	int rowstep;
 
 	imgbuf = ReadPNG(input, &hdr, &rowstep);
 	vfclose(input);
@@ -468,23 +523,9 @@ VFILE *V_FlatFromImageFile(VFILE *input)
 		return result;
 	}
 
-	result = vfopenmem(NULL, 0);
-
-	rowdata = checked_malloc(hdr.width);
-	for (y = 0; y < hdr.height; ++y) {
-		for (x = 0; x < hdr.width; ++x) {
-			pixel = &imgbuf[y * rowstep + x * 4];
-			rowdata[x] = FindColor(
-				doom_palette, pixel[0], pixel[1], pixel[2]);
-		}
-		vfwrite(rowdata, 1, hdr.width, result);
-	}
-
-	// Rewind so that the caller can read from the stream.
-	vfseek(result, 0, SEEK_SET);
+	result = BufferToRaw(imgbuf, rowstep, &hdr);
 fail:
 	free(imgbuf);
-	free(rowdata);
 	return result;
 }
 
@@ -648,10 +689,10 @@ VFILE *V_FullscreenToImageFile(VFILE *input)
 	if (!vfgetbuf(bufreader, (void **) &buf, &buf_len)) {
 		goto fail;
 	}
-	assert(buf_len == 64000);
+	assert(buf_len == FULLSCREEN_SZ);
 
-	hdr.width = 320;
-	hdr.height = 200;
+	hdr.width = FULLSCREEN_W;
+	hdr.height = FULLSCREEN_H;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
 	result = WritePNG(&hdr, buf);

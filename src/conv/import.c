@@ -14,13 +14,43 @@
 #include <stdint.h>
 #include <limits.h>
 
+#include "common.h"
 #include "conv/audio.h"
-#include "ui/dialog.h"
-#include "conv/import.h"
 #include "conv/graphic.h"
+#include "conv/import.h"
 #include "lump_info.h"
 #include "stringlib.h"
 #include "textures/textures.h"
+#include "ui/dialog.h"
+
+// These lumps get converted to the special Heretic/Hexen raw 320x200 format.
+// Note that some of these names are also found in Doom IWADs, so we are very
+// careful to check it's one of the Raven IWADs before using raw format.
+static const char *raven_fullscreen_lumps[] = {
+	// Common
+	"TITLE", "CREDIT", "HELP1", "HELP2", "CREDIT",
+	// Heretic:
+	"E2END", "FINAL1", "FINAL2",
+	// Hexen
+	"FINALE1", "FINALE2", "FINALE3", "INTERPIC",
+};
+
+static bool IsRavenFullscreen(const char *name)
+{
+	char tmpname[13];
+	int i;
+
+	for (i = 0; i < arrlen(raven_fullscreen_lumps); i++) {
+		snprintf(tmpname, sizeof(tmpname), "%s.png",
+		         raven_fullscreen_lumps[i]);
+
+		if (!strcasecmp(tmpname, name)) {
+			return true;
+		}
+	}
+
+	return false;
+}
 
 static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 {
@@ -142,7 +172,16 @@ static VFILE *PerformConversion(VFILE *input, struct wad_file *to_wad,
 	} else if (HasExtension(src_name, audio_extensions)) {
 		return S_FromAudioFile(input);
 	} else if (StringHasSuffix(src_name, ".png")) {
-		if (flats_section) {
+		// We only do the raw format import if this looks like a
+		// WAD file for one of the Raven games. Check for the
+		// "RSAC advisory" graphic; the user can also add an XXTIC
+		// lump to signal if they're making a Raven PWAD.
+		bool is_raven = W_GetNumForName(to_wad, "XXTIC") >= 0
+		             || W_GetNumForName(to_wad, "ADVISOR") >= 0;
+
+		if (is_raven && IsRavenFullscreen(src_name)) {
+			return V_FullscreenFromImageFile(input);
+		} else if (flats_section) {
 			return V_FlatFromImageFile(input);
 		} else {
 			return V_FromImageFile(input);
