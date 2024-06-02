@@ -230,6 +230,9 @@ static uint8_t FindColor(const png_color *pal, int r, int g, int b)
 		diff = (r - pal[i].red) * (r - pal[i].red)
 		     + (g - pal[i].green) * (g - pal[i].green)
 		     + (b - pal[i].blue) * (b - pal[i].blue);
+		if (diff == 0) {
+			return i;
+		}
 		if (diff < best_diff) {
 			best_idx = i;
 			best_diff = diff;
