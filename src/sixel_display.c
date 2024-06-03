@@ -22,8 +22,8 @@
 
 #include "termfuncs.h"
 #include "sixel_display.h"
+#include "stringlib.h"
 
-#define SCALE "200%"
 #define SEND_ATTRIBUTES_ESCAPE  "\x1b[c"
 
 static bool sixels_available = false;
@@ -129,6 +129,7 @@ bool SIXEL_DisplayImage(const char *filename)
 {
 	SIXELSTATUS status = SIXEL_FALSE;
 	sixel_encoder_t *encoder;
+	const char *scale;
 	bool result;
 
 	if (!sixels_available) {
@@ -142,8 +143,14 @@ bool SIXEL_DisplayImage(const char *filename)
 
 	// We scale up the graphics, otherwise they look very small,
 	// especially in iTerm on a retina display.
-	sixel_encoder_setopt(encoder, SIXEL_OPTFLAG_WIDTH, SCALE);
-	sixel_encoder_setopt(encoder, SIXEL_OPTFLAG_HEIGHT, SCALE);
+	// We don't scale up the Hexen startup screen though.
+	if (StringHasSuffix(filename, ".hires.png")) {
+		scale = "100%";
+	} else {
+		scale = "200%";
+	}
+	sixel_encoder_setopt(encoder, SIXEL_OPTFLAG_WIDTH, scale);
+	sixel_encoder_setopt(encoder, SIXEL_OPTFLAG_HEIGHT, scale);
 
 	// Blur-o-vision forever.
 	sixel_encoder_setopt(encoder, SIXEL_OPTFLAG_RESAMPLING, "nearest");
