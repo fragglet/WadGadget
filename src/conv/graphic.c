@@ -623,6 +623,7 @@ VFILE *V_ToImageFile(VFILE *input)
 	VFILE *result = NULL;
 
 	buf = vfreadall(input, &buf_len);
+	vfclose(input);
 	if (buf_len < 6) {
 		goto fail;
 	}
@@ -651,6 +652,7 @@ VFILE *V_FlatToImageFile(VFILE *input)
 	VFILE *result = NULL;
 
 	buf = vfreadall(input, &buf_len);
+	vfclose(input);
 
 	// Lump must be exactly 4096 bytes.
 	if (buf_len != 4096) {

@@ -200,6 +200,7 @@ struct textures *TX_UnmarshalTextures(VFILE *input)
 	int i;
 
 	lump = vfreadall(input, &lump_len);
+	vfclose(input);
 	if (lump_len < 4) {
 		goto fail;
 	}

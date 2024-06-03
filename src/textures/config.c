@@ -278,6 +278,7 @@ struct textures *TX_ParseTextureConfig(VFILE *input, struct pnames *pn)
 	size_t lump_len;
 
 	lump = vfreadall(input, &lump_len);
+	vfclose(input);
 	result = ParseTextureConfig(lump, lump_len, pn);
 	free(lump);
 
@@ -321,6 +322,7 @@ struct pnames *TX_ParsePnamesConfig(VFILE *input)
 	size_t cfg_len;
 
 	cfg = vfreadall(input, &cfg_len);
+	vfclose(input);
 	result = ParsePnamesConfig(cfg, cfg_len);
 	free(cfg);
 	return result;
