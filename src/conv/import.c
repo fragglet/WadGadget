@@ -214,7 +214,7 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 
 		if (!ImportFromFile(from_file, ent->name, to_wad, lumpnum,
 		                    convert)) {
-			// TODO: Delete the new entries we added?
+			W_Rollback(to_wad);
 			// TODO: Show an error message
 			return false;
 		}
