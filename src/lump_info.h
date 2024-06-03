@@ -26,6 +26,7 @@ extern const struct lump_type lump_type_dehacked;
 extern const struct lump_type lump_type_sized;
 extern const struct lump_type lump_type_plaintext;
 extern const struct lump_type lump_type_fullscreen_image;
+extern const struct lump_type lump_type_hexen_hires_image;
 extern const struct lump_type lump_type_pnames;
 extern const struct lump_type lump_type_textures;
 extern const struct lump_type lump_type_unknown;

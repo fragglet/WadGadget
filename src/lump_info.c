@@ -542,7 +542,7 @@ const struct lump_type lump_type_pnames = {
 	".txt",
 };
 
-// Hexen fullscreen imag.e
+// Hexen fullscreen image
 static bool FullscreenImageCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
 	return ent->size == 64000;
@@ -561,6 +561,24 @@ const struct lump_type lump_type_fullscreen_image = {
 	".fullscreen.png",
 };
 
+// Hexen hires loading screen
+static bool HexenHiresImageCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return !strcasecmp(ent->name, "STARTUP");
+}
+
+static void HexenHiresImageFormat(struct wad_file_entry *ent, uint8_t *buf,
+                                  char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len,
+	         "Hexen startup screen\nDimensions: 640x480");
+}
+
+const struct lump_type lump_type_hexen_hires_image = {
+	HexenHiresImageCheck,
+	HexenHiresImageFormat,
+	".hires.png",
+};
 
 // Fallback, "generic lump"
 
@@ -597,6 +615,7 @@ static const struct lump_type *lump_types[] = {
 	&lump_type_demo,
 	&lump_type_pcspeaker,
 	&lump_type_fullscreen_image,
+	&lump_type_hexen_hires_image,
 	&lump_type_sized,
 	&lump_type_plaintext,
 	&lump_type_unknown,

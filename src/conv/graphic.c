@@ -17,6 +17,12 @@
 #include "fs/vfile.h"
 #include "conv/graphic.h"
 
+// Hexen loading screen
+#define HIRES_SCREEN_W  640
+#define HIRES_SCREEN_H  480
+#define HIRES_MIN_LENGTH  ((HIRES_SCREEN_W * HIRES_SCREEN_H / 2) + (16 * 3))
+
+// Heretic/Hexen raw fullscreen images.
 #define FULLSCREEN_W  320
 #define FULLSCREEN_H  200
 #define FULLSCREEN_SZ (320 * 200)
@@ -567,7 +573,8 @@ static bool DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
 	return true;
 }
 
-static VFILE *WritePNG(struct patch_header *hdr, uint8_t *imgbuf)
+static VFILE *WritePNG(struct patch_header *hdr, uint8_t *imgbuf,
+                       const png_color *palette)
 {
 	VFILE *result = NULL;
 	uint8_t *alphabuf;
@@ -596,7 +603,7 @@ static VFILE *WritePNG(struct patch_header *hdr, uint8_t *imgbuf)
 	             PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
 	             PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 	png_set_tRNS(ppng, pinfo, alphabuf, 256, NULL);
-	png_set_PLTE(ppng, pinfo, doom_palette, 256);
+	png_set_PLTE(ppng, pinfo, palette, 256);
 	png_write_info(ppng, pinfo);
 	if (hdr->topoffset != 0 || hdr->leftoffset != 0) {
 		WriteOffsetChunk(ppng, hdr);
@@ -635,7 +642,7 @@ VFILE *V_ToImageFile(VFILE *input)
 		goto fail;
 	}
 
-	result = WritePNG(&hdr, imgbuf);
+	result = WritePNG(&hdr, imgbuf, doom_palette);
 
 fail:
 	free(imgbuf);
@@ -663,7 +670,7 @@ VFILE *V_FlatToImageFile(VFILE *input)
 	hdr.height = 64;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = WritePNG(&hdr, buf);
+	result = WritePNG(&hdr, buf, doom_palette);
 
 fail:
 	free(buf);
@@ -680,14 +687,98 @@ VFILE *V_FullscreenToImageFile(VFILE *input)
 	VFILE *result = NULL;
 
 	buf = vfreadall(input, &buf_len);
+	vfclose(input);
 	assert(buf_len == FULLSCREEN_SZ);
 
 	hdr.width = FULLSCREEN_W;
 	hdr.height = FULLSCREEN_H;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = WritePNG(&hdr, buf);
+	result = WritePNG(&hdr, buf, doom_palette);
 	free(buf);
+
+	return result;
+}
+
+static void ReadHiresPalette(uint8_t *buf, png_color *palette)
+{
+	unsigned int i, r, g, b;
+
+	for (i = 0; i < 16; i++) {
+		r = buf[i * 3];
+		g = buf[i * 3 + 1];
+		b = buf[i * 3 + 2];
+		palette[i].red = (r << 2) | (r >> 4);
+		palette[i].green = (g << 2) | (g >> 4);
+		palette[i].blue = (b << 2) | (b >> 4);
+	}
+}
+
+static uint8_t *PlanarToFlat(void *src, png_color *palette)
+{
+	const uint8_t *srcptrs[4];
+	uint8_t srcbits[4], *dest, *result;
+	int x, y, i, bit;
+
+	// Set up source pointers to read from source buffer - each 4-bit
+	// pixel has its bits split into four sub-buffers
+	for (i = 0; i < 4; ++i) {
+		srcptrs[i] = src + (i * HIRES_SCREEN_W * HIRES_SCREEN_H / 8);
+	}
+
+	// Draw each pixel
+	bit = 0;
+	result = checked_calloc(HIRES_SCREEN_W, HIRES_SCREEN_H);
+	for (y = 0; y < HIRES_SCREEN_H; ++y) {
+		dest = result + y * HIRES_SCREEN_W;
+
+		for (x = 0; x < HIRES_SCREEN_W; ++x) {
+			// Get the bits for this pixel
+			// For each bit, find the byte containing it, shift down
+			// and mask out the specific bit wanted.
+			for (i = 0; i < 4; ++i) {
+				uint8_t b = srcptrs[i][bit / 8];
+				srcbits[i] = (b >> (7 - (bit % 8))) & 0x1;
+			}
+
+			// Reassemble the pixel value
+			*dest = (srcbits[0] << 0) | (srcbits[1] << 1)
+			      | (srcbits[2] << 2) | (srcbits[3] << 3);
+
+			// Next pixel!
+			++dest;
+			++bit;
+		}
+	}
+
+	return result;
+}
+
+VFILE *V_HiresToImageFile(VFILE *input)
+{
+	VFILE *result;
+	uint8_t *lump, *screenbuf;
+	size_t lump_len;
+	png_color palette[16];
+	struct patch_header hdr;
+
+	lump = vfreadall(input, &lump_len);
+	vfclose(input);
+	if (lump_len < HIRES_MIN_LENGTH) {
+		free(lump);
+		vfclose(input);
+		return NULL;
+	}
+
+	ReadHiresPalette(lump, palette);
+	screenbuf = PlanarToFlat(lump + 3 * 16, palette);
+
+	hdr.width = HIRES_SCREEN_W;
+	hdr.height = HIRES_SCREEN_H;
+	result = WritePNG(&hdr, screenbuf, palette);
+
+	free(screenbuf);
+	free(lump);
 
 	return result;
 }

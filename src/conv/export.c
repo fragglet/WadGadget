@@ -81,6 +81,8 @@ static VFILE *PerformConversion(struct directory *from, VFILE *input,
 		return V_ToImageFile(input);
 	} else if (lt == &lump_type_fullscreen_image) {
 		return V_FullscreenToImageFile(input);
+	} else if (lt == &lump_type_hexen_hires_image) {
+		return V_HiresToImageFile(input);
 	} else if (lt == &lump_type_textures) {
 		return ConvertTextures(from, input);
 	} else if (lt == &lump_type_pnames) {
@@ -117,8 +119,7 @@ static const struct lump_type *IdentifyLumpType(struct directory *dir,
 }
 
 static char *FileNameForEntry(const struct lump_type *lt,
-                              struct directory_entry *ent,
-                              bool convert)
+                              struct directory_entry *ent, bool convert)
 {
 	const char *extn;
 

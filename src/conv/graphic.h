@@ -21,4 +21,5 @@ VFILE *V_FlatToImageFile(VFILE *input);
 VFILE *V_FlatFromImageFile(VFILE *input);
 VFILE *V_FullscreenToImageFile(VFILE *input);
 VFILE *V_FullscreenFromImageFile(VFILE *input);
+VFILE *V_HiresToImageFile(VFILE *input);
 void V_SwapPatchHeader(struct patch_header *hdr);
