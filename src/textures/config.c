@@ -160,12 +160,17 @@ static char *ReadLine(uint8_t *buf, size_t buf_len, unsigned int *offset)
 static int ScanLine(char *line, const char *fmt, char *name,
                     int *x, int *y)
 {
-	int nfields;
+	int nfields, len;
 
 	*x = 0;
 	*y = 0;
-	nfields = sscanf(line, fmt, name, x, y);
+	nfields = sscanf(line, fmt, name, &len, x, &len, y, &len);
 	if (nfields < 1) {
+		return 0;
+	}
+
+	// Should be no junk left over on the end of line
+	if (len < strlen(line)) {
 		return 0;
 	}
 
@@ -185,7 +190,7 @@ static bool MaybeAddTexture(struct textures *txs, char *line)
 	char namebuf[10];
 	int w, h, n;
 
-	n = ScanLine(line, "%9s %d %d", namebuf, &w, &h);
+	n = ScanLine(line, "%9s%n %d%n %d%n", namebuf, &w, &h);
 	if (n < 3) {
 		return false;
 	}
@@ -216,7 +221,7 @@ static bool MaybeAddPatch(struct textures *txs, char *line,
 		return false;
 	}
 
-	n = ScanLine(line, "* %9s %d %d", namebuf, &x, &y);
+	n = ScanLine(line, "* %9s%n %d%n %d%n", namebuf, &x, &y);
 	// As long as we have the name, we can append the patch
 	// (X/Y offsets are assumed to be zero)
 	if (n < 1) {
