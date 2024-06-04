@@ -272,7 +272,7 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len,
 
 		if (fail) {
 			ConversionError("Syntax error on line #%d of texture "
-			                "config:\n\n%s", lineno, line);
+			                "config:\n\n%s\n", lineno, line);
 			free(line);
 			TX_FreeTextures(result);
 			return NULL;
@@ -316,8 +316,8 @@ static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
 
 		++lineno;
 		if (strlen(line) > 8) {
-			ConversionError("Syntax error at line #%d of PNAMES "
-			                "config:\n\n%s", lineno, line);
+			ConversionError("Patch name on line #%d exceeds 8 "
+			                "characters:\n\n%s\n", lineno, line);
 			TX_FreePnames(result);
 			return NULL;
 		} else if (strlen(line) > 0) {
