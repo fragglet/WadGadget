@@ -34,7 +34,7 @@ struct pnames *TX_UnmarshalPnames(VFILE *f)
 	uint32_t cnt, names_read;
 
 	if (vfread(&cnt, sizeof(uint32_t), 1, f) != 1) {
-		ConversionError("Failed to read 4 byte PNAMES lump header.");
+		ConversionError("Failed to read 4 byte lump header.");
 		free(pnames);
 		vfclose(f);
 		return NULL;
@@ -47,7 +47,7 @@ struct pnames *TX_UnmarshalPnames(VFILE *f)
 
 	names_read = vfread(pnames->pnames, sizeof(pname), cnt, f);
 	if (names_read != cnt) {
-		ConversionError("PNAMES lump too short: only %d/%d read.",
+		ConversionError("Lump too short: only %d/%d names read.",
 		                names_read, cnt);
 		TX_FreePnames(pnames);
 		vfclose(f);
@@ -65,14 +65,14 @@ VFILE *TX_MarshalPnames(struct pnames *pn)
 
 	SwapLE32(&cnt);
 	if (vfwrite(&cnt, sizeof(uint32_t), 1, result) != 1) {
-		ConversionError("Failed to write PNAMES header.");
+		ConversionError("Failed to write header.");
 		vfclose(result);
 		return NULL;
 	}
 
 	if (vfwrite(pn->pnames, sizeof(pname),
 	            pn->num_pnames, result) != pn->num_pnames) {
-		ConversionError("Failed to write PNAMES.");
+		ConversionError("Failed to write names.");
 		vfclose(result);
 		return NULL;
 	}
@@ -211,7 +211,7 @@ struct textures *TX_UnmarshalTextures(VFILE *input)
 	lump = vfreadall(input, &lump_len);
 	vfclose(input);
 	if (lump_len < 4) {
-		ConversionError("Failed to read TEXTURE lump 4 byte header.");
+		ConversionError("Failed to read 4 byte lump header.");
 		goto fail;
 	}
 
@@ -248,6 +248,7 @@ struct textures *TX_UnmarshalTextures(VFILE *input)
 		result->textures[i] =
 			UnmarshalTexture(lump + start, lump_len - start);
 		if (result->textures[i] == NULL) {
+			ConversionError("Failed to unmarshal texture #%d", i);
 			TX_FreeTextures(result);
 			result = NULL;
 			goto fail;

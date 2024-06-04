@@ -29,10 +29,14 @@ static VFILE *ConvertPnames(VFILE *input)
 	struct pnames *pn = TX_UnmarshalPnames(input);
 
 	if (pn == NULL) {
+		ConversionError("Failed to unmarshal PNAMES lump");
 		return NULL;
 	}
 
 	result = TX_FormatPnamesConfig(pn);
+	if (result == NULL) {
+		ConversionError("Failed to format PNAMES config");
+	}
 	TX_FreePnames(pn);
 	return result;
 }
@@ -58,11 +62,13 @@ static VFILE *ConvertTextures(struct directory *from, VFILE *input)
 	}
 	pn = TX_UnmarshalPnames(pnames_input);
 	if (pn == NULL) {
+		ConversionError("Failed to unmarshal PNAMES lump");
 		vfclose(input);
 		return NULL;
 	}
 	txs = TX_UnmarshalTextures(input);
 	if (txs == NULL) {
+		ConversionError("Failed to unmarshal textures config");
 		TX_FreePnames(pn);
 		return NULL;
 	}
@@ -191,7 +197,7 @@ bool ExportToFile(struct directory *from, struct directory_entry *ent,
 		fromlump = PerformConversion(from, fromlump, lt);
 	}
 	if (fromlump == NULL) {
-		// TODO: Print an error message on failed conversion
+		ConversionError("Failed conversion for '%s'", ent->name);
 		return false;
 	}
 
@@ -240,12 +246,14 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 		const struct lump_type *lt = IdentifyLumpType(from, ent);
 		filename = FileNameForEntry(lt, ent, convert);
 		filename2 = StringJoin("", to->path, "/", filename, NULL);
-		free(filename);
 		success = ExportToFile(from, ent, lt, filename2, convert);
 		free(filename2);
 		if (!success) {
+			ConversionError("Failed to export to '%s'", filename);
+			free(filename);
 			return false;
 		}
+		free(filename);
 		UI_UpdateProgressWindow(&progress, ent->name);
 	}
 

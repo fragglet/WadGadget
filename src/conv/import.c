@@ -46,7 +46,7 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 		}
 		break;
 	default:
-		ConversionError("File type %d cannot be imported.", ent->type);
+		ConversionError("File type %d cannot be imported", ent->type);
 		return;
 	}
 }
@@ -78,6 +78,7 @@ static VFILE *ConvertPnames(VFILE *input)
 	struct pnames *pn = TX_ParsePnamesConfig(input);
 
 	if (pn == NULL) {
+		ConversionError("Failed to parse PNAMES config");
 		return NULL;
 	}
 
@@ -102,9 +103,15 @@ static VFILE *ImportTextures(VFILE *input, struct wad_file *to_wad)
 
 	pnames_input = W_OpenLump(to_wad, pnames_lump_index);
 	pn = TX_UnmarshalPnames(pnames_input);
+	if (pn == NULL) {
+		ConversionError("Failed to parse PNAMES lump");
+		vfclose(input);
+		return NULL;
+	}
 
 	txs = TX_ParseTextureConfig(input, pn);
 	if (txs == NULL) {
+		ConversionError("Failed to parse texture config");
 		TX_FreePnames(pn);
 		return NULL;
 	}
@@ -215,7 +222,8 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 		if (!ImportFromFile(from_file, ent->name, to_wad, lumpnum,
 		                    convert)) {
 			W_Rollback(to_wad);
-			// TODO: Show an error message
+			ConversionError("Failed to import from '%s'",
+			                ent->name);
 			return false;
 		}
 

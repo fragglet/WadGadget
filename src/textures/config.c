@@ -57,6 +57,7 @@ VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn)
 	int i, j;
 
 	if (!CheckTextureConfig(txs, pn)) {
+		ConversionError("Error formatting texture config");
 		vfclose(result);
 		return NULL;
 	}
@@ -174,15 +175,17 @@ static int ScanLine(char *line, const char *fmt, char *name,
 		return 0;
 	}
 
-	// Should be no junk left over on the end of line
-	if (len < strlen(line)) {
-		return 0;
-	}
-
 	// We only allow 8 characters, but parse up to 9 to see if
 	// the limit was exceeded.
 	name[9] = '\0';
 	if (strlen(name) > 8) {
+		ConversionError("Name contains more than 8 characters");
+		return 0;
+	}
+
+	// Should be no junk left over on the end of line
+	if (len < strlen(line)) {
+		ConversionError("Line contains trailing characters");
 		return 0;
 	}
 
