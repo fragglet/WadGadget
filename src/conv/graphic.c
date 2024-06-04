@@ -169,6 +169,8 @@ static const png_color doom_palette[256] = {
 	{0x6f, 0x00, 0x6b}, {0xa7, 0x6b, 0x6b},
 };
 
+static jmp_buf libpng_abort_jump;
+
 void V_SwapPatchHeader(struct patch_header *hdr)
 {
 	SwapLE16(&hdr->width);
@@ -197,7 +199,8 @@ static void WriteOffsetChunk(png_structp ppng, const struct patch_header *hdr)
 
 static void ErrorCallback(png_structp p, png_const_charp s)
 {
-	fprintf(stderr, "libpng error: %s\n", s);
+	ConversionError("%s", s);
+	longjmp(libpng_abort_jump, 1);
 }
 
 static void WarningCallback(png_structp p, png_const_charp s)
@@ -212,12 +215,9 @@ static void PngReadCallback(png_structp ppng, png_bytep buf, size_t len)
 
 	memset(buf, 0, len);
 	result = vfread(buf, 1, len, vf);
-	if (result == 0)
-	{
+	if (result == 0) {
 		png_error(ppng, "end of file reached");
-	}
-	else if (result < 0)
-	{
+	} else if (result < 0) {
 		png_error(ppng, "read error");
 	}
 }
@@ -371,11 +371,17 @@ static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
 	png_uint_32 width, height;
 	uint8_t *imgbuf = NULL;
 
+	if (setjmp(libpng_abort_jump) != 0) {
+		ConversionError("Error when parsing PNG file");
+		vfclose(input);
+		return NULL;
+	}
+
 	hdr->leftoffset = 0;
 	hdr->topoffset = 0;
 
-	ppng = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-	                              NULL, NULL, NULL);
+	ppng = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
+	                              ErrorCallback, WarningCallback);
 	if (!ppng) {
 		ConversionError("Failed to open PNG file");
 		goto fail1;
