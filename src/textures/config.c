@@ -19,6 +19,7 @@
 #include <assert.h>
 
 #include "common.h"
+#include "conv/error.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 
@@ -36,6 +37,10 @@ static bool CheckTextureConfig(struct textures *txs, struct pnames *pn)
 
 		for (j = 0; j < t->patchcount; j++) {
 			if (t->patches[j].patch >= pn->num_pnames) {
+				ConversionError(
+					"Texture %.8s patch #%d has invalid "
+					"PNAMES index %d >= %d", t->name, j,
+					t->patches[j].patch, pn->num_pnames);
 				return false;
 			}
 		}
@@ -249,6 +254,7 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len,
 {
 	struct textures *result;
 	unsigned int offset = 0;
+	int lineno = 0;
 	bool fail;
 
 	result = calloc(1, sizeof(struct textures));
@@ -259,16 +265,19 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len,
 			break;
 		}
 
+		++lineno;
 		fail = strlen(line) > 0
 		    && !MaybeAddPatch(result, line, pnames)
 		    && !MaybeAddTexture(result, line);
-		free(line);
 
 		if (fail) {
-			// error
+			ConversionError("Syntax error on line #%d of texture "
+			                "config:\n\n%s", lineno, line);
+			free(line);
 			TX_FreeTextures(result);
 			return NULL;
 		}
+		free(line);
 	}
 
 	TX_AddSerialNos(result);
@@ -293,7 +302,7 @@ struct textures *TX_ParseTextureConfig(VFILE *input, struct pnames *pn)
 static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
 {
 	struct pnames *result;
-	unsigned int offset = 0;
+	unsigned int offset = 0, lineno = 0;
 
 	result = calloc(1, sizeof(struct pnames));
 	result->pnames = NULL;
@@ -305,7 +314,10 @@ static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
 			break;
 		}
 
+		++lineno;
 		if (strlen(line) > 8) {
+			ConversionError("Syntax error at line #%d of PNAMES "
+			                "config:\n\n%s", lineno, line);
 			TX_FreePnames(result);
 			return NULL;
 		} else if (strlen(line) > 0) {

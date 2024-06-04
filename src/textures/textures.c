@@ -16,6 +16,7 @@
 #include <assert.h>
 
 #include "common.h"
+#include "conv/error.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 
@@ -30,9 +31,10 @@ void TX_FreePnames(struct pnames *pnames)
 struct pnames *TX_UnmarshalPnames(VFILE *f)
 {
 	struct pnames *pnames = checked_calloc(1, sizeof(struct pnames));
-	uint32_t cnt;
+	uint32_t cnt, names_read;
 
 	if (vfread(&cnt, sizeof(uint32_t), 1, f) != 1) {
+		ConversionError("Failed to read 4 byte PNAMES lump header.");
 		free(pnames);
 		vfclose(f);
 		return NULL;
@@ -43,7 +45,10 @@ struct pnames *TX_UnmarshalPnames(VFILE *f)
 	pnames->modified = false;
 	pnames->pnames = checked_calloc(cnt, sizeof(pname));
 
-	if (vfread(pnames->pnames, sizeof(pname), cnt, f) != cnt) {
+	names_read = vfread(pnames->pnames, sizeof(pname), cnt, f);
+	if (names_read != cnt) {
+		ConversionError("PNAMES lump too short: only %d/%d read.",
+		                names_read, cnt);
 		TX_FreePnames(pnames);
 		vfclose(f);
 		return NULL;
@@ -60,12 +65,14 @@ VFILE *TX_MarshalPnames(struct pnames *pn)
 
 	SwapLE32(&cnt);
 	if (vfwrite(&cnt, sizeof(uint32_t), 1, result) != 1) {
+		ConversionError("Failed to write PNAMES header.");
 		vfclose(result);
 		return NULL;
 	}
 
 	if (vfwrite(pn->pnames, sizeof(pname),
 	            pn->num_pnames, result) != pn->num_pnames) {
+		ConversionError("Failed to write PNAMES.");
 		vfclose(result);
 		return NULL;
 	}
@@ -151,6 +158,8 @@ static struct texture *UnmarshalTexture(const uint8_t *start, size_t max_len)
 
 	sz = TextureLen(patchcount);
 	if (sz > max_len) {
+		ConversionError("Texture length %d exceeds maximum length %d",
+		                (int) sz, (int) max_len);
 		return NULL;
 	}
 
@@ -195,19 +204,24 @@ struct textures *TX_UnmarshalTextures(VFILE *input)
 {
 	struct textures *result = NULL;
 	uint8_t *lump;
-	size_t lump_len;
+	size_t lump_len, min_len;
 	uint32_t num_textures;
 	int i;
 
 	lump = vfreadall(input, &lump_len);
 	vfclose(input);
 	if (lump_len < 4) {
+		ConversionError("Failed to read TEXTURE lump 4 byte header.");
 		goto fail;
 	}
 
 	memcpy(&num_textures, lump, sizeof(uint32_t));
 	SwapLE32(&num_textures);
-	if (lump_len < 4 + 4 * num_textures) {
+	min_len = 4 + 4 * num_textures;
+	if (lump_len < min_len) {
+		ConversionError("Number of textures %d too large for lump "
+		                "size:\n%d < %d", num_textures,
+		                (int) lump_len, (int) min_len);
 		goto fail;
 	}
 
@@ -223,6 +237,9 @@ struct textures *TX_UnmarshalTextures(VFILE *input)
 		SwapLE32(&start);
 
 		if (start + TextureLen(0) >= lump_len) {
+			ConversionError("Texture #%d overruns lump, start=%d"
+			                "min len=%d, lump_len=%d", i, start,
+			                (int) TextureLen(0), (int) lump_len);
 			TX_FreeTextures(result);
 			result = NULL;
 			goto fail;

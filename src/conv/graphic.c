@@ -15,6 +15,7 @@
 
 #include "common.h"
 #include "fs/vfile.h"
+#include "conv/error.h"
 #include "conv/graphic.h"
 
 // Hexen loading screen
@@ -376,11 +377,13 @@ static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
 	ppng = png_create_read_struct(PNG_LIBPNG_VER_STRING,
 	                              NULL, NULL, NULL);
 	if (!ppng) {
+		ConversionError("Failed to open PNG file");
 		goto fail1;
 	}
 
 	pinfo = png_create_info_struct(ppng);
 	if (!pinfo) {
+		ConversionError("Failed to create PNG info struct");
 		goto fail2;
 	}
 
@@ -393,6 +396,8 @@ static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
 
 	// Sanity check.
 	if (width >= UINT16_MAX || height >= UINT16_MAX) {
+		ConversionError("PNG dimensions too large: %d, %d",
+		                (int) width, (int) height);
 		goto fail2;
 	}
 
@@ -549,11 +554,16 @@ static bool DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
 		off = columnofs[x];
 		SwapLE32(&off);
 		if (off > srcbuf_len - 1) {
+			ConversionError("Corrupted patch: column %d has "
+			                "invalid offset %d > %d",
+			                x, off, srcbuf_len - 1);
 			return false;
 		}
 		while (srcbuf[off] != 0xff) {
 			if (off >= srcbuf_len - 2
 			 || off + srcbuf[off + 1] + 4 >= srcbuf_len) {
+				ConversionError("Corrupted patch: column %d "
+				                "overruns the end of lump", x);
 				return false;
 			}
 			y = srcbuf[off];
@@ -585,11 +595,13 @@ static VFILE *WritePNG(struct patch_header *hdr, uint8_t *imgbuf,
 	ppng = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
 	                               ErrorCallback, WarningCallback);
 	if (!ppng) {
+		ConversionError("Failed to create PNG write struct");
 		return NULL;
 	}
 
 	pinfo = png_create_info_struct(ppng);
 	if (!pinfo) {
+		ConversionError("Failed to create PNG info struct");
 		goto fail;
 	}
 
@@ -632,6 +644,7 @@ VFILE *V_ToImageFile(VFILE *input)
 	buf = vfreadall(input, &buf_len);
 	vfclose(input);
 	if (buf_len < 6) {
+		ConversionError("Patch too short: %d < 6", (int) buf_len);
 		goto fail;
 	}
 
@@ -663,6 +676,7 @@ VFILE *V_FlatToImageFile(VFILE *input)
 
 	// Lump must be exactly 4096 bytes.
 	if (buf_len != 4096) {
+		ConversionError("Flat lump should be 4096 bytes.");
 		goto fail;
 	}
 
@@ -765,8 +779,9 @@ VFILE *V_HiresToImageFile(VFILE *input)
 	lump = vfreadall(input, &lump_len);
 	vfclose(input);
 	if (lump_len < HIRES_MIN_LENGTH) {
+		ConversionError("Hires image too short: %d < %d bytes",
+		                (int) lump_len, (int) HIRES_MIN_LENGTH);
 		free(lump);
-		vfclose(input);
 		return NULL;
 	}
 

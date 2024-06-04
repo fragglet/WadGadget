@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include "conv/audio.h"
+#include "conv/error.h"
 #include "ui/dialog.h"
 #include "conv/export.h"
 #include "conv/graphic.h"
@@ -51,6 +52,7 @@ static VFILE *ConvertTextures(struct directory *from, VFILE *input)
 	}
 	pnames_input = VFS_OpenByEntry(from, ent);
 	if (pnames_input == NULL) {
+		ConversionError("Failed to open '%s'", ent->name);
 		vfclose(input);
 		return NULL;
 	}
@@ -90,6 +92,7 @@ static VFILE *PerformConversion(struct directory *from, VFILE *input,
 	} else if (lt == &lump_type_mus) {
 		VFILE *result = vfopenmem(NULL, 0);
 		if (mus2mid(input, result)) {
+			ConversionError("MUS to MID conversion failed.");
 			vfclose(input);
 			vfclose(result);
 			return NULL;
@@ -198,6 +201,7 @@ bool ExportToFile(struct directory *from, struct directory_entry *ent,
 	// TODO: This should be written through VFS.
 	f = fopen(to_filename, "wb");
 	if (f == NULL) {
+		ConversionError("Failed to open '%s' for write.", to_filename);
 		vfclose(fromlump);
 		return false;
 	}
@@ -238,9 +242,6 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
 		const struct lump_type *lt = IdentifyLumpType(from, ent);
 		filename = FileNameForEntry(lt, ent, convert);
-		if (filename == NULL) {
-			continue;
-		}
 		filename2 = StringJoin("", to->path, "/", filename, NULL);
 		free(filename);
 		success = ExportToFile(from, ent, lt, filename2, convert);
@@ -258,9 +259,6 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 		const struct lump_type *lt = IdentifyLumpType(from, ent);
 		VFS_RemoveFromSet(from_set, ent->serial_no);
 		filename = FileNameForEntry(lt, ent, convert);
-		if (filename == NULL) {
-			continue;
-		}
 		ent2 = VFS_EntryByName(to, filename);
 		free(filename);
 		if (ent2 != NULL) {

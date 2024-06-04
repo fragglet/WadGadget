@@ -13,6 +13,7 @@ LDFLAGS = $(shell pkg-config --libs $(REQUIRED_PKGS)) $(LIBSIXEL_LDFLAGS)
 OBJS =                      \
     conv/audio.o            \
     conv/endoom.o           \
+    conv/error.o            \
     conv/export.o           \
     conv/graphic.o          \
     conv/import.o           \

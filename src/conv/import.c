@@ -16,6 +16,7 @@
 
 #include "common.h"
 #include "conv/audio.h"
+#include "conv/error.h"
 #include "conv/graphic.h"
 #include "conv/import.h"
 #include "lump_info.h"
@@ -45,8 +46,7 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 		}
 		break;
 	default:
-		UI_MessageBox("'%s' has a file type that\ncan't be imported.",
-		              ent->name);
+		ConversionError("File type %d cannot be imported.", ent->type);
 		return;
 	}
 }
