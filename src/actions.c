@@ -14,6 +14,7 @@
 
 #include "actions.h"
 #include "common.h"
+#include "conv/error.h"
 #include "conv/import.h"
 #include "ui/dialog.h"
 #include "conv/export.h"
@@ -59,6 +60,9 @@ static void PerformCopy(struct directory_pane *active_pane,
 			} else {
 				UI_ShowNotice("%s exported.", buf);
 			}
+		} else {
+			UI_MessageBox("Export failed:\n%s",
+			              GetConversionError());
 		}
 		VFS_FreeSet(&result);
 		return;
@@ -87,6 +91,9 @@ static void PerformCopy(struct directory_pane *active_pane,
 			} else {
 				UI_ShowNotice("%s imported.", buf);
 			}
+		} else {
+			UI_MessageBox("Import failed:\n%s",
+			              GetConversionError());
 		}
 		VFS_FreeSet(&result);
 		return;

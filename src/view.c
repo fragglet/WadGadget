@@ -20,6 +20,7 @@
 #include "common.h"
 #include "ui/dialog.h"
 #include "conv/endoom.h"
+#include "conv/error.h"
 #include "conv/export.h"
 #include "conv/import.h"
 #include "lump_info.h"
@@ -167,7 +168,7 @@ static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
 
 	if (!ExportToFile(ctx->from, ctx->ent, ctx->lt, ctx->filename, true)) {
 		UI_MessageBox("Failed to export to temp file:\n%s",
-		              ctx->filename);
+		              GetConversionError());
 		free(ctx->filename);
 		rmdir(ctx->temp_dir);
 		free(ctx->temp_dir);
@@ -290,7 +291,8 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 		VFS_CommitChanges(ctx->from);
 		UI_ShowNotice("'%s' updated.", ctx->ent->name);
 	} else if (UI_ConfirmDialogBox("Error", "Edit", "Abort", "Import "
-	                               "failed. Edit file again?")) {
+	                               "failed. Error:\n%s\n\nEdit file again?",
+	                               GetConversionError())) {
 		return false;
 	}
 	VFS_Refresh(ctx->from);
