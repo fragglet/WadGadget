@@ -180,27 +180,32 @@ static int ScanLine(char *line, const char *fmt, char *name,
 	name[9] = '\0';
 	if (strlen(name) > 8) {
 		ConversionError("Name contains more than 8 characters");
-		return 0;
+		return -1;
 	}
 
 	// Should be no junk left over on the end of line
 	if (len < strlen(line)) {
 		ConversionError("Line contains trailing characters");
-		return 0;
+		return -1;
 	}
 
 	return nfields;
 }
 
-static bool MaybeAddTexture(struct textures *txs, char *line)
+enum parse_result { ERROR, NO_MATCH, MATCH };
+
+static enum parse_result MaybeAddTexture(struct textures *txs, char *line)
 {
 	struct texture *t;
 	char namebuf[10];
 	int w, h, n;
 
 	n = ScanLine(line, "%9s%n %d%n %d%n", namebuf, &w, &h);
+	if (n < 0) {
+		return ERROR;
+	}
 	if (n < 3) {
-		return false;
+		return NO_MATCH;
 	}
 
 	t = TX_AllocTexture(0);
@@ -214,11 +219,11 @@ static bool MaybeAddTexture(struct textures *txs, char *line)
 	txs->textures[txs->num_textures] = t;
 	++txs->num_textures;
 
-	return true;
+	return MATCH;
 }
 
-static bool MaybeAddPatch(struct textures *txs, char *line,
-                          struct pnames *pnames)
+static enum parse_result MaybeAddPatch(struct textures *txs, char *line,
+                                       struct pnames *pnames)
 {
 	char namebuf[10];
 	struct texture **t;
@@ -226,14 +231,18 @@ static bool MaybeAddPatch(struct textures *txs, char *line,
 	int x, y, n;
 
 	if (txs->num_textures <= 0) {
-		return false;
+		return NO_MATCH;
 	}
 
 	n = ScanLine(line, "* %9s%n %d%n %d%n", namebuf, &x, &y);
+	if (n < 0) {
+		return ERROR;
+	}
+
 	// As long as we have the name, we can append the patch
 	// (X/Y offsets are assumed to be zero)
 	if (n < 1) {
-		return false;
+		return NO_MATCH;
 	}
 
 	p.originx = x;
@@ -249,43 +258,59 @@ static bool MaybeAddPatch(struct textures *txs, char *line,
 	t = &txs->textures[txs->num_textures - 1];
 	*t = TX_AddPatch(*t, &p);
 
-	return true;
+	return MATCH;
 }
 
 static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len,
                                            struct pnames *pnames)
 {
 	struct textures *result;
+	char *line = NULL;
 	unsigned int offset = 0;
-	int lineno = 0;
-	bool fail;
+	int lineno = 0, m;
 
 	result = calloc(1, sizeof(struct textures));
 
 	for (;;) {
-		char *line = ReadLine(buf, buf_len, &offset);
+		free(line);
+		line = ReadLine(buf, buf_len, &offset);
 		if (line == NULL) {
 			break;
 		}
 
 		++lineno;
-		fail = strlen(line) > 0
-		    && !MaybeAddPatch(result, line, pnames)
-		    && !MaybeAddTexture(result, line);
-
-		if (fail) {
-			ConversionError("Syntax error on line #%d of texture "
-			                "config:\n\n%s\n", lineno, line);
-			free(line);
-			TX_FreeTextures(result);
-			return NULL;
+		if (strlen(line) == 0) {
+			continue;
 		}
-		free(line);
+
+		m = MaybeAddPatch(result, line, pnames);
+		if (m == ERROR) {
+			goto fail;
+		} else if (m == MATCH) {
+			continue;
+		}
+
+		m = MaybeAddTexture(result, line);
+		if (m == ERROR) {
+			goto fail;
+		} else if (m == MATCH) {
+			continue;
+		}
+
+		goto fail;
 	}
 
 	TX_AddSerialNos(result);
+	free(line);
 
 	return result;
+
+fail:
+	ConversionError("Syntax error on line #%d of texture "
+	                "config:\n\n%s\n", lineno, line);
+	free(line);
+	TX_FreeTextures(result);
+	return NULL;
 }
 
 struct textures *TX_ParseTextureConfig(VFILE *input, struct pnames *pn)
@@ -320,7 +345,7 @@ static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
 		++lineno;
 		if (strlen(line) > 8) {
 			ConversionError("Patch name on line #%d exceeds 8 "
-			                "characters:\n\n%s\n", lineno, line);
+			                "characters:\n\n%s", lineno, line);
 			TX_FreePnames(result);
 			return NULL;
 		} else if (strlen(line) > 0) {
