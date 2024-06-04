@@ -16,7 +16,7 @@
 
 #include "conv/error.h"
 
-#define MAX_ERROR_LEN  128
+#define MAX_ERROR_LEN  256
 
 static bool have_error;
 static char conversion_error[MAX_ERROR_LEN];

@@ -100,7 +100,7 @@ struct confirm_dialog_box {
 	struct pane pane;
 	const char *title;
 	struct dialog_button left, right;
-	char msg[128];
+	char msg[256];
 	int result;
 };
 
