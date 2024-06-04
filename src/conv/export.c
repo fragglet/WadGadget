@@ -159,9 +159,6 @@ static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
 		}
 		lt = IdentifyLumpType(from, ent);
 		filename = FileNameForEntry(lt, ent, convert);
-		if (filename == NULL) {
-			continue;
-		}
 		ent = VFS_EntryByName(to, filename);
 		if (ent != NULL) {
 			VFS_AddToSet(&overwrite_set, ent->serial_no);
