@@ -501,7 +501,7 @@ const struct lump_type lump_type_plaintext = {
 // TEXTURE1 etc.
 static bool TexturesCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return StringHasPrefix(ent->name, "TEXTURE");
+	return StringHasPrefix(ent->name, "TEXTURE") && ent->size >= 4;
 }
 
 static void TexturesFormat(struct wad_file_entry *ent, uint8_t *buf,
@@ -523,7 +523,7 @@ const struct lump_type lump_type_textures = {
 // Patch names list lump
 static bool PnamesCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return !strcmp(ent->name, "PNAMES");
+	return !strcmp(ent->name, "PNAMES") && ent->size >= 4;
 }
 
 static void PnamesFormat(struct wad_file_entry *ent, uint8_t *buf,
