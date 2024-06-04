@@ -165,7 +165,9 @@ static void InitDialogBox(struct confirm_dialog_box *dialog,
 
 	w = max(UI_StringWidth(dialog->msg) + 4, 35);
 	h = UI_StringHeight(dialog->msg) + 4;
-	dialog->pane.window = newwin(h, w, (scrh / 2) - h, (scrw - w) / 2);
+	dialog->pane.window = newwin(min(h, scrh - 1), min(w, scrw),
+	                             max(1, (scrh - h) / 2),
+	                             max(0, (scrw - w) / 2));
 	dialog->pane.draw = DrawConfirmDialog;
 	dialog->pane.keypress = ConfirmDialogKeypress;
 	dialog->title = title;
