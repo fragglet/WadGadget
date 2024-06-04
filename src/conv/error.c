@@ -47,11 +47,11 @@ void ConversionError(char *fmt, ...)
 	if (strlen(tmpbuf) > 0) {
 		if (nbytes > 0 && conversion_error[nbytes - 1] != '\n') {
 			snprintf(conversion_error + nbytes,
-			         MAX_ERROR_LEN - nbytes, ":");
-			++nbytes;
+			         MAX_ERROR_LEN - nbytes, ":\n");
+			nbytes += 2;
 		}
 		snprintf(conversion_error + nbytes, MAX_ERROR_LEN - nbytes,
-		         "\n%s", tmpbuf);
+		         "%s", tmpbuf);
 	}
 
 	have_error = true;
