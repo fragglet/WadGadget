@@ -44,8 +44,15 @@ void ConversionError(char *fmt, ...)
 	nbytes = vsnprintf(conversion_error, MAX_ERROR_LEN, fmt, args);
 	va_end(args);
 
-	snprintf(conversion_error + nbytes, MAX_ERROR_LEN - nbytes,
-	         "\n%s", tmpbuf);
+	if (strlen(tmpbuf) > 0) {
+		if (nbytes > 0 && conversion_error[nbytes - 1] != '\n') {
+			snprintf(conversion_error + nbytes,
+			         MAX_ERROR_LEN - nbytes, ":");
+			++nbytes;
+		}
+		snprintf(conversion_error + nbytes, MAX_ERROR_LEN - nbytes,
+		         "\n%s", tmpbuf);
+	}
 
 	have_error = true;
 }
