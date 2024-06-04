@@ -373,7 +373,6 @@ static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
 
 	if (setjmp(libpng_abort_jump) != 0) {
 		ConversionError("Error when parsing PNG file");
-		vfclose(input);
 		return NULL;
 	}
 
