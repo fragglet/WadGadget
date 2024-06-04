@@ -148,6 +148,8 @@ static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
 {
 	char *temp_dir;
 
+	ClearConversionErrors();
+
 	ctx->from = from;
 	ctx->ent = ent;
 
@@ -239,6 +241,8 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 {
 	VFILE *from_file;
 	int do_import;
+
+	ClearConversionErrors();
 
 	if (ctx->temp_dir == NULL) {
 		return true;

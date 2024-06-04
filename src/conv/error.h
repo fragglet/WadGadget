@@ -8,6 +8,6 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-void ResetConversionErrors(void);
+void ClearConversionErrors(void);
 void ConversionError(char *fmt, ...);
 const char *GetConversionError(void);

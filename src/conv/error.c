@@ -19,7 +19,7 @@
 static bool have_error;
 static char conversion_error[128];
 
-void ResetConversionErrors(void)
+void ClearConversionErrors(void)
 {
 	strncpy(conversion_error, "", sizeof(conversion_error));
 	have_error = false;

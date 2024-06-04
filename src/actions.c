@@ -37,6 +37,8 @@ static void PerformCopy(struct directory_pane *active_pane,
 	struct file_set result = EMPTY_FILE_SET;
 	char buf[32];
 
+	ClearConversionErrors();
+
 	// When we do an export or import, we create the new files/lumps
 	// in the destination, and then switch to the other pane where they
 	// are highlighted. The import/export functions both populate a
