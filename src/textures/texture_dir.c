@@ -96,12 +96,21 @@ static void TextureDirRename(void *_dir, struct directory_entry *entry,
 {
 	struct texture_dir *dir = _dir;
 	unsigned int idx = entry - dir->dir.entries;
+	char *namedest;
+	int i;
 
 	if (idx >= dir->txs->num_textures) {
 		return;
 	}
 
-	strncpy(dir->txs->textures[idx]->name, new_name, 8);
+	namedest = dir->txs->textures[idx]->name;
+
+	for (i = 0; i < 8; i++) {
+		namedest[i] = toupper(new_name[i]);
+		if (namedest[i] == '\0') {
+			break;
+		}
+	}
 }
 
 static void TextureDirCommit(void *dir)
