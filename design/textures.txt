@@ -1,0 +1,41 @@
+## Texture editor VFS
+
+      Single-lump case:          Multi-lump/file case:
+* WAD / textures:
+  - WAD side:
+    - Rearrange                  Rearrange multiple                F2
+    - Rename                     ? Could be: regex rename          F6
+    - New (empty?) lump?         *                                 F7, Ins
+    - Delete                     Delete multiple LMPs              F8, Del
+
+  - Textures side:
+    - View texture               n/a                               Ent
+    - Copy to new texture lump in WAD   -- Same (multi)            F5
+    - Rename texture             n/a                               F6
+    - Make new texture           ?                                 F7
+    - Delete texture             Delete multiple textures          F8, Del
+
+* Dir / textures:
+  - Dir side
+    - Make WAD                   New WAD containing selected lumps F3
+    - Update from config                                           F4
+    - Import textures config     n/a                               F5
+    - Rename file                n/a                               F6
+    - Make directory             n/a                               F7, Ins
+    - Delete file                Delete files                      F8, Del
+
+  - Textures side:
+    - View texture               n/a                               Ent
+    - Export textures            Export multiple textures          F5
+    - Rename texture             n/a                               F6
+    - Make new texture           n/a                               F7, Ins
+    - Delete texture             Delete multiple textures          F8, Del
+
+* Textures / textures:
+  - Either:
+    - View texture               n/a                               Ent
+    - Update textures            Update multiple                   F4
+    - Copy texture               Copy multiple textures            F5
+    - Rename texture             n/a                               F6, Alt-R
+    - Make new texture           n/a                               F7
+    - Delete texture             Delete multiple textures          F8, Del
