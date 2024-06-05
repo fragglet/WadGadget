@@ -164,13 +164,14 @@ static char *ReadLine(uint8_t *buf, size_t buf_len, unsigned int *offset)
 }
 
 static int ScanLine(char *line, const char *fmt, char *name,
-                    int *x, int *y)
+                    int *x, int *y, int *token_cols, int *error_col)
 {
-	int nfields, len;
+	int nfields;
 
 	*x = 0;
 	*y = 0;
-	nfields = sscanf(line, fmt, name, &len, x, &len, y, &len);
+	nfields = sscanf(line, fmt, &token_cols[0], name, &token_cols[1], x,
+	                 &token_cols[2], y, &token_cols[3]);
 	if (nfields < 1) {
 		return 0;
 	}
@@ -180,12 +181,14 @@ static int ScanLine(char *line, const char *fmt, char *name,
 	name[9] = '\0';
 	if (strlen(name) > 8) {
 		ConversionError("Name contains more than 8 characters");
+		*error_col = token_cols[0] + 8;
 		return -1;
 	}
 
 	// Should be no junk left over on the end of line
-	if (len < strlen(line)) {
+	if (token_cols[nfields] < strlen(line)) {
 		ConversionError("Line contains trailing characters");
+		*error_col = token_cols[nfields];
 		return -1;
 	}
 
@@ -194,18 +197,32 @@ static int ScanLine(char *line, const char *fmt, char *name,
 
 enum parse_result { ERROR, NO_MATCH, MATCH };
 
-static enum parse_result MaybeAddTexture(struct textures *txs, char *line)
+static enum parse_result MaybeAddTexture(struct textures *txs, char *line,
+                                         int *error_col)
 {
 	struct texture *t;
+	int token_cols[4];
 	char namebuf[10];
 	int w, h, n;
 
-	n = ScanLine(line, "%9s%n %d%n %d%n", namebuf, &w, &h);
+	n = ScanLine(line, "%n%9s %n%d %n%d %n", namebuf, &w, &h,
+	             token_cols, error_col);
 	if (n < 0) {
 		return ERROR;
 	}
 	if (n < 3) {
 		return NO_MATCH;
+	}
+
+	if (w < 1) {
+		ConversionError("Texture must have positive width");
+		*error_col = token_cols[1];
+		return ERROR;
+	}
+	if (h < 1) {
+		ConversionError("Texture must have positive height");
+		*error_col = token_cols[2];
+		return ERROR;
 	}
 
 	t = TX_AllocTexture(0);
@@ -223,18 +240,16 @@ static enum parse_result MaybeAddTexture(struct textures *txs, char *line)
 }
 
 static enum parse_result MaybeAddPatch(struct textures *txs, char *line,
-                                       struct pnames *pnames)
+                                       struct pnames *pnames, int *error_col)
 {
 	char namebuf[10];
+	int token_cols[4];
 	struct texture **t;
 	struct patch p;
 	int x, y, n;
 
-	if (txs->num_textures <= 0) {
-		return NO_MATCH;
-	}
-
-	n = ScanLine(line, "* %9s%n %d%n %d%n", namebuf, &x, &y);
+	n = ScanLine(line, "* %n%9s %n%d %n%d %n", namebuf, &x, &y,
+	             token_cols, error_col);
 	if (n < 0) {
 		return ERROR;
 	}
@@ -243,6 +258,12 @@ static enum parse_result MaybeAddPatch(struct textures *txs, char *line,
 	// (X/Y offsets are assumed to be zero)
 	if (n < 1) {
 		return NO_MATCH;
+	}
+
+	if (txs->num_textures <= 0) {
+		ConversionError("Must start a texture definition first");
+		*error_col = 0;
+		return ERROR;
 	}
 
 	p.originx = x;
@@ -265,9 +286,9 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len,
                                            struct pnames *pnames)
 {
 	struct textures *result;
-	char *line = NULL;
+	char *line = NULL, *highlight = NULL;
 	unsigned int offset = 0;
-	int lineno = 0, m;
+	int lineno = 0, m, error_col;
 
 	result = calloc(1, sizeof(struct textures));
 
@@ -279,18 +300,19 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len,
 		}
 
 		++lineno;
+		error_col = -1;
 		if (strlen(line) == 0) {
 			continue;
 		}
 
-		m = MaybeAddPatch(result, line, pnames);
+		m = MaybeAddPatch(result, line, pnames, &error_col);
 		if (m == ERROR) {
 			goto fail;
 		} else if (m == MATCH) {
 			continue;
 		}
 
-		m = MaybeAddTexture(result, line);
+		m = MaybeAddTexture(result, line, &error_col);
 		if (m == ERROR) {
 			goto fail;
 		} else if (m == MATCH) {
@@ -306,9 +328,19 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len,
 	return result;
 
 fail:
-	ConversionError("Syntax error on line #%d of texture "
-	                "config:\n\n%s\n", lineno, line);
+	if (error_col >= 0) {
+		highlight = checked_calloc(error_col + 3, 1);
+		memset(highlight, ' ', error_col);
+		highlight[error_col] = '^';
+		highlight[error_col + 1] = '\n';
+		highlight[error_col + 2] = '\0';
+	} else {
+		highlight = checked_strdup("");
+	}
+	ConversionError("Syntax error on line #%d:\n\n%s\n%s",
+	                lineno, line, highlight);
 	free(line);
+	free(highlight);
 	TX_FreeTextures(result);
 	return NULL;
 }
@@ -345,7 +377,8 @@ static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
 		++lineno;
 		if (strlen(line) > 8) {
 			ConversionError("Patch name on line #%d exceeds 8 "
-			                "characters:\n\n%s", lineno, line);
+			                "characters:\n\n%s\n        ^",
+			                lineno, line);
 			TX_FreePnames(result);
 			return NULL;
 		} else if (strlen(line) > 0) {
