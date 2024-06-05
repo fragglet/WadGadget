@@ -769,11 +769,33 @@ const struct action reload_action = {
 	PerformReload,
 };
 
-static void NavigateNew(struct directory_pane *active_pane,
+static void NavigateNew(struct directory_pane *curr_pane,
+                        struct directory *new_dir)
+{
+	struct directory_pane *new_pane;
+	struct directory_entry *ent;
+
+	ent = UI_DirectoryPaneEntry(curr_pane);
+	new_pane = UI_NewDirectoryPane(NULL, new_dir);
+
+	// Select subfolder we just navigated out of?
+	if (ent == VFS_PARENT_DIRECTORY) {
+		const char *old_path = curr_pane->dir->path;
+		UI_DirectoryPaneSearch(new_pane, PathBaseName(old_path));
+	}
+
+	if (new_pane != NULL) {
+		// We're closing the current pane; if it is a WAD we might
+		// want to clean out any junk data we left behind.
+		CheckCompactWad(curr_pane);
+		ReplacePane(curr_pane, new_pane);
+		SwitchToPane(new_pane);
+	}
+}
+
+static void PerformView(struct directory_pane *active_pane,
                         struct directory_pane *other_pane)
 {
-	struct directory_pane *new_pane = NULL;
-	struct directory *new_dir;
 	struct directory_entry *ent;
 	char *path;
 	bool same_wad;
@@ -790,39 +812,15 @@ static void NavigateNew(struct directory_pane *active_pane,
 		return;
 	}
 
-	new_dir = VFS_OpenDirByEntry(active_pane->dir, ent);
-	if (new_dir == NULL) {
-		UI_MessageBox("Error when opening '%s'.", ent->name);
-		return;
-	}
-
-	new_pane = UI_NewDirectoryPane(NULL, new_dir);
-
-	// Select subfolder we just navigated out of?
-	if (ent == VFS_PARENT_DIRECTORY) {
-		const char *old_path = active_pane->dir->path;
-		UI_DirectoryPaneSearch(new_pane, PathBaseName(old_path));
-	}
-
-	if (new_pane != NULL) {
-		// We're closing the current pane; if it is a WAD we might
-		// want to clean out any junk data we left behind.
-		CheckCompactWad(active_pane);
-		ReplacePane(active_pane, new_pane);
-		SwitchToPane(new_pane);
-	}
-}
-
-static void PerformView(struct directory_pane *active_pane,
-                        struct directory_pane *other_pane)
-{
-	struct directory_entry *ent;
-
-	ent = UI_DirectoryPaneEntry(active_pane);
-
 	// Change directory?
-	if (ent->type == FILE_TYPE_WAD || ent->type == FILE_TYPE_DIR) {
-		NavigateNew(active_pane, other_pane);
+	if (ent->type == FILE_TYPE_DIR || ent->type == FILE_TYPE_WAD) {
+		struct directory *new_dir =
+			VFS_OpenDirByEntry(active_pane->dir, ent);
+		if (new_dir == NULL) {
+			UI_MessageBox("Error when opening '%s'.", ent->name);
+			return;
+		}
+		NavigateNew(active_pane, new_dir);
 		return;
 	}
 
