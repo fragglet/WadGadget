@@ -169,7 +169,7 @@ static bool TextureDirSave(struct texture_dir *dir)
 	W_CommitChanges(wf);
 	VFS_Refresh(dir->parent_dir);
 
-	UI_ShowNotice("TEXTURE1 lump updated.");
+	UI_ShowNotice("%s lump updated.", ent->name);
 
 	return true;
 }
