@@ -20,6 +20,7 @@
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "stringlib.h"
+#include "ui/dialog.h"
 
 #include "textures/textures.h"
 
@@ -129,10 +130,45 @@ static void TextureDirDescribe(char *buf, size_t buf_len, int cnt)
 	}
 }
 
+static bool TextureDirSave(struct texture_dir *dir)
+{
+	struct directory_entry *ent;
+	struct wad_file *wf;
+	VFILE *out, *texture_out;
+	unsigned int idx;
+
+	ent = VFS_EntryBySerial(dir->parent_dir, dir->lump_serial);
+	if (ent == NULL) {
+		return false;
+	}
+
+	texture_out = TX_MarshalTextures(dir->txs);
+	if (texture_out == NULL) {
+		return false;
+	}
+
+	wf = VFS_WadFile(dir->parent_dir);
+	assert(wf != NULL);
+	idx = ent - dir->parent_dir->entries;
+	out = W_OpenLumpRewrite(wf, idx);
+	if (out == NULL) {
+		vfclose(texture_out);
+		return false;
+	}
+
+	vfcopy(texture_out, out);
+	vfclose(texture_out);
+	vfclose(out);
+	W_CommitChanges(wf);
+
+	return true;
+}
+
 static void TextureDirFree(void *_dir)
 {
 	struct texture_dir *dir = _dir;
 
+	TextureDirSave(dir);
 	if (dir->txs != NULL) {
 		TX_FreeTextures(dir->txs);
 	}
