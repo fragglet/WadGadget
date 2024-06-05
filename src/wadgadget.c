@@ -236,6 +236,8 @@ static const struct action *dir_to_dir[] = {
 	NULL,
 };
 
+static const struct action *no_actions[] = {NULL};
+
 static const struct action *common_actions[] = {
 	&rename_action,
 	&delete_action,
@@ -254,13 +256,15 @@ static const struct action *common_actions[] = {
 	NULL,
 };
 
-static const struct action **type_actions[2] = {
-	dir_actions, wad_actions,
+static const struct action **type_actions[NUM_DIR_FILE_TYPES] = {
+	dir_actions, wad_actions, no_actions,
 };
 
-static const struct action **action_lists[2][2] = {
-	{dir_to_dir, dir_to_wad},
-	{wad_to_dir, wad_to_wad},
+static const struct action
+    **action_lists[NUM_DIR_FILE_TYPES][NUM_DIR_FILE_TYPES] = {
+	{dir_to_dir, dir_to_wad, no_actions},
+	{wad_to_dir, wad_to_wad, no_actions},
+	{no_actions, no_actions, no_actions},
 };
 
 static void AddActionList(const struct action **list, int *idx)
@@ -279,12 +283,13 @@ static void BuildActionsList(void)
 	int other = panes[!active_pane]->dir->type;
 	int idx = 0;
 
+	assert(active < NUM_DIR_FILE_TYPES);
+	assert(other < NUM_DIR_FILE_TYPES);
+
 	memset(actions, 0, sizeof(struct action *) * MAX_KEY_BINDINGS);
 
-	AddActionList(type_actions[active == FILE_TYPE_WAD], &idx);
-	AddActionList(
-		action_lists[active == FILE_TYPE_WAD][other == FILE_TYPE_WAD],
-		&idx);
+	AddActionList(type_actions[active], &idx);
+	AddActionList(action_lists[active][other], &idx);
 	AddActionList(common_actions, &idx);
 	actions[idx] = NULL;
 }
@@ -408,6 +413,17 @@ static void DrawInfoPane(void *p)
 		UI_PrintMultilineString(pane->window, 1, 2,
 		    "Directory");
 		break;
+
+	case FILE_TYPE_TEXTURE_LIST:
+		UI_PrintMultilineString(pane->window, 1, 2, "Texture list");
+		break;
+
+	case FILE_TYPE_TEXTURE:
+		UI_PrintMultilineString(pane->window, 1, 2, "Texture");
+		break;
+
+	case NUM_DIR_FILE_TYPES:
+		assert(0);
 	}
 }
 

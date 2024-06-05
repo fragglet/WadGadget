@@ -47,7 +47,7 @@ static void TextureDirRefresh(void *_dir)
 
 	for (i = 0; i < dir->txs->num_textures; i++) {
 		ent = &dir->dir.entries[i];
-		ent->type = FILE_TYPE_FILE;  // TODO: _TEXTURE
+		ent->type = FILE_TYPE_TEXTURE;
 		ent->name = checked_calloc(9, 1);
 		memcpy(ent->name, dir->txs->textures[i]->name, 8);
 		ent->name[8] = '\0';
@@ -171,7 +171,7 @@ struct directory *TX_OpenTextureDir(struct directory *parent,
 	struct texture_dir *dir =
 		checked_calloc(1, sizeof(struct texture_dir));
 
-	dir->dir.type = FILE_TYPE_DIR;  // TODO: texture list
+	dir->dir.type = FILE_TYPE_TEXTURE_LIST;
 	dir->dir.path = StringJoin("/", parent->path, ent->name, NULL);
 	dir->dir.refcount = 1;
 	dir->dir.entries = NULL;
