@@ -315,12 +315,54 @@ static void TempCleanup(struct temp_edit_context *ctx)
 	// ctx->filename will be freed by OpenEntry().
 }
 
+static const char *text_file_extensions[] = {
+	".txt", ".c", ".h", ".cfg", ".ini",
+	".deh", ".bex", ".hhe", ".seh",  // Dehacked and variants
+};
+
+static char *GetOpenCommand(const char *filename)
+{
+	char *editor = getenv("EDITOR");
+	const char *extn;
+
+	// For files with text file extensions, always respect the standard
+	// Unix EDITOR environment variable. This should always work even if
+	// xdg-utils isn't installed.
+	if (editor != NULL) {
+		int i;
+
+		for (i = 0; i < arrlen(text_file_extensions); i++) {
+			extn = text_file_extensions[i];
+			if (StringHasSuffix(filename, extn)) {
+				return editor;
+			}
+		}
+	}
+
+#ifdef __APPLE__
+	return "open";
+#else
+	{
+		static bool have_xdg_utils = false;
+		have_xdg_utils = have_xdg_utils || CheckHaveXdgUtils();
+
+		if (!have_xdg_utils) {
+			TF_SetCursesModes();
+			UI_MessageBox("Sorry, can't open files; xdg-open "
+			              "command not found.\nYou should install "
+			              "the xdg-utils package.");
+			return NULL;
+		}
+	}
+	return "xdg-open";
+#endif
+}
+
 void OpenDirent(struct directory *dir, struct directory_entry *ent)
 {
 	struct temp_edit_context temp_ctx = {NULL};
-	bool edit_success = false;
+	bool displayed, edit_success = true;
 	char *argv[3];
-	int result;
 
 	if (ent->type == FILE_TYPE_FILE) {
 		argv[1] = VFS_EntryPath(dir, ent);
@@ -335,45 +377,28 @@ try_again:
 	// Temporarily suspend curses until the subprogram returns.
 	TF_SuspendCursesMode();
 
-	result = 1;
+	displayed = false;
 
 	if (StringHasSuffix(argv[1], ".png")) {
 		SIXEL_ClearAndPrint("Contents of '%s':\n", ent->name);
-		result = !SIXEL_DisplayImage(argv[1]);
+		displayed = SIXEL_DisplayImage(argv[1]);
 	} else if (StringHasSuffix(argv[1], ".lmp")
 	        && ent->size == ENDOOM_SIZE) {
 		ENDOOM_ShowFile(argv[1]);
-		result = 0;
+		displayed = true;
 	}
 
-#ifdef __APPLE__
-	argv[0] = "open";
-#else
-	{
-		static bool have_xdg_utils = false;
-		have_xdg_utils = have_xdg_utils || CheckHaveXdgUtils();
-
-		if (result != 0 && !have_xdg_utils) {
-			TF_SetCursesModes();
-			UI_MessageBox("Sorry, can't open files; xdg-open "
-			              "command not found.\nYou should install "
-			              "the xdg-utils package.");
-			result = 0;
-		}
-	}
-	argv[0] = "xdg-open";
-#endif
+	argv[0] = GetOpenCommand(argv[1]);
 	argv[2] = NULL;
 
-	if (result != 0) {
+	if (!displayed && argv[0] != NULL) {
 		printf("Opening %s '%s'...\n"
 		       "Waiting until program terminates.\n"
 		       "(^Z = stop waiting, continue in background)\n",
 		       ent->type == FILE_TYPE_LUMP ? "lump" : "file",
 		       ent->name);
 
-		result = _spawnv(_P_WAIT, argv[0], argv);
-		edit_success = result == 0;
+		edit_success = _spawnv(_P_WAIT, argv[0], argv) == 0;
 	}
 
 	// Restore the curses display which may have been trashed if another
@@ -388,7 +413,7 @@ try_again:
 	TempCleanup(&temp_ctx);
 	free(argv[1]);
 
-	if (result != 0) {
+	if (!edit_success) {
 		UI_MessageBox("Failed executing command to open file,\n"
 		              "or program exited with an error.");
 	}
