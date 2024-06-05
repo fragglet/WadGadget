@@ -46,7 +46,7 @@ extern const struct action redraw_screen_action;
 extern const struct action reload_action;
 
 extern const struct action rearrange_action;
-extern const struct action sort_lumps_action;
+extern const struct action sort_entries_action;
 extern const struct action new_lump_action;
 extern const struct action mkdir_action;
 extern const struct action update_action;

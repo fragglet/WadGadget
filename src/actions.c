@@ -308,7 +308,7 @@ static unsigned int *IndexesForTagged(struct directory *dir,
 	unsigned int *result;
 	int i;
 
-	// Build array of lump indexes for each tagged item.
+	// Build array of indexes into dir->entries[] for each tagged item.
 	result = checked_calloc(set->num_entries, sizeof(int));
 
 	i = 0;
@@ -335,58 +335,99 @@ static bool IndexesAreContiguous(unsigned int *indexes, size_t cnt)
 	return true;
 }
 
-static void MoveLumps(struct directory_pane *p, struct wad_file *wf)
+// MakeMoveMapping returns an array containing an index for each entry in
+// vfs->entries that indicates the new location that entry should be
+// swapped into.
+static int *MakeMoveMapping(struct directory *dir, struct file_set *fs,
+                            unsigned int *move_start)
 {
-	struct wad_file_entry *dir;
-	int i, j, numlumps;
-	int insert_start, insert_end, insert_point;
+	struct directory_entry *ent;
+	int *result = checked_calloc(dir->num_entries, sizeof(int));
+	int i, j, adj, move_end;
 
-	insert_start = UI_DirectoryPaneSelected(p) + 1;
-	insert_end = insert_start + p->tagged.num_entries;
-	insert_point = insert_start;
+	for (i = 0; i < dir->num_entries; i++) {
+		result[i] = -1;
+	}
 
-	// TODO: Should this be done through VFS?
-	W_AddEntries(wf, insert_start, p->tagged.num_entries);
-	dir = W_GetDirectory(wf);
-	numlumps = W_NumLumps(wf);
+	// All entries before move_start will be moved out, so move_start
+	// may effectively move backward in the array. Figure out
+	// how much to adjust by.
+	i = 0;
+	adj = 0;
+	while ((ent = VFS_IterateSet(dir, fs, &i)) != NULL) {
+		unsigned int curr_index = ent - dir->entries;
 
-	for (i = 0, j = 0; i < numlumps; i++) {
-		if ((i < insert_start || i >= insert_end)
-		 && VFS_SetHas(&p->tagged, dir[i].serial_no)) {
-			// This is a lump we want to move. Swap it into its
-			// new position.
-			W_SwapEntries(wf, i, insert_point);
-			++insert_point;
-			// There is now an empty "unnamed" lump in the old
-			// position, but it will be replaced the code below
-			// that moves lumps back.
-		} else {
-			W_SwapEntries(wf, i, j);
-			if (i == insert_point) {
-				insert_point = j;
-			}
-			j++;
+		if (curr_index >= *move_start) {
+			break;
+		}
+		adj++;
+	}
+	*move_start -= adj;
+
+	// Now go through all tagged entries and assign their new
+	// positions.
+	i = 0;
+	j = *move_start;
+	move_end = *move_start;
+	while ((ent = VFS_IterateSet(dir, fs, &i)) != NULL) {
+		unsigned int curr_index = ent - dir->entries;
+
+		result[curr_index] = j;
+		++j;
+		++move_end;
+	}
+
+	// Assign all the others to the gaps.
+	j = 0;
+	for (i = 0; i < dir->num_entries; i++) {
+		if (result[i] != -1) {
+			continue;
+		}
+		while (j >= *move_start && j < move_end) {
+			++j;
+		}
+		result[i] = j;
+		++j;
+	}
+
+	return result;
+}
+
+// TODO: This should be a VFS function.
+static void MoveEntries(struct directory *dir, struct file_set *fs,
+                        unsigned int *insert_start)
+{
+	int *new_index;
+	int i, j;
+
+	new_index = MakeMoveMapping(dir, fs, insert_start);
+
+	// Go through all entries. Each forms a chain of swaps to be
+	// followed until we end up back at the start.
+	for (i = 0; i < dir->num_entries; i++) {
+		j = new_index[i];
+		while (j != i) {
+			int next_j;
+			VFS_SwapEntries(dir, i, j);
+			next_j = new_index[j];
+			// Don't swap again.
+			new_index[j] = j;
+			j = next_j;
 		}
 	}
 
-	// All of the empty unnamed lumps are now at the end of the directory,
-	// and we can delete them.
-	W_DeleteEntries(wf, numlumps - p->tagged.num_entries,
-	                p->tagged.num_entries);
-	W_CommitChanges(wf);
-
-	VFS_Refresh(p->dir);
-	UI_DirectoryPaneSelectEntry(p, &p->dir->entries[insert_point]);
-
-	UI_ShowNotice("%d lumps moved.", p->tagged.num_entries);
+	VFS_CommitChanges(dir);
+	VFS_Refresh(dir);
+	free(new_index);
 }
 
 static void PerformRearrange(struct directory_pane *active_pane,
                              struct directory_pane *other_pane)
 {
-	unsigned int *indexes;
+	struct directory *dir = active_pane->dir;
+	char descr[16];
+	unsigned int *indexes, insert_point;
 	bool noop;
-	int insert_point;
 	size_t cnt;
 
 	if (active_pane->tagged.num_entries == 0) {
@@ -394,18 +435,22 @@ static void PerformRearrange(struct directory_pane *active_pane,
 		return;
 	}
 
-	indexes = IndexesForTagged(active_pane->dir, &active_pane->tagged,
-	                           &cnt);
+	indexes = IndexesForTagged(dir, &active_pane->tagged, &cnt);
 	insert_point = UI_DirectoryPaneSelected(active_pane) + 1;
 	noop = IndexesAreContiguous(indexes, cnt)
 	    && insert_point >= indexes[0]
 	    && insert_point <= indexes[cnt - 1] + 1;
 	free(indexes);
 
+	VFS_DescribeSet(dir, &active_pane->tagged, descr, sizeof(descr));
+
 	if (noop) {
 		UI_ShowNotice("They're all in that position already!");
 	} else {
-		MoveLumps(active_pane, VFS_WadFile(active_pane->dir));
+		MoveEntries(dir, &active_pane->tagged, &insert_point);
+		UI_DirectoryPaneSelectEntry(active_pane,
+		                            &dir->entries[insert_point]);
+		UI_ShowNotice("%s moved.", descr);
 	}
 }
 
@@ -414,12 +459,12 @@ const struct action rearrange_action = {
 	PerformRearrange,
 };
 
-static int CompareLumps(struct wad_file_entry *dir, unsigned int i1,
-                        unsigned int i2)
+static int CompareEntries(struct directory *dir, unsigned int i1,
+                          unsigned int i2)
 {
-	int cmp = strncmp(dir[i1].name, dir[i2].name, 8);
+	int cmp = strncmp(dir->entries[i1].name, dir->entries[i2].name, 8);
 
-	// Fallback comparison preserves existing lump order.
+	// Fallback comparison preserves existing order.
 	if (cmp == 0) {
 		return i1 - i2;
 	} else {
@@ -427,8 +472,9 @@ static int CompareLumps(struct wad_file_entry *dir, unsigned int i1,
 	}
 }
 
-static void SortLumps(struct wad_file *wf, struct wad_file_entry *dir,
-                      unsigned int *indexes, unsigned int count)
+// TODO: This should be a VFS function.
+static void SortEntries(struct directory *dir, unsigned int *indexes,
+                        unsigned int count)
 {
 	unsigned int i, pivot;
 
@@ -439,29 +485,29 @@ static void SortLumps(struct wad_file *wf, struct wad_file_entry *dir,
 	// Pick pivot from middle (to avoid degenerate case if already sorted,
 	// and swap it to the start.
 	pivot = count / 2;
-	W_SwapEntries(wf, indexes[pivot], indexes[0]);
+	VFS_SwapEntries(dir, indexes[pivot], indexes[0]);
 	pivot = 0;
 
 	for (i = 1; i < count; i++) {
-		if (CompareLumps(dir, indexes[i], indexes[pivot]) < 0) {
+		if (CompareEntries(dir, indexes[i], indexes[pivot]) < 0) {
 			// This belongs before the pivot.
-			W_SwapEntries(wf, indexes[i], indexes[pivot]);
+			VFS_SwapEntries(dir, indexes[i], indexes[pivot]);
 			++pivot;
 			// Swap back pivot into place
-			W_SwapEntries(wf, indexes[i], indexes[pivot]);
+			VFS_SwapEntries(dir, indexes[i], indexes[pivot]);
 		}
 	}
 
-	SortLumps(wf, dir, indexes, pivot);
-	SortLumps(wf, dir, indexes + pivot + 1, count - pivot - 1);
+	SortEntries(dir, indexes, pivot);
+	SortEntries(dir, indexes + pivot + 1, count - pivot - 1);
 }
 
-static void PerformSortLumps(struct directory_pane *active_pane,
-                             struct directory_pane *other_pane)
+static void PerformSortEntries(struct directory_pane *active_pane,
+                               struct directory_pane *other_pane)
 {
-	struct wad_file *wf;
-	struct wad_file_entry *dir;
+	struct directory *dir = active_pane->dir;
 	unsigned int *indexes;
+	char descr[16];
 	int i;
 	size_t num_tagged = active_pane->tagged.num_entries;
 
@@ -470,17 +516,13 @@ static void PerformSortLumps(struct directory_pane *active_pane,
 		return;
 	}
 
-	wf = VFS_WadFile(active_pane->dir);
-	dir = W_GetDirectory(wf);
-
-	indexes = IndexesForTagged(active_pane->dir, &active_pane->tagged,
-	                           &num_tagged);
+	indexes = IndexesForTagged(dir, &active_pane->tagged, &num_tagged);
 
 	// Sanity check; it usually doesn't make sense to sort if they're
 	// not a contiguous sequence.
 	if (!IndexesAreContiguous(indexes, num_tagged)
-	 && !UI_ConfirmDialogBox("Sort lumps", "Continue", "Cancel",
-	                         "Tagged lumps are not contiguous.\n"
+	 && !UI_ConfirmDialogBox("Sort", "Continue", "Cancel",
+	                         "Tagged items are not contiguous.\n"
 	                         "Continue?")) {
 		free(indexes);
 		return;
@@ -488,36 +530,38 @@ static void PerformSortLumps(struct directory_pane *active_pane,
 
 	// Check if already sorted.
 	for (i = 0; i < num_tagged - 1; i++) {
-		if (CompareLumps(dir, indexes[i], indexes[i + 1]) > 0) {
+		if (CompareEntries(dir, indexes[i], indexes[i + 1]) > 0) {
 			break;
 		}
 	}
 
+	VFS_DescribeSet(dir, &active_pane->tagged, descr, sizeof(descr));
+
 	if (i < num_tagged - 1) {
-		SortLumps(wf, dir, indexes, num_tagged);
-		UI_ShowNotice("%d lumps sorted.", num_tagged);
-	} else if (UI_ConfirmDialogBox("Sort lumps", "Sort", "Cancel",
-	                               "Lumps already sorted.\n"
-	                               "Sort into reverse order?")) {
-		// Reverse sort doesn't even require using SortLumps(). The
+		SortEntries(dir, indexes, num_tagged);
+		UI_ShowNotice("%s sorted.", descr);
+	} else if (UI_ConfirmDialogBox("Sort", "Sort", "Cancel",
+	                               "%s already sorted.\nSort into "
+	                               "reverse order?", descr)) {
+		// Reverse sort doesn't even require using SortEntries(). The
 		// lumps are already sorted, so we just need to reverse
 		// them.
 		for (i = 0; i < num_tagged / 2; i++) {
-			W_SwapEntries(wf, indexes[i],
-			              indexes[num_tagged - i - 1]);
+			VFS_SwapEntries(dir, indexes[i],
+			                indexes[num_tagged - i - 1]);
 		}
-		UI_ShowNotice("%d lumps reverse sorted.", num_tagged);
+		UI_ShowNotice("%s reverse sorted.", descr);
 	}
 
 	free(indexes);
 
-	W_CommitChanges(wf);
+	VFS_CommitChanges(dir);
 	VFS_Refresh(active_pane->dir);
 }
 
-const struct action sort_lumps_action = {
-	SHIFT_KEY_F(2), ']', "Sort", "Sort lumps",
-	PerformSortLumps,
+const struct action sort_entries_action = {
+	SHIFT_KEY_F(2), ']', "Sort", "Sort",
+	PerformSortEntries,
 };
 
 static void PerformNewLump(struct directory_pane *active_pane,

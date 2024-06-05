@@ -199,7 +199,7 @@ static const struct action *wad_actions[] = {
 	&edit_action,
 	&undo_action,
 	&redo_action,
-	&sort_lumps_action,
+	&sort_entries_action,
 	NULL,
 };
 
