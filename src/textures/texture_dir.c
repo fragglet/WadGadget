@@ -20,7 +20,7 @@
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "stringlib.h"
-#include "ui/dialog.h"
+#include "ui/ui.h"
 
 #include "textures/textures.h"
 
@@ -168,6 +168,8 @@ static bool TextureDirSave(struct texture_dir *dir)
 	vfclose(out);
 	W_CommitChanges(wf);
 	VFS_Refresh(dir->parent_dir);
+
+	UI_ShowNotice("TEXTURE1 lump updated.");
 
 	return true;
 }
