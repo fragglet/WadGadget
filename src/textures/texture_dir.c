@@ -167,6 +167,7 @@ static bool TextureDirSave(struct texture_dir *dir)
 	vfclose(texture_out);
 	vfclose(out);
 	W_CommitChanges(wf);
+	VFS_Refresh(dir->parent_dir);
 
 	return true;
 }
