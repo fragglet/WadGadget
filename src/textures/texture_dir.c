@@ -38,21 +38,8 @@ static void TextureDirRefresh(void *_dir)
 	struct texture_dir *dir = _dir;
 	unsigned int i;
 	struct directory_entry *ent;
-	VFILE *input;
 
 	VFS_FreeEntries(&dir->dir);
-
-	ent = VFS_EntryBySerial(dir->parent_dir, dir->lump_serial);
-	if (ent == NULL) {
-		return;
-	}
-
-	input = VFS_OpenByEntry(dir->parent_dir, ent);
-	if (input == NULL) {
-		return;
-	}
-
-	dir->txs = TX_UnmarshalTextures(input);
 
 	dir->dir.num_entries = dir->txs->num_textures;
 	dir->dir.entries = checked_calloc(
@@ -150,10 +137,30 @@ struct directory_funcs texture_dir_funcs = {
 	TextureDirFree,
 };
 
+static bool TextureDirLoad(struct texture_dir *dir)
+{
+	struct directory_entry *ent;
+	VFILE *input;
+
+	ent = VFS_EntryBySerial(dir->parent_dir, dir->lump_serial);
+	if (ent == NULL) {
+		return false;
+	}
+
+	input = VFS_OpenByEntry(dir->parent_dir, ent);
+	if (input == NULL) {
+		return false;
+	}
+
+	dir->txs = TX_UnmarshalTextures(input);
+	return dir->txs != NULL;
+}
+
 struct directory *TX_OpenTextureDir(struct directory *parent,
                                     struct directory_entry *ent)
 {
-	struct texture_dir *dir = calloc(1, sizeof(struct texture_dir));
+	struct texture_dir *dir =
+		checked_calloc(1, sizeof(struct texture_dir));
 
 	dir->dir.type = FILE_TYPE_DIR;  // TODO: texture list
 	dir->dir.path = StringJoin("/", parent->path, ent->name, NULL);
@@ -164,9 +171,14 @@ struct directory *TX_OpenTextureDir(struct directory *parent,
 
 	dir->parent_dir = parent;
 	dir->lump_serial = ent->serial_no;
-	VFS_DirectoryRef(dir->parent_dir);
+
+	if (!TextureDirLoad(dir)) {
+		free(dir);
+		return NULL;
+	}
 
 	TextureDirRefresh(dir);
+	VFS_DirectoryRef(dir->parent_dir);
 
 	return &dir->dir;
 }
