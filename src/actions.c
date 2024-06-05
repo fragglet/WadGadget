@@ -827,10 +827,12 @@ static void PerformView(struct directory_pane *active_pane,
 
 	if (ent->type == FILE_TYPE_LUMP
 	 && StringHasPrefix(ent->name, "TEXTURE")) {
-		struct directory *new_dir =
-			TX_OpenTextureDir(active_pane->dir, ent);
+		struct directory *new_dir;
+		ClearConversionErrors();
+		new_dir = TX_OpenTextureDir(active_pane->dir, ent);
 		if (new_dir == NULL) {
-			UI_MessageBox("Error opening texture directory.");
+			UI_MessageBox("Error opening texture directory:\n%s",
+			              GetConversionError());
 			return;
 		}
 		NavigateNew(active_pane, new_dir);

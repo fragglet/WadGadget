@@ -16,6 +16,7 @@
 #include <assert.h>
 
 #include "common.h"
+#include "conv/error.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "stringlib.h"
@@ -27,6 +28,7 @@
 struct texture_dir {
 	struct directory dir;
 	struct textures *txs;
+	struct pnames *pn;
 
 	// Parent directory; always a WAD file.
 	struct directory *parent_dir;
@@ -131,7 +133,12 @@ static void TextureDirFree(void *_dir)
 {
 	struct texture_dir *dir = _dir;
 
-	TX_FreeTextures(dir->txs);
+	if (dir->txs != NULL) {
+		TX_FreeTextures(dir->txs);
+	}
+	if (dir->pn != NULL) {
+		TX_FreePnames(dir->pn);
+	}
 	VFS_DirectoryUnref(dir->parent_dir);
 }
 
@@ -165,6 +172,32 @@ static bool TextureDirLoad(struct texture_dir *dir)
 	return dir->txs != NULL;
 }
 
+static bool LoadPnames(struct texture_dir *dir)
+{
+	VFILE *input;
+	struct directory_entry *ent =
+		VFS_EntryByName(dir->parent_dir, "PNAMES");
+
+	if (ent == NULL) {
+		ConversionError("WAD does not contain a PNAMES lump.");
+		return false;
+	}
+
+	input = VFS_OpenByEntry(dir->parent_dir, ent);
+	if (input == NULL) {
+		ConversionError("Failed to open PNAMES lump.");
+		return false;
+	}
+
+	dir->pn = TX_UnmarshalPnames(input);
+	if (input == NULL) {
+		ConversionError("Failed to unmarshal PNAMES");
+		return false;
+	}
+
+	return true;
+}
+
 struct directory *TX_OpenTextureDir(struct directory *parent,
                                     struct directory_entry *ent)
 {
@@ -179,15 +212,15 @@ struct directory *TX_OpenTextureDir(struct directory *parent,
 	dir->dir.directory_funcs = &texture_dir_funcs;
 
 	dir->parent_dir = parent;
+	VFS_DirectoryRef(dir->parent_dir);
 	dir->lump_serial = ent->serial_no;
 
-	if (!TextureDirLoad(dir)) {
-		free(dir);
+	if (!TextureDirLoad(dir) || !LoadPnames(dir)) {
+		TextureDirFree(dir);
 		return NULL;
 	}
 
 	TextureDirRefresh(dir);
-	VFS_DirectoryRef(dir->parent_dir);
 
 	return &dir->dir;
 }
