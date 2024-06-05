@@ -837,6 +837,11 @@ static void PerformView(struct directory_pane *active_pane,
 		return;
 	}
 
+	if (ent->type == FILE_TYPE_TEXTURE) {
+		// TODO: Open texture editor
+		return;
+	}
+
 	OpenDirent(active_pane->dir, ent);
 }
 
