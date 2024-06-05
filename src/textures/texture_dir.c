@@ -92,6 +92,7 @@ static void TextureDirRemove(void *_dir, struct directory_entry *entry)
 	memmove(&dir->txs->serial_nos[idx], &dir->txs->serial_nos[idx + 1],
 	        (dir->dir.num_entries - idx - 1) * sizeof(uint64_t));
 	--dir->txs->num_textures;
+	dir->txs->modified = true;
 }
 
 static void TextureDirRename(void *_dir, struct directory_entry *entry,
@@ -114,6 +115,8 @@ static void TextureDirRename(void *_dir, struct directory_entry *entry,
 			break;
 		}
 	}
+
+	dir->txs->modified = true;
 }
 
 static void TextureDirCommit(void *dir)
@@ -136,6 +139,10 @@ static bool TextureDirSave(struct texture_dir *dir)
 	struct wad_file *wf;
 	VFILE *out, *texture_out;
 	unsigned int idx;
+
+	if (!dir->txs->modified) {
+		return true;
+	}
 
 	ent = VFS_EntryBySerial(dir->parent_dir, dir->lump_serial);
 	if (ent == NULL) {
