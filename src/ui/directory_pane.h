@@ -21,8 +21,7 @@ struct directory_pane {
 	struct file_set tagged;
 };
 
-enum file_type UI_DirectoryPaneEntryType(struct directory_pane *p);
-char *UI_DirectoryPaneEntryPath(struct directory_pane *p);
+struct directory_entry *UI_DirectoryPaneEntry(struct directory_pane *p);
 void UI_DirectoryPaneKeypress(void *p, int key);
 void UI_DirectoryPaneFree(struct directory_pane *p);
 void UI_DirectoryPaneSearch(void *p, const char *needle);

@@ -774,37 +774,35 @@ static void NavigateNew(struct directory_pane *active_pane,
 {
 	struct directory_pane *new_pane = NULL;
 	struct directory *new_dir;
-	const char *old_path;
+	struct directory_entry *ent;
 	char *path;
+	bool same_wad;
 
-	path = UI_DirectoryPaneEntryPath(active_pane);
+	ent = UI_DirectoryPaneEntry(active_pane);
+	path = VFS_EntryPath(active_pane->dir, ent);
 
 	// Don't allow the same WAD to be opened twice.
-	if (!strcmp(path, other_pane->dir->path)
-	 && other_pane->dir->type == FILE_TYPE_WAD) {
-		free(path);
+	same_wad = !strcmp(path, other_pane->dir->path)
+	        && other_pane->dir->type == FILE_TYPE_WAD;
+	free(path);
+	if (same_wad) {
 		SwitchToPane(other_pane);
 		return;
 	}
 
-	new_dir = VFS_OpenDir(path);
+	new_dir = VFS_OpenDirByEntry(active_pane->dir, ent);
 	if (new_dir == NULL) {
-		int idx = UI_DirectoryPaneSelected(active_pane);
-		free(path);
-		UI_MessageBox("Error when opening '%s'.",
-		              active_pane->dir->entries[idx].name);
+		UI_MessageBox("Error when opening '%s'.", ent->name);
 		return;
 	}
 
 	new_pane = UI_NewDirectoryPane(NULL, new_dir);
 
 	// Select subfolder we just navigated out of?
-	old_path = active_pane->dir->path;
-	if (strlen(path) < strlen(old_path)) {
+	if (ent == VFS_PARENT_DIRECTORY) {
+		const char *old_path = active_pane->dir->path;
 		UI_DirectoryPaneSearch(new_pane, PathBaseName(old_path));
 	}
-
-	free(path);
 
 	if (new_pane != NULL) {
 		// We're closing the current pane; if it is a WAD we might
@@ -818,23 +816,17 @@ static void NavigateNew(struct directory_pane *active_pane,
 static void PerformView(struct directory_pane *active_pane,
                         struct directory_pane *other_pane)
 {
-	enum file_type typ;
-	int selected;
+	struct directory_entry *ent;
 
-	typ = UI_DirectoryPaneEntryType(active_pane);
+	ent = UI_DirectoryPaneEntry(active_pane);
 
 	// Change directory?
-	if (typ == FILE_TYPE_WAD || typ == FILE_TYPE_DIR) {
+	if (ent->type == FILE_TYPE_WAD || ent->type == FILE_TYPE_DIR) {
 		NavigateNew(active_pane, other_pane);
 		return;
 	}
 
-	selected = UI_DirectoryPaneSelected(active_pane);
-	if (selected < 0) {
-		return;
-	}
-
-	OpenDirent(active_pane->dir, &active_pane->dir->entries[selected]);
+	OpenDirent(active_pane->dir, ent);
 }
 
 const struct action view_action = {
@@ -845,11 +837,10 @@ const struct action view_action = {
 static void PerformCompact(struct directory_pane *active_pane,
                            struct directory_pane *other_pane)
 {
-	const struct directory_entry *ent;
+	struct directory_entry *ent;
 	struct wad_file *wf;
 	bool already_open;
 	char *path;
-	enum file_type typ;
 	uint32_t junk_bytes;
 	int selected;
 
@@ -858,19 +849,17 @@ static void PerformCompact(struct directory_pane *active_pane,
 		return;
 	}
 
-	ent = &active_pane->dir->entries[selected];
-	typ = UI_DirectoryPaneEntryType(active_pane);
+	ent = UI_DirectoryPaneEntry(active_pane);
 
 	// Change directory?
-	if (typ != FILE_TYPE_WAD) {
+	if (ent->type != FILE_TYPE_WAD) {
 		UI_MessageBox("Can't compact; '%s' is not a WAD file.",
 		              ent->name);
 		return;
 	}
 
-	path = UI_DirectoryPaneEntryPath(active_pane);
-
 	// WAD file may be open in the other pane; don't open twice.
+	path = VFS_EntryPath(active_pane->dir, ent);
 	already_open = other_pane->dir->type == FILE_TYPE_WAD
 	            && !strcmp(path, other_pane->dir->path);
 	if (already_open) {

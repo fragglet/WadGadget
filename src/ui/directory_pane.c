@@ -273,26 +273,14 @@ static const struct list_pane_funcs directory_pane_funcs = {
 	NumEntries,
 };
 
-enum file_type UI_DirectoryPaneEntryType(struct directory_pane *p)
+struct directory_entry *UI_DirectoryPaneEntry(struct directory_pane *p)
 {
 	int selected = UI_DirectoryPaneSelected(p);
 
 	if (selected < 0) {
-		return FILE_TYPE_DIR;
+		return VFS_PARENT_DIRECTORY;
 	}
-	return p->dir->entries[selected].type;
-}
-
-// Get path to currently selected entry.
-char *UI_DirectoryPaneEntryPath(struct directory_pane *p)
-{
-	int selected = UI_DirectoryPaneSelected(p);
-
-	if (selected < 0) {
-		return PathDirName(p->dir->path);
-	} else {
-		return VFS_EntryPath(p->dir, &p->dir->entries[selected]);
-	}
+	return &p->dir->entries[selected];
 }
 
 static void DrawPane(void *p)

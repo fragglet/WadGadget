@@ -122,6 +122,38 @@ static VFILE *RealDirOpen(void *_dir, struct directory_entry *entry)
 	return vfwrapfile(fs);
 }
 
+struct directory *RealDirOpenDir(void *_dir, struct directory_entry *entry)
+{
+	struct directory *dir = _dir;
+	char *path;
+	struct directory *result = NULL;
+
+	if (entry == VFS_PARENT_DIRECTORY) {
+		path = PathDirName(dir->path);
+		result = VFS_OpenDir(path);
+		free(path);
+		return result;
+	}
+
+	path = VFS_EntryPath(dir, entry);
+
+	switch (entry->type) {
+	case FILE_TYPE_DIR:
+		result = VFS_OpenDir(path);
+		break;
+
+	case FILE_TYPE_WAD:
+		result = VFS_OpenWadAsDirectory(path);
+		break;
+
+	default:
+		break;
+	}
+
+	free(path);
+	return result;
+}
+
 static void RealDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct directory *dir = _dir;
@@ -153,12 +185,14 @@ static void RealDirDescribeEntries(char *buf, size_t buf_len, int cnt)
 static const struct directory_funcs realdir_funcs = {
 	RealDirRefresh,
 	RealDirOpen,
+	RealDirOpenDir,
 	RealDirRemove,
 	RealDirRename,
 	NULL,
 	RealDirDescribeEntries,
 	NULL,
 };
+
 struct directory *VFS_OpenDir(const char *path)
 {
 	struct directory *d;
@@ -179,27 +213,4 @@ struct directory *VFS_OpenDir(const char *path)
 	}
 
 	return d;
-}
-
-struct directory *VFS_OpenDirByEntry(struct directory *dir,
-                                     struct directory_entry *entry)
-{
-	char *path = VFS_EntryPath(dir, entry);
-	struct directory *result = NULL;
-
-	switch (entry->type) {
-	case FILE_TYPE_DIR:
-		result = VFS_OpenDir(path);
-		break;
-
-	case FILE_TYPE_WAD:
-		result = VFS_OpenWadAsDirectory(path);
-		break;
-
-	default:
-		break;
-	}
-
-	free(path);
-	return result;
 }

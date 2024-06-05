@@ -65,6 +65,20 @@ static VFILE *WadDirOpen(void *_dir, struct directory_entry *entry)
 	return W_OpenLump(dir->wad_file, lump_index);
 }
 
+struct directory *WadDirOpenDir(void *_dir, struct directory_entry *entry)
+{
+	struct wad_directory *dir = _dir;
+
+	if (entry == VFS_PARENT_DIRECTORY) {
+		char *path = PathDirName(dir->dir.path);
+		struct directory *result = VFS_OpenDir(path);
+		free(path);
+		return result;
+	} else {
+		return NULL;
+	}
+}
+
 static void WadDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct wad_directory *dir = _dir;
@@ -105,6 +119,7 @@ static void WadDirFree(void *_dir)
 static const struct directory_funcs waddir_funcs = {
 	WadDirectoryRefresh,
 	WadDirOpen,
+	WadDirOpenDir,
 	WadDirRemove,
 	WadDirRename,
 	WadDirCommit,

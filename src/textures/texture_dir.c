@@ -56,6 +56,12 @@ static VFILE *TextureDirOpen(void *dir, struct directory_entry *entry)
 	return NULL;
 }
 
+static struct directory *TextureDirOpenDir(void *dir,
+                                           struct directory_entry *ent)
+{
+	return NULL;
+}
+
 static void TextureDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct texture_dir *dir = _dir;
@@ -110,6 +116,7 @@ static void TextureDirFree(void *_dir)
 struct directory_funcs texture_dir_funcs = {
 	TextureDirRefresh,
 	TextureDirOpen,
+	TextureDirOpenDir,
 	TextureDirRemove,
 	TextureDirRename,
 	TextureDirCommit,

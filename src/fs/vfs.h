@@ -14,6 +14,8 @@
 #include "fs/vfile.h"
 #include "fs/wad_file.h"
 
+#define VFS_PARENT_DIRECTORY (&_vfs_parent_directory)
+
 enum file_type {
 	FILE_TYPE_FILE,
 	FILE_TYPE_DIR,
@@ -38,6 +40,8 @@ struct directory_entry {
 struct directory_funcs {
 	void (*refresh)(void *dir);
 	VFILE *(*open)(void *dir, struct directory_entry *entry);
+	struct directory *(*open_dir)(void *dir,
+	                              struct directory_entry *entry);
 	void (*remove)(void *dir, struct directory_entry *entry);
 	void (*rename)(void *dir, struct directory_entry *entry,
 	               const char *new_name);
@@ -97,5 +101,7 @@ void VFS_FreeSet(struct file_set *set);
 // For use by implementations of struct directory.
 void VFS_InitDirectory(struct directory *d, const char *path);
 void VFS_FreeEntries(struct directory *d);
+
+extern struct directory_entry _vfs_parent_directory;
 
 #endif /* #ifndef INCLUDED_VFS_H */

@@ -30,6 +30,10 @@
 #define GB(x) (MB(x) * 1000ULL)
 #define TB(x) (GB(x) * 1000ULL)
 
+struct directory_entry _vfs_parent_directory = {
+	FILE_TYPE_DIR, "..",
+};
+
 char *VFS_EntryPath(struct directory *dir, struct directory_entry *entry)
 {
 	return StringJoin("/", dir->path, entry->name, NULL);
@@ -70,6 +74,12 @@ VFILE *VFS_Open(const char *path)
 VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry)
 {
 	return dir->directory_funcs->open(dir, entry);
+}
+
+struct directory *VFS_OpenDirByEntry(struct directory *dir,
+                                     struct directory_entry *entry)
+{
+	return dir->directory_funcs->open_dir(dir, entry);
 }
 
 struct directory_entry *VFS_EntryBySerial(struct directory *dir,
