@@ -191,6 +191,7 @@ static const struct directory_funcs realdir_funcs = {
 	NULL,
 	RealDirDescribeEntries,
 	NULL,
+	NULL,
 };
 
 struct directory *VFS_OpenDir(const char *path)

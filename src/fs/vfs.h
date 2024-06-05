@@ -50,6 +50,7 @@ struct directory_funcs {
 	               const char *new_name);
 	void (*commit)(void *dir);
 	void (*describe_entries)(char *buf, size_t buf_len, int cnt);
+	void (*swap_entries)(void *dir, unsigned int x, unsigned int y);
 	// TODO: insert
 	void (*free)(void *dir);
 };
@@ -87,6 +88,7 @@ void VFS_DescribeSet(struct directory *dir, struct file_set *set,
                      char *buf, size_t buf_len);
 void VFS_DescribeSize(const struct directory_entry *ent, char buf[10],
                       bool shorter);
+bool VFS_SwapEntries(struct directory *dir, unsigned int x, unsigned int y);
 
 void VFS_DirectoryRef(struct directory *dir);
 void VFS_DirectoryUnref(struct directory *dir);

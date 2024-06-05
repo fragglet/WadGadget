@@ -116,6 +116,12 @@ static void WadDirFree(void *_dir)
 	}
 }
 
+static void WadDirSwapEntries(void *_dir, unsigned int x, unsigned int y)
+{
+	struct wad_directory *dir = _dir;
+	W_SwapEntries(dir->wad_file, x, y);
+}
+
 static const struct directory_funcs waddir_funcs = {
 	WadDirectoryRefresh,
 	WadDirOpen,
@@ -124,6 +130,7 @@ static const struct directory_funcs waddir_funcs = {
 	WadDirRename,
 	WadDirCommit,
 	WadDirDescribeEntries,
+	WadDirSwapEntries,
 	WadDirFree,
 };
 

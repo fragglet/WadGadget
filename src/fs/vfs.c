@@ -179,6 +179,19 @@ void VFS_DescribeSize(const struct directory_entry *ent, char buf[10],
 	}
 }
 
+bool VFS_SwapEntries(struct directory *dir, unsigned int x, unsigned int y)
+{
+	struct directory_entry tmp;
+	if (dir->directory_funcs->swap_entries == NULL) {
+		return false;
+	}
+	dir->directory_funcs->swap_entries(dir, x, y);
+	tmp = dir->entries[x];
+	dir->entries[x] = dir->entries[y];
+	dir->entries[y] = tmp;
+	return true;
+}
+
 #ifdef TEST
 int main(int argc, char *argv[])
 {

@@ -196,6 +196,7 @@ struct directory_funcs texture_dir_funcs = {
 	TextureDirRename,
 	TextureDirCommit,
 	TextureDirDescribe,
+	NULL,
 	TextureDirFree,
 };
 
