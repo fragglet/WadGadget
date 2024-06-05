@@ -22,6 +22,7 @@
 #include "stringlib.h"
 #include "ui/ui.h"
 #include "fs/vfs.h"
+#include "textures/textures.h"
 #include "view.h"
 
 #define WAD_JUNK_THRESHOLD_KB  500
@@ -818,6 +819,18 @@ static void PerformView(struct directory_pane *active_pane,
 			VFS_OpenDirByEntry(active_pane->dir, ent);
 		if (new_dir == NULL) {
 			UI_MessageBox("Error when opening '%s'.", ent->name);
+			return;
+		}
+		NavigateNew(active_pane, new_dir);
+		return;
+	}
+
+	if (ent->type == FILE_TYPE_LUMP
+	 && StringHasPrefix(ent->name, "TEXTURE")) {
+		struct directory *new_dir =
+			TX_OpenTextureDir(active_pane->dir, ent);
+		if (new_dir == NULL) {
+			UI_MessageBox("Error opening texture directory.");
 			return;
 		}
 		NavigateNew(active_pane, new_dir);

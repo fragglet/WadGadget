@@ -58,3 +58,6 @@ struct textures *TX_ParseTextureConfig(VFILE *input, struct pnames *pn);
 struct pnames *TX_ParsePnamesConfig(VFILE *input);
 
 void TX_AddSerialNos(struct textures *txs);
+
+struct directory *TX_OpenTextureDir(struct directory *parent,
+                                    struct directory_entry *ent);

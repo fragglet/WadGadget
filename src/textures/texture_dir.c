@@ -18,6 +18,7 @@
 #include "common.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
+#include "stringlib.h"
 
 #include "textures/textures.h"
 
@@ -149,13 +150,13 @@ struct directory_funcs texture_dir_funcs = {
 	TextureDirFree,
 };
 
-struct directory *OpenTextureDir(struct directory *parent,
-                                 struct directory_entry *ent)
+struct directory *TX_OpenTextureDir(struct directory *parent,
+                                    struct directory_entry *ent)
 {
 	struct texture_dir *dir = calloc(1, sizeof(struct texture_dir));
 
 	dir->dir.type = FILE_TYPE_DIR;  // TODO: texture list
-	dir->dir.path = checked_strdup("TEXTURE1");
+	dir->dir.path = StringJoin("/", parent->path, ent->name, NULL);
 	dir->dir.refcount = 1;
 	dir->dir.entries = NULL;
 	dir->dir.num_entries = 0;
