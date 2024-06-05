@@ -26,6 +26,10 @@
 struct texture_dir {
 	struct directory dir;
 	struct textures *txs;
+
+	// Parent directory; always a WAD file.
+	struct directory *parent_dir;
+	uint64_t lump_serial;
 };
 
 static void TextureDirRefresh(void *_dir)
@@ -33,8 +37,21 @@ static void TextureDirRefresh(void *_dir)
 	struct texture_dir *dir = _dir;
 	unsigned int i;
 	struct directory_entry *ent;
+	VFILE *input;
 
 	VFS_FreeEntries(&dir->dir);
+
+	ent = VFS_EntryBySerial(dir->parent_dir, dir->lump_serial);
+	if (ent == NULL) {
+		return;
+	}
+
+	input = VFS_OpenByEntry(dir->parent_dir, ent);
+	if (input == NULL) {
+		return;
+	}
+
+	dir->txs = TX_UnmarshalTextures(input);
 
 	dir->dir.num_entries = dir->txs->num_textures;
 	dir->dir.entries = checked_calloc(
@@ -56,9 +73,16 @@ static VFILE *TextureDirOpen(void *dir, struct directory_entry *entry)
 	return NULL;
 }
 
-static struct directory *TextureDirOpenDir(void *dir,
+static struct directory *TextureDirOpenDir(void *_dir,
                                            struct directory_entry *ent)
 {
+	struct texture_dir *dir = _dir;
+
+	if (ent == VFS_PARENT_DIRECTORY) {
+		VFS_DirectoryRef(dir->parent_dir);
+		return dir->parent_dir;
+	}
+
 	return NULL;
 }
 
@@ -111,6 +135,7 @@ static void TextureDirFree(void *_dir)
 	struct texture_dir *dir = _dir;
 
 	TX_FreeTextures(dir->txs);
+	VFS_DirectoryUnref(dir->parent_dir);
 }
 
 struct directory_funcs texture_dir_funcs = {
@@ -124,7 +149,8 @@ struct directory_funcs texture_dir_funcs = {
 	TextureDirFree,
 };
 
-struct directory *OpenTextureDir(void)
+struct directory *OpenTextureDir(struct directory *parent,
+                                 struct directory_entry *ent)
 {
 	struct texture_dir *dir = calloc(1, sizeof(struct texture_dir));
 
@@ -135,8 +161,9 @@ struct directory *OpenTextureDir(void)
 	dir->dir.num_entries = 0;
 	dir->dir.directory_funcs = &texture_dir_funcs;
 
-	// TODO
-	dir->txs = TX_UnmarshalTextures(VFS_Open("TEXTURE1.lmp"));
+	dir->parent_dir = parent;
+	dir->lump_serial = ent->serial_no;
+	VFS_DirectoryRef(dir->parent_dir);
 
 	TextureDirRefresh(dir);
 
