@@ -198,8 +198,8 @@ static void TextureDirFree(void *_dir)
 {
 	struct texture_dir *dir = _dir;
 
-	TextureDirSave(dir);
 	if (dir->txs != NULL) {
+		TextureDirSave(dir);
 		TX_FreeTextures(dir->txs);
 	}
 	if (dir->pn != NULL) {
