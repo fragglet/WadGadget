@@ -14,6 +14,7 @@
     - Rename texture          s  n/a                               F6
     - Make new texture        t  ?                                 F7
     - Delete texture          s  Delete multiple textures          F8, Del
+    - Export as image         *  Export multiple images            F9
 
 * Dir / textures:
   - Dir side
@@ -29,6 +30,7 @@
     - Rename texture          s  n/a                               F6
     - Make new texture        t  n/a                               F7, Ins
     - Delete texture          s  Delete multiple textures          F8, Del
+    - Export as image         *  Export multiple image             F9
 
 * Textures / textures:
   - Either:
