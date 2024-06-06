@@ -384,11 +384,13 @@ static void DrawInfoPane(void *p)
 {
 	struct directory *dir;
 	struct directory_entry *ent;
+	struct textures *txs;
+	struct texture *t;
 	struct pane *pane = p;
 	int idx = UI_DirectoryPaneSelected(panes[active_pane]);
 	const struct lump_type *lt;
 	struct wad_file *wf;
-	char buf[10], buf2[30];
+	char buf[10], buf2[64];
 
 	wbkgdset(pane->window, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(pane->window);
@@ -426,7 +428,12 @@ static void DrawInfoPane(void *p)
 		break;
 
 	case FILE_TYPE_TEXTURE:
-		UI_PrintMultilineString(pane->window, 1, 2, "Texture");
+		txs = TX_TextureList(dir);
+		t = txs->textures[idx];
+		snprintf(buf2, sizeof(buf2),
+		         "Texture\nDimensions: %dx%d\nPatches: %d",
+		         t->width, t->height, t->patchcount);
+		UI_PrintMultilineString(pane->window, 1, 2, buf2);
 		break;
 
 	case NUM_DIR_FILE_TYPES:
