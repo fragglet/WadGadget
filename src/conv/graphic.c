@@ -531,9 +531,9 @@ VFILE *V_FlatFromImageFile(VFILE *input)
 	if (imgbuf == NULL) {
 		goto fail;
 	}
-	// The image has to be a 64x64 graphic. If it isn't, do a normal
-	// patch format conversion as above.
-	if (hdr.width != 64 || hdr.height != 64) {
+	// Most flats are 64x64. Heretic/Hexen use taller ones, but
+	// they are always 64 pixels wide.
+	if (hdr.width != 64) {
 		result = RGBABufferToPatch(imgbuf, rowstep, &hdr);
 		free(imgbuf);
 		return result;
@@ -679,14 +679,14 @@ VFILE *V_FlatToImageFile(VFILE *input)
 	buf = vfreadall(input, &buf_len);
 	vfclose(input);
 
-	// Lump must be exactly 4096 bytes.
-	if (buf_len != 4096) {
-		ConversionError("Flat lump should be 4096 bytes.");
+	// Most flats are 64x64, but Heretic/Hexen animated ones are larger.
+	if (buf_len < 4096 || (buf_len % 64) != 0) {
+		ConversionError("Flat lump should be a multiple of 64 bytes.");
 		goto fail;
 	}
 
 	hdr.width = 64;
-	hdr.height = 64;
+	hdr.height = buf_len / 64;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
 	result = WritePNG(&hdr, buf, doom_palette);

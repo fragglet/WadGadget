@@ -633,7 +633,7 @@ const struct lump_type *LI_IdentifyLump(struct wad_file *f,
 	// Flats are a special case where we look at lump size but also
 	// check the section of the WAD; it must be between
 	// F_START/F_END markers.
-	if (ent->size == 4096
+	if (ent->size >= 4096 && (ent->size % 64) == 0
 	 && LI_LumpInSection(f, lump_index, &lump_section_flats)) {
 		return &lump_type_flat;
 	}
