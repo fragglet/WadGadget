@@ -42,6 +42,9 @@ struct textures {
 struct texture *TX_AllocTexture(size_t patchcount);
 struct texture *TX_DupTexture(struct texture *t);
 struct texture *TX_AddPatch(struct texture *t, struct patch *p);
+void TX_RemoveTexture(struct textures *txs, unsigned int idx);
+bool TX_RenameTexture(struct textures *txs, unsigned int idx,
+                      const char *new_name);
 
 VFILE *TX_MarshalTextures(struct textures *txs);
 struct textures *TX_UnmarshalTextures(VFILE *input);

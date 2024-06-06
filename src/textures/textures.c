@@ -308,3 +308,42 @@ struct texture *TX_AddPatch(struct texture *t, struct patch *p)
 
 	return t;
 }
+
+void TX_RemoveTexture(struct textures *txs, unsigned int idx)
+{
+	if (idx >= txs->num_textures) {
+		return;
+	}
+
+	free(txs->textures[idx]);
+	memmove(&txs->textures[idx], &txs->textures[idx + 1],
+	        (txs->num_textures - idx - 1) * sizeof(struct texture *));
+	memmove(&txs->serial_nos[idx], &txs->serial_nos[idx + 1],
+	        (txs->num_textures - idx - 1) * sizeof(uint64_t));
+	--txs->num_textures;
+	txs->modified = true;
+}
+
+bool TX_RenameTexture(struct textures *txs, unsigned int idx,
+                      const char *new_name)
+{
+	char *namedest;
+	int i;
+
+	if (idx >= txs->num_textures) {
+		return false;
+	}
+
+	namedest = txs->textures[idx]->name;
+
+	for (i = 0; i < 8; i++) {
+		namedest[i] = toupper(new_name[i]);
+		if (namedest[i] == '\0') {
+			break;
+		}
+	}
+
+	txs->modified = true;
+
+	return true;
+}

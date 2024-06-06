@@ -80,43 +80,16 @@ static struct directory *TextureDirOpenDir(void *_dir,
 static void TextureDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct texture_dir *dir = _dir;
-	unsigned int idx = entry - dir->dir.entries;
 
-	if (idx >= dir->txs->num_textures) {
-		return;
-	}
-
-	free(dir->txs->textures[idx]);
-	memmove(&dir->txs->textures[idx], &dir->txs->textures[idx + 1],
-	        (dir->dir.num_entries - idx - 1) * sizeof(struct texture *));
-	memmove(&dir->txs->serial_nos[idx], &dir->txs->serial_nos[idx + 1],
-	        (dir->dir.num_entries - idx - 1) * sizeof(uint64_t));
-	--dir->txs->num_textures;
-	dir->txs->modified = true;
+	TX_RemoveTexture(dir->txs, entry - dir->dir.entries);
 }
 
 static void TextureDirRename(void *_dir, struct directory_entry *entry,
                              const char *new_name)
 {
 	struct texture_dir *dir = _dir;
-	unsigned int idx = entry - dir->dir.entries;
-	char *namedest;
-	int i;
 
-	if (idx >= dir->txs->num_textures) {
-		return;
-	}
-
-	namedest = dir->txs->textures[idx]->name;
-
-	for (i = 0; i < 8; i++) {
-		namedest[i] = toupper(new_name[i]);
-		if (namedest[i] == '\0') {
-			break;
-		}
-	}
-
-	dir->txs->modified = true;
+	TX_RenameTexture(dir->txs, entry - dir->dir.entries, new_name);
 }
 
 static void TextureDirCommit(void *dir)
