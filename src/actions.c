@@ -419,6 +419,27 @@ static void MoveEntries(struct directory *dir, struct file_set *fs,
 	free(new_index);
 }
 
+static bool NullTextureCheck(struct directory *dir, struct file_set *tagged,
+                             const char *operation, const char *yes)
+{
+	if (dir->num_entries == 0
+	 || !VFS_SetHas(tagged, dir->entries[0].serial_no)
+	 || dir->entries[0].type != FILE_TYPE_TEXTURE
+	 || !StringHasPrefix(dir->entries[0].name, "AA")
+	 || !StringHasSuffix(dir->path, "/TEXTURE1")) {
+		return true;
+	}
+
+	return UI_ConfirmDialogBox(
+		"Null texture warning", yes, "Cancel",
+		"The '%s' texture is a dummy that\n"
+		"needs be the first texture in the list.\n"
+		"If you %s it, whatever texture becomes\n"
+		"first in the list will not work properly.\n"
+		"\nAre you sure you want to %s it?",
+		dir->entries[0].name, operation, operation);
+}
+
 static void PerformRearrange(struct directory_pane *active_pane,
                              struct directory_pane *other_pane)
 {
@@ -444,7 +465,8 @@ static void PerformRearrange(struct directory_pane *active_pane,
 
 	if (noop) {
 		UI_ShowNotice("They're all in that position already!");
-	} else {
+	} else if (NullTextureCheck(active_pane->dir, &active_pane->tagged,
+	                            "move", "Move")) {
 		MoveEntries(dir, &active_pane->tagged, &insert_point);
 		VFS_CommitChanges(dir, "move of %s", descr);
 		VFS_Refresh(dir);
@@ -647,6 +669,10 @@ static void PerformDelete(struct directory_pane *active_pane,
 	                         "Delete %s?", buf)) {
 		return;
 	}
+	if (!NullTextureCheck(dir, tagged, "delete", "Delete")) {
+		return;
+	}
+
 	// We must build the description for the popup here, before
 	// we delete the files.
 	VFS_DescribeSet(dir, tagged, buf, sizeof(buf));

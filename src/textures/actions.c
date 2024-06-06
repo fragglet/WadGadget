@@ -23,16 +23,31 @@ static void PerformNewTexture(struct directory_pane *active_pane,
 	int pos = UI_DirectoryPaneSelected(active_pane) + 1;
 	struct textures *txs = TX_TextureList(active_pane->dir);
 	struct texture t;
+	char *name;
 
-	char *name = UI_TextInputDialogBox(
-		"New texture", "Create", 8,
-		"Enter name for new texture:");
+	if (pos < 1
+	 && txs->num_textures > 0
+	 && StringHasPrefix(txs->textures[0]->name, "AA")
+	 && StringHasSuffix(active_pane->dir->path, "/TEXTURE1")
+	 && !UI_ConfirmDialogBox("New texture", "Create here", "Cancel",
+	                         "You are trying to insert a new texture\n"
+	                         "before the '%.8s' dummy texture. This\n"
+	                         "needs to be the first in the list, or\n"
+	                         "your new texture will not work properly.\n"
+	                         "\nAre you sure you want to proceed?",
+	                         txs->textures[0]->name)) {
+		return;
+	}
+
+	name = UI_TextInputDialogBox("New texture", "Create", 8,
+	                             "Enter name for new texture:");
 	if (name == NULL) {
 		return;
 	}
 
 	memset(&t, 0, sizeof(t));
 	strncpy(t.name, name, 8);
+	free(name);
 	t.width = 128;
 	t.height = 128;
 	TX_AddTexture(txs, pos, &t);
