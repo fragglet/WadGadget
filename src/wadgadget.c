@@ -13,17 +13,18 @@
 #include <signal.h>
 #include <string.h>
 
-#include "ui/actions_pane.h"
-#include "ui/colors.h"
 #include "common.h"
-#include "ui/dialog.h"
-#include "ui/directory_pane.h"
 #include "conv/export.h"
 #include "conv/import.h"
 #include "lump_info.h"
 #include "sixel_display.h"
 #include "stringlib.h"
 #include "termfuncs.h"
+#include "textures/textures.h"
+#include "ui/actions_pane.h"
+#include "ui/colors.h"
+#include "ui/dialog.h"
+#include "ui/directory_pane.h"
 #include "ui/ui.h"
 #include "view.h"
 
@@ -214,6 +215,7 @@ static const struct action *dir_actions[] = {
 static const struct action *texture_actions[] = {
 	&rearrange_action,
 	&sort_entries_action,
+	&new_texture_action,
 };
 
 static const struct action *wad_to_wad[] = {

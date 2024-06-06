@@ -43,7 +43,7 @@ struct texture *TX_AllocTexture(size_t patchcount);
 struct texture *TX_DupTexture(struct texture *t);
 struct texture *TX_AddPatch(struct texture *t, struct patch *p);
 struct texture *TX_TextureForName(struct textures *txs, const char *name);
-int TX_AddTexture(struct textures *txs, struct texture *t);
+bool TX_AddTexture(struct textures *txs, unsigned int pos, struct texture *t);
 void TX_RemoveTexture(struct textures *txs, unsigned int idx);
 bool TX_RenameTexture(struct textures *txs, unsigned int idx,
                       const char *new_name);
@@ -67,3 +67,6 @@ void TX_AddSerialNos(struct textures *txs);
 
 struct directory *TX_OpenTextureDir(struct directory *parent,
                                     struct directory_entry *ent);
+struct textures *TX_TextureList(struct directory *_dir);
+
+extern const struct action new_texture_action;

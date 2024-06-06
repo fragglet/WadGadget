@@ -264,3 +264,12 @@ struct directory *TX_OpenTextureDir(struct directory *parent,
 
 	return &dir->dir;
 }
+
+struct textures *TX_TextureList(struct directory *_dir)
+{
+	struct texture_dir *dir = (struct texture_dir *) _dir;
+
+	assert(dir->dir.directory_funcs == &texture_dir_funcs);
+
+	return dir->txs;
+}

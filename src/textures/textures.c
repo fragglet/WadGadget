@@ -322,20 +322,43 @@ struct texture *TX_TextureForName(struct textures *txs, const char *name)
 	return NULL;
 }
 
-int TX_AddTexture(struct textures *txs, struct texture *t)
+static void SetTextureName(struct texture *t, const char *name)
 {
-	int result = txs->num_textures;
+	char *namedest = t->name;
+	int i;
 
+	for (i = 0; i < 8; i++) {
+		namedest[i] = toupper(name[i]);
+		if (namedest[i] == '\0') {
+			break;
+		}
+	}
+}
+
+bool TX_AddTexture(struct textures *txs, unsigned int pos, struct texture *t)
+{
 	if (TX_TextureForName(txs, t->name) != NULL) {
-		return -1;
+		return false;
 	}
 
 	txs->textures = checked_realloc(txs->textures,
-		(txs->num_textures + 1)  * sizeof(struct texture));
-	txs->textures[result] = TX_DupTexture(t);
+		(txs->num_textures + 1) * sizeof(struct texture *));
+	memmove(&txs->textures[pos + 1], &txs->textures[pos],
+	        (txs->num_textures - pos) * sizeof(struct texture *));
+	txs->textures[pos] = TX_DupTexture(t);
+
+	txs->serial_nos = checked_realloc(txs->serial_nos,
+		(txs->num_textures + 1) * sizeof(uint64_t));
+	memmove(&txs->serial_nos[pos + 1], &txs->serial_nos[pos],
+	        (txs->num_textures - pos) * sizeof(uint64_t));
+	txs->serial_nos[pos] = NewSerialNo();
+
+	SetTextureName(txs->textures[pos], t->name);
+
+	++txs->num_textures;
 	txs->modified = true;
 
-	return result;
+	return true;
 }
 
 void TX_RemoveTexture(struct textures *txs, unsigned int idx)
@@ -356,9 +379,6 @@ void TX_RemoveTexture(struct textures *txs, unsigned int idx)
 bool TX_RenameTexture(struct textures *txs, unsigned int idx,
                       const char *new_name)
 {
-	char *namedest;
-	int i;
-
 	if (idx >= txs->num_textures) {
 		return false;
 	}
@@ -367,14 +387,7 @@ bool TX_RenameTexture(struct textures *txs, unsigned int idx,
 		return false;
 	}
 
-	namedest = txs->textures[idx]->name;
-
-	for (i = 0; i < 8; i++) {
-		namedest[i] = toupper(new_name[i]);
-		if (namedest[i] == '\0') {
-			break;
-		}
-	}
+	SetTextureName(txs->textures[idx], new_name);
 
 	txs->modified = true;
 
