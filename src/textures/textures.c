@@ -322,6 +322,22 @@ struct texture *TX_TextureForName(struct textures *txs, const char *name)
 	return NULL;
 }
 
+int TX_AddTexture(struct textures *txs, struct texture *t)
+{
+	int result = txs->num_textures;
+
+	if (TX_TextureForName(txs, t->name) != NULL) {
+		return -1;
+	}
+
+	txs->textures = checked_realloc(txs->textures,
+		(txs->num_textures + 1)  * sizeof(struct texture));
+	txs->textures[result] = TX_DupTexture(t);
+	txs->modified = true;
+
+	return result;
+}
+
 void TX_RemoveTexture(struct textures *txs, unsigned int idx)
 {
 	if (idx >= txs->num_textures) {

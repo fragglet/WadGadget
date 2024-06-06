@@ -43,6 +43,7 @@ struct texture *TX_AllocTexture(size_t patchcount);
 struct texture *TX_DupTexture(struct texture *t);
 struct texture *TX_AddPatch(struct texture *t, struct patch *p);
 struct texture *TX_TextureForName(struct textures *txs, const char *name);
+int TX_AddTexture(struct textures *txs, struct texture *t);
 void TX_RemoveTexture(struct textures *txs, unsigned int idx);
 bool TX_RenameTexture(struct textures *txs, unsigned int idx,
                       const char *new_name);
