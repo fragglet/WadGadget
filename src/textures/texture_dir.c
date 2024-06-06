@@ -193,48 +193,85 @@ struct directory_funcs texture_dir_funcs = {
 	TextureDirFree,
 };
 
-static bool TextureDirLoad(struct texture_dir *dir)
+struct directory *TX_DirGetParent(struct directory *_dir,
+                                  struct directory_entry **ent)
 {
-	struct directory_entry *ent;
-	VFILE *input;
+	struct texture_dir *dir = (struct texture_dir *) _dir;
 
-	ent = VFS_EntryBySerial(dir->parent_dir, dir->lump_serial);
-	if (ent == NULL) {
-		return false;
+	assert(dir->dir.directory_funcs == &texture_dir_funcs);
+
+	if (ent != NULL) {
+		*ent = VFS_EntryBySerial(dir->parent_dir, dir->lump_serial);
+		assert(*ent != NULL);
 	}
 
-	input = VFS_OpenByEntry(dir->parent_dir, ent);
-	if (input == NULL) {
-		return false;
-	}
-
-	dir->txs = TX_UnmarshalTextures(input);
-	return dir->txs != NULL;
+	return dir->parent_dir;
 }
 
-static bool LoadPnames(struct texture_dir *dir)
+static struct pnames *LoadPnames(struct texture_dir *dir)
 {
 	VFILE *input;
+	struct pnames *pn;
 	struct directory_entry *ent =
 		VFS_EntryByName(dir->parent_dir, "PNAMES");
 
 	if (ent == NULL) {
 		ConversionError("WAD does not contain a PNAMES lump.");
-		return false;
+		return NULL;
 	}
 
 	input = VFS_OpenByEntry(dir->parent_dir, ent);
 	if (input == NULL) {
 		ConversionError("Failed to open PNAMES lump.");
-		return false;
+		return NULL;
 	}
 
-	dir->pn = TX_UnmarshalPnames(input);
-	if (input == NULL) {
+	pn = TX_UnmarshalPnames(input);
+	if (pn == NULL) {
 		ConversionError("Failed to unmarshal PNAMES");
+		return NULL;
+	}
+
+	return pn;
+}
+
+bool TX_DirReload(struct directory *_dir)
+{
+	struct texture_dir *dir = (struct texture_dir *) _dir;
+	struct directory *parent;
+	struct directory_entry *ent;
+	struct textures *new_txs;
+	struct pnames *new_pn;
+	VFILE *input;
+
+	parent = TX_DirGetParent(_dir, &ent);
+
+	new_pn = LoadPnames(dir);
+	if (new_pn == NULL) {
 		return false;
 	}
 
+	input = VFS_OpenByEntry(parent, ent);
+	if (input == NULL) {
+		TX_FreePnames(new_pn);
+		return false;
+	}
+
+	new_txs = TX_UnmarshalTextures(input);
+	if (new_txs == NULL) {
+		TX_FreePnames(new_pn);
+		return false;
+	}
+
+	if (dir->pn != NULL) {
+		TX_FreePnames(dir->pn);
+	}
+	if (dir->txs != NULL) {
+		TX_FreeTextures(dir->txs);
+	}
+	dir->pn = new_pn;
+	dir->txs = new_txs;
+	TextureDirRefresh(dir);
 	return true;
 }
 
@@ -255,12 +292,10 @@ struct directory *TX_OpenTextureDir(struct directory *parent,
 	VFS_DirectoryRef(dir->parent_dir);
 	dir->lump_serial = ent->serial_no;
 
-	if (!TextureDirLoad(dir) || !LoadPnames(dir)) {
+	if (!TX_DirReload(&dir->dir)) {
 		TextureDirFree(dir);
 		return NULL;
 	}
-
-	TextureDirRefresh(dir);
 
 	return &dir->dir;
 }

@@ -213,6 +213,7 @@ static const struct action *dir_actions[] = {
 };
 
 static const struct action *texture_actions[] = {
+	&edit_textures_action,
 	&rearrange_action,
 	&sort_entries_action,
 	&new_texture_action,

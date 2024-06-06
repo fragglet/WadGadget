@@ -12,8 +12,10 @@
 #include <string.h>
 
 #include "actions.h"
+#include "stringlib.h"
 #include "textures/textures.h"
 #include "ui/dialog.h"
+#include "view.h"
 
 static void PerformNewTexture(struct directory_pane *active_pane,
                               struct directory_pane *other_pane)
@@ -43,3 +45,20 @@ const struct action new_texture_action = {
 	PerformNewTexture,
 };
 
+static void PerformEditTextures(struct directory_pane *active_pane,
+                                struct directory_pane *other_pane)
+{
+	struct directory *parent;
+	struct directory_entry *ent;
+
+	parent = TX_DirGetParent(active_pane->dir, &ent);
+	OpenDirent(parent, ent);
+
+	TX_DirReload(active_pane->dir);
+	VFS_ClearSet(&active_pane->tagged);
+}
+
+const struct action edit_textures_action = {
+	KEY_F(4), 'E', "EditCfg", "Edit texture config",
+	PerformEditTextures,
+};

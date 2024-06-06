@@ -67,6 +67,10 @@ void TX_AddSerialNos(struct textures *txs);
 
 struct directory *TX_OpenTextureDir(struct directory *parent,
                                     struct directory_entry *ent);
+bool TX_DirReload(struct directory *_dir);
 struct textures *TX_TextureList(struct directory *_dir);
+struct directory *TX_DirGetParent(struct directory *_dir,
+                                  struct directory_entry **ent);
 
 extern const struct action new_texture_action;
+extern const struct action edit_textures_action;
