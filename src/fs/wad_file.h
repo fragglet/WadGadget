@@ -58,6 +58,7 @@ void W_SwapEntries(struct wad_file *f, unsigned int l1, unsigned int l2);
 // not be updated and the changes will be lost.
 void W_CommitChanges(struct wad_file *f, const char *fmt, ...);
 #define W_Rollback(f)  W_Undo(f, 0)
+const char *W_LastCommitMessage(struct wad_file *f);
 
 // Functions below this point take effect immediately and do not require
 // calling W_CommitChanges().

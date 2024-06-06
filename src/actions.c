@@ -981,6 +981,7 @@ static void PerformUndo(struct directory_pane *active_pane,
 {
 	struct directory *dir = active_pane->dir;
 	struct wad_file *wf = VFS_WadFile(dir);
+	const char *msg;
 	int first_change;
 
 	if (W_CanUndo(wf) == 0) {
@@ -995,6 +996,8 @@ static void PerformUndo(struct directory_pane *active_pane,
 		return;
 	}
 
+	msg = W_LastCommitMessage(wf);
+
 	first_change = W_Undo(wf, 1);
 	if (first_change < 0) {
 		UI_MessageBox("Undo failed.");
@@ -1008,7 +1011,7 @@ static void PerformUndo(struct directory_pane *active_pane,
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
 
-	UI_ShowNotice("Change undone.");
+	UI_ShowNotice("Undid %s.", msg);
 }
 
 const struct action undo_action = {
@@ -1042,7 +1045,7 @@ static void PerformRedo(struct directory_pane *active_pane,
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
 
-	UI_ShowNotice("Change restored.");
+	UI_ShowNotice("Redid %s.", W_LastCommitMessage(wf));
 }
 
 const struct action redo_action = {

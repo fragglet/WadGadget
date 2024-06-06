@@ -529,6 +529,11 @@ void W_CommitChanges(struct wad_file *f, const char *fmt, ...)
 	va_end(args);
 }
 
+const char *W_LastCommitMessage(struct wad_file *wf)
+{
+	return wf->curr_revision->descr;
+}
+
 static uint32_t MinimumWADSize(struct wad_file *f)
 {
 	size_t result = sizeof(struct wad_file_header)
