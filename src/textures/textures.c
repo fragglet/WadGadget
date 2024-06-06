@@ -309,6 +309,19 @@ struct texture *TX_AddPatch(struct texture *t, struct patch *p)
 	return t;
 }
 
+struct texture *TX_TextureForName(struct textures *txs, const char *name)
+{
+	int i;
+
+	for (i = txs->num_textures - 1; i >= 0; --i) {
+		if (!strncasecmp(txs->textures[i]->name, name, 8)) {
+			return txs->textures[i];
+		}
+	}
+
+	return NULL;
+}
+
 void TX_RemoveTexture(struct textures *txs, unsigned int idx)
 {
 	if (idx >= txs->num_textures) {
@@ -331,6 +344,10 @@ bool TX_RenameTexture(struct textures *txs, unsigned int idx,
 	int i;
 
 	if (idx >= txs->num_textures) {
+		return false;
+	}
+
+	if (TX_TextureForName(txs, new_name) != NULL) {
 		return false;
 	}
 
