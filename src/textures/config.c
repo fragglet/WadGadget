@@ -156,6 +156,10 @@ static char *ReadLine(uint8_t *buf, size_t buf_len, unsigned int *offset)
 	if (p != NULL) {
 		*p = '\0';
 	}
+	p = strchr(result, '#');
+	if (p != NULL) {
+		*p = '\0';
+	}
 
 	StripTrailingSpaces(result);
 	StringUpper(result);
