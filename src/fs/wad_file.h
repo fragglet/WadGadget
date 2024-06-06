@@ -56,7 +56,7 @@ void W_SwapEntries(struct wad_file *f, unsigned int l1, unsigned int l2);
 // Must be called after any change to the file by above functions
 // (W_AddEntries, W_OpenLumpRewrite, etc.), otherwise the directory will
 // not be updated and the changes will be lost.
-void W_CommitChanges(struct wad_file *f);
+void W_CommitChanges(struct wad_file *f, const char *fmt, ...);
 #define W_Rollback(f)  W_Undo(f, 0)
 
 // Functions below this point take effect immediately and do not require

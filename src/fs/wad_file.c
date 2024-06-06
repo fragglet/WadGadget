@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <ctype.h>
 #include <assert.h>
 #include <stdbool.h>
@@ -21,12 +22,14 @@
 #include "fs/vfile.h"
 #include "fs/wad_file.h"
 
+#define REVISION_DESCR_LEN  40
 #define WAD_FILE_ENTRY_LEN  16
 
 #define CURR_HEADER(wf) (&(wf)->curr_revision->header)
 
 struct wad_revision {
 	struct wad_file_header header;
+	char descr[REVISION_DESCR_LEN];
 	long eof;
 	struct wad_revision *prev, *next;
 };
@@ -83,6 +86,7 @@ static struct wad_revision *MakeRevision(struct wad_revision *old)
 		*r = *old;
 	}
 
+	snprintf(r->descr, REVISION_DESCR_LEN, "change");
 	r->prev = NULL;
 	r->next = NULL;
 
@@ -132,7 +136,7 @@ bool W_CreateFile(const char *filename)
 	memcpy(wf->curr_revision->header.id, "PWAD", 4);
 	wf->curr_revision->eof = sizeof(struct wad_file_header);
 	wf->write_pos = sizeof(struct wad_file_header);
-	W_CommitChanges(wf);
+	W_CommitChanges(wf, "initial version");
 	W_CloseFile(wf);
 
 	return true;
@@ -236,6 +240,7 @@ struct wad_file *W_OpenFile(const char *filename)
 
 	// Read the WAD file header and build the initial revision.
 	rev = MakeRevision(NULL);
+	snprintf(rev->descr, REVISION_DESCR_LEN, "initial version");
 
 	if (vfread(rev, sizeof(struct wad_file_header), 1, vfs) != 1
 	 || (strncmp(rev->header.id, "IWAD", 4) != 0
@@ -509,13 +514,19 @@ void W_SwapEntries(struct wad_file *f, unsigned int l1, unsigned int l2)
 	f->dirty = true;
 }
 
-void W_CommitChanges(struct wad_file *f)
+void W_CommitChanges(struct wad_file *f, const char *fmt, ...)
 {
+	va_list args;
+
 	if (!f->dirty) {
 		return;
 	}
 
 	WriteDirectory(f);
+
+	va_start(args, fmt);
+	vsnprintf(f->curr_revision->descr, REVISION_DESCR_LEN, fmt, args);
+	va_end(args);
 }
 
 static uint32_t MinimumWADSize(struct wad_file *f)

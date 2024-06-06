@@ -48,7 +48,7 @@ struct directory_funcs {
 	void (*remove)(void *dir, struct directory_entry *entry);
 	void (*rename)(void *dir, struct directory_entry *entry,
 	               const char *new_name);
-	void (*commit)(void *dir);
+	void (*commit)(void *dir, const char *msg);
 	void (*describe_entries)(char *buf, size_t buf_len, int cnt);
 	void (*swap_entries)(void *dir, unsigned int x, unsigned int y);
 	// TODO: insert
@@ -74,7 +74,7 @@ VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry);
 void VFS_Remove(struct directory *dir, struct directory_entry *entry);
 void VFS_Rename(struct directory *dir, struct directory_entry *entry,
                 const char *new_name);
-void VFS_CommitChanges(struct directory *dir);
+void VFS_CommitChanges(struct directory *dir, const char *msg, ...);
 void VFS_Refresh(struct directory *dir);
 struct wad_file *VFS_WadFile(struct directory *dir);
 char *VFS_EntryPath(struct directory *dir, struct directory_entry *entry);

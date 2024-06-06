@@ -292,7 +292,7 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 	} else if (ImportFromFile(from_file, ctx->filename,
 	                          VFS_WadFile(ctx->from), ctx->lumpnum,
 	                          true)) {
-		VFS_CommitChanges(ctx->from);
+		VFS_CommitChanges(ctx->from, "import of '%s'", ctx->ent->name);
 		UI_ShowNotice("'%s' updated.", ctx->ent->name);
 	} else if (UI_ConfirmDialogBox("Error", "Edit", "Abort", "Import "
 	                               "failed. Error:\n%s\n\nEdit file again?",

@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
@@ -110,10 +111,16 @@ struct directory_entry *VFS_EntryByName(struct directory *dir,
 	return NULL;
 }
 
-void VFS_CommitChanges(struct directory *dir)
+void VFS_CommitChanges(struct directory *dir, const char *msg, ...)
 {
+	va_list args;
+	char buf[32];
+
 	if (dir->directory_funcs->commit != NULL) {
-		dir->directory_funcs->commit(dir);
+		va_start(args, msg);
+		vsnprintf(buf, sizeof(buf), msg, args);
+		va_end(args);
+		dir->directory_funcs->commit(dir, buf);
 	}
 }
 

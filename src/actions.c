@@ -87,8 +87,8 @@ static void PerformCopy(struct directory_pane *active_pane,
 
 			UI_DirectoryPaneSetTagged(other_pane, &result);
 			SwitchToPane(other_pane);
-			VFS_CommitChanges(to);
 			VFS_DescribeSet(to, &result, buf, sizeof(buf));
+			VFS_CommitChanges(to, "import of %s", buf);
 			if (from->type == to->type) {
 				UI_ShowNotice("%s copied.", buf);
 			} else {
@@ -227,7 +227,7 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 	free(filename2);
 
 	if (PerformImport(from, from_set, newfile, 0, &result, convert)) {
-		VFS_CommitChanges(newfile);
+		VFS_CommitChanges(newfile, "new WAD");
 		UI_ShowNotice("New WAD contains %d lumps.",
 		              result.num_entries);
 	} else {
@@ -416,8 +416,6 @@ static void MoveEntries(struct directory *dir, struct file_set *fs,
 		}
 	}
 
-	VFS_CommitChanges(dir);
-	VFS_Refresh(dir);
 	free(new_index);
 }
 
@@ -448,6 +446,8 @@ static void PerformRearrange(struct directory_pane *active_pane,
 		UI_ShowNotice("They're all in that position already!");
 	} else {
 		MoveEntries(dir, &active_pane->tagged, &insert_point);
+		VFS_CommitChanges(dir, "move of %s", descr);
+		VFS_Refresh(dir);
 		UI_DirectoryPaneSelectEntry(active_pane,
 		                            &dir->entries[insert_point]);
 		UI_ShowNotice("%s moved.", descr);
@@ -555,7 +555,7 @@ static void PerformSortEntries(struct directory_pane *active_pane,
 
 	free(indexes);
 
-	VFS_CommitChanges(dir);
+	VFS_CommitChanges(dir, "sort of %s", descr);
 	VFS_Refresh(active_pane->dir);
 }
 
@@ -579,8 +579,8 @@ static void PerformNewLump(struct directory_pane *active_pane,
 	// TODO: Should we be creating through VFS?
 	W_AddEntries(f, selected + 1, 1);
 	W_SetLumpName(f, selected + 1, name);
+	W_CommitChanges(f, "creation of '%.8s' lump", name);
 	free(name);
-	W_CommitChanges(f);
 	VFS_Refresh(active_pane->dir);
 	UI_ListPaneKeypress(active_pane, KEY_DOWN);
 }
@@ -616,7 +616,7 @@ static void PerformRename(struct directory_pane *active_pane,
 	}
 	VFS_Rename(active_pane->dir, &active_pane->dir->entries[selected],
 		   input_filename);
-	VFS_CommitChanges(active_pane->dir);
+	VFS_CommitChanges(active_pane->dir, "rename");
 	VFS_Refresh(active_pane->dir);
 	free(input_filename);
 	UI_DirectoryPaneSelectBySerial(active_pane, serial_no);
@@ -664,7 +664,7 @@ static void PerformDelete(struct directory_pane *active_pane,
 		}
 		VFS_Remove(dir, ent);
 	}
-	VFS_CommitChanges(dir);
+	VFS_CommitChanges(dir, "delete of %s", buf);
 	UI_ShowNotice("%s deleted.", buf);
 	VFS_ClearSet(&active_pane->tagged);
 	VFS_Refresh(dir);

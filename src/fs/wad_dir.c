@@ -93,10 +93,10 @@ static void WadDirRename(void *_dir, struct directory_entry *entry,
 	W_SetLumpName(dir->wad_file, entry - dir->dir.entries, new_name);
 }
 
-static void WadDirCommit(void *_dir)
+static void WadDirCommit(void *_dir, const char *msg)
 {
 	struct wad_directory *dir = _dir;
-	W_CommitChanges(dir->wad_file);
+	W_CommitChanges(dir->wad_file, "%s", msg);
 }
 
 static void WadDirDescribeEntries(char *buf, size_t buf_len, int cnt)

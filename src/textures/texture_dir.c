@@ -92,7 +92,7 @@ static void TextureDirRename(void *_dir, struct directory_entry *entry,
 	TX_RenameTexture(dir->txs, entry - dir->dir.entries, new_name);
 }
 
-static void TextureDirCommit(void *dir)
+static void TextureDirCommit(void *dir, const char *msg)
 {
 	// TODO: write the lump
 }
@@ -139,7 +139,7 @@ static bool TextureDirSave(struct texture_dir *dir)
 	vfcopy(texture_out, out);
 	vfclose(texture_out);
 	vfclose(out);
-	W_CommitChanges(wf);
+	W_CommitChanges(wf, "update of '%s' texture directory", ent->name);
 	VFS_Refresh(dir->parent_dir);
 
 	UI_ShowNotice("%s lump updated.", ent->name);
