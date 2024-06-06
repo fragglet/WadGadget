@@ -217,6 +217,8 @@ static const struct action *texture_actions[] = {
 	&rearrange_action,
 	&sort_entries_action,
 	&new_texture_action,
+	&dup_texture_action,
+	NULL,
 };
 
 static const struct action *wad_to_wad[] = {

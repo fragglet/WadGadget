@@ -62,3 +62,49 @@ const struct action edit_textures_action = {
 	KEY_F(4), 'E', "EditCfg", "Edit texture config",
 	PerformEditTextures,
 };
+
+static void PerformDuplicateTexture(struct directory_pane *active_pane,
+                                    struct directory_pane *other_pane)
+{
+	struct textures *txs = TX_TextureList(active_pane->dir);
+	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
+	struct texture *t;
+	int idx = UI_DirectoryPaneSelected(active_pane);
+	char *name;
+
+	if (tagged->num_entries != 1) {
+		UI_MessageBox("You can only duplicate a single texture.");
+		return;
+	}
+	if (idx < 0 || idx >= txs->num_textures) {
+		UI_MessageBox("You have not selected a texture.");
+		return;
+	}
+
+	name = UI_TextInputDialogBox("Duplicate texture", "Duplicate", 8,
+	                             "Enter name for new texture:");
+	if (name == NULL) {
+		return;
+	}
+
+	if (TX_TextureForName(txs, name) != NULL) {
+		free(name);
+		UI_MessageBox("Duplicate texture",
+		              "There is already a texture with this name.");
+	}
+
+	t = TX_DupTexture(txs->textures[idx]);
+	strncpy(t->name, name, 8);
+	free(name);
+
+	TX_AddTexture(txs, idx + 1, t);
+	free(t);
+
+	VFS_Refresh(active_pane->dir);
+	UI_ListPaneKeypress(active_pane, KEY_DOWN);
+}
+
+const struct action dup_texture_action = {
+	KEY_F(3), 0, "DupTxt", "Duplicate texture",
+	PerformDuplicateTexture,
+};

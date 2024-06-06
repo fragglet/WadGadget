@@ -74,3 +74,4 @@ struct directory *TX_DirGetParent(struct directory *_dir,
 
 extern const struct action new_texture_action;
 extern const struct action edit_textures_action;
+extern const struct action dup_texture_action;
