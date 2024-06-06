@@ -174,6 +174,26 @@ static bool TextureDirSave(struct texture_dir *dir)
 	return true;
 }
 
+static void TextureDirSwap(void *_dir, unsigned int x, unsigned int y)
+{
+	struct texture_dir *dir = _dir;
+	struct texture *tmp;
+	uint64_t tmp_serial;
+
+	assert(x < dir->txs->num_textures);
+	assert(y < dir->txs->num_textures);
+
+	tmp = dir->txs->textures[x];
+	dir->txs->textures[x] = dir->txs->textures[y];
+	dir->txs->textures[y] = tmp;
+
+	tmp_serial = dir->txs->serial_nos[x];
+	dir->txs->serial_nos[x] = dir->txs->serial_nos[y];
+	dir->txs->serial_nos[y] = tmp_serial;
+
+	dir->txs->modified = true;
+}
+
 static void TextureDirFree(void *_dir)
 {
 	struct texture_dir *dir = _dir;
@@ -196,7 +216,7 @@ struct directory_funcs texture_dir_funcs = {
 	TextureDirRename,
 	TextureDirCommit,
 	TextureDirDescribe,
-	NULL,
+	TextureDirSwap,
 	TextureDirFree,
 };
 

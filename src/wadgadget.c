@@ -211,6 +211,11 @@ static const struct action *dir_actions[] = {
 	NULL,
 };
 
+static const struct action *texture_actions[] = {
+	&rearrange_action,
+	&sort_entries_action,
+};
+
 static const struct action *wad_to_wad[] = {
 	&update_action,
 	&copy_action,
@@ -257,7 +262,7 @@ static const struct action *common_actions[] = {
 };
 
 static const struct action **type_actions[NUM_DIR_FILE_TYPES] = {
-	dir_actions, wad_actions, no_actions,
+	dir_actions, wad_actions, texture_actions,
 };
 
 static const struct action
