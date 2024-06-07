@@ -157,18 +157,17 @@ static void PerformExportConfig(struct directory_pane *active_pane,
 	txs = TX_TextureList(active_pane->dir);
 	parent = TX_DirGetParent(active_pane->dir, NULL);
 
-	if (active_pane->tagged.num_entries == 0) {
-		if (!UI_ConfirmDialogBox(
-			"Export texture config", "Export", "Cancel",
-			"You have not selected any textures to\n"
-			"export. Export the entire directory?")) {
-			return;
-		}
-		subset = txs;
-	} else {
+	if (active_pane->tagged.num_entries > 0) {
 		// Make a new subset texture directory and convert
 		// it to a config text file.
 		subset = MakeTextureSubset(txs, &active_pane->tagged);
+	} else if (!UI_ConfirmDialogBox(
+	                "Export texture config", "Export", "Cancel",
+	                "You have not selected any textures to\n"
+	                "export. Export the entire directory?")) {
+		return;
+	} else {
+		subset = txs;
 	}
 
 	filename = UI_TextInputDialogBox(
