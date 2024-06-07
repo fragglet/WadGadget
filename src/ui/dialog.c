@@ -26,6 +26,17 @@ struct nonblocking_window {
 	char msg[128];
 };
 
+static WINDOW *CenteredWindow(int w, int h)
+{
+	int scrh, scrw;
+
+	getmaxyx(stdscr, scrh, scrw);
+
+	return newwin(min(h, scrh - 1), min(w, scrw),
+	              max(1, (scrh - h - 1) / 2),
+	              max(0, (scrw - w - 1) / 2));
+}
+
 static void DrawNonblockingWindow(void *pane)
 {
 	struct nonblocking_window *nbw = pane;
@@ -47,19 +58,16 @@ void UI_ShowNonblockingWindow(const char *msg, ...)
 {
 	struct nonblocking_window nbw;
 	va_list args;
-	int scrh, scrw;
 	int w, h;
 
 	va_start(args, msg);
 	vsnprintf(nbw.msg, sizeof(nbw.msg), msg, args);
 	va_end(args);
 
-	getmaxyx(stdscr, scrh, scrw);
-
 	w = max(UI_StringWidth(nbw.msg) + 4, 35);
 	h = UI_StringHeight(nbw.msg) + 2;
 
-	nbw.pane.window = newwin(h, w, (scrh / 2) - h, (scrw - w) / 2);
+	nbw.pane.window = CenteredWindow(w, h);
 	nbw.pane.draw = DrawNonblockingWindow;
 	nbw.pane.keypress = NULL;
 
@@ -159,15 +167,11 @@ static void ConfirmDialogKeypress(void *dialog, int key)
 static void InitDialogBox(struct confirm_dialog_box *dialog,
                           const char *title, const char *msg)
 {
-	int scrh, scrw;
 	int w, h;
-	getmaxyx(stdscr, scrh, scrw);
 
 	w = max(UI_StringWidth(dialog->msg) + 4, 35);
 	h = UI_StringHeight(dialog->msg) + 4;
-	dialog->pane.window = newwin(min(h, scrh - 1), min(w, scrw),
-	                             max(1, (scrh - h) / 2),
-	                             max(0, (scrw - w) / 2));
+	dialog->pane.window = CenteredWindow(w, h);
 	dialog->pane.draw = DrawConfirmDialog;
 	dialog->pane.keypress = ConfirmDialogKeypress;
 	dialog->title = title;
@@ -280,10 +284,8 @@ char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
                             char *msg, ...)
 {
 	struct text_input_dialog_box dialog;
-	int scrh, scrw;
 	int w, h;
 	va_list args;
-	getmaxyx(stdscr, scrh, scrw);
 
 	va_start(args, msg);
 	vsnprintf(dialog.msg, sizeof(dialog.msg), msg, args);
@@ -291,7 +293,7 @@ char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
 
 	w = max(UI_StringWidth(dialog.msg) + 4, 35);
 	h = UI_StringHeight(dialog.msg) + 5;
-	dialog.pane.window = newwin(h, w, (scrh / 2) - h, (scrw - w) / 2);
+	dialog.pane.window = CenteredWindow(w, h);
 	dialog.pane.draw = DrawTextInputDialog;
 	dialog.pane.keypress = TextInputDialogKeypress;
 	dialog.title = title;
