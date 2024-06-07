@@ -138,7 +138,7 @@ static void PerformDuplicateTexture(struct directory_pane *active_pane,
 }
 
 const struct action dup_texture_action = {
-	KEY_F(3), 0, "DupTxt", "Duplicate texture",
+	KEY_F(3), 0, "DupTxt", ". Duplicate texture",
 	PerformDuplicateTexture,
 };
 
