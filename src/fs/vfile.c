@@ -323,15 +323,15 @@ static size_t memory_vfread(void *ptr, size_t size, size_t nitems, void *handle)
 {
 	struct memory_vfile *f = handle;
 	size_t buf_len = size * nitems;
-	size_t result;
+	size_t nbytes;
 
 	buf_len = min(buf_len, f->buf_len - f->pos);
 	nitems = buf_len / size;
-	result = nitems * size;
-	memcpy(ptr, &f->buf[f->pos], result);
+	nbytes = nitems * size;
+	memcpy(ptr, &f->buf[f->pos], nbytes);
 
-	f->pos += result;
-	return result;
+	f->pos += nbytes;
+	return nitems;
 }
 
 static size_t memory_vfwrite(const void *ptr, size_t size,
