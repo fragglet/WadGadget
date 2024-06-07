@@ -139,7 +139,8 @@ static bool TextureDirSave(struct texture_dir *dir)
 	vfcopy(texture_out, out);
 	vfclose(texture_out);
 	vfclose(out);
-	W_CommitChanges(wf, "update of '%s' texture directory", ent->name);
+	VFS_CommitChanges(dir->parent_dir, "update of '%s' texture directory",
+	                  ent->name);
 	VFS_Refresh(dir->parent_dir);
 
 	UI_ShowNotice("%s lump updated.", ent->name);

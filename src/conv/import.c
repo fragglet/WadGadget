@@ -221,7 +221,7 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 
 		if (!ImportFromFile(from_file, ent->name, to_wad, lumpnum,
 		                    convert)) {
-			W_Rollback(to_wad);
+			VFS_Rollback(to);
 			ConversionError("Failed to import from '%s'",
 			                ent->name);
 			return false;

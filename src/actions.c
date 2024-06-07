@@ -601,7 +601,7 @@ static void PerformNewLump(struct directory_pane *active_pane,
 	// TODO: Should we be creating through VFS?
 	W_AddEntries(f, selected + 1, 1);
 	W_SetLumpName(f, selected + 1, name);
-	W_CommitChanges(f, "creation of '%.8s' lump", name);
+	VFS_CommitChanges(active_pane->dir, "creation of '%.8s' lump", name);
 	free(name);
 	VFS_Refresh(active_pane->dir);
 	UI_ListPaneKeypress(active_pane, KEY_DOWN);
@@ -799,7 +799,7 @@ static void CheckCompactWad(struct directory_pane *pane)
 	}
 
 	// Has file been changed?
-	if (W_CanUndo(wf) == 0) {
+	if (VFS_CanUndo(pane->dir) == 0) {
 		return;
 	}
 	// Insignificant amount of junk?
@@ -1025,12 +1025,11 @@ static void PerformUndo(struct directory_pane *active_pane,
                         struct directory_pane *other_pane)
 {
 	struct directory *dir = active_pane->dir;
-	struct wad_file *wf = VFS_WadFile(dir);
 	const char *msg;
-	int first_change;
+	//int first_change;
 
-	if (W_CanUndo(wf) == 0) {
-		if (W_CanRedo(wf) == 0) {
+	if (VFS_CanUndo(dir) == 0) {
+		if (VFS_CanRedo(dir) == 0) {
 			UI_ShowNotice("There is nothing to undo.");
 		} else {
 			// User has either undone every change, or has
@@ -1041,17 +1040,20 @@ static void PerformUndo(struct directory_pane *active_pane,
 		return;
 	}
 
-	msg = W_LastCommitMessage(wf);
+	msg = VFS_LastCommitMessage(dir);
 
-	first_change = W_Undo(wf, 1);
+	VFS_Undo(dir, 1);
+	/*
+	first_change = VFS_Undo(dir, 1);
 	if (first_change < 0) {
 		UI_MessageBox("Undo failed.");
 		return;
 	}
+	*/
 	VFS_Refresh(dir);
 
 	// Move the cursor to the first lump identified as having changed:
-	UI_DirectoryPaneSelectEntry(active_pane, &dir->entries[first_change]);
+	//UI_DirectoryPaneSelectEntry(active_pane, &dir->entries[first_change]);
 
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
@@ -1068,29 +1070,31 @@ static void PerformRedo(struct directory_pane *active_pane,
                         struct directory_pane *other_pane)
 {
 	struct directory *dir = active_pane->dir;
-	struct wad_file *wf = VFS_WadFile(dir);
-	int first_change;
+	//int first_change;
 
-	if (W_CanRedo(wf) == 0) {
+	if (VFS_CanRedo(dir) == 0) {
 		UI_ShowNotice("There is nothing to redo.");
 		return;
 	}
 
+	VFS_Redo(dir, 1);
+	/*
 	first_change = W_Redo(wf, 1);
 	if (first_change < 0) {
 		UI_MessageBox("Redo failed.");
 		return;
 	}
+	*/
 
 	VFS_Refresh(dir);
 
 	// Move the cursor to the first lump identified as having changed:
-	UI_DirectoryPaneSelectEntry(active_pane, &dir->entries[first_change]);
+//UI_DirectoryPaneSelectEntry(active_pane, &dir->entries[first_change]);
 
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
 
-	UI_ShowNotice("Redid %s.", W_LastCommitMessage(wf));
+	UI_ShowNotice("Redid %s.", VFS_LastCommitMessage(dir));
 }
 
 const struct action redo_action = {
