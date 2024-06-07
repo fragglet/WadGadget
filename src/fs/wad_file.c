@@ -442,7 +442,7 @@ bool W_NeedCommit(struct wad_file *f)
 	return f->dirty;
 }
 
-void W_CommitChanges(struct wad_file *f, const char *fmt, ...)
+void W_CommitChanges(struct wad_file *f)
 {
 	if (!f->dirty) {
 		return;

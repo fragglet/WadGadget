@@ -146,18 +146,18 @@ struct directory_entry *VFS_EntryByName(struct directory *dir,
 // does change the underlying directory by writing out any pending changes.
 // VFS_SaveRevision is called by VFS_CommitChanges after committing new
 // changes, but also on initialize to create the first revision of a directory.
-void VFS_SaveRevision(struct directory *dir, const char *msg)
+struct directory_revision *VFS_SaveRevision(struct directory *dir)
 {
 	struct directory_revision *result;
 	VFILE *out;
 
 	if (dir->directory_funcs->save_snapshot == NULL) {
-		return;
+		return NULL;
 	}
 
 	out = dir->directory_funcs->save_snapshot(dir);
 	if (out == NULL) {
-		return;
+		return NULL;
 	}
 
 	result = checked_calloc(1, sizeof(struct directory_revision));
@@ -170,13 +170,13 @@ void VFS_SaveRevision(struct directory *dir, const char *msg)
 		dir->curr_revision->next = result;
 	}
 	dir->curr_revision = result;
-	snprintf(result->descr, sizeof(result->descr), "%s", msg);
+	return result;
 }
 
 void VFS_CommitChanges(struct directory *dir, const char *msg, ...)
 {
+	struct directory_revision *rev;
 	va_list args;
-	char buf[32];
 
 	if (dir->directory_funcs->commit == NULL
 	 || dir->directory_funcs->need_commit == NULL
@@ -184,13 +184,13 @@ void VFS_CommitChanges(struct directory *dir, const char *msg, ...)
 		return;
 	}
 
-	va_start(args, msg);
-	vsnprintf(buf, sizeof(buf), msg, args);
-	va_end(args);
-	dir->directory_funcs->commit(dir, buf);
+	dir->directory_funcs->commit(dir);
 
 	if (dir->curr_revision != NULL) {
-		VFS_SaveRevision(dir, buf);
+		va_start(args, msg);
+		rev = VFS_SaveRevision(dir);
+		vsnprintf(rev->descr, VFS_REVISION_DESCR_LEN, msg, args);
+		va_end(args);
 	}
 }
 

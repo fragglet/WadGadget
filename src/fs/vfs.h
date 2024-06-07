@@ -50,7 +50,7 @@ struct directory_funcs {
 	void (*rename)(void *dir, struct directory_entry *entry,
 	               const char *new_name);
 	bool (*need_commit)(void *dir);
-	void (*commit)(void *dir, const char *msg);
+	void (*commit)(void *dir);
 	void (*describe_entries)(char *buf, size_t buf_len, int cnt);
 	void (*swap_entries)(void *dir, unsigned int x, unsigned int y);
 	VFILE *(*save_snapshot)(void *dir);
@@ -125,7 +125,7 @@ const char *VFS_LastCommitMessage(struct directory *dir);
 
 // For use by implementations of struct directory.
 void VFS_InitDirectory(struct directory *d, const char *path);
-void VFS_SaveRevision(struct directory *d, const char *msg);
+struct directory_revision *VFS_SaveRevision(struct directory *d);
 void VFS_FreeEntries(struct directory *d);
 
 extern struct directory_entry _vfs_parent_directory;

@@ -92,7 +92,7 @@ static void TextureDirRename(void *_dir, struct directory_entry *entry,
 	TX_RenameTexture(dir->txs, entry - dir->dir.entries, new_name);
 }
 
-static void TextureDirCommit(void *dir, const char *msg)
+static void TextureDirCommit(void *dir)
 {
 	// TODO: write the lump
 }

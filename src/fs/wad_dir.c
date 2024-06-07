@@ -93,10 +93,10 @@ static void WadDirRename(void *_dir, struct directory_entry *entry,
 	W_SetLumpName(dir->wad_file, entry - dir->dir.entries, new_name);
 }
 
-static void WadDirCommit(void *_dir, const char *msg)
+static void WadDirCommit(void *_dir)
 {
 	struct wad_directory *dir = _dir;
-	W_CommitChanges(dir->wad_file, "%s", msg);
+	W_CommitChanges(dir->wad_file);
 }
 
 static void WadDirDescribeEntries(char *buf, size_t buf_len, int cnt)
@@ -157,6 +157,7 @@ static const struct directory_funcs waddir_funcs = {
 
 struct directory *VFS_OpenWadAsDirectory(const char *path)
 {
+	struct directory_revision *rev;
 	struct wad_directory *d =
 		checked_calloc(1, sizeof(struct wad_directory));
 
@@ -169,7 +170,8 @@ struct directory *VFS_OpenWadAsDirectory(const char *path)
 		return NULL;
 	}
 	WadDirectoryRefresh(d);
-	VFS_SaveRevision(&d->dir, "Initial version");
+	rev = VFS_SaveRevision(&d->dir);
+	snprintf(rev->descr, VFS_REVISION_DESCR_LEN, "Initial version");
 
 	return &d->dir;
 }
