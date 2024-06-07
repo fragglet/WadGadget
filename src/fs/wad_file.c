@@ -25,18 +25,9 @@
 #define REVISION_DESCR_LEN  40
 #define WAD_FILE_ENTRY_LEN  16
 
-#define CURR_HEADER(wf) (&(wf)->curr_revision->header)
-
 struct snapshot {
 	struct wad_file_header header;
 	long eof;
-};
-
-struct wad_revision {
-	struct wad_file_header header;
-	char descr[REVISION_DESCR_LEN];
-	long eof;
-	struct wad_revision *prev, *next;
 };
 
 struct wad_file {
@@ -49,14 +40,7 @@ struct wad_file {
 	VFILE *current_write_lump;
 	unsigned int current_write_index;
 
-	// We support Undo by keeping multiple copies of the WAD header.
-	// Every time anything in the file changes, we write a new WAD
-	// directory. To undo, we simply revert the WAD header to point
-	// back to the old directory. Redo is implemented in the same way.
-	// This does mean that a WAD can become very fragmented over time
-	// as we keep writing new directories. When this happens, the user
-	// can use W_CompactWAD() to remove them.
-	struct wad_revision *curr_revision;
+	struct wad_file_header header;
 
 	// Current position to start writing any new data. This is usually
 	// at the EOF, but if we undid a previous change we may be
@@ -82,44 +66,6 @@ static uint64_t NewSerialNo(void)
 	return result;
 }
 
-static struct wad_revision *MakeRevision(struct wad_revision *old)
-{
-	struct wad_revision *r =
-		checked_calloc(1, sizeof(struct wad_revision));
-
-	if (old != NULL) {
-		*r = *old;
-	}
-
-	snprintf(r->descr, REVISION_DESCR_LEN, "change");
-	r->prev = NULL;
-	r->next = NULL;
-
-	return r;
-}
-
-static void FreeRevisionChainBackward(struct wad_revision *r)
-{
-	struct wad_revision *prev;
-
-	while (r != NULL) {
-		prev = r->prev;
-		free(r);
-		r = prev;
-	}
-}
-
-static void FreeRevisionChainForward(struct wad_revision *r)
-{
-	struct wad_revision *next;
-
-	while (r != NULL) {
-		next = r->next;
-		free(r);
-		r = next;
-	}
-}
-
 // Just creates an empty WAD file.
 bool W_CreateFile(const char *filename)
 {
@@ -137,11 +83,8 @@ bool W_CreateFile(const char *filename)
 	wf = checked_calloc(1, sizeof(struct wad_file));
 	wf->vfs = vfwrapfile(fs);
 	wf->dirty = true;
-	wf->curr_revision = MakeRevision(NULL);
-	memcpy(wf->curr_revision->header.id, "PWAD", 4);
-	wf->curr_revision->eof = sizeof(struct wad_file_header);
+	memcpy(wf->header.id, "PWAD", 4);
 	wf->write_pos = sizeof(struct wad_file_header);
-	W_CommitChanges(wf, "initial version");
 	W_CloseFile(wf);
 
 	return true;
@@ -159,7 +102,7 @@ static void SwapEntry(struct wad_file_entry *entry)
 	SwapLE32(&entry->size);
 }
 
-// Read WAD directory based on CURR_HEADER(wf)->tablet_offet.
+// Read WAD directory based on wf->header.table_offet.
 // If there is a current directory, it is replaced.
 #define LOOKAHEAD 10
 static int ReadDirectory(struct wad_file *wf)
@@ -168,10 +111,9 @@ static int ReadDirectory(struct wad_file *wf)
 	size_t new_num_lumps;
 	int i, j, k, old_lump_index, first_change;
 
-	new_num_lumps = CURR_HEADER(wf)->num_lumps;
+	new_num_lumps = wf->header.num_lumps;
 	first_change = new_num_lumps;
-	assert(vfseek(wf->vfs, CURR_HEADER(wf)->table_offset,
-	              SEEK_SET) == 0);
+	assert(vfseek(wf->vfs, wf->header.table_offset, SEEK_SET) == 0);
 	new_directory = checked_calloc(
 		new_num_lumps, sizeof(struct wad_file_entry));
 
@@ -226,7 +168,6 @@ static int ReadDirectory(struct wad_file *wf)
 
 struct wad_file *W_OpenFile(const char *filename)
 {
-	struct wad_revision *rev;
 	struct wad_file *result;
 	FILE *fs;
 	VFILE *vfs;
@@ -243,29 +184,20 @@ struct wad_file *W_OpenFile(const char *filename)
 	result->directory = NULL;
 	result->num_lumps = 0;
 
-	// Read the WAD file header and build the initial revision.
-	rev = MakeRevision(NULL);
-	snprintf(rev->descr, REVISION_DESCR_LEN, "initial version");
-
-	if (vfread(rev, sizeof(struct wad_file_header), 1, vfs) != 1
-	 || (strncmp(rev->header.id, "IWAD", 4) != 0
-	  && strncmp(rev->header.id, "PWAD", 4) != 0)) {
+	if (vfread(&result->header, sizeof(struct wad_file_header), 1, vfs) != 1
+	 || (strncmp(result->header.id, "IWAD", 4) != 0
+	  && strncmp(result->header.id, "PWAD", 4) != 0)) {
 		W_CloseFile(result);
 		return NULL;
 	}
 
-	SwapHeader(&rev->header);
+	SwapHeader(&result->header);
 
 	if (vfseek(result->vfs, 0, SEEK_END) != 0) {
 		W_CloseFile(result);
 		return NULL;
 	}
-	rev->eof = vftell(result->vfs);
-
-	// The first revision has now been initialized.
-	result->curr_revision = rev;
-	result->write_pos = rev->eof;
-
+	result->write_pos = vftell(result->vfs);
 	if (ReadDirectory(result) < 0) {
 		W_CloseFile(result);
 		return NULL;
@@ -308,13 +240,9 @@ void W_CloseFile(struct wad_file *f)
 	// doing this is that if we open a file, make some changes and then
 	// undo them all, the file will be precisely restored to its
 	// original contents.
-	if (f->curr_revision != NULL && f->curr_revision->eof > 0
-	 && vfseek(f->vfs, f->curr_revision->eof, SEEK_SET) == 0) {
+	// TODO: Gate this on whether we have ever called W_CommitChanges
+	if (vfseek(f->vfs, f->write_pos, SEEK_SET) == 0) {
 		vftruncate(f->vfs);
-	}
-	if (f->curr_revision != NULL) {
-		FreeRevisionChainBackward(f->curr_revision->prev);
-		FreeRevisionChainForward(f->curr_revision);
 	}
 	vfclose(f->vfs);
 	free(f->directory);
@@ -392,7 +320,7 @@ size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
 
 static void WriteHeader(struct wad_file *f)
 {
-	struct wad_file_header hdr = *CURR_HEADER(f);
+	struct wad_file_header hdr = f->header;
 	SwapHeader(&hdr);
 	assert(!vfseek(f->vfs, 0, SEEK_SET));
 	assert(vfwrite(&hdr, sizeof(struct wad_file_header), 1, f->vfs) == 1);
@@ -467,7 +395,6 @@ VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
 
 static void WriteDirectory(struct wad_file *f)
 {
-	struct wad_revision *new_rev;
 	int i;
 
 	assert(vfseek(f->vfs, f->write_pos, SEEK_SET) == 0);
@@ -480,22 +407,13 @@ static void WriteDirectory(struct wad_file *f)
 		       vfwrite(&ent.name, 8, 1, f->vfs) == 1);
 	}
 
-	// Any "redo" is going to become impossible now.
-	FreeRevisionChainForward(f->curr_revision->next);
+	// Update header to point to new directory.
+	f->header.table_offset = f->write_pos;
+	f->header.num_lumps = f->num_lumps;
 
-	// Make and hook in the new revision.
-	new_rev = MakeRevision(f->curr_revision);
-	new_rev->prev = f->curr_revision;
-	f->curr_revision->next = new_rev;
-	f->curr_revision = new_rev;
-	new_rev->header.table_offset = f->write_pos;
-	new_rev->header.num_lumps = f->num_lumps;
-
-	f->write_pos = vftell(f->vfs);
-
-	// Save the current EOF. If we roll back to this revision later,
+	// Save the current EOF. If we roll back to the previous directory,
 	// we can truncate the file here.
-	new_rev->eof = f->write_pos;
+	f->write_pos = vftell(f->vfs);
 
 	vfsync(f->vfs);
 	WriteHeader(f);
@@ -526,22 +444,11 @@ bool W_NeedCommit(struct wad_file *f)
 
 void W_CommitChanges(struct wad_file *f, const char *fmt, ...)
 {
-	va_list args;
-
 	if (!f->dirty) {
 		return;
 	}
 
 	WriteDirectory(f);
-
-	va_start(args, fmt);
-	vsnprintf(f->curr_revision->descr, REVISION_DESCR_LEN, fmt, args);
-	va_end(args);
-}
-
-const char *W_LastCommitMessage(struct wad_file *wf)
-{
-	return wf->curr_revision->descr;
 }
 
 static uint32_t MinimumWADSize(struct wad_file *f)
@@ -560,17 +467,14 @@ static uint32_t MinimumWADSize(struct wad_file *f)
 uint32_t W_NumJunkBytes(struct wad_file *f)
 {
 	uint32_t min_size = MinimumWADSize(f);
-	long curr_size;
 
 	// Note that we do not use the actual current file size. All
 	// data past the EOF of the current revision will be truncated
 	// when the file is closed anyway, so they don't count.
-	curr_size = f->curr_revision->eof;
-
-	if (curr_size < min_size) {
+	if (f->write_pos < min_size) {
 		return 0;
 	} else {
-		return curr_size - min_size;
+		return f->write_pos - min_size;
 	}
 }
 
@@ -647,90 +551,21 @@ bool W_CompactWAD(struct wad_file *f)
 	}
 	vftruncate(f->vfs);
 
-	// We cannot undo any more.
-	FreeRevisionChainBackward(f->curr_revision->prev);
-	f->curr_revision->prev = NULL;
 	return true;
 }
 
-int W_CanUndo(struct wad_file *wf)
-{
-	struct wad_revision *r = wf->curr_revision;
-	int result = 0;
-
-	while (r->prev != NULL) {
-		r = r->prev;
-		++result;
-	}
-
-	return result;
-}
-
-int W_Undo(struct wad_file *wf, unsigned int levels)
-{
-	struct wad_revision *r = wf->curr_revision;
-	int i, result;
-
-	assert(wf->current_write_lump == NULL);
-
-	for (i = 0; i < levels; i++) {
-		assert(r->prev != NULL);
-		r = r->prev;
-	}
-	wf->curr_revision = r;
-
-	result = ReadDirectory(wf);
-	if (result < 0) {
-		return -1;
-	}
-	WriteHeader(wf);
-	wf->write_pos = r->eof;
-	wf->dirty = false;
-	return result;
-}
-
-int W_CanRedo(struct wad_file *wf)
-{
-	struct wad_revision *r = wf->curr_revision;
-	int result = 0;
-
-	while (r->next != NULL) {
-		r = r->next;
-		++result;
-	}
-
-	return result;
-}
-
-int W_Redo(struct wad_file *wf, unsigned int levels)
-{
-	struct wad_revision *r = wf->curr_revision;
-	int i, result;
-
-	assert(wf->current_write_lump == NULL);
-
-	for (i = 0; i < levels; i++) {
-		assert(r->next != NULL);
-		r = r->next;
-	}
-	wf->curr_revision = r;
-
-	result = ReadDirectory(wf);
-	if (result < 0) {
-		return -1;
-	}
-	WriteHeader(wf);
-	wf->write_pos = r->eof;
-	wf->dirty = false;
-	return result;
-}
-
+// We support Undo by just saving a snapshot of the WAD header. Every time
+// anything in the file changes, we write a new WAD directory. To undo, we
+// simply revert the WAD header to point back to the old directory. Redo is
+// implemented in the same way. This does mean that a WAD can become very
+// fragmented over time as we keep writing new directories. When this
+// happens, the user can use W_CompactWAD() to remove them.
 VFILE *W_SaveSnapshot(struct wad_file *wf)
 {
 	VFILE *result = vfopenmem(NULL, 0);
 	struct snapshot s;
 
-	s.header = wf->curr_revision->header;
+	s.header = wf->header;
 	s.eof = wf->write_pos;
 	assert(vfwrite(&s, sizeof(struct snapshot), 1, result) == 1);
 	assert(vfseek(result, 0, SEEK_SET) == 0);
@@ -744,11 +579,11 @@ void W_RestoreSnapshot(struct wad_file *wf, VFILE *in)
 	struct snapshot s;
 
 	assert(vfread(&s, sizeof(struct snapshot), 1, in) == 1);
-	wf->curr_revision->header = s.header;
+	wf->header = s.header;
 	wf->write_pos = s.eof;
 
 	// TODO: Error report on failed directory read. Return index of
-	// first change, like W_Undo does.
+	// first change, like W_Undo did.
 	ReadDirectory(wf);
 	WriteHeader(wf);
 	wf->write_pos = s.eof;
