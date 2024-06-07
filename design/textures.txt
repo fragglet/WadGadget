@@ -1,41 +1,155 @@
 ## Texture editor VFS
 
+Key: * - specific to particular view; t - all texture views; s - all VFS
+
       Single-lump case:          Multi-lump/file case:
 * WAD / textures:
   - WAD side:
-    - Rearrange               s  Rearrange multiple                F2
-    - Rename                  s  ? Could be: regex rename          F6
-    - New lump                s  -                                 F7, Ins
-    - Delete                  s  Delete multiple LMPs              F8, Del
+    - Rearrange                     s  Rearrange multiple           F2
+    - Rename...                     s  ? Could be: regex rename     F6
+    - New lump...                   s  -                            F7, Ins
+    - Delete                        s  Delete multiple LMPs         F8, Del
 
   - Textures side:
-    - View texture            t  n/a                               Ent
-    - Copy to new lump        *  -- Same (multi)                   F5
-    - Rename texture          s  n/a                               F6
-    - Make new texture        t  ?                                 F7
-    - Delete texture          s  Delete multiple textures          F8, Del
-    - Export as image         *  Export multiple images            F9
+    - View texture                  t  n/a                          Ent
+    - Rearrange                     s  Rearrange multiple           F2
+    - Duplicate                     t  n/a                          F3
+    - Edit texture config           t  n/a                          F4
+    - Rename texture...             s  n/a                          F6
+    - Make new texture...           t  ?                            F7
+    - Delete texture                s  Delete multiple textures     F8, Del
+    - Flatten to graphic            t  Flatten multiple             F9
 
 * Dir / textures:
   - Dir side
-    - Make WAD                s  New WAD containing selected lumps F3
-    - Import textures config  *  n/a                               F5
-    - Rename file             s  n/a                               F6
-    - Make directory          s  n/a                               F7, Ins
-    - Delete file             s  Delete files                      F8, Del
+    - Make WAD...                   s  New WAD containing selected  F3
+    - Import textures config >>>    *  n/a                          F5
+    - Rename file...                s  n/a                          F6
+    - Make directory...             s  n/a                          F7, Ins
+    - Delete file                   s  Delete files                 F8, Del
 
   - Textures side:
-    - View texture            t  n/a                               Ent
-    - Export textures         *  Export multiple textures          F5
-    - Rename texture          s  n/a                               F6
-    - Make new texture        t  n/a                               F7, Ins
-    - Delete texture          s  Delete multiple textures          F8, Del
-    - Export as image         *  Export multiple image             F9
+    - View texture                  t  n/a                          Ent
+    - Rearrange                     s  Rearrange multiple           F2
+    - Duplicate                     t  n/a                          F3
+    - Edit texture config           t  n/a                          F4
+    - Export texture config >>>     *  -- Same (multi)              F5
+    - Rename texture...             s  n/a                          F6
+    - Make new texture...           t  n/a                          F7, Ins
+    - Delete texture                s  Delete multiple textures     F8, Del
+    - Flatten to graphic            t  Flatten multiple             F9
 
 * Textures / textures:
   - Either:
-    - View texture            t  n/a                               Ent
-    - Copy texture            *  Copy multiple textures            F5
-    - Rename texture          s  n/a                               F6, Alt-R
-    - Make new texture        t  n/a                               F7
-    - Delete texture          s  Delete multiple textures          F8, Del
+    - View texture                  t  n/a                          Ent
+    - Rearrange                     s  Rearrange multiple           F2
+    - Duplicate                     t  n/a                          F3
+    - Edit texture config           t  n/a                          F4
+    - Copy >>>                      *  Copy multiple textures       F5
+    - Rename texture...             s  n/a                          F6, Alt-R
+    - Make new texture...           t  n/a                          F7
+    - Delete texture                s  Delete multiple textures     F8, Del
+    - Flatten to graphic            t  Flatten multiple             F9
+
+Building block functions:
+
+ 1. Flatten texture to patch format. Should probably be the output if
+    you open a texture through VFS
+ 2. Make subset texture dir
+ 3. Import and merge texture config (confirming overwrite)
+ 4. Patch to PNG (V_ToImageFile)
+ 5. PNG to SIXEL (SIXEL_DisplayImage)
+ 6. Texture dir to config format
+
+Standard functions (all VFS):
+
+ - Rearrange - F2
+
+   Positions of textures/lumps get moved within directory
+
+ - Rename texture - F6
+
+   Texture name gets changed (assuming no other has the same name)
+
+ - Delete texture - F8
+
+   Texture(s) removed from directory
+
+General functions:
+
+ - View texture - Ent
+
+   Texture gets flattened, converted to SIXEL format and shown on screen
+   (1) then V_ToImageFile, then SIXEL_DisplayImage
+
+ - Duplicate texture - F3
+
+   Does not work with multi-select. User prompted for name of new texture;
+   selected texture is duplicated.
+
+ - Edit texture config - F4
+
+   Open texture dir in text editor. What would occur if we didn't open
+   texture lumps in VFS.
+
+   Texture dir to config format, write to temp file, run editor, then import
+   back into WAD. Exit texture view and highlight lump
+
+ - Make new texture - F7
+
+   New texture gets created at cursor
+
+ - Flatten to graphic - F9
+
+   Textures get flattened and written as new graphic lumps in same WAD.
+
+Special functions:
+
+ - Copy (texture -> textures) - F5
+
+   Copy textures from one texture directory to another
+   (2) from active side, convert to config format then (3) on the other side
+
+ - Import texture config (dir -> textures) - F5
+
+   Variation on the dir -> WAD texture config conversion, but merges into
+   existing texture directory
+   Just (3)
+
+ - Export textures (textures -> dir) - F5
+
+   Variation on the WAD -> dir texture config conversion, but only the
+   marked set of textures
+   (2) then convert to config format and write file
+
+Rejected ideas:
+
+The following are of dubious usefulness, will clutter the interface, and can be
+achieved by exporting to a file and importing back in
+
+ - Copy to new texture dir (textures -> WAD)
+
+   Variation on "Make new texture dir" above. The destination WAD is the
+   one on the other side instead.
+   Create new texture directory, new lump opposite, then (3). Switch panes
+   and highlight new lump
+
+   (1), then V_ToImageFile
+
+ - Make new texture dir
+
+   Variation on "Copy". A new texture lump gets created but only
+   containing the marked set of textures
+   Create new texture directory, new lump, then (3). Exit texture view and
+   highlight new lump
+
+The following can be move to the texture editor window:
+
+ - Copy as graphic (texture -> WAD)
+
+   Texture(s) get flattened into patches that are copied to the other side
+   Just (1)
+
+ - Export as image file (texture -> dir)
+
+   Texture(s) get flattened and exported as PNGs on the other side
