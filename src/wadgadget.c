@@ -122,7 +122,7 @@ static void SetWindowSizes(void)
 
 	wresize(header_pane.window, 1, columns);
 
-	if (!cmdr_mode && columns >= 80) {
+	if (!cmdr_mode && columns >= 80 && lines >= 25) {
 		SetNwtWindowSizes(columns, lines);
 	} else {
 		SetCmdrWindowSizes(columns, lines);
