@@ -37,6 +37,7 @@ extern const struct action export_wad_action;
 
 extern const struct action rename_action;
 extern const struct action delete_action;
+extern const struct action delete_no_confirm_action;
 extern const struct action mark_pattern_action;
 extern const struct action unmark_all_action;
 extern const struct action mark_action;

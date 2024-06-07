@@ -649,33 +649,23 @@ const struct action rename_action = {
 	PerformRename,
 };
 
-static void PerformDelete(struct directory_pane *active_pane,
-                          struct directory_pane *other_pane)
+static void PerformDeleteNoConfirm(struct directory_pane *active_pane,
+                                   struct directory_pane *other_pane)
 {
-	struct directory *dir;
+	struct directory *dir = active_pane->dir;
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
 	char buf[64];
 	int i;
 
 	if (tagged->num_entries == 0) {
-		UI_MessageBox(
-		    "You have not selected anything to delete.");
-		return;
-	}
-
-	dir = active_pane->dir;
-	VFS_DescribeSet(dir, tagged, buf, sizeof(buf));
-	if (!UI_ConfirmDialogBox("Confirm Delete", "Delete", "Cancel",
-	                         "Delete %s?", buf)) {
-		return;
-	}
-	if (!NullTextureCheck(dir, tagged, "delete", "Delete")) {
+		UI_MessageBox("You have not selected anything to delete.");
 		return;
 	}
 
 	// We must build the description for the popup here, before
 	// we delete the files.
 	VFS_DescribeSet(dir, tagged, buf, sizeof(buf));
+
 	// Note that there's a corner-case gotcha here. VFS serial
 	// numbers for files are inode numbers, and through hardlinks
 	// multiple files can have the same inode number. However,
@@ -695,6 +685,35 @@ static void PerformDelete(struct directory_pane *active_pane,
 	VFS_ClearSet(&active_pane->tagged);
 	VFS_Refresh(dir);
 	UI_DirectoryPaneReselect(active_pane);
+}
+
+const struct action delete_no_confirm_action = {
+	SHIFT_KEY_F(8), 0, "Del", "Delete (no confirm)",
+	PerformDeleteNoConfirm,
+};
+
+static void PerformDelete(struct directory_pane *active_pane,
+                          struct directory_pane *other_pane)
+{
+	struct directory *dir = active_pane->dir;
+	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
+	char buf[64];
+
+	if (tagged->num_entries == 0) {
+		UI_MessageBox("You have not selected anything to delete.");
+		return;
+	}
+
+	VFS_DescribeSet(dir, tagged, buf, sizeof(buf));
+	if (!UI_ConfirmDialogBox("Confirm Delete", "Delete", "Cancel",
+	                         "Delete %s?", buf)) {
+		return;
+	}
+	if (!NullTextureCheck(dir, tagged, "delete", "Delete")) {
+		return;
+	}
+
+	PerformDeleteNoConfirm(active_pane, other_pane);
 }
 
 const struct action delete_action = {

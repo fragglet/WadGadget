@@ -265,6 +265,7 @@ static const struct action *common_actions[] = {
 	&redraw_screen_action,
 	&reload_action,
 	&mark_action,
+	&delete_no_confirm_action,
 	&view_action,
 	&other_pane_action,
 	&quit_action,
