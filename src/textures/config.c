@@ -25,7 +25,7 @@
 
 #include "textures/textures.h"
 
-#define TEXTURE_CONFIG_HEADER "; deutex format texture lump configuration\n\n"
+#define TEXTURE_CONFIG_HEADER "; deutex format texture lump configuration\n"
 #define PNAMES_CONFIG_HEADER "; patch names lump configuration\n\n"
 
 static bool CheckTextureConfig(struct textures *txs, struct pnames *pn)
@@ -49,7 +49,8 @@ static bool CheckTextureConfig(struct textures *txs, struct pnames *pn)
 	return true;
 }
 
-VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn)
+VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn,
+                               const char *comment)
 {
 	struct texture *t;
 	VFILE *result = vfopenmem(NULL, 0);
@@ -64,6 +65,14 @@ VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn)
 
 	assert(vfwrite(TEXTURE_CONFIG_HEADER,
 	               strlen(TEXTURE_CONFIG_HEADER), 1, result) == 1);
+
+	if (comment != NULL) {
+		assert(vfwrite("; ", 2, 1, result) == 1);
+		assert(vfwrite(comment, strlen(comment), 1, result) == 1);
+		assert(vfwrite("\n", 1, 1, result) == 1);
+	}
+
+	assert(vfwrite("\n", 1, 1, result) == 1);
 
 	for (i = 0; i < txs->num_textures; i++) {
 		t = txs->textures[i];

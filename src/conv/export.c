@@ -44,6 +44,7 @@ static VFILE *ConvertPnames(VFILE *input)
 static VFILE *ConvertTextures(struct directory *from, VFILE *input)
 {
 	struct directory_entry *ent = VFS_EntryByName(from, "PNAMES");
+	char comment_buf[32];
 	VFILE *pnames_input, *result;
 	struct pnames *pn;
 	struct textures *txs;
@@ -72,7 +73,9 @@ static VFILE *ConvertTextures(struct directory *from, VFILE *input)
 		TX_FreePnames(pn);
 		return NULL;
 	}
-	result = TX_FormatTexturesConfig(txs, pn);
+	snprintf(comment_buf, sizeof(comment_buf), "Exported from %s",
+	         PathBaseName(from->path));
+	result = TX_FormatTexturesConfig(txs, pn, comment_buf);
 	TX_FreeTextures(txs);
 	TX_FreePnames(pn);
 	return result;

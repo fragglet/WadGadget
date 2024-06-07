@@ -58,7 +58,8 @@ struct pnames *TX_UnmarshalPnames(VFILE *f);
 int TX_AppendPname(struct pnames *pn, const char *name);
 int TX_GetPnameIndex(struct pnames *pn, const char *name);
 
-VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn);
+VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn,
+                               const char *comment);
 VFILE *TX_FormatPnamesConfig(struct pnames *p);
 struct textures *TX_ParseTextureConfig(VFILE *input, struct pnames *pn);
 struct pnames *TX_ParsePnamesConfig(VFILE *input);

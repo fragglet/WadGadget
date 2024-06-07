@@ -149,10 +149,13 @@ static void PerformExportConfig(struct directory_pane *active_pane,
 	FILE *out;
 	VFILE *out_wrapped, *marshaled;
 	char *filename = NULL, *filename2 = NULL;
+	char comment_buf[32];
+	struct directory *parent;
 	struct textures *txs, *subset;
 	struct pnames *pn;
 
 	txs = TX_TextureList(active_pane->dir);
+	parent = TX_DirGetParent(active_pane->dir, NULL);
 
 	if (active_pane->tagged.num_entries == 0) {
 		if (!UI_ConfirmDialogBox(
@@ -185,7 +188,9 @@ static void PerformExportConfig(struct directory_pane *active_pane,
 	filename2 = StringJoin("/", other_pane->dir->path, filename, NULL);
 
 	pn = TX_GetDirPnames(active_pane->dir);
-	marshaled = TX_FormatTexturesConfig(subset, pn);
+	snprintf(comment_buf, sizeof(comment_buf), "Exported from %s",
+	         PathBaseName(parent->path));
+	marshaled = TX_FormatTexturesConfig(subset, pn, comment_buf);
 
 	// TODO: This should be written through VFS.
 	out = fopen(filename2, "w");
