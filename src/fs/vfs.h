@@ -14,6 +14,7 @@
 #include "fs/vfile.h"
 #include "fs/wad_file.h"
 
+#define VFS_REVISION_DESCR_LEN  40
 #define VFS_PARENT_DIRECTORY (&_vfs_parent_directory)
 
 enum file_type {
@@ -48,12 +49,23 @@ struct directory_funcs {
 	void (*remove)(void *dir, struct directory_entry *entry);
 	void (*rename)(void *dir, struct directory_entry *entry,
 	               const char *new_name);
+	bool (*need_commit)(void *dir);
 	void (*commit)(void *dir, const char *msg);
 	void (*describe_entries)(char *buf, size_t buf_len, int cnt);
 	void (*swap_entries)(void *dir, unsigned int x, unsigned int y);
+	VFILE *(*save_snapshot)(void *dir);
+	void (*restore_snapshot)(void *dir, VFILE *in);
 	// TODO: insert
 	void (*free)(void *dir);
 };
+
+struct directory_revision {
+	char descr[VFS_REVISION_DESCR_LEN];
+	void *snapshot;
+	size_t snapshot_len;
+	struct directory_revision *prev, *next;
+};
+
 
 struct directory {
 	enum file_type type;
@@ -62,6 +74,7 @@ struct directory {
 	int refcount;
 	struct directory_entry *entries;
 	size_t num_entries;
+	struct directory_revision *curr_revision;
 };
 
 struct directory *VFS_OpenDir(const char *path);
@@ -103,8 +116,16 @@ int VFS_SetHas(struct file_set *l, unsigned int serial_no);
 void VFS_CopySet(struct file_set *to, struct file_set *from);
 void VFS_FreeSet(struct file_set *set);
 
+int VFS_CanUndo(struct directory *dir);
+void VFS_Undo(struct directory *dir, unsigned int levels);
+int VFS_CanRedo(struct directory *dir);
+void VFS_Redo(struct directory *dir, unsigned int levels);
+#define VFS_Rollback(d) VFS_Undo(d, 0)
+const char *VFS_LastCommitMessage(struct directory *dir);
+
 // For use by implementations of struct directory.
 void VFS_InitDirectory(struct directory *d, const char *path);
+void VFS_SaveRevision(struct directory *d, const char *msg);
 void VFS_FreeEntries(struct directory *d);
 
 extern struct directory_entry _vfs_parent_directory;

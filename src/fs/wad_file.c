@@ -27,6 +27,11 @@
 
 #define CURR_HEADER(wf) (&(wf)->curr_revision->header)
 
+struct snapshot {
+	struct wad_file_header header;
+	long eof;
+};
+
 struct wad_revision {
 	struct wad_file_header header;
 	char descr[REVISION_DESCR_LEN];
@@ -514,6 +519,11 @@ void W_SwapEntries(struct wad_file *f, unsigned int l1, unsigned int l2)
 	f->dirty = true;
 }
 
+bool W_NeedCommit(struct wad_file *f)
+{
+	return f->dirty;
+}
+
 void W_CommitChanges(struct wad_file *f, const char *fmt, ...)
 {
 	va_list args;
@@ -713,4 +723,34 @@ int W_Redo(struct wad_file *wf, unsigned int levels)
 	wf->write_pos = r->eof;
 	wf->dirty = false;
 	return result;
+}
+
+VFILE *W_SaveSnapshot(struct wad_file *wf)
+{
+	VFILE *result = vfopenmem(NULL, 0);
+	struct snapshot s;
+
+	s.header = wf->curr_revision->header;
+	s.eof = wf->write_pos;
+	assert(vfwrite(&s, sizeof(struct snapshot), 1, result) == 1);
+	assert(vfseek(result, 0, SEEK_SET) == 0);
+	wf->dirty = false;
+
+	return result;
+}
+
+void W_RestoreSnapshot(struct wad_file *wf, VFILE *in)
+{
+	struct snapshot s;
+
+	assert(vfread(&s, sizeof(struct snapshot), 1, in) == 1);
+	wf->curr_revision->header = s.header;
+	wf->write_pos = s.eof;
+
+	// TODO: Error report on failed directory read. Return index of
+	// first change, like W_Undo does.
+	ReadDirectory(wf);
+	WriteHeader(wf);
+	wf->write_pos = s.eof;
+	wf->dirty = false;
 }

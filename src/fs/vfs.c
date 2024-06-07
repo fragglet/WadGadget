@@ -35,6 +35,30 @@ struct directory_entry _vfs_parent_directory = {
 	FILE_TYPE_DIR, "..",
 };
 
+static void FreeRevisionChainBackward(struct directory_revision *r)
+{
+	struct directory_revision *prev;
+
+	while (r != NULL) {
+		prev = r->prev;
+		free(r->snapshot);
+		free(r);
+		r = prev;
+	}
+}
+
+static void FreeRevisionChainForward(struct directory_revision *r)
+{
+	struct directory_revision *next;
+
+	while (r != NULL) {
+		next = r->next;
+		free(r->snapshot);
+		free(r);
+		r = next;
+	}
+}
+
 char *VFS_EntryPath(struct directory *dir, struct directory_entry *entry)
 {
 	return StringJoin("/", dir->path, entry->name, NULL);
@@ -54,6 +78,10 @@ void VFS_FreeEntries(struct directory *d)
 
 void VFS_InitDirectory(struct directory *d, const char *path)
 {
+	// By default we assume no snapshot/undo capability. The directory
+	// implementation must call VFS_SaveRevision() in its init function
+	// if it is supported.
+	d->curr_revision = NULL;
 	d->path = PathSanitize(path);
 	d->refcount = 1;
 	d->entries = NULL;
@@ -111,16 +139,58 @@ struct directory_entry *VFS_EntryByName(struct directory *dir,
 	return NULL;
 }
 
+// VFS_SaveRevision takes a new snapshot and creates a new directory_revision
+// containing it. It does not commit any changes and should not modify the
+// underlying directory, but the snapshotted data can be used to restore the
+// directory back to its old state later. Compare with VFS_CommitChanges which
+// does change the underlying directory by writing out any pending changes.
+// VFS_SaveRevision is called by VFS_CommitChanges after committing new
+// changes, but also on initialize to create the first revision of a directory.
+void VFS_SaveRevision(struct directory *dir, const char *msg)
+{
+	struct directory_revision *result;
+	VFILE *out;
+
+	if (dir->directory_funcs->save_snapshot == NULL) {
+		return;
+	}
+
+	out = dir->directory_funcs->save_snapshot(dir);
+	if (out == NULL) {
+		return;
+	}
+
+	result = checked_calloc(1, sizeof(struct directory_revision));
+	result->snapshot = vfreadall(out, &result->snapshot_len);
+
+	result->prev = dir->curr_revision;
+	if (dir->curr_revision != NULL) {
+		// Ditch all current redo history.
+		FreeRevisionChainForward(dir->curr_revision->next);
+		dir->curr_revision->next = result;
+	}
+	dir->curr_revision = result;
+	snprintf(result->descr, sizeof(result->descr), "%s", msg);
+}
+
 void VFS_CommitChanges(struct directory *dir, const char *msg, ...)
 {
 	va_list args;
 	char buf[32];
 
-	if (dir->directory_funcs->commit != NULL) {
-		va_start(args, msg);
-		vsnprintf(buf, sizeof(buf), msg, args);
-		va_end(args);
-		dir->directory_funcs->commit(dir, buf);
+	if (dir->directory_funcs->commit == NULL
+	 || dir->directory_funcs->need_commit == NULL
+	 || !dir->directory_funcs->need_commit(dir)) {
+		return;
+	}
+
+	va_start(args, msg);
+	vsnprintf(buf, sizeof(buf), msg, args);
+	va_end(args);
+	dir->directory_funcs->commit(dir, buf);
+
+	if (dir->curr_revision != NULL) {
+		VFS_SaveRevision(dir, buf);
 	}
 }
 
@@ -156,14 +226,20 @@ void VFS_DirectoryUnref(struct directory *dir)
 {
 	--dir->refcount;
 
-	if (dir->refcount == 0) {
-		if (dir->directory_funcs->free != NULL) {
-			dir->directory_funcs->free(dir);
-		}
-		VFS_FreeEntries(dir);
-		free(dir->path);
-		free(dir);
+	if (dir->refcount > 0) {
+		return;
 	}
+
+	if (dir->directory_funcs->free != NULL) {
+		dir->directory_funcs->free(dir);
+	}
+	if (dir->curr_revision != NULL) {
+		FreeRevisionChainBackward(dir->curr_revision->prev);
+		FreeRevisionChainForward(dir->curr_revision);
+	}
+	VFS_FreeEntries(dir);
+	free(dir->path);
+	free(dir);
 }
 
 void VFS_DescribeSize(const struct directory_entry *ent, char buf[10],
@@ -197,6 +273,86 @@ bool VFS_SwapEntries(struct directory *dir, unsigned int x, unsigned int y)
 	dir->entries[x] = dir->entries[y];
 	dir->entries[y] = tmp;
 	return true;
+}
+
+int VFS_CanUndo(struct directory *dir)
+{
+	struct directory_revision *r = dir->curr_revision;
+	int result = 0;
+
+	if (dir->curr_revision == NULL
+	 || dir->directory_funcs->restore_snapshot == NULL) {
+		return 0;
+	}
+
+	while (r->prev != NULL) {
+		r = r->prev;
+		++result;
+	}
+
+	return result;
+}
+
+void VFS_Undo(struct directory *dir, unsigned int levels)
+{
+	struct directory_revision *r = dir->curr_revision;
+	VFILE *in;
+	int i;
+
+	assert(dir->directory_funcs->restore_snapshot != NULL);
+
+	for (i = 0; i < levels; i++) {
+		assert(r->prev != NULL);
+		r = r->prev;
+	}
+	dir->curr_revision = r;
+
+	in = vfopenmem(r->snapshot, r->snapshot_len);
+	dir->directory_funcs->restore_snapshot(dir, in);
+}
+
+int VFS_CanRedo(struct directory *dir)
+{
+	struct directory_revision *r = dir->curr_revision;
+	int result = 0;
+
+	if (dir->curr_revision == NULL
+	 || dir->directory_funcs->restore_snapshot == NULL) {
+		return 0;
+	}
+
+	while (r->next != NULL) {
+		r = r->next;
+		++result;
+	}
+
+	return result;
+}
+
+void VFS_Redo(struct directory *dir, unsigned int levels)
+{
+	struct directory_revision *r = dir->curr_revision;
+	VFILE *in;
+	int i;
+
+	assert(dir->directory_funcs->restore_snapshot != NULL);
+
+	for (i = 0; i < levels; i++) {
+		assert(r->next != NULL);
+		r = r->next;
+	}
+	dir->curr_revision = r;
+
+	in = vfopenmem(r->snapshot, r->snapshot_len);
+	dir->directory_funcs->restore_snapshot(dir, in);
+}
+
+const char *VFS_LastCommitMessage(struct directory *dir)
+{
+	if (dir->curr_revision != NULL) {
+		return dir->curr_revision->descr;
+	}
+	return "No history";
 }
 
 #ifdef TEST

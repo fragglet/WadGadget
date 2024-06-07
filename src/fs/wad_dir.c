@@ -122,15 +122,36 @@ static void WadDirSwapEntries(void *_dir, unsigned int x, unsigned int y)
 	W_SwapEntries(dir->wad_file, x, y);
 }
 
+static bool WadDirNeedCommit(void *_dir)
+{
+	struct wad_directory *dir = _dir;
+	return W_NeedCommit(dir->wad_file);
+}
+
+static VFILE *WadDirSaveSnapshot(void *_dir)
+{
+	struct wad_directory *dir = _dir;
+	return W_SaveSnapshot(dir->wad_file);
+}
+
+static void WadDirRestoreSnapshot(void *_dir, VFILE *in)
+{
+	struct wad_directory *dir = _dir;
+	return W_RestoreSnapshot(dir->wad_file, in);
+}
+
 static const struct directory_funcs waddir_funcs = {
 	WadDirectoryRefresh,
 	WadDirOpen,
 	WadDirOpenDir,
 	WadDirRemove,
 	WadDirRename,
+	WadDirNeedCommit,
 	WadDirCommit,
 	WadDirDescribeEntries,
 	WadDirSwapEntries,
+	WadDirSaveSnapshot,
+	WadDirRestoreSnapshot,
 	WadDirFree,
 };
 
@@ -148,6 +169,7 @@ struct directory *VFS_OpenWadAsDirectory(const char *path)
 		return NULL;
 	}
 	WadDirectoryRefresh(d);
+	VFS_SaveRevision(&d->dir, "Initial version");
 
 	return &d->dir;
 }

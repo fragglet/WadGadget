@@ -188,10 +188,13 @@ static const struct directory_funcs realdir_funcs = {
 	RealDirOpenDir,
 	RealDirRemove,
 	RealDirRename,
-	NULL,
+	NULL,  // need_commit
+	NULL,  // commit
 	RealDirDescribeEntries,
-	NULL,
-	NULL,
+	NULL,  // swap_entries
+	NULL,  // save_snapshot
+	NULL,  // restore_snapshot
+	NULL,  // free
 };
 
 struct directory *VFS_OpenDir(const char *path)

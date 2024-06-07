@@ -187,9 +187,12 @@ struct directory_funcs texture_dir_funcs = {
 	TextureDirOpenDir,
 	TextureDirRemove,
 	TextureDirRename,
+	NULL,  // need_commit
 	TextureDirCommit,
 	TextureDirDescribe,
 	TextureDirSwap,
+	NULL,  // save_snapshot
+	NULL,  // restore_snapshot
 	TextureDirFree,
 };
 
