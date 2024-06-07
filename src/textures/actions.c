@@ -20,6 +20,17 @@
 
 extern void SwitchToPane(struct directory_pane *pane); // in wadgadget.c
 
+static bool CheckExistingTexture(struct textures *txs, const char *name)
+{
+	bool existing = TX_TextureForName(txs, name) != NULL;
+
+	if (existing) {
+		UI_MessageBox("There is already a texture with this name.");
+	}
+
+	return !existing;
+}
+
 static void PerformNewTexture(struct directory_pane *active_pane,
                               struct directory_pane *other_pane)
 {
@@ -45,6 +56,11 @@ static void PerformNewTexture(struct directory_pane *active_pane,
 	name = UI_TextInputDialogBox("New texture", "Create", 8,
 	                             "Enter name for new texture:");
 	if (name == NULL) {
+		return;
+	}
+
+	if (!CheckExistingTexture(txs, name)) {
+		free(name);
 		return;
 	}
 
@@ -105,10 +121,9 @@ static void PerformDuplicateTexture(struct directory_pane *active_pane,
 		return;
 	}
 
-	if (TX_TextureForName(txs, name) != NULL) {
+	if (!CheckExistingTexture(txs, name)) {
 		free(name);
-		UI_MessageBox("Duplicate texture",
-		              "There is already a texture with this name.");
+		return;
 	}
 
 	t = TX_DupTexture(txs->textures[idx]);
