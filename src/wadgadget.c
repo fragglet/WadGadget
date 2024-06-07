@@ -201,6 +201,7 @@ static const struct action *wad_actions[] = {
 	&undo_action,
 	&redo_action,
 	&sort_entries_action,
+	&hexdump_action,
 	NULL,
 };
 
@@ -209,6 +210,7 @@ static const struct action *dir_actions[] = {
 	&make_wad_action,
 	&make_wad_noconv_action,
 	&mkdir_action,
+	&hexdump_action,
 	NULL,
 };
 
@@ -257,7 +259,6 @@ static const struct action *common_actions[] = {
 	&rename_action,
 	&delete_action,
 	&mark_pattern_action,
-	&hexdump_action,
 	&unmark_all_action,
 	&cmdr_mode_action,
 	&swap_panes_action,
