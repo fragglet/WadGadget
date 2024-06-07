@@ -220,6 +220,6 @@ cancel:
 }
 
 const struct action export_texture_config = {
-	KEY_F(5), 0, "ExpCfg", "Export texture config",
+	KEY_F(5), 0, "ExpCfg", "> Export config",
 	PerformExportConfig,
 };
