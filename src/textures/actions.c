@@ -138,7 +138,7 @@ static void PerformDuplicateTexture(struct directory_pane *active_pane,
 }
 
 const struct action dup_texture_action = {
-	KEY_F(3), 0, "DupTxt", ". Duplicate texture",
+	KEY_F(3), 'U', "DupTxt", ". Duplicate texture",
 	PerformDuplicateTexture,
 };
 
@@ -234,6 +234,6 @@ cancel:
 }
 
 const struct action export_texture_config = {
-	KEY_F(5), 0, "ExpCfg", "> Export config",
+	KEY_F(5), 'O', "ExpCfg", "> Export config",
 	PerformExportConfig,
 };
