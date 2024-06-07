@@ -208,6 +208,15 @@ struct directory *TX_DirGetParent(struct directory *_dir,
 	return dir->parent_dir;
 }
 
+struct pnames *TX_GetDirPnames(struct directory *_dir)
+{
+	struct texture_dir *dir = (struct texture_dir *) _dir;
+
+	assert(dir->dir.directory_funcs == &texture_dir_funcs);
+
+	return dir->pn;
+}
+
 static struct pnames *LoadPnames(struct texture_dir *dir)
 {
 	VFILE *input;

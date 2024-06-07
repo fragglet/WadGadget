@@ -71,7 +71,9 @@ bool TX_DirReload(struct directory *_dir);
 struct textures *TX_TextureList(struct directory *_dir);
 struct directory *TX_DirGetParent(struct directory *_dir,
                                   struct directory_entry **ent);
+struct pnames *TX_GetDirPnames(struct directory *_dir);
 
 extern const struct action new_texture_action;
 extern const struct action edit_textures_action;
 extern const struct action dup_texture_action;
+extern const struct action export_texture_config;

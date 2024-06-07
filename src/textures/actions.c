@@ -12,10 +12,13 @@
 #include <string.h>
 
 #include "actions.h"
+#include "common.h"
 #include "stringlib.h"
 #include "textures/textures.h"
 #include "ui/dialog.h"
 #include "view.h"
+
+extern void SwitchToPane(struct directory_pane *pane); // in wadgadget.c
 
 static void PerformNewTexture(struct directory_pane *active_pane,
                               struct directory_pane *other_pane)
@@ -122,4 +125,96 @@ static void PerformDuplicateTexture(struct directory_pane *active_pane,
 const struct action dup_texture_action = {
 	KEY_F(3), 0, "DupTxt", "Duplicate texture",
 	PerformDuplicateTexture,
+};
+
+static struct textures *MakeTextureSubset(struct textures *txs,
+                                          struct file_set *fs)
+{
+	struct textures *result = checked_calloc(1, sizeof(struct textures));
+	unsigned int i;
+
+	for (i = 0; i < txs->num_textures; i++) {
+		if (VFS_SetHas(fs, txs->serial_nos[i])) {
+			TX_AddTexture(result, result->num_textures,
+			              txs->textures[i]);
+		}
+	}
+
+	return result;
+}
+
+static void PerformExportConfig(struct directory_pane *active_pane,
+                                struct directory_pane *other_pane)
+{
+	FILE *out;
+	VFILE *out_wrapped, *marshaled;
+	char *filename = NULL, *filename2 = NULL;
+	struct textures *txs, *subset;
+	struct pnames *pn;
+
+	txs = TX_TextureList(active_pane->dir);
+
+	if (active_pane->tagged.num_entries == 0) {
+		if (!UI_ConfirmDialogBox(
+			"Export texture config", "Export", "Cancel",
+			"You have not selected any textures to\n"
+			"export. Export the entire directory?")) {
+			return;
+		}
+		subset = txs;
+	} else {
+		// Make a new subset texture directory and convert
+		// it to a config text file.
+		subset = MakeTextureSubset(txs, &active_pane->tagged);
+	}
+
+	filename = UI_TextInputDialogBox(
+		"Export texture config",
+		"Export", 30, "Enter filename to export:");
+
+	if (filename == NULL) {
+		goto cancel;
+	}
+
+	if (VFS_EntryByName(other_pane->dir, filename) != NULL
+	 && !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
+	                         "Overwrite existing '%s'?", filename)) {
+		goto cancel;
+	}
+
+	filename2 = StringJoin("/", other_pane->dir->path, filename, NULL);
+
+	pn = TX_GetDirPnames(active_pane->dir);
+	marshaled = TX_FormatTexturesConfig(subset, pn);
+
+	// TODO: This should be written through VFS.
+	out = fopen(filename2, "w");
+	if (out == NULL) {
+		UI_MessageBox("Failed to open file for write:\n%s",
+		              filename2);
+		vfclose(marshaled);
+		goto cancel;
+	}
+
+	out_wrapped = vfwrapfile(out);
+	vfcopy(marshaled, out_wrapped);
+	vfclose(marshaled);
+	vfclose(out_wrapped);
+
+	VFS_Refresh(other_pane->dir);
+
+	SwitchToPane(other_pane);
+	UI_DirectoryPaneSelectByName(other_pane, filename);
+
+cancel:
+	if (subset != txs) {
+		TX_FreeTextures(subset);
+	}
+	free(filename);
+	free(filename2);
+}
+
+const struct action export_texture_config = {
+	KEY_F(5), 0, "ExpCfg", "Export texture config",
+	PerformExportConfig,
 };
