@@ -12,6 +12,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "ui/colors.h"
 #include "ui/pane.h"
 
 #define MAX_SCREEN_PANES 10
@@ -70,17 +71,10 @@ int UI_PaneHide(void *pane)
 
 void UI_DrawAllPanes(void)
 {
-	static WINDOW *fullscr_win = NULL;
 	int i;
 
-	// We maintain a background full-screen window that we just erase
-	// entirely before we draw the others. This ensures that any "crud"
-	// left over after a window is closed will get erased.
-	if (fullscr_win == NULL) {
-		fullscr_win = newwin(0, 0, 0, 0);
-	}
-	werase(fullscr_win);
-	wnoutrefresh(fullscr_win);
+	wbkgdset(newscr, COLOR_PAIR(PAIR_WHITE_BLACK));
+	werase(newscr);
 
 	for (i = 0; i < num_screen_panes; i++) {
 		struct pane *p = screen_panes[i];
