@@ -34,6 +34,9 @@ struct texture_dir {
 	// Parent directory; always a WAD file.
 	struct directory *parent_dir;
 	uint64_t lump_serial;
+
+	// txs->modified_count at the last call to commit.
+	unsigned int last_commit;
 };
 
 static void TextureDirRefresh(void *_dir)
@@ -96,12 +99,14 @@ static bool TextureDirNeedCommit(void *_dir)
 {
 	struct texture_dir *dir = _dir;
 
-	return dir->txs->modified;
+	return dir->txs->modified_count > dir->last_commit;
 }
 
-static void TextureDirCommit(void *dir)
+static void TextureDirCommit(void *_dir)
 {
-	// TODO: write the lump
+	struct texture_dir *dir = _dir;
+
+	dir->last_commit = dir->txs->modified_count;
 }
 
 static void TextureDirDescribe(char *buf, size_t buf_len, int cnt)
@@ -120,7 +125,8 @@ static bool TextureDirSave(struct texture_dir *dir)
 	VFILE *out, *texture_out;
 	unsigned int idx;
 
-	if (!dir->txs->modified) {
+	// Unchanged since it was opened?
+	if (dir->txs->modified_count == 0) {
 		return true;
 	}
 
@@ -172,22 +178,37 @@ static void TextureDirSwap(void *_dir, unsigned int x, unsigned int y)
 	dir->txs->serial_nos[x] = dir->txs->serial_nos[y];
 	dir->txs->serial_nos[y] = tmp_serial;
 
-	dir->txs->modified = true;
+	++dir->txs->modified_count;
 }
 
 static VFILE *TextureDirSaveSnapshot(void *_dir)
 {
 	struct texture_dir *dir = _dir;
-	return TX_MarshalTextures(dir->txs);
+	VFILE *tmp, *result = vfopenmem(NULL, 0);
+
+	assert(vfwrite(&dir->txs->modified_count,
+	               sizeof(int), 1, result) == 1);
+
+	tmp = TX_MarshalTextures(dir->txs);
+	vfcopy(tmp, result);
+	vfclose(tmp);
+	vfseek(result, 0, SEEK_SET);
+	return result;
 }
 
 static void TextureDirRestoreSnapshot(void *_dir, VFILE *in)
 {
 	struct texture_dir *dir = _dir;
-	struct textures *new_txs = TX_UnmarshalTextures(in);
+	struct textures *new_txs;
+	unsigned int mod_count;
+
+	assert(vfread(&mod_count, sizeof(int), 1, in) == 1);
+	new_txs = TX_UnmarshalTextures(in);
+	new_txs->modified_count = mod_count;
 
 	TX_FreeTextures(dir->txs);
 	dir->txs = new_txs;
+	dir->last_commit = mod_count;
 }
 
 static void TextureDirFree(void *_dir)

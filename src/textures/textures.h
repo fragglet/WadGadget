@@ -36,7 +36,7 @@ struct textures {
 	struct texture **textures;
 	size_t num_textures;
 	uint64_t *serial_nos;
-	bool modified;
+	unsigned int modified_count;
 };
 
 struct texture *TX_AllocTexture(size_t patchcount);

@@ -356,7 +356,7 @@ bool TX_AddTexture(struct textures *txs, unsigned int pos, struct texture *t)
 	SetTextureName(txs->textures[pos], t->name);
 
 	++txs->num_textures;
-	txs->modified = true;
+	++txs->modified_count;
 
 	return true;
 }
@@ -373,7 +373,7 @@ void TX_RemoveTexture(struct textures *txs, unsigned int idx)
 	memmove(&txs->serial_nos[idx], &txs->serial_nos[idx + 1],
 	        (txs->num_textures - idx - 1) * sizeof(uint64_t));
 	--txs->num_textures;
-	txs->modified = true;
+	++txs->modified_count;
 }
 
 bool TX_RenameTexture(struct textures *txs, unsigned int idx,
@@ -389,7 +389,7 @@ bool TX_RenameTexture(struct textures *txs, unsigned int idx,
 
 	SetTextureName(txs->textures[idx], new_name);
 
-	txs->modified = true;
+	++txs->modified_count;
 
 	return true;
 }
