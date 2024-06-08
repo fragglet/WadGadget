@@ -108,14 +108,17 @@ int TX_GetPnameIndex(struct pnames *pn, const char *name)
 
 static void SwapTexture(struct texture *t)
 {
-	int i;
-
 	SwapLE32(&t->masked);
 	SwapLE16(&t->width);
 	SwapLE16(&t->height);
 	SwapLE32(&t->masked);
 	SwapLE32(&t->columndirectory);
 	SwapLE16(&t->patchcount);
+}
+
+static void SwapTexturePatches(struct texture *t)
+{
+	int i;
 
 	for (i = 0; i < t->patchcount; i++) {
 		SwapLE16((uint16_t *) &t->patches[i].originx);
@@ -166,6 +169,7 @@ static struct texture *UnmarshalTexture(const uint8_t *start, size_t max_len)
 	result = TX_AllocTexture(patchcount);
 	memcpy(result, start, sz);
 	SwapTexture(result);
+	SwapTexturePatches(result);
 
 	return result;
 }
@@ -285,6 +289,7 @@ VFILE *TX_MarshalTextures(struct textures *txs)
 	for (i = 0; i < txs->num_textures; i++) {
 		struct texture *swapped = TX_DupTexture(txs->textures[i]);
 		size_t len = TextureLen(txs->textures[i]->patchcount);
+		SwapTexturePatches(swapped);
 		SwapTexture(swapped);
 		assert(vfwrite(swapped, 1, len, result) == len);
 		free(swapped);
