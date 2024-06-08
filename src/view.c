@@ -426,7 +426,7 @@ try_again:
 	TF_SetCursesModes();
 	RedrawScreen();
 
-	if (edit_success && !TempMaybeImport(&temp_ctx)) {
+	if (!dir->readonly && edit_success && !TempMaybeImport(&temp_ctx)) {
 		goto try_again;
 	}
 

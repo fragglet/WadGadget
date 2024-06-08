@@ -342,6 +342,7 @@ struct directory *TX_OpenTextureDir(struct directory *parent,
 	dir->dir.entries = NULL;
 	dir->dir.num_entries = 0;
 	dir->dir.directory_funcs = &texture_dir_funcs;
+	dir->dir.readonly = parent->readonly;
 
 	dir->parent_dir = parent;
 	VFS_DirectoryRef(dir->parent_dir);

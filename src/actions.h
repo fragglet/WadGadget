@@ -59,3 +59,5 @@ extern const struct action compact_action;
 
 extern const struct action undo_action;
 extern const struct action redo_action;
+
+bool CheckReadOnly(struct directory *dir);

@@ -39,6 +39,10 @@ static void PerformNewTexture(struct directory_pane *active_pane,
 	struct texture t;
 	char *name;
 
+	if (!CheckReadOnly(active_pane->dir)) {
+		return;
+	}
+
 	if (pos < 1
 	 && txs->num_textures > 0
 	 && StringHasPrefix(txs->textures[0]->name, "AA")
@@ -107,6 +111,10 @@ static void PerformDuplicateTexture(struct directory_pane *active_pane,
 	struct texture *t;
 	int idx = UI_DirectoryPaneSelected(active_pane);
 	char *name;
+
+	if (!CheckReadOnly(active_pane->dir)) {
+		return;
+	}
 
 	if (tagged->num_entries != 1) {
 		UI_MessageBox("You can only duplicate a single texture.");

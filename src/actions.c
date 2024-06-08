@@ -31,12 +31,31 @@ extern void SwitchToPane(struct directory_pane *pane); // in wadgadget.c
 extern void ReplacePane(struct directory_pane *old_pane,
                         struct directory_pane *new_pane);
 
+static void ReadOnlyError(const char *path)
+{
+	UI_MessageBox("'%s' is read-only.", PathBaseName(path));
+}
+
+bool CheckReadOnly(struct directory *dir)
+{
+	if (dir->readonly) {
+		ReadOnlyError(dir->path);
+		return false;
+	}
+
+	return true;
+}
+
 static void PerformCopy(struct directory_pane *active_pane,
                         struct directory_pane *other_pane, bool convert)
 {
 	struct directory *from = active_pane->dir, *to = other_pane->dir;
 	struct file_set result = EMPTY_FILE_SET;
 	char buf[32];
+
+	if (!CheckReadOnly(other_pane->dir)) {
+		return;
+	}
 
 	ClearConversionErrors();
 
@@ -157,6 +176,10 @@ static void PerformMkdir(struct directory_pane *active_pane,
                          struct directory_pane *other_pane)
 {
 	char *input_filename, *filename;
+
+	if (!CheckReadOnly(active_pane->dir)) {
+		return;
+	}
 
 	input_filename = UI_TextInputDialogBox(
 	    "Make directory", "Create", 30, "Name for new directory?");
@@ -449,6 +472,10 @@ static void PerformRearrange(struct directory_pane *active_pane,
 	bool noop;
 	size_t cnt;
 
+	if (!CheckReadOnly(active_pane->dir)) {
+		return;
+	}
+
 	if (active_pane->tagged.num_entries == 0) {
 		UI_MessageBox("You have not selected any lumps to move.");
 		return;
@@ -533,6 +560,10 @@ static void PerformSortEntries(struct directory_pane *active_pane,
 	int i;
 	size_t num_tagged = active_pane->tagged.num_entries;
 
+	if (!CheckReadOnly(active_pane->dir)) {
+		return;
+	}
+
 	if (num_tagged == 0) {
 		UI_MessageBox("You have not selected anything to sort.");
 		return;
@@ -592,6 +623,10 @@ static void PerformNewLump(struct directory_pane *active_pane,
 	int selected = UI_DirectoryPaneSelected(active_pane);
 	struct wad_file *f = VFS_WadFile(active_pane->dir);
 
+	if (!CheckReadOnly(active_pane->dir)) {
+		return;
+	}
+
 	char *name = UI_TextInputDialogBox(
 		"New lump", "Create", 8,
 		"Enter name for new lump:");
@@ -620,6 +655,10 @@ static void PerformRename(struct directory_pane *active_pane,
 	int selected = UI_DirectoryPaneSelected(active_pane);
 	char *old_name = active_pane->dir->entries[selected].name;
 	uint64_t serial_no = active_pane->dir->entries[selected].serial_no;
+
+	if (!CheckReadOnly(active_pane->dir)) {
+		return;
+	}
 
 	if (tagged->num_entries == 0) {
 		UI_MessageBox(
@@ -656,6 +695,10 @@ static void PerformDeleteNoConfirm(struct directory_pane *active_pane,
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
 	char buf[64];
 	int i;
+
+	if (!CheckReadOnly(active_pane->dir)) {
+		return;
+	}
 
 	if (tagged->num_entries == 0) {
 		UI_MessageBox("You have not selected anything to delete.");
@@ -698,6 +741,10 @@ static void PerformDelete(struct directory_pane *active_pane,
 	struct directory *dir = active_pane->dir;
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
 	char buf[64];
+
+	if (!CheckReadOnly(active_pane->dir)) {
+		return;
+	}
 
 	if (tagged->num_entries == 0) {
 		UI_MessageBox("You have not selected anything to delete.");
@@ -974,11 +1021,15 @@ static void PerformCompact(struct directory_pane *active_pane,
 	} else {
 		wf = W_OpenFile(path);
 	}
-	free(path);
 
 	if (wf == NULL) {
 		UI_MessageBox("Failed to open '%s'.", ent->name);
 		return;
+	}
+
+	if (W_IsReadOnly(wf)) {
+		ReadOnlyError(path);
+		goto fail;
 	}
 
 	junk_bytes = W_NumJunkBytes(wf);
@@ -1009,6 +1060,7 @@ fail:
 	if (!already_open) {
 		W_CloseFile(wf);
 	}
+	free(path);
 }
 
 const struct action compact_action = {
@@ -1031,6 +1083,10 @@ static void PerformUndo(struct directory_pane *active_pane,
 	struct directory *dir = active_pane->dir;
 	const char *msg;
 	int first_change;
+
+	if (!CheckReadOnly(dir)) {
+		return;
+	}
 
 	if (VFS_CanUndo(dir) == 0) {
 		if (VFS_CanRedo(dir) == 0) {
@@ -1071,6 +1127,10 @@ static void PerformRedo(struct directory_pane *active_pane,
 {
 	struct directory *dir = active_pane->dir;
 	int first_change;
+
+	if (!CheckReadOnly(dir)) {
+		return;
+	}
 
 	if (VFS_CanRedo(dir) == 0) {
 		UI_ShowNotice("There is nothing to redo.");
