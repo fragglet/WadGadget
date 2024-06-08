@@ -80,6 +80,14 @@ void UI_ListPaneDraw(void *p)
 		lp->funcs->draw_element(lp->subwin, LIST_PANE_END_MARKER,
 		                        lp->data);
 	}
+
+	if (num_entries >= UI_ListPaneLines(lp) * 2) {
+		int lines = UI_ListPaneLines(lp);
+		int range = num_entries - lines;
+		int pos = min(lp->window_offset, range - 1);
+		pos = (pos * lines) / range;
+		mvwaddch(win, pos + 1, wx - 2, ACS_CKBOARD);
+	}
 }
 
 void UI_ListPaneSelect(struct list_pane *p, unsigned int idx)
