@@ -31,11 +31,6 @@ extern void SwitchToPane(struct directory_pane *pane); // in wadgadget.c
 extern void ReplacePane(struct directory_pane *old_pane,
                         struct directory_pane *new_pane);
 
-static void ReadOnlyError(const char *path)
-{
-	UI_MessageBox("'%s' is read-only.", PathBaseName(path));
-}
-
 bool CheckReadOnly(struct directory *dir)
 {
 	struct directory *orig_dir = dir;
@@ -60,7 +55,7 @@ bool CheckReadOnly(struct directory *dir)
 	}
 
 	if (dir->readonly) {
-		ReadOnlyError(dir->path);
+		UI_MessageBox("'%s' is read-only.", PathBaseName(dir->path));
 		return false;
 	}
 
@@ -1054,7 +1049,7 @@ static void PerformCompact(struct directory_pane *active_pane,
 	assert(wf != NULL);
 
 	if (W_IsReadOnly(wf)) {
-		ReadOnlyError(ent->name);
+		CheckReadOnly(wad_dir);
 		goto fail;
 	}
 
@@ -1062,21 +1057,25 @@ static void PerformCompact(struct directory_pane *active_pane,
 	if (junk_bytes == 0) {
 		UI_ShowNotice("'%s' cannot be made any smaller.", ent->name);
 		goto fail;
-	} else if (!UI_ConfirmDialogBox("Compact WAD",
-		"Compact", "Cancel",
-		"'%s' contains %d junk bytes.\nCompact WAD?",
-		ent->name, junk_bytes)) {
+	}
+	if (!UI_ConfirmDialogBox("Compact WAD", "Compact", "Cancel",
+	                         "'%s' contains %d junk bytes.\n"
+	                         "Compact WAD? This operation cannot\n"
+	                         "be undone.", ent->name, junk_bytes)) {
+		goto fail;
+	}
+	if (!CheckReadOnly(wad_dir)) {
+		goto fail;
+	}
+	if (!W_CompactWAD(wf)) {
+		UI_MessageBox("Failed to compact '%s'.", ent->name);
 		goto fail;
 	}
 
-	if (W_CompactWAD(wf)) {
-		UI_ShowNotice("WAD compacted; %dKB saved.", junk_bytes / 1000);
-	} else {
-		UI_MessageBox("Failed to compact '%s'.", ent->name);
-	}
+	UI_ShowNotice("WAD compacted; %dKB saved.", junk_bytes / 1000);
 
+	VFS_Refresh(wad_dir);
 	VFS_Refresh(active_pane->dir);
-	VFS_Refresh(other_pane->dir);
 
 	VFS_ClearHistory(wad_dir);
 
