@@ -213,6 +213,11 @@ struct wad_file *W_OpenFile(const char *filename)
 	return result;
 }
 
+bool W_IsIWAD(struct wad_file *f)
+{
+	return strncmp(f->header.id, "IWAD", 4) == 0;
+}
+
 bool W_IsReadOnly(struct wad_file *f)
 {
 	return f->readonly;

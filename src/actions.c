@@ -38,6 +38,27 @@ static void ReadOnlyError(const char *path)
 
 bool CheckReadOnly(struct directory *dir)
 {
+	struct directory *orig_dir = dir;
+
+	// If this is a directory list, it's the enclosing WAD we actually
+	// want to check.
+	if (dir->type == FILE_TYPE_TEXTURE_LIST) {
+		dir = TX_DirGetParent(dir, NULL);
+	}
+
+	// We req
+	if (dir->type == FILE_TYPE_WAD
+	 && dir->readonly && !W_IsReadOnly(VFS_WadFile(dir))) {
+		if (!UI_ConfirmDialogBox("Edit IWAD?", "Edit IWAD", "Cancel",
+		                         "'%s' is an IWAD file. Are you\n"
+		                         "sure you want to modify it?",
+		                         PathBaseName(dir->path))) {
+			return false;
+		}
+		dir->readonly = false;
+		orig_dir->readonly = false;
+	}
+
 	if (dir->readonly) {
 		ReadOnlyError(dir->path);
 		return false;

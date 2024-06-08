@@ -167,7 +167,9 @@ struct directory *VFS_OpenWadAsDirectory(const char *path)
 		VFS_CloseDir(&d->dir);
 		return NULL;
 	}
-	d->dir.readonly = W_IsReadOnly(d->wad_file);
+	// The directory is read-only if the file is read-only, but
+	// also if the file is an IWAD (we require confirmation first)
+	d->dir.readonly = W_IsReadOnly(d->wad_file) || W_IsIWAD(d->wad_file);
 	WadDirectoryRefresh(d, &d->dir.entries, &d->dir.num_entries);
 	rev = VFS_SaveRevision(&d->dir);
 	snprintf(rev->descr, VFS_REVISION_DESCR_LEN, "Initial version");
