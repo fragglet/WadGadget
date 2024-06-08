@@ -1001,6 +1001,10 @@ static void PerformCompact(struct directory_pane *active_pane,
 	VFS_Refresh(active_pane->dir);
 	VFS_Refresh(other_pane->dir);
 
+	if (already_open) {
+		VFS_ClearHistory(other_pane->dir);
+	}
+
 fail:
 	if (!already_open) {
 		W_CloseFile(wf);

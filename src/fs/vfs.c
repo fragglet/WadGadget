@@ -378,6 +378,21 @@ const char *VFS_LastCommitMessage(struct directory *dir)
 	return "No history";
 }
 
+void VFS_ClearHistory(struct directory *dir)
+{
+	if (dir->curr_revision == NULL) {
+		return;
+	}
+
+	FreeRevisionChainBackward(dir->curr_revision->prev);
+	FreeRevisionChainForward(dir->curr_revision);
+	dir->curr_revision = NULL;
+
+	dir->curr_revision = VFS_SaveRevision(dir);
+	snprintf(dir->curr_revision->descr, VFS_REVISION_DESCR_LEN,
+	         "First revision");
+}
+
 #ifdef TEST
 int main(int argc, char *argv[])
 {

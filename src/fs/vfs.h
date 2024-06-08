@@ -123,12 +123,11 @@ int VFS_CanRedo(struct directory *dir);
 void VFS_Redo(struct directory *dir, unsigned int levels);
 #define VFS_Rollback(d) VFS_Undo(d, 0)
 const char *VFS_LastCommitMessage(struct directory *dir);
+void VFS_ClearHistory(struct directory *dir);
 
 // For use by implementations of struct directory.
 void VFS_InitDirectory(struct directory *d, const char *path);
 struct directory_revision *VFS_SaveRevision(struct directory *d);
-int VFS_SetNewEntries(struct directory *d, struct directory_entry *entries,
-                      size_t num_entries);
 void VFS_FreeEntries(struct directory *d);
 
 extern struct directory_entry _vfs_parent_directory;
