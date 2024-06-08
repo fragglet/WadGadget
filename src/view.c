@@ -260,8 +260,6 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 	VFILE *from_file;
 	int do_import;
 
-	ClearConversionErrors();
-
 	if (ctx->temp_dir == NULL) {
 		return true;
 	}
@@ -304,19 +302,17 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 	// importing back to.
 
 	from_file = VFS_Open(ctx->filename);
-	if (from_file == NULL) {
-		UI_MessageBox("Import failed when opening temp file.\n%s",
-		              ctx->filename);
-	} else if (ImportFromFile(from_file, ctx->filename,
-	                          VFS_WadFile(ctx->from), ctx->lumpnum,
-	                          true)) {
-		VFS_CommitChanges(ctx->from, "import of '%s'", ctx->ent->name);
-		UI_ShowNotice("'%s' updated.", ctx->ent->name);
-	} else if (UI_ConfirmDialogBox("Error", "Edit", "Abort", "Import "
-	                               "failed. Error:\n%s\n\nEdit file again?",
-	                               GetConversionError())) {
-		return false;
+	assert(from_file != NULL);
+
+	if (!ImportFromFile(from_file, ctx->filename,
+	                    VFS_WadFile(ctx->from), ctx->lumpnum, true)) {
+		return !UI_ConfirmDialogBox(
+			"Error", "Edit", "Abort", "Import failed. "
+			"Error:\n%s\n\nEdit file again?",
+			GetConversionError());
 	}
+	VFS_CommitChanges(ctx->from, "import of '%s'", ctx->ent->name);
+	UI_ShowNotice("'%s' updated.", ctx->ent->name);
 	VFS_Refresh(ctx->from);
 
 	return true;

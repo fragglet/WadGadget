@@ -95,8 +95,8 @@ static VFILE *ImportTextures(VFILE *input, struct wad_file *to_wad)
 	VFILE *pnames_input, *result, *lump, *marshaled;
 
 	if (pnames_lump_index < 0) {
-		UI_MessageBox("To import a texture config, your WAD\n"
-		              "must contain a PNAMES lump.");
+		ConversionError("To import a texture config, your WAD\n"
+		                "must contain a PNAMES lump.");
 		vfclose(input);
 		return NULL;
 	}
@@ -174,6 +174,7 @@ bool ImportFromFile(VFILE *from_file, const char *src_name,
 		from_file = PerformConversion(from_file, to_wad, src_name);
 	}
 	if (from_file == NULL) {
+		ConversionError("Failed conversion for '%s'", src_name);
 		return false;
 	}
 
@@ -222,8 +223,6 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 		if (!ImportFromFile(from_file, ent->name, to_wad, lumpnum,
 		                    convert)) {
 			VFS_Rollback(to);
-			ConversionError("Failed to import from '%s'",
-			                ent->name);
 			return false;
 		}
 

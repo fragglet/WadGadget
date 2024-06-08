@@ -67,82 +67,104 @@ bool CheckReadOnly(struct directory *dir)
 	return true;
 }
 
-static void PerformCopy(struct directory_pane *active_pane,
-                        struct directory_pane *other_pane, bool convert)
+static void CopyToDir(struct directory_pane *active_pane,
+                      struct directory_pane *other_pane, bool convert)
 {
 	struct directory *from = active_pane->dir, *to = other_pane->dir;
 	struct file_set result = EMPTY_FILE_SET;
+	struct file_set *export_set = UI_DirectoryPaneTagged(active_pane);
 	char buf[32];
 
+	if (export_set->num_entries < 1) {
+		UI_MessageBox("You have not selected anything to export.");
+		VFS_FreeSet(&result);
+		return;
+	}
+
+	if (!PerformExport(from, export_set, to, &result, convert)) {
+		if (strlen(GetConversionError()) > 0) {
+			UI_MessageBox("Error during export:\n%s",
+			              GetConversionError());
+		}
+		VFS_FreeSet(&result);
+		return;
+	}
+
+	UI_DirectoryPaneSetTagged(other_pane, &result);
+
+	// When we do an export or import, we create the new files/lumps
+	// in the destination, and then switch to the other pane where they
+	// are highlighted. The import/export functions both populate a
+	// result set that contains the serial numbers of the new files.
+	SwitchToPane(other_pane);
+	VFS_DescribeSet(to, &result, buf, sizeof(buf));
+	if (from->type == to->type) {
+		UI_ShowNotice("%s copied.", buf);
+	} else {
+		UI_ShowNotice("%s exported.", buf);
+	}
+
+	VFS_FreeSet(&result);
+}
+
+static void CopyToWAD(struct directory_pane *active_pane,
+                      struct directory_pane *other_pane, bool convert)
+{
+	struct directory *from = active_pane->dir, *to = other_pane->dir;
+	struct file_set *import_set = UI_DirectoryPaneTagged(active_pane);
+	int to_point = UI_DirectoryPaneSelected(other_pane) + 1;
+	struct file_set result = EMPTY_FILE_SET;
+	char buf[32];
+
+	if (import_set->num_entries < 1) {
+		UI_MessageBox("You have not selected anything to import.");
+		VFS_FreeSet(&result);
+		return;
+	}
+
+	if (!PerformImport(from, import_set, to, to_point, &result, convert)) {
+		if (strlen(GetConversionError()) > 0) {
+			UI_MessageBox("Error during import:\n%s",
+			              GetConversionError());
+		}
+		VFS_FreeSet(&result);
+		return;
+	}
+
+	UI_DirectoryPaneSetTagged(other_pane, &result);
+	SwitchToPane(other_pane);
+	VFS_DescribeSet(to, &result, buf, sizeof(buf));
+	VFS_CommitChanges(to, "import of %s", buf);
+	if (from->type == to->type) {
+		UI_ShowNotice("%s copied.", buf);
+	} else {
+		UI_ShowNotice("%s imported.", buf);
+	}
+
+	VFS_FreeSet(&result);
+}
+
+static void PerformCopy(struct directory_pane *active_pane,
+                        struct directory_pane *other_pane, bool convert)
+{
 	if (!CheckReadOnly(other_pane->dir)) {
 		return;
 	}
 
 	ClearConversionErrors();
 
-	// When we do an export or import, we create the new files/lumps
-	// in the destination, and then switch to the other pane where they
-	// are highlighted. The import/export functions both populate a
-	// result set that contains the serial numbers of the new files.
-	if (to->type == FILE_TYPE_DIR) {
-		struct file_set *export_set =
-			UI_DirectoryPaneTagged(active_pane);
-
-		if (export_set->num_entries < 1) {
-			UI_MessageBox(
-			    "You have not selected anything to export.");
-			VFS_FreeSet(&result);
-			return;
-		}
-		if (PerformExport(from, export_set, to, &result, convert)) {
-			UI_DirectoryPaneSetTagged(other_pane, &result);
-			SwitchToPane(other_pane);
-			VFS_DescribeSet(to, &result, buf, sizeof(buf));
-			if (from->type == to->type) {
-				UI_ShowNotice("%s copied.", buf);
-			} else {
-				UI_ShowNotice("%s exported.", buf);
-			}
-		} else {
-			UI_MessageBox("Export failed:\n%s",
-			              GetConversionError());
-		}
-		VFS_FreeSet(&result);
-		return;
-	}
-	if (to->type == FILE_TYPE_WAD) {
-		struct file_set *import_set =
-			UI_DirectoryPaneTagged(active_pane);
-		int to_point = UI_DirectoryPaneSelected(other_pane) + 1;
-
-		if (import_set->num_entries < 1) {
-			UI_MessageBox(
-			    "You have not selected anything to import.");
-			VFS_FreeSet(&result);
-			return;
-		}
-		if (PerformImport(from, import_set, to, to_point,
-		                  &result, convert)) {
-			char buf[32];
-
-			UI_DirectoryPaneSetTagged(other_pane, &result);
-			SwitchToPane(other_pane);
-			VFS_DescribeSet(to, &result, buf, sizeof(buf));
-			VFS_CommitChanges(to, "import of %s", buf);
-			if (from->type == to->type) {
-				UI_ShowNotice("%s copied.", buf);
-			} else {
-				UI_ShowNotice("%s imported.", buf);
-			}
-		} else {
-			UI_MessageBox("Import failed:\n%s",
-			              GetConversionError());
-		}
-		VFS_FreeSet(&result);
-		return;
+	switch (other_pane->dir->type) {
+	case FILE_TYPE_DIR:
+		CopyToDir(active_pane, other_pane, convert);
+		break;
+	case FILE_TYPE_WAD:
+		CopyToWAD(active_pane, other_pane, convert);
+		break;
+	default:
+		UI_MessageBox("Sorry, this isn't implemented yet.");
+		break;
 	}
 
-	UI_MessageBox("Sorry, this isn't implemented yet.");
 }
 
 static void PerformCopyConvert(struct directory_pane *active_pane,

@@ -50,8 +50,8 @@ static VFILE *ConvertTextures(struct directory *from, VFILE *input)
 	struct textures *txs;
 
 	if (ent == NULL) {
-		UI_MessageBox("To export a texture config, your WAD\n"
-		              "must contain a PNAMES lump.");
+		ConversionError("To export a texture config, your WAD\n"
+		                "must contain a PNAMES lump.");
 		vfclose(input);
 		return NULL;
 	}
@@ -207,7 +207,7 @@ bool ExportToFile(struct directory *from, struct directory_entry *ent,
 	// TODO: This should be written through VFS.
 	f = fopen(to_filename, "wb");
 	if (f == NULL) {
-		ConversionError("Failed to open '%s' for write.", to_filename);
+		ConversionError("Failed to open '%s' for write.", ent->name);
 		vfclose(fromlump);
 		return false;
 	}
@@ -231,8 +231,7 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 	int idx;
 
 	if (from->type == FILE_TYPE_DIR && !strcmp(from->path, to->path)) {
-		UI_MessageBox(
-		    "You can't copy to the same directory.");
+		ConversionError("You can't copy to the same directory.");
 		return false;
 	}
 
@@ -249,14 +248,12 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 		const struct lump_type *lt = IdentifyLumpType(from, ent);
 		filename = FileNameForEntry(lt, ent, convert);
 		filename2 = StringJoin("", to->path, "/", filename, NULL);
+		free(filename);
 		success = ExportToFile(from, ent, lt, filename2, convert);
 		free(filename2);
 		if (!success) {
-			ConversionError("Failed to export to '%s'", filename);
-			free(filename);
 			return false;
 		}
-		free(filename);
 		UI_UpdateProgressWindow(&progress, ent->name);
 	}
 
