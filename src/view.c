@@ -72,7 +72,7 @@ static void RestoreSignal(int signum, struct sigaction *saved)
 
 static intptr_t WaitSubprocess(pid_t pid)
 {
-	struct sigaction old_sigint, old_sigterm;
+	struct sigaction old_sigint, old_sigterm, old_sigwinch;
 	struct sigaction tstp_action, old_sigtstp;
 	int result, err;
 
@@ -94,6 +94,7 @@ static intptr_t WaitSubprocess(pid_t pid)
 	// entire program.
 	SuspendSignal(SIGINT, &old_sigint);
 	SuspendSignal(SIGTERM, &old_sigterm);
+	SuspendSignal(SIGWINCH, &old_sigwinch);
 
 	// Keep restarting waitpid unless we receive a SIGTSTP.
 	do {
@@ -103,6 +104,7 @@ static intptr_t WaitSubprocess(pid_t pid)
 	RestoreSignal(SIGTSTP, &old_sigtstp);
 	RestoreSignal(SIGINT, &old_sigint);
 	RestoreSignal(SIGTERM, &old_sigterm);
+	RestoreSignal(SIGWINCH, &old_sigwinch);
 
 	if (got_tstp) {
 		return 0;
