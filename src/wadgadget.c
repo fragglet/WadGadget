@@ -528,7 +528,7 @@ static void Shutdown(void)
 
 // We set a custom handler for SIGTSTP. This is the signal that is sent when
 // the user types a Ctrl-Z. This allows us to use this key combo (for Undo).
-static void TermStopHandler(int)
+static void TermStopHandler(int unused)
 {
 	ungetch(CTRL_('Z'));
 }

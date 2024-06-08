@@ -43,7 +43,7 @@ static void RedrawScreen(void)
 }
 
 // Handler function invoked when SIGTSTP (^Z) is received.
-static void TstpHandler(int)
+static void TstpHandler(int unused)
 {
 	// Allow the waitpid() loop below to exit; we don't want to continue
 	// waiting for the subprogram to exit.
