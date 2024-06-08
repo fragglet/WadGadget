@@ -77,12 +77,12 @@ struct directory {
 	struct directory_entry *entries;
 	size_t num_entries;
 	struct directory_revision *curr_revision;
+	struct directory *next;
 };
 
 struct directory *VFS_OpenDir(const char *path);
 struct directory *VFS_OpenDirByEntry(struct directory *dir,
                                      struct directory_entry *entry);
-struct directory *VFS_OpenWadAsDirectory(const char *path);
 
 VFILE *VFS_Open(const char *path);
 VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry);

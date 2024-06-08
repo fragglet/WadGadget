@@ -1035,9 +1035,8 @@ static void PerformCompact(struct directory_pane *active_pane,
                            struct directory_pane *other_pane)
 {
 	struct directory_entry *ent;
+	struct directory *wad_dir;
 	struct wad_file *wf;
-	bool already_open;
-	char *path;
 	uint32_t junk_bytes;
 	int selected;
 
@@ -1055,23 +1054,19 @@ static void PerformCompact(struct directory_pane *active_pane,
 		return;
 	}
 
-	// WAD file may be open in the other pane; don't open twice.
-	path = VFS_EntryPath(active_pane->dir, ent);
-	already_open = other_pane->dir->type == FILE_TYPE_WAD
-	            && !strcmp(path, other_pane->dir->path);
-	if (already_open) {
-		wf = VFS_WadFile(other_pane->dir);
-	} else {
-		wf = W_OpenFile(path);
-	}
-
-	if (wf == NULL) {
+	// We open the WAD file through the VFS directory API. This ensures
+	// that we don't corrupt things by opening the same WAD twice.
+	wad_dir = VFS_OpenDirByEntry(active_pane->dir, ent);
+	if (wad_dir == NULL) {
 		UI_MessageBox("Failed to open '%s'.", ent->name);
 		return;
 	}
 
+	wf = VFS_WadFile(other_pane->dir);
+	assert(wf != NULL);
+
 	if (W_IsReadOnly(wf)) {
-		ReadOnlyError(path);
+		ReadOnlyError(ent->name);
 		goto fail;
 	}
 
@@ -1095,15 +1090,10 @@ static void PerformCompact(struct directory_pane *active_pane,
 	VFS_Refresh(active_pane->dir);
 	VFS_Refresh(other_pane->dir);
 
-	if (already_open) {
-		VFS_ClearHistory(other_pane->dir);
-	}
+	VFS_ClearHistory(wad_dir);
 
 fail:
-	if (!already_open) {
-		W_CloseFile(wf);
-	}
-	free(path);
+	VFS_CloseDir(wad_dir);
 }
 
 const struct action compact_action = {

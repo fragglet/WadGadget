@@ -25,6 +25,9 @@
 #include "stringlib.h"
 #include "fs/vfs.h"
 
+struct directory *VFS_OpenRealDir(const char *path);  // real_dir.c
+struct directory *VFS_OpenWadAsDirectory(const char *path);  // wad_dir.c
+
 // Yes, Si units, not binary ones.
 #define KB(x) (x * 1000ULL)
 #define MB(x) (KB(x) * 1000ULL)
@@ -34,6 +37,8 @@
 struct directory_entry _vfs_parent_directory = {
 	FILE_TYPE_DIR, "..",
 };
+
+static struct directory *open_dirs = NULL;
 
 static void FreeRevisionChainBackward(struct directory_revision *r)
 {
@@ -86,6 +91,79 @@ void VFS_InitDirectory(struct directory *d, const char *path)
 	d->refcount = 1;
 	d->entries = NULL;
 	d->num_entries = 0;
+}
+
+static struct directory *FindOpenDir(const char *path)
+{
+	struct directory *d = open_dirs;
+
+	while (d != NULL) {
+		if (!strcmp(d->path, path)) {
+			return d;
+		}
+		d = d->next;
+	}
+
+	return NULL;
+}
+
+static void HookOpenDir(struct directory *d)
+{
+	d->next = open_dirs;
+	open_dirs = d;
+}
+
+static void UnhookOpenDir(struct directory *d)
+{
+	struct directory **nextptr = &open_dirs;
+
+	while (*nextptr != NULL) {
+		if (*nextptr == d) {
+			*nextptr = d->next;
+			break;
+		}
+		nextptr = &(*nextptr)->next;
+	}
+}
+
+static int HasWadExtension(const char *name)
+{
+	const char *extn;
+	if (strlen(name) < 4) {
+		return 0;
+	}
+	extn = name + strlen(name) - 4;
+	return !strcasecmp(extn, ".wad");
+}
+
+struct directory *VFS_OpenDir(const char *path)
+{
+	struct directory *d;
+	char *sanitized_path = PathSanitize(path);
+
+	// If the directory is already open, just return the existing
+	// instance. This means that it's never possible for the two
+	// panes to go out of sync, eg. if a new file is created.
+	d = FindOpenDir(sanitized_path);
+	if (d != NULL) {
+		VFS_DirectoryRef(d);
+		free(sanitized_path);
+		return d;
+	}
+
+	// TODO: This is kind of a hack.
+	if (HasWadExtension(sanitized_path)) {
+		d = VFS_OpenWadAsDirectory(sanitized_path);
+	} else {
+		d = VFS_OpenRealDir(sanitized_path);
+	}
+
+	free(sanitized_path);
+
+	if (d != NULL) {
+		HookOpenDir(d);
+	}
+	return d;
 }
 
 VFILE *VFS_Open(const char *path)
@@ -261,6 +339,8 @@ void VFS_DirectoryUnref(struct directory *dir)
 	if (dir->refcount > 0) {
 		return;
 	}
+
+	UnhookOpenDir(dir);
 
 	if (dir->directory_funcs->free != NULL) {
 		dir->directory_funcs->free(dir);

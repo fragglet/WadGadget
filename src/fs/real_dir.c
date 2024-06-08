@@ -139,21 +139,12 @@ struct directory *RealDirOpenDir(void *_dir, struct directory_entry *entry)
 		return result;
 	}
 
-	path = VFS_EntryPath(dir, entry);
-
-	switch (entry->type) {
-	case FILE_TYPE_DIR:
-		result = VFS_OpenDir(path);
-		break;
-
-	case FILE_TYPE_WAD:
-		result = VFS_OpenWadAsDirectory(path);
-		break;
-
-	default:
-		break;
+	if (entry->type != FILE_TYPE_DIR && entry->type != FILE_TYPE_WAD) {
+		return NULL;
 	}
 
+	path = VFS_EntryPath(dir, entry);
+	result = VFS_OpenDir(path);
 	free(path);
 	return result;
 }
@@ -201,16 +192,9 @@ static const struct directory_funcs realdir_funcs = {
 	NULL,  // free
 };
 
-struct directory *VFS_OpenDir(const char *path)
+struct directory *VFS_OpenRealDir(const char *path)
 {
-	struct directory *d;
-
-	// TODO: This is kind of a hack.
-	if (HasWadExtension(path)) {
-		return VFS_OpenWadAsDirectory(path);
-	}
-
-	d = checked_calloc(1, sizeof(struct directory));
+	struct directory *d = checked_calloc(1, sizeof(struct directory));
 
 	d->directory_funcs = &realdir_funcs;
 	VFS_InitDirectory(d, path);
