@@ -42,7 +42,8 @@ struct directory_entry {
 };
 
 struct directory_funcs {
-	void (*refresh)(void *dir);
+	void (*refresh)(void *dir, struct directory_entry **entries,
+	                size_t *num_entries);
 	VFILE *(*open)(void *dir, struct directory_entry *entry);
 	struct directory *(*open_dir)(void *dir,
 	                              struct directory_entry *entry);
@@ -88,7 +89,7 @@ void VFS_Remove(struct directory *dir, struct directory_entry *entry);
 void VFS_Rename(struct directory *dir, struct directory_entry *entry,
                 const char *new_name);
 void VFS_CommitChanges(struct directory *dir, const char *msg, ...);
-void VFS_Refresh(struct directory *dir);
+int VFS_Refresh(struct directory *dir);
 struct wad_file *VFS_WadFile(struct directory *dir);
 char *VFS_EntryPath(struct directory *dir, struct directory_entry *entry);
 struct directory_entry *VFS_EntryBySerial(struct directory *p,
@@ -126,6 +127,8 @@ const char *VFS_LastCommitMessage(struct directory *dir);
 // For use by implementations of struct directory.
 void VFS_InitDirectory(struct directory *d, const char *path);
 struct directory_revision *VFS_SaveRevision(struct directory *d);
+int VFS_SetNewEntries(struct directory *d, struct directory_entry *entries,
+                      size_t num_entries);
 void VFS_FreeEntries(struct directory *d);
 
 extern struct directory_entry _vfs_parent_directory;

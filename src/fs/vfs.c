@@ -194,9 +194,32 @@ void VFS_CommitChanges(struct directory *dir, const char *msg, ...)
 	}
 }
 
-void VFS_Refresh(struct directory *dir)
+// Reload the list of entries for the given directory, returning the index
+// of the first entry to change (or -1 for no change)
+int VFS_Refresh(struct directory *dir)
 {
-	dir->directory_funcs->refresh(dir);
+	struct directory_entry *entries = NULL;
+	size_t num_entries = 0;
+	int i, result;
+
+	dir->directory_funcs->refresh(dir, &entries, &num_entries);
+
+	// Find the first entry to have changed between the old and new.
+	result = -1;
+	for (i = 0; i < num_entries; i++) {
+		if (i >= dir->num_entries
+		 || strcmp(entries[i].name, dir->entries[i].name) != 0
+		 || entries[i].size != dir->entries[i].size) {
+			result = i;
+			break;
+		}
+	}
+
+	VFS_FreeEntries(dir);
+	dir->entries = entries;
+	dir->num_entries = num_entries;
+
+	return result;
 }
 
 void VFS_Remove(struct directory *dir, struct directory_entry *entry)

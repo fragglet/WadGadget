@@ -30,21 +30,17 @@ struct wad_directory {
 	struct wad_file *wad_file;
 };
 
-static void WadDirectoryRefresh(void *_dir)
+static void WadDirectoryRefresh(void *_dir, struct directory_entry **entries,
+                                size_t *num_entries)
 {
 	struct wad_directory *dir = _dir;
 	struct wad_file_entry *waddir = W_GetDirectory(dir->wad_file);
 	unsigned int i, num_lumps = W_NumLumps(dir->wad_file);
-	struct directory_entry *ent;
 
-	VFS_FreeEntries(&dir->dir);
-
-	dir->dir.num_entries = num_lumps;
-	dir->dir.entries = checked_calloc(
-		num_lumps, sizeof(struct directory_entry));
+	*entries = checked_calloc(num_lumps, sizeof(struct directory_entry));
 
 	for (i = 0; i < num_lumps; i++) {
-		ent = &dir->dir.entries[i];
+		struct directory_entry *ent = *entries + i;
 		ent->type = FILE_TYPE_LUMP;
 		ent->name = checked_calloc(9, 1);
 		memcpy(ent->name, waddir[i].name, 8);
@@ -52,6 +48,8 @@ static void WadDirectoryRefresh(void *_dir)
 		ent->size = waddir[i].size;
 		ent->serial_no = waddir[i].serial_no;
 	}
+
+	*num_entries = num_lumps;
 }
 
 static VFILE *WadDirOpen(void *_dir, struct directory_entry *entry)
@@ -169,7 +167,7 @@ struct directory *VFS_OpenWadAsDirectory(const char *path)
 		VFS_CloseDir(&d->dir);
 		return NULL;
 	}
-	WadDirectoryRefresh(d);
+	WadDirectoryRefresh(d, &d->dir.entries, &d->dir.num_entries);
 	rev = VFS_SaveRevision(&d->dir);
 	snprintf(rev->descr, VFS_REVISION_DESCR_LEN, "Initial version");
 

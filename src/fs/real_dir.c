@@ -47,11 +47,14 @@ static int OrderByName(const void *x, const void *y)
 	return strcasecmp(dx->name, dy->name);
 }
 
-static bool _RealDirRefresh(struct directory *d)
+static bool _RealDirRefresh(struct directory *d,
+                            struct directory_entry **entries,
+                            size_t *num_entries)
 {
 	DIR *dir;
 
-	VFS_FreeEntries(d);
+	*entries = NULL;
+	*num_entries = 0;
 
 	dir = opendir(d->path);
 	if (dir == NULL) {
@@ -81,9 +84,9 @@ static bool _RealDirRefresh(struct directory *d)
 		free(path);
 		path = checked_strdup(dirent->d_name);
 
-		d->entries = checked_realloc(d->entries,
-			sizeof(struct directory_entry) * (d->num_entries + 1));
-		ent = &d->entries[d->num_entries];
+		*entries = checked_realloc(*entries,
+			sizeof(struct directory_entry) * (*num_entries + 1));
+		ent = *entries + *num_entries;
 		ent->name = path;
 		ent->type = dirent->d_type == DT_DIR ? FILE_TYPE_DIR :
 		            HasWadExtension(ent->name) ? FILE_TYPE_WAD :
@@ -91,19 +94,20 @@ static bool _RealDirRefresh(struct directory *d)
 		ent->size = stat_ok
 		         && ent->type != FILE_TYPE_DIR ? s.st_size : -1;
 		ent->serial_no = dirent->d_ino;
-		++d->num_entries;
+		++*num_entries;
 	}
 
 	closedir(dir);
 
-	qsort(d->entries, d->num_entries, sizeof(struct directory_entry),
+	qsort(*entries, *num_entries, sizeof(struct directory_entry),
 	      OrderByName);
 	return true;
 }
 
-static void RealDirRefresh(void *d)
+static void RealDirRefresh(void *d, struct directory_entry **entries,
+                           size_t *num_entries)
 {
-	(void) _RealDirRefresh(d);
+	(void) _RealDirRefresh(d, entries, num_entries);
 }
 
 static VFILE *RealDirOpen(void *_dir, struct directory_entry *entry)
@@ -211,7 +215,7 @@ struct directory *VFS_OpenDir(const char *path)
 	d->directory_funcs = &realdir_funcs;
 	VFS_InitDirectory(d, path);
 	d->type = FILE_TYPE_DIR;
-	if (!_RealDirRefresh(d)) {
+	if (!_RealDirRefresh(d, &d->entries, &d->num_entries)) {
 		VFS_CloseDir(d);
 		return NULL;
 	}

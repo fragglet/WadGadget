@@ -39,20 +39,18 @@ struct texture_dir {
 	unsigned int last_commit;
 };
 
-static void TextureDirRefresh(void *_dir)
+static void TextureDirRefresh(void *_dir, struct directory_entry **entries,
+                              size_t *num_entries)
 {
 	struct texture_dir *dir = _dir;
 	unsigned int i;
-	struct directory_entry *ent;
 
-	VFS_FreeEntries(&dir->dir);
-
-	dir->dir.num_entries = dir->txs->num_textures;
-	dir->dir.entries = checked_calloc(
-	dir->txs->num_textures, sizeof(struct directory_entry));
+	*num_entries = dir->txs->num_textures;
+	*entries = checked_calloc(
+		dir->txs->num_textures, sizeof(struct directory_entry));
 
 	for (i = 0; i < dir->txs->num_textures; i++) {
-		ent = &dir->dir.entries[i];
+		struct directory_entry *ent = *entries + i;
 		ent->type = FILE_TYPE_TEXTURE;
 		ent->name = checked_calloc(9, 1);
 		memcpy(ent->name, dir->txs->textures[i]->name, 8);
@@ -327,7 +325,7 @@ bool TX_DirReload(struct directory *_dir)
 	}
 	dir->pn = new_pn;
 	dir->txs = new_txs;
-	TextureDirRefresh(dir);
+	TextureDirRefresh(dir, &dir->dir.entries, &dir->dir.num_entries);
 	return true;
 }
 
