@@ -59,7 +59,8 @@ int UI_TextInputKeypress(struct text_input_box *input, int keypress)
 {
 	size_t pos;
 
-	if (keypress == KEY_BACKSPACE && strlen(input->input) > 0) {
+	if ((keypress == KEY_BACKSPACE || keypress == 0x7f)
+	 && strlen(input->input) > 0) {
 		input->input[strlen(input->input) - 1] = '\0';
 		return 1;
 	}
