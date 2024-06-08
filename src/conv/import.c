@@ -207,6 +207,7 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	to_wad = VFS_WadFile(to);
 	lumpnum = to_index;
 	W_AddEntries(to_wad, lumpnum, from_set->num_entries);
+	VFS_Refresh(to);
 	waddir = W_GetDirectory(to_wad);
 
 	// We only ever do conversions when importing from files.
