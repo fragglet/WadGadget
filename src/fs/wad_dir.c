@@ -167,6 +167,7 @@ struct directory *VFS_OpenWadAsDirectory(const char *path)
 		VFS_CloseDir(&d->dir);
 		return NULL;
 	}
+	d->dir.readonly = W_IsReadOnly(d->wad_file);
 	WadDirectoryRefresh(d, &d->dir.entries, &d->dir.num_entries);
 	rev = VFS_SaveRevision(&d->dir);
 	snprintf(rev->descr, VFS_REVISION_DESCR_LEN, "Initial version");

@@ -178,7 +178,8 @@ void VFS_CommitChanges(struct directory *dir, const char *msg, ...)
 	struct directory_revision *rev;
 	va_list args;
 
-	if (dir->directory_funcs->commit == NULL
+	if (dir->readonly
+	 || dir->directory_funcs->commit == NULL
 	 || dir->directory_funcs->need_commit == NULL
 	 || !dir->directory_funcs->need_commit(dir)) {
 		return;
@@ -226,6 +227,10 @@ void VFS_Remove(struct directory *dir, struct directory_entry *entry)
 {
 	unsigned int index = entry - dir->entries;
 
+	if (dir->readonly) {
+		return;
+	}
+
 	dir->directory_funcs->remove(dir, entry);
 
 	memmove(&dir->entries[index], &dir->entries[index + 1],
@@ -237,6 +242,10 @@ void VFS_Remove(struct directory *dir, struct directory_entry *entry)
 void VFS_Rename(struct directory *dir, struct directory_entry *entry,
                 const char *new_name)
 {
+	if (dir->readonly) {
+		return;
+	}
+
 	dir->directory_funcs->rename(dir, entry, new_name);
 }
 
@@ -288,7 +297,7 @@ void VFS_DescribeSize(const struct directory_entry *ent, char buf[10],
 bool VFS_SwapEntries(struct directory *dir, unsigned int x, unsigned int y)
 {
 	struct directory_entry tmp;
-	if (dir->directory_funcs->swap_entries == NULL) {
+	if (dir->readonly || dir->directory_funcs->swap_entries == NULL) {
 		return false;
 	}
 	dir->directory_funcs->swap_entries(dir, x, y);
@@ -303,7 +312,8 @@ int VFS_CanUndo(struct directory *dir)
 	struct directory_revision *r = dir->curr_revision;
 	int result = 0;
 
-	if (dir->curr_revision == NULL
+	if (dir->readonly
+	 || dir->curr_revision == NULL
 	 || dir->directory_funcs->restore_snapshot == NULL) {
 		return 0;
 	}
@@ -322,6 +332,7 @@ void VFS_Undo(struct directory *dir, unsigned int levels)
 	VFILE *in;
 	int i;
 
+	assert(!dir->readonly);
 	assert(dir->directory_funcs->restore_snapshot != NULL);
 
 	for (i = 0; i < levels; i++) {
@@ -339,7 +350,8 @@ int VFS_CanRedo(struct directory *dir)
 	struct directory_revision *r = dir->curr_revision;
 	int result = 0;
 
-	if (dir->curr_revision == NULL
+	if (dir->readonly
+	 || dir->curr_revision == NULL
 	 || dir->directory_funcs->restore_snapshot == NULL) {
 		return 0;
 	}
@@ -358,6 +370,7 @@ void VFS_Redo(struct directory *dir, unsigned int levels)
 	VFILE *in;
 	int i;
 
+	assert(!dir->readonly);
 	assert(dir->directory_funcs->restore_snapshot != NULL);
 
 	for (i = 0; i < levels; i++) {

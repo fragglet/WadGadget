@@ -32,6 +32,7 @@ struct snapshot {
 
 struct wad_file {
 	VFILE *vfs;
+	bool readonly;
 	struct wad_file_entry *directory;
 	int num_lumps;
 
@@ -169,17 +170,23 @@ static int ReadDirectory(struct wad_file *wf)
 struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;
+	bool readonly = false;
 	FILE *fs;
 	VFILE *vfs;
 
 	fs = fopen(filename, "r+");
 	if (fs == NULL) {
-		return NULL;
+		fs = fopen(filename, "r");
+		if (fs == NULL) {
+			return NULL;
+		}
+		readonly = true;
 	}
 
 	vfs = vfwrapfile(fs);
 
 	result = checked_calloc(1, sizeof(struct wad_file));
+	result->readonly = readonly;
 	result->vfs = vfs;
 	result->directory = NULL;
 	result->num_lumps = 0;
@@ -204,6 +211,11 @@ struct wad_file *W_OpenFile(const char *filename)
 	}
 
 	return result;
+}
+
+bool W_IsReadOnly(struct wad_file *f)
+{
+	return f->readonly;
 }
 
 struct wad_file_entry *W_GetDirectory(struct wad_file *f)
@@ -241,7 +253,7 @@ void W_CloseFile(struct wad_file *f)
 	// undo them all, the file will be precisely restored to its
 	// original contents.
 	// TODO: Gate this on whether we have ever called W_CommitChanges
-	if (vfseek(f->vfs, f->write_pos, SEEK_SET) == 0) {
+	if (!f->readonly && vfseek(f->vfs, f->write_pos, SEEK_SET) == 0) {
 		vftruncate(f->vfs);
 	}
 	vfclose(f->vfs);
@@ -255,6 +267,7 @@ void W_AddEntries(struct wad_file *f, unsigned int before_index,
 	unsigned int i;
 	struct wad_file_entry *ent;
 
+	assert(!f->readonly);
 	assert(f->current_write_lump == NULL);
 	assert(before_index <= f->num_lumps);
 
@@ -286,6 +299,7 @@ void W_DeleteEntry(struct wad_file *f, unsigned int index)
 
 void W_DeleteEntries(struct wad_file *f, unsigned int index, unsigned int cnt)
 {
+	assert(!f->readonly);
 	assert(f->current_write_lump == NULL);
 	assert(index <= f->num_lumps);
 	assert(cnt <= f->num_lumps);
@@ -299,6 +313,7 @@ void W_DeleteEntries(struct wad_file *f, unsigned int index, unsigned int cnt)
 void W_SetLumpName(struct wad_file *f, unsigned int index, const char *name)
 {
 	unsigned int i;
+	assert(!f->readonly);
 	assert(index < f->num_lumps);
 	for (i = 0; i < 8; i++) {
 		f->directory[index].name[i] = toupper(name[i]);
@@ -321,6 +336,7 @@ size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
 static void WriteHeader(struct wad_file *f)
 {
 	struct wad_file_header hdr = f->header;
+	assert(!f->readonly);
 	SwapHeader(&hdr);
 	assert(!vfseek(f->vfs, 0, SEEK_SET));
 	assert(vfwrite(&hdr, sizeof(struct wad_file_header), 1, f->vfs) == 1);
@@ -377,6 +393,7 @@ VFILE *W_OpenLumpRewrite(struct wad_file *f, unsigned int lump_index)
 {
 	VFILE *result;
 
+	assert(!f->readonly);
 	assert(lump_index < f->num_lumps);
 	assert(f->current_write_lump == NULL);
 
@@ -424,6 +441,8 @@ void W_SwapEntries(struct wad_file *f, unsigned int l1, unsigned int l2)
 {
 	struct wad_file_entry tmp;
 
+	assert(!f->readonly);
+
 	if (l1 == l2) {
 		return;
 	}
@@ -439,12 +458,12 @@ void W_SwapEntries(struct wad_file *f, unsigned int l1, unsigned int l2)
 
 bool W_NeedCommit(struct wad_file *f)
 {
-	return f->dirty;
+	return !f->readonly && f->dirty;
 }
 
 void W_CommitChanges(struct wad_file *f)
 {
-	if (!f->dirty) {
+	if (f->readonly || !f->dirty) {
 		return;
 	}
 
@@ -513,6 +532,7 @@ bool W_CompactWAD(struct wad_file *f)
 	struct progress_window progress;
 	uint32_t min_size = MinimumWADSize(f);
 
+	assert(!f->readonly);
 	assert(f->current_write_lump == NULL);
 
 	// Is file length shorter than the minimum size already? (This
@@ -578,6 +598,7 @@ void W_RestoreSnapshot(struct wad_file *wf, VFILE *in)
 {
 	struct snapshot s;
 
+	assert(!wf->readonly);
 	assert(vfread(&s, sizeof(struct snapshot), 1, in) == 1);
 	wf->header = s.header;
 	wf->write_pos = s.eof;

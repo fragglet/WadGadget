@@ -287,23 +287,38 @@ static void DrawPane(void *p)
 {
 	struct directory_pane *dp = p;
 	WINDOW *win = dp->pane.pane.window;
-	int w;
+	int x, w, space;
 	UI_ListPaneDraw(p);
 
-	if (dp->tagged.num_entries != 0) {
+	w = getmaxx(win);
+	space = w - strlen(dp->pane.title) - 10;
+
+	x = w - 3;
+
+	if (dp->dir->readonly && space > 5) {
+		wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
+		mvwaddstr(win, 0, x - 4, "[RO]");
+		wattroff(win, COLOR_PAIR(PAIR_PANE_COLOR));
+
+		x -= 5;
+		w -= 5;
+	}
+
+	if (dp->tagged.num_entries != 0 && space > 6) {
 		char buf[16];
 
-		w = getmaxx(win);
-		if (w - strlen(dp->pane.title) > 22) {
+		if (space > 15) {
 			snprintf(buf, sizeof(buf), "[%d marked]",
 			         (int) dp->tagged.num_entries);
 		} else {
 			snprintf(buf, sizeof(buf), "[%d]",
 			         (int) dp->tagged.num_entries);
 		}
+		x -= strlen(buf);
+		space -= strlen(buf);
 
 		wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
-		mvwaddstr(win, 0, w - strlen(buf) - 3, buf);
+		mvwaddstr(win, 0, x, buf);
 		wattroff(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	}
 }
