@@ -653,10 +653,9 @@ static void PerformDeleteNoConfirm(struct directory_pane *active_pane,
                                    struct directory_pane *other_pane)
 {
 	struct directory *dir = active_pane->dir;
-	struct directory_entry *ent;
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
 	char buf[64];
-	int i, first_change;
+	int i;
 
 	if (tagged->num_entries == 0) {
 		UI_MessageBox("You have not selected anything to delete.");
@@ -667,23 +666,25 @@ static void PerformDeleteNoConfirm(struct directory_pane *active_pane,
 	// we delete the files.
 	VFS_DescribeSet(dir, tagged, buf, sizeof(buf));
 
-	i = 0;
-	while ((ent = VFS_IterateSet(dir, tagged, &i)) != NULL) {
+	// Note that there's a corner-case gotcha here. VFS serial
+	// numbers for files are inode numbers, and through hardlinks
+	// multiple files can have the same inode number. However,
+	// the way things are implemented here, we only ever delete one
+	// of each serial number. So the wrong file can end up being
+	// deleted, but we'll never delete both.
+	for (i = 0; i < tagged->num_entries; i++) {
+		struct directory_entry *ent;
+		ent = VFS_EntryBySerial(dir, tagged->entries[i]);
+		if (ent == NULL) {
+			continue;
+		}
 		VFS_Remove(dir, ent);
 	}
-
 	VFS_CommitChanges(dir, "delete of %s", buf);
 	UI_ShowNotice("%s deleted.", buf);
 	VFS_ClearSet(&active_pane->tagged);
-
-	// Move the cursor to the first lump identified as having changed:
-	first_change = VFS_Refresh(dir);
-	if (first_change >= 0) {
-		UI_DirectoryPaneSelectEntry(active_pane,
-		                            &dir->entries[first_change]);
-	} else {
-		UI_DirectoryPaneReselect(active_pane);
-	}
+	VFS_Refresh(dir);
+	UI_DirectoryPaneReselect(active_pane);
 }
 
 const struct action delete_no_confirm_action = {

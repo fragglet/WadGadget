@@ -224,7 +224,14 @@ int VFS_Refresh(struct directory *dir)
 
 void VFS_Remove(struct directory *dir, struct directory_entry *entry)
 {
+	unsigned int index = entry - dir->entries;
+
 	dir->directory_funcs->remove(dir, entry);
+
+	memmove(&dir->entries[index], &dir->entries[index + 1],
+	        (dir->num_entries - index - 1)
+	          * sizeof(struct directory_entry));
+	--dir->num_entries;
 }
 
 void VFS_Rename(struct directory *dir, struct directory_entry *entry,
