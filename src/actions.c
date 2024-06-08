@@ -1026,7 +1026,7 @@ static void PerformUndo(struct directory_pane *active_pane,
 {
 	struct directory *dir = active_pane->dir;
 	const char *msg;
-	//int first_change;
+	int first_change;
 
 	if (VFS_CanUndo(dir) == 0) {
 		if (VFS_CanRedo(dir) == 0) {
@@ -1043,17 +1043,13 @@ static void PerformUndo(struct directory_pane *active_pane,
 	msg = VFS_LastCommitMessage(dir);
 
 	VFS_Undo(dir, 1);
-	/*
-	first_change = VFS_Undo(dir, 1);
-	if (first_change < 0) {
-		UI_MessageBox("Undo failed.");
-		return;
-	}
-	*/
-	VFS_Refresh(dir);
+	first_change = VFS_Refresh(dir);
 
 	// Move the cursor to the first lump identified as having changed:
-	//UI_DirectoryPaneSelectEntry(active_pane, &dir->entries[first_change]);
+	if (first_change >= 0) {
+		UI_DirectoryPaneSelectEntry(active_pane,
+		                            &dir->entries[first_change]);
+	}
 
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
@@ -1070,7 +1066,7 @@ static void PerformRedo(struct directory_pane *active_pane,
                         struct directory_pane *other_pane)
 {
 	struct directory *dir = active_pane->dir;
-	//int first_change;
+	int first_change;
 
 	if (VFS_CanRedo(dir) == 0) {
 		UI_ShowNotice("There is nothing to redo.");
@@ -1078,18 +1074,13 @@ static void PerformRedo(struct directory_pane *active_pane,
 	}
 
 	VFS_Redo(dir, 1);
-	/*
-	first_change = W_Redo(wf, 1);
-	if (first_change < 0) {
-		UI_MessageBox("Redo failed.");
-		return;
-	}
-	*/
-
-	VFS_Refresh(dir);
+	first_change = VFS_Refresh(dir);
 
 	// Move the cursor to the first lump identified as having changed:
-//UI_DirectoryPaneSelectEntry(active_pane, &dir->entries[first_change]);
+	if (first_change >= 0) {
+		UI_DirectoryPaneSelectEntry(active_pane,
+		                            &dir->entries[first_change]);
+	}
 
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
