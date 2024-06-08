@@ -122,8 +122,11 @@ static void HandleKeypresses(void)
 
 	// We now need to do at least one screen update. But read any
 	// additional keypresses first.
-	nodelay(stdscr, 1);
-	while (HandleKeypress()) {
+	for (;;) {
+		nodelay(stdscr, 1);
+		if (!HandleKeypress()) {
+			break;
+		}
 	}
 }
 
