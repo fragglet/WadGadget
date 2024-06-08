@@ -55,38 +55,54 @@ static void TstpHandler(int)
 	kill(0, SIGCONT);
 }
 
+static void SuspendSignal(int signum, struct sigaction *saved)
+{
+	struct sigaction tmp;
+
+	assert(sigaction(signum, NULL, saved) == 0);
+	tmp = *saved;
+	tmp.sa_handler = SIG_IGN;
+	assert(sigaction(signum, &tmp, NULL) == 0);
+}
+
+static void RestoreSignal(int signum, struct sigaction *saved)
+{
+	assert(sigaction(signum, saved, NULL) == 0);
+}
+
 static intptr_t WaitSubprocess(pid_t pid)
 {
-	void (*old_sigint)(int), (*old_sigterm)(int);
+	struct sigaction old_sigint, old_sigterm;
 	struct sigaction tstp_action, old_sigtstp;
 	int result, err;
 
-	// We have special handling for the SIGTSTP signal. If the user presses
-	// ^Z we stop waiting and let the editor keep running in the background
-	// (useful if the program is a GUI app like the Gimp). To do this, we
-	// have to install our own signal handler and disable the SA_RESTART
-	// flag so that waitpid() below will return.
-	sigaction(SIGTSTP, NULL, &old_sigtstp);
+	// We have special handling for the SIGTSTP signal. If the user
+	// presses ^Z we stop waiting and let the editor keep running in the
+	// background (useful if the program is a GUI app like the Gimp). To
+	// do this, we have to install our own signal handler and disable
+	// the SA_RESTART flag so that waitpid() below will return.
+	assert(sigaction(SIGTSTP, NULL, &old_sigtstp) == 0);
 	memset(&tstp_action, 0, sizeof(struct sigaction));
 	tstp_action.sa_handler = TstpHandler;
 	tstp_action.sa_mask = old_sigtstp.sa_mask;
 	tstp_action.sa_flags = old_sigtstp.sa_flags & ~SA_RESTART;
-	sigaction(SIGTSTP, &tstp_action, &old_sigtstp);
+	assert(sigaction(SIGTSTP, &tstp_action, &old_sigtstp) == 0);
 	got_tstp = false;
 
-	// We ignore SIGINT while waiting; the subprocess handles it. This
-	// allows us to ^C the subcommand without exiting the entire program.
-	old_sigint = signal(SIGINT, SIG_IGN);
-	old_sigterm = signal(SIGTERM, SIG_IGN);
+	// We ignore SIGINT and others while waiting; the subprocess handles
+	// it. This allows us to ^C the subcommand without exiting the
+	// entire program.
+	SuspendSignal(SIGINT, &old_sigint);
+	SuspendSignal(SIGTERM, &old_sigterm);
 
 	// Keep restarting waitpid unless we receive a SIGTSTP.
 	do {
 		err = waitpid(pid, &result, 0);
 	} while (err == EAGAIN && !got_tstp);
 
-	signal(SIGINT, old_sigint);
-	signal(SIGTERM, old_sigterm);
-	sigaction(SIGTSTP, &old_sigtstp, NULL);
+	RestoreSignal(SIGTSTP, &old_sigtstp);
+	RestoreSignal(SIGINT, &old_sigint);
+	RestoreSignal(SIGTERM, &old_sigterm);
 
 	if (got_tstp) {
 		return 0;
