@@ -1050,7 +1050,7 @@ static void PerformCompact(struct directory_pane *active_pane,
 		return;
 	}
 
-	wf = VFS_WadFile(other_pane->dir);
+	wf = VFS_WadFile(wad_dir);
 	assert(wf != NULL);
 
 	if (W_IsReadOnly(wf)) {
