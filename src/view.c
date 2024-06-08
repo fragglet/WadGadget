@@ -406,17 +406,19 @@ try_again:
 		displayed = true;
 	}
 
-	argv[0] = GetOpenCommand(argv[1]);
-	argv[2] = NULL;
+	if (!displayed) {
+		argv[0] = GetOpenCommand(argv[1]);
+		argv[2] = NULL;
 
-	if (!displayed && argv[0] != NULL) {
-		printf("Opening %s '%s'...\n"
-		       "Waiting until program terminates.\n"
-		       "(^Z = stop waiting, continue in background)\n",
-		       ent->type == FILE_TYPE_LUMP ? "lump" : "file",
-		       ent->name);
+		if (argv[0] != NULL) {
+			printf("Opening %s '%s'...\n"
+			       "Waiting until program terminates.\n"
+			       "(^Z = stop waiting, continue in background)\n",
+			       ent->type == FILE_TYPE_LUMP ? "lump" : "file",
+			       ent->name);
 
-		edit_success = _spawnv(_P_WAIT, argv[0], argv) == 0;
+			edit_success = _spawnv(_P_WAIT, argv[0], argv) == 0;
+		}
 	}
 
 	// Restore the curses display which may have been trashed if another
