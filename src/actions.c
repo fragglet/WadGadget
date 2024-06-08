@@ -977,20 +977,8 @@ static void PerformView(struct directory_pane *active_pane,
                         struct directory_pane *other_pane)
 {
 	struct directory_entry *ent;
-	char *path;
-	bool same_wad;
 
 	ent = UI_DirectoryPaneEntry(active_pane);
-	path = VFS_EntryPath(active_pane->dir, ent);
-
-	// Don't allow the same WAD to be opened twice.
-	same_wad = !strcmp(path, other_pane->dir->path)
-	        && other_pane->dir->type == FILE_TYPE_WAD;
-	free(path);
-	if (same_wad) {
-		SwitchToPane(other_pane);
-		return;
-	}
 
 	// Change directory?
 	if (ent->type == FILE_TYPE_DIR || ent->type == FILE_TYPE_WAD) {
