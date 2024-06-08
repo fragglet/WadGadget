@@ -92,6 +92,13 @@ static void TextureDirRename(void *_dir, struct directory_entry *entry,
 	TX_RenameTexture(dir->txs, entry - dir->dir.entries, new_name);
 }
 
+static bool TextureDirNeedCommit(void *_dir)
+{
+	struct texture_dir *dir = _dir;
+
+	return dir->txs->modified;
+}
+
 static void TextureDirCommit(void *dir)
 {
 	// TODO: write the lump
@@ -168,6 +175,21 @@ static void TextureDirSwap(void *_dir, unsigned int x, unsigned int y)
 	dir->txs->modified = true;
 }
 
+static VFILE *TextureDirSaveSnapshot(void *_dir)
+{
+	struct texture_dir *dir = _dir;
+	return TX_MarshalTextures(dir->txs);
+}
+
+static void TextureDirRestoreSnapshot(void *_dir, VFILE *in)
+{
+	struct texture_dir *dir = _dir;
+	struct textures *new_txs = TX_UnmarshalTextures(in);
+
+	TX_FreeTextures(dir->txs);
+	dir->txs = new_txs;
+}
+
 static void TextureDirFree(void *_dir)
 {
 	struct texture_dir *dir = _dir;
@@ -188,12 +210,12 @@ struct directory_funcs texture_dir_funcs = {
 	TextureDirOpenDir,
 	TextureDirRemove,
 	TextureDirRename,
-	NULL,  // need_commit
+	TextureDirNeedCommit,
 	TextureDirCommit,
 	TextureDirDescribe,
 	TextureDirSwap,
-	NULL,  // save_snapshot
-	NULL,  // restore_snapshot
+	TextureDirSaveSnapshot,
+	TextureDirRestoreSnapshot,
 	TextureDirFree,
 };
 
@@ -291,6 +313,7 @@ bool TX_DirReload(struct directory *_dir)
 struct directory *TX_OpenTextureDir(struct directory *parent,
                                     struct directory_entry *ent)
 {
+	struct directory_revision *rev;
 	struct texture_dir *dir =
 		checked_calloc(1, sizeof(struct texture_dir));
 
@@ -309,6 +332,9 @@ struct directory *TX_OpenTextureDir(struct directory *parent,
 		TextureDirFree(dir);
 		return NULL;
 	}
+
+	rev = VFS_SaveRevision(&dir->dir);
+	snprintf(rev->descr, VFS_REVISION_DESCR_LEN, "Initial version");
 
 	return &dir->dir;
 }

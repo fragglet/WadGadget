@@ -66,10 +66,11 @@ static void PerformNewTexture(struct directory_pane *active_pane,
 
 	memset(&t, 0, sizeof(t));
 	strncpy(t.name, name, 8);
-	free(name);
 	t.width = 128;
 	t.height = 128;
 	TX_AddTexture(txs, pos, &t);
+	VFS_CommitChanges(active_pane->dir, "creation of texture '%s'", name);
+	free(name);
 	VFS_Refresh(active_pane->dir);
 	UI_ListPaneKeypress(active_pane, KEY_DOWN);
 }
@@ -85,6 +86,7 @@ static void PerformEditTextures(struct directory_pane *active_pane,
 	struct directory *parent;
 	struct directory_entry *ent;
 
+	// TODO: Write current state of the texture dir before edit
 	parent = TX_DirGetParent(active_pane->dir, &ent);
 	OpenDirent(parent, ent);
 
@@ -128,11 +130,12 @@ static void PerformDuplicateTexture(struct directory_pane *active_pane,
 
 	t = TX_DupTexture(txs->textures[idx]);
 	strncpy(t->name, name, 8);
-	free(name);
 
 	TX_AddTexture(txs, idx + 1, t);
 	free(t);
 
+	VFS_CommitChanges(active_pane->dir, "creation of texture '%s'", name);
+	free(name);
 	VFS_Refresh(active_pane->dir);
 	UI_ListPaneKeypress(active_pane, KEY_DOWN);
 }

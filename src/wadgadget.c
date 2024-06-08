@@ -220,6 +220,8 @@ static const struct action *texture_actions[] = {
 	&sort_entries_action,
 	&new_texture_action,
 	&dup_texture_action,
+	&undo_action,
+	&redo_action,
 	NULL,
 };
 
