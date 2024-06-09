@@ -26,6 +26,7 @@ OBJS =                      \
     fs/wad_file.o           \
     textures/actions.o      \
     textures/config.o       \
+    textures/pnames.o       \
     textures/texture_dir.o  \
     textures/textures.o     \
     ui/actions_pane.o       \
