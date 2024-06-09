@@ -23,17 +23,14 @@
 #include "ui/ui.h"
 
 #include "textures/textures.h"
+#include "textures/internal.h"
 
 // Implementation of a VFS directory that is backed by a textures list.
 // Currently incomplete.
 struct texture_dir {
-	struct directory dir;
+	struct lump_dir dir;
 	struct textures *txs;
 	struct pnames *pn;
-
-	// Parent directory; always a WAD file.
-	struct directory *parent_dir;
-	uint64_t lump_serial;
 
 	// txs->modified_count at the last call to commit.
 	unsigned int last_commit;
@@ -71,8 +68,9 @@ static struct directory *TextureDirOpenDir(void *_dir,
 	struct texture_dir *dir = _dir;
 
 	if (ent == VFS_PARENT_DIRECTORY) {
-		VFS_DirectoryRef(dir->parent_dir);
-		return dir->parent_dir;
+		struct directory *parent = TX_DirGetParent(&dir->dir.dir, NULL);
+		VFS_DirectoryRef(parent);
+		return parent;
 	}
 
 	return NULL;
@@ -82,7 +80,7 @@ static void TextureDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct texture_dir *dir = _dir;
 
-	TX_RemoveTexture(dir->txs, entry - dir->dir.entries);
+	TX_RemoveTexture(dir->txs, entry - dir->dir.dir.entries);
 }
 
 static void TextureDirRename(void *_dir, struct directory_entry *entry,
@@ -90,7 +88,7 @@ static void TextureDirRename(void *_dir, struct directory_entry *entry,
 {
 	struct texture_dir *dir = _dir;
 
-	TX_RenameTexture(dir->txs, entry - dir->dir.entries, new_name);
+	TX_RenameTexture(dir->txs, entry - dir->dir.dir.entries, new_name);
 }
 
 static bool TextureDirNeedCommit(void *_dir)
@@ -118,30 +116,26 @@ static void TextureDirDescribe(char *buf, size_t buf_len, int cnt)
 
 static bool TextureDirSave(struct texture_dir *dir)
 {
+	struct directory *parent;
 	struct directory_entry *ent;
 	struct wad_file *wf;
 	VFILE *out, *texture_out;
-	unsigned int idx;
 
 	// Unchanged since it was opened?
 	if (dir->txs->modified_count == 0) {
 		return true;
 	}
 
-	ent = VFS_EntryBySerial(dir->parent_dir, dir->lump_serial);
-	if (ent == NULL) {
-		return false;
-	}
+	parent = TX_DirGetParent(&dir->dir.dir, &ent);
 
 	texture_out = TX_MarshalTextures(dir->txs);
 	if (texture_out == NULL) {
 		return false;
 	}
 
-	wf = VFS_WadFile(dir->parent_dir);
+	wf = VFS_WadFile(parent);
 	assert(wf != NULL);
-	idx = ent - dir->parent_dir->entries;
-	out = W_OpenLumpRewrite(wf, idx);
+	out = W_OpenLumpRewrite(wf, ent - parent->entries);
 	if (out == NULL) {
 		vfclose(texture_out);
 		return false;
@@ -150,10 +144,10 @@ static bool TextureDirSave(struct texture_dir *dir)
 	vfcopy(texture_out, out);
 	vfclose(texture_out);
 	vfclose(out);
-	VFS_CommitChanges(dir->parent_dir, "update of '%s' texture directory",
+	VFS_CommitChanges(parent, "update of '%s' texture directory",
 	                  ent->name);
 	UI_ShowNotice("%s lump updated.", ent->name);
-	VFS_Refresh(dir->parent_dir);
+	VFS_Refresh(parent);
 
 	return true;
 }
@@ -220,7 +214,7 @@ static void TextureDirFree(void *_dir)
 	if (dir->pn != NULL) {
 		TX_FreePnames(dir->pn);
 	}
-	VFS_DirectoryUnref(dir->parent_dir);
+	VFS_DirectoryUnref(TX_DirGetParent(&dir->dir.dir, NULL));
 }
 
 struct directory_funcs texture_dir_funcs = {
@@ -238,48 +232,19 @@ struct directory_funcs texture_dir_funcs = {
 	TextureDirFree,
 };
 
-struct directory *TX_DirGetParent(struct directory *_dir,
-                                  struct directory_entry **ent)
-{
-	struct texture_dir *dir = (struct texture_dir *) _dir;
-
-	assert(dir->dir.directory_funcs == &texture_dir_funcs);
-
-	if (ent != NULL) {
-		*ent = VFS_EntryBySerial(dir->parent_dir, dir->lump_serial);
-		assert(*ent != NULL);
-	}
-
-	return dir->parent_dir;
-}
-
-struct pnames *TX_GetDirPnames(struct directory *dir)
-{
-	extern struct pnames *TX_PnamesDirPnames(struct directory *dir);
-	struct pnames *pn;
-
-	pn = TX_PnamesDirPnames(dir);
-	if (pn != NULL) {
-		return pn;
-	}
-
-	assert(dir->directory_funcs == &texture_dir_funcs);
-	return ((struct texture_dir *) dir)->pn;
-}
-
 static struct pnames *LoadPnames(struct texture_dir *dir)
 {
 	VFILE *input;
 	struct pnames *pn;
 	struct directory_entry *ent =
-		VFS_EntryByName(dir->parent_dir, "PNAMES");
+		VFS_EntryByName(dir->dir.parent_dir, "PNAMES");
 
 	if (ent == NULL) {
 		ConversionError("WAD does not contain a PNAMES lump.");
 		return NULL;
 	}
 
-	input = VFS_OpenByEntry(dir->parent_dir, ent);
+	input = VFS_OpenByEntry(dir->dir.parent_dir, ent);
 	if (input == NULL) {
 		ConversionError("Failed to open PNAMES lump.");
 		return NULL;
@@ -330,7 +295,7 @@ bool TX_DirReload(struct directory *_dir)
 	}
 	dir->pn = new_pn;
 	dir->txs = new_txs;
-	TextureDirRefresh(dir, &dir->dir.entries, &dir->dir.num_entries);
+	TextureDirRefresh(dir, &dir->dir.dir.entries, &dir->dir.dir.num_entries);
 	return true;
 }
 
@@ -341,34 +306,34 @@ struct directory *TX_OpenTextureDir(struct directory *parent,
 	struct texture_dir *dir =
 		checked_calloc(1, sizeof(struct texture_dir));
 
-	dir->dir.type = FILE_TYPE_TEXTURE_LIST;
-	dir->dir.path = StringJoin("/", parent->path, ent->name, NULL);
-	dir->dir.refcount = 1;
-	dir->dir.entries = NULL;
-	dir->dir.num_entries = 0;
-	dir->dir.directory_funcs = &texture_dir_funcs;
-	dir->dir.readonly = parent->readonly;
+	TX_InitLumpDir(&dir->dir, parent, ent);
+	dir->dir.dir.type = FILE_TYPE_TEXTURE_LIST;
+	dir->dir.dir.directory_funcs = &texture_dir_funcs;
 
-	dir->parent_dir = parent;
-	VFS_DirectoryRef(dir->parent_dir);
-	dir->lump_serial = ent->serial_no;
-
-	if (!TX_DirReload(&dir->dir)) {
-		TextureDirFree(dir);
+	if (!TX_DirReload(&dir->dir.dir)) {
+		VFS_CloseDir(&dir->dir.dir);
 		return NULL;
 	}
 
-	rev = VFS_SaveRevision(&dir->dir);
+	rev = VFS_SaveRevision(&dir->dir.dir);
 	snprintf(rev->descr, VFS_REVISION_DESCR_LEN, "Initial version");
 
-	return &dir->dir;
+	return &dir->dir.dir;
 }
 
 struct textures *TX_TextureList(struct directory *_dir)
 {
 	struct texture_dir *dir = (struct texture_dir *) _dir;
 
-	assert(dir->dir.directory_funcs == &texture_dir_funcs);
+	assert(dir->dir.dir.directory_funcs == &texture_dir_funcs);
 
 	return dir->txs;
+}
+
+struct pnames *TX_TexturesDirGetPnames(struct directory *dir)
+{
+	if (dir->directory_funcs == &texture_dir_funcs) {
+		return ((struct texture_dir *) dir)->pn;
+	}
+	return NULL;
 }

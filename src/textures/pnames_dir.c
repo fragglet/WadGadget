@@ -18,17 +18,15 @@
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "stringlib.h"
+
+#include "textures/internal.h"
 #include "textures/textures.h"
 
 struct pnames_dir {
-	struct directory dir;
+	struct lump_dir dir;
 	struct pnames *pn;
 
-	// Parent directory; always a WAD file.
-	struct directory *parent_dir;
-	uint64_t lump_serial;
-
-	// txs->modified_count at the last call to commit.
+	// pn->modified_count at the last call to commit.
 	unsigned int last_commit;
 };
 
@@ -68,23 +66,10 @@ static void PnamesDirRefresh(void *_dir, struct directory_entry **entries,
 	*entries = new_entries;
 }
 
-static struct directory *PnamesDirOpenDir(void *_dir,
-                                          struct directory_entry *ent)
-{
-	struct pnames_dir *dir = _dir;
-
-	if (ent == VFS_PARENT_DIRECTORY) {
-		VFS_DirectoryRef(dir->parent_dir);
-		return dir->parent_dir;
-	}
-
-	return NULL;
-}
-
 static void PnamesDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct pnames_dir *dir = _dir;
-	unsigned int idx = entry - dir->dir.entries;
+	unsigned int idx = entry - dir->dir.dir.entries;
 
 	assert(idx < dir->pn->num_pnames);
 	TX_RemovePname(dir->pn, idx);
@@ -94,7 +79,7 @@ static void PnamesDirRename(void *_dir, struct directory_entry *entry,
                             const char *new_name)
 {
 	struct pnames_dir *dir = _dir;
-	unsigned int idx = entry - dir->dir.entries;
+	unsigned int idx = entry - dir->dir.dir.entries;
 
 	assert(idx < dir->pn->num_pnames);
 	TX_RenamePname(dir->pn, idx, new_name);
@@ -174,18 +159,18 @@ static void PnamesDirFree(void *_dir)
 {
 	struct pnames_dir *dir = _dir;
 
-	if (dir->last_commit > 0) {
+	if (dir->pn->modified_count > 0) {
 		// TODO: Save new directory
 	}
 
 	TX_FreePnames(dir->pn);
-	VFS_DirectoryUnref(dir->parent_dir);
+	TX_LumpDirFree(&dir->dir);
 }
 
 static struct directory_funcs pnames_dir_funcs = {
 	PnamesDirRefresh,
 	NULL,  // open
-	PnamesDirOpenDir,
+	TX_LumpDirOpenDir,
 	PnamesDirRemove,
 	PnamesDirRename,
 	PnamesDirNeedCommit,
@@ -197,26 +182,14 @@ static struct directory_funcs pnames_dir_funcs = {
 	PnamesDirFree,
 };
 
-struct pnames *TX_PnamesDirPnames(struct directory *dir)
-{
-	if (dir->directory_funcs == &pnames_dir_funcs) {
-		return ((struct pnames_dir *) dir)->pn;
-	}
-
-	return NULL;
-}
-
 static bool LoadPnamesDir(struct pnames_dir *dir)
 {
+	struct directory *parent;
 	struct directory_entry *ent;
 	VFILE *input;
 
-	ent = VFS_EntryBySerial(dir->parent_dir, dir->lump_serial);
-	if (ent == NULL) {
-		return false;
-	}
-
-	input = VFS_OpenByEntry(dir->parent_dir, ent);
+	parent = TX_DirGetParent(&dir->dir.dir, &ent);
+	input = VFS_OpenByEntry(parent, ent);
 	if (input == NULL) {
 		return false;
 	}
@@ -236,27 +209,27 @@ struct directory *TX_OpenPnamesDir(struct directory *parent,
 	struct pnames_dir *dir =
 		checked_calloc(1, sizeof(struct pnames_dir));
 
-	dir->dir.type = FILE_TYPE_PNAMES_LIST;
-	dir->dir.path = StringJoin("/", parent->path, ent->name, NULL);
-	dir->dir.refcount = 1;
-	dir->dir.entries = NULL;
-	dir->dir.num_entries = 0;
-	dir->dir.directory_funcs = &pnames_dir_funcs;
-	dir->dir.readonly = parent->readonly;
-
-	dir->parent_dir = parent;
-	VFS_DirectoryRef(dir->parent_dir);
-	dir->lump_serial = ent->serial_no;
+	TX_InitLumpDir(&dir->dir, parent, ent);
+	dir->dir.dir.type = FILE_TYPE_PNAMES_LIST;
+	dir->dir.dir.directory_funcs = &pnames_dir_funcs;
 
 	if (!LoadPnamesDir(dir)) {
-		PnamesDirFree(dir);
+		VFS_CloseDir(&dir->dir.dir);
 		return NULL;
 	}
 
-	rev = VFS_SaveRevision(&dir->dir);
+	PnamesDirRefresh(dir, &dir->dir.dir.entries, &dir->dir.dir.num_entries);
+
+	rev = VFS_SaveRevision(&dir->dir.dir);
 	snprintf(rev->descr, VFS_REVISION_DESCR_LEN, "Initial version");
 
-	PnamesDirRefresh(dir, &dir->dir.entries, &dir->dir.num_entries);
+	return &dir->dir.dir;
+}
 
-	return &dir->dir;
+struct pnames *TX_PnamesDirGetPnames(struct directory *dir)
+{
+	if (dir->directory_funcs == &pnames_dir_funcs) {
+		return ((struct pnames_dir *) dir)->pn;
+	}
+	return NULL;
 }
