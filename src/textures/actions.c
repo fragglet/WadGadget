@@ -248,3 +248,45 @@ const struct action export_texture_config = {
 	KEY_F(5), 'O', "ExpCfg", "> Export config",
 	PerformExportConfig,
 };
+
+static void PerformNewPname(struct directory_pane *active_pane,
+                            struct directory_pane *other_pane)
+{
+	struct pnames *pn = TX_GetDirPnames(active_pane->dir);
+	int idx;
+	char *name;
+
+	if (!CheckReadOnly(active_pane->dir)) {
+		return;
+	}
+
+	name = UI_TextInputDialogBox("New pname", "Create", 8,
+	                             "Enter new patch name:");
+	if (name == NULL) {
+		return;
+	}
+
+	if (TX_GetPnameIndex(pn, name) >= 0) {
+		UI_DirectoryPaneSelectByName(active_pane, name);
+		UI_MessageBox("'%s' is already in the list.");
+		free(name);
+		return;
+	}
+
+	// We always add the new pname to the end of the directory, as putting
+	// it in the middle of the directory screws up the other indexes.
+	// That's not to say that we don't allow it to be subsequently moved
+	// into a different position, but just adding a pname always does
+	// something safe.
+	idx = TX_AppendPname(pn, name);
+	VFS_CommitChanges(active_pane->dir, "creation of pname '%s'", name);
+	VFS_Refresh(active_pane->dir);
+	UI_DirectoryPaneSelectEntry(active_pane,
+	                            &active_pane->dir->entries[idx]);
+	free(name);
+}
+
+const struct action new_pname_action = {
+	KEY_F(7), 'K', "NewPname", ". New pname",
+	PerformNewPname,
+};

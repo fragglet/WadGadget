@@ -229,7 +229,7 @@ static const struct action *pnames_actions[] = {
 	//&edit_pnamess_action,
 	&rearrange_action,
 	&sort_entries_action,
-	//&new_pname_action,
+	&new_pname_action,
 	&undo_action,
 	&redo_action,
 	NULL,

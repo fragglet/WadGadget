@@ -89,6 +89,7 @@ int TX_AppendPname(struct pnames *pn, const char *name)
 	strncpy(pn->pnames[pn->num_pnames], name, 8);
 	result = pn->num_pnames;
 	++pn->num_pnames;
+	TX_RenamePname(pn, result, name);
 	++pn->modified_count;
 	return result;
 }
@@ -116,8 +117,7 @@ void TX_RemovePname(struct pnames *pn, unsigned int idx)
 	++pn->modified_count;
 }
 
-void TX_RenamePname(struct pnames *pn, unsigned int idx,
-                    const char *name)
+void TX_RenamePname(struct pnames *pn, unsigned int idx, const char *name)
 {
 	char *namedest;
 	int i;
