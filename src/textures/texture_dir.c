@@ -62,20 +62,6 @@ static VFILE *TextureDirOpen(void *dir, struct directory_entry *entry)
 	return NULL;
 }
 
-static struct directory *TextureDirOpenDir(void *_dir,
-                                           struct directory_entry *ent)
-{
-	struct texture_dir *dir = _dir;
-
-	if (ent == VFS_PARENT_DIRECTORY) {
-		struct directory *parent = TX_DirGetParent(&dir->dir.dir, NULL);
-		VFS_DirectoryRef(parent);
-		return parent;
-	}
-
-	return NULL;
-}
-
 static void TextureDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct texture_dir *dir = _dir;
@@ -112,44 +98,6 @@ static void TextureDirDescribe(char *buf, size_t buf_len, int cnt)
 	} else {
 		snprintf(buf, buf_len, "%d textures", cnt);
 	}
-}
-
-static bool TextureDirSave(struct texture_dir *dir)
-{
-	struct directory *parent;
-	struct directory_entry *ent;
-	struct wad_file *wf;
-	VFILE *out, *texture_out;
-
-	// Unchanged since it was opened?
-	if (dir->txs->modified_count == 0) {
-		return true;
-	}
-
-	parent = TX_DirGetParent(&dir->dir.dir, &ent);
-
-	texture_out = TX_MarshalTextures(dir->txs);
-	if (texture_out == NULL) {
-		return false;
-	}
-
-	wf = VFS_WadFile(parent);
-	assert(wf != NULL);
-	out = W_OpenLumpRewrite(wf, ent - parent->entries);
-	if (out == NULL) {
-		vfclose(texture_out);
-		return false;
-	}
-
-	vfcopy(texture_out, out);
-	vfclose(texture_out);
-	vfclose(out);
-	VFS_CommitChanges(parent, "update of '%s' texture directory",
-	                  ent->name);
-	UI_ShowNotice("%s lump updated.", ent->name);
-	VFS_Refresh(parent);
-
-	return true;
 }
 
 static void TextureDirSwap(void *_dir, unsigned int x, unsigned int y)
@@ -207,20 +155,20 @@ static void TextureDirFree(void *_dir)
 {
 	struct texture_dir *dir = _dir;
 
+	TX_LumpDirFree(&dir->dir);
+
 	if (dir->txs != NULL) {
-		TextureDirSave(dir);
 		TX_FreeTextures(dir->txs);
 	}
 	if (dir->pn != NULL) {
 		TX_FreePnames(dir->pn);
 	}
-	VFS_DirectoryUnref(TX_DirGetParent(&dir->dir.dir, NULL));
 }
 
 struct directory_funcs texture_dir_funcs = {
 	TextureDirRefresh,
 	TextureDirOpen,
-	TextureDirOpenDir,
+	TX_LumpDirOpenDir,
 	TextureDirRemove,
 	TextureDirRename,
 	TextureDirNeedCommit,
@@ -259,23 +207,28 @@ static struct pnames *LoadPnames(struct texture_dir *dir)
 	return pn;
 }
 
-bool TX_DirReload(struct directory *_dir)
+static struct pnames *TextureDirGetPnames(void *_dir)
+{
+	struct texture_dir *dir = _dir;
+
+	assert(dir->dir.dir.directory_funcs == &texture_dir_funcs);
+	return dir->pn;
+}
+
+static bool TextureDirLoad(void *_dir, struct directory *wad_dir,
+                           struct directory_entry *ent)
 {
 	struct texture_dir *dir = (struct texture_dir *) _dir;
-	struct directory *parent;
-	struct directory_entry *ent;
 	struct textures *new_txs;
 	struct pnames *new_pn;
 	VFILE *input;
-
-	parent = TX_DirGetParent(_dir, &ent);
 
 	new_pn = LoadPnames(dir);
 	if (new_pn == NULL) {
 		return false;
 	}
 
-	input = VFS_OpenByEntry(parent, ent);
+	input = VFS_OpenByEntry(wad_dir, ent);
 	if (input == NULL) {
 		TX_FreePnames(new_pn);
 		return false;
@@ -295,28 +248,61 @@ bool TX_DirReload(struct directory *_dir)
 	}
 	dir->pn = new_pn;
 	dir->txs = new_txs;
-	TextureDirRefresh(dir, &dir->dir.dir.entries, &dir->dir.dir.num_entries);
 	return true;
 }
+
+static bool TextureDirSave(void *_dir, struct directory *wad_dir,
+                           struct directory_entry *ent)
+{
+	struct texture_dir *dir = _dir;
+	struct wad_file *wf;
+	VFILE *out, *texture_out;
+
+	// Unchanged since it was opened?
+	if (dir->txs->modified_count == 0) {
+		return true;
+	}
+
+	texture_out = TX_MarshalTextures(dir->txs);
+	if (texture_out == NULL) {
+		return false;
+	}
+
+	wf = VFS_WadFile(wad_dir);
+	assert(wf != NULL);
+	out = W_OpenLumpRewrite(wf, ent - wad_dir->entries);
+	if (out == NULL) {
+		vfclose(texture_out);
+		return false;
+	}
+
+	vfcopy(texture_out, out);
+	vfclose(texture_out);
+	vfclose(out);
+	VFS_CommitChanges(wad_dir, "update of '%s' texture directory",
+	                  ent->name);
+	UI_ShowNotice("%s lump updated.", ent->name);
+
+	return true;
+}
+
+static const struct lump_dir_funcs texture_lump_dir_funcs = {
+	TextureDirGetPnames,
+	TextureDirLoad,
+	TextureDirSave,
+};
 
 struct directory *TX_OpenTextureDir(struct directory *parent,
                                     struct directory_entry *ent)
 {
-	struct directory_revision *rev;
 	struct texture_dir *dir =
 		checked_calloc(1, sizeof(struct texture_dir));
 
-	TX_InitLumpDir(&dir->dir, parent, ent);
 	dir->dir.dir.type = FILE_TYPE_TEXTURE_LIST;
 	dir->dir.dir.directory_funcs = &texture_dir_funcs;
-
-	if (!TX_DirReload(&dir->dir.dir)) {
-		VFS_CloseDir(&dir->dir.dir);
+	if (!TX_InitLumpDir(&dir->dir, &texture_lump_dir_funcs, parent, ent)) {
 		return NULL;
 	}
-
-	rev = VFS_SaveRevision(&dir->dir.dir);
-	snprintf(rev->descr, VFS_REVISION_DESCR_LEN, "Initial version");
 
 	return &dir->dir.dir;
 }
@@ -328,12 +314,4 @@ struct textures *TX_TextureList(struct directory *_dir)
 	assert(dir->dir.dir.directory_funcs == &texture_dir_funcs);
 
 	return dir->txs;
-}
-
-struct pnames *TX_TexturesDirGetPnames(struct directory *dir)
-{
-	if (dir->directory_funcs == &texture_dir_funcs) {
-		return ((struct texture_dir *) dir)->pn;
-	}
-	return NULL;
 }

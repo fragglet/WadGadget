@@ -159,15 +159,11 @@ static void PnamesDirFree(void *_dir)
 {
 	struct pnames_dir *dir = _dir;
 
-	if (dir->pn->modified_count > 0) {
-		// TODO: Save new directory
-	}
-
-	TX_FreePnames(dir->pn);
 	TX_LumpDirFree(&dir->dir);
+	TX_FreePnames(dir->pn);
 }
 
-static struct directory_funcs pnames_dir_funcs = {
+static const struct directory_funcs pnames_dir_funcs = {
 	PnamesDirRefresh,
 	NULL,  // open
 	TX_LumpDirOpenDir,
@@ -182,14 +178,20 @@ static struct directory_funcs pnames_dir_funcs = {
 	PnamesDirFree,
 };
 
-static bool LoadPnamesDir(struct pnames_dir *dir)
+struct pnames *PnamesDirGetPnames(void *_dir)
 {
-	struct directory *parent;
-	struct directory_entry *ent;
+	struct pnames_dir *dir = _dir;
+	assert(dir->dir.dir.directory_funcs == &pnames_dir_funcs);
+	return dir->pn;
+}
+
+static bool PnamesDirLoad(void *_dir, struct directory *wad_dir,
+                          struct directory_entry *ent)
+{
+	struct pnames_dir *dir = _dir;
 	VFILE *input;
 
-	parent = TX_DirGetParent(&dir->dir.dir, &ent);
-	input = VFS_OpenByEntry(parent, ent);
+	input = VFS_OpenByEntry(wad_dir, ent);
 	if (input == NULL) {
 		return false;
 	}
@@ -202,34 +204,36 @@ static bool LoadPnamesDir(struct pnames_dir *dir)
 	return true;
 }
 
+static bool PnamesDirSave(void *_dir, struct directory *wad_dir,
+                          struct directory_entry *ent)
+{
+	struct pnames_dir *dir = _dir;
+
+	if (dir->pn->modified_count == 0) {
+		return true;
+	}
+
+	// TODO
+	return true;
+}
+
+static const struct lump_dir_funcs pnames_lump_dir_funcs = {
+	PnamesDirGetPnames,
+	PnamesDirLoad,
+	PnamesDirSave,
+};
+
 struct directory *TX_OpenPnamesDir(struct directory *parent,
                                    struct directory_entry *ent)
 {
-	struct directory_revision *rev;
 	struct pnames_dir *dir =
 		checked_calloc(1, sizeof(struct pnames_dir));
 
-	TX_InitLumpDir(&dir->dir, parent, ent);
 	dir->dir.dir.type = FILE_TYPE_PNAMES_LIST;
 	dir->dir.dir.directory_funcs = &pnames_dir_funcs;
-
-	if (!LoadPnamesDir(dir)) {
-		VFS_CloseDir(&dir->dir.dir);
+	if (!TX_InitLumpDir(&dir->dir, &pnames_lump_dir_funcs,  parent, ent)) {
 		return NULL;
 	}
 
-	PnamesDirRefresh(dir, &dir->dir.dir.entries, &dir->dir.dir.num_entries);
-
-	rev = VFS_SaveRevision(&dir->dir.dir);
-	snprintf(rev->descr, VFS_REVISION_DESCR_LEN, "Initial version");
-
 	return &dir->dir.dir;
-}
-
-struct pnames *TX_PnamesDirGetPnames(struct directory *dir)
-{
-	if (dir->directory_funcs == &pnames_dir_funcs) {
-		return ((struct pnames_dir *) dir)->pn;
-	}
-	return NULL;
 }
