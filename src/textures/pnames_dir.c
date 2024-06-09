@@ -197,6 +197,15 @@ static struct directory_funcs pnames_dir_funcs = {
 	PnamesDirFree,
 };
 
+struct pnames *TX_PnamesDirPnames(struct directory *dir)
+{
+	if (dir->directory_funcs == &pnames_dir_funcs) {
+		return ((struct pnames_dir *) dir)->pn;
+	}
+
+	return NULL;
+}
+
 static bool LoadPnamesDir(struct pnames_dir *dir)
 {
 	struct directory_entry *ent;

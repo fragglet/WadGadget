@@ -253,13 +253,18 @@ struct directory *TX_DirGetParent(struct directory *_dir,
 	return dir->parent_dir;
 }
 
-struct pnames *TX_GetDirPnames(struct directory *_dir)
+struct pnames *TX_GetDirPnames(struct directory *dir)
 {
-	struct texture_dir *dir = (struct texture_dir *) _dir;
+	extern struct pnames *TX_PnamesDirPnames(struct directory *dir);
+	struct pnames *pn;
 
-	assert(dir->dir.directory_funcs == &texture_dir_funcs);
+	pn = TX_PnamesDirPnames(dir);
+	if (pn != NULL) {
+		return pn;
+	}
 
-	return dir->pn;
+	assert(dir->directory_funcs == &texture_dir_funcs);
+	return ((struct texture_dir *) dir)->pn;
 }
 
 static struct pnames *LoadPnames(struct texture_dir *dir)

@@ -75,6 +75,8 @@ struct textures *TX_TextureList(struct directory *_dir);
 struct directory *TX_DirGetParent(struct directory *_dir,
                                   struct directory_entry **ent);
 struct pnames *TX_GetDirPnames(struct directory *_dir);
+struct directory *TX_OpenPnamesDir(struct directory *parent,
+                                   struct directory_entry *ent);
 
 extern const struct action new_texture_action;
 extern const struct action edit_textures_action;
