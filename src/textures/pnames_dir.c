@@ -60,7 +60,7 @@ static void PnamesDirRefresh(void *_dir, struct directory_entry **entries,
 		memcpy(new_entries[i].name, dir->pn->pnames[i], 8);
 		new_entries[i].name[8] = '\0';
 
-		new_entries[i].type = FILE_TYPE_FILE;  // TODO
+		new_entries[i].type = FILE_TYPE_PNAME;
 		new_entries[i].size = 0;
 		new_entries[i].serial_no = PnameSerialNo(dir->pn->pnames[i]);
 	}
@@ -236,7 +236,7 @@ struct directory *TX_OpenPnamesDir(struct directory *parent,
 	struct pnames_dir *dir =
 		checked_calloc(1, sizeof(struct pnames_dir));
 
-	dir->dir.type = FILE_TYPE_DIR;  // TODO
+	dir->dir.type = FILE_TYPE_PNAMES_LIST;
 	dir->dir.path = StringJoin("/", parent->path, ent->name, NULL);
 	dir->dir.refcount = 1;
 	dir->dir.entries = NULL;
