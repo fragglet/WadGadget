@@ -1001,6 +1001,19 @@ static void PerformView(struct directory_pane *active_pane,
 		return;
 	}
 
+	if (ent->type == FILE_TYPE_LUMP && !strcasecmp(ent->name, "PNAMES")) {
+		struct directory *new_dir;
+		ClearConversionErrors();
+		new_dir = TX_OpenPnamesDir(active_pane->dir, ent);
+		if (new_dir == NULL) {
+			UI_MessageBox("Error opening PNAMES directory:\n%s",
+			              GetConversionError());
+			return;
+		}
+		NavigateNew(active_pane, new_dir);
+		return;
+	}
+
 	if (ent->type == FILE_TYPE_TEXTURE) {
 		// TODO: Open texture editor
 		return;
