@@ -37,7 +37,8 @@ bool CheckReadOnly(struct directory *dir)
 
 	// If this is a directory list, it's the enclosing WAD we actually
 	// want to check.
-	if (dir->type == FILE_TYPE_TEXTURE_LIST) {
+	if (dir->type == FILE_TYPE_TEXTURE_LIST
+	 || dir->type == FILE_TYPE_PNAMES_LIST) {
 		dir = TX_DirGetParent(dir, NULL);
 	}
 
@@ -1014,7 +1015,7 @@ static void PerformView(struct directory_pane *active_pane,
 		return;
 	}
 
-	if (ent->type == FILE_TYPE_TEXTURE) {
+	if (ent->type == FILE_TYPE_TEXTURE || ent->type == FILE_TYPE_PNAME) {
 		// TODO: Open texture editor
 		return;
 	}
