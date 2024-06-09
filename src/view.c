@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+#include "actions.h"
 #include "common.h"
 #include "ui/dialog.h"
 #include "conv/endoom.h"
@@ -289,6 +290,17 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 
 	RaiseUsToTop();
 	RedrawScreen();
+
+	// At this point we know there is a change, but if the WAD file
+	// is read-only, we can't import it back again.
+	if (W_IsReadOnly(VFS_WadFile(ctx->from))) {
+		UI_MessageBox("Cannot import changed file; the WAD\n"
+		              "file is read-only.");
+		// TODO: The user went to the trouble of saving an edited
+		// file. Should we at least save a copy somewhere permanent?
+		return true;
+	}
+
 	do_import = UI_ConfirmDialogBox(
 		"Update WAD?", "Import", "Ignore",
 		"File was changed. Import back into WAD?");
@@ -296,11 +308,17 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 		return true;
 	}
 
+	// At this point the user wants to update the WAD, and the WAD file
+	// is not read-only. But we might still need to do the IWAD change
+	// confirmation first.
+	if (!CheckReadOnly(ctx->from)) {
+		return true;
+	}
+
 	// Things can be a bit confusing here because we reversed directions
 	// compared to the original export. 'from' was the WAD and lump we
 	// originally exported from, but now it becomes the 'to' that we're
 	// importing back to.
-
 	from_file = VFS_Open(ctx->filename);
 	assert(from_file != NULL);
 
@@ -422,7 +440,7 @@ try_again:
 	TF_SetCursesModes();
 	RedrawScreen();
 
-	if (!dir->readonly && edit_success && !TempMaybeImport(&temp_ctx)) {
+	if (edit_success && !TempMaybeImport(&temp_ctx)) {
 		goto try_again;
 	}
 
