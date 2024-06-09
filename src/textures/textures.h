@@ -13,7 +13,7 @@ typedef char pname[8];
 struct pnames {
 	pname *pnames;
 	size_t num_pnames;
-	bool modified;
+	unsigned int modified_count;
 };
 
 struct patch {

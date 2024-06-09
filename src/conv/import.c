@@ -116,7 +116,7 @@ static VFILE *ImportTextures(VFILE *input, struct wad_file *to_wad)
 		return NULL;
 	}
 
-	if (pn->modified) {
+	if (pn->modified_count > 0) {
 		if (!UI_ConfirmDialogBox("Update PNAMES?", "Update", "Cancel",
 		                         "Some patch names need to be added "
 		                         "to PNAMES.\nProceed?")) {

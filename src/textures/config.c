@@ -401,7 +401,7 @@ static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
 		free(line);
 	}
 
-	result->modified = false;
+	result->modified_count = 0;
 
 	return result;
 }
