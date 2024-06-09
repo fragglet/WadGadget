@@ -369,6 +369,8 @@ struct textures *TX_ParseTextureConfig(VFILE *input, struct pnames *pn)
 	result = ParseTextureConfig(lump, lump_len, pn);
 	free(lump);
 
+	result->modified_count = 0;
+
 	return result;
 }
 

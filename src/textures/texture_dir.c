@@ -241,9 +241,11 @@ static bool TextureDirLoad(void *_dir, struct directory *wad_dir,
 	}
 
 	if (dir->pn != NULL) {
+		new_pn->modified_count = dir->pn->modified_count + 1;
 		TX_FreePnames(dir->pn);
 	}
 	if (dir->txs != NULL) {
+		new_txs->modified_count = dir->txs->modified_count + 1;
 		TX_FreeTextures(dir->txs);
 	}
 	dir->pn = new_pn;

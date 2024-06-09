@@ -189,6 +189,7 @@ static bool PnamesDirLoad(void *_dir, struct directory *wad_dir,
                           struct directory_entry *ent)
 {
 	struct pnames_dir *dir = _dir;
+	struct pnames *new_pn;
 	VFILE *input;
 
 	input = VFS_OpenByEntry(wad_dir, ent);
@@ -196,10 +197,15 @@ static bool PnamesDirLoad(void *_dir, struct directory *wad_dir,
 		return false;
 	}
 
-	dir->pn = TX_UnmarshalPnames(input);
-	if (dir->pn == NULL) {
+	new_pn = TX_UnmarshalPnames(input);
+	if (new_pn == NULL) {
 		return false;
 	}
+	if (dir->pn != NULL) {
+		new_pn->modified_count = dir->pn->modified_count + 1;
+		TX_FreePnames(dir->pn);
+	}
+	dir->pn = new_pn;
 
 	return true;
 }

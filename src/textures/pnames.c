@@ -42,7 +42,6 @@ struct pnames *TX_UnmarshalPnames(VFILE *f)
 
 	SwapLE32(&cnt);
 	pnames->num_pnames = cnt;
-	++pnames->modified_count;
 	pnames->pnames = checked_calloc(cnt, sizeof(pname));
 
 	names_read = vfread(pnames->pnames, sizeof(pname), cnt, f);
