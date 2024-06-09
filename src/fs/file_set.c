@@ -29,12 +29,13 @@ void VFS_ClearSet(struct file_set *l)
 	l->num_entries = 0;
 }
 
-static unsigned int SearchForTag(struct file_set *l, unsigned int serial_no)
+static unsigned int SearchForTag(struct file_set *l, uint64_t serial_no)
 {
 	unsigned int min = 0, max = l->num_entries;
 
 	while (min < max) {
-		unsigned int midpoint, test_serial;
+		unsigned int midpoint;
+		uint64_t test_serial;
 		midpoint = (min + max) / 2;
 		test_serial = l->entries[midpoint];
 		if (serial_no == test_serial) {
@@ -49,7 +50,7 @@ static unsigned int SearchForTag(struct file_set *l, unsigned int serial_no)
 	return min;
 }
 
-void VFS_AddToSet(struct file_set *l, unsigned int serial_no)
+void VFS_AddToSet(struct file_set *l, uint64_t serial_no)
 {
 	unsigned int entries_index = SearchForTag(l, serial_no);
 
@@ -102,7 +103,7 @@ struct directory_entry *VFS_AddGlobToSet(
 	return result;
 }
 
-void VFS_RemoveFromSet(struct file_set *l, unsigned int serial_no)
+void VFS_RemoveFromSet(struct file_set *l, uint64_t serial_no)
 {
 	unsigned int entries_index = SearchForTag(l, serial_no);
 
@@ -117,7 +118,7 @@ void VFS_RemoveFromSet(struct file_set *l, unsigned int serial_no)
 	--l->num_entries;
 }
 
-int VFS_SetHas(struct file_set *l, unsigned int serial_no)
+bool VFS_SetHas(struct file_set *l, uint64_t serial_no)
 {
 	unsigned int entries_index = SearchForTag(l, serial_no);
 
