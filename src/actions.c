@@ -1118,10 +1118,6 @@ static void PerformUndo(struct directory_pane *active_pane,
 	const char *msg;
 	int first_change;
 
-	if (!CheckReadOnly(dir)) {
-		return;
-	}
-
 	if (VFS_CanUndo(dir) == 0) {
 		if (VFS_CanRedo(dir) == 0) {
 			UI_ShowNotice("There is nothing to undo.");
@@ -1131,6 +1127,11 @@ static void PerformUndo(struct directory_pane *active_pane,
 			// WAD file code.
 			UI_ShowNotice("Cannot undo any further.");
 		}
+		return;
+	}
+
+	if (!CheckReadOnly(dir)) {
+		// This shouldn't actually be possible.
 		return;
 	}
 
@@ -1162,12 +1163,12 @@ static void PerformRedo(struct directory_pane *active_pane,
 	struct directory *dir = active_pane->dir;
 	int first_change;
 
-	if (!CheckReadOnly(dir)) {
+	if (VFS_CanRedo(dir) == 0) {
+		UI_ShowNotice("There is nothing to redo.");
 		return;
 	}
 
-	if (VFS_CanRedo(dir) == 0) {
-		UI_ShowNotice("There is nothing to redo.");
+	if (!CheckReadOnly(dir)) {
 		return;
 	}
 
