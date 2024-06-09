@@ -201,6 +201,7 @@ static void TextureDirRestoreSnapshot(void *_dir, VFILE *in)
 
 	assert(vfread(&mod_count, sizeof(int), 1, in) == 1);
 	new_txs = TX_UnmarshalTextures(in);
+	assert(new_txs != NULL);
 	new_txs->modified_count = mod_count;
 
 	TX_FreeTextures(dir->txs);
