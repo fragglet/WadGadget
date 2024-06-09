@@ -639,12 +639,6 @@ int main(int argc, char *argv[])
 	panes[0] = UI_NewDirectoryPane(pane_windows[0], dir);
 	UI_PaneShow(panes[0]);
 
-	if (dir->type == FILE_TYPE_WAD
-	 && !strcmp(start_path1, start_path2)) {
-		Shutdown();
-		fprintf(stderr, "Can't open the same WAD in both panes.\n");
-		exit(-1);
-	}
 	pane_windows[1] = newwin(24, 27, 1, 53);
 	dir = VFS_OpenDir(start_path2);
 	if (dir == NULL) {
