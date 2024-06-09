@@ -52,7 +52,7 @@ void UI_ListPaneDraw(void *p)
 		if (lp->active) {
 			wattron(lp->subwin, A_REVERSE);
 		}
-		mvwaddstr(lp->subwin, 0, 3, " ");
+		mvwaddstr(lp->subwin, 0, 2, " ");
 		waddstr(lp->subwin, lp->title);
 		waddstr(lp->subwin, " ");
 		wattroff(lp->subwin, A_REVERSE);
