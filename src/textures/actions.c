@@ -14,9 +14,11 @@
 #include "actions.h"
 #include "common.h"
 #include "stringlib.h"
-#include "textures/textures.h"
 #include "ui/dialog.h"
 #include "view.h"
+
+#include "textures/textures.h"
+#include "textures/internal.h"
 
 extern void SwitchToPane(struct directory_pane *pane); // in wadgadget.c
 
@@ -84,23 +86,46 @@ const struct action new_texture_action = {
 	PerformNewTexture,
 };
 
-static void PerformEditTextures(struct directory_pane *active_pane,
-                                struct directory_pane *other_pane)
+static void PerformEditConfig(struct directory_pane *active_pane,
+                              struct directory_pane *other_pane)
 {
+	struct directory_revision *old_rev;
 	struct directory *parent;
 	struct directory_entry *ent;
 
-	// TODO: Write current state of the texture dir before edit
+	if (!TX_DirSave(active_pane->dir)) {
+		UI_MessageBox("Failed to save directory for editing.");
+		return;
+	}
+
 	parent = TX_DirGetParent(active_pane->dir, &ent);
+	old_rev = parent->curr_revision;
 	OpenDirent(parent, ent);
 
-	TX_DirReload(active_pane->dir);
-	VFS_ClearSet(&active_pane->tagged);
+	// Editing may have reset the readonly flag.
+	active_pane->dir->readonly = parent->readonly;
+
+	// If the current revision of the WAD has changed, it can only be
+	// because `OpenDirent()` imported a new version of the lump. So
+	// detect this case and import it into the current directory. We
+	// can then undo the edit to the WAD, so that it only takes effect
+	// once exiting the current directory.
+	if (!parent->readonly && parent->curr_revision != old_rev
+	 && TX_DirReload(active_pane->dir)) {
+		VFS_CommitChanges(active_pane->dir, "edit via text editor");
+		VFS_ClearSet(&active_pane->tagged);
+		VFS_Undo(parent, 1);
+	}
 }
 
 const struct action edit_textures_action = {
 	KEY_F(4), 'E', "EditCfg", "Edit texture config",
-	PerformEditTextures,
+	PerformEditConfig,
+};
+
+const struct action edit_pnames_action = {
+	KEY_F(4), 'E', "EditCfg", "Edit PNAMES config",
+	PerformEditConfig,
 };
 
 static void PerformDuplicateTexture(struct directory_pane *active_pane,

@@ -80,6 +80,7 @@ struct directory *TX_OpenPnamesDir(struct directory *parent,
 
 extern const struct action new_texture_action;
 extern const struct action edit_textures_action;
+extern const struct action edit_pnames_action;
 extern const struct action dup_texture_action;
 extern const struct action export_texture_config;
 extern const struct action new_pname_action;

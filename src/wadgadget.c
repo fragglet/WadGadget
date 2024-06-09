@@ -226,7 +226,7 @@ static const struct action *texture_actions[] = {
 };
 
 static const struct action *pnames_actions[] = {
-	//&edit_pnamess_action,
+	&edit_pnames_action,
 	&rearrange_action,
 	&sort_entries_action,
 	&new_pname_action,
