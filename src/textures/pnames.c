@@ -105,3 +105,32 @@ int TX_GetPnameIndex(struct pnames *pn, const char *name)
 
 	return -1;
 }
+
+void TX_RemovePname(struct pnames *pn, unsigned int idx)
+{
+	assert(idx < pn->num_pnames);
+
+	memmove(&pn->pnames[idx], &pn->pnames[idx + 1],
+	        sizeof(pname) * (pn->num_pnames - idx - 1));
+	--pn->num_pnames;
+	++pn->modified_count;
+}
+
+void TX_RenamePname(struct pnames *pn, unsigned int idx,
+                    const char *name)
+{
+	char *namedest;
+	int i;
+
+	assert(idx < pn->num_pnames);
+
+	namedest = pn->pnames[idx];
+	for (i = 0; i < 8; i++) {
+		namedest[i] = toupper(name[i]);
+		if (namedest[i] == '\0') {
+			break;
+		}
+	}
+
+	++pn->modified_count;
+}

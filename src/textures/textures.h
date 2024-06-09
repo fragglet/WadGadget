@@ -47,16 +47,18 @@ bool TX_AddTexture(struct textures *txs, unsigned int pos, struct texture *t);
 void TX_RemoveTexture(struct textures *txs, unsigned int idx);
 bool TX_RenameTexture(struct textures *txs, unsigned int idx,
                       const char *new_name);
-
 VFILE *TX_MarshalTextures(struct textures *txs);
 struct textures *TX_UnmarshalTextures(VFILE *input);
-void TX_FreePnames(struct pnames *t);
 void TX_FreeTextures(struct textures *t);
 
 VFILE *TX_MarshalPnames(struct pnames *pn);
 struct pnames *TX_UnmarshalPnames(VFILE *f);
 int TX_AppendPname(struct pnames *pn, const char *name);
 int TX_GetPnameIndex(struct pnames *pn, const char *name);
+void TX_RemovePname(struct pnames *pn, unsigned int idx);
+void TX_RenamePname(struct pnames *pn, unsigned int idx,
+                    const char *name);
+void TX_FreePnames(struct pnames *t);
 
 VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn,
                                const char *comment);
