@@ -394,6 +394,6 @@ static void PerformCopyPnames(struct directory_pane *active_pane,
 }
 
 const struct action copy_pnames_action = {
-	KEY_F(5), 'O', "Copy", "> Copy patch names",
+	KEY_F(5), 'O', "Copy", "> Copy names",
 	PerformCopyPnames,
 };
