@@ -18,6 +18,7 @@
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "stringlib.h"
+#include "ui/ui.h"
 
 #include "textures/internal.h"
 #include "textures/textures.h"
@@ -201,12 +202,29 @@ static bool PnamesDirSave(void *_dir, struct directory *wad_dir,
                           struct directory_entry *ent)
 {
 	struct pnames_dir *dir = _dir;
+	struct wad_file *wf = VFS_WadFile(wad_dir);
+	VFILE *out, *marshaled;
 
 	if (dir->pn->modified_count == 0) {
 		return true;
 	}
 
-	// TODO
+	marshaled = TX_MarshalPnames(dir->pn);
+	assert(marshaled != NULL);
+
+	out = W_OpenLumpRewrite(wf, ent - wad_dir->entries);
+	if (out == NULL) {
+		vfclose(marshaled);
+		return false;
+	}
+
+	vfcopy(marshaled, out);
+	vfclose(marshaled);
+	vfclose(out);
+
+	VFS_CommitChanges(wad_dir, "update of '%s'", ent->name);
+	UI_ShowNotice("%s lump updated.", ent->name);
+
 	return true;
 }
 
