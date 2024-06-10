@@ -58,6 +58,7 @@ int TX_GetPnameIndex(struct pnames *pn, const char *name);
 void TX_RemovePname(struct pnames *pn, unsigned int idx);
 void TX_RenamePname(struct pnames *pn, unsigned int idx,
                     const char *name);
+uint64_t TX_PnameSerialNo(const char *pname);
 void TX_FreePnames(struct pnames *t);
 
 VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn,
@@ -84,3 +85,4 @@ extern const struct action edit_pnames_action;
 extern const struct action dup_texture_action;
 extern const struct action export_texture_config;
 extern const struct action new_pname_action;
+extern const struct action copy_pnames_action;

@@ -30,19 +30,6 @@ struct pnames_dir {
 	unsigned int last_commit;
 };
 
-static uint64_t PnameSerialNo(char *pname)
-{
-	uint64_t result = 0;
-	int i;
-
-	for (i = 0; i < 8 && pname[i] != '\0'; i++) {
-		result <<= 8;
-		result |= pname[i];
-	}
-
-	return result;
-}
-
 static void PnamesDirRefresh(void *_dir, struct directory_entry **entries,
                              size_t *num_entries)
 {
@@ -60,7 +47,7 @@ static void PnamesDirRefresh(void *_dir, struct directory_entry **entries,
 
 		new_entries[i].type = FILE_TYPE_PNAME;
 		new_entries[i].size = 0;
-		new_entries[i].serial_no = PnameSerialNo(dir->pn->pnames[i]);
+		new_entries[i].serial_no = TX_PnameSerialNo(dir->pn->pnames[i]);
 	}
 
 	*entries = new_entries;

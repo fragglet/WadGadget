@@ -133,3 +133,18 @@ void TX_RenamePname(struct pnames *pn, unsigned int idx, const char *name)
 
 	++pn->modified_count;
 }
+
+// Since pnames are unique and a maximum of 8 characters, they can fit
+// entirely inside a 64-bit serial number.
+uint64_t TX_PnameSerialNo(const char *pname)
+{
+	uint64_t result = 0;
+	int i;
+
+	for (i = 0; i < 8 && pname[i] != '\0'; i++) {
+		result <<= 8;
+		result |= pname[i];
+	}
+
+	return result;
+}

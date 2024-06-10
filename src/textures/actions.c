@@ -15,6 +15,7 @@
 #include "common.h"
 #include "stringlib.h"
 #include "ui/dialog.h"
+#include "ui/ui.h"
 #include "view.h"
 
 #include "textures/textures.h"
@@ -314,4 +315,85 @@ static void PerformNewPname(struct directory_pane *active_pane,
 const struct action new_pname_action = {
 	KEY_F(7), 'K', "NewPname", ". New pname",
 	PerformNewPname,
+};
+
+static void PnamesCopyNotice(struct directory *from_dir,
+                             struct directory *to_dir,
+                             struct file_set *copied, struct file_set *unused)
+{
+	char copied_descr[64] = "", unused_descr[64] = "";
+	const char *sep;
+
+	if (copied->num_entries > 0) {
+		VFS_DescribeSet(to_dir, copied, copied_descr,
+		                sizeof(copied_descr));
+		StringConcat(copied_descr, " copied", sizeof(copied_descr));
+	}
+	if (unused->num_entries > 0) {
+		VFS_DescribeSet(from_dir, unused, unused_descr,
+		                sizeof(unused_descr));
+		StringConcat(unused_descr, " already present",
+		             sizeof(unused_descr));
+	}
+
+	if (strlen(copied_descr) > 0 && strlen(unused_descr) > 0) {
+		sep = "; ";
+	} else {
+		sep = "";
+	}
+	UI_ShowNotice("%s%s%s.", copied_descr, sep, unused_descr);
+}
+
+static void PerformCopyPnames(struct directory_pane *active_pane,
+                              struct directory_pane *other_pane)
+{
+	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
+	struct file_set copied = EMPTY_FILE_SET, unused = EMPTY_FILE_SET;
+	struct directory *from_dir = active_pane->dir,
+	                 *to_dir = other_pane->dir;
+	struct pnames *pn = TX_GetDirPnames(other_pane->dir);
+	struct directory_entry *ent;
+	int idx;
+
+	if (tagged->num_entries == 0) {
+		UI_MessageBox("You have not selected any pnames to copy.");
+		return;
+	}
+
+	if (!CheckReadOnly(to_dir)) {
+		return;
+	}
+
+	idx = 0;
+	while ((ent = VFS_IterateSet(from_dir, tagged, &idx)) != NULL) {
+		if (TX_GetPnameIndex(pn, ent->name) >= 0) {
+			VFS_AddToSet(&unused, TX_PnameSerialNo(ent->name));
+			continue;
+		}
+		TX_AppendPname(pn, ent->name);
+		VFS_AddToSet(&copied, TX_PnameSerialNo(ent->name));
+	}
+
+	VFS_Refresh(to_dir);
+
+	PnamesCopyNotice(from_dir, to_dir, &copied, &unused);
+
+	if (copied.num_entries > 0) {
+		char buf[32];
+
+		VFS_DescribeSet(to_dir, &copied, buf, sizeof(buf));
+		VFS_CommitChanges(to_dir, "copy of %s", buf);
+
+		VFS_ClearSet(&active_pane->tagged);
+		UI_DirectoryPaneSetTagged(other_pane, &copied);
+		SwitchToPane(other_pane);
+	}
+
+	VFS_FreeSet(&copied);
+	VFS_FreeSet(&unused);
+}
+
+const struct action copy_pnames_action = {
+	KEY_F(5), 'O', "Copy", "> Copy patch names",
+	PerformCopyPnames,
 };
