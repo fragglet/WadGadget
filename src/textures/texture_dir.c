@@ -288,10 +288,51 @@ static bool TextureDirSave(void *_dir, struct directory *wad_dir,
 	return true;
 }
 
+static struct textures *MakeTextureSubset(struct textures *txs,
+                                          struct file_set *fs)
+{
+	struct textures *result = checked_calloc(1, sizeof(struct textures));
+	unsigned int i;
+
+	for (i = 0; i < txs->num_textures; i++) {
+		if (VFS_SetHas(fs, txs->serial_nos[i])) {
+			TX_AddTexture(result, result->num_textures,
+			              txs->textures[i]);
+		}
+	}
+
+	return result;
+}
+
+static VFILE *TextureDirFormatConfig(void *_dir, struct file_set *selected)
+{
+	struct texture_dir *dir = _dir;
+	struct textures *subset;
+	char comment_buf[32];
+	VFILE *result;
+
+	snprintf(comment_buf, sizeof(comment_buf), "Exported from %s",
+	         PathBaseName(TX_DirGetParent(_dir, NULL)->path));
+
+	if (selected != NULL) {
+		subset = MakeTextureSubset(dir->txs, selected);
+	} else {
+		subset = dir->txs;
+	}
+	result = TX_FormatTexturesConfig(subset, dir->pn, comment_buf);
+
+	if (subset != dir->txs) {
+		TX_FreeTextures(subset);
+	}
+
+	return result;
+}
+
 static const struct lump_dir_funcs texture_lump_dir_funcs = {
 	TextureDirGetPnames,
 	TextureDirLoad,
 	TextureDirSave,
+	TextureDirFormatConfig,
 };
 
 struct directory *TX_OpenTextureDir(struct directory *parent,

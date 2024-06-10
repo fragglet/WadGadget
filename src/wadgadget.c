@@ -275,6 +275,11 @@ static const struct action *pnames_to_pnames[] = {
 	NULL,
 };
 
+static const struct action *pnames_to_dir[] = {
+	&export_texture_config,
+	NULL,
+};
+
 static const struct action *no_actions[] = {NULL};
 
 static const struct action *common_actions[] = {
@@ -304,7 +309,7 @@ static const struct action
 	{dir_to_dir,      dir_to_wad, no_actions, no_actions},
 	{wad_to_dir,      wad_to_wad, no_actions, wad_to_pnames},
 	{textures_to_dir, no_actions, no_actions, no_actions},
-	{no_actions,      no_actions, no_actions, pnames_to_pnames},
+	{pnames_to_dir,   no_actions, no_actions, pnames_to_pnames},
 };
 
 static void AddActionList(const struct action **list, int *idx)

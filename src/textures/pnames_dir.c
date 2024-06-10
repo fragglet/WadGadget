@@ -228,10 +228,46 @@ static bool PnamesDirSave(void *_dir, struct directory *wad_dir,
 	return true;
 }
 
+static struct pnames *MakeSubset(struct pnames *pn, struct file_set *selected)
+{
+	struct pnames *result = checked_calloc(1, sizeof(struct pnames));
+	int i;
+
+	for (i = 0; i < pn->num_pnames; i++) {
+		if (VFS_SetHas(selected, TX_PnameSerialNo(pn->pnames[i]))) {
+			TX_AppendPname(result, pn->pnames[i]);
+		}
+	}
+
+	pn->modified_count = 0;
+	return result;
+}
+
+static VFILE *PnamesDirFormatConfig(void *_dir, struct file_set *selected)
+{
+	struct pnames_dir *dir = _dir;
+	struct pnames *subset;
+	VFILE *result;
+
+	if (selected != NULL) {
+		subset = MakeSubset(dir->pn, selected);
+	} else {
+		subset = dir->pn;
+	}
+	result = TX_FormatPnamesConfig(subset);
+
+	if (subset != dir->pn) {
+		TX_FreePnames(subset);
+	}
+
+	return result;
+}
+
 static const struct lump_dir_funcs pnames_lump_dir_funcs = {
 	PnamesDirGetPnames,
 	PnamesDirLoad,
 	PnamesDirSave,
+	PnamesDirFormatConfig,
 };
 
 struct directory *TX_OpenPnamesDir(struct directory *parent,

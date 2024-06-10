@@ -94,6 +94,13 @@ struct pnames *TX_GetDirPnames(struct directory *_dir)
 	return dir->lump_dir_funcs->get_pnames(dir);
 }
 
+VFILE *TX_DirFormatConfig(struct directory *_dir, struct file_set *subset)
+{
+	struct lump_dir *dir = (struct lump_dir *) _dir;
+
+	return dir->lump_dir_funcs->format_config(dir, subset);
+}
+
 bool TX_InitLumpDir(struct lump_dir *dir, const struct lump_dir_funcs *funcs,
                     struct directory *parent, struct directory_entry *ent)
 {

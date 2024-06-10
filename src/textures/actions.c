@@ -179,51 +179,32 @@ const struct action dup_texture_action = {
 	PerformDuplicateTexture,
 };
 
-static struct textures *MakeTextureSubset(struct textures *txs,
-                                          struct file_set *fs)
-{
-	struct textures *result = checked_calloc(1, sizeof(struct textures));
-	unsigned int i;
-
-	for (i = 0; i < txs->num_textures; i++) {
-		if (VFS_SetHas(fs, txs->serial_nos[i])) {
-			TX_AddTexture(result, result->num_textures,
-			              txs->textures[i]);
-		}
-	}
-
-	return result;
-}
-
 static void PerformExportConfig(struct directory_pane *active_pane,
                                 struct directory_pane *other_pane)
 {
-	FILE *out;
-	VFILE *out_wrapped, *marshaled;
+	struct file_set *selected;
 	char *filename = NULL, *filename2 = NULL;
-	char comment_buf[32];
-	struct directory *parent;
-	struct textures *txs, *subset;
-	struct pnames *pn;
-
-	txs = TX_TextureList(active_pane->dir);
-	parent = TX_DirGetParent(active_pane->dir, NULL);
+	VFILE *formatted, *out_wrapped;
+	FILE *out;
 
 	if (active_pane->tagged.num_entries > 0) {
-		// Make a new subset texture directory and convert
-		// it to a config text file.
-		subset = MakeTextureSubset(txs, &active_pane->tagged);
+		selected = &active_pane->tagged;
 	} else if (!UI_ConfirmDialogBox(
-	                "Export texture config", "Export", "Cancel",
+	                "Export config", "Export", "Cancel",
 	                "You have not selected any textures to\n"
 	                "export. Export the entire directory?")) {
 		return;
 	} else {
-		subset = txs;
+		selected = NULL;
+	}
+
+	formatted = TX_DirFormatConfig(active_pane->dir, selected);
+	if (formatted == NULL) {
+		return;
 	}
 
 	filename = UI_TextInputDialogBox(
-		"Export texture config",
+		"Export config",
 		"Export", 30, "Enter filename to export:");
 
 	if (filename == NULL) {
@@ -238,23 +219,18 @@ static void PerformExportConfig(struct directory_pane *active_pane,
 
 	filename2 = StringJoin("/", other_pane->dir->path, filename, NULL);
 
-	pn = TX_GetDirPnames(active_pane->dir);
-	snprintf(comment_buf, sizeof(comment_buf), "Exported from %s",
-	         PathBaseName(parent->path));
-	marshaled = TX_FormatTexturesConfig(subset, pn, comment_buf);
-
 	// TODO: This should be written through VFS.
 	out = fopen(filename2, "w");
 	if (out == NULL) {
 		UI_MessageBox("Failed to open file for write:\n%s",
 		              filename2);
-		vfclose(marshaled);
+		vfclose(formatted);
 		goto cancel;
 	}
 
 	out_wrapped = vfwrapfile(out);
-	vfcopy(marshaled, out_wrapped);
-	vfclose(marshaled);
+	vfcopy(formatted, out_wrapped);
+	vfclose(formatted);
 	vfclose(out_wrapped);
 
 	VFS_Refresh(other_pane->dir);
@@ -263,9 +239,6 @@ static void PerformExportConfig(struct directory_pane *active_pane,
 	UI_DirectoryPaneSelectByName(other_pane, filename);
 
 cancel:
-	if (subset != txs) {
-		TX_FreeTextures(subset);
-	}
 	free(filename);
 	free(filename2);
 }
