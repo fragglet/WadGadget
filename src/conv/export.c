@@ -22,6 +22,7 @@
 #include "conv/mus2mid.h"
 #include "stringlib.h"
 #include "textures/textures.h"
+#include "ui/ui.h"
 
 static VFILE *ConvertPnames(VFILE *input)
 {
@@ -220,6 +221,66 @@ bool ExportToFile(struct directory *from, struct directory_entry *ent,
 	return true;
 }
 
+static bool DuplicateFile(struct directory *dir, struct file_set *from_set,
+                          struct file_set *result_set)
+{
+	struct directory_entry *ent, *ent2;
+	char *filename, *filename2;
+	bool success;
+
+	if (from_set->num_entries != 1) {
+		UI_MessageBox("You can't copy to the same directory.\n"
+		              "To duplicate a file, select a single\n"
+		              "file, not multiple.");
+		return false;
+	}
+
+	ent = VFS_EntryBySerial(dir, from_set->entries[0]);
+	if (ent == NULL) {
+		return false;
+	}
+
+	filename = UI_TextInputDialogBox(
+		"Duplicate file", "Duplicate", 30,
+		"To make a copy of '%s', enter\n"
+		"a new filename:",
+		ent->name);
+	if (filename == NULL) {
+		return false;
+	}
+
+	ent2 = VFS_EntryByName(dir, filename);
+	if (ent == ent2) {
+		UI_ShowNotice("No, I mean a different filename.");
+		return false;
+	}
+
+	if (ent2 != NULL
+	 && !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
+	                         "Overwrite '%s'?", filename)) {
+		free(filename);
+		return false;
+	}
+
+	filename2 = StringJoin("/", dir->path, filename, NULL);
+	success = ExportToFile(dir, ent, &lump_type_unknown, filename2, false);
+
+	VFS_Refresh(dir);
+
+	if (success) {
+		ent = VFS_EntryByName(dir, filename);
+		if (ent != NULL) {
+			VFS_ClearSet(result_set);
+			VFS_AddToSet(result_set, ent->serial_no);
+		}
+	}
+
+	free(filename);
+	free(filename2);
+
+	return success;
+}
+
 bool PerformExport(struct directory *from, struct file_set *from_set,
                    struct directory *to, struct file_set *result,
                    bool convert)
@@ -230,9 +291,8 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 	bool success;
 	int idx;
 
-	if (from->type == FILE_TYPE_DIR && !strcmp(from->path, to->path)) {
-		ConversionError("You can't copy to the same directory.");
-		return false;
+	if (from == to) {
+		return DuplicateFile(from, from_set, result);
 	}
 
 	if (!ConfirmOverwrite(from, from_set, to, convert)) {
