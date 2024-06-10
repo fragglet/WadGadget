@@ -1148,6 +1148,7 @@ static void PerformUndo(struct directory_pane *active_pane,
 
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
+	UI_DirectoryPaneReselect(active_pane);
 
 	UI_ShowNotice("Undid %s.", msg);
 }
@@ -1183,6 +1184,7 @@ static void PerformRedo(struct directory_pane *active_pane,
 
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
+	UI_DirectoryPaneReselect(active_pane);
 
 	UI_ShowNotice("Redid %s.", VFS_LastCommitMessage(dir));
 }
