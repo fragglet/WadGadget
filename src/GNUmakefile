@@ -25,6 +25,7 @@ OBJS =                      \
     fs/wad_dir.o            \
     fs/wad_file.o           \
     textures/actions.o      \
+    textures/bundle.o       \
     textures/config.o       \
     textures/lump_dir.o     \
     textures/pnames.o       \

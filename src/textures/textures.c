@@ -45,7 +45,7 @@ static void SwapTexturePatches(struct texture *t)
 	}
 }
 
-static size_t TextureLen(size_t patchcount)
+size_t TX_TextureLen(size_t patchcount)
 {
 	return sizeof(struct texture)
 	     + sizeof(struct patch) * (patchcount - 1);
@@ -53,14 +53,14 @@ static size_t TextureLen(size_t patchcount)
 
 struct texture *TX_AllocTexture(size_t patchcount)
 {
-	struct texture *result = checked_calloc(1, TextureLen(patchcount));
+	struct texture *result = checked_calloc(1, TX_TextureLen(patchcount));
 	result->patchcount = patchcount;
 	return result;
 }
 
 struct texture *TX_DupTexture(struct texture *t)
 {
-	size_t sz = TextureLen(t->patchcount);
+	size_t sz = TX_TextureLen(t->patchcount);
 	struct texture *result = checked_malloc(sz);
 	memcpy(result, t, sz);
 	return result;
@@ -75,7 +75,7 @@ static struct texture *UnmarshalTexture(const uint8_t *start, size_t max_len)
 	memcpy(&patchcount, start + 20, 2);
 	SwapLE16(&patchcount);
 
-	sz = TextureLen(patchcount);
+	sz = TX_TextureLen(patchcount);
 	if (sz > max_len) {
 		ConversionError("Texture length %d exceeds maximum length %d",
 		                (int) sz, (int) max_len);
@@ -120,6 +120,17 @@ void TX_AddSerialNos(struct textures *txs)
 	}
 }
 
+struct textures *TX_NewTextureList(int num_textures)
+{
+	struct textures *result = checked_calloc(1, sizeof(struct textures));
+	if (num_textures > 0) {
+		result->textures = checked_calloc(num_textures,
+		                                  sizeof(struct texture *));
+	}
+	result->num_textures = num_textures;
+	return result;
+}
+
 struct textures *TX_UnmarshalTextures(VFILE *input)
 {
 	struct textures *result = NULL;
@@ -145,10 +156,7 @@ struct textures *TX_UnmarshalTextures(VFILE *input)
 		goto fail;
 	}
 
-	result = checked_calloc(1, sizeof(struct textures));
-	result->textures =
-		checked_calloc(num_textures, sizeof(struct texture *));
-	result->num_textures = num_textures;
+	result = TX_NewTextureList(num_textures);
 
 	for (i = 0; i < num_textures; i++) {
 		uint32_t start;
@@ -156,10 +164,10 @@ struct textures *TX_UnmarshalTextures(VFILE *input)
 		memcpy(&start, lump + 4 + 4 * i, sizeof(uint32_t));
 		SwapLE32(&start);
 
-		if (start + TextureLen(0) >= lump_len) {
+		if (start + TX_TextureLen(0) >= lump_len) {
 			ConversionError("Texture #%d overruns lump, start=%d"
 			                "min len=%d, lump_len=%d", i, start,
-			                (int) TextureLen(0), (int) lump_len);
+			                (int) TX_TextureLen(0), (int) lump_len);
 			TX_FreeTextures(result);
 			result = NULL;
 			goto fail;
@@ -194,7 +202,7 @@ VFILE *TX_MarshalTextures(struct textures *txs)
 	for (i = 0; i < txs->num_textures; i++) {
 		offsets[i] = lump_len;
 		SwapLE32(&offsets[i]);
-		lump_len += TextureLen(txs->textures[i]->patchcount);
+		lump_len += TX_TextureLen(txs->textures[i]->patchcount);
 	}
 
 	SwapLE32(&num_textures);
@@ -204,7 +212,7 @@ VFILE *TX_MarshalTextures(struct textures *txs)
 
 	for (i = 0; i < txs->num_textures; i++) {
 		struct texture *swapped = TX_DupTexture(txs->textures[i]);
-		size_t len = TextureLen(txs->textures[i]->patchcount);
+		size_t len = TX_TextureLen(txs->textures[i]->patchcount);
 		SwapTexturePatches(swapped);
 		SwapTexture(swapped);
 		assert(vfwrite(swapped, 1, len, result) == len);
@@ -221,7 +229,7 @@ struct texture *TX_AddPatch(struct texture *t, struct patch *p)
 
 	// As long as we have the name, we can append the patch
 	// (X/Y offsets are assumed to be zero)
-	t = checked_realloc(t, TextureLen(t->patchcount + 1));
+	t = checked_realloc(t, TX_TextureLen(t->patchcount + 1));
 	newp = &t->patches[t->patchcount];
 	++t->patchcount;
 
@@ -230,17 +238,17 @@ struct texture *TX_AddPatch(struct texture *t, struct patch *p)
 	return t;
 }
 
-struct texture *TX_TextureForName(struct textures *txs, const char *name)
+int TX_TextureForName(struct textures *txs, const char *name)
 {
 	int i;
 
 	for (i = txs->num_textures - 1; i >= 0; --i) {
 		if (!strncasecmp(txs->textures[i]->name, name, 8)) {
-			return txs->textures[i];
+			return i;
 		}
 	}
 
-	return NULL;
+	return -1;
 }
 
 static void SetTextureName(struct texture *t, const char *name)
@@ -258,7 +266,7 @@ static void SetTextureName(struct texture *t, const char *name)
 
 bool TX_AddTexture(struct textures *txs, unsigned int pos, struct texture *t)
 {
-	if (TX_TextureForName(txs, t->name) != NULL) {
+	if (TX_TextureForName(txs, t->name) >= 0) {
 		return false;
 	}
 
@@ -304,7 +312,7 @@ bool TX_RenameTexture(struct textures *txs, unsigned int idx,
 		return false;
 	}
 
-	if (TX_TextureForName(txs, new_name) != NULL) {
+	if (TX_TextureForName(txs, new_name) >= 0) {
 		return false;
 	}
 

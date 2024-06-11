@@ -39,10 +39,16 @@ struct textures {
 	unsigned int modified_count;
 };
 
+struct texture_bundle {
+	struct textures *txs;
+	struct pnames *pn;
+};
+
+struct textures *TX_NewTextureList(int num_textures);
 struct texture *TX_AllocTexture(size_t patchcount);
 struct texture *TX_DupTexture(struct texture *t);
 struct texture *TX_AddPatch(struct texture *t, struct patch *p);
-struct texture *TX_TextureForName(struct textures *txs, const char *name);
+int TX_TextureForName(struct textures *txs, const char *name);
 bool TX_AddTexture(struct textures *txs, unsigned int pos, struct texture *t);
 void TX_RemoveTexture(struct textures *txs, unsigned int idx);
 bool TX_RenameTexture(struct textures *txs, unsigned int idx,
@@ -51,6 +57,7 @@ VFILE *TX_MarshalTextures(struct textures *txs);
 struct textures *TX_UnmarshalTextures(VFILE *input);
 void TX_FreeTextures(struct textures *t);
 
+struct pnames *TX_NewPnamesList(int num_pnames);
 VFILE *TX_MarshalPnames(struct pnames *pn);
 struct pnames *TX_UnmarshalPnames(VFILE *f);
 int TX_AppendPname(struct pnames *pn, const char *name);
@@ -87,3 +94,27 @@ extern const struct action dup_texture_action;
 extern const struct action export_texture_config;
 extern const struct action new_pname_action;
 extern const struct action copy_pnames_action;
+
+void TX_FreeBundle(struct texture_bundle *b);
+bool TX_BundleLoadPnames(struct texture_bundle *b, VFILE *in);
+bool TX_BundleLoadPnamesFrom(struct texture_bundle *b, struct directory *dir);
+bool TX_BundleLoadTextures(struct texture_bundle *b, struct directory *wad_dir,
+                           VFILE *in);
+bool TX_BundleLoadTexturesFrom(struct texture_bundle *b,
+                               struct directory *wad_dir,
+                               struct directory_entry *ent);
+bool TX_BundleParsePnames(struct texture_bundle *b, VFILE *in);
+bool TX_BundleParseTextures(struct texture_bundle *b, VFILE *in);
+bool TX_BundleConfirmAddPnames(struct texture_bundle *into,
+                               struct texture_bundle *from);
+
+struct texture_bundle_merge_result {
+	int pnames_added;  // Number of PNAMEs added to directory
+	int pnames_present;  // Number of PNAMEs already present in directory
+	int textures_added;  // Number of new tetxures added
+	int textures_overwritten;  // Number of new textures overwritten
+	int textures_present;  // Number of new textures present & identical
+};
+
+void TX_BundleMerge(struct texture_bundle *into, struct texture_bundle *from,
+                    struct texture_bundle_merge_result *result);

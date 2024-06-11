@@ -10,9 +10,8 @@
 
 #include "fs/vfs.h"
 
-bool ImportFromFile(VFILE *fromfile, const char *src_name,
-                    struct wad_file *to_wad, int lumpnum,
-                    bool convert);
+bool ImportFromFile(VFILE *from_file, const char *src_name,
+                    struct directory *to_wad, int lumpnum, bool convert);
 bool PerformImport(struct directory *from, struct file_set *from_set,
                    struct directory *to, int to_index,
                    struct file_set *result, bool convert);

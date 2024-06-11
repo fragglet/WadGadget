@@ -87,60 +87,35 @@ static VFILE *ConvertPnames(VFILE *input)
 	return result;
 }
 
-static VFILE *ImportTextures(VFILE *input, struct wad_file *to_wad)
+static VFILE *ImportTextures(VFILE *input, struct directory *to_wad)
 {
-	int pnames_lump_index = W_GetNumForName(to_wad, "PNAMES");
-	struct textures *txs;
-	struct pnames *pn;
-	VFILE *pnames_input, *result, *lump, *marshaled;
+	struct texture_bundle into, from;
+	struct texture_bundle_merge_result merge_stats;
+	VFILE *result = NULL;
 
-	if (pnames_lump_index < 0) {
-		ConversionError("To import a texture config, your WAD\n"
-		                "must contain a PNAMES lump.");
+	if (!TX_BundleLoadPnamesFrom(&into, to_wad)) {
 		vfclose(input);
 		return NULL;
 	}
 
-	pnames_input = W_OpenLump(to_wad, pnames_lump_index);
-	pn = TX_UnmarshalPnames(pnames_input);
-	if (pn == NULL) {
-		ConversionError("Failed to parse PNAMES lump");
-		vfclose(input);
-		return NULL;
+	if (!TX_BundleParseTextures(&from, input)) {
+		goto fail;
 	}
 
-	txs = TX_ParseTextureConfig(input, pn);
-	if (txs == NULL) {
-		ConversionError("Failed to parse texture config");
-		TX_FreePnames(pn);
-		return NULL;
+	if (!TX_BundleConfirmAddPnames(&into, &from)) {
+		goto fail;
 	}
 
-	if (pn->modified_count > 0) {
-		if (!UI_ConfirmDialogBox("Update PNAMES?", "Update", "Cancel",
-		                         "Some patch names need to be added "
-		                         "to PNAMES.\nProceed?")) {
-			result = NULL;
-			goto fail;
-		}
-
-		lump = W_OpenLumpRewrite(to_wad, pnames_lump_index);
-		marshaled = TX_MarshalPnames(pn);
-		vfcopy(marshaled, lump);
-		vfclose(lump);
-		vfclose(marshaled);
-	}
-
-	result = TX_MarshalTextures(txs);
+	TX_BundleMerge(&into, &from, &merge_stats);
+	result = TX_MarshalTextures(into.txs);
 
 fail:
-	TX_FreeTextures(txs);
-	TX_FreePnames(pn);
-
+	TX_FreeBundle(&into);
+	TX_FreeBundle(&from);
 	return result;
 }
 
-static VFILE *PerformConversion(VFILE *input, struct wad_file *to_wad,
+static VFILE *PerformConversion(VFILE *input, struct directory *to_wad,
                                 const char *src_name)
 {
 	src_name = PathBaseName(src_name);
@@ -166,7 +141,7 @@ static VFILE *PerformConversion(VFILE *input, struct wad_file *to_wad,
 }
 
 bool ImportFromFile(VFILE *from_file, const char *src_name,
-                    struct wad_file *to_wad, int lumpnum, bool convert)
+                    struct directory *to_wad, int lumpnum, bool convert)
 {
 	VFILE *to_lump;
 
@@ -178,7 +153,7 @@ bool ImportFromFile(VFILE *from_file, const char *src_name,
 		return false;
 	}
 
-	to_lump = W_OpenLumpRewrite(to_wad, lumpnum);
+	to_lump = W_OpenLumpRewrite(VFS_WadFile(to_wad), lumpnum);
 	vfcopy(from_file, to_lump);
 	vfclose(from_file);
 	vfclose(to_lump);
@@ -221,7 +196,7 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 
 		from_file = VFS_OpenByEntry(from, ent);
 
-		if (!ImportFromFile(from_file, ent->name, to_wad, lumpnum,
+		if (!ImportFromFile(from_file, ent->name, to, lumpnum,
 		                    convert)) {
 			VFS_Rollback(to);
 			return false;

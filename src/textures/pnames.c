@@ -28,21 +28,29 @@ void TX_FreePnames(struct pnames *pnames)
 	free(pnames);
 }
 
+struct pnames *TX_NewPnamesList(int num_pnames)
+{
+	struct pnames *result = checked_calloc(1, sizeof(struct pnames));
+	if (num_pnames > 0) {
+		result->pnames = checked_calloc(num_pnames, sizeof(pname));
+	}
+	result->num_pnames = num_pnames;
+	return result;
+}
+
 struct pnames *TX_UnmarshalPnames(VFILE *f)
 {
-	struct pnames *pnames = checked_calloc(1, sizeof(struct pnames));
+	struct pnames *pnames;
 	uint32_t cnt, names_read;
 
 	if (vfread(&cnt, sizeof(uint32_t), 1, f) != 1) {
 		ConversionError("Failed to read 4 byte lump header.");
-		free(pnames);
 		vfclose(f);
 		return NULL;
 	}
 
 	SwapLE32(&cnt);
-	pnames->num_pnames = cnt;
-	pnames->pnames = checked_calloc(cnt, sizeof(pname));
+	pnames = TX_NewPnamesList(cnt);
 
 	names_read = vfread(pnames->pnames, sizeof(pname), cnt, f);
 	if (names_read != cnt) {

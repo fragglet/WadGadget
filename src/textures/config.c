@@ -303,7 +303,7 @@ static struct textures *ParseTextureConfig(uint8_t *buf, size_t buf_len,
 	unsigned int offset = 0;
 	int lineno = 0, m, error_col;
 
-	result = calloc(1, sizeof(struct textures));
+	result = TX_NewTextureList(0);
 
 	for (;;) {
 		free(line);

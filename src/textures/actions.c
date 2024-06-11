@@ -25,7 +25,7 @@ extern void SwitchToPane(struct directory_pane *pane); // in wadgadget.c
 
 static bool CheckExistingTexture(struct textures *txs, const char *name)
 {
-	bool existing = TX_TextureForName(txs, name) != NULL;
+	bool existing = TX_TextureForName(txs, name) >= 0;
 
 	if (existing) {
 		UI_MessageBox("There is already a texture with this name.");

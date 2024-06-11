@@ -322,8 +322,8 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 	from_file = VFS_Open(ctx->filename);
 	assert(from_file != NULL);
 
-	if (!ImportFromFile(from_file, ctx->filename,
-	                    VFS_WadFile(ctx->from), ctx->lumpnum, true)) {
+	if (!ImportFromFile(from_file, ctx->filename, ctx->from,
+	                    ctx->lumpnum, true)) {
 		return !UI_ConfirmDialogBox(
 			"Error", "Edit", "Abort", "Import failed. "
 			"Error:\n%s\n\nEdit file again?",
