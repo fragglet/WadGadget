@@ -6,7 +6,7 @@ LIBSIXEL_LDFLAGS = \
     $(shell pkg-config --silence-errors --libs libsixel)
 
 REQUIRED_PKGS = audiofile ncurses libpng
-CFLAGS = -g -Wall -I. -O0 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
+CFLAGS = -g -MMD -Wall -I. -O0 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
          $(LIBSIXEL_CFLAGS)
 LDFLAGS = $(shell pkg-config --libs $(REQUIRED_PKGS)) $(LIBSIXEL_LDFLAGS)
 
@@ -47,6 +47,8 @@ OBJS =                      \
     view.o                  \
     wadgadget.o
 
+DEPS = $(patsubst %.o,%.d,$(OBJS))
+
 wadgadget : $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS)
 
@@ -54,5 +56,6 @@ wadgadget : $(OBJS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean :
-	rm -f wadgadget $(OBJS)
+	rm -f wadgadget $(OBJS) $(DEPS)
 
+-include $(DEPS)
