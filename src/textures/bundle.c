@@ -25,8 +25,8 @@
 #include "fs/vfs.h"
 #include "ui/dialog.h"
 
-#include "textures/internal.h"
 #include "textures/textures.h"
+#include "textures/internal.h"
 
 void TX_FreeBundle(struct texture_bundle *b)
 {

@@ -24,6 +24,8 @@ struct lump_dir {
 	// Parent directory; always a WAD file.
 	struct directory *parent_dir;
 	uint64_t lump_serial;
+
+	struct texture_bundle b;
 };
 
 struct directory *TX_LumpDirOpenDir(void *_dir,

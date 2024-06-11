@@ -29,12 +29,13 @@
 // Currently incomplete.
 struct texture_dir {
 	struct lump_dir dir;
-	struct textures *txs;
-	struct pnames *pn;
 
 	// txs->modified_count at the last call to commit.
 	unsigned int last_commit;
 };
+
+#define TEXTURES(dir) ((dir)->dir.b.txs)
+#define PNAMES(dir) ((dir)->dir.b.pn)
 
 static void TextureDirRefresh(void *_dir, struct directory_entry **entries,
                               size_t *num_entries)
@@ -42,18 +43,18 @@ static void TextureDirRefresh(void *_dir, struct directory_entry **entries,
 	struct texture_dir *dir = _dir;
 	unsigned int i;
 
-	*num_entries = dir->txs->num_textures;
+	*num_entries = TEXTURES(dir)->num_textures;
 	*entries = checked_calloc(
-		dir->txs->num_textures, sizeof(struct directory_entry));
+		TEXTURES(dir)->num_textures, sizeof(struct directory_entry));
 
-	for (i = 0; i < dir->txs->num_textures; i++) {
+	for (i = 0; i < TEXTURES(dir)->num_textures; i++) {
 		struct directory_entry *ent = *entries + i;
 		ent->type = FILE_TYPE_TEXTURE;
 		ent->name = checked_calloc(9, 1);
-		memcpy(ent->name, dir->txs->textures[i]->name, 8);
+		memcpy(ent->name, TEXTURES(dir)->textures[i]->name, 8);
 		ent->name[8] = '\0';
 		ent->size = 0;
-		ent->serial_no = dir->txs->serial_nos[i];
+		ent->serial_no = TEXTURES(dir)->serial_nos[i];
 	}
 }
 
@@ -66,7 +67,7 @@ static void TextureDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct texture_dir *dir = _dir;
 
-	TX_RemoveTexture(dir->txs, entry - dir->dir.dir.entries);
+	TX_RemoveTexture(TEXTURES(dir), entry - dir->dir.dir.entries);
 }
 
 static void TextureDirRename(void *_dir, struct directory_entry *entry,
@@ -74,21 +75,21 @@ static void TextureDirRename(void *_dir, struct directory_entry *entry,
 {
 	struct texture_dir *dir = _dir;
 
-	TX_RenameTexture(dir->txs, entry - dir->dir.dir.entries, new_name);
+	TX_RenameTexture(TEXTURES(dir), entry - dir->dir.dir.entries, new_name);
 }
 
 static bool TextureDirNeedCommit(void *_dir)
 {
 	struct texture_dir *dir = _dir;
 
-	return dir->txs->modified_count > dir->last_commit;
+	return TEXTURES(dir)->modified_count > dir->last_commit;
 }
 
 static void TextureDirCommit(void *_dir)
 {
 	struct texture_dir *dir = _dir;
 
-	dir->last_commit = dir->txs->modified_count;
+	dir->last_commit = TEXTURES(dir)->modified_count;
 }
 
 static void TextureDirDescribe(char *buf, size_t buf_len, int cnt)
@@ -106,18 +107,18 @@ static void TextureDirSwap(void *_dir, unsigned int x, unsigned int y)
 	struct texture *tmp;
 	uint64_t tmp_serial;
 
-	assert(x < dir->txs->num_textures);
-	assert(y < dir->txs->num_textures);
+	assert(x < TEXTURES(dir)->num_textures);
+	assert(y < TEXTURES(dir)->num_textures);
 
-	tmp = dir->txs->textures[x];
-	dir->txs->textures[x] = dir->txs->textures[y];
-	dir->txs->textures[y] = tmp;
+	tmp = TEXTURES(dir)->textures[x];
+	TEXTURES(dir)->textures[x] = TEXTURES(dir)->textures[y];
+	TEXTURES(dir)->textures[y] = tmp;
 
-	tmp_serial = dir->txs->serial_nos[x];
-	dir->txs->serial_nos[x] = dir->txs->serial_nos[y];
-	dir->txs->serial_nos[y] = tmp_serial;
+	tmp_serial = TEXTURES(dir)->serial_nos[x];
+	TEXTURES(dir)->serial_nos[x] = TEXTURES(dir)->serial_nos[y];
+	TEXTURES(dir)->serial_nos[y] = tmp_serial;
 
-	++dir->txs->modified_count;
+	++TEXTURES(dir)->modified_count;
 }
 
 static VFILE *TextureDirSaveSnapshot(void *_dir)
@@ -125,10 +126,10 @@ static VFILE *TextureDirSaveSnapshot(void *_dir)
 	struct texture_dir *dir = _dir;
 	VFILE *tmp, *result = vfopenmem(NULL, 0);
 
-	assert(vfwrite(&dir->txs->modified_count,
+	assert(vfwrite(&TEXTURES(dir)->modified_count,
 	               sizeof(int), 1, result) == 1);
 
-	tmp = TX_MarshalTextures(dir->txs);
+	tmp = TX_MarshalTextures(TEXTURES(dir));
 	vfcopy(tmp, result);
 	vfclose(tmp);
 	vfseek(result, 0, SEEK_SET);
@@ -146,8 +147,8 @@ static void TextureDirRestoreSnapshot(void *_dir, VFILE *in)
 	assert(new_txs != NULL);
 	new_txs->modified_count = mod_count;
 
-	TX_FreeTextures(dir->txs);
-	dir->txs = new_txs;
+	TX_FreeTextures(TEXTURES(dir));
+	TEXTURES(dir) = new_txs;
 	dir->last_commit = mod_count;
 }
 
@@ -156,13 +157,6 @@ static void TextureDirFree(void *_dir)
 	struct texture_dir *dir = _dir;
 
 	TX_LumpDirFree(&dir->dir);
-
-	if (dir->txs != NULL) {
-		TX_FreeTextures(dir->txs);
-	}
-	if (dir->pn != NULL) {
-		TX_FreePnames(dir->pn);
-	}
 }
 
 struct directory_funcs texture_dir_funcs = {
@@ -212,7 +206,7 @@ static struct pnames *TextureDirGetPnames(void *_dir)
 	struct texture_dir *dir = _dir;
 
 	assert(dir->dir.dir.directory_funcs == &texture_dir_funcs);
-	return dir->pn;
+	return PNAMES(dir);
 }
 
 static bool TextureDirLoad(void *_dir, struct directory *wad_dir,
@@ -238,18 +232,10 @@ static bool TextureDirLoad(void *_dir, struct directory *wad_dir,
 	if (new_txs == NULL) {
 		TX_FreePnames(new_pn);
 		return false;
-	}
 
-	if (dir->pn != NULL) {
-		new_pn->modified_count = dir->pn->modified_count + 1;
-		TX_FreePnames(dir->pn);
 	}
-	if (dir->txs != NULL) {
-		new_txs->modified_count = dir->txs->modified_count + 1;
-		TX_FreeTextures(dir->txs);
-	}
-	dir->pn = new_pn;
-	dir->txs = new_txs;
+	PNAMES(dir) = new_pn;
+	TEXTURES(dir) = new_txs;
 	return true;
 }
 
@@ -261,11 +247,11 @@ static bool TextureDirSave(void *_dir, struct directory *wad_dir,
 	VFILE *out, *texture_out;
 
 	// Unchanged since it was opened?
-	if (dir->txs->modified_count == 0) {
+	if (TEXTURES(dir)->modified_count == 0) {
 		return true;
 	}
 
-	texture_out = TX_MarshalTextures(dir->txs);
+	texture_out = TX_MarshalTextures(TEXTURES(dir));
 	if (texture_out == NULL) {
 		return false;
 	}
@@ -315,13 +301,13 @@ static VFILE *TextureDirFormatConfig(void *_dir, struct file_set *selected)
 	         PathBaseName(TX_DirGetParent(_dir, NULL)->path));
 
 	if (selected != NULL) {
-		subset = MakeTextureSubset(dir->txs, selected);
+		subset = MakeTextureSubset(TEXTURES(dir), selected);
 	} else {
-		subset = dir->txs;
+		subset = TEXTURES(dir);
 	}
-	result = TX_FormatTexturesConfig(subset, dir->pn, comment_buf);
+	result = TX_FormatTexturesConfig(subset, PNAMES(dir), comment_buf);
 
-	if (subset != dir->txs) {
+	if (subset != TEXTURES(dir)) {
 		TX_FreeTextures(subset);
 	}
 
@@ -356,5 +342,5 @@ struct textures *TX_TextureList(struct directory *_dir)
 
 	assert(dir->dir.dir.directory_funcs == &texture_dir_funcs);
 
-	return dir->txs;
+	return TEXTURES(dir);
 }

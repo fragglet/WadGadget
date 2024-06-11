@@ -21,8 +21,8 @@
 #include "fs/vfs.h"
 #include "stringlib.h"
 
-#include "textures/internal.h"
 #include "textures/textures.h"
+#include "textures/internal.h"
 
 struct directory *TX_LumpDirOpenDir(void *_dir,
                                     struct directory_entry *ent)
@@ -56,6 +56,7 @@ void TX_LumpDirFree(struct lump_dir *dir)
 
 	TX_DirGetParent(&dir->dir, &ent);
 	dir->lump_dir_funcs->save(dir, dir->parent_dir, ent);
+	TX_FreeBundle(&dir->b);
 	VFS_DirectoryUnref(TX_DirGetParent(&dir->dir, NULL));
 }
 
@@ -63,14 +64,25 @@ bool TX_DirReload(struct directory *_dir)
 {
 	struct lump_dir *dir = (struct lump_dir *) _dir;
 	struct directory_entry *ent;
-	bool result;
+	int txs_modcount, pn_modcount;
+	bool first, success;
 
 	TX_DirGetParent(_dir, &ent);
 
-	result = dir->lump_dir_funcs->load(dir, dir->parent_dir, ent);
+	first = dir->b.txs == NULL;
+	if (!first) {
+		txs_modcount = dir->b.txs->modified_count,
+		pn_modcount = dir->b.pn->modified_count;
+	}
+	success = dir->lump_dir_funcs->load(dir, dir->parent_dir, ent);
 	VFS_Refresh(&dir->dir);
 
-	return result;
+	if (success && !first) {
+		dir->b.txs->modified_count = txs_modcount + 1;
+		dir->b.pn->modified_count = pn_modcount + 1;
+	}
+
+	return success;
 }
 
 bool TX_DirSave(struct directory *_dir)
