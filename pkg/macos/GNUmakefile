@@ -4,6 +4,7 @@ APP_DIR = staging/WadGadget.app
 APP_TOP_DIR = $(APP_DIR)/Contents
 APP_BIN_DIR = $(APP_DIR)/Contents/MacOS
 APP_RES_DIR = $(APP_DIR)/Contents/Resources
+DOC_FILES = README.md COPYING.md
 DMG = wadgadget.dmg
 ICONS = app.icns wadfile.icns
 
@@ -26,6 +27,12 @@ staging: $(ICONS)
 	cp $(ICONS) "$(APP_RES_DIR)"
 	cp Resources/launch.sh "$(APP_BIN_DIR)"
 	./cp-with-libs $(TOPLEVEL)/src/wadgadget "$(APP_BIN_DIR)"
+
+	for d in $(DOC_FILES); do \
+		pandoc $(PANDOC_FLAGS) -f gfm \
+		    -o staging/$$(basename $$d .md).html \
+		    $(TOPLEVEL)/$$d; \
+	done
 
 %.iconset: Resources/%.png
 	mkdir -p $@

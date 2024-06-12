@@ -42,7 +42,7 @@ jobs:
     steps:
     - name: Install build dependencies (Homebrew, macOS)
       if: runner.os == 'macOS'
-      run: brew install libsndfile ncurses libpng
+      run: brew install libsndfile ncurses libpng pandoc
 
     - name: Install build dependencies (apt, Linux)
       if: runner.os == 'Linux'
