@@ -52,7 +52,11 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 }
 
 static const char *audio_extensions[] = {
-	".aiff", ".wav", ".voc", ".flac", NULL,
+	// All the formats supported by libsndfile, except lossily-
+	// compressed formats, because you shouldn't be using those.
+	".aiff", ".wav", ".voc", ".flac", ".aiff", ".svx", ".au", ".paf",
+	".sf", ".w64", ".pvf", ".xi", ".caf", ".wve", ".dwd", ".txw",
+	".sds", ".avr", ".htk", ".rex", ".rx2", ".snd", NULL,
 };
 
 static const char *lump_extensions[] = {

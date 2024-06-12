@@ -5,7 +5,7 @@ LIBSIXEL_CFLAGS = \
 LIBSIXEL_LDFLAGS = \
     $(shell pkg-config --silence-errors --libs libsixel)
 
-REQUIRED_PKGS = audiofile ncurses libpng
+REQUIRED_PKGS = sndfile ncurses libpng
 CFLAGS = -g -MMD -Wall -I. -O0 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
          $(LIBSIXEL_CFLAGS)
 LDFLAGS = $(shell pkg-config --libs $(REQUIRED_PKGS)) $(LIBSIXEL_LDFLAGS)

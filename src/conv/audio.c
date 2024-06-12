@@ -8,11 +8,12 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <af_vfs.h>
-#include <audiofile.h>
+#include <stdlib.h>
+#include <sndfile.h>
 #include <assert.h>
 
 #include "conv/audio.h"
+#include "conv/error.h"
 #include "common.h"
 
 void S_SwapSoundHeader(struct sound_header *hdr)
@@ -22,109 +23,122 @@ void S_SwapSoundHeader(struct sound_header *hdr)
 	SwapLE32(&hdr->num_samples);
 };
 
-static ssize_t AudioFileRead(AFvirtualfile *vfile, void *data, size_t nbytes)
+static sf_count_t SoundFileGetLen(void *user_data)
 {
-	return vfread(data, 1, nbytes, vfile->closure);
-}
+	long pos = vftell(user_data);
+	sf_count_t result;
 
-static AFfileoffset AudioFileLength(AFvirtualfile *vfile)
-{
-	VFILE *f = vfile->closure;
-	AFfileoffset result, old_pos;
-
-	old_pos = vftell(f);
-	assert(vfseek(f, 0, SEEK_END) >= 0);
-	result = vftell(f);
-	assert(vfseek(f, old_pos, SEEK_SET) >= 0);
+	vfseek(user_data, 0, SEEK_END);
+	result = vftell(user_data);
+	vfseek(user_data, pos, SEEK_SET);
 
 	return result;
 }
 
-static ssize_t AudioFileWrite(AFvirtualfile *vfile, const void *data,
-                              size_t nbytes)
+static sf_count_t SoundFileSeek(sf_count_t offset, int whence, void *user_data)
 {
-	return vfwrite(data, 1, nbytes, vfile->closure);
+	return vfseek(user_data, offset, whence);
 }
 
-static void AudioFileDestroy(AFvirtualfile *vfile)
+static sf_count_t SoundFileRead(void *ptr, sf_count_t count, void *user_data)
 {
-	//vfclose(vfile->closure);
+	return vfread(ptr, 1, count, user_data);
 }
 
-static AFfileoffset AudioFileSeek(AFvirtualfile *vfile, AFfileoffset offset,
-                           int is_relative)
+static sf_count_t SoundFileWrite(const void *ptr, sf_count_t count,
+                                 void *user_data)
 {
-	vfseek(vfile->closure, offset, is_relative ? SEEK_CUR : SEEK_SET);
-	return vftell(vfile->closure);
+	return vfwrite(ptr, 1, count, user_data);
 }
 
-static AFfileoffset AudioFileTell(AFvirtualfile *vfile)
+static sf_count_t SoundFileTell(void *user_data)
 {
-	return vftell(vfile->closure);
+	return vftell(user_data);
 }
 
-static AFvirtualfile *MakeVirtualFile(VFILE *vf)
+static struct SF_VIRTUAL_IO virt_ops = {
+	SoundFileGetLen,
+	SoundFileSeek,
+	SoundFileRead,
+	SoundFileWrite,
+	SoundFileTell,
+};
+
+static bool ReadNextSample(SF_INFO *sf_info, SNDFILE *sndfile, short *buf,
+                           uint8_t *result)
 {
-	AFvirtualfile *af = af_virtual_file_new();
+	int accum = 0;
+	int i;
 
-	af->read = AudioFileRead;
-	af->length = AudioFileLength;
-	af->write = AudioFileWrite;
-	af->destroy = AudioFileDestroy;
-	af->seek = AudioFileSeek;
-	af->tell = AudioFileTell;
-	af->closure = vf;
+	if (sf_readf_short(sndfile, buf, 1) != 1) {
+		ConversionError("%s", sf_strerror(sndfile));
+		return false;
+	}
 
-	return af;
+	for (i = 0; i < sf_info->channels; i++) {
+		accum += buf[i];
+	}
+
+	accum /= sf_info->channels;
+
+	// Take top byte and convert to unsigned.
+	return (accum / 256) + 128;
 }
 
 VFILE *S_FromAudioFile(VFILE *input)
 {
-	AFvirtualfile *avf = MakeVirtualFile(input);
-	VFILE *result = vfopenmem(NULL, 0);
-	AFfilehandle af = afOpenVirtualFile(avf, "r", AF_NULL_FILESETUP);
+	short *framebuf;
+	SF_INFO sf_info;
+	SNDFILE *virt;
+	VFILE *result;
 	struct sound_header hdr;
+	uint8_t buf[128];
+	size_t nsamples, buf_len;
+	bool success = true;
 
-	if (af == NULL) {
-		goto fail;
+	virt = sf_open_virtual(&virt_ops, SFM_READ, &sf_info, input);
+	if (virt == NULL) {
+		ConversionError("%s", sf_strerror(NULL));
+		vfclose(input);
+		return NULL;
 	}
 
-	afSetVirtualChannels(af, AF_DEFAULT_TRACK, 1);
-	afSetVirtualSampleFormat(af, AF_DEFAULT_TRACK, AF_SAMPFMT_UNSIGNED, 8);
-
+	result = vfopenmem(NULL, 0);
 	hdr.format = 3;
-	hdr.sample_rate = (int) afGetRate(af, AF_DEFAULT_TRACK);
-	hdr.num_samples = afGetFrameCount(af, AF_DEFAULT_TRACK);
+	hdr.sample_rate = sf_info.samplerate;
+	hdr.num_samples = sf_info.frames;
 	S_SwapSoundHeader(&hdr);
 	vfwrite(&hdr, sizeof(hdr), 1, result);
 
-	for (;;) {
-		uint8_t buf[512];
-		int frames = afReadFrames(af, AF_DEFAULT_TRACK, buf, sizeof(buf));
-
-		if (frames < 0) {
-			goto fail;
-		} else if (frames == 0) {
+	framebuf = checked_calloc(sf_info.channels, sizeof(short));
+	nsamples = 0;
+	buf_len = 0;
+	while (nsamples < sf_info.frames) {
+		success = ReadNextSample(&sf_info, virt, framebuf,
+		                         &buf[buf_len]);
+		if (!success) {
+			ConversionError("unexpected end of file");
 			break;
 		}
-
-		vfwrite(buf, 1, frames, result);
+		++nsamples;
+		++buf_len;
+		// Is the buffer full? Write it out.
+		if (buf_len >= sizeof(buf) || nsamples >= sf_info.frames) {
+			assert(vfwrite(buf, 1, buf_len, result) == buf_len);
+			buf_len = 0;
+		}
 	}
 
+	sf_write_sync(virt);
 	vfseek(result, 0, SEEK_SET);
+	sf_close(virt);
 
-	goto end;
-
-fail:
-	vfclose(result);
-	result = NULL;
-
-end:
-	if (af != NULL) {
-		afCloseFile(af);
-	} else {
-		af_virtual_file_destroy(avf);
+	if (!success) {
+		vfclose(result);
+		result = NULL;
 	}
+
+	free(framebuf);
 	vfclose(input);
 
 	return result;
@@ -133,58 +147,58 @@ end:
 VFILE *S_ToAudioFile(VFILE *input)
 {
 	struct sound_header hdr;
-	AFfilesetup setup = afNewFileSetup();
-	VFILE *result = vfopenmem(NULL, 0);
-	AFvirtualfile *avf;
-	AFfilehandle af;
+	SNDFILE *out;
+	SF_INFO sf_info;
+	VFILE *result;
+	bool success = true;
+	int i;
 
-	assert(vfread(&hdr, sizeof(hdr), 1, input) == 1);
+	if (vfread(&hdr, sizeof(hdr), 1, input) != 1) {
+		ConversionError("failed to read sound lump header");
+		vfclose(input);
+		return NULL;
+	}
 	S_SwapSoundHeader(&hdr);
-	assert(hdr.format == 3);
-
-	afInitFileFormat(setup, AF_FILE_WAVE);
-	afInitChannels(setup, AF_DEFAULT_TRACK, 1);
-	afInitRate(setup, AF_DEFAULT_TRACK, hdr.sample_rate);
-	afInitSampleFormat(setup, AF_DEFAULT_TRACK, AF_SAMPFMT_UNSIGNED, 8);
-
-	avf = MakeVirtualFile(result);
-	af = afOpenVirtualFile(avf, "w", setup);
-	if (af == NULL) {
-		goto fail;
+	if (hdr.format != 3) {
+		ConversionError("sound header has unknown format type (%d)",
+		                hdr.format);
+		vfclose(input);
+		return NULL;
 	}
 
-	for (;;) {
-		uint8_t buf[512];
-		int frames = vfread(buf, 1, sizeof(buf), input);
+	result = vfopenmem(NULL, 0);
+	sf_info.frames = hdr.num_samples;
+	sf_info.samplerate = hdr.sample_rate;
+	sf_info.channels = 1;
+	sf_info.format = SF_FORMAT_WAV|SF_FORMAT_PCM_U8;
 
-		if (frames < 0) {
-			goto fail;
-		} else if (frames == 0) {
+	out = sf_open_virtual(&virt_ops, SFM_WRITE, &sf_info, result);
+	if (out == NULL) {
+		fprintf(stderr, "libsndfile error: %s\n", sf_strerror(NULL));
+		assert(out != NULL);
+	}
+
+	for (i = 0; i < hdr.num_samples; i++) {
+		uint8_t sample;
+		short sample16;
+		success = vfread(&sample, 1, 1, input) == 1;
+		if (!success) {
+			ConversionError("unexpected end of lump, "
+			                "only %d samples read", i);
 			break;
 		}
-
-		if (afWriteFrames(af, AF_DEFAULT_TRACK, buf, frames) < 0) {
-			goto fail;
-		}
+		sample16 = (((short) sample) - 128) * 256;
+		assert(sf_writef_short(out, &sample16, 1) == 1);
 	}
 
-	goto end;
-
-fail:
-	vfclose(result);
-	result = NULL;
-
-end:
-	if (af != NULL) {
-		afCloseFile(af);
-	} else {
-		af_virtual_file_destroy(avf);
-	}
 	vfclose(input);
-	afFreeFileSetup(setup);
+	sf_close(out);
 
-	if (result != NULL) {
-		vfseek(result, 0, SEEK_SET);
+	vfseek(result, 0, SEEK_SET);
+
+	if (!success) {
+		vfclose(result);
+		result = NULL;
 	}
 
 	return result;
