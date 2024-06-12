@@ -82,7 +82,8 @@ static bool ReadNextSample(SF_INFO *sf_info, SNDFILE *sndfile, short *buf,
 	accum /= sf_info->channels;
 
 	// Take top byte and convert to unsigned.
-	return (accum / 256) + 128;
+	*result = (accum / 256) + 128;
+	return true;
 }
 
 VFILE *S_FromAudioFile(VFILE *input)
