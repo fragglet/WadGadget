@@ -239,7 +239,6 @@ static void PerformExportConfig(struct directory_pane *active_pane,
 
 	out_wrapped = vfwrapfile(out);
 	vfcopy(formatted, out_wrapped);
-	vfclose(formatted);
 	vfclose(out_wrapped);
 
 	VFS_Refresh(other_pane->dir);
@@ -248,6 +247,7 @@ static void PerformExportConfig(struct directory_pane *active_pane,
 	UI_DirectoryPaneSelectByName(other_pane, filename);
 
 cancel:
+	vfclose(formatted);
 	free(filename);
 	free(filename2);
 }
