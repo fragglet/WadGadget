@@ -168,13 +168,6 @@ static const struct directory_funcs pnames_dir_funcs = {
 	PnamesDirFree,
 };
 
-struct pnames *PnamesDirGetPnames(void *_dir)
-{
-	struct pnames_dir *dir = _dir;
-	assert(dir->dir.dir.directory_funcs == &pnames_dir_funcs);
-	return PNAMES(dir);
-}
-
 static bool PnamesDirLoad(void *_dir, struct directory *wad_dir,
                           struct directory_entry *ent)
 {
@@ -249,7 +242,6 @@ static VFILE *PnamesDirFormatConfig(void *_dir, struct file_set *selected)
 }
 
 static const struct lump_dir_funcs pnames_lump_dir_funcs = {
-	PnamesDirGetPnames,
 	PnamesDirLoad,
 	PnamesDirSave,
 	PnamesDirFormatConfig,

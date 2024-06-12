@@ -82,7 +82,7 @@ bool TX_DirReload(struct directory *_dir);
 struct textures *TX_TextureList(struct directory *_dir);
 struct directory *TX_DirGetParent(struct directory *_dir,
                                   struct directory_entry **ent);
-struct pnames *TX_GetDirPnames(struct directory *_dir);
+struct texture_bundle *TX_DirGetBundle(struct directory *_dir);
 struct directory *TX_OpenPnamesDir(struct directory *parent,
                                    struct directory_entry *ent);
 VFILE *TX_DirFormatConfig(struct directory *_dir, struct file_set *subset);

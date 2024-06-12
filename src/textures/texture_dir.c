@@ -201,14 +201,6 @@ static struct pnames *LoadPnames(struct texture_dir *dir)
 	return pn;
 }
 
-static struct pnames *TextureDirGetPnames(void *_dir)
-{
-	struct texture_dir *dir = _dir;
-
-	assert(dir->dir.dir.directory_funcs == &texture_dir_funcs);
-	return PNAMES(dir);
-}
-
 static bool TextureDirLoad(void *_dir, struct directory *wad_dir,
                            struct directory_entry *ent)
 {
@@ -315,7 +307,6 @@ static VFILE *TextureDirFormatConfig(void *_dir, struct file_set *selected)
 }
 
 static const struct lump_dir_funcs texture_lump_dir_funcs = {
-	TextureDirGetPnames,
 	TextureDirLoad,
 	TextureDirSave,
 	TextureDirFormatConfig,

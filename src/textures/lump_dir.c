@@ -99,11 +99,11 @@ bool TX_DirSave(struct directory *_dir)
 	return result;
 }
 
-struct pnames *TX_GetDirPnames(struct directory *_dir)
+struct texture_bundle *TX_DirGetBundle(struct directory *_dir)
 {
 	struct lump_dir *dir = (struct lump_dir *) _dir;
 
-	return dir->lump_dir_funcs->get_pnames(dir);
+	return &dir->b;
 }
 
 VFILE *TX_DirFormatConfig(struct directory *_dir, struct file_set *subset)

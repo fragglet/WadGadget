@@ -260,7 +260,7 @@ const struct action export_texture_config = {
 static void PerformNewPname(struct directory_pane *active_pane,
                             struct directory_pane *other_pane)
 {
-	struct pnames *pn = TX_GetDirPnames(active_pane->dir);
+	struct texture_bundle *b = TX_DirGetBundle(active_pane->dir);
 	int idx;
 	char *name;
 
@@ -274,7 +274,7 @@ static void PerformNewPname(struct directory_pane *active_pane,
 		return;
 	}
 
-	if (TX_GetPnameIndex(pn, name) >= 0) {
+	if (TX_GetPnameIndex(b->pn, name) >= 0) {
 		UI_DirectoryPaneSelectByName(active_pane, name);
 		UI_MessageBox("'%s' is already in the list.");
 		free(name);
@@ -286,7 +286,7 @@ static void PerformNewPname(struct directory_pane *active_pane,
 	// That's not to say that we don't allow it to be subsequently moved
 	// into a different position, but just adding a pname always does
 	// something safe.
-	idx = TX_AppendPname(pn, name);
+	idx = TX_AppendPname(b->pn, name);
 	VFS_CommitChanges(active_pane->dir, "creation of pname '%s'", name);
 	VFS_Refresh(active_pane->dir);
 	UI_DirectoryPaneSelectEntry(active_pane,
@@ -333,7 +333,7 @@ static void PerformCopyPnames(struct directory_pane *active_pane,
 	struct file_set copied = EMPTY_FILE_SET, unused = EMPTY_FILE_SET;
 	struct directory *from_dir = active_pane->dir,
 	                 *to_dir = other_pane->dir;
-	struct pnames *pn = TX_GetDirPnames(other_pane->dir);
+	struct texture_bundle *b = TX_DirGetBundle(active_pane->dir);
 	struct directory_entry *ent;
 	int idx;
 
@@ -348,11 +348,11 @@ static void PerformCopyPnames(struct directory_pane *active_pane,
 
 	idx = 0;
 	while ((ent = VFS_IterateSet(from_dir, tagged, &idx)) != NULL) {
-		if (TX_GetPnameIndex(pn, ent->name) >= 0) {
+		if (TX_GetPnameIndex(b->pn, ent->name) >= 0) {
 			VFS_AddToSet(&unused, TX_PnameSerialNo(ent->name));
 			continue;
 		}
-		TX_AppendPname(pn, ent->name);
+		TX_AppendPname(b->pn, ent->name);
 		VFS_AddToSet(&copied, TX_PnameSerialNo(ent->name));
 	}
 

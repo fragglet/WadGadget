@@ -9,7 +9,6 @@
 //
 
 struct lump_dir_funcs {
-	struct pnames *(*get_pnames)(void *dir);
 	bool (*load)(void *dir, struct directory *wad_dir,
 	             struct directory_entry *ent);
 	bool (*save)(void *dir, struct directory *wad_dir,
