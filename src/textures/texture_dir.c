@@ -152,11 +152,9 @@ static void TextureDirRestoreSnapshot(void *_dir, VFILE *in)
 	dir->last_commit = mod_count;
 }
 
-static void TextureDirFree(void *_dir)
+static void TextureDirFree(void *dir)
 {
-	struct texture_dir *dir = _dir;
-
-	TX_LumpDirFree(&dir->dir);
+	TX_LumpDirFree(dir);
 }
 
 struct directory_funcs texture_dir_funcs = {

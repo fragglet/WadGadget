@@ -145,12 +145,9 @@ static void PnamesDirRestoreSnapshot(void *_dir, VFILE *in)
 	dir->last_commit = mod_count;
 }
 
-static void PnamesDirFree(void *_dir)
+static void PnamesDirFree(void *dir)
 {
-	struct pnames_dir *dir = _dir;
-
-	TX_LumpDirFree(&dir->dir);
-	TX_FreePnames(PNAMES(dir));
+	TX_LumpDirFree(dir);
 }
 
 static const struct directory_funcs pnames_dir_funcs = {
