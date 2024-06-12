@@ -170,8 +170,8 @@ bool TX_BundleConfirmAddPnames(struct texture_bundle *into,
 	return missing == 0
 	    || (into->txs->num_textures == 0 && from->txs->num_textures == 0)
 	    || UI_ConfirmDialogBox("Update PNAMES?", "Update", "Cancel",
-	                           "Some patch names need to be added "
-	                           "to PNAMES.\nProceed?");
+	                           "%d patch names need to be added "
+	                           "to PNAMES.\nProceed?", missing);
 }
 
 static bool TexturesIdentical(const struct texture *x, const struct texture *y)

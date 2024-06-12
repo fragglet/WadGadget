@@ -257,6 +257,46 @@ const struct action export_texture_config = {
 	PerformExportConfig,
 };
 
+static void PerformImportConfig(struct directory_pane *active_pane,
+                                struct directory_pane *other_pane)
+{
+	struct texture_bundle_merge_result merge_stats;
+	struct texture_bundle b;
+	struct texture_bundle *into = TX_DirGetBundle(other_pane->dir);
+	struct directory_entry *ent;
+	int selected = UI_DirectoryPaneSelected(active_pane);
+	VFILE *in;
+
+	if (selected < 0) {
+		return;
+	}
+
+	ent = &active_pane->dir->entries[selected];
+	in = VFS_OpenByEntry(active_pane->dir, ent);
+
+	if (!TX_DirParseConfig(other_pane->dir, &b, in)) {
+		return;
+	}
+
+	// TODO: Confirm overwrite
+	if (TX_BundleConfirmAddPnames(into, &b)) {
+		TX_BundleMerge(into, &b, &merge_stats);
+		VFS_CommitChanges(other_pane->dir, "import from '%s'",
+		                  ent->name);
+		// TODO: show notice
+		VFS_Refresh(other_pane->dir);
+		SwitchToPane(other_pane);
+		// TODO: Highlight new/updated items
+	}
+
+	TX_FreeBundle(&b);
+}
+
+const struct action import_texture_config = {
+	KEY_F(5), 'O', "ImpCfg", "> Import config",
+	PerformImportConfig,
+};
+
 static void PerformNewPname(struct directory_pane *active_pane,
                             struct directory_pane *other_pane)
 {
