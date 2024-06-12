@@ -90,9 +90,13 @@ const struct action new_texture_action = {
 static void PerformEditConfig(struct directory_pane *active_pane,
                               struct directory_pane *other_pane)
 {
-	struct directory_revision *old_rev;
+	struct directory_revision *old_rev, *orig_rev;
 	struct directory *parent;
 	struct directory_entry *ent;
+	int i;
+
+	parent = TX_DirGetParent(active_pane->dir, &ent);
+	orig_rev = parent->curr_revision;
 
 	if (!TX_DirSave(active_pane->dir)) {
 		UI_MessageBox("Failed to save directory for editing.");
@@ -106,17 +110,22 @@ static void PerformEditConfig(struct directory_pane *active_pane,
 	// Editing may have reset the readonly flag.
 	active_pane->dir->readonly = parent->readonly;
 
-	// If the current revision of the WAD has changed, it can only be
-	// because `OpenDirent()` imported a new version of the lump. So
-	// detect this case and import it into the current directory. We
-	// can then undo the edit to the WAD, so that it only takes effect
-	// once exiting the current directory.
+	// If the current revision of the WAD has changed since the call to
+	// `OpenDirent()`, we know it imported a new version of the lump.
+	// So detect this case and import it into the current directory.
 	if (!parent->readonly && parent->curr_revision != old_rev
 	 && TX_DirReload(active_pane->dir)) {
 		VFS_CommitChanges(active_pane->dir, "edit via text editor");
 		VFS_ClearSet(&active_pane->tagged);
+	}
+
+	// Up to two WAD revisions may have occurred above (via `TX_DirSave`
+	// and `OpenDirent`). We can now undo the edit to the WAD; the
+	// changes will only takes effect once exiting the current directory.
+	for (i = 0; i < 2 && parent->curr_revision != orig_rev; i++) {
 		VFS_Undo(parent, 1);
 	}
+	assert(parent->curr_revision == orig_rev);
 }
 
 const struct action edit_textures_action = {
