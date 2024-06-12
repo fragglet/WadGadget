@@ -245,6 +245,7 @@ static const struct lump_dir_funcs pnames_lump_dir_funcs = {
 	PnamesDirLoad,
 	PnamesDirSave,
 	PnamesDirFormatConfig,
+	TX_BundleParsePnames,
 };
 
 struct directory *TX_OpenPnamesDir(struct directory *parent,

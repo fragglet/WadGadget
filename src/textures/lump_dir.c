@@ -24,8 +24,7 @@
 #include "textures/textures.h"
 #include "textures/internal.h"
 
-struct directory *TX_LumpDirOpenDir(void *_dir,
-                                    struct directory_entry *ent)
+struct directory *TX_LumpDirOpenDir(void *_dir, struct directory_entry *ent)
 {
 	struct lump_dir *dir = _dir;
 
@@ -111,6 +110,14 @@ VFILE *TX_DirFormatConfig(struct directory *_dir, struct file_set *subset)
 	struct lump_dir *dir = (struct lump_dir *) _dir;
 
 	return dir->lump_dir_funcs->format_config(dir, subset);
+}
+
+bool TX_DirParseConfig(struct directory *_dir, struct texture_bundle *b,
+                       VFILE *in)
+{
+	struct lump_dir *dir = (struct lump_dir *) _dir;
+
+	return dir->lump_dir_funcs->parse_config(b, in);
 }
 
 bool TX_InitLumpDir(struct lump_dir *dir, const struct lump_dir_funcs *funcs,

@@ -310,6 +310,7 @@ static const struct lump_dir_funcs texture_lump_dir_funcs = {
 	TextureDirLoad,
 	TextureDirSave,
 	TextureDirFormatConfig,
+	TX_BundleParseTextures,
 };
 
 struct directory *TX_OpenTextureDir(struct directory *parent,

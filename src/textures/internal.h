@@ -14,6 +14,7 @@ struct lump_dir_funcs {
 	bool (*save)(void *dir, struct directory *wad_dir,
 	             struct directory_entry *ent);
 	VFILE *(*format_config)(void *dir, struct file_set *selected);
+	bool (*parse_config)(struct texture_bundle *b, VFILE *in);
 };
 
 struct lump_dir {
