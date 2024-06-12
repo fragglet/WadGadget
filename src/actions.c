@@ -124,6 +124,8 @@ static void CopyToWAD(struct directory_pane *active_pane,
 			              GetConversionError());
 		}
 		VFS_FreeSet(&result);
+		VFS_Rollback(to);
+		VFS_Refresh(to);
 		return;
 	}
 
@@ -287,12 +289,17 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 	}
 
 	free(filename2);
+	ClearConversionErrors();
 
 	if (PerformImport(from, from_set, newfile, 0, &result, convert)) {
 		VFS_CommitChanges(newfile, "new WAD");
 		UI_ShowNotice("New WAD contains %d lumps.",
 		              result.num_entries);
 	} else {
+		if (strlen(GetConversionError()) > 0) {
+			UI_MessageBox("Failed importing to new WAD:\n%s",
+			              GetConversionError());
+		}
 		free(filename);
 		filename = NULL;
 	}
