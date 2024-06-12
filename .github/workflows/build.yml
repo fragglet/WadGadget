@@ -4,35 +4,85 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: Build
-    runs-on: ubuntu-latest
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    defaults:
+      run:
+        shell: ${{ matrix.config.shell }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: Linux (libsixel)
+            os: ubuntu-latest
+            shell: bash
+            suffix: ""
+            sixel: true
+
+          - name: Linux (no libsixel)
+            os: ubuntu-latest
+            shell: bash
+            suffix: ""
+            sixel: false
+
+          - name: macOS arm64
+            os: macos-13
+            shell: bash
+            suffix: "-macos-x86_64"
+            sixel: true
+
+          - name: macOS x86-64
+            os: macos-latest
+            shell: bash
+            suffix: "-macos-arm64"
+            sixel: true
 
     steps:
-    - name: Install build dependencies
+    - name: Install build dependencies (Homebrew, macOS)
+      if: runner.os == 'macOS'
+      run: brew install libsndfile ncurses libpng
+
+    - name: Install build dependencies (apt, Linux)
       if: runner.os == 'Linux'
       run: |
         sudo apt update
-        sudo apt -q install libncurses-dev gcc make \
-                            libaudiofile-dev libsixel-dev libpng-dev
+        sudo apt -q install libsndfile1-dev libncurses-dev libpng-dev \
+                            gcc pkg-config
+
+    - name: Install libsixel (Homebrew, macOS)
+      if: runner.os == 'macOS' && matrix.config.sixel
+      run: brew install libsixel
+
+    - name: Install libsixel (apt, Linux)
+      if: runner.os == 'Linux' && matrix.config.sixel
+      run: sudo apt -q install libsixel-dev
 
     - uses: actions/checkout@v4
 
-    - name: make
-      run: make -C src -j8 -k
-
-  build_nosixel:
-    name: Build (no libsixel)
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Install build dependencies
-      if: runner.os == 'Linux'
+    - name: Find Git version
+      id: version
       run: |
-        sudo apt update
-        sudo apt -q install libncurses-dev gcc make \
-                            libaudiofile-dev libpng-dev
-
-    - uses: actions/checkout@v4
+        if git describe --exact-match --tags >/dev/null; then
+          VERSION=$(git describe --exact-match --tags)
+          VERSION=${VERSION/#wadgadget-/}
+        else
+          VERSION=$(git rev-parse --short HEAD)
+        fi
+        VERSION=$VERSION${{ matrix.config.suffix }}
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
     - name: make
-      run: make -C src -j8 -k
+      run: make -C src -j8
+
+    - name: Build package (macOS)
+      if: runner.os == 'macOS'
+      run: make -C pkg/macos
+
+    - name: Upload build (macOS)
+      if: runner.os == 'macOS'
+      uses: actions/upload-artifact@v4
+      with:
+        path: "pkg/macos/wadgadget.dmg"
+        name: wadgadget-${{steps.version.outputs.VERSION}}
