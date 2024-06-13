@@ -322,6 +322,8 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 	from_file = VFS_Open(ctx->filename);
 	assert(from_file != NULL);
 
+	ClearConversionErrors();
+
 	if (!ImportFromFile(from_file, ctx->filename, ctx->from,
 	                    ctx->lumpnum, true)) {
 		return !UI_ConfirmDialogBox(
