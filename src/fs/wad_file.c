@@ -103,7 +103,7 @@ bool W_CreateFile(const char *filename)
 
 // Read WAD directory based on wf->header.table_offet.
 // If there is a current directory, it is replaced.
-#define LOOKAHEAD 10
+#define LOOKAHEAD 30
 static int ReadDirectory(struct wad_file *wf)
 {
 	struct wad_file_entry *new_directory;
@@ -126,33 +126,30 @@ static int ReadDirectory(struct wad_file *wf)
 		}
 		SwapEntry(ent);
 
-		// Try to map to a map in the old directory; if found,
-		// we preserve the serial number and do not re-read
-		// the header bytes. We only look several lumps ahead;
-		// in the worst case, we lose all serial numbers and
-		// have to re-read all lump headers.
+		// We always assign a new serial number, but the
+		// snapshotting code may override it back to an old
+		// version.
+		ent->serial_no = NewSerialNo();
+
+		// As an optimization, look ahead into the old directory
+		// and see if we find the same lump. If we do, we can
+		// skip having to read the lump header again.
 		old_lump_index = -1;
 		oldent = NULL;
 		for (k = j; k < min(j + LOOKAHEAD, wf->num_lumps); k++) {
 			oldent = &wf->directory[k];
 			if (ent->position == oldent->position
-			 && ent->size == oldent->size
-			 && !strncmp(ent->name, oldent->name, 8)) {
+			 && ent->size == oldent->size) {
 				old_lump_index = k;
 				break;
-			}
-			if (first_change == new_num_lumps) {
-				first_change = k;
 			}
 		}
 		if (old_lump_index == -1) {
 			long old_pos = vftell(wf->vfs);
-			ent->serial_no = NewSerialNo();
 			ReadLumpHeader(wf, ent);
 			vfseek(wf->vfs, old_pos, SEEK_SET);
 		} else {
 			// We got a match!
-			ent->serial_no = oldent->serial_no;
 			memcpy(ent->lump_header, oldent->lump_header,
 			       LUMP_HEADER_LEN);
 			j = old_lump_index + 1;
@@ -587,10 +584,17 @@ VFILE *W_SaveSnapshot(struct wad_file *wf)
 {
 	VFILE *result = vfopenmem(NULL, 0);
 	struct snapshot s;
+	int i;
 
 	s.header = wf->header;
 	s.eof = wf->write_pos;
+
 	assert(vfwrite(&s, sizeof(struct snapshot), 1, result) == 1);
+	for (i = 0; i < wf->header.num_lumps; i++) {
+		assert(vfwrite(&wf->directory[i].serial_no,
+		               sizeof(uint64_t), 1, result) == 1);
+	}
+
 	assert(vfseek(result, 0, SEEK_SET) == 0);
 	wf->dirty = false;
 
@@ -600,6 +604,7 @@ VFILE *W_SaveSnapshot(struct wad_file *wf)
 void W_RestoreSnapshot(struct wad_file *wf, VFILE *in)
 {
 	struct snapshot s;
+	int i;
 
 	assert(!wf->readonly);
 	assert(vfread(&s, sizeof(struct snapshot), 1, in) == 1);
@@ -609,6 +614,14 @@ void W_RestoreSnapshot(struct wad_file *wf, VFILE *in)
 	// TODO: Error report on failed directory read. Return index of
 	// first change, like W_Undo did.
 	ReadDirectory(wf);
+
+	// Read back old serial numbers.
+	for (i = 0; i < wf->header.num_lumps; i++) {
+		assert(vfread(&wf->directory[i].serial_no,
+		              sizeof(uint64_t), 1, in) == 1);
+	}
+	vfclose(in);
+
 	WriteHeader(wf);
 	wf->write_pos = s.eof;
 	wf->dirty = false;
