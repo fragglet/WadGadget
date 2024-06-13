@@ -97,6 +97,7 @@ extern const struct action import_texture_config;
 extern const struct action export_texture_config;
 extern const struct action new_pname_action;
 extern const struct action copy_pnames_action;
+extern const struct action copy_textures_action;
 
 void TX_FreeBundle(struct texture_bundle *b);
 bool TX_BundleLoadPnames(struct texture_bundle *b, VFILE *in);

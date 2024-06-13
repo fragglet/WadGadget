@@ -419,3 +419,43 @@ const struct action copy_pnames_action = {
 	KEY_F(5), 'O', "Copy", "> Copy names",
 	PerformCopyPnames,
 };
+
+static void PerformCopyTextures(struct directory_pane *active_pane,
+                                struct directory_pane *other_pane)
+{
+	struct texture_bundle_merge_result merge_stats;
+	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
+	struct texture_bundle b;
+	struct directory *from_dir = active_pane->dir,
+	                 *to_dir = other_pane->dir;
+	struct texture_bundle *into_bundle = TX_DirGetBundle(to_dir);
+	VFILE *marshaled;
+
+	if (tagged->num_entries == 0) {
+		UI_MessageBox("You have not selected any textures to copy.");
+		return;
+	}
+
+	if (!CheckReadOnly(to_dir)) {
+		return;
+	}
+
+	marshaled = TX_DirFormatConfig(from_dir, tagged);
+	assert(marshaled != NULL);
+
+	assert(TX_DirParseConfig(to_dir, &b, marshaled));
+
+	// TODO: Confirm overwrite of textures
+	if (TX_BundleConfirmAddPnames(into_bundle, &b)) {
+		TX_BundleMerge(into_bundle, &b, &merge_stats);
+	}
+
+	TX_FreeBundle(&b);
+	VFS_CommitChanges(to_dir, "Copy");
+	VFS_Refresh(to_dir);
+}
+
+const struct action copy_textures_action = {
+	KEY_F(5), 'O', "Copy", "> Copy textures",
+	PerformCopyTextures,
+};
