@@ -206,7 +206,8 @@ static bool TexturesIdentical(const struct texture *x, const struct texture *y)
 	    && !memcmp(x, y, TX_TextureLen(x->patchcount));
 }
 
-void TX_BundleMerge(struct texture_bundle *into, struct texture_bundle *from,
+void TX_BundleMerge(struct texture_bundle *into, unsigned int position,
+                    struct texture_bundle *from,
                     struct texture_bundle_merge_result *result)
 {
 	int i, j;
@@ -236,8 +237,9 @@ void TX_BundleMerge(struct texture_bundle *into, struct texture_bundle *from,
 
 		existing_tnum = TX_TextureForName(into->txs, tx->name);
 		if (existing_tnum < 0) {
-			TX_AddTexture(into->txs, into->txs->num_textures, tx);
+			TX_AddTexture(into->txs, position, tx);
 			free(tx);
+			++position;
 			++result->textures_added;
 		} else if (TexturesIdentical(
 		               into->txs->textures[existing_tnum], tx)) {

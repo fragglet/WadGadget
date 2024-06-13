@@ -110,7 +110,7 @@ static VFILE *ImportTextures(VFILE *input, struct directory *to_wad)
 		goto fail;
 	}
 
-	TX_BundleMerge(&into, &from, &merge_stats);
+	TX_BundleMerge(&into, 0, &from, &merge_stats);
 
 	if (!TX_BundleSavePnamesTo(&into, to_wad)) {
 		goto fail;

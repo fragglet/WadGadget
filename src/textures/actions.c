@@ -265,6 +265,7 @@ static void PerformImportConfig(struct directory_pane *active_pane,
 	struct texture_bundle *into = TX_DirGetBundle(other_pane->dir);
 	struct directory_entry *ent;
 	int selected = UI_DirectoryPaneSelected(active_pane);
+	int insert_pos = UI_DirectoryPaneSelected(other_pane) + 1;
 	VFILE *in;
 
 	if (selected < 0) {
@@ -280,7 +281,7 @@ static void PerformImportConfig(struct directory_pane *active_pane,
 
 	// TODO: Confirm overwrite
 	if (TX_BundleConfirmAddPnames(into, &b)) {
-		TX_BundleMerge(into, &b, &merge_stats);
+		TX_BundleMerge(into, insert_pos, &b, &merge_stats);
 		VFS_CommitChanges(other_pane->dir, "import from '%s'",
 		                  ent->name);
 		// TODO: show notice
@@ -429,6 +430,7 @@ static void PerformCopyTextures(struct directory_pane *active_pane,
 	struct directory *from_dir = active_pane->dir,
 	                 *to_dir = other_pane->dir;
 	struct texture_bundle *into_bundle = TX_DirGetBundle(to_dir);
+	int insert_pos = UI_DirectoryPaneSelected(other_pane) + 1;
 	VFILE *marshaled;
 
 	if (tagged->num_entries == 0) {
@@ -447,7 +449,7 @@ static void PerformCopyTextures(struct directory_pane *active_pane,
 
 	// TODO: Confirm overwrite of textures
 	if (TX_BundleConfirmAddPnames(into_bundle, &b)) {
-		TX_BundleMerge(into_bundle, &b, &merge_stats);
+		TX_BundleMerge(into_bundle, insert_pos, &b, &merge_stats);
 	}
 
 	TX_FreeBundle(&b);
