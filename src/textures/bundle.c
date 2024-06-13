@@ -246,6 +246,7 @@ void TX_BundleMerge(struct texture_bundle *into, struct texture_bundle *from,
 		} else {
 			free(into->txs->textures[existing_tnum]);
 			into->txs->textures[existing_tnum] = tx;
+			++into->txs->modified_count;
 			++result->textures_overwritten;
 		}
 	}
