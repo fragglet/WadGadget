@@ -112,6 +112,8 @@ bool TX_BundleParsePnames(struct texture_bundle *b, VFILE *in);
 bool TX_BundleParseTextures(struct texture_bundle *b, VFILE *in);
 bool TX_BundleConfirmAddPnames(struct texture_bundle *into,
                                struct texture_bundle *from);
+bool TX_BundleConfirmTextureOverwrite(struct texture_bundle *into,
+                                      struct texture_bundle *from);
 
 struct texture_bundle_merge_result {
 	int pnames_added;  // Number of PNAMEs added to directory

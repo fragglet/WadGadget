@@ -283,8 +283,8 @@ static void PerformImportConfig(struct directory_pane *active_pane,
 		return;
 	}
 
-	// TODO: Confirm overwrite
-	if (TX_BundleConfirmAddPnames(into, &b)) {
+	if (TX_BundleConfirmAddPnames(into, &b)
+	 && TX_BundleConfirmTextureOverwrite(into, &b)) {
 		TX_BundleMerge(into, insert_pos, &b, &merge_stats);
 		VFS_CommitChanges(other_pane->dir, "import from '%s'",
 		                  ent->name);
@@ -451,8 +451,8 @@ static void PerformCopyTextures(struct directory_pane *active_pane,
 
 	assert(TX_DirParseConfig(to_dir, &b, marshaled));
 
-	// TODO: Confirm overwrite of textures
-	if (TX_BundleConfirmAddPnames(into_bundle, &b)) {
+	if (TX_BundleConfirmAddPnames(into_bundle, &b)
+	 && TX_BundleConfirmTextureOverwrite(into_bundle, &b)) {
 		TX_BundleMerge(into_bundle, insert_pos, &b, &merge_stats);
 	}
 

@@ -206,6 +206,41 @@ static bool TexturesIdentical(const struct texture *x, const struct texture *y)
 	    && !memcmp(x, y, TX_TextureLen(x->patchcount));
 }
 
+bool TX_BundleConfirmTextureOverwrite(struct texture_bundle *into,
+                                      struct texture_bundle *from)
+{
+	int differing = 0;
+	int i, j;
+
+	for (i = 0; i < from->txs->num_textures; i++) {
+		struct texture *tx = TX_DupTexture(from->txs->textures[i]);
+		int tnum;
+
+		// Remap pname indexes. We have already made sure (above) that
+		// any required patches have been added to PNAMES.
+		for (j = 0; j < tx->patchcount; j++) {
+			uint16_t *patchnum = &tx->patches[j].patch;
+			char *pname = from->pn->pnames[*patchnum];
+			*patchnum = TX_GetPnameIndex(into->pn, pname);
+		}
+
+		tnum = TX_TextureForName(into->txs, tx->name);
+		if (tnum >= 0
+		 && !TexturesIdentical(into->txs->textures[tnum], tx)) {
+			++differing;
+		}
+
+		free(tx);
+	}
+
+	// We only prompt the user to confirm if there are PNAMES to add,
+	// but not if it's PNAMEs we're merging anyway.
+	return differing == 0
+	    || UI_ConfirmDialogBox("Overwrite textures?", "Overwrite", "Cancel",
+	                           "%d textures already exist.\n"
+	                           "Overwrite them?", differing);
+}
+
 void TX_BundleMerge(struct texture_bundle *into, unsigned int position,
                     struct texture_bundle *from,
                     struct texture_bundle_merge_result *result)
