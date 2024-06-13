@@ -378,7 +378,7 @@ static void PerformCopyPnames(struct directory_pane *active_pane,
 	struct file_set copied = EMPTY_FILE_SET, unused = EMPTY_FILE_SET;
 	struct directory *from_dir = active_pane->dir,
 	                 *to_dir = other_pane->dir;
-	struct texture_bundle *b = TX_DirGetBundle(active_pane->dir);
+	struct texture_bundle *b = TX_DirGetBundle(to_dir);
 	struct directory_entry *ent;
 	int idx;
 
