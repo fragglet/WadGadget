@@ -60,16 +60,42 @@ bool TX_BundleLoadPnamesFrom(struct texture_bundle *b, struct directory *dir)
 	if (ent == NULL) {
 		ConversionError("To import a texture config, your WAD\n"
 		                "must contain a PNAMES lump.");
-		return NULL;
+		return false;
 	}
 
 	in = VFS_OpenByEntry(dir, ent);
 	if (in == NULL) {
 		ConversionError("Failed to open PNAMES lump");
-		return NULL;
+		return false;
 	}
 
 	return TX_BundleLoadPnames(b, in);
+}
+
+bool TX_BundleSavePnamesTo(struct texture_bundle *b, struct directory *dir)
+{
+	struct directory_entry *ent;
+	struct wad_file *wf;
+	VFILE *lump, *marshaled;
+
+	// No need to save?
+	if (b->pn->modified_count == 0) {
+		return true;
+	}
+
+	ent = VFS_EntryByName(dir, "PNAMES");
+	if (ent == NULL) {
+		ConversionError("Can't find PNAMES lump to save changes.");
+		return false;
+	}
+
+	wf = VFS_WadFile(dir);
+	lump = W_OpenLumpRewrite(wf, ent - dir->entries);
+	marshaled = TX_MarshalPnames(b->pn);
+	vfcopy(marshaled, lump);
+	vfclose(lump);
+	vfclose(marshaled);
+	return true;
 }
 
 bool TX_BundleLoadTextures(struct texture_bundle *b, struct directory *wad_dir,

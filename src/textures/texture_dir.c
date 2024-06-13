@@ -241,6 +241,10 @@ static bool TextureDirSave(void *_dir, struct directory *wad_dir,
 		return true;
 	}
 
+	if (!TX_BundleSavePnamesTo(&dir->dir.b, wad_dir)) {
+		return false;
+	}
+
 	texture_out = TX_MarshalTextures(TEXTURES(dir));
 	if (texture_out == NULL) {
 		return false;

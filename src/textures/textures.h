@@ -105,6 +105,7 @@ bool TX_BundleLoadTextures(struct texture_bundle *b, struct directory *wad_dir,
 bool TX_BundleLoadTexturesFrom(struct texture_bundle *b,
                                struct directory *wad_dir,
                                struct directory_entry *ent);
+bool TX_BundleSavePnamesTo(struct texture_bundle *b, struct directory *dir);
 bool TX_BundleParsePnames(struct texture_bundle *b, VFILE *in);
 bool TX_BundleParseTextures(struct texture_bundle *b, VFILE *in);
 bool TX_BundleConfirmAddPnames(struct texture_bundle *into,

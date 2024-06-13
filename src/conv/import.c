@@ -111,8 +111,12 @@ static VFILE *ImportTextures(VFILE *input, struct directory *to_wad)
 	}
 
 	TX_BundleMerge(&into, &from, &merge_stats);
-	result = TX_MarshalTextures(into.txs);
 
+	if (!TX_BundleSavePnamesTo(&into, to_wad)) {
+		goto fail;
+	}
+
+	result = TX_MarshalTextures(into.txs);
 fail:
 	TX_FreeBundle(&into);
 	TX_FreeBundle(&from);
