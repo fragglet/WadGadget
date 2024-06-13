@@ -327,6 +327,10 @@ static void PerformImportConfig(struct directory_pane *active_pane,
 		return;
 	}
 
+	if (!CheckReadOnly(other_pane->dir)) {
+		return;
+	}
+
 	ent = &active_pane->dir->entries[selected];
 	in = VFS_OpenByEntry(active_pane->dir, ent);
 
