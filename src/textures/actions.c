@@ -13,6 +13,7 @@
 
 #include "actions.h"
 #include "common.h"
+#include "conv/error.h"
 #include "stringlib.h"
 #include "ui/dialog.h"
 #include "ui/ui.h"
@@ -275,7 +276,10 @@ static void PerformImportConfig(struct directory_pane *active_pane,
 	ent = &active_pane->dir->entries[selected];
 	in = VFS_OpenByEntry(active_pane->dir, ent);
 
+	ClearConversionErrors();
 	if (!TX_DirParseConfig(other_pane->dir, &b, in)) {
+		UI_MessageBox("Failed to import config from '%s':\n%s",
+		              ent->name, GetConversionError());
 		return;
 	}
 
