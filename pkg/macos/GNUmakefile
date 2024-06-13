@@ -7,6 +7,7 @@ APP_RES_DIR = $(APP_DIR)/Contents/Resources
 DOC_FILES = README.md COPYING.md
 DMG = wadgadget.dmg
 ICONS = app.icns wadfile.icns
+PANDOC_FLAGS = --embed-resources
 
 $(DMG) : tmp.dmg
 	rm -f $@
