@@ -36,7 +36,7 @@ void TX_FreeBundle(struct texture_bundle *b)
 	}
 	if (b->pn != NULL) {
 		TX_FreePnames(b->pn);
-		b->txs = NULL;
+		b->pn = NULL;
 	}
 }
 
