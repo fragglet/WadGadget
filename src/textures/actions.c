@@ -289,6 +289,29 @@ static void MergeTexturesResultNotice(struct texture_bundle_merge_result *r)
 	UI_ShowNotice("%s", buf);
 }
 
+static void MergePnamesResultNotice(struct texture_bundle_merge_result *r)
+{
+	char buf[64] = "";
+	size_t buf_len = sizeof(buf), cnt;
+	char *p = buf;
+
+	if (r->pnames_added == 0) {
+		UI_ShowNotice("No new patch names added.");
+		return;
+	}
+
+	cnt = snprintf(p, buf_len, "%d patch name(s) added", r->pnames_added);
+	p += cnt;
+	buf_len -= cnt;
+
+	if (r->pnames_present > 0) {
+		snprintf(p, buf_len, ", %d already present",
+		         r->pnames_present);
+	}
+
+	UI_ShowNotice("%s", buf);
+}
+
 static void PerformImportConfig(struct directory_pane *active_pane,
                                 struct directory_pane *other_pane)
 {
@@ -322,6 +345,8 @@ static void PerformImportConfig(struct directory_pane *active_pane,
 
 		if (into->txs->num_textures > 0) {
 			MergeTexturesResultNotice(&merge_stats);
+		} else {
+			MergePnamesResultNotice(&merge_stats);
 		}
 		VFS_Refresh(other_pane->dir);
 		SwitchToPane(other_pane);
@@ -378,38 +403,12 @@ const struct action new_pname_action = {
 	PerformNewPname,
 };
 
-static void PnamesCopyNotice(struct directory *from_dir,
-                             struct directory *to_dir,
-                             struct file_set *copied, struct file_set *unused)
-{
-	char copied_descr[64] = "", unused_descr[64] = "";
-	const char *sep;
-
-	if (copied->num_entries > 0) {
-		VFS_DescribeSet(to_dir, copied, copied_descr,
-		                sizeof(copied_descr));
-		StringConcat(copied_descr, " copied", sizeof(copied_descr));
-	}
-	if (unused->num_entries > 0) {
-		VFS_DescribeSet(from_dir, unused, unused_descr,
-		                sizeof(unused_descr));
-		StringConcat(unused_descr, " already present",
-		             sizeof(unused_descr));
-	}
-
-	if (strlen(copied_descr) > 0 && strlen(unused_descr) > 0) {
-		sep = "; ";
-	} else {
-		sep = "";
-	}
-	UI_ShowNotice("%s%s%s.", copied_descr, sep, unused_descr);
-}
-
 static void PerformCopyPnames(struct directory_pane *active_pane,
                               struct directory_pane *other_pane)
 {
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
-	struct file_set copied = EMPTY_FILE_SET, unused = EMPTY_FILE_SET;
+	struct file_set copied = EMPTY_FILE_SET;
+	struct texture_bundle_merge_result merge_stats;
 	struct directory *from_dir = active_pane->dir,
 	                 *to_dir = other_pane->dir;
 	struct texture_bundle *b = TX_DirGetBundle(to_dir);
@@ -425,33 +424,32 @@ static void PerformCopyPnames(struct directory_pane *active_pane,
 		return;
 	}
 
+	memset(&merge_stats, 0, sizeof(merge_stats));
 	idx = 0;
 	while ((ent = VFS_IterateSet(from_dir, tagged, &idx)) != NULL) {
 		if (TX_GetPnameIndex(b->pn, ent->name) >= 0) {
-			VFS_AddToSet(&unused, TX_PnameSerialNo(ent->name));
+			++merge_stats.pnames_present;
 			continue;
 		}
 		TX_AppendPname(b->pn, ent->name);
 		VFS_AddToSet(&copied, TX_PnameSerialNo(ent->name));
+		++merge_stats.pnames_added;
 	}
 
 	VFS_Refresh(to_dir);
 
-	PnamesCopyNotice(from_dir, to_dir, &copied, &unused);
+	MergePnamesResultNotice(&merge_stats);
 
-	if (copied.num_entries > 0) {
+	if (merge_stats.pnames_added > 0) {
 		char buf[32];
 
 		VFS_DescribeSet(to_dir, &copied, buf, sizeof(buf));
 		VFS_CommitChanges(to_dir, "copy of %s", buf);
-
-		VFS_ClearSet(&active_pane->tagged);
 		UI_DirectoryPaneSetTagged(other_pane, &copied);
 		SwitchToPane(other_pane);
 	}
 
 	VFS_FreeSet(&copied);
-	VFS_FreeSet(&unused);
 }
 
 const struct action copy_pnames_action = {
