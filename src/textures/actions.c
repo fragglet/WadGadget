@@ -258,6 +258,37 @@ const struct action export_texture_config = {
 	PerformExportConfig,
 };
 
+static void MergeTexturesResultNotice(struct texture_bundle_merge_result *r)
+{
+	char buf[64] = "";
+	size_t buf_len = sizeof(buf), cnt;
+	char *p = buf;
+
+	if (r->textures_added + r->textures_overwritten == 0) {
+		UI_ShowNotice("No new or changed textures added.");
+		return;
+	}
+
+	if (r->textures_added > 0) {
+		cnt = snprintf(p, buf_len, "%d texture(s) added",
+		               r->textures_added);
+		p += cnt;
+		buf_len -= cnt;
+	}
+
+	if (r->textures_overwritten > 0) {
+		if (strlen(buf) > 0) {
+			cnt = snprintf(p, buf_len, ", ");
+			p += cnt;
+			buf_len -= cnt;
+		}
+		snprintf(p, buf_len, "%d texture(s) overwritten",
+		         r->textures_overwritten);
+	}
+
+	UI_ShowNotice("%s", buf);
+}
+
 static void PerformImportConfig(struct directory_pane *active_pane,
                                 struct directory_pane *other_pane)
 {
@@ -288,7 +319,10 @@ static void PerformImportConfig(struct directory_pane *active_pane,
 		TX_BundleMerge(into, insert_pos, &b, &merge_stats);
 		VFS_CommitChanges(other_pane->dir, "import from '%s'",
 		                  ent->name);
-		// TODO: show notice
+
+		if (into->txs->num_textures > 0) {
+			MergeTexturesResultNotice(&merge_stats);
+		}
 		VFS_Refresh(other_pane->dir);
 		SwitchToPane(other_pane);
 		// TODO: Highlight new/updated items
@@ -457,8 +491,12 @@ static void PerformCopyTextures(struct directory_pane *active_pane,
 	}
 
 	TX_FreeBundle(&b);
-	VFS_CommitChanges(to_dir, "Copy");
+	VFS_CommitChanges(to_dir, "copy of %d textures",
+	                  merge_stats.textures_added +
+	                  merge_stats.textures_overwritten);
 	VFS_Refresh(to_dir);
+
+	MergeTexturesResultNotice(&merge_stats);
 }
 
 const struct action copy_textures_action = {
