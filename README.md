@@ -70,3 +70,36 @@ The following table gives a brief summary of the current state:
 | Scripting                      |                      |                                             | ✓ (via Lua)                          |
 | Online help                    |                      |                                             | ✓                                    |
 | A zillion other features       |                      |                                             | ✓                                    |
+
+## FAQ
+
+**Can I use this under Microsoft Windows?**
+
+There is not yet a native Windows version. You can probably make it
+work by using [Windows Subsystem for Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux);
+I have not yet heard from anyone who has tried this.
+
+**Will you add {my favorite feature here}?**
+
+Firstly, WadGadget is never going to implement every feature found in other
+editors like SLADE. Some of the planned features are listed in the table
+above. If there is a particular feature that you think is important to
+add to the program, [file a feature request](https://github.com/fragglet/WadGadget/issues/new).
+
+**What features will never be implemented?**
+
+The goal of the project is to develop a curses-based Doom WAD editor. This
+necessarily means that various features will always be out of scope. Some
+examples are:
+
+* It will never include a level editor, or anything else that requires a
+  graphical display (like an image editor). It's better to delegate that
+  kind of thing to other programs.
+* It is unlikely to ever include any kind of GUI or GUI integration
+* It is unlikely there will ever be support for other archive formats, like
+  `.zip`/`.pk3` (used in some Doom source ports), or formats like `.pak` or
+  `.grp` used in other games.
+
+The project also tries to avoid "useless" features -- for example,
+configuration options to change the colors of the interface (Commander
+Mode is the one such feature that is the exception).
