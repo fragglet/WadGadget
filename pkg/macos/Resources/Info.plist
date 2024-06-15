@@ -28,8 +28,6 @@
 	<string>true</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>NSMainNibFile</key>
-	<string>launcher</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright (C) 2022-2024 Simon Howard</string>
 
