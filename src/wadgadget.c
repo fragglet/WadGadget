@@ -575,7 +575,7 @@ static void InitSearchPane(WINDOW *win)
 	search_pane.pane.window = win;
 	search_pane.pane.draw = DrawSearchPane;
 	search_pane.pane.keypress = SearchPaneKeypress;
-	UI_TextInputInit(&search_pane.input, win, 20);
+	UI_TextInputInit(&search_pane.input, win, 256);
 }
 
 static void Shutdown(void)
