@@ -9,7 +9,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>WadGadget</string>
 	<key>CFBundleExecutable</key>
-	<string>launch.sh</string>
+	<string>main</string>
 	<key>CFBundleGetInfoString</key>
 	<string>WadGadget 0.0.99</string>
 	<key>CFBundleIconFile</key>

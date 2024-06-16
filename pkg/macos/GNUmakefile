@@ -19,14 +19,14 @@ tmp.dmg : staging
 	hdiutil makehybrid -hfs -hfs-volume-name "WadGadget"     \
 	        -hfs-openfolder staging staging -o tmp.dmg
 
-staging: $(ICONS)
+staging: $(ICONS) main
 	rm -rf staging
 	mkdir staging
 
 	mkdir -p "$(APP_BIN_DIR)" "$(APP_RES_DIR)"
 	cp Resources/Info.plist Resources/PkgInfo "$(APP_TOP_DIR)"
 	cp $(ICONS) "$(APP_RES_DIR)"
-	cp Resources/launch.sh "$(APP_BIN_DIR)"
+	cp main "$(APP_BIN_DIR)"
 	./cp-with-libs $(TOPLEVEL)/src/wadgadget "$(APP_BIN_DIR)"
 
 	for d in $(DOC_FILES); do \
@@ -43,9 +43,13 @@ staging: $(ICONS)
 %.icns: %.iconset
 	iconutil -c icns $<
 
+main: main.swift
+	swiftc $< -o $@
+
 clean:
 	rm -f $(DMG) $(ICONS) tmp.dmg
 	rm -rf staging
+	rm -f main
 	rm -rf *.iconset
 
 .PHONY: clean
