@@ -392,8 +392,37 @@ void ReplacePane(struct directory_pane *old_pane,
 	panes[pane_num] = new_pane;
 	UI_PaneShow(new_pane);
 
+	if (pane_num == active_pane) {
+		SwitchToPane(new_pane);
+	}
+
 	// TODO: Does this belong here?
 	UI_TextInputClear(&search_pane.input);
+}
+
+// Drag and drop paste: if the user types a fully-qualified path into the
+// search box and then types a space, we navigate to that directory.
+static bool CheckPathPaste(void)
+{
+	const char *input = search_pane.input.input;
+	struct directory *dir;
+	struct directory_pane *new_pane;
+
+	if (strlen(input) == 0 || input[0] != '/') {
+		return false;
+	}
+
+	dir = VFS_OpenDir(input);
+	if (dir == NULL) {
+		return false;
+	}
+
+	new_pane = UI_NewDirectoryPane(NULL, dir);
+	ReplacePane(panes[active_pane], new_pane);
+
+	UI_TextInputClear(&search_pane.input);
+
+	return true;
 }
 
 // This function is a hack to support the Ins and Del keys, plus some
@@ -426,6 +455,10 @@ static void HandleKeypress(void *pane, int key)
 	int i;
 
 	key = TranslateSpecialKey(key);
+
+	if (key == ' ' && CheckPathPaste()) {
+		return;
+	}
 
 	for (i = 0; actions[i] != NULL; i++) {
 		if (actions[i]->callback != NULL
