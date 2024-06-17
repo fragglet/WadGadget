@@ -1,6 +1,6 @@
 
 TOPLEVEL = ../..
-APP_DIR = staging/WadGadget.app
+APP_DIR = app/WadGadget.app
 APP_TOP_DIR = $(APP_DIR)/Contents
 APP_BIN_DIR = $(APP_DIR)/Contents/MacOS
 APP_RES_DIR = $(APP_DIR)/Contents/Resources
@@ -19,21 +19,30 @@ tmp.dmg : staging
 	hdiutil makehybrid -hfs -hfs-volume-name "WadGadget"     \
 	        -hfs-openfolder staging staging -o tmp.dmg
 
-staging: $(ICONS) main
+staging: app
 	rm -rf staging
 	mkdir staging
 
-	mkdir -p "$(APP_BIN_DIR)" "$(APP_RES_DIR)"
-	cp Resources/Info.plist Resources/PkgInfo "$(APP_TOP_DIR)"
-	cp $(ICONS) "$(APP_RES_DIR)"
-	cp main "$(APP_BIN_DIR)"
-	./cp-with-libs $(TOPLEVEL)/src/wadgadget "$(APP_BIN_DIR)"
+	pkgbuild --identifier org.soulsphere.wadgadget \
+	         --root app/WadGadget.app \
+	         --install-location /Applications/WadGadget.app \
+	         staging/wadgadget.pkg
 
 	for d in $(DOC_FILES); do \
 		pandoc $(PANDOC_FLAGS) -f gfm \
 		    -o staging/$$(basename $$d .md).html \
 		    $(TOPLEVEL)/$$d; \
 	done
+
+app: $(ICONS) main
+	rm -rf app
+	mkdir app
+
+	mkdir -p "$(APP_BIN_DIR)" "$(APP_RES_DIR)"
+	cp Resources/Info.plist Resources/PkgInfo "$(APP_TOP_DIR)"
+	cp $(ICONS) "$(APP_RES_DIR)"
+	cp main "$(APP_BIN_DIR)"
+	./cp-with-libs $(TOPLEVEL)/src/wadgadget "$(APP_BIN_DIR)"
 
 %.iconset: Resources/%.png
 	mkdir -p $@
@@ -48,7 +57,7 @@ main: main.swift
 
 clean:
 	rm -f $(DMG) $(ICONS) tmp.dmg
-	rm -rf staging
+	rm -rf staging app
 	rm -f main
 	rm -rf *.iconset
 
