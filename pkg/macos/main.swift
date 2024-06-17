@@ -73,7 +73,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	// error will occur again.
 	private func dummyRunMainProgram(_ url: URL) {
 		do {
-			try Process.run(url, arguments: ["--version"])
+			let task = try Process.run(url, arguments: ["--version"])
+			task.waitUntilExit()
 		} catch {
 			Logger().log("failed dummy run of main program")
 		}
