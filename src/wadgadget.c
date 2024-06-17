@@ -28,6 +28,8 @@
 #include "ui/ui.h"
 #include "view.h"
 
+#define RESPONSE_FILE_PATH "/tmp/wadgadget-paths.txt"
+
 #define VERSION_OUTPUT \
 "WadGadget version ?\n" \
 "Copyright (C) 2022-2024 Simon Howard\n" \
@@ -641,6 +643,61 @@ static void SetTermStopHandler(void)
 	sigaction(SIGTSTP, &sa, NULL);
 }
 
+#ifdef __APPLE__
+static char *NextLine(char **buf, size_t *buf_len)
+{
+	char *p = memchr(*buf, '\n', *buf_len);
+	char *result = *buf;
+
+	if (p == NULL) {
+		return NULL;
+	}
+
+	*buf_len -= (p - *buf) + 1;
+	*buf = p + 1;
+	*p = '\0';
+
+	return result;
+}
+
+// On macOS, we use a response file to pass through the initial paths
+// from the launcher program to the main wadgadget binary. It's hacky
+// but there doesn't appear to be a cleaner solution.
+static void LoadResponseFile(int *argc, char ***argv)
+{
+	static char *replacement_argv[3];
+	char *buf;
+	size_t buf_len;
+	FILE *fs;
+	VFILE *vfs;
+
+	fs = fopen(RESPONSE_FILE_PATH, "r");
+	if (fs == NULL) {
+		return;
+	}
+
+	vfs = vfwrapfile(fs);
+	buf = vfreadall(vfs, &buf_len);
+	vfclose(vfs);
+
+	replacement_argv[0] = (*argv)[0];
+
+	for (*argc = 1; *argc < arrlen(replacement_argv); ++*argc) {
+		char *line = NextLine(&buf, &buf_len);
+		if (line == NULL) {
+			break;
+		}
+		replacement_argv[*argc] = line;
+	}
+
+	*argv = replacement_argv;
+
+	// Next time we run the program we don't want to use the
+	// response file again.
+	remove(RESPONSE_FILE_PATH);
+}
+#endif
+
 int main(int argc, char *argv[])
 {
 	struct directory *dir;
@@ -660,6 +717,11 @@ int main(int argc, char *argv[])
 		printf(VERSION_OUTPUT);
 		exit(0);
 	}
+
+#ifdef __APPLE__
+	LoadResponseFile(&argc, &argv);
+#endif
+
 	if (argc >= 2) {
 		start_path1 = argv[1];
 	}

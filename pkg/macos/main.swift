@@ -19,6 +19,8 @@
 import Cocoa
 import os.log
 
+let responseFilePath = "/tmp/wadgadget-paths.txt"
+
 class AppDelegate: NSObject, NSApplicationDelegate {
 
 	var window: NSWindow?
@@ -27,7 +29,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		Logger().log("applicationWillFinishLaunching")
 		do {
 			try FileManager.default.removeItem(
-				atPath: "/tmp/wadgadget-paths.txt")
+				atPath: responseFilePath)
 		} catch {
 			Logger().log("failed to delete paths file")
 		}
@@ -40,7 +42,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 			lines = lines + filename + "\n"
 		}
 		do {
-			try lines.write(toFile: "/tmp/wadgadget-paths.txt",
+			try lines.write(toFile: responseFilePath,
 			                atomically: true,
 			                encoding: String.Encoding.utf8)
 		} catch {
