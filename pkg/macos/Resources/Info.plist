@@ -41,7 +41,7 @@
 			<key>CFBundleTypeIconFile</key>
 			<string>wadfile.icns</string>
 			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
+			<string>Editor</string>
 			<key>CFBundleTypeExtensions</key>
 			<array><string>wad</string></array>
 		</dict>
