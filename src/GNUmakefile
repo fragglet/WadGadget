@@ -14,7 +14,7 @@ NCURSES_LDFLAGS = \
     $(shell pkg-config --silence-errors --libs ncurses || echo -lncurses)
 
 REQUIRED_PKGS = sndfile libpng
-CFLAGS := -g -MMD -Wall -I. -O0 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
+CFLAGS := -g -MMD -Wall -I. -O2 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
           $(LIBSIXEL_CFLAGS) $(NCURSES_CFLAGS)
 LDFLAGS := $(shell pkg-config --libs $(REQUIRED_PKGS)) \
            $(LIBSIXEL_LDFLAGS) $(NCURSES_LDFLAGS)
