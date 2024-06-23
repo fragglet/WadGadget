@@ -5,10 +5,19 @@ LIBSIXEL_CFLAGS = \
 LIBSIXEL_LDFLAGS = \
     $(shell pkg-config --silence-errors --libs libsixel)
 
+# Ideally we use the version of ncurses pkg-config tells us about, but
+# some systems (eg. BSDs) ship ncurses as part of the base OS without the
+# accompanying .pc file. So fall back to just providing -lncurses.
+NCURSES_CFLAGS = \
+    $(shell pkg-config --silence-errors --cflags ncurses)
+NCURSES_LDFLAGS = \
+    $(shell pkg-config --silence-errors --libs ncurses || echo -lncurses)
+
 REQUIRED_PKGS = sndfile ncurses libpng
 CFLAGS = -g -MMD -Wall -I. -O0 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
-         $(LIBSIXEL_CFLAGS)
-LDFLAGS = $(shell pkg-config --libs $(REQUIRED_PKGS)) $(LIBSIXEL_LDFLAGS)
+         $(LIBSIXEL_CFLAGS) $(NCURSES_CFLAGS)
+LDFLAGS = $(shell pkg-config --libs $(REQUIRED_PKGS)) \
+          $(LIBSIXEL_LDFLAGS) $(NCURSES_LDFLAGS)
 
 OBJS =                      \
     conv/audio.o            \
