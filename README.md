@@ -103,3 +103,10 @@ examples are:
 The project also tries to avoid "useless" features -- for example,
 configuration options to change the colors of the interface (Commander
 Mode is the one such feature that is the exception).
+
+**Why is this ugly/slow on FreeBSD?**
+
+The version of curses shipped with FreeBSD seems to be very limited or an
+old version for some reason. Make sure you compile against the version from
+the ports database, and also install the terminfo database. You can do this
+with `pkg install ncurses terminfo-db`.
