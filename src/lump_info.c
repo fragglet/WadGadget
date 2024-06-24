@@ -53,7 +53,6 @@ const struct lump_section lump_section_flats = {
 };
 
 static const struct lump_description special_lumps[] = {
-	{"PLAYPAL",   "VGA palette"},
 	{"TINTTAB",   "Translucency table"},
 	{"XLATAB",    "Translucency table"},
 	{"AUTOPAGE",  "Map background texture"},
@@ -428,6 +427,25 @@ const struct lump_type lump_type_dehacked = {
 	".deh",
 };
 
+static bool PaletteCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return !strcasecmp(ent->name, "PLAYPAL")
+	    && (ent->size % (256 * 3)) == 0;
+}
+
+static void PaletteFormat(struct wad_file_entry *ent, uint8_t *buf,
+                          char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "VGA palette (%d palettes)",
+	         ent->size / (256 * 3));
+}
+
+const struct lump_type lump_type_palette = {
+	PaletteCheck,
+	PaletteFormat,
+	".png",
+};
+
 // Lump types identified by fixed size. This type is last in the identification
 // list before "unknown" because it uses the least information to make the
 // identification.
@@ -616,6 +634,7 @@ static const struct lump_type *lump_types[] = {
 	&lump_type_pcspeaker,
 	&lump_type_fullscreen_image,
 	&lump_type_hexen_hires_image,
+	&lump_type_palette,
 	&lump_type_sized,
 	&lump_type_plaintext,
 	&lump_type_unknown,
