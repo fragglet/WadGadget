@@ -11,12 +11,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <png.h>
 
 #include "common.h"
 #include "fs/vfile.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
+#include "conv/vpng.h"
 
 // Hexen loading screen
 #define HIRES_SCREEN_W  640
@@ -169,8 +169,6 @@ static const png_color doom_palette[256] = {
 	{0x6f, 0x00, 0x6b}, {0xa7, 0x6b, 0x6b},
 };
 
-static jmp_buf libpng_abort_jump;
-
 void V_SwapPatchHeader(struct patch_header *hdr)
 {
 	SwapLE16(&hdr->width);
@@ -195,42 +193,6 @@ static void WriteOffsetChunk(png_structp ppng, const struct patch_header *hdr)
 	png_write_chunk(ppng, (png_const_bytep) OFFSET_CHUNK_NAME,
 	                (png_const_bytep) &chunk,
 	                sizeof(chunk));
-}
-
-static void ErrorCallback(png_structp p, png_const_charp s)
-{
-	ConversionError("%s", s);
-	longjmp(libpng_abort_jump, 1);
-}
-
-static void WarningCallback(png_structp p, png_const_charp s)
-{
-	fprintf(stderr, "libpng warning: %s\n", s);
-}
-
-static void PngReadCallback(png_structp ppng, png_bytep buf, size_t len)
-{
-	VFILE *vf = png_get_io_ptr(ppng);
-	int result;
-
-	memset(buf, 0, len);
-	result = vfread(buf, 1, len, vf);
-	if (result == 0) {
-		png_error(ppng, "end of file reached");
-	} else if (result < 0) {
-		png_error(ppng, "read error");
-	}
-}
-
-static void PngWriteCallback(png_structp ppng, png_bytep buf, size_t len)
-{
-	VFILE *vf = png_get_io_ptr(ppng);
-	vfwrite(buf, 1, len, vf);
-}
-
-static void PngFlushCallback(png_structp ppng)
-{
-	// no-op
 }
 
 static uint8_t FindColor(const png_color *pal, int r, int g, int b)
@@ -365,39 +327,23 @@ static int UserChunkCallback(png_structp ppng, png_unknown_chunkp chunk)
 static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
                         int *rowstep)
 {
-	png_structp ppng;
-	png_infop pinfo;
+	struct png_context ctx;
 	int bit_depth, color_type, ilace_type, comp_type, filter_method, y;
 	png_uint_32 width, height;
 	uint8_t *imgbuf = NULL;
 
-	if (setjmp(libpng_abort_jump) != 0) {
-		ConversionError("Error when parsing PNG file");
-		return NULL;
-	}
-
 	hdr->leftoffset = 0;
 	hdr->topoffset = 0;
 
-	ppng = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
-	                              ErrorCallback, WarningCallback);
-	if (!ppng) {
-		ConversionError("Failed to open PNG file");
+	if (!V_OpenPNGRead(&ctx, input)) {
 		goto fail1;
 	}
 
-	pinfo = png_create_info_struct(ppng);
-	if (!pinfo) {
-		ConversionError("Failed to create PNG info struct");
-		goto fail2;
-	}
+	png_set_read_user_chunk_fn(ctx.ppng, hdr, UserChunkCallback);
+	png_read_info(ctx.ppng, ctx.pinfo);
 
-	png_set_read_fn(ppng, input, PngReadCallback);
-	png_set_read_user_chunk_fn(ppng, hdr, UserChunkCallback);
-	png_read_info(ppng, pinfo);
-
-	png_get_IHDR(ppng, pinfo, &width, &height, &bit_depth, &color_type,
-	             &ilace_type, &comp_type, &filter_method);
+	png_get_IHDR(ctx.ppng, ctx.pinfo, &width, &height, &bit_depth,
+	             &color_type, &ilace_type, &comp_type, &filter_method);
 
 	// Sanity check.
 	if (width >= UINT16_MAX || height >= UINT16_MAX) {
@@ -409,27 +355,27 @@ static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
 	hdr->width = width;
 	hdr->height = height;
 	// Convert all input files to RGBA format.
-	png_set_add_alpha(ppng, 0xff, PNG_FILLER_AFTER);
+	png_set_add_alpha(ctx.ppng, 0xff, PNG_FILLER_AFTER);
 	if (color_type == PNG_COLOR_TYPE_PALETTE) {
-		png_set_palette_to_rgb(ppng);
+		png_set_palette_to_rgb(ctx.ppng);
 	}
-	if (png_get_valid(ppng, pinfo, PNG_INFO_tRNS)) {
-		png_set_tRNS_to_alpha(ppng);
+	if (png_get_valid(ctx.ppng, ctx.pinfo, PNG_INFO_tRNS)) {
+		png_set_tRNS_to_alpha(ctx.ppng);
 	}
 	if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) {
-		png_set_expand_gray_1_2_4_to_8(ppng);
+		png_set_expand_gray_1_2_4_to_8(ctx.ppng);
 	}
 	if (bit_depth < 8) {
-		png_set_packing(ppng);
+		png_set_packing(ctx.ppng);
 	}
 
-	png_read_update_info(ppng, pinfo);
+	png_read_update_info(ctx.ppng, ctx.pinfo);
 
-	*rowstep = png_get_rowbytes(ppng, pinfo);
+	*rowstep = png_get_rowbytes(ctx.ppng, ctx.pinfo);
 	imgbuf = checked_malloc(*rowstep * height);
 
 	for (y = 0; y < height; ++y) {
-		png_read_row(ppng, imgbuf + y * *rowstep, NULL);
+		png_read_row(ctx.ppng, imgbuf + y * *rowstep, NULL);
 		/* debugging code
 		{
 			int x;
@@ -442,9 +388,9 @@ static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
 		}*/
 	}
 
-	png_read_end(ppng, NULL);
+	png_read_end(ctx.ppng, NULL);
 fail2:
-	png_destroy_read_struct(&ppng, &pinfo, NULL);
+	V_ClosePNG(&ctx);
 fail1:
 	return imgbuf;
 }
@@ -593,49 +539,37 @@ static VFILE *WritePNG(struct patch_header *hdr, uint8_t *imgbuf,
 {
 	VFILE *result = NULL;
 	uint8_t *alphabuf;
-	png_structp ppng;
-	png_infop pinfo = NULL;
+	struct png_context ctx;
 	int y;
 
-	ppng = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
-	                               ErrorCallback, WarningCallback);
-	if (!ppng) {
-		ConversionError("Failed to create PNG write struct");
+	result = V_OpenPNGWrite(&ctx);
+	if (result == NULL) {
 		return NULL;
-	}
-
-	pinfo = png_create_info_struct(ppng);
-	if (!pinfo) {
-		ConversionError("Failed to create PNG info struct");
-		goto fail;
 	}
 
 	alphabuf = checked_malloc(256);
 	memset(alphabuf, 0xff, 256);
 	alphabuf[TRANSPARENT] = 0;
 
-	result = vfopenmem(NULL, 0);
-	png_set_write_fn(ppng, result, PngWriteCallback, PngFlushCallback);
-	png_set_IHDR(ppng, pinfo, hdr->width, hdr->height, 8,
+	png_set_IHDR(ctx.ppng, ctx.pinfo, hdr->width, hdr->height, 8,
 	             PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
 	             PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-	png_set_tRNS(ppng, pinfo, alphabuf, 256, NULL);
-	png_set_PLTE(ppng, pinfo, palette, 256);
-	png_write_info(ppng, pinfo);
+	png_set_tRNS(ctx.ppng, ctx.pinfo, alphabuf, 256, NULL);
+	png_set_PLTE(ctx.ppng, ctx.pinfo, palette, 256);
+	png_write_info(ctx.ppng, ctx.pinfo);
 	if (hdr->topoffset != 0 || hdr->leftoffset != 0) {
-		WriteOffsetChunk(ppng, hdr);
+		WriteOffsetChunk(ctx.ppng, hdr);
 	}
 
 	for (y = 0; y < hdr->height; y++) {
-		png_write_row(ppng, imgbuf + y * hdr->width);
+		png_write_row(ctx.ppng, imgbuf + y * hdr->width);
 	}
 
-	png_write_end(ppng, pinfo);
+	png_write_end(ctx.ppng, ctx.pinfo);
 	vfseek(result, 0, SEEK_SET);
 	free(alphabuf);
 
-fail:
-	png_destroy_write_struct(&ppng, &pinfo);
+	V_ClosePNG(&ctx);
 	return result;
 }
 
