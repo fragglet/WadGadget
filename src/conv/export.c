@@ -18,6 +18,7 @@
 #include "ui/dialog.h"
 #include "conv/export.h"
 #include "conv/graphic.h"
+#include "conv/palette.h"
 #include "lump_info.h"
 #include "conv/mus2mid.h"
 #include "stringlib.h"
@@ -99,6 +100,8 @@ static VFILE *PerformConversion(struct directory *from, VFILE *input,
 		return ConvertTextures(from, input);
 	} else if (lt == &lump_type_pnames) {
 		return ConvertPnames(input);
+	} else if (lt == &lump_type_palette) {
+		return V_PaletteToImageFile(input);
 	} else if (lt == &lump_type_mus) {
 		VFILE *result = vfopenmem(NULL, 0);
 		if (mus2mid(input, result)) {
