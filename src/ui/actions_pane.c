@@ -126,7 +126,7 @@ static void DrawActionsPane(void *pane)
 	UI_DrawWindowBox(win);
 	mvwaddstr(win, 0, 2, " Actions ");
 
-	for (i = 0, y = 1; i < MAX_KEY_BINDINGS; i++) {
+	for (i = 0, y = 1; i < arrlen(key_ordering); i++) {
 		a = p->actions[i];
 		if (a != NULL) {
 			y += ShowAction(p, y, a, last_idx == i - 1);
