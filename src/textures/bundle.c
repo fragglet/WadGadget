@@ -53,17 +53,22 @@ bool TX_BundleLoadPnames(struct texture_bundle *b, VFILE *in)
 
 bool TX_BundleLoadPnamesFrom(struct texture_bundle *b, struct directory *dir)
 {
-	struct directory_entry *ent;
+	struct wad_file *wf = VFS_WadFile(dir);
 	VFILE *in;
+	int lumpnum;
 
-	ent = VFS_EntryByName(dir, "PNAMES");
-	if (ent == NULL) {
+	// We explicitly use the WAD file interface to look up the PNAMES
+	// lump. The reason is that if we are importing multiple lumps, we
+	// may have imported PNAMES already but the version in the VFS
+	// directory might not contain it yet.
+	lumpnum = W_GetNumForName(wf, "PNAMES");
+	if (lumpnum < 0) {
 		ConversionError("To import a texture config, your WAD\n"
 		                "must contain a PNAMES lump.");
 		return false;
 	}
 
-	in = VFS_OpenByEntry(dir, ent);
+	in = W_OpenLump(wf, lumpnum);
 	if (in == NULL) {
 		ConversionError("Failed to open PNAMES lump");
 		return false;
@@ -74,8 +79,8 @@ bool TX_BundleLoadPnamesFrom(struct texture_bundle *b, struct directory *dir)
 
 bool TX_BundleSavePnamesTo(struct texture_bundle *b, struct directory *dir)
 {
-	struct directory_entry *ent;
-	struct wad_file *wf;
+	int lumpnum;
+	struct wad_file *wf = VFS_WadFile(dir);
 	VFILE *lump, *marshaled;
 
 	// No need to save?
@@ -83,14 +88,13 @@ bool TX_BundleSavePnamesTo(struct texture_bundle *b, struct directory *dir)
 		return true;
 	}
 
-	ent = VFS_EntryByName(dir, "PNAMES");
-	if (ent == NULL) {
+	lumpnum = W_GetNumForName(wf, "PNAMES");
+	if (lumpnum < 0) {
 		ConversionError("Can't find PNAMES lump to save changes.");
 		return false;
 	}
 
-	wf = VFS_WadFile(dir);
-	lump = W_OpenLumpRewrite(wf, ent - dir->entries);
+	lump = W_OpenLumpRewrite(wf, lumpnum);
 	marshaled = TX_MarshalPnames(b->pn);
 	vfcopy(marshaled, lump);
 	vfclose(lump);
@@ -101,28 +105,10 @@ bool TX_BundleSavePnamesTo(struct texture_bundle *b, struct directory *dir)
 bool TX_BundleLoadTextures(struct texture_bundle *b, struct directory *wad_dir,
                            VFILE *in)
 {
-	struct directory_entry *pnames_ent;
-	VFILE *pnames_in;
-
 	b->txs = NULL;
 	b->pn = NULL;
 
-	pnames_ent = VFS_EntryByName(wad_dir, "PNAMES");
-	if (pnames_ent == NULL) {
-		ConversionError("To import a texture config, your WAD\n"
-		                "must contain a PNAMES lump.");
-		vfclose(in);
-		return false;
-	}
-
-	pnames_in = VFS_OpenByEntry(wad_dir, pnames_ent);
-	if (pnames_in == NULL) {
-		ConversionError("Failed to open PNAMES lump.");
-		vfclose(in);
-		return false;
-	}
-
-	if (!TX_BundleLoadPnames(b, pnames_in)) {
+	if (!TX_BundleLoadPnamesFrom(b, wad_dir)) {
 		vfclose(in);
 		return false;
 	}
