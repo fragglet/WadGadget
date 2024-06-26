@@ -11,11 +11,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <png.h>
 
 #include "common.h"
 #include "fs/vfile.h"
 #include "conv/error.h"
+#include "conv/graphic.h"
 #include "conv/vpng.h"
 
 #define PALETTE_SIZE   (256 * 3)
@@ -121,5 +121,33 @@ VFILE *V_PaletteToImageFile(VFILE *input)
 fail:
 	V_ClosePNG(&ctx);
 	free(lump);
+	return result;
+}
+
+VFILE *V_ColormapToImageFile(VFILE *input)
+{
+	uint8_t *buf;
+	struct patch_header hdr;
+	size_t buf_len;
+	VFILE *result = NULL;
+
+	buf = vfreadall(input, &buf_len);
+	vfclose(input);
+
+	if (buf_len % 256 != 0) {
+		ConversionError("Invalid colormap length: %d is not a "
+		                "multiple of 256", buf_len);
+		goto fail;
+	}
+
+	hdr.width = 256;
+	hdr.height = buf_len / 256;
+	hdr.topoffset = 0;
+	hdr.leftoffset = 0;
+	result = V_WritePalettizedPNG(&hdr, buf, doom_palette, false);
+
+fail:
+	free(buf);
+
 	return result;
 }

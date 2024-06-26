@@ -10,3 +10,4 @@
 
 VFILE *V_PaletteFromImageFile(VFILE *input);
 VFILE *V_PaletteToImageFile(VFILE *input);
+VFILE *V_ColormapToImageFile(VFILE *input);

@@ -102,6 +102,8 @@ static VFILE *PerformConversion(struct directory *from, VFILE *input,
 		return ConvertPnames(input);
 	} else if (lt == &lump_type_palette) {
 		return V_PaletteToImageFile(input);
+	} else if (lt == &lump_type_colormap) {
+		return V_ColormapToImageFile(input);
 	} else if (lt == &lump_type_mus) {
 		VFILE *result = vfopenmem(NULL, 0);
 		if (mus2mid(input, result)) {

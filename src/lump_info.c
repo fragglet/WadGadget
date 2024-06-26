@@ -89,7 +89,6 @@ static const struct lump_description level_lumps[] = {
 };
 
 static const struct sized_lump lumps_by_size[] = {
-	{8704,   "Light translation map"},
 	{4000,   "Text mode screen"},
 	{256,    "Color translation table"},
 	{0,      "Empty"},
@@ -446,6 +445,25 @@ const struct lump_type lump_type_palette = {
 	".png",
 };
 
+static bool ColormapCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return !strncasecmp(ent->name, "COLORMAP", 8)
+	    && (ent->size % 256) == 0;
+}
+
+static void ColormapFormat(struct wad_file_entry *ent, uint8_t *buf,
+                          char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "Colormap (%d maps)",
+	         ent->size / 256);
+}
+
+const struct lump_type lump_type_colormap = {
+	ColormapCheck,
+	ColormapFormat,
+	".cmap.png",
+};
+
 // Lump types identified by fixed size. This type is last in the identification
 // list before "unknown" because it uses the least information to make the
 // identification.
@@ -635,6 +653,7 @@ static const struct lump_type *lump_types[] = {
 	&lump_type_fullscreen_image,
 	&lump_type_hexen_hires_image,
 	&lump_type_palette,
+	&lump_type_colormap,
 	&lump_type_sized,
 	&lump_type_plaintext,
 	&lump_type_unknown,
