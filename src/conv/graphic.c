@@ -38,24 +38,6 @@ void V_SwapPatchHeader(struct patch_header *hdr)
 	SwapLE16(&hdr->topoffset);
 };
 
-static void SwapOffsetsChunk(struct offsets_chunk *chunk)
-{
-	SwapBE32(&chunk->leftoffset);
-	SwapBE32(&chunk->topoffset);
-}
-
-static void WriteOffsetChunk(png_structp ppng, const struct patch_header *hdr)
-{
-	struct offsets_chunk chunk;
-
-	chunk.leftoffset = hdr->leftoffset;
-	chunk.topoffset = hdr->topoffset;
-	SwapOffsetsChunk(&chunk);
-	png_write_chunk(ppng, (png_const_bytep) OFFSET_CHUNK_NAME,
-	                (png_const_bytep) &chunk,
-	                sizeof(chunk));
-}
-
 static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
                                 struct patch_header *hdr)
 {
@@ -102,6 +84,7 @@ static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
 			// (2) cannot use 0xff as topdelta.
 			if (y >= 0xff) {
 				vfclose(result);
+				result = NULL;
 				goto fail;
 			}
 			// At this point, we are sure that we are building a
@@ -148,98 +131,6 @@ fail:
 	return result;
 }
 
-static int UserChunkCallback(png_structp ppng, png_unknown_chunkp chunk)
-{
-	struct patch_header *hdr = png_get_user_chunk_ptr(ppng);
-	struct offsets_chunk offs;
-
-	if (strncmp((const char *) chunk->name, OFFSET_CHUNK_NAME, 4) != 0
-	 || chunk->size < sizeof(struct offsets_chunk)) {
-		return 1;
-	}
-
-	offs = *((const struct offsets_chunk *) chunk->data);
-	SwapOffsetsChunk(&offs);
-
-	if (hdr->leftoffset >= INT16_MIN && hdr->leftoffset <= INT16_MAX
-	 && hdr->topoffset >= INT16_MIN && hdr->topoffset <= INT16_MAX) {
-		hdr->leftoffset = offs.leftoffset;
-		hdr->topoffset = offs.topoffset;
-	}
-	return 1;
-}
-
-static uint8_t *ReadPNG(VFILE *input, struct patch_header *hdr,
-                        int *rowstep)
-{
-	struct png_context ctx;
-	int bit_depth, color_type, ilace_type, comp_type, filter_method, y;
-	png_uint_32 width, height;
-	uint8_t *imgbuf = NULL;
-
-	hdr->leftoffset = 0;
-	hdr->topoffset = 0;
-
-	if (!V_OpenPNGRead(&ctx, input)) {
-		goto fail1;
-	}
-
-	png_set_read_user_chunk_fn(ctx.ppng, hdr, UserChunkCallback);
-	png_read_info(ctx.ppng, ctx.pinfo);
-
-	png_get_IHDR(ctx.ppng, ctx.pinfo, &width, &height, &bit_depth,
-	             &color_type, &ilace_type, &comp_type, &filter_method);
-
-	// Sanity check.
-	if (width >= UINT16_MAX || height >= UINT16_MAX) {
-		ConversionError("PNG dimensions too large: %d, %d",
-		                (int) width, (int) height);
-		goto fail2;
-	}
-
-	hdr->width = width;
-	hdr->height = height;
-	// Convert all input files to RGBA format.
-	png_set_add_alpha(ctx.ppng, 0xff, PNG_FILLER_AFTER);
-	if (color_type == PNG_COLOR_TYPE_PALETTE) {
-		png_set_palette_to_rgb(ctx.ppng);
-	}
-	if (png_get_valid(ctx.ppng, ctx.pinfo, PNG_INFO_tRNS)) {
-		png_set_tRNS_to_alpha(ctx.ppng);
-	}
-	if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) {
-		png_set_expand_gray_1_2_4_to_8(ctx.ppng);
-	}
-	if (bit_depth < 8) {
-		png_set_packing(ctx.ppng);
-	}
-
-	png_read_update_info(ctx.ppng, ctx.pinfo);
-
-	*rowstep = png_get_rowbytes(ctx.ppng, ctx.pinfo);
-	imgbuf = checked_malloc(*rowstep * height);
-
-	for (y = 0; y < height; ++y) {
-		png_read_row(ctx.ppng, imgbuf + y * *rowstep, NULL);
-		/* debugging code
-		{
-			int x;
-			printf("%5d: ", y);
-			for (x = 0; x < width; ++x) {
-				int c = imgbuf[y * rowstep + x * 4];
-				printf("%c", c ? '#' : ' ');
-			}
-			printf("\r\n");
-		}*/
-	}
-
-	png_read_end(ctx.ppng, NULL);
-fail2:
-	V_ClosePNG(&ctx);
-fail1:
-	return imgbuf;
-}
-
 static VFILE *BufferToRaw(uint8_t *imgbuf, int rowstep,
                           struct patch_header *hdr)
 {
@@ -265,7 +156,7 @@ VFILE *V_FromImageFile(VFILE *input)
 	uint8_t *imgbuf;
 	int rowstep;
 
-	imgbuf = ReadPNG(input, &hdr, &rowstep);
+	imgbuf = V_ReadRGBAPNG(input, &hdr, &rowstep);
 	vfclose(input);
 	if (imgbuf == NULL) {
 		goto fail;
@@ -284,7 +175,7 @@ VFILE *V_FullscreenFromImageFile(VFILE *input)
 	uint8_t *imgbuf;
 	int rowstep;
 
-	imgbuf = ReadPNG(input, &hdr, &rowstep);
+	imgbuf = V_ReadRGBAPNG(input, &hdr, &rowstep);
 	if (imgbuf == NULL) {
 		goto fail;
 	}
@@ -309,7 +200,7 @@ VFILE *V_FlatFromImageFile(VFILE *input)
 	uint8_t *imgbuf = NULL;
 	int rowstep;
 
-	imgbuf = ReadPNG(input, &hdr, &rowstep);
+	imgbuf = V_ReadRGBAPNG(input, &hdr, &rowstep);
 	vfclose(input);
 	if (imgbuf == NULL) {
 		goto fail;
@@ -336,7 +227,7 @@ static bool DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
 	uint32_t off;
 	int x, y, i, cnt;
 
-	memset(dstbuf, TRANSPARENT, hdr->width * hdr->height);
+	memset(dstbuf, PALETTE_TRANSPARENT, hdr->width * hdr->height);
 
 	for (x = 0; x < hdr->width; ++x) {
 		off = columnofs[x];
@@ -371,45 +262,6 @@ static bool DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
 	return true;
 }
 
-static VFILE *WritePNG(struct patch_header *hdr, uint8_t *imgbuf,
-                       const png_color *palette)
-{
-	VFILE *result = NULL;
-	uint8_t *alphabuf;
-	struct png_context ctx;
-	int y;
-
-	result = V_OpenPNGWrite(&ctx);
-	if (result == NULL) {
-		return NULL;
-	}
-
-	alphabuf = checked_malloc(256);
-	memset(alphabuf, 0xff, 256);
-	alphabuf[TRANSPARENT] = 0;
-
-	png_set_IHDR(ctx.ppng, ctx.pinfo, hdr->width, hdr->height, 8,
-	             PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
-	             PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
-	png_set_tRNS(ctx.ppng, ctx.pinfo, alphabuf, 256, NULL);
-	png_set_PLTE(ctx.ppng, ctx.pinfo, palette, 256);
-	png_write_info(ctx.ppng, ctx.pinfo);
-	if (hdr->topoffset != 0 || hdr->leftoffset != 0) {
-		WriteOffsetChunk(ctx.ppng, hdr);
-	}
-
-	for (y = 0; y < hdr->height; y++) {
-		png_write_row(ctx.ppng, imgbuf + y * hdr->width);
-	}
-
-	png_write_end(ctx.ppng, ctx.pinfo);
-	vfseek(result, 0, SEEK_SET);
-	free(alphabuf);
-
-	V_ClosePNG(&ctx);
-	return result;
-}
-
 VFILE *V_ToImageFile(VFILE *input)
 {
 	uint8_t *buf, *imgbuf = NULL;
@@ -431,7 +283,7 @@ VFILE *V_ToImageFile(VFILE *input)
 		goto fail;
 	}
 
-	result = WritePNG(&hdr, imgbuf, doom_palette);
+	result = V_WritePalettizedPNG(&hdr, imgbuf, doom_palette, true);
 
 fail:
 	free(imgbuf);
@@ -460,7 +312,7 @@ VFILE *V_FlatToImageFile(VFILE *input)
 	hdr.height = buf_len / 64;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = WritePNG(&hdr, buf, doom_palette);
+	result = V_WritePalettizedPNG(&hdr, buf, doom_palette, false);
 
 fail:
 	free(buf);
@@ -484,7 +336,7 @@ VFILE *V_FullscreenToImageFile(VFILE *input)
 	hdr.height = FULLSCREEN_H;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = WritePNG(&hdr, buf, doom_palette);
+	result = V_WritePalettizedPNG(&hdr, buf, doom_palette, false);
 	free(buf);
 
 	return result;
@@ -566,7 +418,7 @@ VFILE *V_HiresToImageFile(VFILE *input)
 
 	hdr.width = HIRES_SCREEN_W;
 	hdr.height = HIRES_SCREEN_H;
-	result = WritePNG(&hdr, screenbuf, palette);
+	result = V_WritePalettizedPNG(&hdr, screenbuf, palette, false);
 
 	free(screenbuf);
 	free(lump);
