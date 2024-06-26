@@ -52,6 +52,10 @@ const struct lump_section lump_section_flats = {
 	"F_START", "FF_START", "F_END", "FF_END",
 };
 
+const struct lump_section lump_section_colormaps = {
+	"C_START", "C_START", "C_END", "C_END",
+};
+
 static const struct lump_description special_lumps[] = {
 	{"TINTTAB",   "Translucency table"},
 	{"XLATAB",    "Translucency table"},
@@ -674,6 +678,11 @@ const struct lump_type *LI_IdentifyLump(struct wad_file *f,
 	if (ent->size >= 4096 && (ent->size % 64) == 0
 	 && LI_LumpInSection(f, lump_index, &lump_section_flats)) {
 		return &lump_type_flat;
+	}
+
+	if ((ent->size % 256) == 0
+	 && LI_LumpInSection(f, lump_index, &lump_section_colormaps)) {
+		return &lump_type_colormap;
 	}
 
 	memset(buf, 0, sizeof(buf));
