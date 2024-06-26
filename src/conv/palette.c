@@ -20,6 +20,66 @@
 
 #define PALETTE_SIZE   (256 * 3)
 
+VFILE *V_PaletteFromImageFile(VFILE *input)
+{
+	struct png_context ctx;
+	int bit_depth, color_type, ilace_type, comp_type, filter_method;
+	int rowstep, y;
+	png_uint_32 width, height;
+	uint8_t *rowbuf;
+	VFILE *result = NULL;
+
+	if (!V_OpenPNGRead(&ctx, input)) {
+		return NULL;
+	}
+
+	png_read_info(ctx.ppng, ctx.pinfo);
+	png_get_IHDR(ctx.ppng, ctx.pinfo, &width, &height, &bit_depth,
+	             &color_type, &ilace_type, &comp_type, &filter_method);
+
+	// check dimensions
+	if ((width * height) % 256 != 0) {
+		ConversionError("Invalid dimensions for palette: %dx%d = "
+		                "%d pixels; should be a multiple of 256",
+		                width, height, width * height);
+		goto fail;
+	}
+
+	// Convert all input files to RGB format.
+	png_set_strip_alpha(ctx.ppng);
+	if (color_type == PNG_COLOR_TYPE_PALETTE) {
+		png_set_palette_to_rgb(ctx.ppng);
+	}
+	if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) {
+		png_set_expand_gray_1_2_4_to_8(ctx.ppng);
+	}
+	if (bit_depth < 8) {
+		png_set_packing(ctx.ppng);
+	}
+
+	png_read_update_info(ctx.ppng, ctx.pinfo);
+
+	rowstep = png_get_rowbytes(ctx.ppng, ctx.pinfo);
+	rowbuf = checked_malloc(rowstep);
+	result = vfopenmem(NULL, 0);
+
+	for (y = 0; y < height; ++y) {
+		png_read_row(ctx.ppng, rowbuf, NULL);
+		assert(vfwrite(rowbuf, 3, width, result) == width);
+	}
+
+	free(rowbuf);
+	png_read_end(ctx.ppng, NULL);
+
+	// Rewind so that the caller can read from the stream.
+	vfseek(result, 0, SEEK_SET);
+
+fail:
+	V_ClosePNG(&ctx);
+	vfclose(input);
+	return result;
+}
+
 VFILE *V_PaletteToImageFile(VFILE *input)
 {
 	VFILE *result = NULL;

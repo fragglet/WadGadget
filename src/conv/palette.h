@@ -8,4 +8,5 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+VFILE *V_PaletteFromImageFile(VFILE *input);
 VFILE *V_PaletteToImageFile(VFILE *input);

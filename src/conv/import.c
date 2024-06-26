@@ -19,6 +19,7 @@
 #include "conv/error.h"
 #include "conv/graphic.h"
 #include "conv/import.h"
+#include "conv/palette.h"
 #include "lump_info.h"
 #include "stringlib.h"
 #include "textures/textures.h"
@@ -132,6 +133,8 @@ static VFILE *PerformConversion(VFILE *input, struct directory *to_wad,
 		return input;
 	} else if (HasExtension(src_name, audio_extensions)) {
 		return S_FromAudioFile(input);
+	} else if (!strcasecmp(src_name, "playpal.png")) {
+		return V_PaletteFromImageFile(input);
 	} else if (StringHasSuffix(src_name, ".flat.png")) {
 		return V_FlatFromImageFile(input);
 	} else if (StringHasSuffix(src_name, ".fullscreen.png")) {
