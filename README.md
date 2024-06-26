@@ -61,6 +61,8 @@ The following table gives a brief summary of the current state:
 | Music playback                 | ✓                    | fragglet/WadGadget#14                       | ✓                                    |
 | Music import                   | ✓                    | ✓                                           | ✓ (many formats)                     |
 | Music export                   | ✓ (MUS)              | ✓ (converts MUS to MID)                     | ✓ (many formats)                     |
+| Palette/colormap import        |                      | ✓ (PNG)                                     | ✓                                    |
+| Palette/colormap export        |                      | ✓ (PNG)                                     | ✓                                    |
 | Texture editor                 | ✓                    | WIP (fragglet/WadGadget#9); can be edited as text as a stopgap | ✓                 |
 | PNAMES editor                  | ✓                    | ✓                                           | ✓                                    |
 | Online help                    |                      |                                             | ✓ (browser tabs to access help/wiki) |
