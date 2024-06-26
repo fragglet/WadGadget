@@ -135,6 +135,9 @@ static VFILE *PerformConversion(VFILE *input, struct directory *to_wad,
 		return S_FromAudioFile(input);
 	} else if (!strcasecmp(src_name, "playpal.png")) {
 		return V_PaletteFromImageFile(input);
+	} else if (!strcasecmp(src_name, "colormap.png")
+	        || StringHasSuffix(src_name, ".cmap.png")) {
+		return V_ColormapFromImageFile(input);
 	} else if (StringHasSuffix(src_name, ".flat.png")) {
 		return V_FlatFromImageFile(input);
 	} else if (StringHasSuffix(src_name, ".fullscreen.png")) {

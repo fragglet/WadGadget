@@ -151,3 +151,36 @@ fail:
 
 	return result;
 }
+
+VFILE *V_ColormapFromImageFile(VFILE *input)
+{
+	VFILE *result = NULL;
+	struct patch_header hdr;
+	uint8_t *imgbuf = NULL, *palettized;
+	int rowstep;
+
+	imgbuf = V_ReadRGBAPNG(input, &hdr, &rowstep);
+	vfclose(input);
+	if (imgbuf == NULL) {
+		goto fail;
+	}
+
+	if ((hdr.width * hdr.height) % 256 != 0) {
+		ConversionError("Invalid dimensions to make a colormap "
+		                "lump; %dx%d = %d pixels, not a multiple "
+		                "of 256.", hdr.width, hdr.height,
+		                hdr.width * hdr.height);
+		goto fail;
+	}
+
+	palettized = V_PalettizeRGBABuffer(doom_palette, imgbuf, rowstep,
+	                                   hdr.width, hdr.height);
+	result = vfopenmem(NULL, 0);
+	assert(vfwrite(palettized, hdr.width,
+	               hdr.height, result) == hdr.height);
+	vfseek(result, 0, SEEK_SET);
+	free(palettized);
+fail:
+	free(imgbuf);
+	return result;
+}
