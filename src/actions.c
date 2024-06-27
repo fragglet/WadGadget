@@ -19,6 +19,8 @@
 #include "ui/dialog.h"
 #include "conv/export.h"
 #include "ui/pane.h"
+#include "pager/pager.h"
+#include "pager/hexdump.h"
 #include "stringlib.h"
 #include "ui/ui.h"
 #include "fs/vfs.h"
@@ -1114,8 +1116,29 @@ const struct action edit_action = {
 	KEY_F(4), 'E', "Edit", "Edit",
 };
 
+static void PerformHexdump(struct directory_pane *active_pane,
+                           struct directory_pane *other_pane)
+{
+	int selected = UI_DirectoryPaneSelected(active_pane);
+	struct directory_entry *ent;
+	VFILE *input;
+
+	if (selected < 0) {
+		return;
+	}
+	ent = &active_pane->dir->entries[selected];
+
+	input = VFS_OpenByEntry(active_pane->dir, ent);
+	if (input == NULL) {
+		return;
+	}
+
+	P_RunHexdumpPager(ent->name, input);
+}
+
 const struct action hexdump_action = {
 	0, 'D', "Hexdump", "| Hexdump",
+	PerformHexdump
 };
 
 static void PerformUndo(struct directory_pane *active_pane,
