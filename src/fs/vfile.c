@@ -410,7 +410,7 @@ static struct vfile_functions memory_io_functions = {
 	memory_vfsync,
 };
 
-VFILE *vfopenmem(void *buf, size_t buf_len)
+VFILE *vfopenmem(const void *buf, size_t buf_len)
 {
 	struct memory_vfile *memfile;
 	memfile = checked_calloc(1, sizeof(struct memory_vfile));

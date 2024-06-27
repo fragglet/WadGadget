@@ -48,7 +48,7 @@ size_t vfwrite(const void *ptr, size_t size, size_t nitems, VFILE *stream);
 void vftruncate(VFILE *stream);
 
 // Read/write to memory buffer.
-VFILE *vfopenmem(void *buf, size_t buf_len);
+VFILE *vfopenmem(const void *buf, size_t buf_len);
 bool vfgetbuf(VFILE *f, void **buf, size_t *buf_len);
 void *vfreadall(VFILE *input, size_t *len);
 
