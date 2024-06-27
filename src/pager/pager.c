@@ -73,6 +73,8 @@ static void HandleKeypress(struct pager *p, int c)
 	int i;
 
 	switch (c) {
+	case 'q':
+	case 'Q':
 	case 27:
 		p->done = true;
 		break;
