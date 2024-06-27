@@ -451,8 +451,9 @@ const struct lump_type lump_type_palette = {
 
 static bool ColormapCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return !strncasecmp(ent->name, "COLORMAP", 8)
-	    && (ent->size % 256) == 0;
+	return (ent->size % 256) == 0
+	    && (!strncasecmp(ent->name, "COLORMAP", 8)
+	     || !strncasecmp(ent->name, "FOGMAP", 8));
 }
 
 static void ColormapFormat(struct wad_file_entry *ent, uint8_t *buf,
