@@ -17,12 +17,26 @@
 static void DrawHexdumpLine(WINDOW *win, unsigned int line, void *user_data)
 {
 	struct hexdump_pager_config *cfg = user_data;
-	char buf[10];
+	char buf[12];
 	int i;
+
+	snprintf(buf, sizeof(buf), " %08x: ", line * 16);
+	waddstr(win, buf);
 
 	for (i = 0; i < 16 && line * 16 + i < cfg->data_len; i++) {
 		snprintf(buf, sizeof(buf), "%02x ", cfg->data[line * 16 + i]);
 		waddstr(win, buf);
+	}
+
+	mvwaddstr(win, 0, 60, "");
+
+	for (i = 0; i < 16 && line * 16 + i < cfg->data_len; i++) {
+		int c = cfg->data[line * 16 + i];
+		if (c >= 32 && c < 127) {
+			waddch(win, c);
+		} else {
+			waddch(win, '.');
+		}
 	}
 }
 
