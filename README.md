@@ -39,7 +39,7 @@ The following table gives a brief summary of the current state:
 | Interface                      | Text UI (80x25)      | ncurses (~any screen size)                  | GUI (wxWidgets)                      |
 | Two pane view                  | ✓ (in 1.4 beta)      | ✓                                           | ✓ (multi-tab)                        |
 | File formats                   | WAD                  | WAD                                         | WAD, ZIP, PAK, HOG, many others      |
-| Basics: Create, Delete, Rename | ✓                    | ✓                                           | ✓                                    |
+| Fundamentals: Create, Delete, Rename | ✓              | ✓                                           | ✓                                    |
 | Rearrange lumps within WAD     |                      | ✓                                           | ✓                                    |
 | Filesystem navigation          | ✓                    | ✓ (fully integrated with WAD view)          | ✓                                    |
 | Basic file management          |                      | ✓ (open, copy, delete, rename files)        | ✓ (kind of, via OS file open dialog) |
@@ -70,7 +70,6 @@ The following table gives a brief summary of the current state:
 | Edit ACS scripts               |                      |                                             | ✓                                    |
 | Source port features           |                      |                                             | ✓                                    |
 | Scripting                      |                      |                                             | ✓ (via Lua)                          |
-| Online help                    |                      |                                             | ✓                                    |
 | A zillion other features       |                      |                                             | ✓                                    |
 
 ## FAQ
