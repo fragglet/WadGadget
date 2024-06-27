@@ -216,19 +216,18 @@ void UI_DirectoryPaneSearch(void *p, const char *needle)
 	}
 }
 
-void UI_DirectoryPaneSearchAgain(void *p, const char *needle)
+bool UI_DirectoryPaneSearchAgain(void *p, const char *needle)
 {
 	struct directory_pane *dp = p;
 	int start_index = dp->pane.selected;
 
 	if (strlen(needle) == 0 || !strcmp(needle, "..")) {
-		return;
+		return false;
 	}
 
 	// When searching again, we only do substring matches.
-	if (!SubstringSearch(dp, needle, start_index)) {
-		(void) SubstringSearch(dp, needle, 0);
-	}
+	return SubstringSearch(dp, needle, start_index)
+	    || SubstringSearch(dp, needle, 0);
 }
 
 int UI_DirectoryPaneSelected(struct directory_pane *p)

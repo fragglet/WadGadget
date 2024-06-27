@@ -25,7 +25,7 @@ struct directory_entry *UI_DirectoryPaneEntry(struct directory_pane *p);
 void UI_DirectoryPaneKeypress(void *p, int key);
 void UI_DirectoryPaneFree(struct directory_pane *p);
 void UI_DirectoryPaneSearch(void *p, const char *needle);
-void UI_DirectoryPaneSearchAgain(void *p, const char *needle);
+bool UI_DirectoryPaneSearchAgain(void *p, const char *needle);
 void UI_DirectoryPaneReselect(struct directory_pane *p);
 void UI_DirectoryPaneSelectEntry(struct directory_pane *p,
                                  struct directory_entry *ent);
