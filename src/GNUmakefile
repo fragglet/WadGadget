@@ -35,6 +35,8 @@ OBJS =                      \
     fs/vfs.o                \
     fs/wad_dir.o            \
     fs/wad_file.o           \
+    pager/pager.o           \
+    pager/plaintext.o       \
     textures/actions.o      \
     textures/bundle.o       \
     textures/config.o       \
