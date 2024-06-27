@@ -18,9 +18,11 @@
 #include "conv/import.h"
 #include "ui/dialog.h"
 #include "conv/export.h"
+#include "help_text.h"
 #include "ui/pane.h"
 #include "pager/pager.h"
 #include "pager/hexdump.h"
+#include "pager/plaintext.h"
 #include "stringlib.h"
 #include "ui/ui.h"
 #include "fs/vfs.h"
@@ -1222,4 +1224,16 @@ static void PerformRedo(struct directory_pane *active_pane,
 const struct action redo_action = {
 	0, 'Y', "Redo", "| Redo",
 	PerformRedo,
+};
+
+static void ShowHelp(struct directory_pane *active_pane,
+                            struct directory_pane *other_pane)
+{
+	VFILE *input = vfopenmem(help_text, strlen(help_text));
+	P_RunPlaintextPager("WadGadget help", input);
+}
+
+const struct action help_action = {
+	KEY_F(1), 0, "Help", "Help",
+	ShowHelp,
 };

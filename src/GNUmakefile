@@ -19,6 +19,8 @@ CFLAGS := -g -MMD -Wall -I. -O2 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
 LDFLAGS := $(shell pkg-config --libs $(REQUIRED_PKGS)) \
            $(LIBSIXEL_LDFLAGS) $(NCURSES_LDFLAGS)
 
+HELP_FILES = help/help.txt
+
 OBJS =                      \
     conv/audio.o            \
     conv/endoom.o           \
@@ -54,6 +56,7 @@ OBJS =                      \
     ui/text_input.o         \
     ui/ui.o                 \
     actions.o               \
+    help_text.o             \
     lump_info.o             \
     sixel_display.o         \
     stringlib.o             \
@@ -70,7 +73,10 @@ wadgadget : $(OBJS)
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+help_text.c: $(HELP_FILES) help/make_help.py
+	help/make_help.py $(HELP_FILES) > $@
+
 clean :
-	rm -f wadgadget $(OBJS) $(DEPS)
+	rm -f wadgadget $(OBJS) $(DEPS) help_text.c
 
 -include $(DEPS)

@@ -65,7 +65,7 @@ The following table gives a brief summary of the current state:
 | Palette/colormap export        |                      | ✓ (PNG)                                     | ✓                                    |
 | Texture editor                 | ✓                    | WIP (fragglet/WadGadget#9); can be edited as text as a stopgap | ✓                 |
 | PNAMES editor                  | ✓                    | ✓                                           | ✓                                    |
-| Online help                    |                      |                                             | ✓ (browser tabs to access help/wiki) |
+| Online help                    |                      | ✓                                           | ✓ (browser tabs to access help/wiki) |
 | View/edit levels               |                      |                                             | ✓                                    |
 | Edit ACS scripts               |                      |                                             | ✓                                    |
 | Source port features           |                      |                                             | ✓                                    |

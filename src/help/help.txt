@@ -1,0 +1,191 @@
+
+This help page is a work in progress.
+
+**Common keys**
+
+        Tab   Switch panes
+Space         Mark
+Ctrl-G        Mark pattern
+Ctrl-A  F10   Unmark all
+Ctrl-N        Search again
+Ctrl-W        Clear search
+Ctrl-_        Swap panes
+Ctrl-J        Toggle Commander Mode
+Ctrl-L        Redraw screen
+        Esc   Quit
+
+**Directory view**
+
+        Enter     View/edit file
+Ctrl-D            View hexdump of selected file
+Ctrl-P  F2        Compact selected WAD file
+Ctrl-U  F3        Update
+Ctrl-E  F4        Edit
+Ctrl-O  F5        Copy or import files; see below
+        Shift-F5  Import raw, no file conversion
+Ctrl-B  F6        Rename selected file/directory
+Ctrl-K  F7        Make directory
+Ctrl-X  F8        Delete file(s)
+        Shift-F8  Delete file(s) (no confirmation)
+Ctrl-F  F9        Make WAD containing marked files; see below
+        Shift-F9  Make WAD, no file conversion
+Ctrl-A  F10       Unmark all marked files
+Ctrl-R            Reload directory
+
+Notes on copying:
+ * If a WAD file is in the opposite pane, Import (F5) imports the selected file
+   (or tagged files) into the WAD. The files will be converted to the WAD
+   native format based on the file's name and extension (see the table below).
+   New lumps are always created, even if there are already other lumps with the
+   same names. The horizontal line in the opposite pane shows where they will
+   be inserted.
+ * Use Shift-F5 to import into a WAD file without performing any file format
+   conversion (ie. ignore filename, import files as raw lumps).
+ * If another directory is in the opposite pane, Copy (F5) performs a normal
+   file copy. Mark multiple files to copy multiple files, otherwise the
+   currently selected file is copied. You cannot copy directories.
+ * If the same directory is in the opposite pane, Copy (F5) will make a duplicate
+   copy of the selected file; you will be prompted to enter a name for the new
+   file. You cannot do this with multiple files at the same time.
+ * If a texture directory is in the opposite pane, Import config (F5) will parse
+   the selected file as a deutex plain text texture file, and then insert the
+   textures into the texture directory. Existing textures with the same names
+   will be overwritten; any new textures will be inserted at the position
+   indicated by a horizontal line in the opposite pane.
+ * Make WAD (F9) creates a new .wad file in the same directory and copies the
+   marked files into the .wad file. If no files are marked, an empty .wad file
+   is created.
+
+File formats when importing to a WAD (unless Shift-F5 is used):
+
+Extension        Lump type                  Notes
+--------------------------------------------------------------------------------
+.lmp             Raw lump or demo file      No conversion performed
+.mus             DMX MUS music track        No conversion performed
+.mid             MIDI music track           No conversion performed
+.wav             Sound effect
+.voc             Sound effect
+.flac            Sound effect
+playpal.png      VGA palette lump           Must be a multiple of 256 pixels
+colormap.png     Color mapping lump         Must be a multiple of 256 pixels
+.cmap.png        Color mapping lump         Must be a multiple of 256 pixels
+.flat.png        Floor/ceiling texture      Must be 64 pixels wide
+.png             Graphic lump
+PNAMES.txt       Plain text patch names
+TEXTURE*.txt     Plain text texture config  Must already have a PNAMES lump
+.fullscreen.png  Hexen full screen image    Must be 320x200 pixels
+
+**WAD view**
+
+        Enter     View/edit lump
+Ctrl-D            View hexdump of selected lump
+Ctrl-V  F2        Move (rearrange) marked lumps
+Ctrl-]  Shift-F2  Sort marked lumps into alphabetical order
+Ctrl-U  F3        Update
+Ctrl-E  F4        Edit
+Ctrl-O  F5        Copy or export lumps; see below
+        Shift-F5  Export as raw, no file conversion
+Ctrl-B  F6        Rename selected lump
+Ctrl-K  F7        Make new lump
+Ctrl-X  F8        Delete lump(s)
+        Shift-F8  Delete lump(s) (no confirmation)
+Ctrl-F  F9        Export marked lumps to new WAD file; see below
+Ctrl-A  F10       Unmark all marked lumps
+Ctrl-Z            Undo last change
+Ctrl-Y            Redo change
+
+Notes on copying:
+ * If a WAD file is in the opposite pane, Copy (F5) copies the selected lump
+   (or tagged lumps) to the other file. The lumps will be inserted into the
+   other WAD as new lumps, even if there are already lumps with the same names.
+   A horizontal line in the opposite pane shows where the copied lumps will be
+   inserted.
+ * If a directory is in the opposite pane, Export (F5) will export those lumps
+   as files into that directory. The lumps will be converted to an appropriate
+   file format depending on the type of lump. See the table below for details.
+ * Shift-F5 will export to files without performing any conversion (ie. .lmp
+   files). You can also this function to export music tracks as .mus files
+   instead of converting to .mid.
+ * Files can be imported back into WAD files by switching to the opposite pane
+   and using Import (F5).
+ * If a patch names list is in the opposite pane, Copy names (F5) will copy the
+   names of the tagged lumps into the list. This is useful if you imported some
+   new patches into your WAD and need to add them to PNAMES.
+ * Export as WAD (F9) will create a new .wad file in the directory in the
+   opposite pane. All marked lumps will be copied into the new .wad.
+
+File formats when exporting from a WAD (unless Shift-F5 is used):
+
+Lump type                  File extension   File format
+---------------------------------------------------------------------------
+DMX MUS music format       .mid             MIDI music track
+Sound effect               .wav             WAVE sound file
+VGA palette lump           playpal.png      Portable Network Graphics
+Color mapping lump         .cmap.png        Portable Network Graphics
+Floor/ceiling texture      .flat.png        Portable Network Graphics
+Graphic lump               .png             Portable Network Graphics
+PNAMES lump                .txt             Plain text, one name per line
+TEXTURE* lump              .txt             Deutex plain text config format
+Hexen full screen graphic  .fullscreen.png  Portable Network Graphics
+STARTUP                    .hires.png       Portable Network Graphics
+Demo (DEMO1-DEMO4)         .lmp             No conversion performed
+Anything else              .lmp             No conversion performed
+
+**Texture editor**
+
+Ctrl-V  F2        Move (rearrange) marked textures
+Ctrl-]  Shift-F2  Sort marked textures into alphabetical order
+Ctrl-U  F3        Duplicate selected texture
+Ctrl-E  F4        Edit texture config
+Ctrl-O  F5        Copy or export; see below
+Ctrl-B  F6        Rename selected texture
+Ctrl-K  F7        Make new texture
+Ctrl-X  F8        Delete texture(s)
+        Shift-F8  Delete texture(s) (no confirmation)
+Ctrl-A  F10       Unmark all marked textures
+Ctrl-Z            Undo last change
+Ctrl-Y            Redo change
+
+Notes on copying:
+ * If another texture directory is in the opposite pane, Copy (F5) copies the
+   selected texture (or marked textures) to the other directory. This can be
+   used to copy texture definitions between WADs. If textures with the same
+   names already exist, they will be overwritten; any new textures will be
+   inserted into the other directory at the position indicated by a horizontal
+   line in the opposite pane.
+ * If a directory is in the opposite pane, Export config (F5) will create a
+   plain text file in that directory, containing the tagged textures in the
+   deutex plain text format. If no textures are tagged, the entire directory is
+   exported.
+ * To import such a text file back into the texture directory, switch to the
+   opposite pane and use Import config (F5).
+ * Texture directories go hand-in-hand with PNAMES lumps. If you add textures
+   into a directory that use new PNAMES, it is important that you update the
+   PNAMES lump when prompted.
+
+**PNAMES editor**
+
+Ctrl-V  F2        Move (rearrange) marked patch names
+Ctrl-]  Shift-F2  Sort marked names into alphabetical order
+Ctrl-E  F4        Edit plain text config file
+Ctrl-O  F5        Copy or export; see below
+Ctrl-B  F6        Rename selected patch name
+Ctrl-K  F7        Add new patch name
+Ctrl-X  F8        Delete patch names(s)
+        Shift-F8  Delete patch names(s) (no confirmation)
+Ctrl-A  F10       Unmark all marked patch names
+Ctrl-Z            Undo last change
+Ctrl-Y            Redo change
+
+Notes on copying:
+ * If another patch names list is in the opposite pane, Copy names (F5) will
+   add the selected name (or tagged names) into the other list. Duplicate
+   names will not be added.
+ * Patch names corresponding to lumps can be added to the list by opening the
+   same WAD in the opposite pane, selecting the lumps and using Copy names (F5).
+ * New patch names are always added to the end of the directory.
+ * If a directory is in the opposite pane, Export config (F5) will create a
+   plain text file in that directory that contains the tagged names, one per
+   line. If none are tagged, the file will contain the entire list.
+ * To import such a file into the texture directory, select the file in the
+   opposite pane and use Import config (F5).

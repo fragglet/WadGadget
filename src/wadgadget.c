@@ -327,6 +327,7 @@ static const struct action *common_actions[] = {
 	&delete_no_confirm_action,
 	&view_action,
 	&other_pane_action,
+	&help_action,
 	&quit_action,
 	NULL,
 };
