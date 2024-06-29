@@ -14,13 +14,18 @@
 #include "pager/pager.h"
 #include "ui/colors.h"
 
-void P_DrawPager(struct pager *p)
+static void DrawPager(void *_p)
 {
+	struct pager *p = _p;
 	char buf[10];
 	int y, lineno, range;
 
 	werase(newscr);
+	wresize(p->pane.window, LINES, COLS);
 	wresize(p->line_win, 1, COLS);
+
+	// Draw the top title row.
+	// TODO: This should not be part of the pager itself.
 	mvwin(p->line_win, 0, 0);
 	wbkgd(p->line_win, COLOR_PAIR(PAIR_HEADER));
 	werase(p->line_win);
@@ -29,6 +34,7 @@ void P_DrawPager(struct pager *p)
 	if (p->cfg->title != NULL) {
 		waddstr(p->line_win, p->cfg->title);
 	}
+
 	range = p->cfg->num_lines > (LINES - 1) ?
 	        p->cfg->num_lines - LINES + 1: 0;
 	p->window_offset = min(p->window_offset, range);
@@ -59,13 +65,16 @@ void P_InitPager(struct pager *p, struct pager_config *cfg)
 {
 	memset(p, 0, sizeof(struct pager));
 
-	p->line_win = newwin(1, COLS, 0, 0);
+	p->pane.window = newwin(1, COLS, 0, 0);
+	p->pane.draw = DrawPager;
+	p->line_win = subwin(p->pane.window, 1, COLS, 0, 0);
 	p->cfg = cfg;
 }
 
 void P_FreePager(struct pager *p)
 {
 	delwin(p->line_win);
+	delwin(p->pane.window);
 }
 
 static void HandleKeypress(struct pager *p, int c)
@@ -123,7 +132,7 @@ void P_RunPager(struct pager_config *cfg)
 
 	P_InitPager(&p, cfg);
 	while (!p.done) {
-		P_DrawPager(&p);
+		DrawPager(&p);
 		P_BlockOnInput(&p);
 	}
 	P_FreePager(&p);

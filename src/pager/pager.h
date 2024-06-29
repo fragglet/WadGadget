@@ -9,6 +9,7 @@
 //
 
 #include <curses.h>
+#include "ui/pane.h"
 
 typedef void (*pager_draw_line_fn)(WINDOW *win, unsigned int line,
                                    void *user_data);
@@ -21,6 +22,7 @@ struct pager_config {
 };
 
 struct pager {
+	struct pane pane;
 	WINDOW *line_win;
 	bool done;
 	unsigned int window_offset;
