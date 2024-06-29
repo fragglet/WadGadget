@@ -17,6 +17,7 @@ struct pane {
 	WINDOW *window;
 	void (*draw)(void *pane);
 	void (*keypress)(void *pane, int key);
+	struct pane *next;
 };
 
 void UI_PaneKeypress(void *pane, int key);

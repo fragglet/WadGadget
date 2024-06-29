@@ -17,8 +17,7 @@
 
 #define MAX_SCREEN_PANES 10
 
-static struct pane *screen_panes[MAX_SCREEN_PANES];
-static unsigned int num_screen_panes = 0;
+static struct pane *bottom_pane;
 static int main_loop_exited = 0;
 
 void UI_PaneKeypress(void *pane, int key)
@@ -30,54 +29,58 @@ void UI_PaneKeypress(void *pane, int key)
 	}
 }
 
-static int GetPaneIndex(void *pane)
+static struct pane **GetPanePtr(struct pane *p)
 {
-	unsigned int i;
+	struct pane **ptr;
 
-	for (i = 0; i < num_screen_panes; i++) {
-		if (screen_panes[i] == pane) {
-			return i;
+	ptr = &bottom_pane;
+	for (;;) {
+		if (*ptr == p) {
+			return ptr;
 		}
+		if (*ptr == NULL) {
+			return NULL;
+		}
+		ptr = &(*ptr)->next;
 	}
-
-	return -1;
 }
 
-void UI_PaneShow(void *pane)
+void UI_PaneShow(void *_pane)
 {
+	struct pane *pane = _pane;
+	struct pane **top_ptr;
+
 	// In case already shown, remove first; we will add it back
 	// at the top of the stack.
 	UI_PaneHide(pane);
 
-	assert(num_screen_panes < MAX_SCREEN_PANES);
-
-	screen_panes[num_screen_panes] = pane;
-	++num_screen_panes;
+	top_ptr = GetPanePtr(NULL);
+	pane->next = NULL;
+	*top_ptr = pane;
 }
 
-int UI_PaneHide(void *pane)
+int UI_PaneHide(void *_pane)
 {
-	int idx = GetPaneIndex(pane);
+	struct pane *pane = _pane;
+	struct pane **pane_ptr = GetPanePtr(pane);
 
-	if (idx < 0) {
-		return 0;
+	if (pane_ptr != NULL) {
+		*pane_ptr = pane->next;
+		pane->next = NULL;
+		return true;
 	}
 
-	memmove(&screen_panes[idx], &screen_panes[idx + 1],
-	        (num_screen_panes - idx - 1) * sizeof(struct pane *));
-	--num_screen_panes;
-	return 1;
+	return false;
 }
 
 void UI_DrawAllPanes(void)
 {
-	int i;
+	struct pane *p;
 
 	wbkgdset(newscr, COLOR_PAIR(PAIR_WHITE_BLACK));
 	werase(newscr);
 
-	for (i = 0; i < num_screen_panes; i++) {
-		struct pane *p = screen_panes[i];
+	for (p = bottom_pane; p != NULL; p = p->next) {
 		if (p->draw != NULL) {
 			p->draw(p);
 			wnoutrefresh(p->window);
@@ -93,9 +96,24 @@ void UI_RaisePaneToTop(void *pane)
 	}
 }
 
+static struct pane *GetPrevPane(struct pane *pane)
+{
+	struct pane *p = bottom_pane;
+
+	while (p != NULL) {
+		if (p->next == pane) {
+			return p;
+		}
+		p = p->next;
+	}
+
+	return NULL;
+}
+
 static bool HandleKeypress(void)
 {
-	int key, i;
+	struct pane *p;
+	int key;
 
 	// TODO: This should handle multiple keypresses before returning.
 	key = getch();
@@ -104,9 +122,9 @@ static bool HandleKeypress(void)
 	}
 
 	// Keypress goes to the top pane that has a keypress handler.
-	for (i = num_screen_panes - 1; i >= 0; i--) {
-		if (screen_panes[i]->keypress != NULL) {
-			UI_PaneKeypress(screen_panes[i], key);
+	for (p = GetPrevPane(NULL); p != NULL; p = GetPrevPane(p)) {
+		if (p->keypress != NULL) {
+			UI_PaneKeypress(p, key);
 			break;
 		}
 	}
