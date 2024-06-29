@@ -21,25 +21,12 @@ struct actions_pane {
 	const struct action *actions[MAX_KEY_BINDINGS];
 };
 
-struct actions_accel {
-	const char *name;
-	char key[8];
-	const struct action *action;
-};
-
-struct actions_bar {
-	struct pane pane;
-	struct actions_accel accels[MAX_KEY_BINDINGS];
-	int last_width, spacing;
-	const struct action **actions;
-	bool function_keys;
-};
-
 void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win);
 void UI_ActionsPaneSet(struct actions_pane *pane,
                        const struct action **actions, bool left_to_right,
                        bool function_keys);
 
-void UI_ActionsBarInit(struct actions_bar *pane, WINDOW *win);
-void UI_ActionsBarSet(struct actions_bar *pane,
-                      const struct action **actions, bool function_keys);
+void UI_ActionsBarInit(void);
+const struct action **UI_ActionsBarSetActions(const struct action **actions);
+void UI_ActionsBarSetFunctionKeys(bool function_keys);
+bool UI_ActionsBarEnable(bool enabled);

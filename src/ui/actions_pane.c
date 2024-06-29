@@ -17,6 +17,22 @@
 #include "stringlib.h"
 #include "ui/ui.h"
 
+struct actions_accel {
+	const char *name;
+	char key[8];
+	const struct action *action;
+};
+
+struct actions_bar {
+	struct pane pane;
+	struct actions_accel accels[MAX_KEY_BINDINGS];
+	int last_width, spacing;
+	const struct action **actions;
+	bool enabled, function_keys;
+};
+
+static struct actions_bar actions_bar;
+
 static const int key_ordering[] = {
 	KEY_F(1), KEY_F(2), KEY_F(3), KEY_F(4), KEY_F(5), KEY_F(6),
 	KEY_F(7), KEY_F(8), KEY_F(9), ' ', CTRL_('G'), KEY_F(10),
@@ -312,10 +328,12 @@ static void DrawActionsBar(void *pane)
 	struct actions_bar *p = pane;
 	WINDOW *win = p->pane.window;
 	int i, j;
-	int columns = getmaxx(win);
 
-	if (columns != p->last_width) {
-		RecalculateNames(p, columns);
+	wresize(p->pane.window, 1, COLS);
+	mvwin(p->pane.window, LINES - 1, 0);
+
+	if (COLS != p->last_width) {
+		RecalculateNames(p, COLS);
 	}
 
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
@@ -338,20 +356,39 @@ static void DrawActionsBar(void *pane)
 	}
 }
 
-void UI_ActionsBarInit(struct actions_bar *pane, WINDOW *win)
+void UI_ActionsBarInit(void)
 {
-	pane->pane.window = win;
-	pane->pane.draw = DrawActionsBar;
-	pane->pane.keypress = NULL;
-	pane->actions = NULL;
-	pane->function_keys = true;
+	actions_bar.pane.window = newwin(1, COLS, LINES - 1, 0);
+	actions_bar.pane.draw = DrawActionsBar;
+	actions_bar.pane.keypress = NULL;
+	actions_bar.actions = NULL;
+	actions_bar.function_keys = true;
 }
 
-void UI_ActionsBarSet(struct actions_bar *pane,
-                      const struct action **actions,
-                      bool function_keys)
+const struct action **UI_ActionsBarSetActions(const struct action **actions)
 {
-	pane->actions = actions;
-	pane->function_keys = function_keys;
-	RecalculateNames(pane, getmaxx(pane->pane.window));
+	const struct action **old_actions;
+
+	old_actions = actions_bar.actions;
+	actions_bar.actions = actions;
+	RecalculateNames(&actions_bar, COLS);
+
+	return old_actions;
+}
+
+void UI_ActionsBarSetFunctionKeys(bool function_keys)
+{
+	actions_bar.function_keys = function_keys;
+}
+
+bool UI_ActionsBarEnable(bool enabled)
+{
+	bool result = actions_bar.enabled;
+	actions_bar.enabled = enabled;
+	if (enabled) {
+		UI_PaneShow(&actions_bar);
+	} else {
+		UI_PaneHide(&actions_bar);
+	}
+	return result;
 }

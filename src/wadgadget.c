@@ -50,7 +50,6 @@ struct search_pane {
 
 static const struct action *actions[MAX_KEY_BINDINGS + 1];
 static struct actions_pane actions_pane;
-static struct actions_bar actions_bar;
 static struct pane header_pane, info_pane;
 static struct search_pane search_pane;
 static WINDOW *pane_windows[2];
@@ -75,8 +74,8 @@ static void SetNwtWindowSizes(int columns, int lines)
 	mvwin(search_pane.pane.window, lines - 3,
 	      left_width - 1);
 
-	UI_PaneHide(&actions_bar);
 	UI_PaneShow(&actions_pane);
+	UI_ActionsBarEnable(false);
 
 	wresize(pane_windows[0], lines - 1, left_width);
 	mvwin(pane_windows[0], 1, 0);
@@ -98,14 +97,11 @@ static void SetCmdrWindowSizes(int columns, int lines)
 	      active_pane != 0 ? left_width - 1 : 0);
 
 	UI_PaneHide(&actions_pane);
-	UI_PaneShow(&actions_bar);
+	UI_ActionsBarEnable(true);
 
 	// Search pane fits along bottom of screen.
 	wresize(search_pane.pane.window, 1, columns);
 	mvwin(search_pane.pane.window, lines - 2, 0);
-
-	wresize(actions_bar.pane.window, 1, columns);
-	mvwin(actions_bar.pane.window, lines - 1, 0);
 
 	wresize(pane_windows[0], lines - (active_pane ? 3 : 7),
 	        left_width);
@@ -157,7 +153,8 @@ static void ToggleCmdrMode(struct directory_pane *a,
 	}
 	UI_ActionsPaneSet(&actions_pane, actions, active_pane == 0,
 	                  use_function_keys);
-	UI_ActionsBarSet(&actions_bar, actions, use_function_keys);
+	UI_ActionsBarSetActions(actions);
+	UI_ActionsBarEnable(true);
 	SetWindowSizes();
 }
 
@@ -390,7 +387,7 @@ void SwitchToPane(struct directory_pane *pane)
 	BuildActionsList();
 	UI_ActionsPaneSet(&actions_pane, actions, active_pane == 0,
 	                  use_function_keys);
-	UI_ActionsBarSet(&actions_bar, actions, use_function_keys);
+	UI_ActionsBarSetActions(actions);
 	SetWindowSizes();
 }
 
@@ -766,8 +763,7 @@ int main(int argc, char *argv[])
 	UI_ActionsPaneInit(&actions_pane, newwin(15, 26, 6, 27));
 	UI_PaneShow(&actions_pane);
 
-	UI_ActionsBarInit(&actions_bar, newwin(1, 1, 1, 1));
-	UI_PaneShow(&actions_bar);
+	UI_ActionsBarInit();
 
 	pane_windows[0] = newwin(24, 27, 1, 0);
 	dir = VFS_OpenDir(start_path1);
