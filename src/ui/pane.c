@@ -73,6 +73,15 @@ int UI_PaneHide(void *_pane)
 	return false;
 }
 
+void UI_DrawPane(struct pane *p)
+{
+	if (p->draw != NULL) {
+		if (p->draw(p)) {
+			wnoutrefresh(p->window);
+		}
+	}
+}
+
 void UI_DrawAllPanes(void)
 {
 	struct pane *p;
@@ -81,10 +90,7 @@ void UI_DrawAllPanes(void)
 	werase(newscr);
 
 	for (p = bottom_pane; p != NULL; p = p->next) {
-		if (p->draw != NULL) {
-			p->draw(p);
-			wnoutrefresh(p->window);
-		}
+		UI_DrawPane(p);
 	}
 	doupdate();
 }

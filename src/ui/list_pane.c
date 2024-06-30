@@ -29,7 +29,7 @@ unsigned int UI_ListPaneLines(struct list_pane *lp)
 	return getmaxy(lp->pane.window) - 2;
 }
 
-void UI_ListPaneDraw(void *p)
+bool UI_ListPaneDraw(void *p)
 {
 	struct list_pane *lp = p;
 	WINDOW *win = lp->pane.window;
@@ -88,6 +88,8 @@ void UI_ListPaneDraw(void *p)
 		pos = (pos * lines) / range;
 		mvwaddch(win, pos + 1, wx - 2, ACS_CKBOARD);
 	}
+
+	return true;
 }
 
 void UI_ListPaneSelect(struct list_pane *p, unsigned int idx)

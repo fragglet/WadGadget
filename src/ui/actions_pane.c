@@ -130,7 +130,7 @@ static int ShowAction(struct actions_pane *p, int y,
 	return result;
 }
 
-static void DrawActionsPane(void *pane)
+static bool DrawActionsPane(void *pane)
 {
 	struct actions_pane *p = pane;
 	const struct action *a;
@@ -152,6 +152,8 @@ static void DrawActionsPane(void *pane)
 		}
 		last_idx = i;
 	}
+
+	return true;
 }
 
 void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win)
@@ -323,7 +325,7 @@ static void RecalculateNames(struct actions_bar *p, int columns)
 	p->last_width = columns;
 }
 
-static void DrawActionsBar(void *pane)
+static bool DrawActionsBar(void *pane)
 {
 	struct actions_bar *p = pane;
 	WINDOW *win = p->pane.window;
@@ -354,6 +356,8 @@ static void DrawActionsBar(void *pane)
 		wattron(win, COLOR_PAIR(PAIR_HEADER));
 		waddstr(win, p->accels[i].name);
 	}
+
+	return true;
 }
 
 void UI_ActionsBarInit(void)

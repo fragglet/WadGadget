@@ -14,7 +14,7 @@
 #include "pager/pager.h"
 #include "ui/colors.h"
 
-static void DrawPager(void *_p)
+static bool DrawPager(void *_p)
 {
 	struct pager *p = _p;
 	char buf[10];
@@ -59,6 +59,8 @@ static void DrawPager(void *_p)
 	mvaddstr(LINES - 1, COLS - 1, "");
 
 	doupdate();
+
+	return true;
 }
 
 void P_InitPager(struct pager *p, struct pager_config *cfg)

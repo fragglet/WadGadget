@@ -283,7 +283,7 @@ struct directory_entry *UI_DirectoryPaneEntry(struct directory_pane *p)
 	return &p->dir->entries[selected];
 }
 
-static void DrawPane(void *p)
+static bool DrawPane(void *p)
 {
 	struct directory_pane *dp = p;
 	WINDOW *win = dp->pane.pane.window;
@@ -322,6 +322,7 @@ static void DrawPane(void *p)
 		wattroff(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	}
 
+	return true;
 }
 
 struct directory_pane *UI_NewDirectoryPane(

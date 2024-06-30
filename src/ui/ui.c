@@ -81,7 +81,7 @@ static const char *games[] = {
 #define START_STR "= WadGadget for "
 #define END_STR "\b\b and the rest ="
 
-static void DrawHeaderPane(void *p)
+static bool DrawHeaderPane(void *p)
 {
 	struct pane *pane = p;
 	int w, x;
@@ -91,7 +91,7 @@ static void DrawHeaderPane(void *p)
 		wbkgdset(pane->window, COLOR_PAIR(PAIR_NOTICE));
 		werase(pane->window);
 		mvwaddstr(pane->window, 0, 1, notice_buf);
-		return;
+		return true;
 	}
 
 	w = getmaxx(pane->window);
@@ -132,6 +132,8 @@ static void DrawHeaderPane(void *p)
 
 	waddstr(pane->window, END_STR);
 	wattroff(pane->window, A_BOLD);
+
+	return true;
 }
 
 void UI_InitHeaderPane(struct pane *pane, WINDOW *win)

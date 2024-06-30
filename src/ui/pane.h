@@ -15,7 +15,7 @@
 
 struct pane {
 	WINDOW *window;
-	void (*draw)(void *pane);
+	bool (*draw)(void *pane);
 	void (*keypress)(void *pane, int key);
 	struct pane *next;
 };

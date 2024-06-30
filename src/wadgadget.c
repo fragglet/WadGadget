@@ -500,7 +500,7 @@ static void HandleKeypress(void *pane, int key)
 	}
 }
 
-static void DrawInfoPane(void *p)
+static bool DrawInfoPane(void *p)
 {
 	struct directory *dir;
 	struct directory_entry *ent;
@@ -518,7 +518,7 @@ static void DrawInfoPane(void *p)
 	mvwaddstr(pane->window, 0, 2, " Info ");
 
 	if (idx < 0) {
-		return;
+		return true;
 	}
 	dir = panes[active_pane]->dir;
 	ent = &dir->entries[idx];
@@ -564,9 +564,11 @@ static void DrawInfoPane(void *p)
 	case NUM_DIR_FILE_TYPES:
 		assert(0);
 	}
+
+	return true;
 }
 
-static void DrawSearchPane(void *pane)
+static bool DrawSearchPane(void *pane)
 {
 	struct search_pane *p = pane;
 	WINDOW *win = p->pane.window;
@@ -593,6 +595,8 @@ static void DrawSearchPane(void *pane)
 		wresize(p->input.win, 1, w - 9);
 	}
 	UI_TextInputDraw(&p->input);
+
+	return true;
 }
 
 static void SearchPaneKeypress(void *pane, int key)

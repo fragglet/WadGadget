@@ -37,7 +37,7 @@ static WINDOW *CenteredWindow(int w, int h)
 	              max(0, (scrw - w - 1) / 2));
 }
 
-static void DrawNonblockingWindow(void *pane)
+static bool DrawNonblockingWindow(void *pane)
 {
 	struct nonblocking_window *nbw = pane;
 	WINDOW *win = nbw->pane.window;
@@ -52,6 +52,8 @@ static void DrawNonblockingWindow(void *pane)
 
 	getmaxyx(win, h, w);
 	mvwaddstr(win, h - 1, w - 2, "");
+
+	return true;
 }
 
 void UI_ShowNonblockingWindow(const char *msg, ...)
@@ -112,7 +114,7 @@ struct confirm_dialog_box {
 	int result;
 };
 
-static void DrawConfirmDialog(void *pane)
+static bool DrawConfirmDialog(void *pane)
 {
 	struct confirm_dialog_box *dialog = pane;
 	WINDOW *win = dialog->pane.window;
@@ -148,6 +150,8 @@ static void DrawConfirmDialog(void *pane)
 		waddstr(win, " ");
 	}
 	wattroff(win, A_BOLD);
+
+	return true;
 }
 
 static void ConfirmDialogKeypress(void *dialog, int key)
@@ -234,7 +238,7 @@ struct text_input_dialog_box {
 	struct text_input_box input;
 };
 
-static void DrawTextInputDialog(void *pane)
+static bool DrawTextInputDialog(void *pane)
 {
 	struct text_input_dialog_box *dialog = pane;
 	WINDOW *win = dialog->pane.window;
@@ -262,6 +266,8 @@ static void DrawTextInputDialog(void *pane)
 
 	wattroff(win, A_BOLD);
 	UI_TextInputDraw(&dialog->input);
+
+	return true;
 }
 
 static void TextInputDialogKeypress(void *dialog, int key)
