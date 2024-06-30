@@ -96,6 +96,7 @@ void UI_DrawAllPanes(void)
 		UI_DrawPane(p);
 	}
 	UI_DrawPane(actions_bar);
+	UI_DrawPane(title_bar);
 
 	doupdate();
 }
@@ -178,5 +179,4 @@ void UI_Init(void)
 {
 	actions_bar = UI_ActionsBarInit();
 	title_bar = UI_TitleBarInit();
-	UI_PaneShow(title_bar);
 }
