@@ -132,18 +132,14 @@ void P_FreePager(struct pager *p)
 
 void P_RunPager(struct pager_config *cfg)
 {
-	struct pane *old_panes = UI_SavePanes();
-	const struct action **old_actions =
-		UI_ActionsBarSetActions(NULL); // TODO
-	bool actions_bar_enabled = UI_ActionsBarEnable(true);
+	struct saved_screen ss;
 	struct pager p;
 
+	UI_SaveScreen(&ss);
 	P_InitPager(&p, cfg);
 	UI_PaneShow(&p);
 	UI_RunMainLoop();
 	UI_PaneHide(&p);
 	P_FreePager(&p);
-	UI_RestorePanes(old_panes);
-	UI_ActionsBarSetActions(old_actions);
-	UI_ActionsBarEnable(actions_bar_enabled);
+	UI_RestoreScreen(&ss);
 }

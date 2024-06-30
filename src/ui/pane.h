@@ -20,6 +20,12 @@ struct pane {
 	struct pane *next;
 };
 
+struct saved_screen {
+	struct pane *panes;
+	const struct action **actions;
+	bool actions_bar_enabled;
+};
+
 void UI_PaneKeypress(void *pane, int key);
 void UI_PaneShow(void *pane);
 int UI_PaneHide(void *pane);
@@ -28,8 +34,11 @@ void UI_RaisePaneToTop(void *pane);
 void UI_RunMainLoop(void);
 void UI_ExitMainLoop(void);
 void UI_Init(void);
+
 struct pane *UI_SavePanes(void);
 void UI_RestorePanes(struct pane *old_panes);
+void UI_SaveScreen(struct saved_screen *ss);
+void UI_RestoreScreen(struct saved_screen *ss);
 
 #endif /* #ifndef PANE_H_INCLUDED */
 
