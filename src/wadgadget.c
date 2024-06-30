@@ -21,6 +21,7 @@
 #include "stringlib.h"
 #include "termfuncs.h"
 #include "textures/textures.h"
+#include "ui/actions_bar.h"
 #include "ui/actions_pane.h"
 #include "ui/colors.h"
 #include "ui/dialog.h"

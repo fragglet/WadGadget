@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef ACTIONS_H
+#define ACTIONS_H
+
 #include "ui/directory_pane.h"
 
 struct action {
@@ -61,4 +64,7 @@ extern const struct action compact_action;
 extern const struct action undo_action;
 extern const struct action redo_action;
 
+const char *UI_ActionKeyDescription(const struct action *a, bool function_keys);
 bool CheckReadOnly(struct directory *dir);
+
+#endif  /* #ifdef ACTIONS_H */

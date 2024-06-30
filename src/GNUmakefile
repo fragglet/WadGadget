@@ -48,6 +48,7 @@ OBJS =                      \
     textures/pnames_dir.o   \
     textures/texture_dir.o  \
     textures/textures.o     \
+    ui/actions_bar.o        \
     ui/actions_pane.o       \
     ui/dialog.o             \
     ui/directory_pane.o     \

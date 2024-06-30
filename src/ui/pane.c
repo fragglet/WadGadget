@@ -12,7 +12,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "ui/actions_pane.h"
+#include "ui/actions_bar.h"
 #include "ui/colors.h"
 #include "ui/pane.h"
 

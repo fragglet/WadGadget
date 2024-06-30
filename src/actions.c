@@ -35,6 +35,38 @@ extern void SwitchToPane(struct directory_pane *pane); // in wadgadget.c
 extern void ReplacePane(struct directory_pane *old_pane,
                         struct directory_pane *new_pane);
 
+const char *UI_ActionKeyDescription(const struct action *a, bool function_keys)
+{
+	int key = a->key;
+	if (!function_keys && a->key >= KEY_F(1) && a->key <= KEY_F(10)
+	 && a->ctrl_key != 0) {
+		key = 0;
+	}
+	switch (key) {
+	case KEY_F(1): return "F1";
+	case KEY_F(2): return "F2";
+	case KEY_F(3): return "F3";
+	case KEY_F(4): return "F4";
+	case KEY_F(5): return "F5";
+	case KEY_F(6): return "F6";
+	case KEY_F(7): return "F7";
+	case KEY_F(8): return "F8";
+	case KEY_F(9): return "F9";
+	case KEY_F(10): return "F10";
+	case ' ': return "Space";
+	case '\t': return "Tab";
+	case '\r': return "Ent";
+	case 27: return "Esc";
+	default: break;
+	}
+	if (a->ctrl_key) {
+		static char buf[3];
+		snprintf(buf, sizeof(buf), "^%c", a->ctrl_key);
+		return buf;
+	}
+	return "??";
+}
+
 bool CheckReadOnly(struct directory *dir)
 {
 	struct directory *orig_dir = dir;

@@ -25,8 +25,3 @@ void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win);
 void UI_ActionsPaneSet(struct actions_pane *pane,
                        const struct action **actions, bool left_to_right,
                        bool function_keys);
-
-struct pane *UI_ActionsBarInit(void);
-const struct action **UI_ActionsBarSetActions(const struct action **actions);
-void UI_ActionsBarSetFunctionKeys(bool function_keys);
-bool UI_ActionsBarEnable(bool enabled);
