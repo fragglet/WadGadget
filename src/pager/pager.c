@@ -14,6 +14,7 @@
 #include "pager/pager.h"
 #include "ui/actions_bar.h"
 #include "ui/colors.h"
+#include "ui/title_bar.h"
 
 void TitleBarTODO(struct pager *p)
 {
@@ -136,6 +137,7 @@ void P_RunPager(struct pager_config *cfg)
 	struct pager p;
 
 	UI_SaveScreen(&ss);
+	UI_SetTitleBar(cfg->title);
 	P_InitPager(&p, cfg);
 	UI_PaneShow(&p);
 	UI_RunMainLoop();
