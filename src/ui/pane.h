@@ -24,7 +24,7 @@ struct saved_screen {
 	struct pane *panes;
 	const struct action **actions;
 	bool actions_bar_enabled;
-	const char *title;
+	const char *title, *subtitle;
 };
 
 void UI_PaneKeypress(void *pane, int key);

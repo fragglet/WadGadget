@@ -219,6 +219,7 @@ void UI_SaveScreen(struct saved_screen *ss)
 	ss->actions = UI_ActionsBarSetActions(NULL);
 	ss->actions_bar_enabled = UI_ActionsBarEnable(true);
 	ss->title = UI_SetTitleBar(NULL);
+	ss->subtitle = UI_SetSubtitle(NULL);
 }
 
 void UI_RestoreScreen(struct saved_screen *ss)
@@ -227,4 +228,5 @@ void UI_RestoreScreen(struct saved_screen *ss)
 	UI_ActionsBarSetActions(ss->actions);
 	UI_ActionsBarEnable(ss->actions_bar_enabled);
 	UI_SetTitleBar(ss->title);
+	UI_SetSubtitle(ss->subtitle);
 }

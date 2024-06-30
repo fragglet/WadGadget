@@ -14,3 +14,4 @@
 struct pane *UI_TitleBarInit(void);
 void UI_ShowNotice(const char *msg, ...);
 const char *UI_SetTitleBar(const char *msg);
+const char *UI_SetSubtitle(const char *msg);

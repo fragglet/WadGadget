@@ -38,19 +38,17 @@ static const char *games[] = {
 
 struct title_bar {
 	struct pane pane;
-	const char *msg;
+	const char *msg, *subtitle;
 };
 
 static struct title_bar title_bar_singleton;
 
-static void DrawCutesyTitle(WINDOW *win)
+static void DrawCutesyTitle(WINDOW *win, int w)
 {
-	int w, x;
+	int x;
 	int i, count_extra = 0;
 
 	mvwaddstr(win, 0, 1, START_STR);
-
-	w = getmaxx(win);
 
 	x = strlen(START_STR) + strlen(END_STR);
 	for (i = 0; games[i] != NULL && x + strlen(games[i]) < w; i++) {
@@ -102,7 +100,15 @@ static bool DrawTitleBar(void *_p)
 		waddstr(p->pane.window, " ");
 		waddstr(p->pane.window, p->msg);
 	} else {
-		DrawCutesyTitle(p->pane.window);
+		int w = getmaxx(p->pane.window);
+		w -= p->subtitle != NULL ? strlen(p->subtitle) + 3 : 0;
+
+		DrawCutesyTitle(p->pane.window, w);
+	}
+	if (p->subtitle != NULL) {
+		int x = getmaxx(p->pane.window) - strlen(p->subtitle) - 3;
+		mvwaddstr(p->pane.window, 0, x, " ");
+		waddstr(p->pane.window, p->subtitle);
 	}
 	wattroff(p->pane.window, A_BOLD);
 
@@ -135,5 +141,12 @@ const char *UI_SetTitleBar(const char *msg)
 {
 	const char *old = title_bar_singleton.msg;
 	title_bar_singleton.msg = msg;
+	return old;
+}
+
+const char *UI_SetSubtitle(const char *msg)
+{
+	const char *old = title_bar_singleton.subtitle;
+	title_bar_singleton.subtitle = msg;
 	return old;
 }
