@@ -38,31 +38,20 @@ static const char *games[] = {
 
 struct title_bar {
 	struct pane pane;
+	const char *msg;
 };
 
 static struct title_bar title_bar_singleton;
 
-static bool DrawTitleBar(void *_p)
+static void DrawCutesyTitle(WINDOW *win)
 {
-	struct title_bar *p = _p;
 	int w, x;
-	int i, count_extra;
+	int i, count_extra = 0;
 
-	if (time(NULL) - last_notice_time < NOTICE_TIME_SECS) {
-		wbkgdset(p->pane.window, COLOR_PAIR(PAIR_NOTICE));
-		werase(p->pane.window);
-		mvwaddstr(p->pane.window, 0, 1, notice_buf);
-		return true;
-	}
+	mvwaddstr(win, 0, 1, START_STR);
 
-	w = getmaxx(p->pane.window);
+	w = getmaxx(win);
 
-	wbkgdset(p->pane.window, COLOR_PAIR(PAIR_HEADER));
-	werase(p->pane.window);
-	wattron(p->pane.window, A_BOLD);
-	mvwaddstr(p->pane.window, 0, 1, START_STR);
-
-	count_extra = 0;
 	x = strlen(START_STR) + strlen(END_STR);
 	for (i = 0; games[i] != NULL && x + strlen(games[i]) < w; i++) {
 		if (games[i][0] != '[') {
@@ -81,17 +70,40 @@ static bool DrawTitleBar(void *_p)
 			continue;
 		}
 		if (games[i][0] != '[') {
-			waddstr(p->pane.window, games[i]);
-			waddstr(p->pane.window, ", ");
+			waddstr(win, games[i]);
+			waddstr(win, ", ");
 		} else if (count_extra > 0) {
-			waddstr(p->pane.window, games[i] + 1);
-			waddstr(p->pane.window, ", ");
+			waddstr(win, games[i] + 1);
+			waddstr(win, ", ");
 			--count_extra;
 		}
-		x = getcurx(p->pane.window);
+		x = getcurx(win);
 	}
 
-	waddstr(p->pane.window, END_STR);
+	waddstr(win, END_STR);
+}
+
+static bool DrawTitleBar(void *_p)
+{
+	struct title_bar *p = _p;
+
+	if (time(NULL) - last_notice_time < NOTICE_TIME_SECS) {
+		wbkgdset(p->pane.window, COLOR_PAIR(PAIR_NOTICE));
+		werase(p->pane.window);
+		mvwaddstr(p->pane.window, 0, 1, notice_buf);
+		return true;
+	}
+
+	wbkgdset(p->pane.window, COLOR_PAIR(PAIR_HEADER));
+	werase(p->pane.window);
+	wattron(p->pane.window, A_BOLD);
+
+	if (p->msg != NULL) {
+		waddstr(p->pane.window, " ");
+		waddstr(p->pane.window, p->msg);
+	} else {
+		DrawCutesyTitle(p->pane.window);
+	}
 	wattroff(p->pane.window, A_BOLD);
 
 	return true;
@@ -117,4 +129,11 @@ void UI_ShowNotice(const char *msg, ...)
 	va_end(args);
 
 	last_notice_time = time(NULL);
+}
+
+const char *UI_SetTitleBar(const char *msg)
+{
+	const char *old = title_bar_singleton.msg;
+	title_bar_singleton.msg = msg;
+	return old;
 }
