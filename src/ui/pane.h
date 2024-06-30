@@ -28,6 +28,8 @@ void UI_RaisePaneToTop(void *pane);
 void UI_RunMainLoop(void);
 void UI_ExitMainLoop(void);
 void UI_Init(void);
+struct pane *UI_SavePanes(void);
+void UI_RestorePanes(struct pane *old_panes);
 
 #endif /* #ifndef PANE_H_INCLUDED */
 

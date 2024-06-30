@@ -136,6 +136,7 @@ void P_BlockOnInput(struct pager *p)
 
 void P_RunPager(struct pager_config *cfg)
 {
+	struct pane *old_panes = UI_SavePanes();
 	struct pager p;
 
 	P_InitPager(&p, cfg);
@@ -144,4 +145,5 @@ void P_RunPager(struct pager_config *cfg)
 		P_BlockOnInput(&p);
 	}
 	P_FreePager(&p);
+	UI_RestorePanes(old_panes);
 }

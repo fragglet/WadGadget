@@ -122,16 +122,9 @@ static struct pane *GetPrevPane(struct pane *pane)
 	return NULL;
 }
 
-static bool HandleKeypress(void)
+static void InputKeyPress(int key)
 {
 	struct pane *p;
-	int key;
-
-	// TODO: This should handle multiple keypresses before returning.
-	key = getch();
-	if (key == ERR) {
-		return false;
-	}
 
 	// Keypress goes to the top pane that has a keypress handler.
 	for (p = GetPrevPane(NULL); p != NULL; p = GetPrevPane(p)) {
@@ -140,6 +133,20 @@ static bool HandleKeypress(void)
 			break;
 		}
 	}
+
+}
+
+static bool HandleKeypress(void)
+{
+	int key;
+
+	// TODO: This should handle multiple keypresses before returning.
+	key = getch();
+	if (key == ERR) {
+		return false;
+	}
+
+	InputKeyPress(key);
 
 	return true;
 }
@@ -179,4 +186,22 @@ void UI_Init(void)
 {
 	actions_bar = UI_ActionsBarInit();
 	title_bar = UI_TitleBarInit();
+}
+
+struct pane *UI_SavePanes(void)
+{
+	struct pane *result = bottom_pane;
+	bottom_pane = NULL;
+	return result;
+}
+
+void UI_RestorePanes(struct pane *old_panes)
+{
+	while (bottom_pane != NULL) {
+		UI_PaneHide(bottom_pane);
+	}
+
+	bottom_pane = old_panes;
+	InputKeyPress(KEY_RESIZE);
+
 }
