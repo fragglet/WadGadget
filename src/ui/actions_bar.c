@@ -123,7 +123,8 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 	// Can we fit any more shortcuts in?
 	i = 0;
 	add_index = 10;
-	while (p->actions[i] != NULL && add_index < MAX_KEY_BINDINGS) {
+	while (p->actions != NULL && p->actions[i] != NULL
+	    && add_index < MAX_KEY_BINDINGS) {
 		a = p->actions[i];
 		// Don't add any function key actions; we already have them.
 		if (a == NULL || a->shortname == NULL || HasFunctionKey(a)) {
@@ -146,7 +147,7 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 		i++;
 	}
 
-	return spacing / num_shortcuts;
+	return num_shortcuts > 0 ? spacing / num_shortcuts : 1;
 }
 
 static void RecalculateNames(struct actions_bar *p, int columns)
@@ -154,12 +155,8 @@ static void RecalculateNames(struct actions_bar *p, int columns)
 	const struct action *a, *cells[10];
 	int i;
 
-	if (p->actions == NULL) {
-		return;
-	}
-
 	memset(cells, 0, sizeof(cells));
-	for (i = 0; p->actions[i] != NULL; i++) {
+	for (i = 0; p->actions != NULL && p->actions[i] != NULL; i++) {
 		a = p->actions[i];
 		if (a != NULL && HasFunctionKey(a)) {
 			cells[a->key - KEY_F(1)] = a;

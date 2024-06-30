@@ -12,6 +12,7 @@
 
 #include "common.h"
 #include "pager/pager.h"
+#include "ui/actions_bar.h"
 #include "ui/colors.h"
 
 void TitleBarTODO(struct pager *p)
@@ -48,7 +49,7 @@ static bool DrawPager(void *_p)
 	struct pager *p = _p;
 	int y, lineno, win_h;
 
-	assert(wresize(p->pane.window, LINES - 1, COLS) == OK);
+	assert(wresize(p->pane.window, LINES - 2, COLS) == OK);
 	assert(wresize(p->line_win, 1, COLS) == OK);
 
 	wbkgdset(p->line_win, COLOR_PAIR(PAIR_WHITE_BLACK));
@@ -132,6 +133,9 @@ void P_FreePager(struct pager *p)
 void P_RunPager(struct pager_config *cfg)
 {
 	struct pane *old_panes = UI_SavePanes();
+	const struct action **old_actions =
+		UI_ActionsBarSetActions(NULL); // TODO
+	bool actions_bar_enabled = UI_ActionsBarEnable(true);
 	struct pager p;
 
 	P_InitPager(&p, cfg);
@@ -140,4 +144,6 @@ void P_RunPager(struct pager_config *cfg)
 	UI_PaneHide(&p);
 	P_FreePager(&p);
 	UI_RestorePanes(old_panes);
+	UI_ActionsBarSetActions(old_actions);
+	UI_ActionsBarEnable(actions_bar_enabled);
 }
