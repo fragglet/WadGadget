@@ -21,7 +21,7 @@
 
 static struct pane *actions_bar, *title_bar;
 static struct pane *bottom_pane;
-static int main_loop_exited = 0;
+static bool main_loop_exited = false;
 
 void UI_PaneKeypress(void *pane, int key)
 {
@@ -174,12 +174,12 @@ void UI_RunMainLoop(void)
 		HandleKeypresses();
 	}
 
-	main_loop_exited = 0;
+	main_loop_exited = false;
 }
 
 void UI_ExitMainLoop(void)
 {
-	main_loop_exited = 1;
+	main_loop_exited = true;
 }
 
 void UI_Init(void)
