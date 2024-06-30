@@ -55,6 +55,7 @@ OBJS =                      \
     ui/list_pane.o          \
     ui/pane.o               \
     ui/text_input.o         \
+    ui/title_bar.o          \
     ui/ui.o                 \
     actions.o               \
     help_text.o             \

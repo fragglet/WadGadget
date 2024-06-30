@@ -15,10 +15,11 @@
 #include "ui/actions_bar.h"
 #include "ui/colors.h"
 #include "ui/pane.h"
+#include "ui/title_bar.h"
 
 #define MAX_SCREEN_PANES 10
 
-static struct pane *actions_bar;
+static struct pane *actions_bar, *title_bar;
 static struct pane *bottom_pane;
 static int main_loop_exited = 0;
 
@@ -176,4 +177,6 @@ void UI_ExitMainLoop(void)
 void UI_Init(void)
 {
 	actions_bar = UI_ActionsBarInit();
+	title_bar = UI_TitleBarInit();
+	UI_PaneShow(title_bar);
 }

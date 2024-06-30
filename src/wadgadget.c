@@ -26,6 +26,7 @@
 #include "ui/colors.h"
 #include "ui/dialog.h"
 #include "ui/directory_pane.h"
+#include "ui/title_bar.h"
 #include "ui/ui.h"
 #include "view.h"
 
@@ -51,7 +52,7 @@ struct search_pane {
 
 static const struct action *actions[MAX_KEY_BINDINGS + 1];
 static struct actions_pane actions_pane;
-static struct pane header_pane, info_pane;
+static struct pane info_pane;
 static struct search_pane search_pane;
 static WINDOW *pane_windows[2];
 static struct directory_pane *panes[2];
@@ -118,8 +119,6 @@ static void SetWindowSizes(void)
 {
 	int lines, columns;
 	getmaxyx(stdscr, lines, columns);
-
-	wresize(header_pane.window, 1, columns);
 
 	if (!cmdr_mode && columns >= 80 && lines >= 25) {
 		SetNwtWindowSizes(columns, lines);
@@ -755,11 +754,6 @@ int main(int argc, char *argv[])
 	refresh();
 
 	UI_Init();
-
-	// The hard-coded window sizes and positions here get reset
-	// when SetWindowSizes() is called below.
-	UI_InitHeaderPane(&header_pane, newwin(1, 80, 0, 0));
-	UI_PaneShow(&header_pane);
 
 	InitInfoPane(newwin(5, 26, 1, 27));
 	UI_PaneShow(&info_pane);

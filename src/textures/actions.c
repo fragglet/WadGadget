@@ -16,6 +16,7 @@
 #include "conv/error.h"
 #include "stringlib.h"
 #include "ui/dialog.h"
+#include "ui/title_bar.h"
 #include "ui/ui.h"
 #include "view.h"
 

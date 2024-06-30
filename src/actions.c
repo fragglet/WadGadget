@@ -24,6 +24,7 @@
 #include "pager/hexdump.h"
 #include "pager/plaintext.h"
 #include "stringlib.h"
+#include "ui/title_bar.h"
 #include "ui/ui.h"
 #include "fs/vfs.h"
 #include "textures/textures.h"

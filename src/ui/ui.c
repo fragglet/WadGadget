@@ -18,12 +18,6 @@
 #include "ui/pane.h"
 #include "ui/ui.h"
 
-#define MAX_NOTICE_LEN    100
-#define NOTICE_TIME_SECS    2
-
-static char notice_buf[MAX_NOTICE_LEN + 1];
-static time_t last_notice_time;
-
 int UI_StringWidth(char *s)
 {
 	int max_width = 0, cur_width = 0;
@@ -68,90 +62,6 @@ void UI_PrintMultilineString(WINDOW *win, int y, int x, const char *s)
 			waddch(win, *p);
 		}
 	}
-}
-
-// What games use the WAD format?
-static const char *games[] = {
-	"Doom", "[Doom II", "[Final Doom", "Heretic", "Hexen", "Strife",
-	"[Chex Quest", "[Freedoom", "[Rise of the Triad", "[HACX",
-	"[Amulets & Armor", "[Duke Nukem 3D", "[Tank Wars",
-	"[Birthright: The Gorgon's Alliance", "[Doom 2D", NULL,
-};
-
-#define START_STR "= WadGadget for "
-#define END_STR "\b\b and the rest ="
-
-static bool DrawHeaderPane(void *p)
-{
-	struct pane *pane = p;
-	int w, x;
-	int i, count_extra;
-
-	if (time(NULL) - last_notice_time < NOTICE_TIME_SECS) {
-		wbkgdset(pane->window, COLOR_PAIR(PAIR_NOTICE));
-		werase(pane->window);
-		mvwaddstr(pane->window, 0, 1, notice_buf);
-		return true;
-	}
-
-	w = getmaxx(pane->window);
-
-	wbkgdset(pane->window, COLOR_PAIR(PAIR_HEADER));
-	werase(pane->window);
-	wattron(pane->window, A_BOLD);
-	mvwaddstr(pane->window, 0, 1, START_STR);
-
-	count_extra = 0;
-	x = strlen(START_STR) + strlen(END_STR);
-	for (i = 0; games[i] != NULL && x + strlen(games[i]) < w; i++) {
-		if (games[i][0] != '[') {
-			x += strlen(games[i]) + 2;
-		}
-	}
-	for (i = 0; games[i] != NULL && x + strlen(games[i]) < w; i++) {
-		if (games[i][0] == '[') {
-			x += strlen(games[i]) + 1;
-			++count_extra;
-		}
-	}
-	x = 0;
-	for (i = 0; games[i] != NULL; i++) {
-		if (x + strlen(games[i]) > w - strlen(END_STR)) {
-			continue;
-		}
-		if (games[i][0] != '[') {
-			waddstr(pane->window, games[i]);
-			waddstr(pane->window, ", ");
-		} else if (count_extra > 0) {
-			waddstr(pane->window, games[i] + 1);
-			waddstr(pane->window, ", ");
-			--count_extra;
-		}
-		x = getcurx(pane->window);
-	}
-
-	waddstr(pane->window, END_STR);
-	wattroff(pane->window, A_BOLD);
-
-	return true;
-}
-
-void UI_InitHeaderPane(struct pane *pane, WINDOW *win)
-{
-	pane->window = win;
-	pane->draw = DrawHeaderPane;
-	pane->keypress = NULL;
-}
-
-void UI_ShowNotice(const char *msg, ...)
-{
-	va_list args;
-
-	va_start(args, msg);
-	vsnprintf(notice_buf, sizeof(notice_buf), msg, args);
-	va_end(args);
-
-	last_notice_time = time(NULL);
 }
 
 // These are clock hand directions. Imagine all the border characters as a

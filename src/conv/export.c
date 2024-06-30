@@ -23,6 +23,7 @@
 #include "conv/mus2mid.h"
 #include "stringlib.h"
 #include "textures/textures.h"
+#include "ui/title_bar.h"
 #include "ui/ui.h"
 
 static VFILE *ConvertPnames(VFILE *input)

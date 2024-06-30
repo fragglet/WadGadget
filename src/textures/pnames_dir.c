@@ -18,6 +18,7 @@
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "stringlib.h"
+#include "ui/title_bar.h"
 #include "ui/ui.h"
 
 #include "textures/textures.h"

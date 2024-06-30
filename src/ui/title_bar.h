@@ -11,12 +11,5 @@
 #include "ui/pane.h"
 #include "ui/text_input.h"
 
-#define FILE_PANE_WIDTH  27
-#define FILE_PANE_HEIGHT 24
-
-int UI_StringWidth(char *s);
-int UI_StringHeight(char *s);
-void UI_PrintMultilineString(WINDOW *win, int y, int x, const char *s);
-void UI_DrawBox(WINDOW *win, int x, int y, int w, int h);
-void UI_DrawWindowBox(WINDOW *win);
-
+struct pane *UI_TitleBarInit(void);
+void UI_ShowNotice(const char *msg, ...);
