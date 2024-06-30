@@ -16,33 +16,20 @@
 #include "ui/colors.h"
 #include "ui/title_bar.h"
 
-void TitleBarTODO(struct pager *p)
+static void UpdateSubtitle(struct pager *p)
 {
-	char buf[10];
 	int range, win_h;
-
-	// Draw the top title row.
-	// TODO: This should not be part of the pager itself.
-	mvwin(p->line_win, 0, 0);
-	wbkgd(p->line_win, COLOR_PAIR(PAIR_HEADER));
-	werase(p->line_win);
-	wattron(p->line_win, A_BOLD);
-	mvwaddstr(p->line_win, 0, 0, " ");
-	if (p->cfg->title != NULL) {
-		waddstr(p->line_win, p->cfg->title);
-	}
 
 	win_h = getmaxy(p->pane.window);
 	range = p->cfg->num_lines > win_h ?
 	        p->cfg->num_lines - win_h + 1: 0;
 	p->window_offset = min(p->window_offset, range);
 	if (range > 0) {
-		snprintf(buf, sizeof(buf), "%d%%",
+		snprintf(p->subtitle, sizeof(p->subtitle), "%d%%",
 		         min(100, p->window_offset * 100 / range));
-		mvwaddstr(p->line_win, 0, COLS - strlen(buf) - 2, buf);
 	}
-	wattroff(p->line_win, A_BOLD);
-	wnoutrefresh(p->line_win);
+
+	UI_SetSubtitle(p->subtitle);
 }
 
 static bool DrawPager(void *_p)
@@ -52,6 +39,8 @@ static bool DrawPager(void *_p)
 
 	assert(wresize(p->pane.window, LINES - 2, COLS) == OK);
 	assert(wresize(p->line_win, 1, COLS) == OK);
+
+	UpdateSubtitle(p);
 
 	wbkgdset(p->line_win, COLOR_PAIR(PAIR_WHITE_BLACK));
 

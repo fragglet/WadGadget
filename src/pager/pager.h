@@ -26,6 +26,7 @@ struct pager {
 	WINDOW *line_win;
 	unsigned int window_offset;
 	struct pager_config *cfg;
+	char subtitle[15];
 };
 
 void P_InitPager(struct pager *p, struct pager_config *cfg);
