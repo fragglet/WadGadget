@@ -88,6 +88,7 @@ void UI_DrawPane(struct pane *p)
 void UI_DrawAllPanes(void)
 {
 	struct pane *p;
+	int cur_x, cur_y;
 
 	wbkgdset(newscr, COLOR_PAIR(PAIR_WHITE_BLACK));
 	werase(newscr);
@@ -95,8 +96,14 @@ void UI_DrawAllPanes(void)
 	for (p = bottom_pane; p != NULL; p = p->next) {
 		UI_DrawPane(p);
 	}
+
+	getyx(newscr, cur_y, cur_x);
 	UI_DrawPane(actions_bar);
 	UI_DrawPane(title_bar);
+
+	// We move the cursor to its last position in the topmost pane,
+	// but ignoring the top and bottom bars.
+	move(cur_y, cur_x);
 
 	doupdate();
 }
