@@ -14,15 +14,10 @@
 #include "pager/pager.h"
 #include "ui/colors.h"
 
-static bool DrawPager(void *_p)
+void TitleBarTODO(struct pager *p)
 {
-	struct pager *p = _p;
 	char buf[10];
-	int y, lineno, range;
-
-	werase(newscr);
-	wresize(p->pane.window, LINES, COLS);
-	wresize(p->line_win, 1, COLS);
+	int range, win_h;
 
 	// Draw the top title row.
 	// TODO: This should not be part of the pager itself.
@@ -35,8 +30,9 @@ static bool DrawPager(void *_p)
 		waddstr(p->line_win, p->cfg->title);
 	}
 
-	range = p->cfg->num_lines > (LINES - 1) ?
-	        p->cfg->num_lines - LINES + 1: 0;
+	win_h = getmaxy(p->pane.window);
+	range = p->cfg->num_lines > win_h ?
+	        p->cfg->num_lines - win_h + 1: 0;
 	p->window_offset = min(p->window_offset, range);
 	if (range > 0) {
 		snprintf(buf, sizeof(buf), "%d%%",
@@ -45,19 +41,29 @@ static bool DrawPager(void *_p)
 	}
 	wattroff(p->line_win, A_BOLD);
 	wnoutrefresh(p->line_win);
+}
+
+static bool DrawPager(void *_p)
+{
+	struct pager *p = _p;
+	int y, lineno, win_h;
+
+	assert(wresize(p->pane.window, LINES, COLS) == OK);
+	assert(wresize(p->line_win, 1, COLS) == OK);
 
 	wbkgdset(p->line_win, COLOR_PAIR(PAIR_WHITE_BLACK));
 
 	lineno = p->window_offset;
-	for (y = 1; y < LINES && lineno < p->cfg->num_lines; ++y, ++lineno) {
-		mvwin(p->line_win, y, 0);
+	win_h = getmaxy(p->pane.window);
+	for (y = 0; y < win_h && lineno < p->cfg->num_lines; ++y, ++lineno) {
+		assert(mvderwin(p->line_win, y, 0) == OK);
 		werase(p->line_win);
+		mvwaddstr(p->line_win, 0, 0, "");
 		p->cfg->draw_line(p->line_win, lineno, p->cfg->user_data);
-		wnoutrefresh(p->line_win);
 	}
+	wnoutrefresh(p->pane.window);
 
-	mvaddstr(LINES - 1, COLS - 1, "");
-
+	mvaddstr(win_h - 1, getmaxx(p->pane.window) - 1, "");
 	doupdate();
 
 	return true;
@@ -67,9 +73,9 @@ void P_InitPager(struct pager *p, struct pager_config *cfg)
 {
 	memset(p, 0, sizeof(struct pager));
 
-	p->pane.window = newwin(1, COLS, 0, 0);
+	p->pane.window = newwin(LINES - 2, COLS, 1, 0);
 	p->pane.draw = DrawPager;
-	p->line_win = subwin(p->pane.window, 1, COLS, 0, 0);
+	p->line_win = derwin(p->pane.window, 1, COLS, 0, 0);
 	p->cfg = cfg;
 }
 
