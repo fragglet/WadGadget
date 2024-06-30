@@ -331,6 +331,10 @@ static bool DrawActionsBar(void *pane)
 	WINDOW *win = p->pane.window;
 	int i, j;
 
+	if (!p->enabled) {
+		return false;
+	}
+
 	wresize(p->pane.window, 1, COLS);
 	mvwin(p->pane.window, LINES - 1, 0);
 
@@ -360,13 +364,15 @@ static bool DrawActionsBar(void *pane)
 	return true;
 }
 
-void UI_ActionsBarInit(void)
+struct pane *UI_ActionsBarInit(void)
 {
 	actions_bar.pane.window = newwin(1, COLS, LINES - 1, 0);
 	actions_bar.pane.draw = DrawActionsBar;
 	actions_bar.pane.keypress = NULL;
 	actions_bar.actions = NULL;
 	actions_bar.function_keys = true;
+
+	return &actions_bar.pane;
 }
 
 const struct action **UI_ActionsBarSetActions(const struct action **actions)
@@ -389,10 +395,5 @@ bool UI_ActionsBarEnable(bool enabled)
 {
 	bool result = actions_bar.enabled;
 	actions_bar.enabled = enabled;
-	if (enabled) {
-		UI_PaneShow(&actions_bar);
-	} else {
-		UI_PaneHide(&actions_bar);
-	}
 	return result;
 }

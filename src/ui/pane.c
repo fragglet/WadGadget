@@ -12,11 +12,13 @@
 #include <string.h>
 #include <assert.h>
 
+#include "ui/actions_pane.h"
 #include "ui/colors.h"
 #include "ui/pane.h"
 
 #define MAX_SCREEN_PANES 10
 
+static struct pane *actions_bar;
 static struct pane *bottom_pane;
 static int main_loop_exited = 0;
 
@@ -92,6 +94,8 @@ void UI_DrawAllPanes(void)
 	for (p = bottom_pane; p != NULL; p = p->next) {
 		UI_DrawPane(p);
 	}
+	UI_DrawPane(actions_bar);
+
 	doupdate();
 }
 
@@ -169,3 +173,7 @@ void UI_ExitMainLoop(void)
 	main_loop_exited = 1;
 }
 
+void UI_Init(void)
+{
+	actions_bar = UI_ActionsBarInit();
+}

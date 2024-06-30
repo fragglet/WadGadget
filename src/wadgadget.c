@@ -753,6 +753,8 @@ int main(int argc, char *argv[])
 
 	refresh();
 
+	UI_Init();
+
 	// The hard-coded window sizes and positions here get reset
 	// when SetWindowSizes() is called below.
 	UI_InitHeaderPane(&header_pane, newwin(1, 80, 0, 0));
@@ -766,8 +768,6 @@ int main(int argc, char *argv[])
 
 	UI_ActionsPaneInit(&actions_pane, newwin(15, 26, 6, 27));
 	UI_PaneShow(&actions_pane);
-
-	UI_ActionsBarInit();
 
 	pane_windows[0] = newwin(24, 27, 1, 0);
 	dir = VFS_OpenDir(start_path1);

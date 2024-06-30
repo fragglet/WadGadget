@@ -27,6 +27,7 @@ void UI_DrawAllPanes(void);
 void UI_RaisePaneToTop(void *pane);
 void UI_RunMainLoop(void);
 void UI_ExitMainLoop(void);
+void UI_Init(void);
 
 #endif /* #ifndef PANE_H_INCLUDED */
 
