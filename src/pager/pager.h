@@ -24,7 +24,6 @@ struct pager_config {
 struct pager {
 	struct pane pane;
 	WINDOW *line_win;
-	bool done;
 	unsigned int window_offset;
 	struct pager_config *cfg;
 };

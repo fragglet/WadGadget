@@ -48,7 +48,7 @@ static bool DrawPager(void *_p)
 	struct pager *p = _p;
 	int y, lineno, win_h;
 
-	assert(wresize(p->pane.window, LINES, COLS) == OK);
+	assert(wresize(p->pane.window, LINES - 1, COLS) == OK);
 	assert(wresize(p->line_win, 1, COLS) == OK);
 
 	wbkgdset(p->line_win, COLOR_PAIR(PAIR_WHITE_BLACK));
@@ -61,12 +61,55 @@ static bool DrawPager(void *_p)
 		mvwaddstr(p->line_win, 0, 0, "");
 		p->cfg->draw_line(p->line_win, lineno, p->cfg->user_data);
 	}
-	wnoutrefresh(p->pane.window);
 
-	mvaddstr(win_h - 1, getmaxx(p->pane.window) - 1, "");
-	doupdate();
+	mvwaddstr(p->pane.window, win_h - 1, getmaxx(p->pane.window) - 1, "");
 
 	return true;
+}
+
+static void HandleKeypress(void *_p, int c)
+{
+	struct pager *p = _p;
+	int i;
+	int win_h = getmaxy(p->pane.window);
+
+	switch (c) {
+	case 'q':
+	case 'Q':
+	case 27:
+		UI_ExitMainLoop();
+		break;
+	case KEY_UP:
+		if (p->window_offset > 0) {
+			--p->window_offset;
+		}
+		break;
+	case KEY_DOWN:
+		if (p->window_offset + win_h < p->cfg->num_lines) {
+			++p->window_offset;
+		}
+		break;
+	case KEY_PPAGE:
+		for (i = 0; i < win_h; i++) {
+			HandleKeypress(p, KEY_UP);
+		}
+		break;
+	case KEY_NPAGE:
+		for (i = 0; i < win_h; i++) {
+			HandleKeypress(p, KEY_DOWN);
+		}
+		break;
+	case KEY_HOME:
+		p->window_offset = 0;
+		break;
+	case KEY_END:
+		p->window_offset = p->cfg->num_lines < win_h ? 0 :
+		                   p->cfg->num_lines - win_h;
+		break;
+	case KEY_RESIZE:
+		refresh();
+		break;
+	}
 }
 
 void P_InitPager(struct pager *p, struct pager_config *cfg)
@@ -74,6 +117,7 @@ void P_InitPager(struct pager *p, struct pager_config *cfg)
 	memset(p, 0, sizeof(struct pager));
 
 	p->pane.window = newwin(LINES - 2, COLS, 1, 0);
+	p->pane.keypress = HandleKeypress;
 	p->pane.draw = DrawPager;
 	p->line_win = derwin(p->pane.window, 1, COLS, 0, 0);
 	p->cfg = cfg;
@@ -85,65 +129,15 @@ void P_FreePager(struct pager *p)
 	delwin(p->pane.window);
 }
 
-static void HandleKeypress(struct pager *p, int c)
-{
-	int i;
-
-	switch (c) {
-	case 'q':
-	case 'Q':
-	case 27:
-		p->done = true;
-		break;
-	case KEY_UP:
-		if (p->window_offset > 0) {
-			--p->window_offset;
-		}
-		break;
-	case KEY_DOWN:
-		if (p->window_offset + LINES - 1 < p->cfg->num_lines) {
-			++p->window_offset;
-		}
-		break;
-	case KEY_PPAGE:
-		for (i = 0; i < LINES - 1; i++) {
-			HandleKeypress(p, KEY_UP);
-		}
-		break;
-	case KEY_NPAGE:
-		for (i = 0; i < LINES - 1; i++) {
-			HandleKeypress(p, KEY_DOWN);
-		}
-		break;
-	case KEY_HOME:
-		p->window_offset = 0;
-		break;
-	case KEY_END:
-		p->window_offset = p->cfg->num_lines < LINES - 1 ? 0 :
-		                   p->cfg->num_lines - LINES + 1;
-		break;
-	case KEY_RESIZE:
-		refresh();
-		break;
-	}
-}
-
-void P_BlockOnInput(struct pager *p)
-{
-	int c = getch();
-	HandleKeypress(p, c);
-}
-
 void P_RunPager(struct pager_config *cfg)
 {
 	struct pane *old_panes = UI_SavePanes();
 	struct pager p;
 
 	P_InitPager(&p, cfg);
-	while (!p.done) {
-		DrawPager(&p);
-		P_BlockOnInput(&p);
-	}
+	UI_PaneShow(&p);
+	UI_RunMainLoop();
+	UI_PaneHide(&p);
 	P_FreePager(&p);
 	UI_RestorePanes(old_panes);
 }
