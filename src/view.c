@@ -25,6 +25,8 @@
 #include "conv/export.h"
 #include "conv/import.h"
 #include "lump_info.h"
+#include "pager/pager.h"
+#include "pager/plaintext.h"
 #include "sixel_display.h"
 #include "stringlib.h"
 #include "termfuncs.h"
@@ -355,23 +357,30 @@ static const char *text_file_extensions[] = {
 	".deh", ".bex", ".hhe", ".seh",  // Dehacked and variants
 };
 
+static bool IsTextFile(const char *filename)
+{
+	int i;
+	const char *extn;
+
+	for (i = 0; i < arrlen(text_file_extensions); i++) {
+		extn = text_file_extensions[i];
+		if (StringHasSuffix(filename, extn)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 static char *GetOpenCommand(const char *filename)
 {
 	char *editor = getenv("EDITOR");
-	const char *extn;
 
 	// For files with text file extensions, always respect the standard
 	// Unix EDITOR environment variable. This should always work even if
 	// xdg-utils isn't installed.
-	if (editor != NULL) {
-		int i;
-
-		for (i = 0; i < arrlen(text_file_extensions); i++) {
-			extn = text_file_extensions[i];
-			if (StringHasSuffix(filename, extn)) {
-				return editor;
-			}
-		}
+	if (editor != NULL && IsTextFile(filename)) {
+		return editor;
 	}
 
 #ifdef __APPLE__
@@ -409,10 +418,21 @@ void OpenDirent(struct directory *dir, struct directory_entry *ent)
 	}
 
 try_again:
+	displayed = false;
+
+	if (IsTextFile(argv[1])) {
+		FILE *in;
+		VFILE *vin;
+		in = fopen(argv[1], "r");
+		assert(in != NULL);
+		vin = vfwrapfile(in);
+		assert(vin != NULL);
+		displayed = P_RunPlaintextPager(ent->name, vin, true)
+		             != PLAINTEXT_PAGER_WANT_EDIT;
+	}
+
 	// Temporarily suspend curses until the subprogram returns.
 	TF_SuspendCursesMode();
-
-	displayed = false;
 
 	if (StringHasSuffix(argv[1], ".png")) {
 		SIXEL_ClearAndPrint("Contents of '%s':\n", ent->name);
