@@ -11,6 +11,9 @@
 struct plaintext_pager_config {
 	struct pager_config pc;
 	char **lines;
+	uint8_t *data;
+	size_t data_len;
+	void *hexdump_config;
 };
 
 bool P_InitPlaintextConfig(const char *title,

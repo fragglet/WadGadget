@@ -14,7 +14,33 @@
 #include "common.h"
 #include "fs/vfile.h"
 #include "pager/pager.h"
+#include "pager/hexdump.h"
 #include "pager/plaintext.h"
+#include "ui/actions_bar.h"
+
+static void SwitchToHexdump(void)
+{
+	struct plaintext_pager_config *cfg = current_pager->cfg->user_data;
+	struct hexdump_pager_config *hdc = cfg->hexdump_config;
+
+	if (hdc == NULL) {
+		VFILE *in = vfopenmem(cfg->data, cfg->data_len);
+		hdc = checked_calloc(1, sizeof(struct hexdump_pager_config));
+		assert(P_InitHexdumpConfig(cfg->pc.title, hdc, in));
+		cfg->hexdump_config = hdc;
+	}
+
+	P_SwitchConfig(&hdc->pc);
+}
+
+const struct action switch_hexdump_action = {
+	KEY_F(4), 0, "Hexdump", "View Hexdump", SwitchToHexdump,
+};
+
+static const struct action *plaintext_pager_actions[] = {
+	&switch_hexdump_action,
+	NULL,
+};
 
 static void DrawPlaintextLine(WINDOW *win, unsigned int line, void *user_data)
 {
@@ -37,23 +63,24 @@ void P_FreePlaintextConfig(struct plaintext_pager_config *cfg)
 bool P_InitPlaintextConfig(const char *title,
                            struct plaintext_pager_config *cfg, VFILE *input)
 {
-	char *data, *p;
-	size_t data_len, remaining;
+	char *p;
+	size_t remaining;
 	unsigned int lineno;
 
 	cfg->pc.title = title;
 	cfg->pc.draw_line = DrawPlaintextLine;
 	cfg->pc.user_data = cfg;
-	cfg->pc.actions = NULL;
+	cfg->pc.actions = plaintext_pager_actions;
+	cfg->hexdump_config = NULL;
 
-	data = vfreadall(input, &data_len);
+	cfg->data = vfreadall(input, &cfg->data_len);
 	vfclose(input);
-	if (data == NULL) {
+	if (cfg->data == NULL) {
 		return false;
 	}
 
-	p = data;
-	remaining = data_len;
+	p = (char *) cfg->data;
+	remaining = cfg->data_len;
 	cfg->pc.num_lines = 1;
 	for (;;) {
 		char *newline = memchr(p, '\n', remaining);
@@ -66,8 +93,8 @@ bool P_InitPlaintextConfig(const char *title,
 	}
 
 	cfg->lines = checked_calloc(cfg->pc.num_lines, sizeof(char *));
-	p = data;
-	remaining = data_len;
+	p = (char *) cfg->data;
+	remaining = cfg->data_len;
 	lineno = 0;
 
 	while (lineno < cfg->pc.num_lines) {
@@ -111,6 +138,9 @@ bool P_RunPlaintextPager(const char *title, VFILE *input)
 	}
 
 	P_RunPager(&cfg.pc);
+	if (cfg.hexdump_config != NULL) {
+		P_FreeHexdumpConfig(cfg.hexdump_config);
+	}
 	P_FreePlaintextConfig(&cfg);
 
 	return true;
