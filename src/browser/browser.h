@@ -13,6 +13,7 @@ void B_ReplacePane(struct directory_pane *old_pane,
                    struct directory_pane *new_pane);
 void B_Shutdown(void);
 void B_Init(const char *path1, const char *path2);
+bool B_CheckPathPaste(void);
 
 extern struct directory_pane *browser_panes[2];
 extern unsigned int current_pane;

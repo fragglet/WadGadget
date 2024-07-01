@@ -843,6 +843,10 @@ static void PerformMark(void)
 	int selected = UI_DirectoryPaneSelected(active_pane);
 	struct directory_entry *ent;
 
+	if (B_CheckPathPaste()) {
+		return;
+	}
+
 	if (active_pane->pane.selected <= 0) {
 		return;
 	}

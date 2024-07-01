@@ -206,11 +206,57 @@ static bool DrawActionsBar(void *pane)
 	return true;
 }
 
+// This function is a hack to support the Ins and Del keys, plus some
+// other weirder ones, if by some miracle they're ever encountered.
+static int TranslateSpecialKey(int key)
+{
+	switch (key) {
+	case KEY_HELP:    return KEY_F(1);        // help
+	case KEY_MOVE:    return KEY_F(2);        // move
+	case KEY_SMOVE:   return SHIFT_KEY_F(2);  // shift-move
+	case KEY_COPY:    return KEY_F(5);        // copy
+	case KEY_SCOPY:   return SHIFT_KEY_F(5);  // shift-copy
+	case KEY_IC:      return KEY_F(7);        // insert
+	case KEY_DC:      return KEY_F(8);        // delete
+	case KEY_SDC:     return SHIFT_KEY_F(8);  // shift-delete
+	case KEY_CREATE:  return KEY_F(9);        // create
+	case KEY_EXIT:    return 27;              // exit
+	case KEY_MARK:    return ' ';             // mark
+	case KEY_NEXT:    return CTRL_('N');      // next
+	case KEY_UNDO:    return CTRL_('Z');      // undo
+	case KEY_REDO:    return CTRL_('Y');      // redo
+	case KEY_REFRESH: return CTRL_('R');      // refresh
+	case KEY_BEG:     return KEY_HOME;        // begin
+	default:          return key;
+	}
+}
+
+static void HandleKeypress(void *_p, int key)
+{
+	struct actions_bar *p = _p;
+	int i;
+
+	if (p->actions == NULL) {
+		return;
+	}
+
+	key = TranslateSpecialKey(key);
+
+	for (i = 0; p->actions[i] != NULL; i++) {
+		if (p->actions[i]->callback != NULL
+		 && (key == p->actions[i]->key
+		  || key == CTRL_(p->actions[i]->ctrl_key))) {
+			p->actions[i]->callback();
+			return;
+		}
+	}
+}
+
 struct pane *UI_ActionsBarInit(void)
 {
 	actions_bar_singleton.pane.window = newwin(1, COLS, LINES - 1, 0);
 	actions_bar_singleton.pane.draw = DrawActionsBar;
-	actions_bar_singleton.pane.keypress = NULL;
+	actions_bar_singleton.pane.keypress = HandleKeypress;
 	actions_bar_singleton.actions = NULL;
 	actions_bar_singleton.function_keys = true;
 

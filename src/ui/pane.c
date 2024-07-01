@@ -134,6 +134,8 @@ static void InputKeyPress(int key)
 {
 	struct pane *p;
 
+	UI_PaneKeypress(actions_bar, key);
+
 	// Keypress goes to the top pane that has a keypress handler.
 	for (p = GetPrevPane(NULL); p != NULL; p = GetPrevPane(p)) {
 		if (p->keypress != NULL) {

@@ -19,6 +19,7 @@
 #include "common.h"
 #include "ui/dialog.h"
 #include "ui/pane.h"
+#include "ui/actions_bar.h"
 #include "ui/ui.h"
 
 struct nonblocking_window {
@@ -186,6 +187,7 @@ static void InitDialogBox(struct confirm_dialog_box *dialog,
 int UI_ConfirmDialogBox(const char *title, const char *yes,
                         const char *no, const char *msg, ...)
 {
+	const struct action **saved_actions = UI_ActionsBarSetActions(NULL);
 	struct confirm_dialog_box dialog;
 	va_list args;
 
@@ -207,11 +209,14 @@ int UI_ConfirmDialogBox(const char *title, const char *yes,
 	UI_RunMainLoop();
 	UI_PaneHide(&dialog);
 
+	UI_ActionsBarSetActions(saved_actions);
+
 	return dialog.result;
 }
 
 void UI_MessageBox(const char *msg, ...)
 {
+	const struct action **saved_actions = UI_ActionsBarSetActions(NULL);
 	struct confirm_dialog_box dialog;
 	va_list args;
 
@@ -227,6 +232,8 @@ void UI_MessageBox(const char *msg, ...)
 	UI_PaneShow(&dialog);
 	UI_RunMainLoop();
 	UI_PaneHide(&dialog);
+
+	UI_ActionsBarSetActions(saved_actions);
 }
 
 struct text_input_dialog_box {
@@ -289,6 +296,7 @@ static void TextInputDialogKeypress(void *dialog, int key)
 char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
                             char *msg, ...)
 {
+	const struct action **saved_actions = UI_ActionsBarSetActions(NULL);
 	struct text_input_dialog_box dialog;
 	int w, h;
 	va_list args;
@@ -312,6 +320,8 @@ char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
 	UI_PaneShow(&dialog);
 	UI_RunMainLoop();
 	UI_PaneHide(&dialog);
+
+	UI_ActionsBarSetActions(saved_actions);
 
 	if (!dialog.result) {
 		free(dialog.input.input);
