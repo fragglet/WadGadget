@@ -21,14 +21,14 @@
 #include "termfuncs.h"
 #include "textures/textures.h"
 #include "ui/actions_bar.h"
-#include "ui/actions_pane.h"
 #include "ui/colors.h"
 #include "ui/dialog.h"
-#include "ui/directory_pane.h"
 #include "ui/title_bar.h"
 #include "ui/ui.h"
 #include "view.h"
 
+#include "browser/actions_pane.h"
+#include "browser/directory_pane.h"
 #include "browser/browser.h"
 
 #define INFO_PANE_WIDTH 29

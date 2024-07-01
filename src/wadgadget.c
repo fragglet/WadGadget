@@ -14,7 +14,7 @@
 #include <string.h>
 
 #include "common.h"
-#include "ui/directory_pane.h"
+#include "browser/directory_pane.h"
 #include "browser/browser.h"
 #include "sixel_display.h"
 #include "termfuncs.h"

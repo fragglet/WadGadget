@@ -12,7 +12,6 @@
 #include <limits.h>
 
 #include "ui/actions_bar.h"
-#include "ui/actions_pane.h"
 #include "ui/colors.h"
 #include "common.h"
 #include "stringlib.h"

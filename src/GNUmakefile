@@ -22,7 +22,9 @@ LDFLAGS := $(shell pkg-config --libs $(REQUIRED_PKGS)) \
 HELP_FILES = help/help.txt
 
 OBJS =                      \
+    browser/actions_pane.o  \
     browser/browser.o       \
+    browser/directory_pane.o\
     conv/audio.o            \
     conv/endoom.o           \
     conv/error.o            \
@@ -50,9 +52,7 @@ OBJS =                      \
     textures/texture_dir.o  \
     textures/textures.o     \
     ui/actions_bar.o        \
-    ui/actions_pane.o       \
     ui/dialog.o             \
-    ui/directory_pane.o     \
     ui/list_pane.o          \
     ui/pane.o               \
     ui/text_input.o         \

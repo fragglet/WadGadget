@@ -10,6 +10,8 @@
 
 #include "actions.h"
 
+#define MAX_KEY_BINDINGS 30
+
 struct pane *UI_ActionsBarInit(void);
 const struct action **UI_ActionsBarSetActions(const struct action **actions);
 void UI_ActionsBarSetFunctionKeys(bool function_keys);

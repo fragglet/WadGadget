@@ -11,7 +11,7 @@
 #ifndef ACTIONS_H
 #define ACTIONS_H
 
-#include "ui/directory_pane.h"
+#include "browser/directory_pane.h"
 
 struct action {
 	// If non-zero, key that when pressed invokes the callback.

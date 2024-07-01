@@ -15,11 +15,11 @@
 #include <assert.h>
 
 #include "ui/colors.h"
+#include "browser/directory_pane.h"
 #include "common.h"
 #include "ui/dialog.h"
 #include "stringlib.h"
 #include "ui/ui.h"
-#include "ui/directory_pane.h"
 
 static void DrawEntry(WINDOW *win, int idx, void *data)
 {
