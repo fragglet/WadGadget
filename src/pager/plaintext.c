@@ -40,6 +40,7 @@ const struct action switch_hexdump_action = {
 
 static const struct action *plaintext_pager_actions[] = {
 	&switch_hexdump_action,
+	&exit_pager_action,
 	NULL,
 };
 

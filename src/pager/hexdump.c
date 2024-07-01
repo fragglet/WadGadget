@@ -64,6 +64,7 @@ const struct action switch_ascii_action = {
 
 static const struct action *hexdump_pager_actions[] = {
 	&switch_ascii_action,
+	&exit_pager_action,
 	NULL,
 };
 

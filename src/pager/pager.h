@@ -38,3 +38,4 @@ void P_RunPager(struct pager_config *cfg);
 void P_SwitchConfig(struct pager_config *cfg);
 
 extern struct pager *current_pager;
+extern const struct action exit_pager_action;

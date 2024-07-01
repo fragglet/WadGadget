@@ -18,6 +18,10 @@
 
 struct pager *current_pager;
 
+const struct action exit_pager_action = {
+	27, 0, "Close", "Close", UI_ExitMainLoop,
+};
+
 static void UpdateSubtitle(struct pager *p)
 {
 	int range, win_h;
@@ -69,7 +73,6 @@ static void HandleKeypress(void *_p, int c)
 	switch (c) {
 	case 'q':
 	case 'Q':
-	case 27:
 		UI_ExitMainLoop();
 		break;
 	case KEY_UP:
