@@ -39,7 +39,7 @@ static bool CheckExistingTexture(struct textures *txs, const char *name)
 
 static void PerformNewTexture(void)
 {
-	int pos = UI_DirectoryPaneSelected(active_pane) + 1;
+	int pos = B_DirectoryPaneSelected(active_pane) + 1;
 	struct textures *txs = TX_TextureList(active_pane->dir);
 	struct texture t;
 	char *name;
@@ -142,9 +142,9 @@ const struct action edit_pnames_action = {
 static void PerformDuplicateTexture(void)
 {
 	struct textures *txs = TX_TextureList(active_pane->dir);
-	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
+	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
 	struct texture *t;
-	int idx = UI_DirectoryPaneSelected(active_pane);
+	int idx = B_DirectoryPaneSelected(active_pane);
 	char *name;
 
 	if (!B_CheckReadOnly(active_pane->dir)) {
@@ -243,7 +243,7 @@ static void PerformExportConfig(void)
 	VFS_Refresh(other_pane->dir);
 
 	B_SwitchToPane(other_pane);
-	UI_DirectoryPaneSelectByName(other_pane, filename);
+	B_DirectoryPaneSelectByName(other_pane, filename);
 
 cancel:
 	vfclose(formatted);
@@ -316,8 +316,8 @@ static void PerformImportConfig(void)
 	struct texture_bundle b;
 	struct texture_bundle *into = TX_DirGetBundle(other_pane->dir);
 	struct directory_entry *ent;
-	int selected = UI_DirectoryPaneSelected(active_pane);
-	int insert_pos = UI_DirectoryPaneSelected(other_pane) + 1;
+	int selected = B_DirectoryPaneSelected(active_pane);
+	int insert_pos = B_DirectoryPaneSelected(other_pane) + 1;
 	VFILE *in;
 
 	if (selected < 0) {
@@ -379,7 +379,7 @@ static void PerformNewPname(void)
 	}
 
 	if (TX_GetPnameIndex(b->pn, name) >= 0) {
-		UI_DirectoryPaneSelectByName(active_pane, name);
+		B_DirectoryPaneSelectByName(active_pane, name);
 		UI_MessageBox("'%s' is already in the list.");
 		free(name);
 		return;
@@ -393,8 +393,8 @@ static void PerformNewPname(void)
 	idx = TX_AppendPname(b->pn, name);
 	VFS_CommitChanges(active_pane->dir, "creation of pname '%s'", name);
 	VFS_Refresh(active_pane->dir);
-	UI_DirectoryPaneSelectEntry(active_pane,
-	                            &active_pane->dir->entries[idx]);
+	B_DirectoryPaneSelectEntry(active_pane,
+	                           &active_pane->dir->entries[idx]);
 	free(name);
 }
 
@@ -405,7 +405,7 @@ const struct action new_pname_action = {
 
 static void PerformCopyPnames(void)
 {
-	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
+	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
 	struct file_set copied = EMPTY_FILE_SET;
 	struct texture_bundle_merge_result merge_stats;
 	struct directory *from_dir = active_pane->dir,
@@ -444,7 +444,7 @@ static void PerformCopyPnames(void)
 
 		VFS_DescribeSet(to_dir, &copied, buf, sizeof(buf));
 		VFS_CommitChanges(to_dir, "copy of %s", buf);
-		UI_DirectoryPaneSetTagged(other_pane, &copied);
+		B_DirectoryPaneSetTagged(other_pane, &copied);
 		B_SwitchToPane(other_pane);
 	}
 
@@ -459,12 +459,12 @@ const struct action copy_pnames_action = {
 static void PerformCopyTextures(void)
 {
 	struct texture_bundle_merge_result merge_stats;
-	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
+	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
 	struct texture_bundle b;
 	struct directory *from_dir = active_pane->dir,
 	                 *to_dir = other_pane->dir;
 	struct texture_bundle *into_bundle = TX_DirGetBundle(to_dir);
-	int insert_pos = UI_DirectoryPaneSelected(other_pane) + 1;
+	int insert_pos = B_DirectoryPaneSelected(other_pane) + 1;
 	VFILE *marshaled;
 
 	if (tagged->num_entries == 0) {

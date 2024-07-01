@@ -109,7 +109,7 @@ static bool DrawActionsPane(void *pane)
 	return true;
 }
 
-void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win)
+void B_ActionsPaneInit(struct actions_pane *pane, WINDOW *win)
 {
 	pane->pane.window = win;
 	pane->pane.draw = DrawActionsPane;
@@ -118,9 +118,9 @@ void UI_ActionsPaneInit(struct actions_pane *pane, WINDOW *win)
 	memset(pane->actions, 0, sizeof(pane->actions));
 }
 
-void UI_ActionsPaneSet(struct actions_pane *pane,
-                       const struct action **actions, bool left_to_right,
-                       bool function_keys)
+void B_ActionsPaneSet(struct actions_pane *pane,
+                      const struct action **actions, bool left_to_right,
+                      bool function_keys)
 {
 	const struct action *a;
 	int i, j;

@@ -115,15 +115,15 @@ static unsigned int NumEntries(void *data)
 	return dp->dir->num_entries + 1;
 }
 
-void UI_DirectoryPaneReselect(struct directory_pane *p)
+void B_DirectoryPaneReselect(struct directory_pane *p)
 {
 	if (p->pane.selected > p->dir->num_entries) {
 		p->pane.selected = p->dir->num_entries;
 	}
 }
 
-void UI_DirectoryPaneSelectEntry(struct directory_pane *p,
-                                 struct directory_entry *ent)
+void B_DirectoryPaneSelectEntry(struct directory_pane *p,
+                                struct directory_entry *ent)
 {
 	unsigned int idx = ent - p->dir->entries;
 	if (idx >= p->dir->num_entries) {
@@ -132,20 +132,20 @@ void UI_DirectoryPaneSelectEntry(struct directory_pane *p,
 	UI_ListPaneSelect(&p->pane, idx + 1);
 }
 
-void UI_DirectoryPaneSelectByName(struct directory_pane *p, const char *name)
+void B_DirectoryPaneSelectByName(struct directory_pane *p, const char *name)
 {
 	struct directory_entry *entry = VFS_EntryByName(p->dir, name);
 	if (entry != NULL) {
-		UI_DirectoryPaneSelectEntry(p, entry);
+		B_DirectoryPaneSelectEntry(p, entry);
 	}
 }
 
-void UI_DirectoryPaneSelectBySerial(struct directory_pane *p,
-                                    uint64_t serial_no)
+void B_DirectoryPaneSelectBySerial(struct directory_pane *p,
+                                   uint64_t serial_no)
 {
 	struct directory_entry *entry = VFS_EntryBySerial(p->dir, serial_no);
 	if (entry != NULL) {
-		UI_DirectoryPaneSelectEntry(p, entry);
+		B_DirectoryPaneSelectEntry(p, entry);
 	}
 }
 
@@ -195,7 +195,7 @@ static bool SubstringSearch(struct directory_pane *dp, const char *needle,
 	return false;
 }
 
-void UI_DirectoryPaneSearch(void *p, const char *needle)
+void B_DirectoryPaneSearch(void *p, const char *needle)
 {
 	struct directory_pane *dp = p;
 
@@ -216,7 +216,7 @@ void UI_DirectoryPaneSearch(void *p, const char *needle)
 	}
 }
 
-bool UI_DirectoryPaneSearchAgain(void *p, const char *needle)
+bool B_DirectoryPaneSearchAgain(void *p, const char *needle)
 {
 	struct directory_pane *dp = p;
 	int start_index = dp->pane.selected;
@@ -230,18 +230,18 @@ bool UI_DirectoryPaneSearchAgain(void *p, const char *needle)
 	    || SubstringSearch(dp, needle, 0);
 }
 
-int UI_DirectoryPaneSelected(struct directory_pane *p)
+int B_DirectoryPaneSelected(struct directory_pane *p)
 {
 	return UI_ListPaneSelected(&p->pane) - 1;
 }
 
-struct file_set *UI_DirectoryPaneTagged(struct directory_pane *p)
+struct file_set *B_DirectoryPaneTagged(struct directory_pane *p)
 {
 	if (p->tagged.num_entries > 0) {
 		return &p->tagged;
 	} else {
 		static struct file_set result;
-		int selected = UI_DirectoryPaneSelected(p);
+		int selected = B_DirectoryPaneSelected(p);
 		if (selected >= 0) {
 			// Some devious pointer magic here.
 			result.entries = &p->dir->entries[selected].serial_no;
@@ -254,7 +254,7 @@ struct file_set *UI_DirectoryPaneTagged(struct directory_pane *p)
 	}
 }
 
-void UI_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set)
+void B_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set)
 {
 	struct directory_entry *dirent;
 	int idx = 0;
@@ -264,7 +264,7 @@ void UI_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set)
 	// Jump to first in the set.
 	dirent = VFS_IterateSet(p->dir, &p->tagged, &idx);
 	if (dirent != NULL) {
-		UI_DirectoryPaneSelectBySerial(p, dirent->serial_no);
+		B_DirectoryPaneSelectBySerial(p, dirent->serial_no);
 	}
 }
 
@@ -273,9 +273,9 @@ static const struct list_pane_funcs directory_pane_funcs = {
 	NumEntries,
 };
 
-struct directory_entry *UI_DirectoryPaneEntry(struct directory_pane *p)
+struct directory_entry *B_DirectoryPaneEntry(struct directory_pane *p)
 {
-	int selected = UI_DirectoryPaneSelected(p);
+	int selected = B_DirectoryPaneSelected(p);
 
 	if (selected < 0) {
 		return VFS_PARENT_DIRECTORY;

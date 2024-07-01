@@ -21,20 +21,20 @@ struct directory_pane {
 	struct file_set tagged;
 };
 
-struct directory_entry *UI_DirectoryPaneEntry(struct directory_pane *p);
-void UI_DirectoryPaneKeypress(void *p, int key);
-void UI_DirectoryPaneFree(struct directory_pane *p);
-void UI_DirectoryPaneSearch(void *p, const char *needle);
-bool UI_DirectoryPaneSearchAgain(void *p, const char *needle);
-void UI_DirectoryPaneReselect(struct directory_pane *p);
-void UI_DirectoryPaneSelectEntry(struct directory_pane *p,
-                                 struct directory_entry *ent);
-void UI_DirectoryPaneSelectBySerial(struct directory_pane *p,
-                                    uint64_t serial_no);
-void UI_DirectoryPaneSelectByName(struct directory_pane *p, const char *name);
-int UI_DirectoryPaneSelected(struct directory_pane *p);
-struct file_set *UI_DirectoryPaneTagged(struct directory_pane *p);
-void UI_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set);
+struct directory_entry *B_DirectoryPaneEntry(struct directory_pane *p);
+void B_DirectoryPaneKeypress(void *p, int key);
+void B_DirectoryPaneFree(struct directory_pane *p);
+void B_DirectoryPaneSearch(void *p, const char *needle);
+bool B_DirectoryPaneSearchAgain(void *p, const char *needle);
+void B_DirectoryPaneReselect(struct directory_pane *p);
+void B_DirectoryPaneSelectEntry(struct directory_pane *p,
+                                struct directory_entry *ent);
+void B_DirectoryPaneSelectBySerial(struct directory_pane *p,
+                                   uint64_t serial_no);
+void B_DirectoryPaneSelectByName(struct directory_pane *p, const char *name);
+int B_DirectoryPaneSelected(struct directory_pane *p);
+struct file_set *B_DirectoryPaneTagged(struct directory_pane *p);
+void B_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set);
 
 struct directory_pane *UI_NewDirectoryPane(
 	WINDOW *pane, struct directory *dir);

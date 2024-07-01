@@ -69,7 +69,7 @@ static void CopyToDir(bool convert)
 {
 	struct directory *from = active_pane->dir, *to = other_pane->dir;
 	struct file_set result = EMPTY_FILE_SET;
-	struct file_set *export_set = UI_DirectoryPaneTagged(active_pane);
+	struct file_set *export_set = B_DirectoryPaneTagged(active_pane);
 	char buf[32];
 
 	if (export_set->num_entries < 1) {
@@ -87,7 +87,7 @@ static void CopyToDir(bool convert)
 		return;
 	}
 
-	UI_DirectoryPaneSetTagged(other_pane, &result);
+	B_DirectoryPaneSetTagged(other_pane, &result);
 
 	// When we do an export or import, we create the new files/lumps
 	// in the destination, and then switch to the other pane where they
@@ -107,8 +107,8 @@ static void CopyToDir(bool convert)
 static void CopyToWAD(bool convert)
 {
 	struct directory *from = active_pane->dir, *to = other_pane->dir;
-	struct file_set *import_set = UI_DirectoryPaneTagged(active_pane);
-	int to_point = UI_DirectoryPaneSelected(other_pane) + 1;
+	struct file_set *import_set = B_DirectoryPaneTagged(active_pane);
+	int to_point = B_DirectoryPaneSelected(other_pane) + 1;
 	struct file_set result = EMPTY_FILE_SET;
 	char buf[32];
 
@@ -129,7 +129,7 @@ static void CopyToWAD(bool convert)
 		return;
 	}
 
-	UI_DirectoryPaneSetTagged(other_pane, &result);
+	B_DirectoryPaneSetTagged(other_pane, &result);
 	B_SwitchToPane(other_pane);
 	VFS_DescribeSet(to, &result, buf, sizeof(buf));
 	VFS_CommitChanges(to, "import of %s", buf);
@@ -225,7 +225,7 @@ static void PerformMkdir(void)
 	                      NULL);
 	mkdir(filename, 0777);
 	VFS_Refresh(active_pane->dir);
-	UI_DirectoryPaneSelectByName(active_pane, input_filename);
+	B_DirectoryPaneSelectByName(active_pane, input_filename);
 	free(input_filename);
 	free(filename);
 }
@@ -332,7 +332,7 @@ static void CreateWad(bool convert)
 	filename = CreateWadInDir(from_pane->dir, import_set, to_pane->dir,
 	                          convert);
 	if (filename != NULL) {
-		UI_DirectoryPaneSearch(to_pane, filename);
+		B_DirectoryPaneSearch(to_pane, filename);
 		free(filename);
 		B_SwitchToPane(to_pane);
 	}
@@ -518,7 +518,7 @@ static void PerformRearrange(void)
 	}
 
 	indexes = IndexesForTagged(dir, &active_pane->tagged, &cnt);
-	insert_point = UI_DirectoryPaneSelected(active_pane) + 1;
+	insert_point = B_DirectoryPaneSelected(active_pane) + 1;
 	noop = IndexesAreContiguous(indexes, cnt)
 	    && insert_point >= indexes[0]
 	    && insert_point <= indexes[cnt - 1] + 1;
@@ -533,8 +533,8 @@ static void PerformRearrange(void)
 		MoveEntries(dir, &active_pane->tagged, &insert_point);
 		VFS_CommitChanges(dir, "move of %s", descr);
 		VFS_Refresh(dir);
-		UI_DirectoryPaneSelectEntry(active_pane,
-		                            &dir->entries[insert_point]);
+		B_DirectoryPaneSelectEntry(active_pane,
+		                           &dir->entries[insert_point]);
 		UI_ShowNotice("%s moved.", descr);
 	}
 }
@@ -654,7 +654,7 @@ const struct action sort_entries_action = {
 
 static void PerformNewLump(void)
 {
-	int selected = UI_DirectoryPaneSelected(active_pane);
+	int selected = B_DirectoryPaneSelected(active_pane);
 	struct wad_file *f = VFS_WadFile(active_pane->dir);
 
 	if (!B_CheckReadOnly(active_pane->dir)) {
@@ -684,8 +684,8 @@ const struct action new_lump_action = {
 static void PerformRename(void)
 {
 	char *input_filename;
-	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
-	int selected = UI_DirectoryPaneSelected(active_pane);
+	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
+	int selected = B_DirectoryPaneSelected(active_pane);
 	char *old_name = active_pane->dir->entries[selected].name;
 	uint64_t serial_no = active_pane->dir->entries[selected].serial_no;
 
@@ -713,7 +713,7 @@ static void PerformRename(void)
 	VFS_CommitChanges(active_pane->dir, "rename");
 	VFS_Refresh(active_pane->dir);
 	free(input_filename);
-	UI_DirectoryPaneSelectBySerial(active_pane, serial_no);
+	B_DirectoryPaneSelectBySerial(active_pane, serial_no);
 }
 
 const struct action rename_action = {
@@ -724,7 +724,7 @@ const struct action rename_action = {
 static void PerformDeleteNoConfirm(void)
 {
 	struct directory *dir = active_pane->dir;
-	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
+	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
 	char buf[64];
 	int i;
 
@@ -759,7 +759,7 @@ static void PerformDeleteNoConfirm(void)
 	UI_ShowNotice("%s deleted.", buf);
 	VFS_ClearSet(&active_pane->tagged);
 	VFS_Refresh(dir);
-	UI_DirectoryPaneReselect(active_pane);
+	B_DirectoryPaneReselect(active_pane);
 }
 
 const struct action delete_no_confirm_action = {
@@ -770,7 +770,7 @@ const struct action delete_no_confirm_action = {
 static void PerformDelete(void)
 {
 	struct directory *dir = active_pane->dir;
-	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
+	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
 	char buf[64];
 
 	if (!B_CheckReadOnly(active_pane->dir)) {
@@ -816,7 +816,7 @@ static void PerformMarkPattern(void)
 	if (first_match == NULL) {
 		UI_ShowNotice("No matches found.");
 	} else {
-		UI_DirectoryPaneSelectEntry(active_pane, first_match);
+		B_DirectoryPaneSelectEntry(active_pane, first_match);
 		UI_ShowNotice("%d marked.",
 		              active_pane->tagged.num_entries - old_cnt);
 	}
@@ -840,7 +840,7 @@ const struct action unmark_all_action = {
 
 static void PerformMark(void)
 {
-	int selected = UI_DirectoryPaneSelected(active_pane);
+	int selected = B_DirectoryPaneSelected(active_pane);
 	struct directory_entry *ent;
 
 	if (B_CheckPathPaste()) {
@@ -941,13 +941,13 @@ static void NavigateNew(struct directory_pane *curr_pane,
 	struct directory_pane *new_pane;
 	struct directory_entry *ent;
 
-	ent = UI_DirectoryPaneEntry(curr_pane);
+	ent = B_DirectoryPaneEntry(curr_pane);
 	new_pane = UI_NewDirectoryPane(NULL, new_dir);
 
 	// Select subfolder we just navigated out of?
 	if (ent == VFS_PARENT_DIRECTORY) {
 		const char *old_path = curr_pane->dir->path;
-		UI_DirectoryPaneSearch(new_pane, PathBaseName(old_path));
+		B_DirectoryPaneSearch(new_pane, PathBaseName(old_path));
 	}
 
 	if (new_pane != NULL) {
@@ -963,7 +963,7 @@ static void PerformView(void)
 {
 	struct directory_entry *ent;
 
-	ent = UI_DirectoryPaneEntry(active_pane);
+	ent = B_DirectoryPaneEntry(active_pane);
 
 	// Change directory?
 	if (ent->type == FILE_TYPE_DIR || ent->type == FILE_TYPE_WAD) {
@@ -1025,12 +1025,12 @@ static void PerformCompact(void)
 	uint32_t junk_bytes;
 	int selected;
 
-	selected = UI_DirectoryPaneSelected(active_pane);
+	selected = B_DirectoryPaneSelected(active_pane);
 	if (selected < 0) {
 		return;
 	}
 
-	ent = UI_DirectoryPaneEntry(active_pane);
+	ent = B_DirectoryPaneEntry(active_pane);
 
 	// Change directory?
 	if (ent->type != FILE_TYPE_WAD) {
@@ -1097,7 +1097,7 @@ const struct action edit_action = {
 
 static void PerformHexdump(void)
 {
-	int selected = UI_DirectoryPaneSelected(active_pane);
+	int selected = B_DirectoryPaneSelected(active_pane);
 	struct directory_entry *ent;
 	VFILE *input;
 
@@ -1149,13 +1149,13 @@ static void PerformUndo(void)
 
 	// Move the cursor to the first lump identified as having changed:
 	if (first_change >= 0) {
-		UI_DirectoryPaneSelectEntry(active_pane,
-		                            &dir->entries[first_change]);
+		B_DirectoryPaneSelectEntry(active_pane,
+		                           &dir->entries[first_change]);
 	}
 
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
-	UI_DirectoryPaneReselect(active_pane);
+	B_DirectoryPaneReselect(active_pane);
 
 	UI_ShowNotice("Undid %s.", msg);
 }
@@ -1184,13 +1184,13 @@ static void PerformRedo(void)
 
 	// Move the cursor to the first lump identified as having changed:
 	if (first_change >= 0) {
-		UI_DirectoryPaneSelectEntry(active_pane,
-		                            &dir->entries[first_change]);
+		B_DirectoryPaneSelectEntry(active_pane,
+		                           &dir->entries[first_change]);
 	}
 
 	// Undo screws up serial numbers.
 	VFS_ClearSet(&active_pane->tagged);
-	UI_DirectoryPaneReselect(active_pane);
+	B_DirectoryPaneReselect(active_pane);
 
 	UI_ShowNotice("Redid %s.", VFS_LastCommitMessage(dir));
 }

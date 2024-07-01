@@ -139,8 +139,8 @@ static void ToggleCmdrMode(void)
 	if (!cmdr_mode) {
 		use_function_keys = !use_function_keys;
 	}
-	UI_ActionsPaneSet(&actions_pane, actions, current_pane == 0,
-	                  use_function_keys);
+	B_ActionsPaneSet(&actions_pane, actions, current_pane == 0,
+	                 use_function_keys);
 	UI_ActionsBarSetActions(actions);
 	UI_ActionsBarEnable(true);
 	SetWindowSizes();
@@ -156,8 +156,8 @@ static void SearchAgain(void)
 	int old_selected = active_pane->pane.selected;
 	bool found;
 
-	found = UI_DirectoryPaneSearchAgain(active_pane,
-	                                    search_pane.input.input);
+	found = B_DirectoryPaneSearchAgain(active_pane,
+	                                   search_pane.input.input);
 
 	if (active_pane->pane.selected < old_selected) {
 		UI_ShowNotice("Searched to the end; returning to the start.");
@@ -371,8 +371,8 @@ void B_SwitchToPane(struct directory_pane *pane)
 	pane->pane.active = 1;
 
 	BuildActionsList();
-	UI_ActionsPaneSet(&actions_pane, actions, current_pane == 0,
-	                  use_function_keys);
+	B_ActionsPaneSet(&actions_pane, actions, current_pane == 0,
+	                 use_function_keys);
 	UI_ActionsBarSetActions(actions);
 	SetWindowSizes();
 }
@@ -387,7 +387,7 @@ void B_ReplacePane(struct directory_pane *old_pane,
 
 	VFS_CloseDir(old_pane->dir);
 	UI_PaneHide(old_pane);
-	// TODO UI_DirectoryPaneFree(old_pane);
+	// TODO B_DirectoryPaneFree(old_pane);
 
 	browser_panes[pane_num] = new_pane;
 	UI_PaneShow(new_pane);
@@ -450,7 +450,7 @@ static bool DrawInfoPane(void *p)
 	struct textures *txs;
 	struct texture *t;
 	struct pane *pane = p;
-	int idx = UI_DirectoryPaneSelected(active_pane);
+	int idx = B_DirectoryPaneSelected(active_pane);
 	const struct lump_type *lt;
 	struct wad_file *wf;
 	char buf[10], buf2[64];
@@ -549,7 +549,7 @@ static void SearchPaneKeypress(void *pane, int key)
 	// Space key triggers mark, does not go to search input.
 	if (key != ' ' && UI_TextInputKeypress(&p->input, key)) {
 		if (key != KEY_BACKSPACE) {
-			UI_DirectoryPaneSearch(active_pane, p->input.input);
+			B_DirectoryPaneSearch(active_pane, p->input.input);
 		}
 	} else {
 		HandleKeypress(NULL, key);
@@ -595,7 +595,7 @@ void B_Init(const char *path1, const char *path2)
 	InitSearchPane(newwin(4, 26, 20, 27));
 	UI_PaneShow(&search_pane);
 
-	UI_ActionsPaneInit(&actions_pane, newwin(15, 26, 6, 27));
+	B_ActionsPaneInit(&actions_pane, newwin(15, 26, 6, 27));
 	UI_PaneShow(&actions_pane);
 
 	pane_windows[0] = newwin(24, 27, 1, 0);
