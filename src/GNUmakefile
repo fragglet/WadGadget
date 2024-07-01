@@ -22,6 +22,7 @@ LDFLAGS := $(shell pkg-config --libs $(REQUIRED_PKGS)) \
 HELP_FILES = help/help.txt
 
 OBJS =                      \
+    browser/browser.o       \
     conv/audio.o            \
     conv/endoom.o           \
     conv/error.o            \

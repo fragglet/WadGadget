@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 
 #include "actions.h"
+#include "browser/browser.h"
 #include "common.h"
 #include "conv/error.h"
 #include "conv/import.h"
@@ -31,10 +32,6 @@
 #include "view.h"
 
 #define WAD_JUNK_THRESHOLD_KB  500
-
-extern void SwitchToPane(struct directory_pane *pane); // in wadgadget.c
-extern void ReplacePane(struct directory_pane *old_pane,
-                        struct directory_pane *new_pane);
 
 const char *UI_ActionKeyDescription(const struct action *a, bool function_keys)
 {
@@ -129,7 +126,7 @@ static void CopyToDir(struct directory_pane *active_pane,
 	// in the destination, and then switch to the other pane where they
 	// are highlighted. The import/export functions both populate a
 	// result set that contains the serial numbers of the new files.
-	SwitchToPane(other_pane);
+	B_SwitchToPane(other_pane);
 	VFS_DescribeSet(to, &result, buf, sizeof(buf));
 	if (from->type == to->type) {
 		UI_ShowNotice("%s copied.", buf);
@@ -167,7 +164,7 @@ static void CopyToWAD(struct directory_pane *active_pane,
 	}
 
 	UI_DirectoryPaneSetTagged(other_pane, &result);
-	SwitchToPane(other_pane);
+	B_SwitchToPane(other_pane);
 	VFS_DescribeSet(to, &result, buf, sizeof(buf));
 	VFS_CommitChanges(to, "import of %s", buf);
 	if (from->type == to->type) {
@@ -378,7 +375,7 @@ static void CreateWad(struct directory_pane *active_pane,
 	if (filename != NULL) {
 		UI_DirectoryPaneSearch(to_pane, filename);
 		free(filename);
-		SwitchToPane(to_pane);
+		B_SwitchToPane(to_pane);
 	}
 }
 
@@ -1008,8 +1005,8 @@ static void NavigateNew(struct directory_pane *curr_pane,
 		// We're closing the current pane; if it is a WAD we might
 		// want to clean out any junk data we left behind.
 		CheckCompactWad(curr_pane);
-		ReplacePane(curr_pane, new_pane);
-		SwitchToPane(new_pane);
+		B_ReplacePane(curr_pane, new_pane);
+		B_SwitchToPane(new_pane);
 	}
 }
 

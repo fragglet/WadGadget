@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "actions.h"
+#include "browser/browser.h"
 #include "common.h"
 #include "conv/error.h"
 #include "stringlib.h"
@@ -22,8 +23,6 @@
 
 #include "textures/textures.h"
 #include "textures/internal.h"
-
-extern void SwitchToPane(struct directory_pane *pane); // in wadgadget.c
 
 static bool CheckExistingTexture(struct textures *txs, const char *name)
 {
@@ -245,7 +244,7 @@ static void PerformExportConfig(struct directory_pane *active_pane,
 
 	VFS_Refresh(other_pane->dir);
 
-	SwitchToPane(other_pane);
+	B_SwitchToPane(other_pane);
 	UI_DirectoryPaneSelectByName(other_pane, filename);
 
 cancel:
@@ -354,7 +353,7 @@ static void PerformImportConfig(struct directory_pane *active_pane,
 			MergePnamesResultNotice(&merge_stats);
 		}
 		VFS_Refresh(other_pane->dir);
-		SwitchToPane(other_pane);
+		B_SwitchToPane(other_pane);
 		// TODO: Highlight new/updated items
 	}
 
@@ -451,7 +450,7 @@ static void PerformCopyPnames(struct directory_pane *active_pane,
 		VFS_DescribeSet(to_dir, &copied, buf, sizeof(buf));
 		VFS_CommitChanges(to_dir, "copy of %s", buf);
 		UI_DirectoryPaneSetTagged(other_pane, &copied);
-		SwitchToPane(other_pane);
+		B_SwitchToPane(other_pane);
 	}
 
 	VFS_FreeSet(&copied);
