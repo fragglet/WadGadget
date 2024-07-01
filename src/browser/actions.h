@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef ACTIONS_H
-#define ACTIONS_H
+#ifndef BROWSER_ACTIONS_H
+#define BROWSER_ACTIONS_H
 
 #include "browser/directory_pane.h"
 #include "ui/actions_bar.h"
@@ -52,4 +52,4 @@ extern const struct action redo_action;
 
 bool B_CheckReadOnly(struct directory *dir);
 
-#endif  /* #ifdef ACTIONS_H */
+#endif  /* #ifdef BROWSER_ACTIONS_H */
