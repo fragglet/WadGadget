@@ -49,6 +49,7 @@ static bool DrawPager(void *_p)
 	UpdateSubtitle(p);
 
 	wbkgdset(p->line_win, COLOR_PAIR(PAIR_WHITE_BLACK));
+	werase(p->pane.window);
 
 	lineno = p->window_offset;
 	win_h = getmaxy(p->pane.window);
