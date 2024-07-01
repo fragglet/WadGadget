@@ -36,4 +36,4 @@ All [standard controls](common.md) are also supported.
    plain text file in that directory that contains the tagged names, one per
    line. If none are tagged, the file will contain the entire list.
  * To import such a file into the texture directory, select the file in the
-   [opposite pane](directory_view.md) and use Import config (F5).
+   [opposite pane](dir_view.md) and use Import config (F5).

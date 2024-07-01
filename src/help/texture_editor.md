@@ -40,7 +40,7 @@ All [standard controls](common.md) are also supported.
    deutex plain text format. If no textures are tagged, the entire directory is
    exported.
  * To import such a text file back into the texture directory, switch to the
-   [opposite pane](directory_view.md) and use Import config (F5).
+   [opposite pane](dir_view.md) and use Import config (F5).
  * Texture directories go hand-in-hand with PNAMES lumps. If you add textures
    into a directory that use new PNAMES, it is important that you update the
    PNAMES lump when prompted.
