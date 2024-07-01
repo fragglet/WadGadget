@@ -28,6 +28,7 @@ static void SwitchToHexdump(void)
 		hdc = checked_calloc(1, sizeof(struct hexdump_pager_config));
 		assert(P_InitHexdumpConfig(cfg->pc.title, hdc, in));
 		cfg->hexdump_config = hdc;
+		hdc->plaintext_config = cfg;
 	}
 
 	P_SwitchConfig(&hdc->pc);

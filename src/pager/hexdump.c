@@ -10,9 +10,11 @@
 
 #include <stdlib.h>
 
+#include "common.h"
 #include "fs/vfile.h"
 #include "pager/pager.h"
 #include "pager/hexdump.h"
+#include "pager/plaintext.h"
 
 static void DrawHexdumpLine(WINDOW *win, unsigned int line, void *user_data)
 {
@@ -40,13 +42,39 @@ static void DrawHexdumpLine(WINDOW *win, unsigned int line, void *user_data)
 	}
 }
 
+static void SwitchToASCII(void)
+{
+	struct hexdump_pager_config *cfg = current_pager->cfg->user_data;
+	struct plaintext_pager_config *ptc = cfg->plaintext_config;
+
+	if (ptc == NULL) {
+		VFILE *in = vfopenmem(cfg->data, cfg->data_len);
+		ptc = checked_calloc(1, sizeof(struct plaintext_pager_config));
+		assert(P_InitPlaintextConfig(cfg->pc.title, ptc, in));
+		cfg->plaintext_config = ptc;
+		ptc->hexdump_config = cfg;
+	}
+
+	P_SwitchConfig(&ptc->pc);
+}
+
+const struct action switch_ascii_action = {
+	KEY_F(4), 0, "ASCII", "View as ASCII", SwitchToASCII,
+};
+
+static const struct action *hexdump_pager_actions[] = {
+	&switch_ascii_action,
+	NULL,
+};
+
 bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
                          VFILE *input)
 {
 	cfg->pc.title = title;
 	cfg->pc.draw_line = DrawHexdumpLine;
 	cfg->pc.user_data = cfg;
-	cfg->pc.actions = NULL;
+	cfg->pc.actions = hexdump_pager_actions;
+	cfg->plaintext_config = NULL;
 
 	cfg->data = vfreadall(input, &cfg->data_len);
 	vfclose(input);
@@ -69,6 +97,9 @@ bool P_RunHexdumpPager(const char *title, VFILE *input)
 	}
 
 	P_RunPager(&cfg.pc);
+	if (cfg.plaintext_config != NULL) {
+		P_FreePlaintextConfig(cfg.plaintext_config);
+	}
 	P_FreeHexdumpConfig(&cfg);
 
 	return true;
