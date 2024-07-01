@@ -127,6 +127,7 @@ void P_RunPager(struct pager_config *cfg)
 
 	UI_SaveScreen(&ss);
 	UI_SetTitleBar(cfg->title);
+	UI_ActionsBarSetActions(cfg->actions);
 	P_InitPager(&p, cfg);
 	UI_PaneShow(&p);
 	UI_RunMainLoop();

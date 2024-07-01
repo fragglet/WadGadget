@@ -9,6 +9,7 @@
 //
 
 #include <curses.h>
+#include "ui/actions_bar.h"
 #include "ui/pane.h"
 
 typedef void (*pager_draw_line_fn)(WINDOW *win, unsigned int line,
@@ -19,6 +20,7 @@ struct pager_config {
 	pager_draw_line_fn draw_line;
 	void *user_data;
 	unsigned int num_lines;
+	const struct action **actions;
 };
 
 struct pager {

@@ -46,6 +46,7 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 	cfg->pc.title = title;
 	cfg->pc.draw_line = DrawHexdumpLine;
 	cfg->pc.user_data = cfg;
+	cfg->pc.actions = NULL;
 
 	cfg->data = vfreadall(input, &cfg->data_len);
 	vfclose(input);

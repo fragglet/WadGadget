@@ -44,6 +44,7 @@ bool P_InitPlaintextConfig(const char *title,
 	cfg->pc.title = title;
 	cfg->pc.draw_line = DrawPlaintextLine;
 	cfg->pc.user_data = cfg;
+	cfg->pc.actions = NULL;
 
 	data = vfreadall(input, &data_len);
 	vfclose(input);
