@@ -33,7 +33,7 @@
 
 #define WAD_JUNK_THRESHOLD_KB  500
 
-bool CheckReadOnly(struct directory *dir)
+bool B_CheckReadOnly(struct directory *dir)
 {
 	struct directory *orig_dir = dir;
 
@@ -144,7 +144,7 @@ static void CopyToWAD(bool convert)
 
 static void PerformCopy(bool convert)
 {
-	if (!CheckReadOnly(other_pane->dir)) {
+	if (!B_CheckReadOnly(other_pane->dir)) {
 		return;
 	}
 
@@ -212,7 +212,7 @@ static void PerformMkdir(void)
 {
 	char *input_filename, *filename;
 
-	if (!CheckReadOnly(active_pane->dir)) {
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -508,7 +508,7 @@ static void PerformRearrange(void)
 	bool noop;
 	size_t cnt;
 
-	if (!CheckReadOnly(active_pane->dir)) {
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -595,7 +595,7 @@ static void PerformSortEntries(void)
 	int i;
 	size_t num_tagged = active_pane->tagged.num_entries;
 
-	if (!CheckReadOnly(active_pane->dir)) {
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -657,7 +657,7 @@ static void PerformNewLump(void)
 	int selected = UI_DirectoryPaneSelected(active_pane);
 	struct wad_file *f = VFS_WadFile(active_pane->dir);
 
-	if (!CheckReadOnly(active_pane->dir)) {
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -689,7 +689,7 @@ static void PerformRename(void)
 	char *old_name = active_pane->dir->entries[selected].name;
 	uint64_t serial_no = active_pane->dir->entries[selected].serial_no;
 
-	if (!CheckReadOnly(active_pane->dir)) {
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -728,7 +728,7 @@ static void PerformDeleteNoConfirm(void)
 	char buf[64];
 	int i;
 
-	if (!CheckReadOnly(active_pane->dir)) {
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -773,7 +773,7 @@ static void PerformDelete(void)
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
 	char buf[64];
 
-	if (!CheckReadOnly(active_pane->dir)) {
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -1051,7 +1051,7 @@ static void PerformCompact(void)
 	assert(wf != NULL);
 
 	if (W_IsReadOnly(wf)) {
-		CheckReadOnly(wad_dir);
+		B_CheckReadOnly(wad_dir);
 		goto fail;
 	}
 
@@ -1066,7 +1066,7 @@ static void PerformCompact(void)
 	                         "be undone.", ent->name, junk_bytes)) {
 		goto fail;
 	}
-	if (!CheckReadOnly(wad_dir)) {
+	if (!B_CheckReadOnly(wad_dir)) {
 		goto fail;
 	}
 	if (!W_CompactWAD(wf)) {
@@ -1137,7 +1137,7 @@ static void PerformUndo(void)
 		return;
 	}
 
-	if (!CheckReadOnly(dir)) {
+	if (!B_CheckReadOnly(dir)) {
 		// This shouldn't actually be possible.
 		return;
 	}
@@ -1175,7 +1175,7 @@ static void PerformRedo(void)
 		return;
 	}
 
-	if (!CheckReadOnly(dir)) {
+	if (!B_CheckReadOnly(dir)) {
 		return;
 	}
 

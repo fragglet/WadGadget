@@ -312,7 +312,7 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 	// At this point the user wants to update the WAD, and the WAD file
 	// is not read-only. But we might still need to do the IWAD change
 	// confirmation first.
-	if (!CheckReadOnly(ctx->from)) {
+	if (!B_CheckReadOnly(ctx->from)) {
 		return true;
 	}
 

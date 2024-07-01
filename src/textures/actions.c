@@ -44,7 +44,7 @@ static void PerformNewTexture(void)
 	struct texture t;
 	char *name;
 
-	if (!CheckReadOnly(active_pane->dir)) {
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -147,7 +147,7 @@ static void PerformDuplicateTexture(void)
 	int idx = UI_DirectoryPaneSelected(active_pane);
 	char *name;
 
-	if (!CheckReadOnly(active_pane->dir)) {
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -324,7 +324,7 @@ static void PerformImportConfig(void)
 		return;
 	}
 
-	if (!CheckReadOnly(other_pane->dir)) {
+	if (!B_CheckReadOnly(other_pane->dir)) {
 		return;
 	}
 
@@ -368,7 +368,7 @@ static void PerformNewPname(void)
 	int idx;
 	char *name;
 
-	if (!CheckReadOnly(active_pane->dir)) {
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -419,7 +419,7 @@ static void PerformCopyPnames(void)
 		return;
 	}
 
-	if (!CheckReadOnly(to_dir)) {
+	if (!B_CheckReadOnly(to_dir)) {
 		return;
 	}
 
@@ -472,7 +472,7 @@ static void PerformCopyTextures(void)
 		return;
 	}
 
-	if (!CheckReadOnly(to_dir)) {
+	if (!B_CheckReadOnly(to_dir)) {
 		return;
 	}
 

@@ -50,6 +50,6 @@ extern const struct action compact_action;
 extern const struct action undo_action;
 extern const struct action redo_action;
 
-bool CheckReadOnly(struct directory *dir);
+bool B_CheckReadOnly(struct directory *dir);
 
 #endif  /* #ifdef ACTIONS_H */
