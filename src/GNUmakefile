@@ -22,6 +22,7 @@ LDFLAGS := $(shell pkg-config --libs $(REQUIRED_PKGS)) \
 HELP_FILES = help/help.txt
 
 OBJS =                      \
+    browser/actions.o       \
     browser/actions_pane.o  \
     browser/browser.o       \
     browser/directory_pane.o\
@@ -58,7 +59,6 @@ OBJS =                      \
     ui/text_input.o         \
     ui/title_bar.o          \
     ui/ui.o                 \
-    actions.o               \
     help_text.o             \
     lump_info.o             \
     sixel_display.o         \

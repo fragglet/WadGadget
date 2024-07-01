@@ -8,7 +8,6 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include "actions.h"
 #include "ui/actions_bar.h"
 #include "ui/pane.h"
 

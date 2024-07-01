@@ -17,7 +17,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
-#include "actions.h"
+#include "browser/actions.h"
 #include "common.h"
 #include "ui/dialog.h"
 #include "conv/endoom.h"

@@ -28,6 +28,7 @@
 #include "view.h"
 
 #include "browser/actions_pane.h"
+#include "browser/actions.h"
 #include "browser/directory_pane.h"
 #include "browser/browser.h"
 

@@ -11,8 +11,6 @@
 #ifndef UI_ACTIONS_BAR_H
 #define UI_ACTIONS_BAR_H
 
-#include "actions.h"
-
 #define MAX_KEY_BINDINGS 30
 
 struct action {
@@ -33,5 +31,7 @@ struct pane *UI_ActionsBarInit(void);
 const struct action **UI_ActionsBarSetActions(const struct action **actions);
 void UI_ActionsBarSetFunctionKeys(bool function_keys);
 bool UI_ActionsBarEnable(bool enabled);
+
+const char *UI_ActionKeyDescription(const struct action *a, bool function_keys);
 
 #endif  /* #ifndef UI_ACTIONS_BAR_H */
