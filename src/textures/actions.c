@@ -13,6 +13,7 @@
 #include <stdbool.h>
 
 #include "ui/actions_bar.h"
+#include "browser/actions.h"
 #include "browser/directory_pane.h"
 #include "browser/browser.h"
 #include "common.h"
