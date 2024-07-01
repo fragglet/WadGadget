@@ -42,7 +42,7 @@ static void UpdateSubtitle(struct pager *p)
 static bool DrawPager(void *_p)
 {
 	struct pager *p = _p;
-	int y, lineno, win_h;
+	int y, curs_y, lineno, win_h;
 
 	assert(wresize(p->pane.window, LINES - 2, COLS) == OK);
 	assert(wresize(p->line_win, 1, COLS) == OK);
@@ -61,7 +61,13 @@ static bool DrawPager(void *_p)
 		p->cfg->draw_line(p->line_win, lineno, p->cfg->user_data);
 	}
 
-	mvwaddstr(p->pane.window, win_h - 1, getmaxx(p->pane.window) - 1, "");
+	if (p->cfg->num_lines > win_h) {
+		curs_y = (p->window_offset * (win_h - 1))
+		       / (p->cfg->num_lines - win_h);
+	} else {
+		curs_y = win_h - 1;
+	}
+	mvwaddstr(p->pane.window, curs_y, getmaxx(p->pane.window) - 1, "");
 
 	return true;
 }
