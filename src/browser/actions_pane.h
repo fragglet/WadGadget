@@ -11,7 +11,6 @@
 #include "actions.h"
 #include "ui/actions_bar.h"
 #include "ui/pane.h"
-#include "fs/vfs.h"
 
 struct actions_pane {
 	struct pane pane;
