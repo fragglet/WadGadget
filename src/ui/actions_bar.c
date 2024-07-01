@@ -147,7 +147,7 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 		i++;
 	}
 
-	return num_shortcuts > 0 ? spacing / num_shortcuts : 1;
+	return min(num_shortcuts > 0 ? spacing / num_shortcuts : 1, 3);
 }
 
 static void RecalculateNames(struct actions_bar *p, int columns)
