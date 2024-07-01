@@ -28,14 +28,15 @@ static void UpdateSubtitle(struct pager *p)
 
 	win_h = getmaxy(p->pane.window);
 	range = p->cfg->num_lines > win_h ?
-	        p->cfg->num_lines - win_h + 1: 0;
+	        p->cfg->num_lines - win_h : 0;
 	p->window_offset = min(p->window_offset, range);
 	if (range > 0) {
 		snprintf(p->subtitle, sizeof(p->subtitle), "%d%%",
 		         min(100, p->window_offset * 100 / range));
+		UI_SetSubtitle(p->subtitle);
+	} else {
+		UI_SetSubtitle(NULL);
 	}
-
-	UI_SetSubtitle(p->subtitle);
 }
 
 static bool DrawPager(void *_p)
