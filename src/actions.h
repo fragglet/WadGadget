@@ -24,8 +24,7 @@ struct action {
 	// Long name shown on the actions pane in Normal Mode , or in
 	// Commander Mode if there is space.
 	char *description;
-	void (*callback)(struct directory_pane *active,
-	                 struct directory_pane *other);
+	void (*callback)(void);
 };
 
 extern const struct action copy_action;

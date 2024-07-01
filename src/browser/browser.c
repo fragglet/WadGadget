@@ -43,9 +43,10 @@ static struct actions_pane actions_pane;
 static struct pane info_pane;
 static struct search_pane search_pane;
 static WINDOW *pane_windows[2];
-static struct directory_pane *panes[2];
 static bool cmdr_mode = false, use_function_keys = true;
-static unsigned int current_pane = 0;
+
+struct directory_pane *browser_panes[2];
+unsigned int current_pane = 0;
 
 static void SetNwtWindowSizes(int columns, int lines)
 {
@@ -121,8 +122,7 @@ static void SetWindowSizes(void)
 	UI_RaisePaneToTop(&search_pane);
 }
 
-static void PerformSwitchPane(struct directory_pane *a,
-                              struct directory_pane *other_pane)
+static void PerformSwitchPane(void)
 {
 	B_SwitchToPane(other_pane);
 }
@@ -132,8 +132,7 @@ static const struct action other_pane_action = {
 	PerformSwitchPane,
 };
 
-static void ToggleCmdrMode(struct directory_pane *a,
-                           struct directory_pane *b)
+static void ToggleCmdrMode(void)
 {
 	cmdr_mode = !cmdr_mode;
 	if (!cmdr_mode) {
@@ -151,8 +150,7 @@ static const struct action cmdr_mode_action = {
 	ToggleCmdrMode,
 };
 
-static void SearchAgain(struct directory_pane *active_pane,
-                        struct directory_pane *b)
+static void SearchAgain(void)
 {
 	int old_selected = active_pane->pane.selected;
 	bool found;
@@ -176,14 +174,13 @@ static const struct action search_again_action = {
 	SearchAgain,
 };
 
-static void SwapPanes(struct directory_pane *active_pane,
-                      struct directory_pane *b)
+static void SwapPanes(void)
 {
-	struct directory_pane *tmp = panes[0];
+	struct directory_pane *tmp = browser_panes[0];
 	WINDOW *wintmp = pane_windows[0];
 
-	panes[0] = panes[1];
-	panes[1] = tmp;
+	browser_panes[0] = browser_panes[1];
+	browser_panes[1] = tmp;
 	pane_windows[0] = pane_windows[1];
 	pane_windows[1] = wintmp;
 
@@ -341,8 +338,8 @@ static void AddActionList(const struct action **list, int *idx)
 
 static void BuildActionsList(void)
 {
-	int active = panes[current_pane]->dir->type;
-	int other = panes[!current_pane]->dir->type;
+	int active = active_pane->dir->type;
+	int other = other_pane->dir->type;
 	int idx = 0;
 
 	assert(active < NUM_DIR_FILE_TYPES);
@@ -358,8 +355,8 @@ static void BuildActionsList(void)
 
 static int PaneNum(struct directory_pane *p)
 {
-	unsigned int result = p == panes[0] ? 0 : 1;
-	assert(panes[result] == p);
+	unsigned int result = p == browser_panes[0] ? 0 : 1;
+	assert(browser_panes[result] == p);
 	return result;
 }
 
@@ -367,7 +364,7 @@ void B_SwitchToPane(struct directory_pane *pane)
 {
 	unsigned int pane_num = PaneNum(pane);
 
-	panes[current_pane]->pane.active = 0;
+	active_pane->pane.active = 0;
 	current_pane = pane_num;
 	UI_RaisePaneToTop(pane);
 	pane->pane.active = 1;
@@ -391,7 +388,7 @@ void B_ReplacePane(struct directory_pane *old_pane,
 	UI_PaneHide(old_pane);
 	// TODO UI_DirectoryPaneFree(old_pane);
 
-	panes[pane_num] = new_pane;
+	browser_panes[pane_num] = new_pane;
 	UI_PaneShow(new_pane);
 
 	if (pane_num == current_pane) {
@@ -420,7 +417,7 @@ static bool CheckPathPaste(void)
 	}
 
 	new_pane = UI_NewDirectoryPane(NULL, dir);
-	B_ReplacePane(panes[current_pane], new_pane);
+	B_ReplacePane(active_pane, new_pane);
 
 	UI_TextInputClear(&search_pane.input);
 
@@ -466,24 +463,23 @@ static void HandleKeypress(void *pane, int key)
 		if (actions[i]->callback != NULL
 		 && (key == actions[i]->key
 		  || key == CTRL_(actions[i]->ctrl_key))) {
-			actions[i]->callback(panes[current_pane],
-			                     panes[!current_pane]);
+			actions[i]->callback();
 			return;
 		}
 	}
 
 	switch (key) {
 	case KEY_LEFT:
-		B_SwitchToPane(panes[0]);
+		B_SwitchToPane(browser_panes[0]);
 		break;
 	case KEY_RIGHT:
-		B_SwitchToPane(panes[1]);
+		B_SwitchToPane(browser_panes[1]);
 		break;
 	case KEY_RESIZE:
 		SetWindowSizes();
 		break;
 	default:
-		UI_PaneKeypress(panes[current_pane], key);
+		UI_PaneKeypress(active_pane, key);
 		break;
 	}
 }
@@ -495,7 +491,7 @@ static bool DrawInfoPane(void *p)
 	struct textures *txs;
 	struct texture *t;
 	struct pane *pane = p;
-	int idx = UI_DirectoryPaneSelected(panes[current_pane]);
+	int idx = UI_DirectoryPaneSelected(active_pane);
 	const struct lump_type *lt;
 	struct wad_file *wf;
 	char buf[10], buf2[64];
@@ -508,7 +504,7 @@ static bool DrawInfoPane(void *p)
 	if (idx < 0) {
 		return true;
 	}
-	dir = panes[current_pane]->dir;
+	dir = active_pane->dir;
 	ent = &dir->entries[idx];
 	switch (ent->type) {
 	case FILE_TYPE_LUMP:
@@ -594,8 +590,7 @@ static void SearchPaneKeypress(void *pane, int key)
 	// Space key triggers mark, does not go to search input.
 	if (key != ' ' && UI_TextInputKeypress(&p->input, key)) {
 		if (key != KEY_BACKSPACE) {
-			UI_DirectoryPaneSearch(panes[current_pane],
-			                       p->input.input);
+			UI_DirectoryPaneSearch(active_pane, p->input.input);
 		}
 	} else {
 		HandleKeypress(NULL, key);
@@ -620,11 +615,11 @@ static void InitSearchPane(WINDOW *win)
 void B_Shutdown(void)
 {
 	TF_RestoreOldPalette();
-	if (panes[0] != NULL) {
-		VFS_CloseDir(panes[0]->dir);
+	if (browser_panes[0] != NULL) {
+		VFS_CloseDir(browser_panes[0]->dir);
 	}
-	if (panes[1] != NULL) {
-		VFS_CloseDir(panes[1]->dir);
+	if (browser_panes[1] != NULL) {
+		VFS_CloseDir(browser_panes[1]->dir);
 	}
 	clear();
 	refresh();
@@ -651,8 +646,8 @@ void B_Init(const char *path1, const char *path2)
 		fprintf(stderr, "Failed to open '%s'.\n", path1);
 		exit(-1);
 	}
-	panes[0] = UI_NewDirectoryPane(pane_windows[0], dir);
-	UI_PaneShow(panes[0]);
+	browser_panes[0] = UI_NewDirectoryPane(pane_windows[0], dir);
+	UI_PaneShow(browser_panes[0]);
 
 	pane_windows[1] = newwin(24, 27, 1, 53);
 	dir = VFS_OpenDir(path2);
@@ -661,10 +656,10 @@ void B_Init(const char *path1, const char *path2)
 		fprintf(stderr, "Failed to open '%s'.\n", path2);
 		exit(-1);
 	}
-	panes[1] = UI_NewDirectoryPane(pane_windows[1], dir);
-	UI_PaneShow(panes[1]);
+	browser_panes[1] = UI_NewDirectoryPane(pane_windows[1], dir);
+	UI_PaneShow(browser_panes[1]);
 
-	B_SwitchToPane(panes[0]);
+	B_SwitchToPane(browser_panes[0]);
 
 	SetWindowSizes();
 }

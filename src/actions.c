@@ -97,8 +97,7 @@ bool CheckReadOnly(struct directory *dir)
 	return true;
 }
 
-static void CopyToDir(struct directory_pane *active_pane,
-                      struct directory_pane *other_pane, bool convert)
+static void CopyToDir(bool convert)
 {
 	struct directory *from = active_pane->dir, *to = other_pane->dir;
 	struct file_set result = EMPTY_FILE_SET;
@@ -137,8 +136,7 @@ static void CopyToDir(struct directory_pane *active_pane,
 	VFS_FreeSet(&result);
 }
 
-static void CopyToWAD(struct directory_pane *active_pane,
-                      struct directory_pane *other_pane, bool convert)
+static void CopyToWAD(bool convert)
 {
 	struct directory *from = active_pane->dir, *to = other_pane->dir;
 	struct file_set *import_set = UI_DirectoryPaneTagged(active_pane);
@@ -176,8 +174,7 @@ static void CopyToWAD(struct directory_pane *active_pane,
 	VFS_FreeSet(&result);
 }
 
-static void PerformCopy(struct directory_pane *active_pane,
-                        struct directory_pane *other_pane, bool convert)
+static void PerformCopy(bool convert)
 {
 	if (!CheckReadOnly(other_pane->dir)) {
 		return;
@@ -187,28 +184,25 @@ static void PerformCopy(struct directory_pane *active_pane,
 
 	switch (other_pane->dir->type) {
 	case FILE_TYPE_DIR:
-		CopyToDir(active_pane, other_pane, convert);
+		CopyToDir(convert);
 		break;
 	case FILE_TYPE_WAD:
-		CopyToWAD(active_pane, other_pane, convert);
+		CopyToWAD(convert);
 		break;
 	default:
 		UI_MessageBox("Sorry, this isn't implemented yet.");
 		break;
 	}
-
 }
 
-static void PerformCopyConvert(struct directory_pane *active_pane,
-                               struct directory_pane *other_pane)
+static void PerformCopyConvert(void)
 {
-	PerformCopy(active_pane, other_pane, true);
+	PerformCopy(true);
 }
 
-static void PerformCopyNoConvert(struct directory_pane *active_pane,
-                                 struct directory_pane *other_pane)
+static void PerformCopyNoConvert(void)
 {
-	PerformCopy(active_pane, other_pane, false);
+	PerformCopy(false);
 }
 
 const struct action copy_action = {
@@ -236,8 +230,7 @@ const struct action import_noconv_action = {
 	PerformCopyNoConvert,
 };
 
-static void PerformUpdate(struct directory_pane *active_pane,
-                          struct directory_pane *other_pane)
+static void PerformUpdate(void)
 {
 	UI_MessageBox("Sorry, not implemented yet.");
 }
@@ -247,8 +240,7 @@ const struct action update_action = {
 	PerformUpdate,
 };
 
-static void PerformMkdir(struct directory_pane *active_pane,
-                         struct directory_pane *other_pane)
+static void PerformMkdir(void)
 {
 	char *input_filename, *filename;
 
@@ -344,8 +336,7 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 	return filename;
 }
 
-static void CreateWad(struct directory_pane *active_pane,
-                      struct directory_pane *other_pane, bool convert)
+static void CreateWad(bool convert)
 {
 	struct directory_pane *from_pane, *to_pane;
 	struct file_set *import_set;
@@ -379,16 +370,14 @@ static void CreateWad(struct directory_pane *active_pane,
 	}
 }
 
-static void CreateWadConvert(struct directory_pane *active_pane,
-                             struct directory_pane *other_pane)
+static void CreateWadConvert(void)
 {
-	CreateWad(active_pane, other_pane, true);
+	CreateWad(true);
 }
 
-static void CreateWadNoConvert(struct directory_pane *active_pane,
-                               struct directory_pane *other_pane)
+static void CreateWadNoConvert(void)
 {
-	CreateWad(active_pane, other_pane, false);
+	CreateWad(false);
 }
 
 const struct action make_wad_action = {
@@ -543,8 +532,7 @@ static bool NullTextureCheck(struct directory *dir, struct file_set *tagged,
 		dir->entries[0].name, operation, operation);
 }
 
-static void PerformRearrange(struct directory_pane *active_pane,
-                             struct directory_pane *other_pane)
+static void PerformRearrange(void)
 {
 	struct directory *dir = active_pane->dir;
 	char descr[16];
@@ -631,8 +619,7 @@ static void SortEntries(struct directory *dir, unsigned int *indexes,
 	SortEntries(dir, indexes + pivot + 1, count - pivot - 1);
 }
 
-static void PerformSortEntries(struct directory_pane *active_pane,
-                               struct directory_pane *other_pane)
+static void PerformSortEntries(void)
 {
 	struct directory *dir = active_pane->dir;
 	unsigned int *indexes;
@@ -697,8 +684,7 @@ const struct action sort_entries_action = {
 	PerformSortEntries,
 };
 
-static void PerformNewLump(struct directory_pane *active_pane,
-                           struct directory_pane *other_pane)
+static void PerformNewLump(void)
 {
 	int selected = UI_DirectoryPaneSelected(active_pane);
 	struct wad_file *f = VFS_WadFile(active_pane->dir);
@@ -727,8 +713,7 @@ const struct action new_lump_action = {
 	PerformNewLump,
 };
 
-static void PerformRename(struct directory_pane *active_pane,
-                          struct directory_pane *other_pane)
+static void PerformRename(void)
 {
 	char *input_filename;
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
@@ -768,8 +753,7 @@ const struct action rename_action = {
 	PerformRename,
 };
 
-static void PerformDeleteNoConfirm(struct directory_pane *active_pane,
-                                   struct directory_pane *other_pane)
+static void PerformDeleteNoConfirm(void)
 {
 	struct directory *dir = active_pane->dir;
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
@@ -815,8 +799,7 @@ const struct action delete_no_confirm_action = {
 	PerformDeleteNoConfirm,
 };
 
-static void PerformDelete(struct directory_pane *active_pane,
-                          struct directory_pane *other_pane)
+static void PerformDelete(void)
 {
 	struct directory *dir = active_pane->dir;
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
@@ -840,7 +823,7 @@ static void PerformDelete(struct directory_pane *active_pane,
 		return;
 	}
 
-	PerformDeleteNoConfirm(active_pane, other_pane);
+	PerformDeleteNoConfirm();
 }
 
 const struct action delete_action = {
@@ -848,8 +831,7 @@ const struct action delete_action = {
 	PerformDelete,
 };
 
-static void PerformMarkPattern(struct directory_pane *active_pane,
-                               struct directory_pane *other_pane)
+static void PerformMarkPattern(void)
 {
 	struct directory_entry *first_match;
 	size_t old_cnt;
@@ -878,8 +860,7 @@ const struct action mark_pattern_action = {
 	PerformMarkPattern,
 };
 
-static void PerformUnmarkAll(struct directory_pane *active_pane,
-                             struct directory_pane *other_pane)
+static void PerformUnmarkAll(void)
 {
 	VFS_ClearSet(&active_pane->tagged);
 }
@@ -889,8 +870,7 @@ const struct action unmark_all_action = {
 	PerformUnmarkAll,
 };
 
-static void PerformMark(struct directory_pane *active_pane,
-                        struct directory_pane *other_pane)
+static void PerformMark(void)
 {
 	int selected = UI_DirectoryPaneSelected(active_pane);
 	struct directory_entry *ent;
@@ -948,8 +928,7 @@ static void CheckCompactWad(struct directory_pane *pane)
 	}
 }
 
-static void PerformQuit(struct directory_pane *active_pane,
-                        struct directory_pane *other_pane)
+static void PerformQuit(void)
 {
 	// Editing may have left some junk data. Prompt to see if
 	// the user wants to clean it out.
@@ -963,8 +942,7 @@ const struct action quit_action = {
 	PerformQuit,
 };
 
-static void RedrawScreen(struct directory_pane *a,
-                         struct directory_pane *b)
+static void RedrawScreen(void)
 {
 	clearok(stdscr, TRUE);
 	wrefresh(stdscr);
@@ -975,8 +953,7 @@ const struct action redraw_screen_action = {
 	RedrawScreen,
 };
 
-static void PerformReload(struct directory_pane *active_pane,
-                          struct directory_pane *other_pane)
+static void PerformReload(void)
 {
 	VFS_Refresh(active_pane->dir);
 }
@@ -1010,8 +987,7 @@ static void NavigateNew(struct directory_pane *curr_pane,
 	}
 }
 
-static void PerformView(struct directory_pane *active_pane,
-                        struct directory_pane *other_pane)
+static void PerformView(void)
 {
 	struct directory_entry *ent;
 
@@ -1069,8 +1045,7 @@ const struct action view_action = {
 	PerformView,
 };
 
-static void PerformCompact(struct directory_pane *active_pane,
-                           struct directory_pane *other_pane)
+static void PerformCompact(void)
 {
 	struct directory_entry *ent;
 	struct directory *wad_dir;
@@ -1148,8 +1123,7 @@ const struct action edit_action = {
 	KEY_F(4), 'E', "Edit", "Edit",
 };
 
-static void PerformHexdump(struct directory_pane *active_pane,
-                           struct directory_pane *other_pane)
+static void PerformHexdump(void)
 {
 	int selected = UI_DirectoryPaneSelected(active_pane);
 	struct directory_entry *ent;
@@ -1173,8 +1147,7 @@ const struct action hexdump_action = {
 	PerformHexdump
 };
 
-static void PerformUndo(struct directory_pane *active_pane,
-                        struct directory_pane *other_pane)
+static void PerformUndo(void)
 {
 	struct directory *dir = active_pane->dir;
 	const char *msg;
@@ -1220,8 +1193,7 @@ const struct action undo_action = {
 	PerformUndo,
 };
 
-static void PerformRedo(struct directory_pane *active_pane,
-                        struct directory_pane *other_pane)
+static void PerformRedo(void)
 {
 	struct directory *dir = active_pane->dir;
 	int first_change;
@@ -1256,8 +1228,7 @@ const struct action redo_action = {
 	PerformRedo,
 };
 
-static void ShowHelp(struct directory_pane *active_pane,
-                            struct directory_pane *other_pane)
+static void ShowHelp(void)
 {
 	VFILE *input = vfopenmem(help_text, strlen(help_text));
 	P_RunPlaintextPager("WadGadget help", input);

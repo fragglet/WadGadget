@@ -35,8 +35,7 @@ static bool CheckExistingTexture(struct textures *txs, const char *name)
 	return !existing;
 }
 
-static void PerformNewTexture(struct directory_pane *active_pane,
-                              struct directory_pane *other_pane)
+static void PerformNewTexture(void)
 {
 	int pos = UI_DirectoryPaneSelected(active_pane) + 1;
 	struct textures *txs = TX_TextureList(active_pane->dir);
@@ -88,8 +87,7 @@ const struct action new_texture_action = {
 	PerformNewTexture,
 };
 
-static void PerformEditConfig(struct directory_pane *active_pane,
-                              struct directory_pane *other_pane)
+static void PerformEditConfig(void)
 {
 	struct directory_revision *old_rev, *orig_rev;
 	struct directory *parent;
@@ -139,8 +137,7 @@ const struct action edit_pnames_action = {
 	PerformEditConfig,
 };
 
-static void PerformDuplicateTexture(struct directory_pane *active_pane,
-                                    struct directory_pane *other_pane)
+static void PerformDuplicateTexture(void)
 {
 	struct textures *txs = TX_TextureList(active_pane->dir);
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
@@ -189,8 +186,7 @@ const struct action dup_texture_action = {
 	PerformDuplicateTexture,
 };
 
-static void PerformExportConfig(struct directory_pane *active_pane,
-                                struct directory_pane *other_pane)
+static void PerformExportConfig(void)
 {
 	struct file_set *selected;
 	char *filename = NULL, *filename2 = NULL;
@@ -312,8 +308,7 @@ static void MergePnamesResultNotice(struct texture_bundle_merge_result *r)
 	UI_ShowNotice("%s", buf);
 }
 
-static void PerformImportConfig(struct directory_pane *active_pane,
-                                struct directory_pane *other_pane)
+static void PerformImportConfig(void)
 {
 	struct texture_bundle_merge_result merge_stats;
 	struct texture_bundle b;
@@ -365,8 +360,7 @@ const struct action import_texture_config = {
 	PerformImportConfig,
 };
 
-static void PerformNewPname(struct directory_pane *active_pane,
-                            struct directory_pane *other_pane)
+static void PerformNewPname(void)
 {
 	struct texture_bundle *b = TX_DirGetBundle(active_pane->dir);
 	int idx;
@@ -407,8 +401,7 @@ const struct action new_pname_action = {
 	PerformNewPname,
 };
 
-static void PerformCopyPnames(struct directory_pane *active_pane,
-                              struct directory_pane *other_pane)
+static void PerformCopyPnames(void)
 {
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
 	struct file_set copied = EMPTY_FILE_SET;
@@ -461,8 +454,7 @@ const struct action copy_pnames_action = {
 	PerformCopyPnames,
 };
 
-static void PerformCopyTextures(struct directory_pane *active_pane,
-                                struct directory_pane *other_pane)
+static void PerformCopyTextures(void)
 {
 	struct texture_bundle_merge_result merge_stats;
 	struct file_set *tagged = UI_DirectoryPaneTagged(active_pane);
