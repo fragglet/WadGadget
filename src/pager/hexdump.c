@@ -59,7 +59,7 @@ static void SwitchToASCII(void)
 }
 
 const struct action switch_ascii_action = {
-	KEY_F(4), 0, "ASCII", "View as ASCII", SwitchToASCII,
+	0, 'D', "ASCII", "View as ASCII", SwitchToASCII,
 };
 
 static const struct action *hexdump_pager_actions[] = {

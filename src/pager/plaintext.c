@@ -35,7 +35,7 @@ static void SwitchToHexdump(void)
 }
 
 const struct action switch_hexdump_action = {
-	KEY_F(4), 0, "Hexdump", "View Hexdump", SwitchToHexdump,
+	0, 'D', "Hexdump", "View Hexdump", SwitchToHexdump,
 };
 
 static const struct action *plaintext_pager_actions[] = {
