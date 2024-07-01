@@ -16,6 +16,8 @@
 #include "ui/colors.h"
 #include "ui/title_bar.h"
 
+struct pager *current_pager;
+
 static void UpdateSubtitle(struct pager *p)
 {
 	int range, win_h;
@@ -125,6 +127,8 @@ void P_RunPager(struct pager_config *cfg)
 	struct saved_screen ss;
 	struct pager p;
 
+	current_pager = &p;
+
 	UI_SaveScreen(&ss);
 	UI_SetTitleBar(cfg->title);
 	UI_ActionsBarSetActions(cfg->actions);
@@ -134,4 +138,14 @@ void P_RunPager(struct pager_config *cfg)
 	UI_PaneHide(&p);
 	P_FreePager(&p);
 	UI_RestoreScreen(&ss);
+
+	current_pager = NULL;
+}
+
+void P_SwitchConfig(struct pager_config *cfg)
+{
+	assert(current_pager != NULL);
+	current_pager->cfg = cfg;
+	current_pager->window_offset = 0;
+	UI_ActionsBarSetActions(cfg->actions);
 }

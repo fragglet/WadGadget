@@ -35,3 +35,6 @@ void P_InitPager(struct pager *p, struct pager_config *cfg);
 void P_FreePager(struct pager *p);
 void P_BlockOnInput(struct pager *p);
 void P_RunPager(struct pager_config *cfg);
+void P_SwitchConfig(struct pager_config *cfg);
+
+extern struct pager *current_pager;
