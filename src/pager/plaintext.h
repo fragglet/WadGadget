@@ -14,9 +14,17 @@ struct plaintext_pager_config {
 	uint8_t *data;
 	size_t data_len;
 	void *hexdump_config;
+	bool want_edit;
 };
 
-bool P_InitPlaintextConfig(const char *title,
+enum plaintext_pager_result {
+	PLAINTEXT_PAGER_FAILURE,
+	PLAINTEXT_PAGER_DONE,
+	PLAINTEXT_PAGER_WANT_EDIT,
+};
+
+bool P_InitPlaintextConfig(const char *title, bool editable,
                            struct plaintext_pager_config *cfg, VFILE *input);
 void P_FreePlaintextConfig(struct plaintext_pager_config *cfg);
-bool P_RunPlaintextPager(const char *title, VFILE *input);
+enum plaintext_pager_result P_RunPlaintextPager(
+	const char *title, VFILE *input, bool editable);

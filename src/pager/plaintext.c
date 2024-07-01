@@ -34,11 +34,23 @@ static void SwitchToHexdump(void)
 	P_SwitchConfig(&hdc->pc);
 }
 
-const struct action switch_hexdump_action = {
+static const struct action switch_hexdump_action = {
 	0, 'D', "Hexdump", "View Hexdump", SwitchToHexdump,
 };
 
+static void ExitPagerAndEdit(void)
+{
+	struct plaintext_pager_config *cfg = current_pager->cfg->user_data;
+	cfg->want_edit = true;
+	UI_ExitMainLoop();
+}
+
+static const struct action exit_pager_edit_action = {
+	0, 'E', "Edit", "Edit",  ExitPagerAndEdit,
+};
+
 static const struct action *plaintext_pager_actions[] = {
+	&exit_pager_edit_action,
 	&switch_hexdump_action,
 	&exit_pager_action,
 	NULL,
@@ -62,7 +74,7 @@ void P_FreePlaintextConfig(struct plaintext_pager_config *cfg)
 	free(cfg->lines);
 }
 
-bool P_InitPlaintextConfig(const char *title,
+bool P_InitPlaintextConfig(const char *title, bool editable,
                            struct plaintext_pager_config *cfg, VFILE *input)
 {
 	char *p;
@@ -72,8 +84,10 @@ bool P_InitPlaintextConfig(const char *title,
 	cfg->pc.title = title;
 	cfg->pc.draw_line = DrawPlaintextLine;
 	cfg->pc.user_data = cfg;
-	cfg->pc.actions = plaintext_pager_actions;
+	cfg->pc.actions = editable ? plaintext_pager_actions
+	                           : plaintext_pager_actions + 1;
 	cfg->hexdump_config = NULL;
+	cfg->want_edit = false;
 
 	cfg->data = vfreadall(input, &cfg->data_len);
 	vfclose(input);
@@ -131,12 +145,13 @@ bool P_InitPlaintextConfig(const char *title,
 	return true;
 }
 
-bool P_RunPlaintextPager(const char *title, VFILE *input)
+enum plaintext_pager_result P_RunPlaintextPager(
+	const char *title, VFILE *input, bool editable)
 {
 	struct plaintext_pager_config cfg;
 
-	if (!P_InitPlaintextConfig(title, &cfg, input)) {
-		return false;
+	if (!P_InitPlaintextConfig(title, editable, &cfg, input)) {
+		return PLAINTEXT_PAGER_FAILURE;
 	}
 
 	P_RunPager(&cfg.pc);
@@ -145,5 +160,6 @@ bool P_RunPlaintextPager(const char *title, VFILE *input)
 	}
 	P_FreePlaintextConfig(&cfg);
 
-	return true;
+	return cfg.want_edit ? PLAINTEXT_PAGER_WANT_EDIT
+	                     : PLAINTEXT_PAGER_DONE;
 }

@@ -1203,7 +1203,7 @@ const struct action redo_action = {
 static void ShowHelp(void)
 {
 	VFILE *input = vfopenmem(help_text, strlen(help_text));
-	P_RunPlaintextPager("WadGadget help", input);
+	P_RunPlaintextPager("WadGadget help", input, false);
 }
 
 const struct action help_action = {

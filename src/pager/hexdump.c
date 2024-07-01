@@ -50,7 +50,7 @@ static void SwitchToASCII(void)
 	if (ptc == NULL) {
 		VFILE *in = vfopenmem(cfg->data, cfg->data_len);
 		ptc = checked_calloc(1, sizeof(struct plaintext_pager_config));
-		assert(P_InitPlaintextConfig(cfg->pc.title, ptc, in));
+		assert(P_InitPlaintextConfig(cfg->pc.title, false, ptc, in));
 		cfg->plaintext_config = ptc;
 		ptc->hexdump_config = cfg;
 	}
