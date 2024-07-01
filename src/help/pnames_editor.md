@@ -11,16 +11,16 @@ containing the PNAMES lump.
 
 ## Keys
 
-Ctrl-V  F2        Move (rearrange) marked patch names
-Ctrl-E  F4        Edit plain text config file
-Ctrl-O  F5        Copy or export; [see below](#copying)
-Ctrl-B  F6        Rename selected patch name
-Ctrl-K  F7        Add new patch name
-Ctrl-X  F8        Delete patch names(s)
-        Shift-F8  Delete patch names(s) (no confirmation)
-Ctrl-A  F10       Unmark all marked patch names
-Ctrl-Z            Undo last change
-Ctrl-Y            Redo change
+    Ctrl-V  F2        Move (rearrange) marked patch names
+    Ctrl-E  F4        Edit plain text config file
+    Ctrl-O  F5        Copy or export; [see below](#copying)
+    Ctrl-B  F6        Rename selected patch name
+    Ctrl-K  F7        Add new patch name
+    Ctrl-X  F8        Delete patch names(s)
+            Shift-F8  Delete patch names(s) (no confirmation)
+    Ctrl-A  F10       Unmark all marked patch names
+    Ctrl-Z            Undo last change
+    Ctrl-Y            Redo change
 
 All [standard controls](common.md) are also supported.
 

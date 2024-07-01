@@ -12,18 +12,18 @@ containing the texture lump.
 
 ## Keys
 
-Ctrl-V  F2        Move (rearrange) marked textures
-Ctrl-]  Shift-F2  Sort marked textures into alphabetical order
-Ctrl-U  F3        Duplicate selected texture
-Ctrl-E  F4        Edit texture config
-Ctrl-O  F5        Copy or export; [see below](#copying)
-Ctrl-B  F6        Rename selected texture
-Ctrl-K  F7        Make new texture
-Ctrl-X  F8        Delete texture(s)
-        Shift-F8  Delete texture(s) (no confirmation)
-Ctrl-A  F10       Unmark all marked textures
-Ctrl-Z            Undo last change
-Ctrl-Y            Redo change
+    Ctrl-V  F2        Move (rearrange) marked textures
+    Ctrl-]  Shift-F2  Sort marked textures into alphabetical order
+    Ctrl-U  F3        Duplicate selected texture
+    Ctrl-E  F4        Edit texture config
+    Ctrl-O  F5        Copy or export; [see below](#copying)
+    Ctrl-B  F6        Rename selected texture
+    Ctrl-K  F7        Make new texture
+    Ctrl-X  F8        Delete texture(s)
+            Shift-F8  Delete texture(s) (no confirmation)
+    Ctrl-A  F10       Unmark all marked textures
+    Ctrl-Z            Undo last change
+    Ctrl-Y            Redo change
 
 All [standard controls](common.md) are also supported.
 

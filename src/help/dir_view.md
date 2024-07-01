@@ -12,21 +12,21 @@ editor for that file type.
 
 ## Keys
 
-        Enter     View/edit file
-Ctrl-D            View hexdump of selected file
-Ctrl-P  F2        Compact selected WAD file
-Ctrl-U  F3        Update
-Ctrl-E  F4        Edit
-Ctrl-O  F5        Copy or import files; [see below](#copying)
-        Shift-F5  Import raw, no file conversion
-Ctrl-B  F6        Rename selected file/directory
-Ctrl-K  F7        Make directory
-Ctrl-X  F8        Delete file(s)
-        Shift-F8  Delete file(s) (no confirmation)
-Ctrl-F  F9        Make WAD containing marked files; see below
-        Shift-F9  Make WAD, no file conversion
-Ctrl-A  F10       Unmark all marked files
-Ctrl-R            Reload directory
+            Enter     View/edit file
+    Ctrl-D            View hexdump of selected file
+    Ctrl-P  F2        Compact selected WAD file
+    Ctrl-U  F3        Update
+    Ctrl-E  F4        Edit
+    Ctrl-O  F5        Copy or import files; [see below](#copying)
+            Shift-F5  Import raw, no file conversion
+    Ctrl-B  F6        Rename selected file/directory
+    Ctrl-K  F7        Make directory
+    Ctrl-X  F8        Delete file(s)
+            Shift-F8  Delete file(s) (no confirmation)
+    Ctrl-F  F9        Make WAD containing marked files; see below
+            Shift-F9  Make WAD, no file conversion
+    Ctrl-A  F10       Unmark all marked files
+    Ctrl-R            Reload directory
 
 All [standard controls](common.md) are also supported.
 
@@ -59,19 +59,19 @@ All [standard controls](common.md) are also supported.
 
 File formats when importing to a WAD (unless Shift-F5 is used):
 
-Extension        Lump type                  Notes
---------------------------------------------------------------------------------
-.lmp             Raw lump or demo file      No conversion performed
-.mus             DMX MUS music track        No conversion performed
-.mid             MIDI music track           No conversion performed
-.wav             Sound effect
-.voc             Sound effect
-.flac            Sound effect
-playpal.png      VGA palette lump           Must be a multiple of 256 pixels
-colormap.png     Color mapping lump         Must be a multiple of 256 pixels
-.cmap.png        Color mapping lump         Must be a multiple of 256 pixels
-.flat.png        Floor/ceiling texture      Must be 64 pixels wide
-.png             Graphic lump
-PNAMES.txt       Plain text patch names
-TEXTURE*.txt     Plain text texture config  Must already have a PNAMES lump
-.fullscreen.png  Hexen full screen image    Must be 320x200 pixels
+    Extension        Lump type                  Notes
+    ---------------------------------------------------------------------------
+    .lmp             Raw lump or demo file      No conversion performed
+    .mus             DMX MUS music track        No conversion performed
+    .mid             MIDI music track           No conversion performed
+    .wav             Sound effect
+    .voc             Sound effect
+    .flac            Sound effect
+    playpal.png      VGA palette lump           Must be multiple of 256 pixels
+    colormap.png     Color mapping lump         Must be multiple of 256 pixels
+    .cmap.png        Color mapping lump         Must be multiple of 256 pixels
+    .flat.png        Floor/ceiling texture      Must be 64 pixels wide
+    .png             Graphic lump
+    PNAMES.txt       Plain text patch names
+    TEXTURE*.txt     Plain text texture config  Must already have a PNAMES lump
+    .fullscreen.png  Hexen full screen image    Must be 320x200 pixels
