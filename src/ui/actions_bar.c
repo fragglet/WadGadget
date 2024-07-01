@@ -9,6 +9,7 @@
 //
 
 #include <string.h>
+#include <stdbool.h>
 #include <limits.h>
 
 #include "ui/actions_bar.h"

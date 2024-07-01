@@ -10,6 +10,7 @@
 
 #include <string.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #include "browser/actions_pane.h"
 #include "ui/colors.h"
