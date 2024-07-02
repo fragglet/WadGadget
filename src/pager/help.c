@@ -26,10 +26,55 @@ static const struct action *help_pager_actions[] = {
 	NULL,
 };
 
+static bool HaveSyntaxElements(const char *start, const char *el1, ...)
+{
+	va_list args;
+	const char *p, *q;
+
+	if (strncmp(start, el1, strlen(el1)) != 0) {
+		return false;
+	}
+
+	p = start + strlen(el1);
+
+	va_start(args, el1);
+	for (;;) {
+		const char *el = va_arg(args, const char *);
+		if (el == NULL) {
+			return true;
+		}
+
+		q = strstr(p, el);
+		if (q == NULL) {
+			return false;
+		}
+		p = q + strlen(el);
+	}
+}
+
+static const char *DrawLink(WINDOW *win, const char *link)
+{
+	const char *p;
+
+	wattron(win, A_BOLD);
+	wattron(win, A_UNDERLINE);
+	for (p = link + 1; *p != '\0'; ++p) {
+		if (HaveSyntaxElements(p, "](", ")", NULL)) {
+			p = strstr(p, ")");
+			break;
+		}
+		waddch(win, *p);
+	}
+	wattroff(win, A_UNDERLINE);
+	wattroff(win, A_BOLD);
+
+	return p;
+}
+
 static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 {
 	struct help_pager_config *cfg = user_data;
-	const char *line;
+	const char *line, *p;
 
 	assert(lineno < cfg->pc.num_lines);
 	line = cfg->lines[lineno];
@@ -46,7 +91,14 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 		wattroff(win, A_BOLD);
 		wattroff(win, A_UNDERLINE);
 	}
-	waddstr(win, line);
+
+	for (p = line; *p != '\0'; ++p) {
+		if (HaveSyntaxElements(p, "[", "](", ")", NULL)) {
+			p = DrawLink(win, p);
+			continue;
+		}
+		waddch(win, *p);
+	}
 }
 
 void P_FreeHelpConfig(struct help_pager_config *cfg)
