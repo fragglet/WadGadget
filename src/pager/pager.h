@@ -19,7 +19,7 @@ struct pager_config {
 	const char *title;
 	pager_draw_line_fn draw_line;
 	void *user_data;
-	unsigned int num_lines;
+	size_t num_lines;
 	const struct action **actions;
 };
 
