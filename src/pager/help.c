@@ -77,7 +77,7 @@ static const char *LineHasLink(const char *p)
 	return NULL;
 }
 
-static bool ScanNextLink(struct help_pager_config *cfg)
+static bool ScanNextLink(struct help_pager_config *cfg, int dir)
 {
 	int win_h = 25;
 	int lineno = cfg->current_link_line;
@@ -86,9 +86,9 @@ static bool ScanNextLink(struct help_pager_config *cfg)
 		win_h = getmaxy(current_pager->pane.window);
 	}
 
-	while (lineno < cfg->pc.num_lines) {
+	while (lineno >= 0 && lineno < cfg->pc.num_lines) {
 		if (!LineHasLink(cfg->lines[lineno])) {
-			++lineno;
+			lineno += dir;
 			continue;
 		}
 
@@ -108,12 +108,23 @@ static bool ScanNextLink(struct help_pager_config *cfg)
 static void JumpNextLink(struct help_pager_config *cfg)
 {
 	++cfg->current_link_line;
-	if (ScanNextLink(cfg)) {
+	if (ScanNextLink(cfg, 1)) {
 		return;
 	}
 
 	cfg->current_link_line = 0;
-	ScanNextLink(cfg);
+	ScanNextLink(cfg, 1);
+}
+
+static void JumpPrevLink(struct help_pager_config *cfg)
+{
+	--cfg->current_link_line;
+	if (ScanNextLink(cfg, -1)) {
+		return;
+	}
+
+	cfg->current_link_line = cfg->pc.num_lines - 1;
+	ScanNextLink(cfg, -1);
 }
 
 static void PerformNextLink(void)
@@ -123,6 +134,15 @@ static void PerformNextLink(void)
 
 static const struct action next_link_action = {
         '\t', 0, "Next Link", "Next Link", PerformNextLink,
+};
+
+static void PerformPrevLink(void)
+{
+	JumpPrevLink(current_pager->cfg->user_data);
+}
+
+static const struct action prev_link_action = {
+	KEY_BTAB, 0, NULL, NULL, PerformPrevLink,
 };
 
 static void FreeLines(struct help_pager_config *cfg)
@@ -180,6 +200,7 @@ static const struct action follow_link_action = {
 
 static const struct action *help_pager_actions[] = {
 	&exit_pager_action,
+	&prev_link_action,
 	&next_link_action,
 	&follow_link_action,
 	NULL,
