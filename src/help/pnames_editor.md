@@ -27,14 +27,14 @@ All [standard controls](common.md) are also supported.
 
 ## Copying
 
- * If another patch names list is in the opposite pane, Copy names (F5) will
+ * If another patch names list is in the opposite pane, **Copy names (F5)** will
    add the selected name (or tagged names) into the other list. Duplicate
    names will not be added.
  * Patch names corresponding to lumps can be added to the list by opening the
-   same WAD in the opposite pane, selecting the lumps and using Copy names (F5).
+   same WAD in the opposite pane, selecting the lumps and using **Copy names (F5)**.
  * New patch names are always added to the end of the directory.
- * If a directory is in the opposite pane, Export config (F5) will create a
+ * If a directory is in the opposite pane, **Export config (F5**) will create a
    plain text file in that directory that contains the tagged names, one per
    line. If none are tagged, the file will contain the entire list.
  * To import such a file into the texture directory, select the file in the
-   [opposite pane](dir_view.md) and use Import config (F5).
+   [opposite pane](dir_view.md) and use **Import config (F5)**.

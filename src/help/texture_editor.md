@@ -30,18 +30,18 @@ All [standard controls](common.md) are also supported.
 
 ## Copying
 
- * If another texture directory is in the opposite pane, Copy (F5) copies the
+ * If another texture directory is in the opposite pane, **Copy (F5)** copies the
    selected texture (or marked textures) to the other directory. This can be
    used to copy texture definitions between WADs. If textures with the same
    names already exist, they will be overwritten; any new textures will be
    inserted into the other directory at the position indicated by a horizontal
    line in the opposite pane.
- * If a directory is in the opposite pane, Export config (F5) will create a
+ * If a directory is in the opposite pane, **Export config (F5)** will create a
    plain text file in that directory, containing the tagged textures in the
    deutex plain text format. If no textures are tagged, the entire directory is
    exported.
  * To import such a text file back into the texture directory, switch to the
-   [opposite pane](dir_view.md) and use Import config (F5).
+   [opposite pane](dir_view.md) and use **Import config (F5)**.
  * Texture directories go hand-in-hand with PNAMES lumps. If you add textures
    into a directory that use new PNAMES, it is important that you update the
    PNAMES lump when prompted.

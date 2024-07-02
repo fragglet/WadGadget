@@ -39,12 +39,12 @@ All [standard controls](common.md) are also supported.
 
 ## Copying
 
- * If a WAD file is in the opposite pane, Copy (F5) copies the selected lump
+ * If a WAD file is in the opposite pane, **Copy (F5)** copies the selected lump
    (or tagged lumps) to the other file. The lumps will be inserted into the
    other WAD as new lumps, even if there are already lumps with the same names.
    A horizontal line in the opposite pane shows where the copied lumps will be
    inserted.
- * If a directory is in the opposite pane, Export (F5) will export those lumps
+ * If a directory is in the opposite pane, **Export (F5)** will export those lumps
    as files into that directory. The lumps will be converted to an appropriate
    file format depending on the type of lump.
    [See the table below for details](#file-formats).
@@ -52,11 +52,11 @@ All [standard controls](common.md) are also supported.
    files). You can also this function to export music tracks as .mus files
    instead of converting to .mid.
  * Files can be imported back into WAD files by switching to the opposite pane
-   and using Import (F5).
- * If a patch names list is in the opposite pane, Copy names (F5) will copy the
+   and using **Import (F5)**.
+ * If a patch names list is in the opposite pane, **Copy names (F5)** will copy the
    names of the tagged lumps into the list. This is useful if you imported some
    new patches into your WAD and need to add them to PNAMES.
- * Export as WAD (F9) will create a new .wad file in the directory in the
+ * **Export as WAD (F9)** will create a new .wad file in the directory in the
    opposite pane. All marked lumps will be copied into the new .wad.
 
 ## File formats
