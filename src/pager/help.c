@@ -57,13 +57,24 @@ static bool IsLinkStart(const char *p)
 
 static bool ScanNextLink(struct help_pager_config *cfg)
 {
+	int win_h = 25;
 	char *p;
 	int lineno = cfg->current_link_line;
+
+	if (current_pager != NULL && current_pager->pane.window != NULL) {
+		win_h = getmaxy(current_pager->pane.window);
+	}
 
 	while (lineno < cfg->pc.num_lines) {
 		p = strstr(cfg->lines[lineno], "[");
 		if (p != NULL && IsLinkStart(p)) {
 			cfg->current_link_line = lineno;
+			if (current_pager != NULL &&
+			    (lineno < current_pager->window_offset
+			  || lineno > current_pager->window_offset + win_h)) {
+				current_pager->window_offset =
+					max(lineno - 5, 0);
+			}
 			return true;
 		}
 		++lineno;
