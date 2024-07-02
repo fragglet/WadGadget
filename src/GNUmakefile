@@ -19,7 +19,12 @@ CFLAGS := -g -MMD -Wall -I. -O2 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
 LDFLAGS := $(shell pkg-config --libs $(REQUIRED_PKGS)) \
            $(LIBSIXEL_LDFLAGS) $(NCURSES_LDFLAGS)
 
-HELP_FILES = help/help.txt
+HELP_FILES =                \
+    help/common.md          \
+    help/dir_view.md        \
+    help/pnames_editor.md   \
+    help/texture_editor.md  \
+    help/wad_view.md
 
 OBJS =                      \
     browser/actions.o       \

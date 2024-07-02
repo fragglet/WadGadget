@@ -1200,10 +1200,44 @@ const struct action redo_action = {
 	PerformRedo,
 };
 
+static const char *HelpFileContents(const char *filename)
+{
+	int i;
+
+	for (i = 0; help_files[i].filename != NULL; i++) {
+		if (!strcmp(help_files[i].filename, filename)) {
+			return help_files[i].contents;
+		}
+	}
+
+	return "Can't find help file!";
+}
+
 static void ShowHelp(void)
 {
-	VFILE *input = vfopenmem(help_text, strlen(help_text));
-	P_RunPlaintextPager("WadGadget help", input, false);
+	int i;
+	const struct {
+		enum file_type ft;
+		const char *fn;
+	} help_files_per_type[] = {
+		{FILE_TYPE_DIR, "dir_view.md"},
+		{FILE_TYPE_WAD, "wad_view.md"},
+		{FILE_TYPE_TEXTURE_LIST, "texture_editor.md"},
+		{FILE_TYPE_PNAMES_LIST, "pnames_editor.md"},
+	};
+
+	for (i = 0; i < arrlen(help_files_per_type); i++) {
+		if (help_files_per_type[i].ft == active_pane->dir->type) {
+			const char *filename = help_files_per_type[i].fn;
+			const char *help_text = HelpFileContents(filename);
+			VFILE *input = vfopenmem(help_text, strlen(help_text));
+			P_RunPlaintextPager("WadGadget help", input, false);
+			return;
+		}
+	}
+
+	UI_MessageBox("Can't find a help page for file_type %d",
+	              active_pane->dir->type);
 }
 
 const struct action help_action = {

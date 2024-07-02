@@ -14,13 +14,18 @@ import os
 import re
 import sys
 
-EXTN_RE = re.compile(r"\..*$")
-
 print("// This file is auto-generated.")
+print("#include <stdlib.h>")
+print('#include "help_text.h"')
 
+help_files = []
 for filename in sys.argv[1:]:
 	with open(filename, "r") as f:
 		text = f.read()
 
-	stem = EXTN_RE.sub("", os.path.basename(filename))
-	print("const char *%s_text = %s;" % (stem, json.dumps(text)))
+	help_files.append((os.path.basename(filename), text))
+
+print("const struct help_file help_files[] = {\n%s\t{NULL, NULL}\n};" % (
+	"".join("\t{%s, %s},\n" % (json.dumps(filename), json.dumps(text))
+	        for filename, text in help_files),
+))
