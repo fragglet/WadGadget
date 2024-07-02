@@ -74,13 +74,62 @@ void P_FreePlaintextConfig(struct plaintext_pager_config *cfg)
 	free(cfg->lines);
 }
 
-bool P_InitPlaintextConfig(const char *title, bool editable,
-                           struct plaintext_pager_config *cfg, VFILE *input)
+char **P_PlaintextLines(const char *data, size_t data_len, size_t *num_lines)
 {
-	char *p;
+	char **lines;
+	const char *p;
 	size_t remaining;
 	unsigned int lineno;
 
+	p = data;
+	remaining = data_len;
+	*num_lines = 1;
+	for (;;) {
+		char *newline = memchr(p, '\n', remaining);
+		if (newline == NULL) {
+			break;
+		}
+		++*num_lines;
+		remaining -= newline - p + 1;
+		p = newline + 1;
+	}
+
+	lines = checked_calloc(*num_lines, sizeof(char *));
+	p = data;
+	remaining = data_len;
+	lineno = 0;
+
+	while (lineno < *num_lines) {
+		char *newline = memchr(p, '\n', remaining);
+		size_t line_bytes;
+
+		if (newline != NULL) {
+			line_bytes = newline - p;
+		} else {
+			line_bytes = remaining;
+		}
+
+		lines[lineno] = checked_calloc(line_bytes + 1, 1);
+		memcpy(lines[lineno], p, line_bytes);
+
+		++lineno;
+
+		if (newline != NULL) {
+			++line_bytes;
+		} else {
+			break;
+		}
+
+		remaining -= line_bytes;
+		p += line_bytes;
+	}
+
+	return lines;
+}
+
+bool P_InitPlaintextConfig(const char *title, bool editable,
+                           struct plaintext_pager_config *cfg, VFILE *input)
+{
 	cfg->pc.title = title;
 	cfg->pc.draw_line = DrawPlaintextLine;
 	cfg->pc.user_data = cfg;
@@ -95,48 +144,8 @@ bool P_InitPlaintextConfig(const char *title, bool editable,
 		return false;
 	}
 
-	p = (char *) cfg->data;
-	remaining = cfg->data_len;
-	cfg->pc.num_lines = 1;
-	for (;;) {
-		char *newline = memchr(p, '\n', remaining);
-		if (newline == NULL) {
-			break;
-		}
-		++cfg->pc.num_lines;
-		remaining -= newline - p + 1;
-		p = newline + 1;
-	}
-
-	cfg->lines = checked_calloc(cfg->pc.num_lines, sizeof(char *));
-	p = (char *) cfg->data;
-	remaining = cfg->data_len;
-	lineno = 0;
-
-	while (lineno < cfg->pc.num_lines) {
-		char *newline = memchr(p, '\n', remaining);
-		size_t line_bytes;
-
-		if (newline != NULL) {
-			line_bytes = newline - p;
-		} else {
-			line_bytes = remaining;
-		}
-
-		cfg->lines[lineno] = checked_calloc(line_bytes + 1, 1);
-		memcpy(cfg->lines[lineno], p, line_bytes);
-
-		++lineno;
-
-		if (newline != NULL) {
-			++line_bytes;
-		} else {
-			break;
-		}
-
-		remaining -= line_bytes;
-		p += line_bytes;
-	}
+	cfg->lines = P_PlaintextLines((char *) cfg->data, cfg->data_len,
+	                              &cfg->pc.num_lines);
 
 	return true;
 }
