@@ -209,6 +209,25 @@ static const char *DrawLink(WINDOW *win, const char *link, bool highlighted)
 	return p;
 }
 
+static const char *DrawBoldText(WINDOW *win, const char *text)
+{
+	const char *p, *end;
+
+	text += 2;
+	end = strstr(text, "**");
+	if (end == NULL) {
+		return text;
+	}
+
+	wattron(win, A_BOLD);
+	for (p = text; p < end; ++p) {
+		waddch(win, *p);
+	}
+	wattroff(win, A_BOLD);
+
+	return end + 1;
+}
+
 static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 {
 	struct help_pager_config *cfg = user_data;
@@ -234,9 +253,11 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 		if (IsLinkStart(p)) {
 			// Note we only allow one link per line.
 			p = DrawLink(win, p, lineno == cfg->current_link_line);
-			continue;
+		} else if (HaveSyntaxElements(p, "**", "**", NULL)) {
+			p = DrawBoldText(win, p);
+		} else {
+			waddch(win, *p);
 		}
-		waddch(win, *p);
 	}
 }
 
