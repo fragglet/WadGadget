@@ -7,6 +7,9 @@
 // distributed WITHOUT ANY WARRANTY; without even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
+//
+// Help viewer. This implements a very restricted subset of the Markdown
+// syntax.
 
 #include <stdlib.h>
 #include <string.h>
@@ -20,11 +23,6 @@
 #include "stringlib.h"
 #include "ui/actions_bar.h"
 #include "ui/dialog.h"
-
-static const struct action *help_pager_actions[] = {
-	&exit_pager_action,
-	NULL,
-};
 
 static bool HaveSyntaxElements(const char *start, const char *el1, ...)
 {
@@ -52,9 +50,61 @@ static bool HaveSyntaxElements(const char *start, const char *el1, ...)
 	}
 }
 
-static const char *DrawLink(WINDOW *win, const char *link)
+static bool IsLinkStart(const char *p)
+{
+	return HaveSyntaxElements(p, "[", "](", ")", NULL);
+}
+
+static bool ScanNextLink(struct help_pager_config *cfg)
+{
+	char *p;
+	int lineno = cfg->current_link_line;
+
+	while (lineno < cfg->pc.num_lines) {
+		p = strstr(cfg->lines[lineno], "[");
+		if (p != NULL && IsLinkStart(p)) {
+			cfg->current_link_line = lineno;
+			return true;
+		}
+		++lineno;
+	}
+
+	return false;
+}
+
+static void JumpNextLink(struct help_pager_config *cfg)
+{
+	++cfg->current_link_line;
+	if (ScanNextLink(cfg)) {
+		return;
+	}
+
+	cfg->current_link_line = 0;
+	ScanNextLink(cfg);
+}
+
+static void PerformNextLink(void)
+{
+	JumpNextLink(current_pager->cfg->user_data);
+}
+
+static const struct action next_link_action = {
+        '\t', 0, "Next Link", "Next Link", PerformNextLink,
+};
+
+static const struct action *help_pager_actions[] = {
+	&exit_pager_action,
+	&next_link_action,
+	NULL,
+};
+
+static const char *DrawLink(WINDOW *win, const char *link, bool highlighted)
 {
 	const char *p;
+
+	if (highlighted) {
+		wattron(win, A_REVERSE);
+	}
 
 	wattron(win, A_BOLD);
 	wattron(win, A_UNDERLINE);
@@ -67,6 +117,7 @@ static const char *DrawLink(WINDOW *win, const char *link)
 	}
 	wattroff(win, A_UNDERLINE);
 	wattroff(win, A_BOLD);
+	wattroff(win, A_REVERSE);
 
 	return p;
 }
@@ -93,8 +144,9 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 	}
 
 	for (p = line; *p != '\0'; ++p) {
-		if (HaveSyntaxElements(p, "[", "](", ")", NULL)) {
-			p = DrawLink(win, p);
+		if (IsLinkStart(p)) {
+			// Note we only allow one link per line.
+			p = DrawLink(win, p, lineno == cfg->current_link_line);
 			continue;
 		}
 		waddch(win, *p);
@@ -141,6 +193,8 @@ bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename)
 
 	cfg->lines = P_PlaintextLines(contents, strlen(contents),
 	                              &cfg->pc.num_lines);
+	cfg->current_link_line = -1;
+	JumpNextLink(cfg);
 	return true;
 }
 

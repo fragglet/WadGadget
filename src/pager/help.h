@@ -11,6 +11,7 @@
 struct help_pager_config {
 	struct pager_config pc;
 	char **lines;
+	int current_link_line;
 };
 
 void P_FreeHelpConfig(struct help_pager_config *cfg);
