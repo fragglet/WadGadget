@@ -137,10 +137,6 @@ bool P_InitPlaintextConfig(const char *title, bool editable,
 		remaining -= line_bytes;
 		p += line_bytes;
 	}
-	if (strlen(cfg->lines[cfg->pc.num_lines - 1]) == 0) {
-		free(cfg->lines[cfg->pc.num_lines - 1]);
-		--cfg->pc.num_lines;
-	}
 
 	return true;
 }
