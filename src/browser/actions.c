@@ -19,11 +19,10 @@
 #include "conv/import.h"
 #include "ui/dialog.h"
 #include "conv/export.h"
-#include "help_text.h"
 #include "ui/pane.h"
 #include "pager/pager.h"
+#include "pager/help.h"
 #include "pager/hexdump.h"
-#include "pager/plaintext.h"
 #include "stringlib.h"
 #include "ui/title_bar.h"
 #include "ui/ui.h"
@@ -1200,19 +1199,6 @@ const struct action redo_action = {
 	PerformRedo,
 };
 
-static const char *HelpFileContents(const char *filename)
-{
-	int i;
-
-	for (i = 0; help_files[i].filename != NULL; i++) {
-		if (!strcmp(help_files[i].filename, filename)) {
-			return help_files[i].contents;
-		}
-	}
-
-	return "Can't find help file!";
-}
-
 static void ShowHelp(void)
 {
 	int i;
@@ -1229,9 +1215,7 @@ static void ShowHelp(void)
 	for (i = 0; i < arrlen(help_files_per_type); i++) {
 		if (help_files_per_type[i].ft == active_pane->dir->type) {
 			const char *filename = help_files_per_type[i].fn;
-			const char *help_text = HelpFileContents(filename);
-			VFILE *input = vfopenmem(help_text, strlen(help_text));
-			P_RunPlaintextPager("WadGadget help", input, false);
+			P_RunHelpPager(filename);
 			return;
 		}
 	}
