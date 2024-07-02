@@ -1,3 +1,4 @@
+
 # WAD file editor
 
 WAD files ("Where's All the Data?") contain all of the artwork, levels, sound
