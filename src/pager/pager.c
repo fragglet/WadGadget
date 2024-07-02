@@ -160,3 +160,16 @@ void P_SwitchConfig(struct pager_config *cfg)
 	current_pager->window_offset = 0;
 	UI_ActionsBarSetActions(cfg->actions);
 }
+
+void P_JumpToLine(struct pager *p, int lineno)
+{
+	int win_h;
+
+	if (p->pane.window == NULL) {
+		p->window_offset = lineno;
+		return;
+	}
+
+	win_h = getmaxy(p->pane.window);
+	p->window_offset = max(min(lineno, p->cfg->num_lines - win_h), 0);
+}

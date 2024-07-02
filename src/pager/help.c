@@ -97,7 +97,7 @@ static bool ScanNextLink(struct help_pager_config *cfg, int dir)
 		if (current_pager != NULL &&
 		    (lineno < current_pager->window_offset
 		  || lineno >= current_pager->window_offset + win_h)) {
-			current_pager->window_offset = max(lineno - 5, 0);
+			P_JumpToLine(current_pager, lineno - 5);
 		}
 		return true;
 	}
