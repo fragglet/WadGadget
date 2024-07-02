@@ -17,6 +17,7 @@
 #include "pager/pager.h"
 #include "pager/plaintext.h"
 #include "pager/help.h"
+#include "stringlib.h"
 #include "ui/actions_bar.h"
 #include "ui/dialog.h"
 
@@ -25,12 +26,27 @@ static const struct action *help_pager_actions[] = {
 	NULL,
 };
 
-static void DrawHelpLine(WINDOW *win, unsigned int line, void *user_data)
+static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 {
 	struct help_pager_config *cfg = user_data;
+	const char *line;
 
-	assert(line < cfg->pc.num_lines);
-	waddstr(win, cfg->lines[line]);
+	assert(lineno < cfg->pc.num_lines);
+	line = cfg->lines[lineno];
+
+	if (StringHasPrefix(line, "# ")) {
+		wattron(win, A_BOLD);
+		wattron(win, A_UNDERLINE);
+		line += 2;
+	} else if (StringHasPrefix(line, "## ")) {
+		wattron(win, A_BOLD);
+		wattron(win, A_UNDERLINE);
+		line += 3;
+	} else {
+		wattroff(win, A_BOLD);
+		wattroff(win, A_UNDERLINE);
+	}
+	waddstr(win, line);
 }
 
 void P_FreeHelpConfig(struct help_pager_config *cfg)
