@@ -80,6 +80,8 @@ static void PerformSearch(void)
 {
 	char *needle;
 
+	current_pager->search_line = -1;
+
 	needle = UI_TextInputDialogBox(
 		"Search", "Search", 32, "Enter search string:");
 
