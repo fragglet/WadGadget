@@ -254,6 +254,7 @@ static void PerformFollowLink(void)
 		SaveToHistory(current_pager, cfg);
 		OpenHelpFile(cfg, filename);
 		current_pager->window_offset = 0;
+		P_ClearSearch(current_pager);
 	}
 	free(filename);
 }

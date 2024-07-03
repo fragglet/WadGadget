@@ -268,7 +268,7 @@ void P_SwitchConfig(struct pager_config *cfg)
 	assert(current_pager != NULL);
 	current_pager->cfg = cfg;
 	current_pager->window_offset = 0;
-	current_pager->search_line = -1;
+	P_ClearSearch(current_pager);
 	UI_ActionsBarSetActions(cfg->actions);
 }
 
@@ -283,4 +283,9 @@ void P_JumpToLine(struct pager *p, int lineno)
 
 	win_h = getmaxy(p->pane.window);
 	p->window_offset = max(min(lineno, p->cfg->num_lines - win_h), 0);
+}
+
+void P_ClearSearch(struct pager *p)
+{
+	current_pager->search_line = -1;
 }
