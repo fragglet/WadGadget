@@ -25,6 +25,7 @@ struct pager_config {
 
 struct pager {
 	struct pane pane;
+	WINDOW *search_pad;
 	WINDOW *line_win;
 	unsigned int window_offset;
 	struct pager_config *cfg;
@@ -40,3 +41,4 @@ void P_JumpToLine(struct pager *p, int lineno);
 
 extern struct pager *current_pager;
 extern const struct action exit_pager_action;
+extern const struct action pager_search_action;

@@ -9,10 +9,12 @@
 //
 
 #include <string.h>
+#include <ctype.h>
 
 #include "common.h"
 #include "pager/pager.h"
 #include "ui/actions_bar.h"
+#include "ui/dialog.h"
 #include "ui/colors.h"
 #include "ui/title_bar.h"
 
@@ -20,6 +22,66 @@ struct pager *current_pager;
 
 const struct action exit_pager_action = {
 	27, 0, "Close", "Close", UI_ExitMainLoop,
+};
+
+static bool LineContainsString(struct pager *p, unsigned int lineno,
+                               const char *needle)
+{
+	int i, j, w, needle_len;
+
+	werase(p->search_pad);
+	wmove(p->search_pad, 0, 0);
+	p->cfg->draw_line(p->search_pad, lineno, p->cfg->user_data);
+
+	w = getmaxx(p->search_pad);
+	needle_len = strlen(needle);
+	for (i = 0; i < w - needle_len; i++) {
+		for (j = 0; needle[j] != '\0'; j++) {
+			int c = mvwinch(p->search_pad, 0, i + j);
+			if (tolower(needle[j]) != tolower(c & A_CHARTEXT)) {
+				break;
+			}
+		}
+		if (needle[j] == '\0') {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static bool Search(struct pager *p, const char *needle)
+{
+	int i;
+
+	for (i = 0; i < p->cfg->num_lines; i++) {
+		if (LineContainsString(p, i, needle)) {
+			P_JumpToLine(p, i);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static void PerformSearch(void)
+{
+	char *needle;
+
+	needle = UI_TextInputDialogBox(
+		"Search", "Search", 32, "Enter search string:");
+
+	if (needle == NULL) {
+		return;
+	}
+
+	if (!Search(current_pager, needle)) {
+		UI_ShowNotice("No match found.");
+	}
+}
+
+const struct action pager_search_action = {
+	0, 'F', "Search", "Search", PerformSearch,
 };
 
 static void UpdateSubtitle(struct pager *p)
@@ -124,6 +186,7 @@ void P_InitPager(struct pager *p, struct pager_config *cfg)
 	p->pane.keypress = HandleKeypress;
 	p->pane.draw = DrawPager;
 	p->line_win = derwin(p->pane.window, 1, COLS, 0, 0);
+	p->search_pad = newpad(1, 120);
 	p->cfg = cfg;
 }
 
@@ -131,6 +194,7 @@ void P_FreePager(struct pager *p)
 {
 	delwin(p->line_win);
 	delwin(p->pane.window);
+	delwin(p->search_pad);
 }
 
 void P_RunPager(struct pager_config *cfg)

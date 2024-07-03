@@ -72,7 +72,7 @@ static void ChangeColumns(void)
 {
 	struct hexdump_pager_config *cfg = current_pager->cfg->user_data;
 	char *answer;
-	int cols, view_offset;
+	int cols;
 
 	answer = UI_TextInputDialogBox(
 		"Change columns per line", "Set columns", 2,
@@ -101,6 +101,7 @@ static const struct action *hexdump_pager_actions[] = {
 	&switch_ascii_action,
 	&change_columns_action,
 	&exit_pager_action,
+	&pager_search_action,
 	NULL,
 };
 

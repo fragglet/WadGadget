@@ -53,6 +53,7 @@ static const struct action *plaintext_pager_actions[] = {
 	&exit_pager_edit_action,
 	&switch_hexdump_action,
 	&exit_pager_action,
+	&pager_search_action,
 	NULL,
 };
 

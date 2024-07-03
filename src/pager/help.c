@@ -307,6 +307,7 @@ static const struct action *help_pager_actions[] = {
 	&next_link_action,
 	&follow_link_action,
 	&toc_action,
+	&pager_search_action,
 	NULL,
 };
 
