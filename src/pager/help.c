@@ -124,7 +124,7 @@ static void PerformNextLink(void)
 }
 
 static const struct action next_link_action = {
-        '\t', 0, "Next Link", "Next Link", PerformNextLink,
+        '\t', 0, "NextLink", "Next Link", PerformNextLink,
 };
 
 static void PerformPrevLink(void)
@@ -251,7 +251,7 @@ static void PerformFollowLink(void)
 }
 
 static const struct action follow_link_action = {
-	'\r', 0, "Open Link", "Open Link", PerformFollowLink,
+	'\r', 0, "Open", "Open Link", PerformFollowLink,
 };
 
 static void PerformGoBack(void)
@@ -288,7 +288,7 @@ static void OpenTableOfContents(void)
 }
 
 static const struct action toc_action = {
-	0, 'T', "Table of Contents", "Table of Contents", OpenTableOfContents,
+	0, 'T', "Contents", "Table of Contents", OpenTableOfContents,
 };
 
 

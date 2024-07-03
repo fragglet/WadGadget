@@ -60,6 +60,46 @@ static bool HasFunctionKey(const struct action *a)
 	return a->key >= KEY_F(1) && a->key <= KEY_F(10);
 }
 
+static void ExpandAcceleratorNames(struct actions_bar *p, int *spacing)
+{
+	struct actions_accel *accel;
+	int i, num_accels = 0;
+
+	for (i = 0; i < arrlen(p->accels); i++) {
+		if (p->accels[i].action != NULL) {
+			++num_accels;
+		}
+	}
+
+	// Expand some to longer names where possible, but always keep at
+	// least one space between shortcuts.
+	while (*spacing > num_accels) {
+		int best = -1, best_diff = INT_MAX, diff;
+		const char *longname;
+
+		for (i = 0; i < arrlen(p->accels) && *spacing > num_accels; i++) {
+			accel = &p->accels[i];
+			if (accel->action == NULL) {
+				continue;
+			}
+			longname = LongName(accel->action);
+			diff = strlen(longname) - strlen(p->accels[i].name);
+			if (diff > 0 && diff < best_diff
+			 && *spacing - diff >= num_accels) {
+				best_diff = diff;
+				best = i;
+			}
+		}
+
+		if (best < 0) {
+			break;
+		}
+
+		p->accels[best].name = LongName(p->accels[best].action);
+		*spacing -= best_diff;
+	}
+}
+
 static int SetAccelerators(struct actions_bar *p, const struct action **cells,
                            int columns)
 {
@@ -92,32 +132,10 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 		return 0;
 	}
 
-	// Expand some to longer names where possible, but always keep at
-	// least one space between shortcuts. In non-shortcut mode, we
-	// always use short names so we can cram in as many shortcuts as
-	// possible.
-	while (p->function_keys && spacing >= num_shortcuts) {
-		int best = -1, best_diff = INT_MAX;
-		const char *longname;
-
-		for (i = 0; i < 10; i++) {
-			if (cells[i] == NULL) {
-				continue;
-			}
-			longname = LongName(cells[i]);
-			diff = strlen(longname) - strlen(p->accels[i].name);
-			if (diff > 0 && diff < best_diff
-			 && spacing - diff >= num_shortcuts) {
-				best_diff = diff;
-				best = i;
-			}
-		}
-		if (best < 0) {
-			break;
-		}
-
-		p->accels[best].name = LongName(cells[best]);
-		spacing -= best_diff;
+	// In non-shortcut mode, we always use short names so we can cram in as
+	// many shortcuts as possible.
+	if (p->function_keys) {
+		ExpandAcceleratorNames(p, &spacing);
 	}
 
 	// Can we fit any more shortcuts in?
@@ -146,6 +164,8 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 		}
 		i++;
 	}
+
+	ExpandAcceleratorNames(p, &spacing);
 
 	return min(num_shortcuts > 0 ? spacing / num_shortcuts : 1, 3);
 }
