@@ -21,6 +21,7 @@ LDFLAGS := $(shell pkg-config --libs $(REQUIRED_PKGS)) \
 
 HELP_FILES =                \
     help/common.md          \
+    help/contents.md        \
     help/dir_view.md        \
     help/pnames_editor.md   \
     help/texture_editor.md  \

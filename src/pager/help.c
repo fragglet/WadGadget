@@ -286,12 +286,27 @@ static const struct action back_action = {
 	KEY_LEFT, 'B', "Back", "Back", PerformGoBack,
 };
 
+static void OpenTableOfContents(void)
+{
+	struct help_pager_config *cfg = current_pager->cfg->user_data;
+
+	SaveToHistory(current_pager, cfg);
+	OpenHelpFile(cfg, "contents.md");
+	current_pager->window_offset = 0;
+}
+
+static const struct action toc_action = {
+	0, 'T', "Table of Contents", "Table of Contents", OpenTableOfContents,
+};
+
+
 static const struct action *help_pager_actions[] = {
 	&exit_pager_action,
 	&back_action,
 	&prev_link_action,
 	&next_link_action,
 	&follow_link_action,
+	&toc_action,
 	NULL,
 };
 
