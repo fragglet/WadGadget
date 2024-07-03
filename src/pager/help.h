@@ -8,10 +8,18 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+struct help_pager_history {
+	char *filename;
+	int window_offset, current_link_line;
+	struct help_pager_history *next;
+};
+
 struct help_pager_config {
 	struct pager_config pc;
+	char *filename;
 	char **lines;
 	int current_link_line;
+	struct help_pager_history *history;
 };
 
 void P_FreeHelpConfig(struct help_pager_config *cfg);

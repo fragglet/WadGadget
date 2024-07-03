@@ -157,7 +157,7 @@ static char *AnchorName(const char *line)
 		return NULL;
 	}
 
-	result = strdup(line);
+	result = checked_strdup(line);
 	for (p = result; *p != '\0'; ++p) {
 		if (*p == ' ') {
 			*p = '-';
@@ -198,6 +198,18 @@ static void FreeLines(struct help_pager_config *cfg)
 	free(cfg->lines);
 }
 
+static void SaveToHistory(struct pager *p, struct help_pager_config *cfg)
+{
+	struct help_pager_history *h;
+
+	h = checked_calloc(1, sizeof(struct help_pager_history));
+	h->filename = checked_strdup(cfg->filename);
+	h->window_offset = p->window_offset;
+	h->current_link_line = cfg->current_link_line;
+	h->next = cfg->history;
+	cfg->history = h;
+}
+
 static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 {
 	const char *contents = HelpFileContents(filename);
@@ -207,6 +219,8 @@ static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 	}
 
 	FreeLines(cfg);
+	free(cfg->filename);
+	cfg->filename = checked_strdup(filename);
 	cfg->lines = P_PlaintextLines(contents, strlen(contents),
 	                              &cfg->pc.num_lines);
 	cfg->current_link_line = -1;
@@ -226,7 +240,7 @@ static void PerformFollowLink(void)
 		return;
 	}
 
-	filename = strdup(link_middle + 2);
+	filename = checked_strdup(link_middle + 2);
 	p = strchr(filename, ')');
 	if (p == NULL) {
 		return;
@@ -237,7 +251,9 @@ static void PerformFollowLink(void)
 	if (filename[0] == '#') {
 		JumpToAnchor(current_pager, filename + 1);
 	} else {
+		SaveToHistory(current_pager, cfg);
 		OpenHelpFile(cfg, filename);
+		current_pager->window_offset = 0;
 	}
 	free(filename);
 }
@@ -246,8 +262,33 @@ static const struct action follow_link_action = {
 	'\r', 0, "Open Link", "Open Link", PerformFollowLink,
 };
 
+static void PerformGoBack(void)
+{
+	struct help_pager_config *cfg = current_pager->cfg->user_data;
+	struct help_pager_history *h;
+
+	if (cfg->history == NULL) {
+		return;
+	}
+
+	h = cfg->history;
+	cfg->history = h->next;
+
+	OpenHelpFile(cfg, h->filename);
+	current_pager->window_offset = h->window_offset;
+	cfg->current_link_line = h->current_link_line;
+
+	free(h->filename);
+	free(h);
+}
+
+static const struct action back_action = {
+	KEY_LEFT, 'B', "Back", "Back", PerformGoBack,
+};
+
 static const struct action *help_pager_actions[] = {
 	&exit_pager_action,
+	&back_action,
 	&prev_link_action,
 	&next_link_action,
 	&follow_link_action,
@@ -332,7 +373,17 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 
 void P_FreeHelpConfig(struct help_pager_config *cfg)
 {
+	struct help_pager_history *h;
 	FreeLines(cfg);
+	free(cfg->filename);
+
+	h = cfg->history;
+	while (h != NULL) {
+		struct help_pager_history *next = h->next;
+		free(h->filename);
+		free(h);
+		h = next;
+	}
 }
 
 bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename)
@@ -342,6 +393,8 @@ bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename)
 	cfg->pc.user_data = cfg;
 	cfg->pc.actions = help_pager_actions;
 	cfg->lines = NULL;
+	cfg->filename = NULL;
+	cfg->history = NULL;
 	cfg->pc.num_lines = 0;
 
 	return OpenHelpFile(cfg, filename);
