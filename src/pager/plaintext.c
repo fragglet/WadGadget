@@ -54,6 +54,7 @@ static const struct action *plaintext_pager_actions[] = {
 	&switch_hexdump_action,
 	&exit_pager_action,
 	&pager_search_action,
+	&pager_search_again_action,
 	NULL,
 };
 

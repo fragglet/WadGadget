@@ -8,6 +8,7 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -50,11 +51,11 @@ static bool LineContainsString(struct pager *p, unsigned int lineno,
 	return false;
 }
 
-static bool Search(struct pager *p, const char *needle)
+static bool Search(struct pager *p, const char *needle, int start_line)
 {
 	int i;
 
-	for (i = p->search_line + 1; i < p->cfg->num_lines; i++) {
+	for (i = start_line; i < p->cfg->num_lines; i++) {
 		if (LineContainsString(p, i, needle)) {
 			p->search_line = i;
 			P_JumpToLine(p, i);
@@ -64,7 +65,7 @@ static bool Search(struct pager *p, const char *needle)
 
 	// Return to top.
 	UI_ShowNotice("Searched to the end; returning to the start.");
-	for (i = 0; i < p->search_line; i++) {
+	for (i = 0; i < start_line; i++) {
 		if (LineContainsString(p, i, needle)) {
 			p->search_line = i;
 			P_JumpToLine(p, i);
@@ -86,13 +87,39 @@ static void PerformSearch(void)
 		return;
 	}
 
-	if (!Search(current_pager, needle)) {
+	if (!Search(current_pager, needle, current_pager->window_offset)) {
 		UI_ShowNotice("No match found.");
+		return;
 	}
+
+	free(current_pager->last_search);
+	current_pager->last_search = checked_strdup(needle);
 }
 
 const struct action pager_search_action = {
 	0, 'F', "Search", "Search", PerformSearch,
+};
+
+static void PerformSearchAgain(void)
+{
+	int last_search_line;
+
+	if (current_pager->last_search == NULL) {
+		PerformSearch();
+		return;
+	}
+
+	last_search_line = current_pager->search_line;
+
+	Search(current_pager, current_pager->last_search,
+	       current_pager->search_line + 1);
+	if (current_pager->search_line == last_search_line) {
+		UI_ShowNotice("No more matches found.");
+	}
+}
+
+const struct action pager_search_again_action = {
+	0, 'N', "Next", "Search Again", PerformSearchAgain,
 };
 
 static void UpdateSubtitle(struct pager *p)
@@ -204,6 +231,7 @@ void P_InitPager(struct pager *p, struct pager_config *cfg)
 	p->line_win = derwin(p->pane.window, 1, COLS, 0, 0);
 	p->search_pad = newpad(1, 120);
 	p->search_line = -1;
+	p->last_search = NULL;
 	p->cfg = cfg;
 }
 
@@ -212,6 +240,7 @@ void P_FreePager(struct pager *p)
 	delwin(p->line_win);
 	delwin(p->pane.window);
 	delwin(p->search_pad);
+	free(p->last_search);
 }
 
 void P_RunPager(struct pager_config *cfg)

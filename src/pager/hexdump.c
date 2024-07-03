@@ -102,6 +102,7 @@ static const struct action *hexdump_pager_actions[] = {
 	&change_columns_action,
 	&exit_pager_action,
 	&pager_search_action,
+	&pager_search_again_action,
 	NULL,
 };
 
