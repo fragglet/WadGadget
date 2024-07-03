@@ -145,6 +145,49 @@ static const struct action prev_link_action = {
 	KEY_BTAB, 0, NULL, NULL, PerformPrevLink,
 };
 
+static char *AnchorName(const char *line)
+{
+	char *result, *p;
+
+	if (StringHasPrefix(line, "# ")) {
+		line += 2;
+	} else if (StringHasPrefix(line, "## ")) {
+		line += 3;
+	} else {
+		return NULL;
+	}
+
+	result = strdup(line);
+	for (p = result; *p != '\0'; ++p) {
+		if (*p == ' ') {
+			*p = '-';
+		}
+	}
+
+	return result;
+}
+
+static bool JumpToAnchor(struct pager *p, const char *anchor)
+{
+	struct help_pager_config *cfg = p->cfg->user_data;
+	char *curr;
+	int i;
+
+	for (i = 0; i < cfg->pc.num_lines; i++) {
+		curr = AnchorName(cfg->lines[i]);
+		if (curr != NULL) {
+			if (!strcasecmp(curr, anchor)) {
+				free(curr);
+				P_JumpToLine(p, i);
+				return true;
+			}
+			free(curr);
+		}
+	}
+
+	return false;
+}
+
 static void FreeLines(struct help_pager_config *cfg)
 {
 	int i;
@@ -190,7 +233,12 @@ static void PerformFollowLink(void)
 	}
 
 	*p = '\0';
-	OpenHelpFile(cfg, filename);
+
+	if (filename[0] == '#') {
+		JumpToAnchor(current_pager, filename + 1);
+	} else {
+		OpenHelpFile(cfg, filename);
+	}
 	free(filename);
 }
 
