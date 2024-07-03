@@ -13,6 +13,7 @@ struct hexdump_pager_config {
 	uint8_t *data;
 	size_t data_len;
 	void *plaintext_config;
+	int columns;
 };
 
 bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,

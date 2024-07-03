@@ -15,6 +15,7 @@
 #include "pager/pager.h"
 #include "pager/hexdump.h"
 #include "pager/plaintext.h"
+#include "ui/dialog.h"
 
 static void DrawHexdumpLine(WINDOW *win, unsigned int line, void *user_data)
 {
@@ -22,23 +23,28 @@ static void DrawHexdumpLine(WINDOW *win, unsigned int line, void *user_data)
 	char buf[12];
 	int i;
 
-	snprintf(buf, sizeof(buf), " %08x: ", line * 16);
+	snprintf(buf, sizeof(buf), " %08x: ", line * cfg->columns);
 	waddstr(win, buf);
 
-	for (i = 0; i < 16 && line * 16 + i < cfg->data_len; i++) {
-		snprintf(buf, sizeof(buf), "%02x ", cfg->data[line * 16 + i]);
+	i = 0;
+	while (i < cfg->columns && line * cfg->columns + i < cfg->data_len) {
+		snprintf(buf, sizeof(buf), "%02x ",
+		         cfg->data[line * cfg->columns + i]);
 		waddstr(win, buf);
+		++i;
 	}
 
-	mvwaddstr(win, 0, 60, "");
+	mvwaddstr(win, 0, cfg->columns * 3 + 12, "");
 
-	for (i = 0; i < 16 && line * 16 + i < cfg->data_len; i++) {
-		int c = cfg->data[line * 16 + i];
+	i = 0;
+	while (i < cfg->columns && line * cfg->columns + i < cfg->data_len) {
+		int c = cfg->data[line * cfg->columns + i];
 		if (c >= 32 && c < 127) {
 			waddch(win, c);
 		} else {
 			waddch(win, '.');
 		}
+		++i;
 	}
 }
 
@@ -62,8 +68,38 @@ const struct action switch_ascii_action = {
 	0, 'D', "ASCII", "View as ASCII", SwitchToASCII,
 };
 
+static void ChangeColumns(void)
+{
+	struct hexdump_pager_config *cfg = current_pager->cfg->user_data;
+	char *answer;
+	int cols, view_offset;
+
+	answer = UI_TextInputDialogBox(
+		"Change columns per line", "Set columns", 2,
+		"Enter the number of columns\nto display per line:");
+	if (answer == NULL) {
+		return;
+	}
+
+	cols = atoi(answer);
+	if (cols <= 0) {
+		return;
+	}
+
+	current_pager->window_offset =
+		current_pager->window_offset * cfg->columns / cols;
+
+	cfg->columns = cols;
+	cfg->pc.num_lines = (cfg->data_len + cols - 1) / cols;
+}
+
+const struct action change_columns_action = {
+	0, 'O', "Columns", "Columns", ChangeColumns,
+};
+
 static const struct action *hexdump_pager_actions[] = {
 	&switch_ascii_action,
+	&change_columns_action,
 	&exit_pager_action,
 	NULL,
 };
@@ -79,7 +115,8 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 
 	cfg->data = vfreadall(input, &cfg->data_len);
 	vfclose(input);
-	cfg->pc.num_lines = (cfg->data_len + 15) / 16;
+	cfg->columns = 16;
+	cfg->pc.num_lines = (cfg->data_len + cfg->columns - 1) / cfg->columns;
 
 	return cfg->data != NULL;
 }
