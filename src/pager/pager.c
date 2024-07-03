@@ -58,7 +58,7 @@ static bool Search(struct pager *p, const char *needle, int start_line)
 	for (i = start_line; i < p->cfg->num_lines; i++) {
 		if (LineContainsString(p, i, needle)) {
 			p->search_line = i;
-			P_JumpToLine(p, i);
+			P_JumpWithinWindow(p, i);
 			return true;
 		}
 	}
@@ -68,7 +68,7 @@ static bool Search(struct pager *p, const char *needle, int start_line)
 	for (i = 0; i < start_line; i++) {
 		if (LineContainsString(p, i, needle)) {
 			p->search_line = i;
-			P_JumpToLine(p, i);
+			P_JumpWithinWindow(p, i);
 			return true;
 		}
 	}
@@ -283,6 +283,23 @@ void P_JumpToLine(struct pager *p, int lineno)
 
 	win_h = getmaxy(p->pane.window);
 	p->window_offset = max(min(lineno, p->cfg->num_lines - win_h), 0);
+}
+
+// P_JumpToLine, but keep current window position unless the line is
+// not visible.
+void P_JumpWithinWindow(struct pager *p, int lineno)
+{
+	int win_h;
+
+	if (p->pane.window == NULL) {
+		win_h = 25;
+	} else {
+		win_h = getmaxy(p->pane.window);
+	}
+
+	if (lineno < p->window_offset || lineno >= p->window_offset + win_h) {
+		P_JumpToLine(current_pager, lineno - 5);
+	}
 }
 
 void P_ClearSearch(struct pager *p)

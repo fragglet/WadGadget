@@ -79,27 +79,18 @@ static const char *LineHasLink(const char *p)
 
 static bool ScanNextLink(struct help_pager_config *cfg, int dir)
 {
-	int win_h = 25;
 	int lineno = cfg->current_link_line;
 
-	if (current_pager != NULL && current_pager->pane.window != NULL) {
-		win_h = getmaxy(current_pager->pane.window);
-	}
-
 	while (lineno >= 0 && lineno < cfg->pc.num_lines) {
-		if (!LineHasLink(cfg->lines[lineno])) {
-			lineno += dir;
-			continue;
+		if (LineHasLink(cfg->lines[lineno])) {
+			cfg->current_link_line = lineno;
+			if (current_pager != NULL) {
+				P_JumpWithinWindow(current_pager, lineno);
+			}
+			return true;
 		}
 
-		// This line has a link.
-		cfg->current_link_line = lineno;
-		if (current_pager != NULL &&
-		    (lineno < current_pager->window_offset
-		  || lineno >= current_pager->window_offset + win_h)) {
-			P_JumpToLine(current_pager, lineno - 5);
-		}
-		return true;
+		lineno += dir;
 	}
 
 	return false;

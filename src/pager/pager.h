@@ -40,6 +40,7 @@ void P_BlockOnInput(struct pager *p);
 void P_RunPager(struct pager_config *cfg);
 void P_SwitchConfig(struct pager_config *cfg);
 void P_JumpToLine(struct pager *p, int lineno);
+void P_JumpWithinWindow(struct pager *p, int lineno);
 void P_ClearSearch(struct pager *p);
 
 extern struct pager *current_pager;
