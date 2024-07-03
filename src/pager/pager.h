@@ -28,6 +28,7 @@ struct pager {
 	WINDOW *search_pad;
 	WINDOW *line_win;
 	unsigned int window_offset;
+	int search_line;
 	struct pager_config *cfg;
 	char subtitle[15];
 };

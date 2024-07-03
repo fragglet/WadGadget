@@ -54,8 +54,19 @@ static bool Search(struct pager *p, const char *needle)
 {
 	int i;
 
-	for (i = 0; i < p->cfg->num_lines; i++) {
+	for (i = p->search_line + 1; i < p->cfg->num_lines; i++) {
 		if (LineContainsString(p, i, needle)) {
+			p->search_line = i;
+			P_JumpToLine(p, i);
+			return true;
+		}
+	}
+
+	// Return to top.
+	UI_ShowNotice("Searched to the end; returning to the start.");
+	for (i = 0; i < p->search_line; i++) {
+		if (LineContainsString(p, i, needle)) {
+			p->search_line = i;
 			P_JumpToLine(p, i);
 			return true;
 		}
@@ -118,6 +129,11 @@ static bool DrawPager(void *_p)
 	win_h = getmaxy(p->pane.window);
 	for (y = 0; y < win_h && lineno < p->cfg->num_lines; ++y, ++lineno) {
 		assert(mvderwin(p->line_win, y, 0) == OK);
+		if (lineno == p->search_line) {
+			wbkgdset(p->line_win, COLOR_PAIR(PAIR_NOTICE));
+		} else {
+			wbkgdset(p->line_win, COLOR_PAIR(PAIR_WHITE_BLACK));
+		}
 		werase(p->line_win);
 		mvwaddstr(p->line_win, 0, 0, "");
 		p->cfg->draw_line(p->line_win, lineno, p->cfg->user_data);
@@ -187,6 +203,7 @@ void P_InitPager(struct pager *p, struct pager_config *cfg)
 	p->pane.draw = DrawPager;
 	p->line_win = derwin(p->pane.window, 1, COLS, 0, 0);
 	p->search_pad = newpad(1, 120);
+	p->search_line = -1;
 	p->cfg = cfg;
 }
 
@@ -222,6 +239,7 @@ void P_SwitchConfig(struct pager_config *cfg)
 	assert(current_pager != NULL);
 	current_pager->cfg = cfg;
 	current_pager->window_offset = 0;
+	current_pager->search_line = -1;
 	UI_ActionsBarSetActions(cfg->actions);
 }
 
