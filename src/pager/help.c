@@ -232,7 +232,7 @@ static void PerformFollowLink(void)
 	struct help_pager_config *cfg = current_pager->cfg->user_data;
 	const char *line = cfg->lines[cfg->current_link_line];
 	const char *link_middle = strstr(line, "](");
-	char *filename, *p;
+	char *filename, *anchor = NULL, *p;
 
 	if (link_middle == NULL) {
 		return;
@@ -246,13 +246,20 @@ static void PerformFollowLink(void)
 
 	*p = '\0';
 
-	if (filename[0] == '#') {
-		JumpToAnchor(current_pager, filename + 1);
-	} else {
+	p = strchr(filename, '#');
+	if (p != NULL) {
+		anchor = p + 1;
+		*p = '\0';
+	}
+
+	if (strlen(filename) > 0) {
 		SaveToHistory(current_pager, cfg);
 		OpenHelpFile(cfg, filename);
 		current_pager->window_offset = 0;
 		P_ClearSearch(current_pager);
+	}
+	if (anchor != NULL) {
+		JumpToAnchor(current_pager, anchor);
 	}
 	free(filename);
 }
