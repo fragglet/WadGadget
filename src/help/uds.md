@@ -78,67 +78,67 @@ write to the author at "msfell@aol.com" on the Internet.
 
 # CONTENTS
 
-[1] Introduction
- * [1-1] id Software's Copyright
- * [1-2] What's New
-[2] The Basics
- * [2-1] Pwads
- * [2-2] DOOM version information
- * [2-3] Terminology conventions
-[3] List of DOOM.WAD Directory Entries
-[4] The Levels
- * [4-1] ExMy or MAPxy
- * [4-2] THINGS
-   * [4-2-1] Thing Types
-   * [4-2-2] Thing Sizes
-   * [4-2-3] Thing Options
- * [4-3] LINEDEFS
-   * [4-3-1] Linedef Flags
-   * [4-3-2] Linedef Types
- * [4-4] SIDEDEFS
- * [4-5] VERTEXES
- * [4-6] SEGS
- * [4-7] SSECTORS
- * [4-8] NODES
- * [4-9] SECTORS
-   * [4-9-1] Special Sector Types
- * [4-10] REJECT
- * [4-11] BLOCKMAP
-[5] Graphics
- * [5-1] Picture Format
-[6] Flats (Floor and Ceiling Textures)
- * [6-1] Animated Floors, see [8-4-1]
-[7] Sounds and Music
- * [7-1] PC Speaker Sound Effects
- * [7-2] Soundcard Sound Effects
- * [7-3] Music
- * [7-4] GENMIDI
- * [7-5] DMXGUS
-[8] Miscellaneous Lumps
- * [8-1] PLAYPAL
- * [8-2] COLORMAP
- * [8-3] ENDOOM
- * [8-4] TEXTURE1 and TEXTURE2
-   * [8-4-1] Animated Walls
-   * [8-4-2] The SKY Textures
- * [8-5] PNAMES
- * [8-6] DEMOs
-   * [8-6-1] Level changes from 1.2 to 1.666 DOOM.WAD
-[9] Savegame Files
+[[1]](#chapter-1-introduction) Introduction
+ * [[1-1]](#1-1-id-softwares-copyright-and-the-shareware-version) id Software's Copyright
+ * [[1-2]](#1-2-whats-new) What's New
+[[2]](#chapter-2-basics) The Basics
+ * [[2-1]](#2-1-pwads) Pwads
+ * [[2-2]](#2-2-doom-versions) DOOM version information
+ * [[2-3]](#2-3-terminology-conventions) Terminology conventions
+[[3]](#chapter-3-list-of-doomwad-directory-entries) List of DOOM.WAD Directory Entries
+[[4]](#chapter-4-the-levels) The Levels
+ * [[4-1]](#4-1-exmy-or-mapxy) ExMy or MAPxy
+ * [[4-2]](#4-2-things) THINGS
+   * [[4-2-1]](#4-2-1-thing-types) Thing Types
+   * [[4-2-2]](#4-2-2-thing-sizes) Thing Sizes
+   * [[4-2-3]](#4-2-3-thing-options) Thing Options
+ * [[4-3]](#4-3-linedefs) LINEDEFS
+   * [[4-3-1]](#4-3-1-linedef-flags) Linedef Flags
+   * [[4-3-2]](#4-3-2-linedef-types) Linedef Types
+ * [[4-4]](#4-4-sidedefs) SIDEDEFS
+ * [[4-5]](#4-5-vertexes) VERTEXES
+ * [[4-6]](#4-6-segs) SEGS
+ * [[4-7]](#4-7-ssectors) SSECTORS
+ * [[4-8]](#4-8-nodes) NODES
+ * [[4-9]](#4-9-sectors) SECTORS
+   * [[4-9-1]](#4-9-1-special-sector-types) Special Sector Types
+ * [[4-10]](#4-10-reject) REJECT
+ * [[4-11]](#4-11-blockmap) BLOCKMAP
+[[5]](#chapter-5-graphics) Graphics
+ * [[5-1]](#5-1-picture-format) Picture Format
+[[6]](#chapter-6-flats-floor-and-ceiling-textures) Flats (Floor and Ceiling Textures)
+ * [[6-1]](#6-1-animated-flats) Animated Floors, see [[8-4-1]](#8-4-1-animated-walls)
+[[7]](#chapter-7-sounds-and-music) Sounds and Music
+ * [[7-1]](#7-1-pc-speaker-sound-effects) PC Speaker Sound Effects
+ * [[7-2]](#7-2-soundcard-sound-effects) Soundcard Sound Effects
+ * [[7-3]](#7-3-music) Music
+ * [[7-4]](#7-4-genmidi) GENMIDI
+ * [[7-5]](#7-5-dmxgus) DMXGUS
+[[8]](#chapter-8-miscellaneous-lumps) Miscellaneous Lumps
+ * [[8-1]](#8-1-playpal) PLAYPAL
+ * [[8-2]](#8-2-colormap) COLORMAP
+ * [[8-3]](#8-3-endoom) ENDOOM
+ * [[8-4]](#8-4-texture1-and-texture2) TEXTURE1 and TEXTURE2
+   * [[8-4-1]](#8-4-1-animated-walls) Animated Walls
+   * [[8-4-2]](#8-4-2-the-sky-textures) The SKY Textures
+ * [[8-5]](#8-5-pnames) PNAMES
+ * [[8-6]](#8-6-demos) DEMOs
+   * [[8-6-1]](#8-6-1-level-changes-from-12-to-1666-doomwad) Level changes from 1.2 to 1.666 DOOM.WAD
+[[9]](#chapter-9-savegame-files) Savegame Files
 
-[10] The DOOM.EXE File
- * [10-1] Version 1.2 DOOM.EXE Data Segment Overview
- * [10-1] Version 1.666 DOOM.EXE Data Segment Overview
- * [10-3] Detail on some EXE Data Structures
+[[10]](#chapter-10-the-doomexe-file) The DOOM.EXE File
+ * [[10-1]](#10-1-version-12-doomexe-data-segment-overview) Version 1.2 DOOM.EXE Data Segment Overview
+ * [[10-1]](#10-1-version-12-doomexe-data-segment-overview) Version 1.666 DOOM.EXE Data Segment Overview
+ * [[10-3]](#10-3-detail-on-some-exe-data-structures) Detail on some EXE Data Structures
 
 APPENDICES
 
-[A-1] Backus-Naur Form definitions of wad elements
-[A-2] Engine limits
-[A-3] DOOM.WAD changes and errors
-[A-3] A BLOCKMAP algorithm
-[A-4] Other helpful documents
-[A-5] Acknowledgments
+[[A-1]](#appendix-a-1-backus-naur-form-definitions-of-wad-elements) Backus-Naur Form definitions of wad elements
+[[A-2]](#appendix-a-2-doom-engine-limits) Engine limits
+[[A-3]](#appendix-a-3-a-blockmap-algorithm) DOOM.WAD changes and errors
+[[A-3]](#appendix-a-3-a-blockmap-algorithm) A BLOCKMAP algorithm
+[[A-4]](#appendix-a-4-other-helpful-documents) Other helpful documents
+[[A-5]](#appendix-a-5-acknowledgments) Acknowledgments
 
 
 # CHAPTER [1]: Introduction
@@ -170,7 +170,7 @@ be information useful to advanced level designers and players.
 
 The material herein is somewhat technical and it is not recommended for
 beginners, unless they are determined. There are some other very useful
-documents in existence; I list the ones I know of in Appendix [A-3].
+documents in existence; I list the ones I know of in Appendix [[A-3]](#appendix-a-3-a-blockmap-algorithm).
 
 
 ## [1-1]: id Software's Copyright and the Shareware Version
@@ -228,13 +228,13 @@ May and July like I should have. Those updates would have been numbered
 
 Here's some of the new or revised sections since the 1.3 specs:
 
- * DOOM 2 info, especially in [4-2-1] and [4-3-2]
- * lots of info on the DOOM.EXE file in [10]
- * BNF style definitions in [A-1]
- * DOOM engine limits in [A-2]
- * the DEMO format [8-6]
- * the ENDOOM lump [8-3]
- * comprehensive list of WAD lumps in [3]
+ * DOOM 2 info, especially in [[4-2-1]](#4-2-1-thing-types) and [[4-3-2]](#4-3-2-linedef-types)
+ * lots of info on the DOOM.EXE file in [[10]](#chapter-10-the-doomexe-file)
+ * BNF style definitions in [[A-1]](#appendix-a-1-backus-naur-form-definitions-of-wad-elements)
+ * DOOM engine limits in [[A-2]](#appendix-a-2-doom-engine-limits)
+ * the DEMO format [[8-6]](#8-6-demos)
+ * the ENDOOM lump [[8-3]](#8-3-endoom)
+ * comprehensive list of WAD lumps in [[3]](#chapter-3-list-of-doomwad-directory-entries)
 
  * many parts rewritten for clarity
  * changes in terminology to reflect id's where possible, and to be
@@ -276,25 +276,25 @@ A "lump" is just data, in one of several different formats. Some
 contain sound data, some contain graphics data, some contain level
 structure data, etc. These specs are mostly concerned with delineating
 the formats of the various lump types. There are 10 different types of
-map/level lump formats, each has a section in chapter [4] (sections 2-11).
+map/level lump formats, each has a section in chapter [[4]](#chapter-4-the-levels) (sections 2-11).
 There are 13 other types of lump formats, listed below with the section
 where the format is explained, and the actual lump names in parentheses.
-Also, Appendix [A-1] has definitions of the structures of all these
+Also, Appendix [[A-1]](#appendix-a-1-backus-naur-form-definitions-of-wad-elements) has definitions of the structures of all these
 WAD elements.
 
-* [8-1] palettes (PLAYPAL)
-* [8-2] colormaps (COLORMAP)
-* [8-3] dos exit text (ENDOOM)
-* [8-6] demos (DEMO1, DEMO2, and DEMO3)
-* [8-4] texture composition list (TEXTURE1 and TEXTURE2)
-* [8-5] wall patch "number for name" indexing list (PNAMES)
-* [7-4] midi mapping (GENMIDI)
-* [7-5] Gravis UltraSound patch mappings (DMXGUS)
-* [7-1] PC speaker sound effects (DP*)
-* [7-2] Soundcard sound effects (DS*)
-* [7-3] songs (D_*)
-* [6]   flats (lumpnames between F_START and F_END)
-* [5]   all other graphics (all other lumps)
+* [[8-1]](#8-1-playpal) palettes (PLAYPAL)
+* [[8-2]](#8-2-colormap) colormaps (COLORMAP)
+* [[8-3]](#8-3-endoom) dos exit text (ENDOOM)
+* [[8-6]](#8-6-demos) demos (DEMO1, DEMO2, and DEMO3)
+* [[8-4]](#8-4-texture1-and-texture2) texture composition list (TEXTURE1 and TEXTURE2)
+* [[8-5]](#8-5-pnames) wall patch "number for name" indexing list (PNAMES)
+* [[7-4]](#7-4-genmidi) midi mapping (GENMIDI)
+* [[7-5]](#7-5-dmxgus) Gravis UltraSound patch mappings (DMXGUS)
+* [[7-1]](#7-1-pc-speaker-sound-effects) PC speaker sound effects (DP*)
+* [[7-2]](#7-2-soundcard-sound-effects) Soundcard sound effects (DS*)
+* [[7-3]](#7-3-music) songs (D_*)
+* [[6]](#chapter-6-flats-floor-and-ceiling-textures)   flats (lumpnames between F_START and F_END)
+* [[5]](#chapter-5-graphics)   all other graphics (all other lumps)
 
 The "marker" and "label" lump names like "S_START" and "E1M1" (or
 "MAP01") do not actually refer to lumps - they have zero length. They
@@ -321,11 +321,11 @@ the "PWAD" indicator, as id has requested.
 
 A typical pwad might contain new data for a single level, in which
 case it would contain the 10 lumps and 11 directory entries necessary
-to define the level (as described in chapter [4]).
+to define the level (as described in chapter [[4]](#chapter-4-the-levels)).
 
 A pwad file may contain more than one level or parts of levels, in
 addition to replacement graphics, sounds, etc. (as of version 1.666,
-sprites and flats do NOT work from pwads - see chapter [5] for more).
+sprites and flats do NOT work from pwads - see chapter [[5]](#chapter-5-graphics) for more).
 In fact, there is apparently no limit to how many entries may be in a
 pwad. The original doom levels are pretty complicated, and they are
 from 50-200 kilobytes each in size, uncompressed.
@@ -375,7 +375,7 @@ amounts of the stuff that's now in 1.666, but there's no information
 here about what exactly those changes were. One, I didn't keep track,
 and two, they're not really important.
 
-See appendix [A-3] for some miscellany about what has changed from
+See appendix [[A-3]](#appendix-a-3-a-blockmap-algorithm) for some miscellany about what has changed from
 version to version.
 
 ## [2-3]: Terminology conventions
@@ -411,10 +411,10 @@ numbers and variable types:
 
 There are over 2000 entries in the DOOM.WAD directory. Most of them
 can be easily described in groups, and so are not explicitly mentioned
-in this list. This includes the sprites (see [4-2-1] for sprite names
-and [5] for the sprite lump naming system), the wall patches ([8-4] and
-[8-5] have more info), the flats (chapter [6]), the sounds and songs
-(chapter [7]), and the map data lumps (chapter [4]). All the others
+in this list. This includes the sprites (see [[4-2-1]](#4-2-1-thing-types) for sprite names
+and [[5]](#chapter-5-graphics) for the sprite lump naming system), the wall patches ([[8-4]](#8-4-texture1-and-texture2) and
+[[8-5]](#8-5-pnames) have more info), the flats (chapter [[6]](#chapter-6-flats-floor-and-ceiling-textures)), the sounds and songs
+(chapter [[7]](#chapter-7-sounds-and-music)), and the map data lumps (chapter [[4]](#chapter-4-the-levels)). All the others
 are listed here.
 
 There have been several changes from version to version. The "Ver"
@@ -434,20 +434,20 @@ characters, and * can be replaced by an ASCII string (up to the
 
     LumpName  Ver   Description
     --------  ---   -----------
-    PLAYPAL         fourteen 256 color palettes. See [8-1].
-    COLORMAP        maps colors in the palette down to darker ones. [8-2].
-    ENDOOM          text message displayed when you exit to DOS. [8-3].
-    DEMOx           x=1-3, are the demos. [8-6].
-    ExMy            subsequent entries define a single level's data. [4].
+    PLAYPAL         fourteen 256 color palettes. See [[8-1]](#8-1-playpal).
+    COLORMAP        maps colors in the palette down to darker ones. [[8-2]](#8-2-colormap).
+    ENDOOM          text message displayed when you exit to DOS. [[8-3]](#8-3-endoom).
+    DEMOx           x=1-3, are the demos. [[8-6]](#8-6-demos).
+    ExMy            subsequent entries define a single level's data. [[4]](#chapter-4-the-levels).
     MAPxy     2     like ExMy, but for DOOM 2.
     TEXTURE1        list of wall texture names and their composition data,
-                    used in the SIDEDEF portion of each level. [8-4].
+                    used in the SIDEDEF portion of each level. [[8-4]](#8-4-texture1-and-texture2).
     TEXTURE2  r     more wall texture compositions.
-    PNAMES          lists all lump names used as wall patches. [8-5].
-    GENMIDI         General Midi standard instrument data. [7-3].
-    DMXGUS          Gravis Ultra Sound instrument patches. [7-4].
+    PNAMES          lists all lump names used as wall patches. [[8-5]](#8-5-pnames).
+    GENMIDI         General Midi standard instrument data. [[7-3]](#7-3-music).
+    DMXGUS          Gravis Ultra Sound instrument patches. [[7-4]](#7-4-genmidi).
 
-    D_ExMy          music for a doom 1 level. [7-2].
+    D_ExMy          music for a doom 1 level. [[7-2]](#7-2-soundcard-sound-effects).
     D_INTER         music played on the summary screen between levels.
     D_INTRO         music played when the game starts.
     D_INTROA  1.2   more introductory music.
@@ -455,13 +455,13 @@ characters, and * can be replaced by an ASCII string (up to the
     D_BUNNY   r     music for while a certain rabbit has his story told...
     D_*       2     music for a doom 2 level.
 
-    DP_*      vary  PC speaker sound effects. [7-1].
-    DS_*      vary  Soundcard sound effects. [7-1].
+    DP_*      vary  PC speaker sound effects. [[7-1]](#7-1-pc-speaker-sound-effects).
+    DS_*      vary  Soundcard sound effects. [[7-1]](#7-1-pc-speaker-sound-effects).
 
 All the remaining entries in the directory, except the flats between
 F_START and F_END, and the "markers" like S_START, refer to lumps which
-are pictures, in the doom/wad graphic format described in chapter [5].
-The flats are also pictures, but in a format described in chapter [6].
+are pictures, in the doom/wad graphic format described in chapter [[5]](#chapter-5-graphics).
+The flats are also pictures, but in a format described in chapter [[6]](#chapter-6-flats-floor-and-ceiling-textures).
 
 The next seven are full screen (320 by 200 pixel) pictures. After
 that, ST* are status-bar pictures, WI* are for the screens between
@@ -588,7 +588,7 @@ The following entries are markers that do not point to a lump; they
 have zero size:
 
     S_START         marks the start of the item/monster "sprite" section.
-                    See chapter [5] for the naming convention used here.
+                    See chapter [[5]](#chapter-5-graphics) for the naming convention used here.
     S_END           is immediately after the last sprite.
     P_START         marks the beginning of the wall patches.
     P1_START          before the first of the shareware wall patches.
@@ -649,8 +649,8 @@ fields:
    things look the same from all directions. Values are rounded to
    the nearest 45 degree angle, so if the value is 80, it will
    actually face 90 - north.
-4. Type of thing, see next subsection, [4-2-1]
-5. Thing options, see [4-2-3]
+4. Type of thing, see next subsection, [[4-2-1]](#4-2-1-thing-types)
+5. Thing options, see [[4-2-3]](#4-2-3-thing-options)
 
 ### [4-2-1]: Thing Types
 
@@ -676,7 +676,7 @@ extracting this table and SORTing it.
             SOULA0-SOULB0-C0-D0-C0-B0 then repeats. Thing 15, a dead
             player, is PLAYN0.
     +       Monsters and players and barrels. They can be hurt, and they
-            have a more complicated sprite arrangement. See chapter [5].
+            have a more complicated sprite arrangement. See chapter [[5]](#chapter-5-graphics).
     CAPITAL Monsters, counts toward the KILL ratio at the end of a level.
     #       An obstacle, players and monsters can't move through it.
     ^       Hangs from the ceiling, or floats (if a monster).
@@ -920,7 +920,7 @@ they see a player if they are deaf. Otherwise, they will activate when
 they hear gunshots, etc. (including the punch!). Sound does not travel
 through solid walls (walls that are solid at the time of the noise).
 Also, lines can be set so that sound does not pass through them (see
-[4-3-1] bit 6). This option is also known as the "ambush" option (or
+[[4-3-1]](#4-3-1-linedef-flags) bit 6). This option is also known as the "ambush" option (or
 flag, or attribute).
 
 ## [4-3]: LINEDEFS
@@ -930,8 +930,8 @@ and each linedef's record is 14 bytes, containing 7 <short> fields:
 
 1. from the VERTEX with this number (the first vertex is 0).
 2. to the VERTEX with this number (31 is the 32nd vertex).
-3. flags, see [4-3-1] below.
-4. types, see [4-3-2] below.
+3. flags, see [[4-3-1]](#4-3-1-linedef-flags) below.
+4. types, see [[4-3-2]](#4-3-2-linedef-types) below.
 5. is a "tag" or "trigger" number which ties this line's effect type
    to all SECTORS that have the same tag number (in their last
    field).
@@ -995,14 +995,14 @@ sector on the other side (and the sector heights allow it).
 
 Finally, monsters can see through and attack through two-sided lines,
 despite any of the line's other flag settings and textures (once again,
-provided sector heights and the REJECT [4-10] allow it).
+provided sector heights and the REJECT [[4-10]](#4-10-reject) allow it).
 
 3 (Upper unpegged) - The upper texture is pasted onto the wall from
 the top down instead of from the bottom up like usual.
 
 Upper textures normally have the bottom of the wall texture to be
 drawn lined up with the bottom of the "upper" space in which it is
-to be drawn (sidedef Y offsets then apply [4-4]). This can result
+to be drawn (sidedef Y offsets then apply [[4-4]](#4-4-sidedefs)). This can result
 in the upper texture being misaligned with a neighboring "middle"
 texture. To help solve this problem, common at "windows", this flag
 can be set.
@@ -1011,7 +1011,7 @@ If the upper texture is unpegged, it is drawn with the wall texture's
 top row at the ceiling, just like middle and lower textures are usually
 drawn. This can help realign the upper texture with a neighbor.
 
-The article TEXTURES, cited in appendix [A-4] gives a great deal
+The article TEXTURES, cited in appendix [[A-4]](#appendix-a-4-other-helpful-documents) gives a great deal
 more explanation on the "unpegged" flags and how to use them.
 
 4 (Lower unpegged) - Lower and middle textures are drawn from the
@@ -1042,7 +1042,7 @@ on the facing side of the secret line, then the map will show the lines
 beyond and thus give up the secret.
 
 Also note that this flag has NOTHING to do with the SECRETS ratio on
-inter-level screens. That's done with special sector 9 (see [4-9-1]).
+inter-level screens. That's done with special sector 9 (see [[4-9-1]](#4-9-1-special-sector-types)).
 
 6 (Block Sound) - For purposes of monsters hearing sounds and thus
 becoming alerted. Every time a player fires a weapon, the "sound" of
@@ -1187,7 +1187,7 @@ is tagged to the same sector will cause the type 6 crusher to start
 again, with its original maximum and minimum ceiling heights.
 
 11. Some line types cause floor textures and/or some special sector types
-(see [4-9-1]) to transfer to the tagged sector. The tagged sectors' floor
+(see [[4-9-1]](#4-9-1-special-sector-types)) to transfer to the tagged sector. The tagged sectors' floor
 and/or special sector (SS) type will change to match that of the "model"
 sector. The TRIGGER model gets the info from the sector that the
 activating line's right side faces. The NUMERIC model gets the info
@@ -1433,7 +1433,7 @@ themselves and the ceiling.
      79   Light  WR  -     -     -  -   0
      80   Light  WR  -     -     -  -   HE (light level)
      81   Light  WR  -     -     -  -   255
-     17   Light  W1  -     -     -  -   Light blinks (see [4-9-1] type 3)
+     17   Light  W1  -     -     -  -   Light blinks (see [[4-9-1]](#4-9-1-special-sector-types) type 3)
     138 * Light  SR  clunk -     -  -   255
     139 * Light  SR  clunk -     -  -   0
 
@@ -1443,7 +1443,7 @@ A sidedef is a definition of what wall texture(s) to draw along a
 LINEDEF, and a group of sidedefs outline the space of a SECTOR.
 
 There will be one sidedef for a line that borders only one sector
-(and it must be the RIGHT side, as noted in [4-3]). It is not
+(and it must be the RIGHT side, as noted in [[4-3]](#4-3-linedefs)). It is not
 necessary to define what the doom player would see from the other
 side of that line because the doom player can't go there. The doom
 player can only go where there is a sector.
@@ -1484,13 +1484,13 @@ This is sometimes called the "Tutti Frutti" effect.
 
 There are some transparent textures which can be used as middle textures
 on 2-sided sidedefs (between sectors). These textures need to be composed
-of a single patch (see [8-4]), and note that on a very tall wall, they
+of a single patch (see [[8-4]](#8-4-texture1-and-texture2)), and note that on a very tall wall, they
 will NOT be tiled. Only one will be placed, at the spot determined by
 the "lower unpegged" flag being on/off and the sidedef's y offset. And
 if a transparent texture is used as an upper or lower texture, then
 the good old "Tutti Frutti" effect will have its way.
 
-Also note that animated wall textures (see [8-4-1]) do NOT animate
+Also note that animated wall textures (see [[8-4-1]](#8-4-1-animated-walls)) do NOT animate
 if they are the "middle" texture on a 2-sided line. So much for the
 lava waterfall with the hidden room at its base...hmm, maybe not...
 
@@ -1594,7 +1594,7 @@ set of precalculated nodes, ssectors, and segs.
 Here I will explain what the nodes are for, and how they can be
 generated automatically from the set of linedefs, sidedefs, and
 vertices. I am NOT including any code or a pseudo-code algorithm, like
-I do for the BLOCKMAP (appendix [A-3]). This is for reasons of space,
+I do for the BLOCKMAP (appendix [[A-3]](#appendix-a-3-a-blockmap-algorithm)). This is for reasons of space,
 and more importantly, the fact that I haven't written any such
 algorithm myself. If there's to be some "node code" published here, it
 will have to be donated by someone, well-commented, well-organized, in
@@ -1660,7 +1660,7 @@ partition line of a node, and the remaining spaces on either side of
 the partition line become the right and left CHILDREN of the node. All
 partition lines have a direction, and the space on the "right" side of
 the partition is the right child of the node; the space on the "left"
-is the left child (there's a cute sketch in [4-3]: LINEDEFS that shows
+is the left child (there's a cute sketch in [[4-3]](#4-3-linedefs): LINEDEFS that shows
 how right and left relate to the start and end of a line). Note that if
 there does not exist a seg in the remaining space which can serve as a
 partition line, then there is no need for a further partition, i.e.
@@ -1792,12 +1792,12 @@ Each sector's record is 26 bytes, comprising 2 <short> fields, then
    as either floors or ceilings.
 5. lightlevel of this sector: 0 = total dark, 255 (0xff) = maximum
    light. There are actually only 32 brightnesses possible (see
-   COLORMAP [8-2]), so 0-7 are the same, ..., 248-255 are the same.
-6. special sector: see [4-9-1] immediately below.
+   COLORMAP [[8-2]](#8-2-colormap)), so 0-7 are the same, ..., 248-255 are the same.
+6. special sector: see [[4-9-1]](#4-9-1-special-sector-types) immediately below.
 7. a "tag" number corresponding to LINEDEF(s) with the same tag
    number. When that linedef is activated, something will usually
    happen to this sector - its floor will rise, the lights will
-   go out, etc. See [4-3-2] for the list of linedef effects.
+   go out, etc. See [[4-3-2]](#4-3-2-linedef-types) for the list of linedef effects.
 
 ### [4-9-1]: Special Sector Types
 
@@ -1929,7 +1929,7 @@ to simplify collision-detection between moving things and walls. If a
 level doesn't have a blockmap, it will display fine, but everybody walks
 through walls, and no one can hurt anyone else.
 
-A concise definition of the BLOCKMAP is in appendix [A-1]. This is
+A concise definition of the BLOCKMAP is in appendix [[A-1]](#appendix-a-1-backus-naur-form-definitions-of-wad-elements). This is
 the full explanation of it.
 
 The whole level is cut into "blocks", each is a 128 (hex 80) wide
@@ -2020,7 +2020,7 @@ sprites (monsters, items), the wall patches, and various miscellaneous
 pictures for the status bar, menu text, inter-level map, etc. Every
 one of these picture lumps contains exactly one picture. The flats
 (floor and ceiling pictures) are NOT in this format, they are raw data;
-see chapter [6].
+see chapter [[6]](#chapter-6-flats-floor-and-ceiling-textures).
 
 A great many of these lumps are used in sprites. A "sprite" is the
 picture or pictures necessary to display any of the THINGS. Some of
@@ -2028,7 +2028,7 @@ them are simple, a single lump like SUITA0. Most of the monsters have
 50 or more lumps.
 
 The first four letters of these lumps are the sprite's "name". TROO
-is for imps, BKEY is for the blue key, and so on. See [4-2-1] for a list
+is for imps, BKEY is for the blue key, and so on. See [[4-2-1]](#4-2-1-thing-types) for a list
 of them all. The fifth letter in the lump is an indication of what "frame"
 it is, for animation sequences. The letters correspond to numbers, ASCII
 "A" equalling 0, "B" is 1, ... "Z" is 25, etc. The highest needed by a
@@ -2075,7 +2075,7 @@ fact the README says it can), but it can't.
 
 Each picture has three sections. First, an 8-byte header composed of
 four short-integers. Then a number of long-integer pointers. Then the
-picture's pixel/color data. See [A-1] for concise BNF style definitions,
+picture's pixel/color data. See [[A-1]](#appendix-a-1-backus-naur-form-definitions-of-wad-elements) for concise BNF style definitions,
 here is a meatier explanation of the format:
 
 (A) The header's four fields are:
@@ -2153,7 +2153,7 @@ as can be done with wall textures. They are pasted according to grid lines
 smoothly even across jagged boundaries between sectors with the same
 floor or ceiling height.
 
-As discussed in chapter [5], replacement and/or new-name flats don't
+As discussed in chapter [[5]](#chapter-5-graphics), replacement and/or new-name flats don't
 work right from pwad files unless they are all in the same wad.
 
 Theoretically, you can change all the flats want by constructing a
@@ -2167,7 +2167,7 @@ window if the display is not full-screen.
 
 ## [6-1]: Animated Flats
 
-See Chapter [8-4-1] for a discussion of how the animated walls and
+See Chapter [[8-4-1]](#8-4-1-animated-walls) for a discussion of how the animated walls and
 flats work. Unfortunately, the fact that the flats all need to be
 lumped together in one wad file means that its not possible to change
 the animations via a pwad file, unless it contains ALL the flats, which
@@ -2175,7 +2175,7 @@ amounts to several hundred k. Plus it is illegal to distribute the
 original data, so to pass around modifications, either all the flats
 must be all-new, or a utility must be used to construct a FLATS.WAD
 on an end-user's hard drive, using the original DOOM.WAD plus the
-additions. (Note: Bernd Kreimeier, listed in [A-5], has written a
+additions. (Note: Bernd Kreimeier, listed in [[A-5]](#appendix-a-5-acknowledgments), has written a
 utility that does just this. It is called DMADDS11).
 
 # CHAPTER [7]: Sounds and Music
@@ -2313,7 +2313,7 @@ color to which original color 0 gets mapped.
 The colormaps are numbered 0-33. Colormaps 0-31 are for the different
 brightness levels, 0 being the brightest (light level 248-255), 31 being
 the darkest (light level 0-7). Light level is the fifth field of each
-SECTOR record, see [4-9].
+SECTOR record, see [[4-9]](#4-9-sectors).
 
 Colormap 32 is used for every pixel in the display window (but not
 the status bar), regardless of sector brightness, when the player is
@@ -2704,7 +2704,7 @@ entering very small passageways. The player's radius can be made 1 and
 his "height" 1, so he can enter mouse-sized crawlspaces. There are a
 lot more exciting examples, such as invisible monsters, cyber-demons
 that look like players, super-fast shotguns, and a hundred others, but
-I won't describe all of that here. See appendix [A-4] for some EXE
+I won't describe all of that here. See appendix [[A-4]](#appendix-a-4-other-helpful-documents) for some EXE
 utilities and documents. Here I will simply give the data that has
 been figured out to date.
 
@@ -3072,7 +3072,7 @@ Two integers: 1, 0, then 6 code-pointers.
 THING TABLE. 103 entries in v1.2 which are each 88 bytes = 22 integers.
 136 entries in v1.666, which are each 92 bytes = 23 integers.
 
-1.  Thing number, as used in maps. See [4-2-1]. Some of them are
+1.  Thing number, as used in maps. See [[4-2-1]](#4-2-1-thing-types). Some of them are
     equal to -1, e.g. the players' entry, and all projectiles.
 2.  "Spawn" state. State number (from STATE TABLE) for when this
     thing first appears.
@@ -3255,7 +3255,7 @@ different kinds of lumps:
     <header_12>     := <skill>
                        <episode>
                        <map>
-                       <player> [4]
+                       <player> [[4]](#chapter-4-the-levels)
     <header_16>     := <version>
                        <skill>
                        <episode>
@@ -3265,7 +3265,7 @@ different kinds of lumps:
                        <fast>
                        <nomonsters>
                        <viewpoint>
-                       <player> [4]
+                       <player> [[4]](#chapter-4-the-levels)
     <skill>         := <byte:0..4>
     <episode>       := {<byte:1..3> | <byte:1>}     ;DOOM 1 or DOOM 2
     <map>           := {<byte:1..9> | <byte:1..32>} ;DOOM 1 or DOOM 2
@@ -3294,7 +3294,7 @@ different kinds of lumps:
 
 ------
 
-    <DMXGUS>        := pointless to describe here, see section [7-5]
+    <DMXGUS>        := pointless to describe here, see section [[7-5]](#7-5-dmxgus)
 
 ------
 
@@ -3444,8 +3444,8 @@ different kinds of lumps:
                        <y>
                        <dx>
                        <dy>
-                       <bbox> [2]
-                       <child> [2]
+                       <bbox> [[2]](#chapter-2-basics)
+                       <child> [[2]](#chapter-2-basics)
     <bbox>          := <boxtop>             ;all are <short>
                        <boxbottom>
                        <boxleft>
@@ -3461,7 +3461,7 @@ different kinds of lumps:
                        <special_sector>     ;<short>
                        <tag>                ;<short>
 
-    <REJECT>        := <bitarray>           ;see [4-10] for this one
+    <REJECT>        := <bitarray>           ;see [[4-10]](#4-10-reject) for this one
 
     <BLOCKMAP>      := <xorigin>            ;<short>
                        <yorigin>            ;<short>
@@ -3644,7 +3644,7 @@ DOOMBSP.ZIP     The source code from id's bsp routines, which build
                 If you want to see C, here it is.
 
 METRICS.ZIP     "DOOM Metrics", by Scott Amspoker. Has some more info
-                and more explanations related to [4-2-2]: Thing Sizes,
+                and more explanations related to [[4-2-2]](#4-2-2-thing-sizes): Thing Sizes,
                 and how monsters prefer stairs that aren't too steep.
 
 TEXPATCH.ZIP    Textures To Patches, by Gregory Lewis. Shows the
@@ -3659,7 +3659,7 @@ TEXTURES.ZIP    "Managing Textures and the Unpegged Attribute", by
 DH200.ZIP       DOOM.EXE Hack Editor, by Greg Lewis. This program
                 allows changes to be made to the DOOM.EXE file and
                 they can be saved/loaded via patch files. The thing
-                and frame tables (discussed in chapter [10]) are the
+                and frame tables (discussed in chapter [[10]](#chapter-10-the-doomexe-file)) are the
                 main emphasis of this excellent utility.
 
 ???             "Fun with Dehacked", edited by Dan Lottero. Has a lot
@@ -3714,7 +3714,7 @@ Frans P. de Vries (fpdevries@hgl.signaal.nl)
         comprehensive list of typos and mistakes in the 1.3 specs.
 
 Paul Falstad (pjf@crash.cts.com)
-        I got ALL of the [8-6-1] information from his messages.
+        I got ALL of the [[8-6-1]](#8-6-1-level-changes-from-12-to-1666-doomwad) information from his messages.
 
 Robert Fenske (rfenske@swri.edu)
         Passed along a great linedef flag list. Also helped with linedef
@@ -3764,7 +3764,7 @@ Brian McKimens (samneric@connected.com)
 
 Tom Neff (tneff@panix.com)
         Edits (writes) the DESIGNxx.FAQ. Suggested BNF and wrote the
-        intro to [A-1]. Created the WIF text standard. General advice.
+        intro to [[A-1]](#appendix-a-1-backus-naur-form-definitions-of-wad-elements). Created the WIF text standard. General advice.
 
 Tom Nettleship (mastn@midge.bath.ac.uk)
         Explained BSP trees in comp.graphics.algorithms messages.
