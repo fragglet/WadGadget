@@ -251,10 +251,10 @@ engine to use.
 
 A WAD file has three parts:
 
-  (1) a twelve-byte header
-  (2) one or more "lumps"
-  (3) a directory or "info table" that contains the names, offsets, and
-        sizes of all the lumps in the WAD
+1. a twelve-byte header
+2. one or more "lumps"
+3. a directory or "info table" that contains the names, offsets, and
+     sizes of all the lumps in the WAD
 
 The header consists of three four-byte parts:
 
@@ -282,19 +282,19 @@ where the format is explained, and the actual lump names in parentheses.
 Also, Appendix [A-1] has definitions of the structures of all these
 WAD elements.
 
-  [8-1] palettes (PLAYPAL)
-  [8-2] colormaps (COLORMAP)
-  [8-3] dos exit text (ENDOOM)
-  [8-6] demos (DEMO1, DEMO2, and DEMO3)
-  [8-4] texture composition list (TEXTURE1 and TEXTURE2)
-  [8-5] wall patch "number for name" indexing list (PNAMES)
-  [7-4] midi mapping (GENMIDI)
-  [7-5] Gravis UltraSound patch mappings (DMXGUS)
-  [7-1] PC speaker sound effects (DP*)
-  [7-2] Soundcard sound effects (DS*)
-  [7-3] songs (D_*)
-  [6]   flats (lumpnames between F_START and F_END)
-  [5]   all other graphics (all other lumps)
+* [8-1] palettes (PLAYPAL)
+* [8-2] colormaps (COLORMAP)
+* [8-3] dos exit text (ENDOOM)
+* [8-6] demos (DEMO1, DEMO2, and DEMO3)
+* [8-4] texture composition list (TEXTURE1 and TEXTURE2)
+* [8-5] wall patch "number for name" indexing list (PNAMES)
+* [7-4] midi mapping (GENMIDI)
+* [7-5] Gravis UltraSound patch mappings (DMXGUS)
+* [7-1] PC speaker sound effects (DP*)
+* [7-2] Soundcard sound effects (DS*)
+* [7-3] songs (D_*)
+* [6]   flats (lumpnames between F_START and F_END)
+* [5]   all other graphics (all other lumps)
 
 The "marker" and "label" lump names like "S_START" and "E1M1" (or
 "MAP01") do not actually refer to lumps - they have zero length. They
@@ -334,12 +334,12 @@ Pwad files need to have the extension .WAD to work. Many of them have
 descriptive names, e.g. if J.R.R. Tolkien made a new level, he might call
 it GONDOLIN.WAD - to use this level, a player would type
 
-  DOOM -FILE GONDOLIN.WAD
+    DOOM -FILE GONDOLIN.WAD
 
 at the command line, along with any other parameters. More than one
 external file can be added, thus in general:
 
-  DOOM -FILE [pwad_filename] [pwad_filename] [pwad_filename] ...
+    DOOM -FILE [pwad_filename] [pwad_filename] [pwad_filename] ...
 
 If there are duplicate entries amongst the directories of all the
 wads being "added", the pwads listed LAST take precedence.
@@ -356,17 +356,17 @@ external files at once, warp to certain levels, specify options, etc.
 
 ## [2-2]: DOOM versions
 
-Version Date    Time    Is
+    Version Date    Time    Is
 
-1.0     10dec93 01:00   first release (aka DOOM Operating System 0.99)
-1.1     16dec93 01:10   slightly different from 1.0, newer dos extender
-1.2     17feb94 01:20   modem play added!
-1.3     -       -       unauthorized beta release
-1.4     28jun94 01:04   shareware beta
-1.5     ??jul94 ?       shareware beta
-1.6     03aug94 01:06   shareware beta
-1.666   01sep94 16:42   registered full upgrade!
-1.666   ?       ?       DOOM 2!
+    1.0     10dec93 01:00   first release (aka DOOM Operating System 0.99)
+    1.1     16dec93 01:10   slightly different from 1.0, newer dos extender
+    1.2     17feb94 01:20   modem play added!
+    1.3     -       -       unauthorized beta release
+    1.4     28jun94 01:04   shareware beta
+    1.5     ??jul94 ?       shareware beta
+    1.6     03aug94 01:06   shareware beta
+    1.666   01sep94 16:42   registered full upgrade!
+    1.666   ?       ?       DOOM 2!
 
 The important releases as of this writing are 1.2 and 1.666. Hopefully,
 everyone will move up to 1.666 soon; it has many important improvements
@@ -383,28 +383,29 @@ version to version.
 Throughout this document, I will use the following conventions for
 numbers and variable types:
 
-(1) Most numbers will be decimal. Hexadecimal numbers will usually be
-    labeled thus: 0xffff or $ffff. But sometimes I'll say "hex ...".
-    And in tablature form, a column heading "HEX" indicates all the
-    numbers in that column are hexadecimal.
-(2) "byte" is of course the generic, 8 bits. It will usually mean one
-    8-bit component of a larger data type, or an 8-bit ASCII
-    character, or some such. As a number, it is an unsigned 8-bit
-    integer (0..255).
-(3) "short" is a signed 16-bit integer (-32768..32767), stored in
-    lo-hi format.
-(4) "ushort" or "unsigned short" is an unsigned 16-bit integer (0..65535).
-(5) "integer" or "long" is a signed 32-bit integer. If you don't read
-    this first, my use of the word "integer" might not be immediately
-    apparent.
-(6) "string8" or "8-byte string" is an ASCII string with length between
-    1 and 8 characters inclusive. If its length is less than 8, the
-    remaining bytes are zeros.
-(7) The first byte of a file or any data structure, for addressing and
-    offset purposes, is byte #0, not byte #1.
-(8) Some abbreviations I use: E1, E2, and E3 refer to episodes 1, 2, and
-    3 respectively. "The EXE" means the file DOOM.EXE.
-(666) Any reference to this number is purely intentional.
+1. Most numbers will be decimal. Hexadecimal numbers will usually be
+   labeled thus: 0xffff or $ffff. But sometimes I'll say "hex ...".
+   And in tablature form, a column heading "HEX" indicates all the
+   numbers in that column are hexadecimal.
+2. "byte" is of course the generic, 8 bits. It will usually mean one
+   8-bit component of a larger data type, or an 8-bit ASCII
+   character, or some such. As a number, it is an unsigned 8-bit
+   integer (0..255).
+3. "short" is a signed 16-bit integer (-32768..32767), stored in
+   lo-hi format.
+4. "ushort" or "unsigned short" is an unsigned 16-bit integer (0..65535).
+5. "integer" or "long" is a signed 32-bit integer. If you don't read
+   this first, my use of the word "integer" might not be immediately
+   apparent.
+6. "string8" or "8-byte string" is an ASCII string with length between
+   1 and 8 characters inclusive. If its length is less than 8, the
+   remaining bytes are zeros.
+7. The first byte of a file or any data structure, for addressing and
+   offset purposes, is byte #0, not byte #1.
+8. Some abbreviations I use: E1, E2, and E3 refer to episodes 1, 2, and
+   3 respectively. "The EXE" means the file DOOM.EXE.
+
+666: Any reference to this number is purely intentional.
 
 # CHAPTER [3]: List of DOOM.WAD Directory Entries
 
@@ -419,43 +420,43 @@ are listed here.
 There have been several changes from version to version. The "Ver"
 column indicates in which doom versions the lump exists:
 
-___     no indication means it is in every version. Most are like this.
-1.1     it was in 1.0 and 1.1, but not in 1.2 and later. It is obsolete.
-1.2     it is not in 1.1 and earlier, only in 1.2 and up.
-1.6     it is not in 1.2 and earlier, only in 1.666 and up.
-r       it is only in the registered version, not the shareware.
-1       it is only in DOOM 1, it is not in DOOM 2.
-2       it is only in DOOM 2, it is not in DOOM 1.
+    ___   no indication means it is in every version. Most are like this.
+    1.1   it was in 1.0 and 1.1, but not in 1.2 and later. It is obsolete.
+    1.2   it is not in 1.1 and earlier, only in 1.2 and up.
+    1.6   it is not in 1.2 and earlier, only in 1.666 and up.
+    r     it is only in the registered version, not the shareware.
+    1     it is only in DOOM 1, it is not in DOOM 2.
+    2     it is only in DOOM 2, it is not in DOOM 1.
 
 In the lump names, x (and y and e) indicates variable ASCII
 characters, and * can be replaced by an ASCII string (up to the
 8-byte lumpname limit).
 
-LumpName  Ver   Description
---------  ---   -----------
-PLAYPAL         fourteen 256 color palettes. See [8-1].
-COLORMAP        maps colors in the palette down to darker ones. [8-2].
-ENDOOM          text message displayed when you exit to DOS. [8-3].
-DEMOx           x=1-3, are the demos. [8-6].
-ExMy            subsequent entries define a single level's data. [4].
-MAPxy     2     like ExMy, but for DOOM 2.
-TEXTURE1        list of wall texture names and their composition data,
-                used in the SIDEDEF portion of each level. [8-4].
-TEXTURE2  r     more wall texture compositions.
-PNAMES          lists all lump names used as wall patches. [8-5].
-GENMIDI         General Midi standard instrument data. [7-3].
-DMXGUS          Gravis Ultra Sound instrument patches. [7-4].
+    LumpName  Ver   Description
+    --------  ---   -----------
+    PLAYPAL         fourteen 256 color palettes. See [8-1].
+    COLORMAP        maps colors in the palette down to darker ones. [8-2].
+    ENDOOM          text message displayed when you exit to DOS. [8-3].
+    DEMOx           x=1-3, are the demos. [8-6].
+    ExMy            subsequent entries define a single level's data. [4].
+    MAPxy     2     like ExMy, but for DOOM 2.
+    TEXTURE1        list of wall texture names and their composition data,
+                    used in the SIDEDEF portion of each level. [8-4].
+    TEXTURE2  r     more wall texture compositions.
+    PNAMES          lists all lump names used as wall patches. [8-5].
+    GENMIDI         General Midi standard instrument data. [7-3].
+    DMXGUS          Gravis Ultra Sound instrument patches. [7-4].
 
-D_ExMy          music for a doom 1 level. [7-2].
-D_INTER         music played on the summary screen between levels.
-D_INTRO         music played when the game starts.
-D_INTROA  1.2   more introductory music.
-D_VICTOR        music played on the victory text-screen after an episode.
-D_BUNNY   r     music for while a certain rabbit has his story told...
-D_*       2     music for a doom 2 level.
+    D_ExMy          music for a doom 1 level. [7-2].
+    D_INTER         music played on the summary screen between levels.
+    D_INTRO         music played when the game starts.
+    D_INTROA  1.2   more introductory music.
+    D_VICTOR        music played on the victory text-screen after an episode.
+    D_BUNNY   r     music for while a certain rabbit has his story told...
+    D_*       2     music for a doom 2 level.
 
-DP_*      vary  PC speaker sound effects. [7-1].
-DS_*      vary  Soundcard sound effects. [7-1].
+    DP_*      vary  PC speaker sound effects. [7-1].
+    DS_*      vary  Soundcard sound effects. [7-1].
 
 All the remaining entries in the directory, except the flats between
 F_START and F_END, and the "markers" like S_START, refer to lumps which
@@ -466,141 +467,141 @@ The next seven are full screen (320 by 200 pixel) pictures. After
 that, ST* are status-bar pictures, WI* are for the screens between
 levels, and M_* are for menus.
 
-HELP1           Ad-screen says Register!, with some screen shots.
-HELP2           Actual help, all the controls explained.
-TITLEPIC        Maybe this is the title screen? Gee, I dunno...
-CREDIT          People at id Software who created this great game.
-VICTORY2  r     Screen shown after a victorious end to episode 2.
-PFUB1     r     A nice little rabbit minding his own peas and queues...
-PFUB2     r     ...a hint of what's waiting in Doom 2.
+    HELP1           Ad-screen says Register!, with some screen shots.
+    HELP2           Actual help, all the controls explained.
+    TITLEPIC        Maybe this is the title screen? Gee, I dunno...
+    CREDIT          People at id Software who created this great game.
+    VICTORY2  r     Screen shown after a victorious end to episode 2.
+    PFUB1     r     A nice little rabbit minding his own peas and queues...
+    PFUB2     r     ...a hint of what's waiting in Doom 2.
 
-ENDx      r     x=0-6, big red "THE END" gets shot up.
-AMMNUMx         x=0-9. Small grey digits for ammo count (15/200 etc).
-STxBARy   1.1   x=M or A, y= L or R. Status bar used to be in pieces.
-STCHAT    1.1   Status bar used to have a "chat" box.
-STRSNUMx  1.1   x=0-9. Small red digits.
-STWEAPx   1.1   x=0-5. COOL little weapon icons. Why'd they drop them?
-STFRAGS   1.1   Tiny "FRAG" to be placed on top of part of status bar.
-STBAR     1.2   Status Bar as used in deathmatches.
-STGNUMx         x=0-9. Small grey digits used on the "Arms" panel.
-STTNUMx         x=0-9. Big red digits used for Armor, Health, etc.
-STTMINUS  1.6   Big red "-" used for negative frags.
-STYSNUMx        x=0-9. Small yellow digits used on the "Arms" panel.
-STTPRCNT        Big red % used in Armor and Health.
-STKEYSx         x=0-5. Blue/Yellow/Red Keycards and Skullkeys.
-STDISK          Disk, used at bottom right corner during disk accesses.
-STCDROM   1.6   CD, used during CD-ROM accesses.
-STARMS          "Arms" panel which replaces "Frags" in non-deathmatch.
-STCFNxxx        xxx=033-095, also 121. Small red ASCII characters.
-STFBx           x=0-3. Green/black/brown/red squares, for ST player faces.
-STPBx           x=0-3. Squares with bottoms, for inter-level screens.
-STFSTxy         x=0-4, y=0-2. Player face. x=0 is 100% health...x=4 is
-                very low health. y=0 is glancing right, y=2 left.
-STFTLx0         x=0-4. Face looking left, player hurt from that direction.
-STFTRx0         x=0-4. Face looking right.
-STFOUCHx        x=0-4. Face looking surprised (hurt bad).
-STFEVLx         x=0-4. Face with a grin (when pick up new weapons).
-STFKILLx        x=0-4. Face with a grimace (when killing foes).
-STFGOD0         Face with yellow eyes (invulnerable).
-STFDEAD0        Dead face.
-BRDR_*          Tiny pictures used as a border between a less-than-full
-                screen view and the "outside" marbleized zone. TL is
-                top left, BR bottom right, you can guess the rest.
-WIBONUS   1.1   Medium sized red text "BONUS"
-WISCORE   1.1   "SCORE"
-WIMSTPx   1.1   x=0-3. Red text "ONE" to "FOUR".
-WIMSTBx   1.1   x=0-3. Grey text "ONE" to "FOUR".
-WIMINUS   1.6   Small red "-" used for negative frags.
-WIMAPx          x=0-2. 320x200 maps used on inter-level screens for e1,2,3.
-WIAe0x0y        patches used to animate inter-level maps.
-WIURH0          "YOU ARE HERE" with an arrow pointing left.
-WIURH1          "YOU ARE HERE" with an arrow pointing right.
-WISPLAT         Splat mark that indicates a completed level.
-WIOSTK          "KILLS"
-WIOSTI          "ITEMS"
-WIF             "FINISHED"
-WIMSTT          "TOTAL"
-WIOSTS          "SCRT"
-WIOSTF          "F."
-WITIME          "TIME"
-WIPAR           "PAR"
-WIMSTAR         "YOU"
-WIPCNT          "%"
-WINUMx          x=0-9. Medium sized red digits.
-WICOLON         ":"
-WISUCKS         "SUCKS"
-WIFRGS          "FRAGS"
-WILVxy          x=0-2, y=0-8. E(x+1)M(y+1) level names in grey/white letters.
-WIPx            x=1-4. Red "P1" - "P4", for multiplayer summaries.
-WIBPx           x=1-4. Grey "P1" - "P4"
-WIKILRS         Small red "KILLERS" going sideways up, for deathmatches.
-WIVCTMS         Small red "VICTIMS" for the top of the deathmatch chart.
-WISCRT2         "SECRET"
-WIENTER         "ENTERING"
-M_DOOM          The DOOM logo
-M_RDTHIS        Big red "Read This!"
-M_OPTION        "Options"
-M_QUITG         "Quit Game"
-M_NGAME         "New Game"
-M_SKULL1        The skull indicator with eyes lit.
-M_SKULL2        The skull indicator with eyes unlit.
-M_THERMO        The marker on e.g. the Sfx volume "thermometer".
-M_THERMR        The right end of the thermometer.
-M_THERML        The left end.
-M_THERMM        The middle, repeated over and over.
-M_ENDGAM        "End Game"
-M_PAUSE         "Pause"
-M_MESSG         "Messages:"
-M_MSGON         "on"
-M_MSGOFF        "off"
-M_EPISOD        "Which Epsiode?"
-M_EPI1          "Knee-Deep In The Dead"
-M_EPI2          "The Shores Of Hell"
-M_EPI3          "Inferno"
-M_HURT          "Hurt me plenty."
-M_JKILL         "I'm too young to die."
-M_ROUGH         "Hey, not too rough."
-M_SKILL         "Choose Skill Level:"
-M_NEWG          "NEW GAME" (title of New Game menu)
-M_ULTRA         "Ultra-Violence."
-M_NMARE   1.2   "Nightmare!"
-M_SVOL          "Sound Volume"
-M_OPTTTL        "OPTIONS" (title of Options menu)
-M_SAVEG         "Save Game"
-M_LOADG         "Load Game"
-M_DISP          "Display"
-M_MSENS         "Mouse sensitivity"
-M_GDHIGH        "high"
-M_GDLOW         "low"
-M_DETAIL        "Graphic Detail:"
-M_DISOPT        "DISPLAY OPTIONS"
-M_SCRNSZ        "Screen Size"
-M_SGTTL         "SAVE GAME"
-M_LGTTL         "LOAD GAME"
-M_SFXVOL        "Sfx Volume"
-M_MUSVOL        "Music Volume"
-M_LSLEFT        Load/save box, left part
-M_LSCNTR        Load/save box, center part (repeated)
-M_LSRGHT        Load/save box, right part
+    ENDx      r     x=0-6, big red "THE END" gets shot up.
+    AMMNUMx         x=0-9. Small grey digits for ammo count (15/200 etc).
+    STxBARy   1.1   x=M or A, y= L or R. Status bar used to be in pieces.
+    STCHAT    1.1   Status bar used to have a "chat" box.
+    STRSNUMx  1.1   x=0-9. Small red digits.
+    STWEAPx   1.1   x=0-5. COOL little weapon icons. Why'd they drop them?
+    STFRAGS   1.1   Tiny "FRAG" to be placed on top of part of status bar.
+    STBAR     1.2   Status Bar as used in deathmatches.
+    STGNUMx         x=0-9. Small grey digits used on the "Arms" panel.
+    STTNUMx         x=0-9. Big red digits used for Armor, Health, etc.
+    STTMINUS  1.6   Big red "-" used for negative frags.
+    STYSNUMx        x=0-9. Small yellow digits used on the "Arms" panel.
+    STTPRCNT        Big red % used in Armor and Health.
+    STKEYSx         x=0-5. Blue/Yellow/Red Keycards and Skullkeys.
+    STDISK          Disk, used at bottom right corner during disk accesses.
+    STCDROM   1.6   CD, used during CD-ROM accesses.
+    STARMS          "Arms" panel which replaces "Frags" in non-deathmatch.
+    STCFNxxx        xxx=033-095, also 121. Small red ASCII characters.
+    STFBx           x=0-3. Green/black/brown/red squares, for ST player faces.
+    STPBx           x=0-3. Squares with bottoms, for inter-level screens.
+    STFSTxy         x=0-4, y=0-2. Player face. x=0 is 100% health...x=4 is
+                    very low health. y=0 is glancing right, y=2 left.
+    STFTLx0         x=0-4. Face looking left, player hurt from that direction.
+    STFTRx0         x=0-4. Face looking right.
+    STFOUCHx        x=0-4. Face looking surprised (hurt bad).
+    STFEVLx         x=0-4. Face with a grin (when pick up new weapons).
+    STFKILLx        x=0-4. Face with a grimace (when killing foes).
+    STFGOD0         Face with yellow eyes (invulnerable).
+    STFDEAD0        Dead face.
+    BRDR_*          Tiny pictures used as a border between a less-than-full
+                    screen view and the "outside" marbleized zone. TL is
+                    top left, BR bottom right, you can guess the rest.
+    WIBONUS   1.1   Medium sized red text "BONUS"
+    WISCORE   1.1   "SCORE"
+    WIMSTPx   1.1   x=0-3. Red text "ONE" to "FOUR".
+    WIMSTBx   1.1   x=0-3. Grey text "ONE" to "FOUR".
+    WIMINUS   1.6   Small red "-" used for negative frags.
+    WIMAPx          x=0-2. 320x200 maps used on inter-level screens for e1,2,3.
+    WIAe0x0y        patches used to animate inter-level maps.
+    WIURH0          "YOU ARE HERE" with an arrow pointing left.
+    WIURH1          "YOU ARE HERE" with an arrow pointing right.
+    WISPLAT         Splat mark that indicates a completed level.
+    WIOSTK          "KILLS"
+    WIOSTI          "ITEMS"
+    WIF             "FINISHED"
+    WIMSTT          "TOTAL"
+    WIOSTS          "SCRT"
+    WIOSTF          "F."
+    WITIME          "TIME"
+    WIPAR           "PAR"
+    WIMSTAR         "YOU"
+    WIPCNT          "%"
+    WINUMx          x=0-9. Medium sized red digits.
+    WICOLON         ":"
+    WISUCKS         "SUCKS"
+    WIFRGS          "FRAGS"
+    WILVxy          x=0-2, y=0-8. E(x+1)M(y+1) level names in grey/white letters.
+    WIPx            x=1-4. Red "P1" - "P4", for multiplayer summaries.
+    WIBPx           x=1-4. Grey "P1" - "P4"
+    WIKILRS         Small red "KILLERS" going sideways up, for deathmatches.
+    WIVCTMS         Small red "VICTIMS" for the top of the deathmatch chart.
+    WISCRT2         "SECRET"
+    WIENTER         "ENTERING"
+    M_DOOM          The DOOM logo
+    M_RDTHIS        Big red "Read This!"
+    M_OPTION        "Options"
+    M_QUITG         "Quit Game"
+    M_NGAME         "New Game"
+    M_SKULL1        The skull indicator with eyes lit.
+    M_SKULL2        The skull indicator with eyes unlit.
+    M_THERMO        The marker on e.g. the Sfx volume "thermometer".
+    M_THERMR        The right end of the thermometer.
+    M_THERML        The left end.
+    M_THERMM        The middle, repeated over and over.
+    M_ENDGAM        "End Game"
+    M_PAUSE         "Pause"
+    M_MESSG         "Messages:"
+    M_MSGON         "on"
+    M_MSGOFF        "off"
+    M_EPISOD        "Which Epsiode?"
+    M_EPI1          "Knee-Deep In The Dead"
+    M_EPI2          "The Shores Of Hell"
+    M_EPI3          "Inferno"
+    M_HURT          "Hurt me plenty."
+    M_JKILL         "I'm too young to die."
+    M_ROUGH         "Hey, not too rough."
+    M_SKILL         "Choose Skill Level:"
+    M_NEWG          "NEW GAME" (title of New Game menu)
+    M_ULTRA         "Ultra-Violence."
+    M_NMARE   1.2   "Nightmare!"
+    M_SVOL          "Sound Volume"
+    M_OPTTTL        "OPTIONS" (title of Options menu)
+    M_SAVEG         "Save Game"
+    M_LOADG         "Load Game"
+    M_DISP          "Display"
+    M_MSENS         "Mouse sensitivity"
+    M_GDHIGH        "high"
+    M_GDLOW         "low"
+    M_DETAIL        "Graphic Detail:"
+    M_DISOPT        "DISPLAY OPTIONS"
+    M_SCRNSZ        "Screen Size"
+    M_SGTTL         "SAVE GAME"
+    M_LGTTL         "LOAD GAME"
+    M_SFXVOL        "Sfx Volume"
+    M_MUSVOL        "Music Volume"
+    M_LSLEFT        Load/save box, left part
+    M_LSCNTR        Load/save box, center part (repeated)
+    M_LSRGHT        Load/save box, right part
 
 The following entries are markers that do not point to a lump; they
 have zero size:
 
-S_START         marks the start of the item/monster "sprite" section.
-                See chapter [5] for the naming convention used here.
-S_END           is immediately after the last sprite.
-P_START         marks the beginning of the wall patches.
-P1_START          before the first of the shareware wall patches.
-P1_END            after the last of the shareware wall patches.
-P2_START  r       registered wall patches.
-P2_END    r       registered wall patches.
-P_END           marks the end of the wall patches.
-F_START         marks the beginning of the flats (floor textures).
-F1_START          shareware flats.
-F1_END            shareware flats.
-F2_START  r       registered flats.
-F2_END    r       registered flats.
-F_END           marks the end of the flats.
+    S_START         marks the start of the item/monster "sprite" section.
+                    See chapter [5] for the naming convention used here.
+    S_END           is immediately after the last sprite.
+    P_START         marks the beginning of the wall patches.
+    P1_START          before the first of the shareware wall patches.
+    P1_END            after the last of the shareware wall patches.
+    P2_START  r       registered wall patches.
+    P2_END    r       registered wall patches.
+    P_END           marks the end of the wall patches.
+    F_START         marks the beginning of the flats (floor textures).
+    F1_START          shareware flats.
+    F1_END            shareware flats.
+    F2_START  r       registered flats.
+    F2_END    r       registered flats.
+    F_END           marks the end of the flats.
 
 # CHAPTER [4]: The Levels
 
@@ -640,16 +641,16 @@ barrels, etc. The size of each THINGS lump will be a multiple of ten,
 since each thing requires ten bytes to describe it, in five <short>
 fields:
 
-(1) X position of thing (at level's inception)
-(2) Y position of thing
-(3) Angle the thing faces. On the automap, 0 is east, 90 is north, 180
-    is west, 270 is south. This value is only used for monsters, player
-    starts, deathmatch starts, and teleporter landing spots. Other
-    things look the same from all directions. Values are rounded to
-    the nearest 45 degree angle, so if the value is 80, it will
-    actually face 90 - north.
-(4) Type of thing, see next subsection, [4-2-1]
-(5) Thing options, see [4-2-3]
+1. X position of thing (at level's inception)
+2. Y position of thing
+3. Angle the thing faces. On the automap, 0 is east, 90 is north, 180
+   is west, 270 is south. This value is only used for monsters, player
+   starts, deathmatch starts, and teleporter landing spots. Other
+   things look the same from all directions. Values are rounded to
+   the nearest 45 degree angle, so if the value is 80, it will
+   actually face 90 - north.
+4. Type of thing, see next subsection, [4-2-1]
+5. Thing options, see [4-2-3]
 
 ### [4-2-1]: Thing Types
 
@@ -658,178 +659,178 @@ kind. The table below summarizes the different types. They are listed
 in functional groups. You can easily get a numerical-order list by
 extracting this table and SORTing it.
 
-Dec/Hex The thing's number in decimal and hexadecimal. This is the
-        number used in the THINGS lump on a level (ExMy or MAPxx).
-V       Version of DOOM needed to use this object:
-        no mark indicates all versions have this object
-r         requires registered DOOM or DOOM 2
-2         requires DOOM 2
-Spr     The sprite name associated with this thing. This is the first
-        four letters of the lumps that are pictures of this thing.
-seq.    The sequence of frames displayed. "-" means it displays nothing.
-        Unanimated things will have just an "a" here, e.g. a backpack's
-        only picture can be found in the wad under BPAKA0. Animated
-        things will show the order that their frames are displayed
-        (they cycle back after the last one). So the blue key
-        alternates between BKEYA0 and BKEYB0. The soulsphere uses
-        SOULA0-SOULB0-C0-D0-C0-B0 then repeats. Thing 15, a dead
-        player, is PLAYN0.
-+       Monsters and players and barrels. They can be hurt, and they
-        have a more complicated sprite arrangement. See chapter [5].
-CAPITAL Monsters, counts toward the KILL ratio at the end of a level.
-#       An obstacle, players and monsters can't move through it.
-^       Hangs from the ceiling, or floats (if a monster).
-$       A regular item that players may get.
-!       An artifact item; counts toward the ITEM ratio at level's end.
-        Note that 2025, the radiation suit, was an ITEM in version
-        1.2, but it is not an ITEM in version 1.666 on. Also note
-        that 2022 and 2024, invulnerability and invisibility, do not
-        respawn in -altdeath games.
+    Dec/Hex The thing's number in decimal and hexadecimal. This is the
+            number used in the THINGS lump on a level (ExMy or MAPxx).
+    V       Version of DOOM needed to use this object:
+            no mark indicates all versions have this object
+    r         requires registered DOOM or DOOM 2
+    2         requires DOOM 2
+    Spr     The sprite name associated with this thing. This is the first
+            four letters of the lumps that are pictures of this thing.
+    seq.    The sequence of frames displayed. "-" means it displays nothing.
+            Unanimated things will have just an "a" here, e.g. a backpack's
+            only picture can be found in the wad under BPAKA0. Animated
+            things will show the order that their frames are displayed
+            (they cycle back after the last one). So the blue key
+            alternates between BKEYA0 and BKEYB0. The soulsphere uses
+            SOULA0-SOULB0-C0-D0-C0-B0 then repeats. Thing 15, a dead
+            player, is PLAYN0.
+    +       Monsters and players and barrels. They can be hurt, and they
+            have a more complicated sprite arrangement. See chapter [5].
+    CAPITAL Monsters, counts toward the KILL ratio at the end of a level.
+    #       An obstacle, players and monsters can't move through it.
+    ^       Hangs from the ceiling, or floats (if a monster).
+    $       A regular item that players may get.
+    !       An artifact item; counts toward the ITEM ratio at level's end.
+            Note that 2025, the radiation suit, was an ITEM in version
+            1.2, but it is not an ITEM in version 1.666 on. Also note
+            that 2022 and 2024, invulnerability and invisibility, do not
+            respawn in -altdeath games.
 
-Dec. Hex  V Spr  seq.     Thing is:
+    Dec. Hex  V Spr  seq.     Thing is:
 
-  -1 ffff   ---- -        (nothing)
-   0 0000   ---- -        (nothing)
-   1 0001   PLAY +        Player 1 start (Player 1 start needed on ALL
-levels)
-   2 0002   PLAY +        Player 2 start (Player starts 2-4 are needed in)
-   3 0003   PLAY +        Player 3 start (cooperative mode multiplayer games)
-   4 0004   PLAY +        Player 4 start
-  11 000b   ---- -        Deathmatch start positions. Should have >= 4/level
-  14 000e   ---- -        Teleport landing. Where players/monsters land when
-  14                        they teleport to the SECTOR containing this thing
+      -1 ffff   ---- -        (nothing)
+       0 0000   ---- -        (nothing)
+       1 0001   PLAY +        Player 1 start (Player 1 start needed on ALL
+    levels)
+       2 0002   PLAY +        Player 2 start (Player starts 2-4 are needed in)
+       3 0003   PLAY +        Player 3 start (cooperative mode multiplayer games)
+       4 0004   PLAY +        Player 4 start
+      11 000b   ---- -        Deathmatch start positions. Should have >= 4/level
+      14 000e   ---- -        Teleport landing. Where players/monsters land when
+      14                        they teleport to the SECTOR containing this thing
 
-3004 0bbc   POSS +      # FORMER HUMAN: regular pistol-shooting zombieman
-  84 0054 2 SSWV +      # WOLFENSTEIN SS: guest appearance by Wolf3D blue guy
-   9 0009   SPOS +      # FORMER HUMAN SERGEANT: black armor, shotgunners
-  65 0041 2 CPOS +      # HEAVY WEAPON DUDE: red armor, chaingunners
-3001 0bb9   TROO +      # IMP: brown, hurl fireballs
-3002 0bba   SARG +      # DEMON: pink, muscular bull-like chewers
-  58 003a   SARG +      # SPECTRE: invisible version of the DEMON
-3006 0bbe r SKUL +     ^# LOST SOUL: flying flaming skulls, they really bite
-3005 0bbd r HEAD +     ^# CACODEMON: red one-eyed floating heads. Behold...
-  69 0045 2 BOS2 +      # HELL KNIGHT: grey-not-pink BARON, weaker
-3003 0bbb   BOSS +      # BARON OF HELL: cloven hooved minotaur boss
-  68 0044 2 BSPI +      # ARACHNOTRON: baby SPIDER, shoots green plasma
-  71 0047 2 PAIN +     ^# PAIN ELEMENTAL: shoots LOST SOULS, deserves its
-name
-  66 0042 2 SKEL +      # REVENANT: Fast skeletal dude shoots homing missles
-  67 0043 2 FATT +      # MANCUBUS: Big, slow brown guy shoots barrage of
-fire
-  64 0040 2 VILE +      # ARCH-VILE: Super-fire attack, ressurects the dead!
-   7 0007 r SPID +      # SPIDER MASTERMIND: giant walking brain boss
-  16 0010 r CYBR +      # CYBER-DEMON: robo-boss, rocket launcher
+    3004 0bbc   POSS +      # FORMER HUMAN: regular pistol-shooting zombieman
+      84 0054 2 SSWV +      # WOLFENSTEIN SS: guest appearance by Wolf3D blue guy
+       9 0009   SPOS +      # FORMER HUMAN SERGEANT: black armor, shotgunners
+      65 0041 2 CPOS +      # HEAVY WEAPON DUDE: red armor, chaingunners
+    3001 0bb9   TROO +      # IMP: brown, hurl fireballs
+    3002 0bba   SARG +      # DEMON: pink, muscular bull-like chewers
+      58 003a   SARG +      # SPECTRE: invisible version of the DEMON
+    3006 0bbe r SKUL +     ^# LOST SOUL: flying flaming skulls, they really bite
+    3005 0bbd r HEAD +     ^# CACODEMON: red one-eyed floating heads. Behold...
+      69 0045 2 BOS2 +      # HELL KNIGHT: grey-not-pink BARON, weaker
+    3003 0bbb   BOSS +      # BARON OF HELL: cloven hooved minotaur boss
+      68 0044 2 BSPI +      # ARACHNOTRON: baby SPIDER, shoots green plasma
+      71 0047 2 PAIN +     ^# PAIN ELEMENTAL: shoots LOST SOULS, deserves its
+    name
+      66 0042 2 SKEL +      # REVENANT: Fast skeletal dude shoots homing missles
+      67 0043 2 FATT +      # MANCUBUS: Big, slow brown guy shoots barrage of
+    fire
+      64 0040 2 VILE +      # ARCH-VILE: Super-fire attack, ressurects the dead!
+       7 0007 r SPID +      # SPIDER MASTERMIND: giant walking brain boss
+      16 0010 r CYBR +      # CYBER-DEMON: robo-boss, rocket launcher
 
-  88 0058 2 BBRN +      # BOSS BRAIN: Horrifying visage of the ultimate demon
-  89 0059 2 -    -        Boss Shooter: Shoots spinning skull-blocks
-  87 0057 2 -    -        Spawn Spot: Where Todd McFarlane's guys appear
+      88 0058 2 BBRN +      # BOSS BRAIN: Horrifying visage of the ultimate demon
+      89 0059 2 -    -        Boss Shooter: Shoots spinning skull-blocks
+      87 0057 2 -    -        Spawn Spot: Where Todd McFarlane's guys appear
 
-2005 07d5   CSAW a      $ Chainsaw
-2001 07d1   SHOT a      $ Shotgun
-  82 0052 2 SGN2 a      $ Double-barreled shotgun
-2002 07d2   MGUN a      $ Chaingun, gatling gun, mini-gun, whatever
-2003 07d3   LAUN a      $ Rocket launcher
-2004 07d4 r PLAS a      $ Plasma gun
-2006 07d6 r BFUG a      $ Bfg9000
-2007 07d7   CLIP a      $ Ammo clip
-2008 07d8   SHEL a      $ Shotgun shells
-2010 07da   ROCK a      $ A rocket
-2047 07ff r CELL a      $ Cell charge
-2048 0800   AMMO a      $ Box of Ammo
-2049 0801   SBOX a      $ Box of Shells
-2046 07fe   BROK a      $ Box of Rockets
-  17 0011 r CELP a      $ Cell charge pack
-   8 0008   BPAK a      $ Backpack: doubles maximum ammo capacities
+    2005 07d5   CSAW a      $ Chainsaw
+    2001 07d1   SHOT a      $ Shotgun
+      82 0052 2 SGN2 a      $ Double-barreled shotgun
+    2002 07d2   MGUN a      $ Chaingun, gatling gun, mini-gun, whatever
+    2003 07d3   LAUN a      $ Rocket launcher
+    2004 07d4 r PLAS a      $ Plasma gun
+    2006 07d6 r BFUG a      $ Bfg9000
+    2007 07d7   CLIP a      $ Ammo clip
+    2008 07d8   SHEL a      $ Shotgun shells
+    2010 07da   ROCK a      $ A rocket
+    2047 07ff r CELL a      $ Cell charge
+    2048 0800   AMMO a      $ Box of Ammo
+    2049 0801   SBOX a      $ Box of Shells
+    2046 07fe   BROK a      $ Box of Rockets
+      17 0011 r CELP a      $ Cell charge pack
+       8 0008   BPAK a      $ Backpack: doubles maximum ammo capacities
 
-2011 07db   STIM a      $ Stimpak
-2012 07dc   MEDI a      $ Medikit
-2014 07de   BON1 abcdcb ! Health Potion +1% health
-2015 07df   BON2 abcdcb ! Spirit Armor +1% armor
-2018 07e2   ARM1 ab     $ Green armor 100%
-2019 07e3   ARM2 ab     $ Blue armor 200%
-  83 0053 2 MEGA abcd   ! Megasphere: 200% health, 200% armor
-2013 07dd   SOUL abcdcb ! Soulsphere, Supercharge, +100% health
-2022 07e6 r PINV abcd   ! Invulnerability
-2023 07e7 r PSTR a      ! Berserk Strength and 100% health
-2024 07e8   PINS abcd   ! Invisibility
-2025 07e9   SUIT a     (!)Radiation suit - see notes on ! above
-2026 07ea   PMAP abcdcb ! Computer map
-2045 07fd   PVIS ab     ! Lite Amplification goggles
+    2011 07db   STIM a      $ Stimpak
+    2012 07dc   MEDI a      $ Medikit
+    2014 07de   BON1 abcdcb ! Health Potion +1% health
+    2015 07df   BON2 abcdcb ! Spirit Armor +1% armor
+    2018 07e2   ARM1 ab     $ Green armor 100%
+    2019 07e3   ARM2 ab     $ Blue armor 200%
+      83 0053 2 MEGA abcd   ! Megasphere: 200% health, 200% armor
+    2013 07dd   SOUL abcdcb ! Soulsphere, Supercharge, +100% health
+    2022 07e6 r PINV abcd   ! Invulnerability
+    2023 07e7 r PSTR a      ! Berserk Strength and 100% health
+    2024 07e8   PINS abcd   ! Invisibility
+    2025 07e9   SUIT a     (!)Radiation suit - see notes on ! above
+    2026 07ea   PMAP abcdcb ! Computer map
+    2045 07fd   PVIS ab     ! Lite Amplification goggles
 
-   5 0005   BKEY ab     $ Blue keycard
-  40 0028 r BSKU ab     $ Blue skullkey
-  13 000d   RKEY ab     $ Red keycard
-  38 0026 r RSKU ab     $ Red skullkey
-   6 0006   YKEY ab     $ Yellow keycard
-  39 0027 r YSKU ab     $ Yellow skullkey
+       5 0005   BKEY ab     $ Blue keycard
+      40 0028 r BSKU ab     $ Blue skullkey
+      13 000d   RKEY ab     $ Red keycard
+      38 0026 r RSKU ab     $ Red skullkey
+       6 0006   YKEY ab     $ Yellow keycard
+      39 0027 r YSKU ab     $ Yellow skullkey
 
-2035 07f3   BAR1 ab+    # Barrel; not an obstacle after blown up
-                            (BEXP sprite)
-  72 0048 2 KEEN a+     # A guest appearance by Billy
+    2035 07f3   BAR1 ab+    # Barrel; not an obstacle after blown up
+                                (BEXP sprite)
+      72 0048 2 KEEN a+     # A guest appearance by Billy
 
-  48 0030   ELEC a      # Tall, techno pillar
-  30 001e r COL1 a      # Tall green pillar
-  32 0020 r COL3 a      # Tall red pillar
-  31 001f r COL2 a      # Short green pillar
-  36 0024 r COL5 ab     # Short green pillar with beating heart
-  33 0021 r COL4 a      # Short red pillar
-  37 0025 r COL6 a      # Short red pillar with skull
-  47 002f r SMIT a      # Stalagmite: small brown pointy stump
-  43 002b r TRE1 a      # Burnt tree: gray tree
-  54 0036 r TRE2 a      # Large brown tree
+      48 0030   ELEC a      # Tall, techno pillar
+      30 001e r COL1 a      # Tall green pillar
+      32 0020 r COL3 a      # Tall red pillar
+      31 001f r COL2 a      # Short green pillar
+      36 0024 r COL5 ab     # Short green pillar with beating heart
+      33 0021 r COL4 a      # Short red pillar
+      37 0025 r COL6 a      # Short red pillar with skull
+      47 002f r SMIT a      # Stalagmite: small brown pointy stump
+      43 002b r TRE1 a      # Burnt tree: gray tree
+      54 0036 r TRE2 a      # Large brown tree
 
-2028 07ec   COLU a      # Floor lamp
-  85 0055 2 TLMP abcd   # Tall techno floor lamp
-  86 0056 2 TLP2 abcd   # Short techno floor lamp
-  34 0022   CAND a        Candle
-  35 0023   CBRA a      # Candelabra
-  44 002c r TBLU abcd   # Tall blue firestick
-  45 002d r TGRE abcd   # Tall green firestick
-  46 002e   TRED abcd   # Tall red firestick
-  55 0037 r SMBT abcd   # Short blue firestick
-  56 0038 r SMGT abcd   # Short green firestick
-  57 0039 r SMRT abcd   # Short red firestick
-  70 0046 2 FCAN abc    # Burning barrel
+    2028 07ec   COLU a      # Floor lamp
+      85 0055 2 TLMP abcd   # Tall techno floor lamp
+      86 0056 2 TLP2 abcd   # Short techno floor lamp
+      34 0022   CAND a        Candle
+      35 0023   CBRA a      # Candelabra
+      44 002c r TBLU abcd   # Tall blue firestick
+      45 002d r TGRE abcd   # Tall green firestick
+      46 002e   TRED abcd   # Tall red firestick
+      55 0037 r SMBT abcd   # Short blue firestick
+      56 0038 r SMGT abcd   # Short green firestick
+      57 0039 r SMRT abcd   # Short red firestick
+      70 0046 2 FCAN abc    # Burning barrel
 
-  41 0029 r CEYE abcb   # Evil Eye: floating eye in symbol, over candle
-  42 002a r FSKU abc    # Floating Skull: flaming skull-rock
+      41 0029 r CEYE abcb   # Evil Eye: floating eye in symbol, over candle
+      42 002a r FSKU abc    # Floating Skull: flaming skull-rock
 
-  49 0031 r GOR1 abcb  ^# Hanging victim, twitching
-  63 003f r GOR1 abcb  ^  Hanging victim, twitching
-  50 0032 r GOR2 a     ^# Hanging victim, arms out
-  59 003b r GOR2 a     ^  Hanging victim, arms out
-  52 0034 r GOR4 a     ^# Hanging pair of legs
-  60 003c r GOR4 a     ^  Hanging pair of legs
-  51 0033 r GOR3 a     ^# Hanging victim, 1-legged
-  61 003d r GOR3 a     ^  Hanging victim, 1-legged
-  53 0035 r GOR5 a     ^# Hanging leg
-  62 003e r GOR5 a     ^  Hanging leg
-  73 0049 2 HDB1 a     ^# Hanging victim, guts removed
-  74 004a 2 HDB2 a     ^# Hanging victim, guts and brain removed
-  75 004b 2 HDB3 a     ^# Hanging torso, looking down
-  76 004c 2 HDB4 a     ^# Hanging torso, open skull
-  77 004d 2 HDB5 a     ^# Hanging torso, looking up
-  78 004e 2 HDB6 a     ^# Hanging torso, brain removed
+      49 0031 r GOR1 abcb  ^# Hanging victim, twitching
+      63 003f r GOR1 abcb  ^  Hanging victim, twitching
+      50 0032 r GOR2 a     ^# Hanging victim, arms out
+      59 003b r GOR2 a     ^  Hanging victim, arms out
+      52 0034 r GOR4 a     ^# Hanging pair of legs
+      60 003c r GOR4 a     ^  Hanging pair of legs
+      51 0033 r GOR3 a     ^# Hanging victim, 1-legged
+      61 003d r GOR3 a     ^  Hanging victim, 1-legged
+      53 0035 r GOR5 a     ^# Hanging leg
+      62 003e r GOR5 a     ^  Hanging leg
+      73 0049 2 HDB1 a     ^# Hanging victim, guts removed
+      74 004a 2 HDB2 a     ^# Hanging victim, guts and brain removed
+      75 004b 2 HDB3 a     ^# Hanging torso, looking down
+      76 004c 2 HDB4 a     ^# Hanging torso, open skull
+      77 004d 2 HDB5 a     ^# Hanging torso, looking up
+      78 004e 2 HDB6 a     ^# Hanging torso, brain removed
 
-  25 0019 r POL1 a      # Impaled human
-  26 001a r POL6 ab     # Twitching impaled human
-  27 001b r POL4 a      # Skull on a pole
-  28 001c r POL2 a      # 5 skulls shish kebob
-  29 001d r POL3 ab     # Pile of skulls and candles
-  10 000a   PLAY w        Bloody mess (an exploded player)
-  12 000c   PLAY w        Bloody mess, this thing is exactly the same as 10
-  24 0018   POL5 a        Pool of blood and flesh
-  79 004f 2 POB1 a        Pool of blood
-  80 0050 2 POB2 a        Pool of blood
-  81 0051 2 BRS1 a        Pool of brains
-  15 000f   PLAY n        Dead player
-  18 0012   POSS l        Dead former human
-  19 0013   SPOS l        Dead former sergeant
-  20 0014   TROO m        Dead imp
-  21 0015   SARG n        Dead demon
-  22 0016 r HEAD l        Dead cacodemon
-  23 0017 r SKUL k        Dead lost soul, invisible
-                              (they blow up when killed)
+      25 0019 r POL1 a      # Impaled human
+      26 001a r POL6 ab     # Twitching impaled human
+      27 001b r POL4 a      # Skull on a pole
+      28 001c r POL2 a      # 5 skulls shish kebob
+      29 001d r POL3 ab     # Pile of skulls and candles
+      10 000a   PLAY w        Bloody mess (an exploded player)
+      12 000c   PLAY w        Bloody mess, this thing is exactly the same as 10
+      24 0018   POL5 a        Pool of blood and flesh
+      79 004f 2 POB1 a        Pool of blood
+      80 0050 2 POB2 a        Pool of blood
+      81 0051 2 BRS1 a        Pool of brains
+      15 000f   PLAY n        Dead player
+      18 0012   POSS l        Dead former human
+      19 0013   SPOS l        Dead former sergeant
+      20 0014   TROO m        Dead imp
+      21 0015   SARG n        Dead demon
+      22 0016 r HEAD l        Dead cacodemon
+      23 0017 r SKUL k        Dead lost soul, invisible
+                                  (they blow up when killed)
 
 ### [4-2-2]: Thing Sizes
 
@@ -867,44 +868,44 @@ dies. Bullets do 10 damage, Shotgun shells 70 (7 pellets, each is 10),
 Plasma 20, Rockets 100, and the BFG does 1000 for a direct hit. There's
 more info on this stuff in the DOOM FAQ.
 
-Dec. Hex  Radius Height Mass Tough Speed  Sprite name or class of things:
+    Dec. Hex  Radius Height Mass Tough Speed  Sprite name or class of things:
 
--    -      16     56    100  (100)    -  PLAY
-3004 0bbc   20     56    100    20     8  POSS
-  84 0054   20     56    100    50     8  SSWV
-   9 0009   20     56    100    30     8  SPOS
-  65 0041   20     56    100    70     8  CPOS
-3001 0bb9   20     56    100    60     8  TROO
-3002 0bba   30     56    400   150    10  SARG
-  58 003a   30     56    400   150    10  SARG (Inviso model)
-3006 0bbe   16     56     50   100     8  SKUL
-3005 0bbd   31     56    400   400     8  HEAD
-  69 0045   24     64   1000   500     8  BOS2
-3003 0bbb   24     64   1000  1000     8  BOSS
-  68 0044   64     64    600   500    12  BSPI
-  71 0047   31     56    400   400     8  PAIN
-  66 0042   20     56    500   300    10  SKEL
-  67 0043   48     64   1000   600     8  FATT
-  64 0040   20     56    500   700    15  VILE
-   7 0007  128    100   1000  3000    12  SPID
-  16 0010   40    110   1000  4000    16  CYBR
-  88 0058   16     16   6666   250     0  BBRN
-  72 0048   16     72   6666   100     0  KEEN
-2035 07f3   10     42    100    20     0  BAR1
-   -    -   20     16      -     -     -  most non-obstacles (e.g. gettables)
-   -    -   16     16      -     -     -  most obstacles
-  54 0036   32     16      -     -     -  large brown tree
+    -    -      16     56    100  (100)    -  PLAY
+    3004 0bbc   20     56    100    20     8  POSS
+      84 0054   20     56    100    50     8  SSWV
+       9 0009   20     56    100    30     8  SPOS
+      65 0041   20     56    100    70     8  CPOS
+    3001 0bb9   20     56    100    60     8  TROO
+    3002 0bba   30     56    400   150    10  SARG
+      58 003a   30     56    400   150    10  SARG (Inviso model)
+    3006 0bbe   16     56     50   100     8  SKUL
+    3005 0bbd   31     56    400   400     8  HEAD
+      69 0045   24     64   1000   500     8  BOS2
+    3003 0bbb   24     64   1000  1000     8  BOSS
+      68 0044   64     64    600   500    12  BSPI
+      71 0047   31     56    400   400     8  PAIN
+      66 0042   20     56    500   300    10  SKEL
+      67 0043   48     64   1000   600     8  FATT
+      64 0040   20     56    500   700    15  VILE
+       7 0007  128    100   1000  3000    12  SPID
+      16 0010   40    110   1000  4000    16  CYBR
+      88 0058   16     16   6666   250     0  BBRN
+      72 0048   16     72   6666   100     0  KEEN
+    2035 07f3   10     42    100    20     0  BAR1
+       -    -   20     16      -     -     -  most non-obstacles (e.g. gettables)
+       -    -   16     16      -     -     -  most obstacles
+      54 0036   32     16      -     -     -  large brown tree
 
 ### [4-2-3]: Thing Options
 
 Short 5 of 5, occupying bytes 8-9 of each thing record, control a
 few options, according to which bits are set:
 
-bit 0   the THING is present at skill 1 and 2
-bit 1   the THING is present at skill 3 (hurt me plenty)
-bit 2   the THING is present at skill 4 and 5 (ultra-violence, nightmare)
-bit 3   indicates a deaf guard.
-bit 4   means the THING only appears in multiplayer mode.
+    bit 0  the THING is present at skill 1 and 2
+    bit 1  the THING is present at skill 3 (hurt me plenty)
+    bit 2  the THING is present at skill 4 and 5 (ultra-violence, nightmare)
+    bit 3  indicates a deaf guard.
+    bit 4  means the THING only appears in multiplayer mode.
 
 bits 5-15 have no effect.
 
@@ -927,16 +928,16 @@ flag, or attribute).
 Each linedef represents a line from one of the VERTEXES to another,
 and each linedef's record is 14 bytes, containing 7 <short> fields:
 
-(1) from the VERTEX with this number (the first vertex is 0).
-(2) to the VERTEX with this number (31 is the 32nd vertex).
-(3) flags, see [4-3-1] below.
-(4) types, see [4-3-2] below.
-(5) is a "tag" or "trigger" number which ties this line's effect type
-    to all SECTORS that have the same tag number (in their last
-    field).
-(6) number of the "right" SIDEDEF for this linedef.
-(7) "left" SIDEDEF, if this line adjoins 2 SECTORS. Otherwise, it is
-    equal to -1 (FFFF hex).
+1. from the VERTEX with this number (the first vertex is 0).
+2. to the VERTEX with this number (31 is the 32nd vertex).
+3. flags, see [4-3-1] below.
+4. types, see [4-3-2] below.
+5. is a "tag" or "trigger" number which ties this line's effect type
+   to all SECTORS that have the same tag number (in their last
+   field).
+6. number of the "right" SIDEDEF for this linedef.
+7. "left" SIDEDEF, if this line adjoins 2 SECTORS. Otherwise, it is
+   equal to -1 (FFFF hex).
 
 "right" and "left" are based on the direction of the linedef as
 indicated by the "from" and "to", or "start" and "end", VERTEXES.
@@ -960,18 +961,18 @@ bit is not set (equal to 0), the condition is not true. Note that the
 "unpegged" flags cannot be independently set for the two SIDEDEFs of
 a line. Here's a list of the flags, followed by a discussion of each:
 
-bit     Condition
+    bit     Condition
 
-0       Impassible
-1       Block Monsters
-2       Two-sided
-3       Upper Unpegged
-4       Lower Unpegged
-5       Secret
-6       Block Sound
-7       Not on Map
-8       Already on Map
-9-15    unused
+    0       Impassible
+    1       Block Monsters
+    2       Two-sided
+    3       Upper Unpegged
+    4       Lower Unpegged
+    5       Secret
+    6       Block Sound
+    7       Not on Map
+    8       Already on Map
+    9-15    unused
 
 0 (Impassible) - Players and monsters cannot cross this line. Note that
 if there is no sector on the other side, they can't go through the line
@@ -1091,49 +1092,49 @@ sector numbers, nor the linedef numbers. A tag number is in a lindef's
 
 Explanations of all the abbreviations in the table:
 
-Val     The value of the linedef "type" field (#4). If you want them
-        in numerical order, use SORT or something.
-*       This line function only works in 1.666 and up
-Class   The category of the effect
-Act     Activation. How the linedef's effect is activated.
-n       does NOT require a tag number (see note 5 below)
-W       walk-over activation
-S       switch ("use" - default config is spacebar)
-G       gunfire (pistol, shotgun, chaingun) cross or hit line
-1       the line may be activated once only
-R       potentially repeatable activation
-&       affected sectors "locked out" from further changes. See notes 9/10.
-m       Monster actions can activate the line's effect
-Sound   The type of noise made by moving sectors
-Speed   How quickly a floor moves up/down etc.
-Tm      Time - how long it "rests"; doors "rest" when they've gone as
-        high as they're going to go, lifts "rest" at the bottom, etc.
-Chg     Change - some of them cause a floor texture change and/or special
-        sector change. See note 11 below.
-T       Trigger model, see note 11 below.
-N       Numeric model, see note 11 below.
-X       Floor texture is transferred, and Sector type 0.
-P       Special Sector types 4, 5, 7, 9, 11, 16 transfer.
-Effect  What happens to the affected sector(s).
-open    The ceiling goes (up) to LEC-4.
-close   The ceiling goes (down) to the floor level.
-up      Will move up at specified speed if the destination is above.
-        If the destination is below, it arrives there instantly.
-down    Will move down at specified speed if the destination is below.
-        If the destination is above, it arrives there instantly.
-open/   The door can be activated while moving. If it's open or opening,
-close   it closes. If it's closed or closing, it opens, then pauses,
-        then closes.
-open,   The door can only be activated if it is in the closed state.
-close   It opens, pauses, then closes.
-lift    The floor goes down to LIF, rests, then back up to original height.
-L       lowest
-H       highest
-C       ceiling
-F       floor
-E       adjacent sectors, excluding the affected sector
-I       adjacent sectors, including the affected sector
-nh      next-higher, i.e. LEF that is higher than source.
+    Val     The value of the linedef "type" field (#4). If you want them
+            in numerical order, use SORT or something.
+    *       This line function only works in 1.666 and up
+    Class   The category of the effect
+    Act     Activation. How the linedef's effect is activated.
+    n       does NOT require a tag number (see note 5 below)
+    W       walk-over activation
+    S       switch ("use" - default config is spacebar)
+    G       gunfire (pistol, shotgun, chaingun) cross or hit line
+    1       the line may be activated once only
+    R       potentially repeatable activation
+    &       affected sectors "locked out" from further changes. See notes 9/10.
+    m       Monster actions can activate the line's effect
+    Sound   The type of noise made by moving sectors
+    Speed   How quickly a floor moves up/down etc.
+    Tm      Time - how long it "rests"; doors "rest" when they've gone as
+            high as they're going to go, lifts "rest" at the bottom, etc.
+    Chg     Change - some of them cause a floor texture change and/or special
+            sector change. See note 11 below.
+    T       Trigger model, see note 11 below.
+    N       Numeric model, see note 11 below.
+    X       Floor texture is transferred, and Sector type 0.
+    P       Special Sector types 4, 5, 7, 9, 11, 16 transfer.
+    Effect  What happens to the affected sector(s).
+    open    The ceiling goes (up) to LEC-4.
+    close   The ceiling goes (down) to the floor level.
+    up      Will move up at specified speed if the destination is above.
+            If the destination is below, it arrives there instantly.
+    down    Will move down at specified speed if the destination is below.
+            If the destination is above, it arrives there instantly.
+    open/   The door can be activated while moving. If it's open or opening,
+    close   it closes. If it's closed or closing, it opens, then pauses,
+            then closes.
+    open,   The door can only be activated if it is in the closed state.
+    close   It opens, pauses, then closes.
+    lift    The floor goes down to LIF, rests, then back up to original height.
+    L       lowest
+    H       highest
+    C       ceiling
+    F       floor
+    E       adjacent sectors, excluding the affected sector
+    I       adjacent sectors, including the affected sector
+    nh      next-higher, i.e. LEF that is higher than source.
 
 More notes and longer discussions related to these terms:
 
@@ -1221,9 +1222,11 @@ they're done, and this is the height of the "outside" sector that borders
 the donut.
 
 Whew!
+
 13. Line types 30 and 96, "up ShortestLowerTexture" means that affected
 sector(s) floors go up a number of units equal to the height of the
 shortest "lower" texture facing out from the sector(s).
+
 14. STAIRS. Any sector tagged to a stair-raiser line will go up 8. Now
 find the lowest-numbered 2-sided linedef whose RIGHT side faces this
 sector (the first step). The sector on the other side of the lindedef
@@ -1247,182 +1250,182 @@ themselves and the ceiling.
 
 
 
-Val   Class Act  Sound Speed Tm Chg Effect
+    Val   Class Act  Sound Speed Tm Chg Effect
 
-SPECIAL (Continuous effect, doesn't need triggereing)
+    SPECIAL (Continuous effect, doesn't need triggereing)
 
- 48   Spec  n--  -     -     -  -   Scrolling wall
+     48   Spec  n--  -     -     -  -   Scrolling wall
 
-LOCAL DOORS ("MANUAL" DOORS)
+    LOCAL DOORS ("MANUAL" DOORS)
 
-  1   mDoor nSRm door  med   4  -   open/close
- 26   mDoor nSR  door  med   4  -   open/close BLUE KEY
- 28   mDoor nSR  door  med   4  -   open/close RED KEY
- 27   mDoor nSR  door  med   4  -   open/close YELLOW KEY
- 31   mDoor nS1  door  med   -  -   open
- 32   mDoor nS1  door  med   -  -   open BLUE KEY
- 33   mDoor nS1  door  med   -  -   open RED KEY
- 34   mDoor nS1  door  med   -  -   open YELLOW KEY
- 46   mDoor nGR  door  med   -  -   open
-117 * mDoor nSR  blaze turbo 4  -   open/close
-118 * mDoor nS1  blaze turbo -  -   open
+      1   mDoor nSRm door  med   4  -   open/close
+     26   mDoor nSR  door  med   4  -   open/close BLUE KEY
+     28   mDoor nSR  door  med   4  -   open/close RED KEY
+     27   mDoor nSR  door  med   4  -   open/close YELLOW KEY
+     31   mDoor nS1  door  med   -  -   open
+     32   mDoor nS1  door  med   -  -   open BLUE KEY
+     33   mDoor nS1  door  med   -  -   open RED KEY
+     34   mDoor nS1  door  med   -  -   open YELLOW KEY
+     46   mDoor nGR  door  med   -  -   open
+    117 * mDoor nSR  blaze turbo 4  -   open/close
+    118 * mDoor nS1  blaze turbo -  -   open
 
-REMOTE DOORS
+    REMOTE DOORS
 
-  4   rDoor  W1  door  med   4  -   open,close
- 29   rDoor  S1  door  med   4  -   open,close
- 90   rDoor  WR  door  med   4  -   open,close
- 63   rDoor  SR  door  med   4  -   open,close
-  2   rDoor  W1  door  med   -  -   open
-103   rDoor  S1  door  med   -  -   open
- 86   rDoor  WR  door  med   -  -   open
- 61   rDoor  SR  door  med   -  -   open
-  3   rDoor  W1  door  med   -  -   close
- 50   rDoor  S1  door  med   -  -   close
- 75   rDoor  WR  door  med   -  -   close
- 42   rDoor  SR  door  med   -  -   close
- 16   rDoor  W1  door  med   30 -   close, then opens
- 76   rDoor  WR  door  med   30 -   close, then opens
-108 * rDoor  W1  blaze turbo 4  -   open,close
-111 * rDoor  WR  blaze turbo 4  -   open,close
-105 * rDoor  S1  blaze turbo 4  -   open,close
-114 * rDoor  SR  blaze turbo 4  -   open,close
-109 * rDoor  W1  blaze turbo -  -   open
-112 * rDoor  S1  blaze turbo -  -   open
-106 * rDoor  WR  blaze turbo -  -   open
-115 * rDoor  SR  blaze turbo -  -   open
-110 * rDoor  W1  blaze turbo -  -   close
-113 * rDoor  S1  blaze turbo -  -   close
-107 * rDoor  WR  blaze turbo -  -   close
-116 * rDoor  SR  blaze turbo -  -   close
-133 * rDoor  S1  blaze turbo -  -   open BLUE KEY
- 99 * rDoor  SR  blaze turbo -  -   open BLUE KEY
-135 * rDoor  S1  blaze turbo -  -   open RED KEY
-134 * rDoor  SR  blaze turbo -  -   open RED KEY
-137 * rDoor  S1  blaze turbo -  -   open YELLOW KEY
-136 * rDoor  SR  blaze turbo -  -   open YELLOW KEY
+      4   rDoor  W1  door  med   4  -   open,close
+     29   rDoor  S1  door  med   4  -   open,close
+     90   rDoor  WR  door  med   4  -   open,close
+     63   rDoor  SR  door  med   4  -   open,close
+      2   rDoor  W1  door  med   -  -   open
+    103   rDoor  S1  door  med   -  -   open
+     86   rDoor  WR  door  med   -  -   open
+     61   rDoor  SR  door  med   -  -   open
+      3   rDoor  W1  door  med   -  -   close
+     50   rDoor  S1  door  med   -  -   close
+     75   rDoor  WR  door  med   -  -   close
+     42   rDoor  SR  door  med   -  -   close
+     16   rDoor  W1  door  med   30 -   close, then opens
+     76   rDoor  WR  door  med   30 -   close, then opens
+    108 * rDoor  W1  blaze turbo 4  -   open,close
+    111 * rDoor  WR  blaze turbo 4  -   open,close
+    105 * rDoor  S1  blaze turbo 4  -   open,close
+    114 * rDoor  SR  blaze turbo 4  -   open,close
+    109 * rDoor  W1  blaze turbo -  -   open
+    112 * rDoor  S1  blaze turbo -  -   open
+    106 * rDoor  WR  blaze turbo -  -   open
+    115 * rDoor  SR  blaze turbo -  -   open
+    110 * rDoor  W1  blaze turbo -  -   close
+    113 * rDoor  S1  blaze turbo -  -   close
+    107 * rDoor  WR  blaze turbo -  -   close
+    116 * rDoor  SR  blaze turbo -  -   close
+    133 * rDoor  S1  blaze turbo -  -   open BLUE KEY
+     99 * rDoor  SR  blaze turbo -  -   open BLUE KEY
+    135 * rDoor  S1  blaze turbo -  -   open RED KEY
+    134 * rDoor  SR  blaze turbo -  -   open RED KEY
+    137 * rDoor  S1  blaze turbo -  -   open YELLOW KEY
+    136 * rDoor  SR  blaze turbo -  -   open YELLOW KEY
 
-CEILINGS
+    CEILINGS
 
- 40   Ceil   W1  mover slow  -  -   up to HEC
- 41   Ceil   S1  mover slow  -  -   down to floor
- 43   Ceil   SR  mover slow  -  -   down to floor
- 44   Ceil   W1  mover slow  -  -   down to floor + 8
- 49   Ceil   S1  mover slow  -  -   down to floor + 8
- 72   Ceil   WR  mover slow  -  -   down to floor + 8
+     40   Ceil   W1  mover slow  -  -   up to HEC
+     41   Ceil   S1  mover slow  -  -   down to floor
+     43   Ceil   SR  mover slow  -  -   down to floor
+     44   Ceil   W1  mover slow  -  -   down to floor + 8
+     49   Ceil   S1  mover slow  -  -   down to floor + 8
+     72   Ceil   WR  mover slow  -  -   down to floor + 8
 
-LIFTS
+    LIFTS
 
- 10   Lift   W1  lift  fast  3  -   lift
- 21   Lift   S1  lift  fast  3  -   lift
- 88   Lift   WRm lift  fast  3  -   lift
- 62   Lift   SR  lift  fast  3  -   lift
-121 * Lift   W1  lift  turbo 3  -   lift
-122 * Lift   S1  lift  turbo 3  -   lift
-120 * Lift   WR  lift  turbo 3  -   lift
-123 * Lift   SR  lift  turbo 3  -   lift
+     10   Lift   W1  lift  fast  3  -   lift
+     21   Lift   S1  lift  fast  3  -   lift
+     88   Lift   WRm lift  fast  3  -   lift
+     62   Lift   SR  lift  fast  3  -   lift
+    121 * Lift   W1  lift  turbo 3  -   lift
+    122 * Lift   S1  lift  turbo 3  -   lift
+    120 * Lift   WR  lift  turbo 3  -   lift
+    123 * Lift   SR  lift  turbo 3  -   lift
 
-FLOORS
+    FLOORS
 
-119 * Floor  W1  mover slow  -  -   up to nhEF
-128 * Floor  WR  mover slow  -  -   up to nhEF
- 18   Floor  S1  mover slow  -  -   up to nhEF
- 69   Floor  SR  mover slow  -  -   up to nhEF
- 22   Floor  W1& mover slow  -  TX  up to nhEF
- 95   Floor  WR& mover slow  -  TX  up to nhEF
- 20   Floor  S1& mover slow  -  TX  up to nhEF
- 68   Floor  SR& mover slow  -  TX  up to nhEF
- 47   Floor  G1& mover slow  -  TX  up to nhEF
-  5   Floor  W1  mover slow  -  -   up to LIC
- 91   Floor  WR  mover slow  -  -   up to LIC
-101   Floor  S1  mover slow  -  -   up to LIC
- 64   Floor  SR  mover slow  -  -   up to LIC
- 24   Floor  G1  mover slow  -  -   up to LIC
-130 * Floor  W1  mover turbo -  -   up to nhEF
-131 * Floor  S1  mover turbo -  -   up to nhEF
-129 * Floor  WR  mover turbo -  -   up to nhEF
-132 * Floor  SR  mover turbo -  -   up to nhEF
- 56   Floor  W1& mover slow  -  -   up to LIC - 8, CRUSH
- 94   Floor  WR& mover slow  -  -   up to LIC - 8, CRUSH
- 55   Floor  S1  mover slow  -  -   up to LIC - 8, CRUSH
- 65   Floor  SR  mover slow  -  -   up to LIC - 8, CRUSH
- 58   Floor  W1  mover slow  -  -   up 24
- 92   Floor  WR  mover slow  -  -   up 24
- 15   Floor  S1& mover slow  -  TX  up 24
- 66   Floor  SR& mover slow  -  TX  up 24
- 59   Floor  W1& mover slow  -  TXP up 24
- 93   Floor  WR& mover slow  -  TXP up 24
- 14   Floor  S1& mover slow  -  TX  up 32
- 67   Floor  SR& mover slow  -  TX  up 32
-140 * Floor  S1  mover med   -  -   up 512
- 30   Floor  W1  mover slow  -  -   up ShortestLowerTexture
- 96   Floor  WR  mover slow  -  -   up ShortestLowerTexture
- 38   Floor  W1  mover slow  -  -   down to LEF
- 23   Floor  S1  mover slow  -  -   down to LEF
- 82   Floor  WR  mover slow  -  -   down to LEF
- 60   Floor  SR  mover slow  -  -   down to LEF
- 37   Floor  W1  mover slow  -  NXP down to LEF
- 84   Floor  WR  mover slow  -  NXP down to LEF
- 19   Floor  W1  mover slow  -  -   down to HEF
-102   Floor  S1  mover slow  -  -   down to HEF
- 83   Floor  WR  mover slow  -  -   down to HEF
- 45   Floor  SR  mover slow  -  -   down to HEF
- 36   Floor  W1  mover fast  -  -   down to HEF + 8
- 71   Floor  S1  mover fast  -  -   down to HEF + 8
- 98   Floor  WR  mover fast  -  -   down to HEF + 8
- 70   Floor  SR  mover fast  -  -   down to HEF + 8
-  9   Floor  S1  mover slow  -  NXP donut (see note 12 above)
+    119 * Floor  W1  mover slow  -  -   up to nhEF
+    128 * Floor  WR  mover slow  -  -   up to nhEF
+     18   Floor  S1  mover slow  -  -   up to nhEF
+     69   Floor  SR  mover slow  -  -   up to nhEF
+     22   Floor  W1& mover slow  -  TX  up to nhEF
+     95   Floor  WR& mover slow  -  TX  up to nhEF
+     20   Floor  S1& mover slow  -  TX  up to nhEF
+     68   Floor  SR& mover slow  -  TX  up to nhEF
+     47   Floor  G1& mover slow  -  TX  up to nhEF
+      5   Floor  W1  mover slow  -  -   up to LIC
+     91   Floor  WR  mover slow  -  -   up to LIC
+    101   Floor  S1  mover slow  -  -   up to LIC
+     64   Floor  SR  mover slow  -  -   up to LIC
+     24   Floor  G1  mover slow  -  -   up to LIC
+    130 * Floor  W1  mover turbo -  -   up to nhEF
+    131 * Floor  S1  mover turbo -  -   up to nhEF
+    129 * Floor  WR  mover turbo -  -   up to nhEF
+    132 * Floor  SR  mover turbo -  -   up to nhEF
+     56   Floor  W1& mover slow  -  -   up to LIC - 8, CRUSH
+     94   Floor  WR& mover slow  -  -   up to LIC - 8, CRUSH
+     55   Floor  S1  mover slow  -  -   up to LIC - 8, CRUSH
+     65   Floor  SR  mover slow  -  -   up to LIC - 8, CRUSH
+     58   Floor  W1  mover slow  -  -   up 24
+     92   Floor  WR  mover slow  -  -   up 24
+     15   Floor  S1& mover slow  -  TX  up 24
+     66   Floor  SR& mover slow  -  TX  up 24
+     59   Floor  W1& mover slow  -  TXP up 24
+     93   Floor  WR& mover slow  -  TXP up 24
+     14   Floor  S1& mover slow  -  TX  up 32
+     67   Floor  SR& mover slow  -  TX  up 32
+    140 * Floor  S1  mover med   -  -   up 512
+     30   Floor  W1  mover slow  -  -   up ShortestLowerTexture
+     96   Floor  WR  mover slow  -  -   up ShortestLowerTexture
+     38   Floor  W1  mover slow  -  -   down to LEF
+     23   Floor  S1  mover slow  -  -   down to LEF
+     82   Floor  WR  mover slow  -  -   down to LEF
+     60   Floor  SR  mover slow  -  -   down to LEF
+     37   Floor  W1  mover slow  -  NXP down to LEF
+     84   Floor  WR  mover slow  -  NXP down to LEF
+     19   Floor  W1  mover slow  -  -   down to HEF
+    102   Floor  S1  mover slow  -  -   down to HEF
+     83   Floor  WR  mover slow  -  -   down to HEF
+     45   Floor  SR  mover slow  -  -   down to HEF
+     36   Floor  W1  mover fast  -  -   down to HEF + 8
+     71   Floor  S1  mover fast  -  -   down to HEF + 8
+     98   Floor  WR  mover fast  -  -   down to HEF + 8
+     70   Floor  SR  mover fast  -  -   down to HEF + 8
+      9   Floor  S1  mover slow  -  NXP donut (see note 12 above)
 
-STAIRS
+    STAIRS
 
-  8   Stair  W1  mover slow  -  -   stairs
-  7   Stair  S1  mover slow  -  -   stairs
-100 * Stair  W1  mover turbo -  -   stairs (each up 16 not 8) + crush
-127 * Stair  S1  mover turbo -  -   stairs (each up 16 not 8) + crush
+      8   Stair  W1  mover slow  -  -   stairs
+      7   Stair  S1  mover slow  -  -   stairs
+    100 * Stair  W1  mover turbo -  -   stairs (each up 16 not 8) + crush
+    127 * Stair  S1  mover turbo -  -   stairs (each up 16 not 8) + crush
 
-MOVING FLOORS
+    MOVING FLOORS
 
- 53   MvFlr  W1& lift  slow  3  -   start moving floor
- 54   MvFlr  W1& -     -     -  -   stop moving floor
- 87   MvFlr  WR& lift  slow  3  -   start moving floor
- 89   MvFlr  WR& -     -     -  -   stop moving floor
+     53   MvFlr  W1& lift  slow  3  -   start moving floor
+     54   MvFlr  W1& -     -     -  -   stop moving floor
+     87   MvFlr  WR& lift  slow  3  -   start moving floor
+     89   MvFlr  WR& -     -     -  -   stop moving floor
 
-CRUSHING CEILINGS
+    CRUSHING CEILINGS
 
-  6   Crush  W1& crush med   0  -   start crushing, fast hurt
- 25   Crush  W1& crush med   0  -   start crushing, slow hurt
- 73   Crush  WR& crush slow  0  -   start crushing, slow hurt
- 77   Crush  WR& crush med   0  -   start crushing, fast hurt
- 57   Crush  W1& -     -     -  -   stop crush
- 74   Crush  WR& -     -     -  -   stop crush
-141 * Crush  W1& none? slow  0  -   start crushing, slow hurt "Silent"
+      6   Crush  W1& crush med   0  -   start crushing, fast hurt
+     25   Crush  W1& crush med   0  -   start crushing, slow hurt
+     73   Crush  WR& crush slow  0  -   start crushing, slow hurt
+     77   Crush  WR& crush med   0  -   start crushing, fast hurt
+     57   Crush  W1& -     -     -  -   stop crush
+     74   Crush  WR& -     -     -  -   stop crush
+    141 * Crush  W1& none? slow  0  -   start crushing, slow hurt "Silent"
 
-EXIT LEVEL
+    EXIT LEVEL
 
- 11   Exit  nS-  clunk -     -  -   End level, go to next level
- 51   Exit  nS-  clunk -     -  -   End level, go to secret level
- 52   Exit  nW-  clunk -     -  -   End level, go to next level
-124 * Exit  nW-  clunk -     -  -   End level, go to secret level
+     11   Exit  nS-  clunk -     -  -   End level, go to next level
+     51   Exit  nS-  clunk -     -  -   End level, go to secret level
+     52   Exit  nW-  clunk -     -  -   End level, go to next level
+    124 * Exit  nW-  clunk -     -  -   End level, go to secret level
 
-TELEPORT
+    TELEPORT
 
- 39   Telpt  W1m tport -     -  -   Teleport
- 97   Telpt  WRm tport -     -  -   Teleport
-125 * Telpt  W1m tport -     -  -   Teleport monsters only
-126 * Telpt  WRm tport -     -  -   Teleport monsters only
+     39   Telpt  W1m tport -     -  -   Teleport
+     97   Telpt  WRm tport -     -  -   Teleport
+    125 * Telpt  W1m tport -     -  -   Teleport monsters only
+    126 * Telpt  WRm tport -     -  -   Teleport monsters only
 
-LIGHT
+    LIGHT
 
- 35   Light  W1  -     -     -  -   0
-104   Light  W1  -     -     -  -   LE (light level)
- 12   Light  W1  -     -     -  -   HE (light level)
- 13   Light  W1  -     -     -  -   255
- 79   Light  WR  -     -     -  -   0
- 80   Light  WR  -     -     -  -   HE (light level)
- 81   Light  WR  -     -     -  -   255
- 17   Light  W1  -     -     -  -   Light blinks (see [4-9-1] type 3)
-138 * Light  SR  clunk -     -  -   255
-139 * Light  SR  clunk -     -  -   0
+     35   Light  W1  -     -     -  -   0
+    104   Light  W1  -     -     -  -   LE (light level)
+     12   Light  W1  -     -     -  -   HE (light level)
+     13   Light  W1  -     -     -  -   255
+     79   Light  WR  -     -     -  -   0
+     80   Light  WR  -     -     -  -   HE (light level)
+     81   Light  WR  -     -     -  -   255
+     17   Light  W1  -     -     -  -   Light blinks (see [4-9-1] type 3)
+    138 * Light  SR  clunk -     -  -   255
+    139 * Light  SR  clunk -     -  -   0
 
 ## [4-4]: SIDEDEFS
 
@@ -1438,18 +1441,18 @@ player can only go where there is a sector.
 Each sidedef's record is 30 bytes, comprising 2 <short> fields, then
 3 <8-byte string> fields, then a final <short> field:
 
-(1) X offset for pasting the appropriate wall texture onto the wall's
-    "space": positive offset moves into the texture, so the left
-    portion gets cut off (# of columns off left side = offset).
-    Negative offset moves texture farther right, in the wall's space.
-(2) Y offset: analogous to the X, for vertical.
-(3) "upper" texture name: the part above the juncture with a lower
-    ceiling of an adjacent sector.
-(4) "lower" texture name: the part below a juncture with a higher
-    floored adjacent sector.
-(5) "middle" texture name: the regular part of the wall. Also known as
-    "normal" or "full" texture.
-(6) SECTOR that this sidedef faces or helps to surround.
+1. X offset for pasting the appropriate wall texture onto the wall's
+   "space": positive offset moves into the texture, so the left
+   portion gets cut off (# of columns off left side = offset).
+   Negative offset moves texture farther right, in the wall's space.
+2. Y offset: analogous to the X, for vertical.
+3. "upper" texture name: the part above the juncture with a lower
+   ceiling of an adjacent sector.
+4. "lower" texture name: the part below a juncture with a higher
+   floored adjacent sector.
+5. "middle" texture name: the regular part of the wall. Also known as
+   "normal" or "full" texture.
+6. SECTOR that this sidedef faces or helps to surround.
 
 The texture names are from the TEXTURE1/2 resources. The names of
 wall patches in the directory (between P_START and P_END) are not
@@ -1486,8 +1489,8 @@ lava waterfall with the hidden room at its base...hmm, maybe not...
 These are the beginning and end points for LINEDEFS and SEGS. Each
 vertice's record is 4 bytes in 2 <short> fields:
 
-(1) X coordinate
-(2) Y coordinate
+1. X coordinate
+2. Y coordinate
 
 On the automap within the game, with the grid on (press 'G'), the
 lines are 128 apart (0x80), two lines = 256 (0x100).
@@ -1506,23 +1509,23 @@ which are part of the NODES recursive tree.
 
 Each seg is 12 bytes in 6 <short> fields:
 
-(1) start of seg is VERTEX with this number
-(2) end VERTEX
-(3) angle: 0= east, 16384=north, -16384=south, -32768=west.
-    In hex, it's 0000=east, 4000=north, 8000=west, c000=south.
-    This is also know as BAMS for Binary Angle Measurement.
-(4) LINEDEF that this seg goes along
-(5) direction: 0 if the seg goes the same direction as the linedef it
-    is on, 1 if the seg goes the opposite direction. This is the
-    same as (0 if the seg is on the RIGHT side of the linedef) or
-    (1 if the seg is on the LEFT side of the linedef).
-(6) offset: distance along the linedef to the start of this seg (the
-    vertex in field 1). The offset is in the same direction as the
-    seg. If field 5 is 0, then the distance is from the "start"
-    vertex of the linedef to the "start" vertex of the seg. If field
-    5 is 1, then the offset is from the "end" vertex of the linedef
-    to the "start" vertex of the seg. So if the seg begins at one of
-    the two endpoints of the linedef, this offset will be 0.
+1. start of seg is VERTEX with this number
+2. end VERTEX
+3. angle: 0= east, 16384=north, -16384=south, -32768=west.
+   In hex, it's 0000=east, 4000=north, 8000=west, c000=south.
+   This is also know as BAMS for Binary Angle Measurement.
+4. LINEDEF that this seg goes along
+5. direction: 0 if the seg goes the same direction as the linedef it
+   is on, 1 if the seg goes the opposite direction. This is the
+   same as (0 if the seg is on the RIGHT side of the linedef) or
+   (1 if the seg is on the LEFT side of the linedef).
+6. offset: distance along the linedef to the start of this seg (the
+   vertex in field 1). The offset is in the same direction as the
+   seg. If field 5 is 0, then the distance is from the "start"
+   vertex of the linedef to the "start" vertex of the seg. If field
+   5 is 1, then the offset is from the "end" vertex of the linedef
+   to the "start" vertex of the seg. So if the seg begins at one of
+   the two endpoints of the linedef, this offset will be 0.
 
 For diagonal segs, the offset distance can be obtained from the
 formula DISTANCE = SQR((x2 - x1)^2 + (y2 - y1)^2). The angle can be
@@ -1540,8 +1543,8 @@ There will be (number of nodes + 1) ssectors.
 
 Each ssector is 4 bytes in 2 <short> fields:
 
-(1) This many SEGS are in this SSECTOR...
-(2) ...starting with this SEG number
+1. This many SEGS are in this SSECTOR...
+2. ...starting with this SEG number
 
 The segs in ssector 0 should be segs 0 through x, then ssector 1
 contains segs x+1 through y, ssector 2 containg segs y+1 to z, etc.
@@ -1553,26 +1556,26 @@ structure in the wad file.
 
 Each node is 28 bytes in 14 <short> fields:
 
-(1)  X coordinate of partition line's start
-(2)  Y coordinate of partition line's start
-(3)  DX, change in X to end of partition line
-(4)  DY, change in Y to end of partition line
+1.  X coordinate of partition line's start
+2.  Y coordinate of partition line's start
+3.  DX, change in X to end of partition line
+4.  DY, change in Y to end of partition line
 
 If (1) to (4) equaled 64, 128, -64, -64, the partition line would
 go from (64,128) to (0,64).
 
-(5)  Y upper bound for right bounding-box.\
-(6)  Y lower bound                         All SEGS in right child of node
-(7)  X lower bound                         must be within this box.
-(8)  X upper bound                        /
-(9)  Y upper bound for left bounding box. \
-(10) Y lower bound                         All SEGS in left child of node
-(11) X lower bound                         must be within this box.
-(12) X upper bound                        /
-(13) a NODE or SSECTOR number for the right child. If bit 15 of this
-     <short> is set, then the rest of the number represents the
-     child SSECTOR. If not, the child is a recursed node.
-(14) a NODE or SSECTOR number for the left child.
+5.  Y upper bound for right bounding-box.\
+6.  Y lower bound                         All SEGS in right child of node
+7.  X lower bound                         must be within this box.
+8.  X upper bound                        /
+9.  Y upper bound for left bounding box. \
+10. Y lower bound                         All SEGS in left child of node
+11. X lower bound                         must be within this box.
+12. X upper bound                        /
+13. a NODE or SSECTOR number for the right child. If bit 15 of this
+    <short> is set, then the rest of the number represents the
+    child SSECTOR. If not, the child is a recursed node.
+14. a NODE or SSECTOR number for the left child.
 
 The NODES lump is by far the most difficult to understand of all the
 data structures in DOOM. A new level won't display right without a valid
@@ -1614,12 +1617,12 @@ up and down), so from any viewpoint inside the square, none of its
 four walls can possibly block the view of any of the others. Now
 imagine a sector shaped like this drawing:
 
-+--------------.------+   The * is the viewpoint, looking ->, east. The
-|               .     |   diagonal wall marked @ @ can't be seen at all,
-|               /\    |@  and the vertical wall marked @@@ is partially
-|  *->        /   @\  |@  occluded by the other diagonal wall. This sector
-|           /       @\|@  needs to be divided. Suppose the diagonal wall
-+---------/               is extended, as shown by the two dots (..):
+    +--------------.------+   The * is the viewpoint, looking ->, east. The
+    |               .     |   diagonal wall marked @ @ can't be seen at all,
+    |               /\    |@  and the vertical wall marked @@@ is partially
+    |  *->        /   @\  |@  occluded by the other diagonal wall. This sector
+    |           /       @\|@  needs to be divided. Suppose the diagonal wall
+    +---------/               is extended, as shown by the two dots (..):
 
 now each of the two resulting sub-sectors are sufficient, because while
 in either one, no wall that is part of that sub-sector blocks any other.
@@ -1681,41 +1684,41 @@ extension of a partition line. The <, >, and ^ symbols indicate the
 directions of partition lines. All the space within the drawing is
 actual level space, i.e. sectors.
 
-      +-----+-------+-------+            0                     (5)
-      |     |       |       |         /     \      ==>       /     \
-      |  e  |^  f   |^  g   |       1         4           (4)       (1)
-      |     |4      |5      |     /   \      / \         /   \      / \
-+---- + . . +-------+-------+    2     3    e   5      (3)   (2)   2  (0)
-|     |           < 0       |   / \   / \      / \     / \   / \      / \
-|  a  |       b             |  a   b c   d    f   g   6   5 4   3    1   0
-|     |^                    |
-| . . |2. . . . . +---------+ The order in which      How the elements are
-|     |           |1 >        the node tree's         numbered when it's
-|  c  |^    d     |           elements get made.      finished.
-|     |3          |           0 = node                (5) = node
-+-----+-----------+           a = ssector             6 = ssector
+          +-----+-------+-------+            0                     (5)
+          |     |       |       |         /     \      ==>       /     \
+          |  e  |^  f   |^  g   |       1         4           (4)       (1)
+          |     |4      |5      |     /   \      / \         /   \      / \
+    +---- + . . +-------+-------+    2     3    e   5      (3)   (2)   2  (0)
+    |     |           < 0       |   / \   / \      / \     / \   / \      / \
+    |  a  |       b             |  a   b c   d    f   g   6   5 4   3    1   0
+    |     |^                    |
+    | . . |2. . . . . +---------+ The order in which      How the elements are
+    |     |           |1 >        the node tree's         numbered when it's
+    |  c  |^    d     |           elements get made.      finished.
+    |     |3          |           0 = node                (5) = node
+    +-----+-----------+           a = ssector             6 = ssector
 
-  1. Make segs from all the linedefs. There are 5 two-sided lines here.
-  2. Pick the vertex at 0 and go west (left). This is the first
-       partition line. Note the . . extension line.
-  3. Pick the vertex at 1, going east. The backwards extension . . cuts
-       the line 3>2>, and the unlabeled left edge line. The left edge
-       was one seg, it becomes two. The 3>2> line was two segs, it
-       becomes four. New vertices are created at the intersection
-       points to do this.
-  4. Pick the (newly created) vertex at 2. Now the REMAINING spaces on
-       both sides of the partition line are suitable for ssectors. The
-       left one is first, it becomes a, the right b. Note that ssector
-       a has 3 segs, and ssector b has 5 segs. The . . imaginary lines
-       are NOT segs.
-  5. Back up the tree, and take 1's right branch. Pick 3. Once again, we
-       can make 2 ssectors, c and d, 3 segs each. Back up the tree to 0.
-  6. Pick 4. Now the left side is a ssector, it becomes e. But the right
-       side is not, it needs one more node. Pick 5, make f and g.
-  7. All done, so reverse all the ordination of the nodes and the
-       ssectors. Ssector 0's segs become segs 0-2, ssector 1's segs
-       become segs 3-7, etc. The segs are written sequentially according
-       to the ssector numbering.
+1. Make segs from all the linedefs. There are 5 two-sided lines here.
+2. Pick the vertex at 0 and go west (left). This is the first
+   partition line. Note the . . extension line.
+3. Pick the vertex at 1, going east. The backwards extension . . cuts
+   the line 3>2>, and the unlabeled left edge line. The left edge
+   was one seg, it becomes two. The 3>2> line was two segs, it
+   becomes four. New vertices are created at the intersection
+   points to do this.
+4. Pick the (newly created) vertex at 2. Now the REMAINING spaces on
+   both sides of the partition line are suitable for ssectors. The
+   left one is first, it becomes a, the right b. Note that ssector
+   a has 3 segs, and ssector b has 5 segs. The . . imaginary lines
+   are NOT segs.
+5. Back up the tree, and take 1's right branch. Pick 3. Once again, we
+   can make 2 ssectors, c and d, 3 segs each. Back up the tree to 0.
+6. Pick 4. Now the left side is a ssector, it becomes e. But the right
+   side is not, it needs one more node. Pick 5, make f and g.
+7. All done, so reverse all the ordination of the nodes and the
+   ssectors. Ssector 0's segs become segs 0-2, ssector 1's segs
+   become segs 3-7, etc. The segs are written sequentially according
+   to the ssector numbering.
 
 If we want to create an algorithm to do the nodes automatically, it
 needs to be able to pick partition lines automatically. From studying
@@ -1738,13 +1741,13 @@ linedefs could avoid having any splits, so they are inevitable. It's
 just that with some choices of partition lines, there end up being
 fewer splits. For example,
 
-+--------------+       If a and b are chosen as partition lines,
-|              |       there will be four extra vertices needed,
-+---+      +---+ < A   and this shape becomes five ssectors and
-    |^    ^|           16 segs. If A and B are chosen, however,
-+---+a    b+---+ < B   there are no extra vertices, and only three
-|              |       ssectors and 12 segs.
-+--------------+
+    +--------------+       If a and b are chosen as partition lines,
+    |              |       there will be four extra vertices needed,
+    +---+      +---+ < A   and this shape becomes five ssectors and
+        |^    ^|           16 segs. If A and B are chosen, however,
+    +---+a    b+---+ < B   there are no extra vertices, and only three
+    |              |       ssectors and 12 segs.
+    +--------------+
 
 I've read that for a "small" number of polygons (less than 1000?),
 which is what we're dealing with in a doom level, one should definitely
@@ -1771,20 +1774,20 @@ the other, although fairly convincing illusions are possible.
 Each sector's record is 26 bytes, comprising 2 <short> fields, then
 2 <8-byte string> fields, then 3 <short> fields:
 
-(1) Floor is at this height for this sector
-(2) Ceiling height
-(3) name of the flat used for the floor texture, from the directory.
-(4) name of the flat used for the ceiling texture.
-    All the flats in the directory between F_START and F_END work
-    as either floors or ceilings.
-(5) lightlevel of this sector: 0 = total dark, 255 (0xff) = maximum
-    light. There are actually only 32 brightnesses possible (see
-    COLORMAP [8-2]), so 0-7 are the same, ..., 248-255 are the same.
-(6) special sector: see [4-9-1] immediately below.
-(7) a "tag" number corresponding to LINEDEF(s) with the same tag
-    number. When that linedef is activated, something will usually
-    happen to this sector - its floor will rise, the lights will
-    go out, etc. See [4-3-2] for the list of linedef effects.
+1. Floor is at this height for this sector
+2. Ceiling height
+3. name of the flat used for the floor texture, from the directory.
+4. name of the flat used for the ceiling texture.
+   All the flats in the directory between F_START and F_END work
+   as either floors or ceilings.
+5. lightlevel of this sector: 0 = total dark, 255 (0xff) = maximum
+   light. There are actually only 32 brightnesses possible (see
+   COLORMAP [8-2]), so 0-7 are the same, ..., 248-255 are the same.
+6. special sector: see [4-9-1] immediately below.
+7. a "tag" number corresponding to LINEDEF(s) with the same tag
+   number. When that linedef is activated, something will usually
+   happen to this sector - its floor will rise, the lights will
+   go out, etc. See [4-3-2] for the list of linedef effects.
 
 ### [4-9-1]: Special Sector Types
 
@@ -1815,40 +1818,40 @@ the player takes 20% damage at the end of every second that they are in
 the sector, except at skill 1, they will take 10% damage. If the player
 has armor, then the damage is split between health and armor.
 
-Dec Hex Class   Condition or effect
+    Dec Hex Class   Condition or effect
 
- 0  00  -       Normal, no special characteristic.
- 1  01  Light   random off
- 2  02  Light   blink 0.5 second
- 3  03  Light   blink 1.0 second
- 4  04  Both    -10/20% health AND light blink 0.5 second
- 5  05  Damage  -5/10% health
- 7  07  Damage  -2/5% health
- 8  08  Light   oscillates
- 9  09  Secret  a player must stand in this sector to get credit for
-                finding this secret. This is for the SECRETS ratio
-                on inter-level screens.
-10  0a  Door    30 seconds after level start, ceiling closes like a door.
-11  0b  End     -10/20% health. If a player's health is lowered to less
-                than 11% while standing here, then the level ends! Play
-                proceeds to the next level. If it is a final level
-                (levels 8 in DOOM 1, level 30 in DOOM 2), the game ends!
-12  0c  Light   blink 0.5 second, synchronized
-13  0d  Light   blink 1.0 second, synchronized
-14  0e  Door    300 seconds after level start, ceiling opens like a door.
-16  10  Damage  -10/20% health
+     0  00  -       Normal, no special characteristic.
+     1  01  Light   random off
+     2  02  Light   blink 0.5 second
+     3  03  Light   blink 1.0 second
+     4  04  Both    -10/20% health AND light blink 0.5 second
+     5  05  Damage  -5/10% health
+     7  07  Damage  -2/5% health
+     8  08  Light   oscillates
+     9  09  Secret  a player must stand in this sector to get credit for
+                    finding this secret. This is for the SECRETS ratio
+                    on inter-level screens.
+    10  0a  Door    30 seconds after level start, ceiling closes like a door.
+    11  0b  End     -10/20% health. If a player's health is lowered to less
+                    than 11% while standing here, then the level ends! Play
+                    proceeds to the next level. If it is a final level
+                    (levels 8 in DOOM 1, level 30 in DOOM 2), the game ends!
+    12  0c  Light   blink 0.5 second, synchronized
+    13  0d  Light   blink 1.0 second, synchronized
+    14  0e  Door    300 seconds after level start, ceiling opens like a door.
+    16  10  Damage  -10/20% health
 
 The following value can only be used in versions 1.666 and up, it will
 cause an error and exit to DOS in version 1.2 and earlier:
 
-17  11  Light   flickers on and off randomly
+    17  11  Light   flickers on and off randomly
 
 All other values cause an error and exit to DOS. This includes these
 two values which were developed and are quoted by id as being available,
 but are not actually implemented in DOOM.EXE (as of version 1.666):
 
- 6  06  -       crushing ceiling
-15  0f  -       ammo creator
+     6  06  -       crushing ceiling
+    15  0f  -       ammo creator
 
 What a shame! The "ammo creator" sounds especially interesting!
 
@@ -1864,14 +1867,14 @@ in a given sector can detect and/or attack players in another sector.
 
 Make a table of sectors vs. sectors, like this:
 
-         sector that the player is in
-              0  1  2  3  4
-            +---------------
-sector    0 | 0  1  0  0  0
-that      1 | 1  0  1  1  0
-the       2 | 0  1  0  1  0
-monster   3 | 0  1  1  1  0
-is in     4 | 0  0  1  0  0
+             sector that the player is in
+                  0  1  2  3  4
+                +---------------
+    sector    0 | 0  1  0  0  0
+    that      1 | 1  0  1  1  0
+    the       2 | 0  1  0  1  0
+    monster   3 | 0  1  1  1  0
+    is in     4 | 0  0  1  0  0
 
 A 1 means the monster cannot become activated by seeing a player, nor
 can it attack the player. A 0 means there is no restriction. All non-
@@ -1889,7 +1892,7 @@ in the table becomes bit 0 of byte 0, the 2nd bit is bit 1 of byte 0,
 the 9th bit is bit 0 of byte 1, etc. So if the above table represented
 a level with only 5 sectors, its REJECT would be 4 bytes:
 
-10100010 00101001 01000111 xxxxxxx0 (hex A2 29 47 00, decimal 162 41 71 0)
+    10100010 00101001 01000111 xxxxxxx0 (hex A2 29 47 00, decimal 162 41 71 0)
 
 In other words, the REJECT is a long string of bits which are read
 from least significant bit to most significant bit, according to the
@@ -1944,11 +1947,10 @@ the blocklists.
 
 The 8-byte header contains 4 short integers:
 
-(1)     X coordinate of block-grid origin
-(2)     Y coordinate of block-grid origin
-(3)     # of columns (blocks in X direction)
-(4)     # of rows (blocks in Y direction)
-
+1. X coordinate of block-grid origin
+2. Y coordinate of block-grid origin
+3. # of columns (blocks in X direction)
+4. # of rows (blocks in Y direction)
 
 The block-grid origin is the bottom-left corner of the bottom-left
 (southwest) block. id's blockmap builder this origin point at 8 less
@@ -2068,12 +2070,12 @@ here is a meatier explanation of the format:
 
 (A) The header's four fields are:
 
-  (1) Width. The number of columns of picture data.
-  (2) Height. The number of rows.
-  (3) Left offset. The number of pixels to the left of the center;
-        where the first column gets drawn.
-  (4) Top offset. The number of pixels above the origin;
-        where the top row is.
+1. Width. The number of columns of picture data.
+2. Height. The number of rows.
+3. Left offset. The number of pixels to the left of the center;
+     where the first column gets drawn.
+4. Top offset. The number of pixels above the origin;
+     where the top row is.
 
 The width and height define a rectangular space or limits for drawing
 a picture within. To be "centered", (3) is usually about half of the
@@ -2190,10 +2192,10 @@ systems using soundcards.
 This data is in a RAW format for 8-bit 11 KHz mono sound - first is
 an 8-byte header composed of 4 unsigned short integers:
 
-(1) 3           (means what?)
-(2) 11025       (the sample rate, samples per second)
-(3) N           (the number of samples)
-(4) 0
+1. 3           (means what?)
+2. 11025       (the sample rate, samples per second)
+3. N           (the number of samples)
+4. 0
 
 Each sample is a single byte, since they are 8-bit samples. The
 maximum number of samples is 65535, so at 11 KHz, a little less than
@@ -2204,17 +2206,16 @@ maximum number of samples is 65535, so at 11 KHz, a little less than
 D_* entries is the directory refer to lumps that are music. This
 music is in the MUS file format, which goes like this:
 
-offset  type    contents
-
-0       ASCII   "MUS" and CTRL-Z (hex 4d 55 53 1a)
-4      <short>  # of bytes of music data
-6      <short>  # of bytes of header data (offset to start of music)
-8      <short>  number of primary channels
-10     <short>  number of secondary channels
-12     <short>  number of instrument patches
-14     <short>  0
-16     <short>s instrument patch numbers
-X to end  ?     Music data
+    offset  type    contents
+    0       ASCII   "MUS" and CTRL-Z (hex 4d 55 53 1a)
+    4      <short>  # of bytes of music data
+    6      <short>  # of bytes of header data (offset to start of music)
+    8      <short>  number of primary channels
+    10     <short>  number of secondary channels
+    12     <short>  number of instrument patches
+    14     <short>  0
+    16     <short>s instrument patch numbers
+    X to end  ?     Music data
 
 X is the header size (the second short). Drum patch numbers (greater
 than 128) are 28 less than the numbers listed in the DMXGUS lump.
@@ -2238,25 +2239,25 @@ Ultra-Sound soundcard. It's in a very simple format - ASCII text!
 Here's the start and end of the DMXGUS lump from DOOM 1 version 1.2,
 which is 200 lines, of which the first 10 are comments:
 
-#Purpose: Different size patch libraries for different memory sizes.
-#         The libraries are built in such a way as to leave 8K+32bytes
-#         after the patches are loaded for digital audio.
-#
-#Revision History: 06/22/93 - Fixed problem with 512K patch library
-#                  07/26/93 - patch names changed in various releases
-#
-#
-#Explanation of Columns: Patch #  256K  512K  768K  1024K  Patch Name
-#
-0, 2, 1, 1, 1, acpiano
-1, 2, 1, 1, 1, britepno
-2, 2, 1, 1, 1, synpiano
-.
-.
-.
-213, 128, 128, 128, 128, castinet
-214, 128, 128, 128, 128, surdo1
-215, 128, 128, 128, 128, surdo2
+    #Purpose: Different size patch libraries for different memory sizes.
+    #         The libraries are built in such a way as to leave 8K+32bytes
+    #         after the patches are loaded for digital audio.
+    #
+    #Revision History: 06/22/93 - Fixed problem with 512K patch library
+    #                  07/26/93 - patch names changed in various releases
+    #
+    #
+    #Explanation of Columns: Patch #  256K  512K  768K  1024K  Patch Name
+    #
+    0, 2, 1, 1, 1, acpiano
+    1, 2, 1, 1, 1, britepno
+    2, 2, 1, 1, 1, synpiano
+    .
+    .
+    .
+    213, 128, 128, 128, 128, castinet
+    214, 128, 128, 128, 128, surdo1
+    215, 128, 128, 128, 128, surdo2
 
 # CHAPTER [8]: Miscellaneous Lumps
 
@@ -2325,12 +2326,12 @@ the (extended) ASCII character set, while the first byte of each pair
 is the color attribute for that character. The color attribute can
 be explained thus:
 
- bit 7    6   5   4   3   2   1   0
-  +-----+---+---+---+---+---+---+---+
-  |     |   .   .   |   .   .   .   |
-  |Blink| Background|  Foreground   |
-  |     |   .   .   |   .   .   .   |
-  +-----+---+---+---+---+---+---+---+
+     bit 7    6   5   4   3   2   1   0
+      +-----+---+---+---+---+---+---+---+
+      |     |   .   .   |   .   .   .   |
+      |Blink| Background|  Foreground   |
+      |     |   .   .   |   .   .   .   |
+      +-----+---+---+---+---+---+---+---+
 
 So the foreground color can be from 0-15, the background color can
 be from 0-7, and the "blink" attribute is either on or off. All this
@@ -2360,11 +2361,11 @@ The first (texture name) field is an 8-byte string (less than 8 byte
 names are padded with zeros), the rest of the fields are 2-byte short
 integers:
 
-(1) The name of the texture, used in SIDEDEFS, e.g. "FIREWALL".
-(2) always 0.
-(3) always 0.
-(4) total width of texture
-(5) total height of texture
+1. The name of the texture, used in SIDEDEFS, e.g. "FIREWALL".
+2. always 0.
+3. always 0.
+4. total width of texture
+5. total height of texture
 
 The fourth and fifth fields define a "space" (usually 128 by 128
 or 64 by 72 or etc...) in which individual wall patches are placed
@@ -2372,22 +2373,21 @@ to form the overall picture. To tile vertically on a very tall wall
 without exhibiting the "Tutti Frutti" effect, a texture must have
 height 128, the maximum. There is no maximum width.
 
-(6) always 0.
-(7) always 0.
-(8) Number of 5-field (5 <short>) patch descriptors that follow. This
-means that each texture entry has variable length. Many entries have just
-1 patch, the most used in DOOM in a single texture is 64.
-
+6. always 0.
+7. always 0.
+8. Number of 5-field (5 <short>) patch descriptors that follow. This
+   means that each texture entry has variable length. Many entries have just
+   1 patch, the most used in DOOM in a single texture is 64.
 
 Patch descriptor:
 
-  (a) x offset from top-left corner of texture space defined in fields
-        4 and 5 to start placement of this patch
-  (b) y offset
-  (c) number (0...) of the entry in the PNAMES lump that contains the
-        lump name from the directory, of the wall patch to use...
-  (d) always 1, is for something called "stepdir"...
-  (e) always 0, is for "colormap"...
+    (a) x offset from top-left corner of texture space defined in fields
+          4 and 5 to start placement of this patch
+    (b) y offset
+    (c) number (0...) of the entry in the PNAMES lump that contains the
+          lump name from the directory, of the wall patch to use...
+    (d) always 1, is for something called "stepdir"...
+    (e) always 0, is for "colormap"...
 
 Each texture's entry ends after the last of its patch descriptors.
 
@@ -2441,36 +2441,35 @@ that only DOOM 2 has the necessary picture lumps, but version 1.666 of
 DOOM.EXE for DOOM 1 also has the capability to use these animation-cycle
 names (for pwad designers).
 
-First       Last         Ver    Normal # of frames
+    First       Last         Ver    Normal # of frames
 
-BLODGR1     BLODGR4       r     4
-BLODRIP1    BLODRIP4      r     4
-FIREBLU1    FIREBLU2      r     2
-FIRELAV3    FIRELAVA      r     2 (3 patches are in DOOM.WAD, 1 is unused)
-FIREMAG1    FIREMAG3      r     3
-FIREWALA    FIREWALL      r     3
-GSTFONT1    GSTFONT3      r     3
-ROCKRED1    ROCKRED3      r     3
-SLADRIP1    SLADRIP3     All    3
+    BLODGR1     BLODGR4       r     4
+    BLODRIP1    BLODRIP4      r     4
+    FIREBLU1    FIREBLU2      r     2
+    FIRELAV3    FIRELAVA      r     2 (3 patches are in DOOM.WAD, 1 is unused)
+    FIREMAG1    FIREMAG3      r     3
+    FIREWALA    FIREWALL      r     3
+    GSTFONT1    GSTFONT3      r     3
+    ROCKRED1    ROCKRED3      r     3
+    SLADRIP1    SLADRIP3     All    3
 
-BFALL1      BFALL4        2     4
-SFALL1      SFALL4        2     4
-WFALL1      WFALL4        2     4
-DBRAIN1     DBRAIN4       2     4
+    BFALL1      BFALL4        2     4
+    SFALL1      SFALL4        2     4
+    WFALL1      WFALL4        2     4
+    DBRAIN1     DBRAIN4       2     4
 
-(floor/ceiling animations):
+    (floor/ceiling animations):
 
-NUKAGE1     NUKAGE3      All    3
-FWATER1     FWATER4       r     4
-SWATER1     SWATER4       -     4 (SWATER lumps aren't in any DOOM.WAD)
-LAVA1       LAVA4         r     4
-BLOOD1      BLOOD3        r     3
+    NUKAGE1     NUKAGE3      All    3
+    FWATER1     FWATER4       r     4
+    SWATER1     SWATER4       -     4 (SWATER lumps aren't in any DOOM.WAD)
+    LAVA1       LAVA4         r     4
+    BLOOD1      BLOOD3        r     3
 
-RROCK05     RROCK08       2     4
-SLIME01     SLIME04       2     4
-SLIME05     SLIME08       2     4
-SLIME09     SLIME12       2     4
-
+    RROCK05     RROCK08       2     4
+    SLIME01     SLIME04       2     4
+    SLIME05     SLIME08       2     4
+    SLIME09     SLIME12       2     4
 
 ### [8-4-2]: The SKY Textures
 
@@ -2547,40 +2546,40 @@ and deserves the .LMP extension.
 
 A DOOM demo has three parts:
 
-  (1) header - 7 or 13 bytes
-  (2) data recording player moves - 4 bytes per player per gametic
-  (3) quit byte - equals 128 (0x80)
+1. header - 7 or 13 bytes
+2. data recording player moves - 4 bytes per player per gametic
+3. quit byte - equals 128 (0x80)
 
 (1) There are two different kinds of header depending on the version of
 DOOM used to record the demo. Versions up to 1.2 use a 7-byte header:
 
-  byte  range   purpose
+      byte  range   purpose
 
-0       0-4     skill level. 0="I'm too young to die", 4="Nightmare!"
-1       1-3     episode.
-2       1-9     mission/map.
-3       0-1     player 1 is present if this is 1.
-4       0-1     player 2.
-5       0-1     player 3.
-6       0-1     player 4.
+    0       0-4     skill level. 0="I'm too young to die", 4="Nightmare!"
+    1       1-3     episode.
+    2       1-9     mission/map.
+    3       0-1     player 1 is present if this is 1.
+    4       0-1     player 2.
+    5       0-1     player 3.
+    6       0-1     player 4.
 
 Versions after 1.2 use a 13-byte header:
 
-byte    range   purpose
+    byte    range   purpose
 
-0       104-106 version. 104=1.4 beta, 105=1.5 beta, 106=1.6 beta or 1.666
-1       0-4     skill level. 0="I'm too young to die", 4="Nightmare!"
-2       1-3     episode. In DOOM 2 this is always 1.
-3       1-32    mission/map/level. In DOOM 1, it's 1-9. In DOOM 2, it's 1-32.
-4       0-2     mode. 0=single or cooperative, 1=deathmatch, 2=altdeath
-5       0-      respawn. 0=no respawn parameter, (any other value)=respawn.
-6       0-      fast. 0=no fast parameter, (any other value)=fast.
-7       0-      nomonsters. 0=monsters exist, (any other value)=nomonsters.
-8       0-3     viewpoint. 0=player 1's status bar, ..., 3=player 4.
-9       0-1     player 1 is present if this is 1.
-10 0x0a 0-1     player 2.
-11 0x0b 0-1     player 3.
-12 0x0c 0-1     player 4.
+    0       104-106 version. 104=1.4 beta, 105=1.5 beta, 106=1.6 beta or 1.666
+    1       0-4     skill level. 0="I'm too young to die", 4="Nightmare!"
+    2       1-3     episode. In DOOM 2 this is always 1.
+    3       1-32    mission/map/level. In DOOM 1, it's 1-9. In DOOM 2, it's 1-32.
+    4       0-2     mode. 0=single or cooperative, 1=deathmatch, 2=altdeath
+    5       0-      respawn. 0=no respawn parameter, (any other value)=respawn.
+    6       0-      fast. 0=no fast parameter, (any other value)=fast.
+    7       0-      nomonsters. 0=monsters exist, (any other value)=nomonsters.
+    8       0-3     viewpoint. 0=player 1's status bar, ..., 3=player 4.
+    9       0-1     player 1 is present if this is 1.
+    10 0x0a 0-1     player 2.
+    11 0x0b 0-1     player 3.
+    12 0x0c 0-1     player 4.
 
 (2) The player-move data is recorded in 4-byte chunks. Every 1/35 of a
 second is a gametic, and for every gametic, there is one 4-byte chunk
@@ -3043,15 +3042,15 @@ SPRITE NAME POINTERS. 105 pointers to the strings "TROO", "SHTG", ...,
 STATE TABLE. 512 entries in v1.2, 967 entries in v1.666. Each entry
 is 28 bytes in 7 integers:
 
-(1)     sprite number 0-..., lookup in sprite name pointers list.
-(2)     sprite frame, 0="A" in a sprite lump, 1="B", etc.
-(3)     duration, how many gametics this state is displayed until
-        it looks for the next. -1 (0xffffffff) is forever.
-(4)     a "code pointer" which indicates what action(s) accompany
-        the displaying of this state.
-(5)     next state in sequence. 0 means no next state, sequence is done.
-(6)     always 0, has no effect.
-(7)     always 0, has no effect.
+1.     sprite number 0-..., lookup in sprite name pointers list.
+2.     sprite frame, 0="A" in a sprite lump, 1="B", etc.
+3.     duration, how many gametics this state is displayed until
+       it looks for the next. -1 (0xffffffff) is forever.
+4.     a "code pointer" which indicates what action(s) accompany
+       the displaying of this state.
+5.     next state in sequence. 0 means no next state, sequence is done.
+6.     always 0, has no effect.
+7.     always 0, has no effect.
 
 
 8b3a8 ***
@@ -3063,69 +3062,69 @@ Two integers: 1, 0, then 6 code-pointers.
 THING TABLE. 103 entries in v1.2 which are each 88 bytes = 22 integers.
 136 entries in v1.666, which are each 92 bytes = 23 integers.
 
-(1)     Thing number, as used in maps. See [4-2-1]. Some of them are
-        equal to -1, e.g. the players' entry, and all projectiles.
-(2)     "Spawn" state. State number (from STATE TABLE) for when this
-        thing first appears.
-(3)     Health. Inanimates can't be killed, so it doesn't apply to them.
-(4)     "Moving" state. First state # of monsters pursuing, etc.
-(5)     "See player" sound. For monsters who become activated. Also for
-        projectiles' first sound. Note that sounds are 1-..., not 0-...
-        0 indicates no sound.
-(6)     Reaction Time. Lower is faster.
-(7)     "Attack" sound.
-(8)     "Pain" state.
-(9)     Painchance. The chance out of 256 that a monster will be disrupted
-        when it gets hurt. Otherwise, they keep attacking.
-(10)    "Pain" sound.
-(11)    "Close attack" state.
-(12)    "Distance attack" state.
-(13)    "Death" state, or "explode" for projectiles.
-(14)    "Explosive death" state, only some monsters can be "mushed".
-(15)    "Death" sound, or "explode" for projectiles.
-(16)    Speed of movement. Projectiles' speed are * 65536.
-(17)    Horizontal size (radius) * 65536
-(18)    Height * 65536
-(19)    Mass
-(20)    Missile damage. Also, the Lost Soul has a 3 here, for it's attack.
-(21)    "Act" sound, for wandering monsters.
-(22)    Flags, see below
-(23)    "Respawn" state, for monsters being ressurected. VERSION 1.666 ONLY
+1.  Thing number, as used in maps. See [4-2-1]. Some of them are
+    equal to -1, e.g. the players' entry, and all projectiles.
+2.  "Spawn" state. State number (from STATE TABLE) for when this
+    thing first appears.
+3.  Health. Inanimates can't be killed, so it doesn't apply to them.
+4.  "Moving" state. First state # of monsters pursuing, etc.
+5.  "See player" sound. For monsters who become activated. Also for
+    projectiles' first sound. Note that sounds are 1-..., not 0-...
+    0 indicates no sound.
+6.  Reaction Time. Lower is faster.
+7.  "Attack" sound.
+8.  "Pain" state.
+9.  Painchance. The chance out of 256 that a monster will be disrupted
+    when it gets hurt. Otherwise, they keep attacking.
+10. "Pain" sound.
+11. "Close attack" state.
+12. "Distance attack" state.
+13. "Death" state, or "explode" for projectiles.
+14. "Explosive death" state, only some monsters can be "mushed".
+15. "Death" sound, or "explode" for projectiles.
+16. Speed of movement. Projectiles' speed are * 65536.
+17. Horizontal size (radius) * 65536
+18. Height * 65536
+19. Mass
+20. Missile damage. Also, the Lost Soul has a 3 here, for it's attack.
+21. "Act" sound, for wandering monsters.
+22. Flags, see below
+23. "Respawn" state, for monsters being ressurected. VERSION 1.666 ONLY
 
 Flags. 0 = condition is false. 1 = condition is true.
 
-  bit   flagname        effect on thing
+    bit   flagname        effect on thing
 
-  0     Special         it is a gettable thing (ammo, health, etc.)
-  1     Solid           creatures can't pass through (but projectiles can)
-  2     Shootable       can be hurt (note barrels have this set)
-  3     NoSector        totally invisible
-  4     NoBlockmap
-  5
-  6     (InPain)        ?
-  7
-  8     SpawnCeiling    hung from ceiling
-  9     NoGravity       floating monsters and not-on-ground things
-  10    Dropoff         doesn't automatically hug floor if "jump" off ledge
-  11    Pickup          can pick up gettable items
-  12    (NoClip)        walks through walls
-  13
-  14    Float           floating monsters
-  15    (Semi-NoClip)   climb tall steps
-  16    Missile         projectiles
-  17    (Disappearing   ?
-         Weapon)
-  18    Shadow          semi-invisible like Spectres
-  19    NoBlood         uses PUFF instead of BLUD when hurt (e.g. barrels)
-  20    (SlideHelpless) ?
-  21
-  22    CountKill       Monster: counts toward KILLS ratio on inter-level
-  23    CountItem       Artifact: counts toward ITEMS on inter-level screen
-  24    (Running)       ?
-  25    NotDMatch       this thing doesn't get spawned in deathmatch modes
-  26    Color0          \ 00 = green stays green  01 = change to dark greys
-  27    Color1          / 10 = change to browns   11 = change to dark reds
-  28-                   unused
+    0     Special         it is a gettable thing (ammo, health, etc.)
+    1     Solid           creatures can't pass through (but projectiles can)
+    2     Shootable       can be hurt (note barrels have this set)
+    3     NoSector        totally invisible
+    4     NoBlockmap
+    5
+    6     (InPain)        ?
+    7
+    8     SpawnCeiling    hung from ceiling
+    9     NoGravity       floating monsters and not-on-ground things
+    10    Dropoff         doesn't automatically hug floor if "jump" off ledge
+    11    Pickup          can pick up gettable items
+    12    (NoClip)        walks through walls
+    13
+    14    Float           floating monsters
+    15    (Semi-NoClip)   climb tall steps
+    16    Missile         projectiles
+    17    (Disappearing   ?
+           Weapon)
+    18    Shadow          semi-invisible like Spectres
+    19    NoBlood         uses PUFF instead of BLUD when hurt (e.g. barrels)
+    20    (SlideHelpless) ?
+    21
+    22    CountKill       Monster: counts toward KILLS ratio on inter-level
+    23    CountItem       Artifact: counts toward ITEMS on inter-level screen
+    24    (Running)       ?
+    25    NotDMatch       this thing doesn't get spawned in deathmatch modes
+    26    Color0          \ 00 = green stays green  01 = change to dark greys
+    27    Color1          / 10 = change to browns   11 = change to dark reds
+    28-                   unused
 
 8d730 *** n/a
 
@@ -3140,31 +3139,31 @@ End of DOOM.EXE
 The descriptions below use a modified Backus-Naur Form (BNF) notation.
 Each entry looks like
 
-<keyword>       := description          ;type or comment (optional)
-                   description cont'd.  ;type or comment (optional)
+    <keyword>       := description          ;type or comment (optional)
+                       description cont'd.  ;type or comment (optional)
 
 Descriptions composed of more than one sequential keyword or element
 are usually listed with one element per line. This is for clarity and also
 allows each succesive element to be assigned different types without extra
 lines.
 
-<keyword>       := <whatever>           ;<type>
+    <keyword>       := <whatever>           ;<type>
 
 is a shorthand for
 
-<keyword>       := <whatever>
-<whatever>      := <type>
+    <keyword>       := <whatever>
+    <whatever>      := <type>
 
 The description is one or more of the following predefined types,
 and/or previously or subsequently defined keywords.
 
-<byte>          is an unsigned 8-bit integer (0 to 255).
-<char>          is a signed 8-bit integer (-128 to 127).
-<ushort>        is an unsigned 16-bit integer in lo-hi format (0 to 65535)
-<short>         is a signed 16-bit integer (-32768 to 32767).
-<long>          is a signed 32-bit integer (-2147483648 to 2147483647).
-<string8>       is an ASCII string of from 1 to 8 bytes. If its length is
-                less than 8 bytes, the remainder are zeros (hex 00).
+    <byte>          is an unsigned 8-bit integer (0 to 255).
+    <char>          is a signed 8-bit integer (-128 to 127).
+    <ushort>        is an unsigned 16-bit integer in lo-hi format (0 to 65535)
+    <short>         is a signed 16-bit integer (-32768 to 32767).
+    <long>          is a signed 32-bit integer (-2147483648 to 2147483647).
+    <string8>       is an ASCII string of from 1 to 8 bytes. If its length is
+                    less than 8 bytes, the remainder are zeros (hex 00).
 
 Any of these may be followed by a range: <byte:1..99> means a byte
 restricted to the range 1 to 99 inclusive. A single number means that
@@ -3187,291 +3186,289 @@ are directly inserted.
 
 ------
 
-<WAD file>      := "PWAD"|"IWAD"
-                   <numlumps>
-                   <infotableofs>
-                   <lumps>
-                   <directory>
+    <WAD file>      := "PWAD"|"IWAD"
+                       <numlumps>
+                       <infotableofs>
+                       <lumps>
+                       <directory>
 
-<numlumps>      := <long>               ;number of lumps in WAD file
-<infotableofs>  := <long>               ;file offset to directory start
+    <numlumps>      := <long>               ;number of lumps in WAD file
+    <infotableofs>  := <long>               ;file offset to directory start
 
-<lumps>         := <lump> [numlumps]
-<lump>          :=                      ;see different kinds below
+    <lumps>         := <lump> [numlumps]
+    <lump>          :=                      ;see different kinds below
 
-<directory>     := {<lumpinfo> | <otherinfo>} [numlumps]
-<lumpinfo>      := <filepos>            ;<long>
-                   <size>               ;<long>
-                   <name>               ;<string8>
+    <directory>     := {<lumpinfo> | <otherinfo>} [numlumps]
+    <lumpinfo>      := <filepos>            ;<long>
+                       <size>               ;<long>
+                       <name>               ;<string8>
 
-<otherinfo>     := <marker> | <label>
-<marker>        := <dummynumber>        ;<long> with any value
-                   <long:0>
-                   <"S_START" | etc>    ;<string8>
+    <otherinfo>     := <marker> | <label>
+    <marker>        := <dummynumber>        ;<long> with any value
+                       <long:0>
+                       <"S_START" | etc>    ;<string8>
 
-<label>         := {<"E"> <episode> <"M"> <mission>} | {<"MAP"> <level>}
-<episode>       := "1"|"2"|"3"
-<mission>       := "1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
-<level>         := "01"|"02"|"03"|"04"|"05"|"06"|"07"|"08"|"09"|"10"
-                   |"11"|"12"|"13"|"14"|"15"|"16"|"17"|"18"|"19"|"20"
-                   |"21"|"22"|"23"|"24"|"25"|"26"|"27"|"28"|"29"|"30"
-                   |"31"|"32"
+    <label>         := {<"E"> <episode> <"M"> <mission>} | {<"MAP"> <level>}
+    <episode>       := "1"|"2"|"3"
+    <mission>       := "1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
+    <level>         := "01"|"02"|"03"|"04"|"05"|"06"|"07"|"08"|"09"|"10"
+                       |"11"|"12"|"13"|"14"|"15"|"16"|"17"|"18"|"19"|"20"
+                       |"21"|"22"|"23"|"24"|"25"|"26"|"27"|"28"|"29"|"30"
+                       |"31"|"32"
 
-------
 different kinds of lumps:
-------
 
-<PLAYPAL>       := <palette> [14]
-<palette>       := {<red> <green> <blue>} [256]
-<red>           := <byte>
-<green>         := <byte>
-<blue>          := <byte>
-
-------
-
-<COLORMAP>      := <color_map> [34]
-<color_map>     := <mapping> [256]
-<mapping>       := <byte>
+    <PLAYPAL>       := <palette> [14]
+    <palette>       := {<red> <green> <blue>} [256]
+    <red>           := <byte>
+    <green>         := <byte>
+    <blue>          := <byte>
 
 ------
 
-<ENDOOM>        := <character_cell> [1000]
-<character_cell>:= <color_attributes>           ;<byte>
-                   <character>                  ;<byte>
+    <COLORMAP>      := <color_map> [34]
+    <color_map>     := <mapping> [256]
+    <mapping>       := <byte>
 
 ------
 
-<demo>          := <header>
-                   <gametic_data>
-                   <byte:128>
-<header>        := {<header_12> | <header_16>}  ;different versions
-<header_12>     := <skill>
-                   <episode>
-                   <map>
-                   <player> [4]
-<header_16>     := <version>
-                   <skill>
-                   <episode>
-                   <map>
-                   <mode>
-                   <respawn>
-                   <fast>
-                   <nomonsters>
-                   <viewpoint>
-                   <player> [4]
-<skill>         := <byte:0..4>
-<episode>       := {<byte:1..3> | <byte:1>}     ;DOOM 1 or DOOM 2
-<map>           := {<byte:1..9> | <byte:1..32>} ;DOOM 1 or DOOM 2
-<player>        := <byte:0..1>          ;0 means not present, 1 means present
-<version>       := <byte:104..106>      ;versions 1.4, 1.5, 1.6 (also 1.666)
-<mode>          := <byte:0..2}          ;cooperative|deathmatch|altdeath
-<respawn>       := <byte>               ;0 is off, non-zero is on
-<fast>          := <byte>               ;0 is off, non-zero is on
-<nomonsters>    := <byte>               ;0 is off, non-zero is on
-<viewpoint>     := <byte:0..3>          ;shown from this player's view
-
-<gametic_data>  := <gametic> [...]
-<gametic>       := <player_move> [1..4] ;1-4 is # of players present in demo
-<player_move>   := <forward>            ;<char>
-                   <strafe>             ;<char>
-                   <turn>               ;<char>
-                   <use>                ;<byte>
+    <ENDOOM>        := <character_cell> [1000]
+    <character_cell>:= <color_attributes>           ;<byte>
+                       <character>                  ;<byte>
 
 ------
 
-<GENMIDI>       := "#OPL_II#"
-                   <instr_data> [150]
-                   <instr_name> [150]
-<instr_data>    := <byte> [36]          ;format unknown to me
-<instr_name>    := <byte> [32]          ;padded with 0s
+    <demo>          := <header>
+                       <gametic_data>
+                       <byte:128>
+    <header>        := {<header_12> | <header_16>}  ;different versions
+    <header_12>     := <skill>
+                       <episode>
+                       <map>
+                       <player> [4]
+    <header_16>     := <version>
+                       <skill>
+                       <episode>
+                       <map>
+                       <mode>
+                       <respawn>
+                       <fast>
+                       <nomonsters>
+                       <viewpoint>
+                       <player> [4]
+    <skill>         := <byte:0..4>
+    <episode>       := {<byte:1..3> | <byte:1>}     ;DOOM 1 or DOOM 2
+    <map>           := {<byte:1..9> | <byte:1..32>} ;DOOM 1 or DOOM 2
+    <player>        := <byte:0..1>          ;0 means not present, 1 means present
+    <version>       := <byte:104..106>      ;versions 1.4, 1.5, 1.6 (also 1.666)
+    <mode>          := <byte:0..2}          ;cooperative|deathmatch|altdeath
+    <respawn>       := <byte>               ;0 is off, non-zero is on
+    <fast>          := <byte>               ;0 is off, non-zero is on
+    <nomonsters>    := <byte>               ;0 is off, non-zero is on
+    <viewpoint>     := <byte:0..3>          ;shown from this player's view
+
+    <gametic_data>  := <gametic> [...]
+    <gametic>       := <player_move> [1..4] ;1-4 is # of players present in demo
+    <player_move>   := <forward>            ;<char>
+                       <strafe>             ;<char>
+                       <turn>               ;<char>
+                       <use>                ;<byte>
 
 ------
 
-<DMXGUS>        := pointless to describe here, see section [7-5]
+    <GENMIDI>       := "#OPL_II#"
+                       <instr_data> [150]
+                       <instr_name> [150]
+    <instr_data>    := <byte> [36]          ;format unknown to me
+    <instr_name>    := <byte> [32]          ;padded with 0s
 
 ------
 
-<song>          := "MUS"
-                   <byte:26>
-                   <music_length>       ;<ushort>
-                   <music_start>        ;<ushort>
-                   <primary_channels>   ;<ushort>
-                   <secondary_channels> ;<ushort>
-                   <num_instr_patches>  ;<ushort>
-                   <ushort:0>
-                   <instr_patches>
-                   <music data>
-<instr_patches> := <instr_patch> [num_instr_patches]
-<instr_patch>   := <ushort>             ;Drum patch #s 28 less than in DMXGUS
-
-<music data>    := ???
+    <DMXGUS>        := pointless to describe here, see section [7-5]
 
 ------
 
-<soundeffect>   := <ushort:3>
-                   <ushort:11025>       ;sampling rate
-                   <num_samples>        ;<ushort>
-                   <ushort:0>
-                   <samples>
-<samples>       := <sample> [num_samples]       ;<byte>
+    <song>          := "MUS"
+                       <byte:26>
+                       <music_length>       ;<ushort>
+                       <music_start>        ;<ushort>
+                       <primary_channels>   ;<ushort>
+                       <secondary_channels> ;<ushort>
+                       <num_instr_patches>  ;<ushort>
+                       <ushort:0>
+                       <instr_patches>
+                       <music data>
+    <instr_patches> := <instr_patch> [num_instr_patches]
+    <instr_patch>   := <ushort>             ;Drum patch #s 28 less than in DMXGUS
+
+    <music data>    := ???
 
 ------
 
-<PC_sound>      := <ushort:0>
-                   <num_PC_samples>     ;<ushort>
-                   <PC_samples>
-<PC_samples>    := <PC_sample> [num_PC_samples]
-<PC_sample>     := <byte>               ;seem to range [0..96]
+    <soundeffect>   := <ushort:3>
+                       <ushort:11025>       ;sampling rate
+                       <num_samples>        ;<ushort>
+                       <ushort:0>
+                       <samples>
+    <samples>       := <sample> [num_samples]       ;<byte>
 
 ------
 
-<TEXTURE1>      := <num_textures>       ;<long>
-                   <tex_offsets>
-                   <tex_entries>
-<tex_offsets>   := <tex_offset> [num_textures]
-<tex_offset>    := <long>
-<tex_entries>   := <tex_entry> [num_textures]
-<tex_entry>     := <tex_name>           ;<string8>
-                   <short:0>
-                   <short:0>
-                   <tex_width>          ;<short>
-                   <tex_height>         ;<short>
-                   <short:0>
-                   <short:0>
-                   <num_patches>        ;<short>
-                   <patches>
-<patches>       := <patch> [num_patches]
-<patch>         := <x_offset>           ;all are <short>
-                   <y_offset>
-                   <pname_number>       ;lookup in <PNAMES> for picture
-                   <short:1>            ;supposedly <stepdir>
-                   <short:0>            ;supposedly <color_map>
+    <PC_sound>      := <ushort:0>
+                       <num_PC_samples>     ;<ushort>
+                       <PC_samples>
+    <PC_samples>    := <PC_sample> [num_PC_samples]
+    <PC_sample>     := <byte>               ;seem to range [0..96]
 
 ------
 
-<PNAMES>        := <num_pnames>         ;<long>
-                   <pnames>
-<pnames>        := <pname> [num_pnames]
-<pname>         := <string8>]           ;match the <name> from the
-                                        ;<lumpinfo> of a <picture>
+    <TEXTURE1>      := <num_textures>       ;<long>
+                       <tex_offsets>
+                       <tex_entries>
+    <tex_offsets>   := <tex_offset> [num_textures]
+    <tex_offset>    := <long>
+    <tex_entries>   := <tex_entry> [num_textures]
+    <tex_entry>     := <tex_name>           ;<string8>
+                       <short:0>
+                       <short:0>
+                       <tex_width>          ;<short>
+                       <tex_height>         ;<short>
+                       <short:0>
+                       <short:0>
+                       <num_patches>        ;<short>
+                       <patches>
+    <patches>       := <patch> [num_patches]
+    <patch>         := <x_offset>           ;all are <short>
+                       <y_offset>
+                       <pname_number>       ;lookup in <PNAMES> for picture
+                       <short:1>            ;supposedly <stepdir>
+                       <short:0>            ;supposedly <color_map>
 
 ------
 
-<picture>       := <header>
-                   <pointers>           ;offsets to <column> starts
-                   <pixel_data>
-<header>        := <width>              ;all are <short>
-                   <height>
-                   <left_offset>
-                   <top_offset>
-<pointers>      := <pointer> [width]    ;<long>
-<pixel_data>    := <column> [width]
-<column>        := <post> [...]
-                   <byte:255>           ;255 (0xff) ends the column
-<post>          := <rowstart>           ;<byte>
-                   <num_pixels>         ;<byte>
-                   <unused>             ;<byte>
-                   <pixels>
-                   <unused>             ;<byte>
-<pixels>        := <pixel> [num_pixels] ;<byte>
+    <PNAMES>        := <num_pnames>         ;<long>
+                       <pnames>
+    <pnames>        := <pname> [num_pnames]
+    <pname>         := <string8>]           ;match the <name> from the
+                                            ;<lumpinfo> of a <picture>
 
 ------
 
-<flat>          := <colorbyte> [4096]   ;<byte>
+    <picture>       := <header>
+                       <pointers>           ;offsets to <column> starts
+                       <pixel_data>
+    <header>        := <width>              ;all are <short>
+                       <height>
+                       <left_offset>
+                       <top_offset>
+    <pointers>      := <pointer> [width]    ;<long>
+    <pixel_data>    := <column> [width]
+    <column>        := <post> [...]
+                       <byte:255>           ;255 (0xff) ends the column
+    <post>          := <rowstart>           ;<byte>
+                       <num_pixels>         ;<byte>
+                       <unused>             ;<byte>
+                       <pixels>
+                       <unused>             ;<byte>
+    <pixels>        := <pixel> [num_pixels] ;<byte>
 
 ------
 
-<maplevel>      := <THINGS>
-                   <LINDEDEFS>
-                   <SIDEDEFS>
-                   <VERTEXES>
-                   <SEGS>
-                   <SSECTORS>
-                   <NODES>
-                   <SECTORS>
-                   <REJECT>
-                   <BLOCKMAP>
+    <flat>          := <colorbyte> [4096]   ;<byte>
 
-<THINGS>        := <thing> [...]
-<thing>         := <x_position>         ;all are <short>
-                   <y_position>
-                   <angle>
-                   <type>
-                   <options>
+------
 
-<LINEDEFS>      := <linedef> [...]
-<linedef>       := <vertex_start>       ;all are <short>
-                   <vertex_end>
-                   <flags>
-                   <function>
-                   <tag>
-                   <sidedef_right>
-                   <sidedef_left>       ;if <short: -1> there's no left side
+    <maplevel>      := <THINGS>
+                       <LINDEDEFS>
+                       <SIDEDEFS>
+                       <VERTEXES>
+                       <SEGS>
+                       <SSECTORS>
+                       <NODES>
+                       <SECTORS>
+                       <REJECT>
+                       <BLOCKMAP>
 
-<SIDEDEFS>      := <sidedef> [...]
-<sidedef>       := <xoffset>            ;<short>
-                   <yoffset>            ;<short>
-                   <uppertexture>       ;<string8>
-                   <lowertexture>       ;<string8>
-                   <middletexture>      ;<string8>
-                   <sector_ref>         ;<short>
+    <THINGS>        := <thing> [...]
+    <thing>         := <x_position>         ;all are <short>
+                       <y_position>
+                       <angle>
+                       <type>
+                       <options>
 
-<VERTEXES>      := <vertex> [...]
-<vertex>        := <X_coord>            ;both are <short>
-                   <Y_coord>
+    <LINEDEFS>      := <linedef> [...]
+    <linedef>       := <vertex_start>       ;all are <short>
+                       <vertex_end>
+                       <flags>
+                       <function>
+                       <tag>
+                       <sidedef_right>
+                       <sidedef_left>       ;if <short: -1> there's no left side
 
-<SEGS>          := <seg> [...]          ;<segs> stored by <subsector> order
-<seg>           := <vertex_start>       ;all are <short>
-                   <vertex_end>
-                   <bams>
-                   <line_num>
-                   <segside>
-                   <segoffset>
+    <SIDEDEFS>      := <sidedef> [...]
+    <sidedef>       := <xoffset>            ;<short>
+                       <yoffset>            ;<short>
+                       <uppertexture>       ;<string8>
+                       <lowertexture>       ;<string8>
+                       <middletexture>      ;<string8>
+                       <sector_ref>         ;<short>
 
-<SSECTORS>      := <subsector> [...]
-<subsector>     := <numsegs>            ;both are <short>
-                   <start_seg>
+    <VERTEXES>      := <vertex> [...]
+    <vertex>        := <X_coord>            ;both are <short>
+                       <Y_coord>
 
-<NODES>         := <node> [...]
-<node>          := <x>                  ;first four are <short>
-                   <y>
-                   <dx>
-                   <dy>
-                   <bbox> [2]
-                   <child> [2]
-<bbox>          := <boxtop>             ;all are <short>
-                   <boxbottom>
-                   <boxleft>
-                   <boxright>
-<child>         := <ushort>             ;if 0x8000 it's a subsector
+    <SEGS>          := <seg> [...]          ;<segs> stored by <subsector> order
+    <seg>           := <vertex_start>       ;all are <short>
+                       <vertex_end>
+                       <bams>
+                       <line_num>
+                       <segside>
+                       <segoffset>
 
-<SECTORS>       := <sector> [...]
-<sector>        := <floorheight>        ;<short>
-                   <ceilingheight>      ;<short>
-                   <floorpic>           ;<string8>
-                   <ceilingpic>         ;<string8>
-                   <lightlevel>         ;<short>
-                   <special_sector>     ;<short>
-                   <tag>                ;<short>
+    <SSECTORS>      := <subsector> [...]
+    <subsector>     := <numsegs>            ;both are <short>
+                       <start_seg>
 
-<REJECT>        := <bitarray>           ;see [4-10] for this one
+    <NODES>         := <node> [...]
+    <node>          := <x>                  ;first four are <short>
+                       <y>
+                       <dx>
+                       <dy>
+                       <bbox> [2]
+                       <child> [2]
+    <bbox>          := <boxtop>             ;all are <short>
+                       <boxbottom>
+                       <boxleft>
+                       <boxright>
+    <child>         := <ushort>             ;if 0x8000 it's a subsector
 
-<BLOCKMAP>      := <xorigin>            ;<short>
-                   <yorigin>            ;<short>
-                   <xblocks>            ;<short>
-                   <yblocks>            ;<short>
-                   <listoffsets>
-                   <blocklists>
-<listoffsets>   := <listoffset> [numofblocks]
-<listoffset>    := <ushort>
-<numofblocks>   := <short>              ;note it equals <xblocks> * <yblocks>
-<blocklists>    := <blocklist> [numofblocks]
-<blocklist>     := <short: 0>           ;for dynamic thinglist pointer
-                   <lines_in_block>
-                   <short: -1>
-<lines_in_block>:= <linedef_num> [...]  ;the numbers of all the <linedef>s
-                                        ;that are in the block
-<linedef_num>   := <short>
+    <SECTORS>       := <sector> [...]
+    <sector>        := <floorheight>        ;<short>
+                       <ceilingheight>      ;<short>
+                       <floorpic>           ;<string8>
+                       <ceilingpic>         ;<string8>
+                       <lightlevel>         ;<short>
+                       <special_sector>     ;<short>
+                       <tag>                ;<short>
+
+    <REJECT>        := <bitarray>           ;see [4-10] for this one
+
+    <BLOCKMAP>      := <xorigin>            ;<short>
+                       <yorigin>            ;<short>
+                       <xblocks>            ;<short>
+                       <yblocks>            ;<short>
+                       <listoffsets>
+                       <blocklists>
+    <listoffsets>   := <listoffset> [numofblocks]
+    <listoffset>    := <ushort>
+    <numofblocks>   := <short>              ;note it equals <xblocks> * <yblocks>
+    <blocklists>    := <blocklist> [numofblocks]
+    <blocklist>     := <short: 0>           ;for dynamic thinglist pointer
+                       <lines_in_block>
+                       <short: -1>
+    <lines_in_block>:= <linedef_num> [...]  ;the numbers of all the <linedef>s
+                                            ;that are in the block
+    <linedef_num>   := <short>
 
 # APPENDIX [A-2]: DOOM engine limits
 
