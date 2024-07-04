@@ -13,6 +13,7 @@
 #include "common.h"
 #include "fs/vfile.h"
 #include "pager/pager.h"
+#include "pager/help.h"
 #include "pager/hexdump.h"
 #include "pager/plaintext.h"
 #include "ui/dialog.h"
@@ -97,12 +98,22 @@ const struct action change_columns_action = {
 	0, 'O', "Columns", "Columns", ChangeColumns,
 };
 
+static void OpenDoomSpecs(void)
+{
+	P_RunHelpPager("uds.md");
+}
+
+const struct action open_specs_action = {
+	0, 'U', "Specs", "Open Doom Specs", OpenDoomSpecs,
+};
+
 static const struct action *hexdump_pager_actions[] = {
 	&switch_ascii_action,
 	&change_columns_action,
 	&exit_pager_action,
 	&pager_search_action,
 	&pager_search_again_action,
+	&open_specs_action,
 	NULL,
 };
 

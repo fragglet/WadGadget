@@ -25,7 +25,8 @@ HELP_FILES =                \
     help/dir_view.md        \
     help/pnames_editor.md   \
     help/texture_editor.md  \
-    help/wad_view.md
+    help/wad_view.md        \
+    help/uds.md
 
 OBJS =                      \
     browser/actions.o       \
