@@ -45,25 +45,25 @@ information in this file is not recommended.
 This article is Copyright 1994 by Matt Fell.  All rights reserved.
 You are granted the following rights:
 
-I.  To make copies of this work in original form, so long as
-    (a) the copies are exact and complete;
-    (b) the copies include the copyright notice and these paragraphs
-        in their entirety;
-    (c) the copies give obvious credit to the author, Matt Fell;
-    (d) the copies are in electronic form.
-II. To distribute this work, or copies made under the provisions
-  above, so long as
-    (a) this is the original work and not a derivative form;
-    (b) you do not charge a fee for copying or for distribution;
-    (c) you ensure that the distributed form includes the copyright
-        notice, this paragraph, the disclaimer of warranty in
-        their entirety and credit to the author;
-    (d) the distributed form is not in an electronic magazine or
-        within computer software (prior explicit permission may be
-        obtained from the author);
-    (e) the distributed form is the NEWEST version of the article to
-        the best of the knowledge of the distributor;
-    (f) the distributed form is electronic.
+    I.  To make copies of this work in original form, so long as
+        (a) the copies are exact and complete;
+        (b) the copies include the copyright notice and these paragraphs
+            in their entirety;
+        (c) the copies give obvious credit to the author, Matt Fell;
+        (d) the copies are in electronic form.
+    II. To distribute this work, or copies made under the provisions
+      above, so long as
+        (a) this is the original work and not a derivative form;
+        (b) you do not charge a fee for copying or for distribution;
+        (c) you ensure that the distributed form includes the copyright
+            notice, this paragraph, the disclaimer of warranty in
+            their entirety and credit to the author;
+        (d) the distributed form is not in an electronic magazine or
+            within computer software (prior explicit permission may be
+            obtained from the author);
+        (e) the distributed form is the NEWEST version of the article to
+            the best of the knowledge of the distributor;
+        (f) the distributed form is electronic.
 
 You may not distribute this work by any non-electronic media,
 including but not limited to books, newsletters, magazines, manuals,
@@ -1140,17 +1140,22 @@ More notes and longer discussions related to these terms:
 
 1.  "Adjacent" is any sector that shares a LINEDEF with the tagged sector
 (sectors are adjacent to themselves).
+
 2.  All S activations and the teleporters only work from the RIGHT side
 of the linedef.
+
 3.  For teleporters, if more than 1 sector is tagged the same and each
 has a teleport landing THING, then the lowest numbered sector is the
 destination.
+
 4.  Floors that raise up an absolute height (up 24, 32) will go up INTO
 ceilings, so using the WR and SR types of these in levels is unwise.
+
 5.  A few of the linedef types don't require tag numbers: the end-level
 switches, the scrolling wall type 48 (0x30), and the "manual" doors which
 operate on the sector facing the left side of the linedef with the manual
 door line type.
+
 666.  Here's the terms id uses for different types of activations:
       Manual: nSR and nS1 doors
       Trigger: W1
@@ -1159,23 +1164,28 @@ door line type.
       Button: SR
       Impact: G
       Effect: line 48 is the only one
+
 7.  The "moving floors" go up to a maximum of HIF and go down to a minimum
 of LIF. Why they sometimes go up first and sometimes down is still a
 mystery to me.
+
 8.  The "crushing ceilings" go from their original ceiling height down
 to (floor + 8), then back up. While crushing a creature, their downward
 speed slows considerably. "Fast hurt" does about 120% total damage per
 crush, and "slow hurt" grabs you and does somewhere around 1000-2000%
 total damage per crush.
+
 9.  The & symbol indicates that a sector cannot be affected any more by
 other line types after it has performed this effect, even if it has
 finished. These are the floor-texture-changers and... (keep reading)
+
 10. Moving floors and crushing ceilings also "lock out" further changes
 to the sectors affected, EXCEPT for restarting the moving floor or
 crushing ceiling. If a line triggers a type 6 crushing ceiling in a
 sector, then it is stopped, then ANY other line with a "crush" type that
 is tagged to the same sector will cause the type 6 crusher to start
 again, with its original maximum and minimum ceiling heights.
+
 11. Some line types cause floor textures and/or some special sector types
 (see [4-9-1]) to transfer to the tagged sector. The tagged sectors' floor
 and/or special sector (SS) type will change to match that of the "model"
@@ -1195,6 +1205,7 @@ transferred. SS 4 "blinks" and causes damage, but only the damaging part
 can be transferred. SS 11 also turns off god-mode and causes a level END
 when health <11%, this characteristic is part of SS 11, and cannot be
 isolated via fancy transfers.
+
 12. Line type 9 is a special one. The definitive example is the chainsaw
 pillar on E1M2. Take the lowest-numbered linedef that has a sidedef in
 the tagged sector. If that linedef is one-sided, nothing happens. If it
@@ -1246,9 +1257,8 @@ The component steps of a stairway can have any shape or size.
 The turbo stairs (100, 127) work just like regular stairs except that
 each step goes up 16 not 8, and rising steps can crush things between
 themselves and the ceiling.
+
 15. Line types 78 and 85 do NOTHING as of version 1.666.
-
-
 
     Val   Class Act  Sound Speed Tm Chg Effect
 
@@ -1678,8 +1688,8 @@ numbered in order from 0 on up, and when it's all done (nothing's left
 but ssectors), then ALL the numbers, for nodes and ssectors, are
 reversed. If there's 485 nodes, then 485 becomes 0 and 0 becomes 485.
 
-Here is another fabulous drawing which will explain everything.
-+ is a vertex, - and | indicate linedefs, the . . indicates an
+Here is another fabulous drawing which will explain everything. +
+is a vertex, - and | indicate linedefs, the . . indicates an
 extension of a partition line. The <, >, and ^ symbols indicate the
 directions of partition lines. All the space within the drawing is
 actual level space, i.e. sectors.
@@ -1949,8 +1959,8 @@ The 8-byte header contains 4 short integers:
 
 1. X coordinate of block-grid origin
 2. Y coordinate of block-grid origin
-3. # of columns (blocks in X direction)
-4. # of rows (blocks in Y direction)
+3. number of columns (blocks in X direction)
+4. number of rows (blocks in Y direction)
 
 The block-grid origin is the bottom-left corner of the bottom-left
 (southwest) block. id's blockmap builder this origin point at 8 less
