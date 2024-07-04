@@ -140,12 +140,12 @@ static char *AnchorName(const char *line)
 {
 	char *result, *p;
 
-	if (StringHasPrefix(line, "# ")) {
-		line += 2;
-	} else if (StringHasPrefix(line, "## ")) {
-		line += 3;
-	} else {
+	if (!StringHasPrefix(line, "#")) {
 		return NULL;
+	}
+
+	while (*line == '#' || *line == ' ') {
+		++line;
 	}
 
 	result = checked_strdup(line);
@@ -355,14 +355,12 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 	assert(lineno < cfg->pc.num_lines);
 	line = cfg->lines[lineno];
 
-	if (StringHasPrefix(line, "# ")) {
+	if (StringHasPrefix(line, "#")) {
 		wattron(win, A_BOLD);
 		wattron(win, A_UNDERLINE);
-		line += 2;
-	} else if (StringHasPrefix(line, "## ")) {
-		wattron(win, A_BOLD);
-		wattron(win, A_UNDERLINE);
-		line += 3;
+		while (*line == '#' || *line == ' ') {
+			++line;
+		}
 	} else {
 		wattroff(win, A_BOLD);
 		wattroff(win, A_UNDERLINE);
