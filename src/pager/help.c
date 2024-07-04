@@ -13,6 +13,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "common.h"
 #include "fs/vfile.h"
@@ -138,8 +139,9 @@ static const struct action prev_link_action = {
 
 static char *AnchorName(const char *line)
 {
-	char *result, *p;
+	char *result, *p, *q;
 
+	// Only headings.
 	if (!StringHasPrefix(line, "#")) {
 		return NULL;
 	}
@@ -149,11 +151,16 @@ static char *AnchorName(const char *line)
 	}
 
 	result = checked_strdup(line);
-	for (p = result; *p != '\0'; ++p) {
-		if (*p == ' ') {
-			*p = '-';
+	for (p = result, q = result; *p != '\0'; ++p) {
+		if (isalnum(*p)) {
+			*q = tolower(*p);
+			++q;
+		} else if (*p == ' ' || *p == '-') {
+			*q = '-';
+			++q;
 		}
 	}
+	*q = '\0';
 
 	return result;
 }
