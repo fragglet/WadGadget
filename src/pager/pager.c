@@ -99,7 +99,7 @@ static void PerformSearch(void)
 }
 
 const struct action pager_search_action = {
-	0, 'F', "Search", "Search", PerformSearch,
+	'/', 'F', "Search", "Search", PerformSearch,
 };
 
 static void PerformSearchAgain(void)
@@ -121,7 +121,7 @@ static void PerformSearchAgain(void)
 }
 
 const struct action pager_search_again_action = {
-	0, 'N', "Next", "Search Again", PerformSearchAgain,
+	'n', 'N', "Next", "Search Again", PerformSearchAgain,
 };
 
 static void UpdateSubtitle(struct pager *p)
