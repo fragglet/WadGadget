@@ -305,6 +305,7 @@ static void OpenTableOfContents(void)
 	SaveToHistory(current_pager, cfg);
 	OpenHelpFile(cfg, "contents.md");
 	current_pager->window_offset = 0;
+	current_pager->search_line = -1;
 }
 
 static const struct action toc_action = {
