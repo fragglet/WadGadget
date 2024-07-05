@@ -434,6 +434,31 @@ static bool HelpPagerKeypress(struct pager *p, int key)
 	return false;
 }
 
+static void HelpPagerMoved(struct pager *p)
+{
+	struct help_pager_config *cfg = p->cfg->user_data;
+	int win_h = getmaxy(p->pane.window);
+	int lineno;
+
+	if (cfg->current_link_line < 0
+	 || LineWithinWindow(p, cfg->current_link_line)) {
+		return;
+	}
+
+	// Currently selected link is not within the visible window, so
+	// we should try to find a new link.
+
+	if (cfg->current_link_line < p->window_offset) {
+		lineno = ScanForLink(cfg, p->window_offset, 1);
+	} else {
+		lineno = ScanForLink(cfg, p->window_offset + win_h - 1, -1);
+	}
+
+	if (lineno >= 0 && LineWithinWindow(p, lineno)) {
+		cfg->current_link_line = lineno;
+	}
+}
+
 void P_FreeHelpConfig(struct help_pager_config *cfg)
 {
 	struct help_pager_history *h;
@@ -454,7 +479,7 @@ bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename)
 	cfg->pc.title = "WadGadget help";
 	cfg->pc.draw_line = DrawHelpLine;
 	cfg->pc.keypress = HelpPagerKeypress;
-	cfg->pc.window_moved = NULL;
+	cfg->pc.window_moved = HelpPagerMoved;
 	cfg->pc.user_data = cfg;
 	cfg->pc.actions = help_pager_actions;
 	cfg->lines = NULL;
