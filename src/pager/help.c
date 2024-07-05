@@ -252,8 +252,9 @@ static void PerformFollowLink(void)
 		*p = '\0';
 	}
 
+	SaveToHistory(current_pager, cfg);
+
 	if (strlen(filename) > 0) {
-		SaveToHistory(current_pager, cfg);
 		OpenHelpFile(cfg, filename);
 		current_pager->window_offset = 0;
 		current_pager->search_line = -1;
