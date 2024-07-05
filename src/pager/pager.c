@@ -179,10 +179,18 @@ static bool DrawPager(void *_p)
 	return true;
 }
 
+static void ScrollPager(struct pager *p, int dir)
+{
+	int win_h = getmaxy(p->pane.window);
+	int max_offset = p->cfg->num_lines - win_h;
+
+	p->window_offset =
+		max(min((int) p->window_offset + dir, max_offset), 0);
+}
+
 static void HandleKeypress(void *_p, int c)
 {
 	struct pager *p = _p;
-	int i;
 	int win_h = getmaxy(p->pane.window);
 
 	if (p->cfg->keypress != NULL && p->cfg->keypress(p, c)) {
@@ -195,31 +203,22 @@ static void HandleKeypress(void *_p, int c)
 		UI_ExitMainLoop();
 		break;
 	case KEY_UP:
-		if (p->window_offset > 0) {
-			--p->window_offset;
-		}
+		ScrollPager(p, -1);
 		break;
 	case KEY_DOWN:
-		if (p->window_offset + win_h < p->cfg->num_lines) {
-			++p->window_offset;
-		}
+		ScrollPager(p, 1);
 		break;
 	case KEY_PPAGE:
-		for (i = 0; i < win_h; i++) {
-			HandleKeypress(p, KEY_UP);
-		}
+		ScrollPager(p, -win_h);
 		break;
 	case KEY_NPAGE:
-		for (i = 0; i < win_h; i++) {
-			HandleKeypress(p, KEY_DOWN);
-		}
+		ScrollPager(p, win_h);
 		break;
 	case KEY_HOME:
 		p->window_offset = 0;
 		break;
 	case KEY_END:
-		p->window_offset = p->cfg->num_lines < win_h ? 0 :
-		                   p->cfg->num_lines - win_h;
+		ScrollPager(p, p->cfg->num_lines);
 		break;
 	case KEY_RESIZE:
 		refresh();
