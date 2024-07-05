@@ -165,7 +165,7 @@ static char *AnchorName(const char *line)
 	return result;
 }
 
-static bool JumpToAnchor(struct pager *p, const char *anchor)
+static int JumpToAnchor(struct pager *p, const char *anchor)
 {
 	struct help_pager_config *cfg = p->cfg->user_data;
 	char *curr;
@@ -176,14 +176,14 @@ static bool JumpToAnchor(struct pager *p, const char *anchor)
 		if (curr != NULL) {
 			if (!strcasecmp(curr, anchor)) {
 				free(curr);
-				P_JumpToLine(p, i);
-				return true;
+				P_JumpWithinWindow(p, i);
+				return i;
 			}
 			free(curr);
 		}
 	}
 
-	return false;
+	return -1;
 }
 
 static void FreeLines(struct help_pager_config *cfg)
@@ -256,10 +256,14 @@ static void PerformFollowLink(void)
 		SaveToHistory(current_pager, cfg);
 		OpenHelpFile(cfg, filename);
 		current_pager->window_offset = 0;
+		current_pager->search_line = -1;
 		P_ClearSearch(current_pager);
 	}
 	if (anchor != NULL) {
-		JumpToAnchor(current_pager, anchor);
+		int anchor_line = JumpToAnchor(current_pager, anchor);
+		if (anchor_line >= 0) {
+			current_pager->search_line = anchor_line;
+		}
 	}
 	free(filename);
 }
@@ -283,6 +287,7 @@ static void PerformGoBack(void)
 	OpenHelpFile(cfg, h->filename);
 	current_pager->window_offset = h->window_offset;
 	cfg->current_link_line = h->current_link_line;
+	current_pager->search_line = -1;
 
 	free(h->filename);
 	free(h);
