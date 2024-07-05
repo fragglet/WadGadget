@@ -12,12 +12,16 @@
 #include "ui/actions_bar.h"
 #include "ui/pane.h"
 
+typedef struct pager pager_t;
+
 typedef void (*pager_draw_line_fn)(WINDOW *win, unsigned int line,
                                    void *user_data);
+typedef bool (*pager_keypress_fn)(pager_t *p, int c);
 
 struct pager_config {
 	const char *title;
 	pager_draw_line_fn draw_line;
+	pager_keypress_fn keypress;
 	void *user_data;
 	size_t num_lines;
 	const struct action **actions;

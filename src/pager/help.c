@@ -417,6 +417,7 @@ bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename)
 {
 	cfg->pc.title = "WadGadget help";
 	cfg->pc.draw_line = DrawHelpLine;
+	cfg->pc.keypress = NULL;
 	cfg->pc.user_data = cfg;
 	cfg->pc.actions = help_pager_actions;
 	cfg->lines = NULL;

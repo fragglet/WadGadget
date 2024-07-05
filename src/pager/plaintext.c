@@ -134,6 +134,7 @@ bool P_InitPlaintextConfig(const char *title, bool editable,
 {
 	cfg->pc.title = title;
 	cfg->pc.draw_line = DrawPlaintextLine;
+	cfg->pc.keypress = NULL;
 	cfg->pc.user_data = cfg;
 	cfg->pc.actions = editable ? plaintext_pager_actions
 	                           : plaintext_pager_actions + 1;

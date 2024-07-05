@@ -185,6 +185,10 @@ static void HandleKeypress(void *_p, int c)
 	int i;
 	int win_h = getmaxy(p->pane.window);
 
+	if (p->cfg->keypress != NULL && p->cfg->keypress(p, c)) {
+		return;
+	}
+
 	switch (c) {
 	case 'q':
 	case 'Q':
