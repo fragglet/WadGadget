@@ -78,50 +78,35 @@ static const char *LineHasLink(const char *p)
 	return NULL;
 }
 
-static bool ScanNextLink(struct help_pager_config *cfg, int dir)
+static int ScanForLink(struct help_pager_config *cfg, int lineno, int dir)
 {
-	int lineno = cfg->current_link_line;
-
 	while (lineno >= 0 && lineno < cfg->pc.num_lines) {
 		if (LineHasLink(cfg->lines[lineno])) {
-			cfg->current_link_line = lineno;
-			if (current_pager != NULL) {
-				P_JumpWithinWindow(current_pager, lineno);
-			}
-			return true;
+			return lineno;
 		}
 
 		lineno += dir;
 	}
 
-	return false;
-}
-
-static void JumpNextLink(struct help_pager_config *cfg)
-{
-	++cfg->current_link_line;
-	if (ScanNextLink(cfg, 1)) {
-		return;
-	}
-
-	cfg->current_link_line = 0;
-	ScanNextLink(cfg, 1);
-}
-
-static void JumpPrevLink(struct help_pager_config *cfg)
-{
-	--cfg->current_link_line;
-	if (ScanNextLink(cfg, -1)) {
-		return;
-	}
-
-	cfg->current_link_line = cfg->pc.num_lines - 1;
-	ScanNextLink(cfg, -1);
+	return -1;
 }
 
 static void PerformNextLink(void)
 {
-	JumpNextLink(current_pager->cfg->user_data);
+	struct help_pager_config *cfg = current_pager->cfg->user_data;
+	int lineno;
+
+	lineno = ScanForLink(cfg, cfg->current_link_line + 1, 1);
+	if (lineno < 0) {
+		lineno = ScanForLink(cfg, 0, 1);
+	}
+
+	if (lineno >= 0) {
+		cfg->current_link_line = lineno;
+		if (current_pager != NULL) {
+			P_JumpWithinWindow(current_pager, lineno);
+		}
+	}
 }
 
 static const struct action next_link_action = {
@@ -130,7 +115,20 @@ static const struct action next_link_action = {
 
 static void PerformPrevLink(void)
 {
-	JumpPrevLink(current_pager->cfg->user_data);
+	struct help_pager_config *cfg = current_pager->cfg->user_data;
+	int lineno;
+
+	lineno = ScanForLink(cfg, cfg->current_link_line - 1, -1);
+	if (lineno < 0) {
+		lineno = ScanForLink(cfg, cfg->current_link_line - 1, -1);
+	}
+
+	if (lineno >= 0) {
+		cfg->current_link_line = lineno;
+		if (current_pager != NULL) {
+			P_JumpWithinWindow(current_pager, lineno);
+		}
+	}
 }
 
 static const struct action prev_link_action = {
@@ -221,8 +219,7 @@ static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 	cfg->filename = checked_strdup(filename);
 	cfg->lines = P_PlaintextLines(contents, strlen(contents),
 	                              &cfg->pc.num_lines);
-	cfg->current_link_line = -1;
-	JumpNextLink(cfg);
+	cfg->current_link_line = ScanForLink(cfg, 0, 1);
 
 	return true;
 }
@@ -325,6 +322,13 @@ static const struct action *help_pager_actions[] = {
 	NULL,
 };
 
+static bool LineWithinWindow(struct pager *p, int lineno)
+{
+	int win_h = getmaxy(p->pane.window);
+	return lineno >= p->window_offset
+	    && lineno < p->window_offset + win_h;
+}
+
 static const char *DrawLink(WINDOW *win, const char *link, bool highlighted)
 {
 	const char *p;
@@ -399,6 +403,37 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 	}
 }
 
+static bool HelpPagerKeypress(struct pager *p, int key)
+{
+	struct help_pager_config *cfg = p->cfg->user_data;
+	int lineno;
+
+	switch (key) {
+	case KEY_UP:
+		lineno = ScanForLink(cfg, cfg->current_link_line - 1, -1);
+		break;
+	case KEY_DOWN:
+		lineno = ScanForLink(cfg, cfg->current_link_line + 1, 1);
+		break;
+	case KEY_HOME:
+		cfg->current_link_line = ScanForLink(cfg, 0, 1);
+		return false;
+	case KEY_END:
+		cfg->current_link_line =
+			ScanForLink(cfg, cfg->pc.num_lines - 1, -1);
+		return false;
+	default:
+		return false;
+	}
+
+	if (lineno >= 0 && LineWithinWindow(p, lineno)) {
+		cfg->current_link_line = lineno;
+		return true;
+	}
+
+	return false;
+}
+
 void P_FreeHelpConfig(struct help_pager_config *cfg)
 {
 	struct help_pager_history *h;
@@ -418,7 +453,7 @@ bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename)
 {
 	cfg->pc.title = "WadGadget help";
 	cfg->pc.draw_line = DrawHelpLine;
-	cfg->pc.keypress = NULL;
+	cfg->pc.keypress = HelpPagerKeypress;
 	cfg->pc.user_data = cfg;
 	cfg->pc.actions = help_pager_actions;
 	cfg->lines = NULL;
