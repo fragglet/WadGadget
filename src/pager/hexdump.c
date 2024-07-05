@@ -122,6 +122,7 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 {
 	cfg->pc.title = title;
 	cfg->pc.draw_line = DrawHexdumpLine;
+	cfg->pc.window_moved = NULL;
 	cfg->pc.keypress = NULL;
 	cfg->pc.user_data = cfg;
 	cfg->pc.actions = hexdump_pager_actions;

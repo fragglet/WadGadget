@@ -124,6 +124,18 @@ const struct action pager_search_again_action = {
 	'n', 'N', "Next", "Search Again", PerformSearchAgain,
 };
 
+static void SetWindowOffset(struct pager *p, int lineno)
+{
+	if (p->window_offset == lineno) {
+		return;
+	}
+
+	p->window_offset = lineno;
+	if (p->cfg->window_moved != NULL) {
+		p->cfg->window_moved(p);
+	}
+}
+
 static void UpdateSubtitle(struct pager *p)
 {
 	int range, win_h;
@@ -131,7 +143,7 @@ static void UpdateSubtitle(struct pager *p)
 	win_h = getmaxy(p->pane.window);
 	range = p->cfg->num_lines > win_h ?
 	        p->cfg->num_lines - win_h : 0;
-	p->window_offset = min(p->window_offset, range);
+	SetWindowOffset(p, min(p->window_offset, range));
 	if (range > 0) {
 		snprintf(p->subtitle, sizeof(p->subtitle), "%d%%",
 		         min(100, p->window_offset * 100 / range));
@@ -183,9 +195,10 @@ static void ScrollPager(struct pager *p, int dir)
 {
 	int win_h = getmaxy(p->pane.window);
 	int max_offset = p->cfg->num_lines - win_h;
+	int lineno;
 
-	p->window_offset =
-		max(min((int) p->window_offset + dir, max_offset), 0);
+	lineno = min((int) p->window_offset + dir, max_offset);
+	SetWindowOffset(p, max(lineno, 0));
 }
 
 static void HandleKeypress(void *_p, int c)
@@ -215,12 +228,15 @@ static void HandleKeypress(void *_p, int c)
 		ScrollPager(p, win_h);
 		break;
 	case KEY_HOME:
-		p->window_offset = 0;
+		SetWindowOffset(p, 0);
 		break;
 	case KEY_END:
 		ScrollPager(p, p->cfg->num_lines);
 		break;
 	case KEY_RESIZE:
+		if (p->cfg->window_moved != NULL) {
+			p->cfg->window_moved(p);
+		}
 		refresh();
 		break;
 	}
@@ -272,7 +288,7 @@ void P_SwitchConfig(struct pager_config *cfg)
 {
 	assert(current_pager != NULL);
 	current_pager->cfg = cfg;
-	current_pager->window_offset = 0;
+	SetWindowOffset(current_pager, 0);
 	P_ClearSearch(current_pager);
 	UI_ActionsBarSetActions(cfg->actions);
 }
@@ -282,12 +298,12 @@ void P_JumpToLine(struct pager *p, int lineno)
 	int win_h;
 
 	if (p->pane.window == NULL) {
-		p->window_offset = lineno;
+		SetWindowOffset(p, lineno);
 		return;
 	}
 
 	win_h = getmaxy(p->pane.window);
-	p->window_offset = max(min(lineno, p->cfg->num_lines - win_h), 0);
+	SetWindowOffset(p, max(min(lineno, p->cfg->num_lines - win_h), 0));
 }
 
 // P_JumpToLine, but keep current window position unless the line is

@@ -17,11 +17,13 @@ typedef struct pager pager_t;
 typedef void (*pager_draw_line_fn)(WINDOW *win, unsigned int line,
                                    void *user_data);
 typedef bool (*pager_keypress_fn)(pager_t *p, int c);
+typedef void (*pager_window_moved_fn)(pager_t *p);
 
 struct pager_config {
 	const char *title;
 	pager_draw_line_fn draw_line;
 	pager_keypress_fn keypress;
+	pager_window_moved_fn window_moved;
 	void *user_data;
 	size_t num_lines;
 	const struct action **actions;
