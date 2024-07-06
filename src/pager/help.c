@@ -206,6 +206,27 @@ static void SaveToHistory(struct pager *p, struct help_pager_config *cfg)
 	cfg->history = h;
 }
 
+// After loading a help file we scan through and unindent all code
+// blocks (lines starting with four spaces). This is so that eg. the
+// title ASCII art for the Unofficial Doom Specs fits in 80 columns.
+static void UnindentLines(struct help_pager_config *cfg)
+{
+	bool maybe_code_block = true;
+	char *line;
+	int i;
+
+	for (i = 0; i < cfg->pc.num_lines; i++) {
+		line = cfg->lines[i];
+		if (strlen(line) == 0) {
+			maybe_code_block = true;
+		} else if (strncmp(line, "    ", 4) != 0) {
+			maybe_code_block = false;
+		} else if (maybe_code_block) {
+			memmove(line, line + 3, strlen(line) - 2);
+		}
+	}
+}
+
 static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 {
 	const char *contents = HelpFileContents(filename);
@@ -219,6 +240,7 @@ static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 	cfg->filename = checked_strdup(filename);
 	cfg->lines = P_PlaintextLines(contents, strlen(contents),
 	                              &cfg->pc.num_lines);
+	UnindentLines(cfg);
 	cfg->current_link_line = ScanForLink(cfg, 0, 1);
 
 	return true;
