@@ -10,15 +10,21 @@
 
 struct help_pager_history {
 	char *filename;
-	int window_offset, current_link_line;
+	int window_offset, current_link;
 	struct help_pager_history *next;
+};
+
+struct help_pager_link {
+	int lineno;
 };
 
 struct help_pager_config {
 	struct pager_config pc;
 	char *filename;
 	char **lines;
-	int current_link_line;
+	struct help_pager_link *links;
+	int num_links;
+	int current_link;
 	struct help_pager_history *history;
 };
 
