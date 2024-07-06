@@ -134,12 +134,12 @@ bool P_InitPlaintextConfig(const char *title, bool editable,
 {
 	cfg->pc.title = title;
 	cfg->pc.draw_line = DrawPlaintextLine;
-	cfg->pc.window_moved = NULL;
-	cfg->pc.keypress = NULL;
 	cfg->pc.user_data = cfg;
 	cfg->pc.actions = editable ? plaintext_pager_actions
 	                           : plaintext_pager_actions + 1;
 	cfg->hexdump_config = NULL;
+	cfg->pc.get_link = NULL;
+	cfg->pc.current_link = -1;
 	cfg->want_edit = false;
 
 	cfg->data = vfreadall(input, &cfg->data_len);
@@ -150,6 +150,7 @@ bool P_InitPlaintextConfig(const char *title, bool editable,
 
 	cfg->lines = P_PlaintextLines((char *) cfg->data, cfg->data_len,
 	                              &cfg->pc.num_lines);
+	cfg->pc.num_links = 0;
 
 	return true;
 }

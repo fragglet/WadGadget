@@ -12,7 +12,6 @@
 #include "ui/actions_bar.h"
 #include "ui/pane.h"
 
-typedef struct pager pager_t;
 struct pager_config;
 
 struct pager_link {
@@ -21,16 +20,12 @@ struct pager_link {
 
 typedef void (*pager_draw_line_fn)(WINDOW *win, unsigned int line,
                                    void *user_data);
-typedef bool (*pager_keypress_fn)(pager_t *p, int c);
-typedef void (*pager_window_moved_fn)(pager_t *p);
 typedef void (*pager_get_link_fn)(struct pager_config *cfg, int idx,
                                   struct pager_link *link);
 
 struct pager_config {
 	const char *title;
 	pager_draw_line_fn draw_line;
-	pager_keypress_fn keypress;
-	pager_window_moved_fn window_moved;
 	void *user_data;
 	size_t num_lines;
 	const struct action **actions;
@@ -63,3 +58,5 @@ extern struct pager *current_pager;
 extern const struct action exit_pager_action;
 extern const struct action pager_search_action;
 extern const struct action pager_search_again_action;
+extern const struct action pager_prev_link_action;
+extern const struct action pager_next_link_action;

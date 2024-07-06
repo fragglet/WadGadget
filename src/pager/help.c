@@ -99,45 +99,6 @@ static void FindLinks(struct help_pager_config *cfg)
 	cfg->pc.num_links = num_links;
 }
 
-static void PerformNextLink(void)
-{
-	struct pager_config *cfg = current_pager->cfg;
-
-	if (cfg->current_link + 1 >= cfg->num_links) {
-		return;
-	}
-
-	++cfg->current_link;
-	if (current_pager != NULL) {
-		struct pager_link l;
-		cfg->get_link(cfg, cfg->current_link, &l);
-		P_JumpWithinWindow(current_pager, l.lineno);
-	}
-}
-
-static const struct action next_link_action = {
-        '\t', 0, "NextLink", "Next Link", PerformNextLink,
-};
-
-static void PerformPrevLink(void)
-{
-	struct pager_config *cfg = current_pager->cfg;
-
-	if (cfg->current_link <= 0) {
-		return;
-	}
-	--cfg->current_link;
-	if (current_pager != NULL) {
-		struct pager_link l;
-		cfg->get_link(cfg, cfg->current_link, &l);
-		P_JumpWithinWindow(current_pager, l.lineno);
-	}
-}
-
-static const struct action prev_link_action = {
-	KEY_BTAB, 0, NULL, NULL, PerformPrevLink,
-};
-
 static char *AnchorName(const char *line)
 {
 	char *result, *p, *q;
@@ -349,40 +310,14 @@ static const struct action toc_action = {
 static const struct action *help_pager_actions[] = {
 	&exit_pager_action,
 	&back_action,
-	&prev_link_action,
-	&next_link_action,
+	&pager_prev_link_action,
+	&pager_next_link_action,
 	&follow_link_action,
 	&toc_action,
 	&pager_search_action,
 	&pager_search_again_action,
 	NULL,
 };
-
-enum line_location { OUTSIDE_WINDOW, INSIDE_WINDOW, ON_WINDOW_EDGE };
-
-static enum line_location LinkWithinWindow(struct pager *p, int link)
-{
-	int win_h = getmaxy(p->pane.window);
-	struct pager_link l;
-	int lineno;
-
-	if (link == -1) {
-		return OUTSIDE_WINDOW;
-	}
-
-	p->cfg->get_link(p->cfg, link, &l);
-	lineno = l.lineno;
-
-	if (lineno == p->window_offset - 1
-	 || lineno == p->window_offset + win_h) {
-		return ON_WINDOW_EDGE;
-	} else if (lineno >= p->window_offset
-	        && lineno < p->window_offset + win_h) {
-		return INSIDE_WINDOW;
-	} else {
-		return OUTSIDE_WINDOW;
-	}
-}
 
 static const char *DrawLink(WINDOW *win, const char *link, bool highlighted)
 {
@@ -464,114 +399,6 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 	}
 }
 
-static bool HelpPagerKeypress(struct pager *p, int key)
-{
-	struct pager_config *cfg = p->cfg;
-	enum line_location line_loc;
-	int new_link;
-
-	if (cfg->num_links == 0) {
-		return false;
-	}
-
-	switch (key) {
-	case KEY_UP:
-		new_link = cfg->current_link - 1;
-		if (new_link < 0) {
-			return false;
-		}
-		break;
-	case KEY_DOWN:
-		new_link = cfg->current_link + 1;
-		if (new_link >= cfg->num_links) {
-			return false;
-		}
-		break;
-	case KEY_HOME:
-		cfg->current_link = 0;
-		return false;
-	case KEY_END:
-		cfg->current_link = cfg->num_links - 1;
-		return false;
-	default:
-		return false;
-	}
-
-	// If we return true, the window will not be scrolled. If the next
-	// link is within the current window, we jump to it and do not
-	// scroll.
-	// There is one corner case: if the next link is right on the very
-	// edge of the window (one line above or below the current window,
-	// represented by ON_WINDOW_EDGE), we want to both scroll *and*
-	// move the selection to the link on the newly-revealed line.
-	line_loc = LinkWithinWindow(p, new_link);
-	if (line_loc != OUTSIDE_WINDOW) {
-		cfg->current_link = new_link;
-		return line_loc == INSIDE_WINDOW;
-	}
-
-	return false;
-}
-
-// Returns index of link with largest index and line number < lineno
-static int FindByLineno(struct pager_config *cfg, int lineno)
-{
-	struct pager_link l;
-	int low = 0, high = cfg->num_links - 1, idx;
-
-	if (cfg->num_links == 0) {
-		return -1;
-	}
-	cfg->get_link(cfg, 0, &l);
-	if (lineno < l.lineno) {
-		return -1;
-	}
-
-	while (high - low >= 2) {
-		idx = (low + high) / 2;
-		cfg->get_link(cfg, idx, &l);
-		if (l.lineno < lineno) {
-			low = idx;
-		} else {
-			high = idx;
-		}
-	}
-
-	return low;
-}
-
-static void HelpPagerMoved(struct pager *p)
-{
-	struct pager_config *cfg = p->cfg;
-	struct pager_link l;
-	int win_h = getmaxy(p->pane.window);
-	int new_link;
-
-	if (cfg->current_link < 0) {
-		return;
-	}
-
-	if (LinkWithinWindow(p, cfg->current_link) == INSIDE_WINDOW) {
-		return;
-	}
-
-	// Currently selected link is not within the visible window, so
-	// we should try to find a new link.
-	cfg->get_link(cfg, cfg->current_link, &l);
-	if (l.lineno < p->window_offset) {
-		new_link = FindByLineno(cfg, p->window_offset);
-		if (new_link >= 0 && new_link < cfg->num_links - 1) {
-			++new_link;
-		}
-	} else {
-		new_link = FindByLineno(cfg, p->window_offset + win_h - 1);
-	}
-
-	if (LinkWithinWindow(p, new_link) == INSIDE_WINDOW) {
-		cfg->current_link = new_link;
-	}
-}
-
 void P_FreeHelpConfig(struct help_pager_config *cfg)
 {
 	struct help_pager_history *h;
@@ -600,8 +427,6 @@ bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename)
 {
 	cfg->pc.title = "WadGadget help";
 	cfg->pc.draw_line = DrawHelpLine;
-	cfg->pc.keypress = HelpPagerKeypress;
-	cfg->pc.window_moved = HelpPagerMoved;
 	cfg->pc.get_link = HelpPagerGetLink;
 	cfg->pc.user_data = cfg;
 	cfg->pc.actions = help_pager_actions;

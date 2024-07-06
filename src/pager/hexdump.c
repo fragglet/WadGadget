@@ -122,16 +122,17 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 {
 	cfg->pc.title = title;
 	cfg->pc.draw_line = DrawHexdumpLine;
-	cfg->pc.window_moved = NULL;
-	cfg->pc.keypress = NULL;
 	cfg->pc.user_data = cfg;
 	cfg->pc.actions = hexdump_pager_actions;
+	cfg->pc.get_link = NULL;
 	cfg->plaintext_config = NULL;
 
 	cfg->data = vfreadall(input, &cfg->data_len);
 	vfclose(input);
 	cfg->columns = 16;
 	cfg->pc.num_lines = (cfg->data_len + cfg->columns - 1) / cfg->columns;
+	cfg->pc.num_links = 0;
+	cfg->pc.current_link = -1;
 
 	return cfg->data != NULL;
 }
