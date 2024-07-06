@@ -23,61 +23,61 @@ versions when they are ready.  Thanks.
 
 # Table of Contents
 
- * [0] Definitions used in this File
- * [1] About This File
- * [2] Introduction to Hexen
- * [3] Hexen Data Structures
-    * [3-1] The Hexen LINEDEF structure
-      * [3-1-1] Line Flags
-    * [3-2] The Hexen THING structure
-      * [3-2-1] Thing Flags
-      * [3-2-2] Thing Types
- * [4] Hexen Script Language
-    * [4-1] Variables and their Scope
-    * [4-2] Language Structure
-      * [4-2-1] Keywords
-      * [4-2-2] Comments
-      * [4-2-3] World-variable definitions
-      * [4-2-4] Map-variable definitions
-      * [4-2-5] Include Directive
-      * [4-2-5] Define Directive
-      * [4-2-6] Constant Expressions
-      * [4-2-7] String Literals
-      * [4-2-6] Script Definitions
-      * [4-2-6] Statements
-        * [4-2-6-1] Declaration Statements
-        * [4-2-6-1] Assignment Statements
-        * [4-2-6-2] Compound Statements
-        * [4-2-6-3] Switch Statements
-        * [4-2-6-4] Jump Statements
-        * [4-2-6-5] Iteration Statements
-        * [4-2-6-6] Function Statements
-        * [4-2-6-7] Print Statements
-        * [4-2-6-8] Selection Statements
-        * [4-2-6-9] Control Statements
-      * [4-2-7] Internal Functions
- * [5] Flats with special properties
- * [6] The MAPINFO lump
- * [7] PolyObjects
-    * [7-1] Polyobj Start Spots and Anchor Points
+ * [[0]](#0-definitions-used-in-this-file) Definitions used in this File
+ * [[1]](#1-about-this-file) About This File
+ * [[2]](#2-introduction-to-hexen) Introduction to Hexen
+ * [[3]](#3-hexen-data-structures) Hexen Data Structures
+    * [[3-1]](#3-1-the-hexen-linedef-structure) The Hexen LINEDEF structure
+      * [[3-1-1]](#3-1-1-line-flags) Line Flags
+    * [[3-2]](#3-2-the-hexen-thing-structure) The Hexen THING structure
+      * [[3-2-1]](#3-2-1-thing-flags) Thing Flags
+      * [[3-2-2]](#3-2-2-thing-types) Thing Types
+ * [[4]](#4-hexen-script-language) Hexen Script Language
+    * [[4-1]](#4-1-variables-and-their-scope) Variables and their Scope
+    * [[4-2]](#4-2-language-structure) Language Structure
+      * [[4-2-1]](#4-2-1-keywords) Keywords
+      * [[4-2-2]](#4-2-2-comments) Comments
+      * [[4-2-3]](#4-2-3-world-variable-definitions) World-variable definitions
+      * [[4-2-4]](#4-2-4-map-variable-definitions) Map-variable definitions
+      * [[4-2-5]](#4-2-5-define-directive) Include Directive
+      * [[4-2-5]](#4-2-5-define-directive) Define Directive
+      * [[4-2-6]](#4-2-6-statements) Constant Expressions
+      * [[4-2-7]](#4-2-7-internal-functions) String Literals
+      * [[4-2-6]](#4-2-6-statements) Script Definitions
+      * [[4-2-6]](#4-2-6-statements) Statements
+        * [[4-2-6-1]](#4-2-6-1-assignment-statements) Declaration Statements
+        * [[4-2-6-1]](#4-2-6-1-assignment-statements) Assignment Statements
+        * [[4-2-6-2]](#4-2-6-2-compound-statements) Compound Statements
+        * [[4-2-6-3]](#4-2-6-3-switch-statements) Switch Statements
+        * [[4-2-6-4]](#4-2-6-4-jump-statements) Jump Statements
+        * [[4-2-6-5]](#4-2-6-5-iteration-statements) Iteration Statements
+        * [[4-2-6-6]](#4-2-6-6-function-statements) Function Statements
+        * [[4-2-6-7]](#4-2-6-7-print-statements) Print Statements
+        * [[4-2-6-8]](#4-2-6-8-selection-statements) Selection Statements
+        * [[4-2-6-9]](#4-2-6-9-control-statements) Control Statements
+      * [[4-2-7]](#4-2-7-internal-functions) Internal Functions
+ * [[5]](#5-flats-with-special-properties) Flats with special properties
+ * [[6]](#6-the-mapinfo-lump) The MAPINFO lump
+ * [[7]](#7-polyobjects) PolyObjects
+    * [[7-1]](#7-1-polyobj-start-spots-and-anchor-points) Polyobj Start Spots and Anchor Points
 
 APPENDICES
 
- * [A]: List of Spawnable Objects
- * [B]: List of Activateable/Deactivateable Objects
- * [C]: List of THINGS that require arguments
- * [D]: Sector Specials
- * [E]: Action Specials
-    * [E-1] Floor and Ceiling Specials
-    * [E-2] Stair Specials
-    * [E-3] Door Specials
-    * [E-4] Script Specials
-    * [E-5] Light Specials
-    * [E-6] Miscellaneous Specials
-    * [E-7] Thing Specials
-    * [E-8] PolyObject Specials
- * [F]: Sector Sounds for ChangeSectorSound() special
- * [G]: Key Numbers
+ * [[A]](#appendix-a-list-of-spawnable-objects): List of Spawnable Objects
+ * [[B]](#appendix-b-list-of-activateabledeactivateable-objects): List of Activateable/Deactivateable Objects
+ * [[C]](#appendix-c-list-of-things-that-require-arguments): List of THINGS that require arguments
+ * [[D]](#appendix-d-sector-specials): Sector Specials
+ * [[E]](#appendix-e-action-specials): Action Specials
+    * [[E-1]](#e-1-floor-and-ceiling-specials) Floor and Ceiling Specials
+    * [[E-2]](#e-2-stair-specials) Stair Specials
+    * [[E-3]](#e-3-door-specials) Door Specials
+    * [[E-4]](#e-4-script-specials) Script Specials
+    * [[E-5]](#e-5-light-specials) Light Specials
+    * [[E-6]](#e-6-miscellaneous-specials) Miscellaneous Specials
+    * [[E-7]](#e-7-thing-specials) Thing Specials
+    * [[E-8]](#e-8-polyobject-specials) PolyObject Specials
+ * [[F]](#appendix-f-sector-sounds-for-changesectorsound-special): Sector Sounds for ChangeSectorSound() special
+ * [[G]](#appendix-g-key-numbers): Key Numbers
 
 # [0] Definitions used in this File
 
@@ -163,7 +163,7 @@ Hexen:
       8           the line is always drawn on the auto-map, even if it
                   hasn't been seen by the player.
 
-    * 9           the line's special ([3-1]) is repeatable, ie: it can
+    * 9           the line's special ([[3-1]](#3-1-the-hexen-linedef-structure)) is repeatable, ie: it can
                   be activated more than once.
     * 10..12      the line's special activation, ie: how the special is
                   activated.
@@ -195,8 +195,8 @@ Hexen:
                               and is immediately subjected to gravity.
       8           word        the angle the thing is facing when the map
                               is entered.
-      10          word        the thing type (see [3-2-2].)
-    * 12          word        thing flags (see [3-2-1].)
+      10          word        the thing type (see [[3-2-2]](#3-2-2-thing-types).)
+    * 12          word        thing flags (see [[3-2-1]](#3-2-1-thing-flags).)
       14          byte        special type (see [Specials]).  a thing's
                               special is activated when the thing is
                               killed (Monster), destroyed (Tree, Urn, etc.),
