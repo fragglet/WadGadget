@@ -76,16 +76,26 @@ static bool Search(struct pager *p, const char *needle, int start_line)
 	return false;
 }
 
+static void PerformSearchAgain(void);
+
 static void PerformSearch(void)
 {
 	char *needle;
-
-	current_pager->search_line = -1;
 
 	needle = UI_TextInputDialogBox(
 		"Search", "Search", 32, "Enter search string:");
 
 	if (needle == NULL) {
+		current_pager->search_line = -1;
+		return;
+	}
+	// Search again if the user presses /, enter. Because I'm a
+	// vim user and it's baked into my muscle memory.
+	if (strlen(needle) == 0) {
+		free(needle);
+		if (current_pager->last_search != NULL) {
+			PerformSearchAgain();
+		}
 		return;
 	}
 
@@ -95,7 +105,7 @@ static void PerformSearch(void)
 	}
 
 	free(current_pager->last_search);
-	current_pager->last_search = checked_strdup(needle);
+	current_pager->last_search = needle;
 }
 
 const struct action pager_search_action = {
