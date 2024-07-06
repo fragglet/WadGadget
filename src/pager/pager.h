@@ -27,6 +27,8 @@ struct pager_config {
 	void *user_data;
 	size_t num_lines;
 	const struct action **actions;
+	int current_link;
+	int num_links;
 };
 
 struct pager {

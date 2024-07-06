@@ -96,21 +96,21 @@ static void FindLinks(struct help_pager_config *cfg)
 		}
 	}
 
-	cfg->num_links = num_links;
+	cfg->pc.num_links = num_links;
 }
 
 static void PerformNextLink(void)
 {
 	struct help_pager_config *cfg = current_pager->cfg->user_data;
 
-	if (cfg->current_link + 1 >= cfg->num_links) {
+	if (cfg->pc.current_link + 1 >= cfg->pc.num_links) {
 		return;
 	}
 
-	++cfg->current_link;
+	++cfg->pc.current_link;
 	if (current_pager != NULL) {
 		P_JumpWithinWindow(current_pager,
-		                   cfg->links[cfg->current_link].lineno);
+		                   cfg->links[cfg->pc.current_link].lineno);
 	}
 }
 
@@ -122,13 +122,13 @@ static void PerformPrevLink(void)
 {
 	struct help_pager_config *cfg = current_pager->cfg->user_data;
 
-	if (cfg->current_link <= 0) {
+	if (cfg->pc.current_link <= 0) {
 		return;
 	}
-	--cfg->current_link;
+	--cfg->pc.current_link;
 	if (current_pager != NULL) {
 		P_JumpWithinWindow(current_pager,
-		                   cfg->links[cfg->current_link].lineno);
+		                   cfg->links[cfg->pc.current_link].lineno);
 	}
 }
 
@@ -203,7 +203,7 @@ static void SaveToHistory(struct pager *p, struct help_pager_config *cfg)
 	h = checked_calloc(1, sizeof(struct help_pager_history));
 	h->filename = checked_strdup(cfg->filename);
 	h->window_offset = p->window_offset;
-	h->current_link = cfg->current_link;
+	h->current_link = cfg->pc.current_link;
 	h->next = cfg->history;
 	cfg->history = h;
 }
@@ -244,7 +244,7 @@ static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 	                              &cfg->pc.num_lines);
 	UnindentLines(cfg);
 	FindLinks(cfg);
-	cfg->current_link = 0;
+	cfg->pc.current_link = 0;
 
 	return true;
 }
@@ -256,11 +256,12 @@ static void PerformFollowLink(void)
 	char *filename, *anchor = NULL, *p;
 	int lineno;
 
-	if (cfg->current_link < 0 || cfg->current_link >= cfg->num_links) {
+	if (cfg->pc.current_link < 0
+	 || cfg->pc.current_link >= cfg->pc.num_links) {
 		return;
 	}
 
-	lineno = cfg->links[cfg->current_link].lineno;
+	lineno = cfg->links[cfg->pc.current_link].lineno;
 	line = cfg->lines[lineno];
 
 	link_middle = strstr(line, "](");
@@ -317,7 +318,7 @@ static void PerformGoBack(void)
 
 	OpenHelpFile(cfg, h->filename);
 	current_pager->window_offset = h->window_offset;
-	cfg->current_link = h->current_link;
+	cfg->pc.current_link = h->current_link;
 	current_pager->search_line = -1;
 
 	free(h->filename);
@@ -436,8 +437,9 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 		wattroff(win, A_UNDERLINE);
 	}
 
-	if (cfg->current_link >= 0 && cfg->current_link < cfg->num_links) {
-		current_link_line = cfg->links[cfg->current_link].lineno;
+	if (cfg->pc.current_link >= 0
+	 && cfg->pc.current_link < cfg->pc.num_links) {
+		current_link_line = cfg->links[cfg->pc.current_link].lineno;
 	}
 
 	for (p = line; *p != '\0'; ++p) {
@@ -458,28 +460,28 @@ static bool HelpPagerKeypress(struct pager *p, int key)
 	enum line_location line_loc;
 	int new_link;
 
-	if (cfg->num_links == 0) {
+	if (cfg->pc.num_links == 0) {
 		return false;
 	}
 
 	switch (key) {
 	case KEY_UP:
-		new_link = cfg->current_link - 1;
+		new_link = cfg->pc.current_link - 1;
 		if (new_link < 0) {
 			return false;
 		}
 		break;
 	case KEY_DOWN:
-		new_link = cfg->current_link + 1;
-		if (new_link >= cfg->num_links) {
+		new_link = cfg->pc.current_link + 1;
+		if (new_link >= cfg->pc.num_links) {
 			return false;
 		}
 		break;
 	case KEY_HOME:
-		cfg->current_link = 0;
+		cfg->pc.current_link = 0;
 		return false;
 	case KEY_END:
-		cfg->current_link = cfg->num_links - 1;
+		cfg->pc.current_link = cfg->pc.num_links - 1;
 		return false;
 	default:
 		return false;
@@ -494,7 +496,7 @@ static bool HelpPagerKeypress(struct pager *p, int key)
 	// move the selection to the link on the newly-revealed line.
 	line_loc = LineWithinWindow(p, cfg->links[new_link].lineno);
 	if (line_loc != OUTSIDE_WINDOW) {
-		cfg->current_link = new_link;
+		cfg->pc.current_link = new_link;
 		return line_loc == INSIDE_WINDOW;
 	}
 
@@ -504,9 +506,9 @@ static bool HelpPagerKeypress(struct pager *p, int key)
 // Returns index of link with largest index and line number < lineno
 static int FindByLineno(struct help_pager_config *cfg, int lineno)
 {
-	int low = 0, high = cfg->num_links - 1, idx;
+	int low = 0, high = cfg->pc.num_links - 1, idx;
 
-	if (cfg->num_links == 0 || lineno < cfg->links[0].lineno) {
+	if (cfg->pc.num_links == 0 || lineno < cfg->links[0].lineno) {
 		return -1;
 	}
 
@@ -528,11 +530,11 @@ static void HelpPagerMoved(struct pager *p)
 	int win_h = getmaxy(p->pane.window);
 	int lineno, l;
 
-	if (cfg->current_link < 0) {
+	if (cfg->pc.current_link < 0) {
 		return;
 	}
 
-	lineno = cfg->links[cfg->current_link].lineno;
+	lineno = cfg->links[cfg->pc.current_link].lineno;
 	if (LineWithinWindow(p, lineno) == INSIDE_WINDOW) {
 		return;
 	}
@@ -541,7 +543,7 @@ static void HelpPagerMoved(struct pager *p)
 	// we should try to find a new link.
 	if (lineno < p->window_offset) {
 		l = FindByLineno(cfg, p->window_offset);
-		if (l >= 0 && l < cfg->num_links - 1) {
+		if (l >= 0 && l < cfg->pc.num_links - 1) {
 			++l;
 		}
 	} else {
@@ -549,7 +551,7 @@ static void HelpPagerMoved(struct pager *p)
 	}
 
 	if (LineWithinWindow(p, cfg->links[l].lineno) == INSIDE_WINDOW) {
-		cfg->current_link = l;
+		cfg->pc.current_link = l;
 	}
 }
 

@@ -23,8 +23,6 @@ struct help_pager_config {
 	char *filename;
 	char **lines;
 	struct help_pager_link *links;
-	int num_links;
-	int current_link;
 	struct help_pager_history *history;
 };
 
