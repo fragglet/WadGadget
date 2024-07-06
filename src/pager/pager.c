@@ -277,8 +277,10 @@ void P_FreePager(struct pager *p)
 void P_RunPager(struct pager_config *cfg)
 {
 	struct saved_screen ss;
+	struct pager *old_pager;
 	struct pager p;
 
+	old_pager = current_pager;
 	current_pager = &p;
 
 	UI_SaveScreen(&ss);
@@ -291,7 +293,7 @@ void P_RunPager(struct pager_config *cfg)
 	P_FreePager(&p);
 	UI_RestoreScreen(&ss);
 
-	current_pager = NULL;
+	current_pager = old_pager;
 }
 
 void P_SwitchConfig(struct pager_config *cfg)
