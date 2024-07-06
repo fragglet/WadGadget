@@ -829,7 +829,7 @@ extracting this table and SORTing it.
       21 0015   SARG n        Dead demon
       22 0016 r HEAD l        Dead cacodemon
       23 0017 r SKUL k        Dead lost soul, invisible
-                                  (they blow up when killed)
+                              (they blow up when killed)
 
 ### [4-2-2]: Thing Sizes
 
@@ -3619,14 +3619,15 @@ Some of the following items get widely distributed (BBS, Usenet,
 online services, FTP) and some don't. Three prominent FTP sites
 with huge quantities of doom-related material are:
 
-  infant2.sphs.indiana.edu    /pub/doom and subdirectories
+    infant2.sphs.indiana.edu    /pub/doom and subdirectories
                                   (../wad_edit/text has most documents)
     wuarchive.wustl.edu         /pub/msdos_uploads/games/doomstuff
     ftp.uwp.edu                 /pub/incoming/id
                                 /pub/msdos/games/id/home-brew/doom
 
-  The infant2 site also has a number of mirrors.
-  As time passes, newer versions of these documents may be released,
+The infant2 site also has a number of mirrors.
+
+As time passes, newer versions of these documents may be released,
 and/or the file names will change:
 
 DESIGN12.ZIP    Level Design FAQ, edited by Tom Neff
