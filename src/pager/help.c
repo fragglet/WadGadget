@@ -322,11 +322,22 @@ static const struct action *help_pager_actions[] = {
 	NULL,
 };
 
-static bool LineWithinWindow(struct pager *p, int lineno)
+enum line_location { OUTSIDE_WINDOW, INSIDE_WINDOW, ON_WINDOW_EDGE };
+
+static enum line_location LineWithinWindow(struct pager *p, int lineno)
 {
 	int win_h = getmaxy(p->pane.window);
-	return lineno >= p->window_offset
-	    && lineno < p->window_offset + win_h;
+	if (lineno == -1) {
+		return OUTSIDE_WINDOW;
+	} else if (lineno == p->window_offset - 1
+	 || lineno == p->window_offset + win_h) {
+		return ON_WINDOW_EDGE;
+	} else if (lineno >= p->window_offset
+	        && lineno < p->window_offset + win_h) {
+		return INSIDE_WINDOW;
+	} else {
+		return OUTSIDE_WINDOW;
+	}
 }
 
 static const char *DrawLink(WINDOW *win, const char *link, bool highlighted)
@@ -406,6 +417,7 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 static bool HelpPagerKeypress(struct pager *p, int key)
 {
 	struct help_pager_config *cfg = p->cfg->user_data;
+	enum line_location line_loc;
 	int lineno;
 
 	switch (key) {
@@ -426,9 +438,17 @@ static bool HelpPagerKeypress(struct pager *p, int key)
 		return false;
 	}
 
-	if (lineno >= 0 && LineWithinWindow(p, lineno)) {
+	// If we return true, the window will not be scrolled. If the next
+	// link is within the current window, we jump to it and do not
+	// scroll.
+	// There is one corner case: if the next link is right on the very
+	// edge of the window (one line above or below the current window,
+	// represented by ON_WINDOW_EDGE), we want to both scroll *and*
+	// move the selection to the link on the newly-revealed line.
+	line_loc = LineWithinWindow(p, lineno);
+	if (line_loc != OUTSIDE_WINDOW) {
 		cfg->current_link_line = lineno;
-		return true;
+		return line_loc == INSIDE_WINDOW;
 	}
 
 	return false;
@@ -441,7 +461,7 @@ static void HelpPagerMoved(struct pager *p)
 	int lineno;
 
 	if (cfg->current_link_line < 0
-	 || LineWithinWindow(p, cfg->current_link_line)) {
+	 || LineWithinWindow(p, cfg->current_link_line) == INSIDE_WINDOW) {
 		return;
 	}
 
@@ -454,7 +474,7 @@ static void HelpPagerMoved(struct pager *p)
 		lineno = ScanForLink(cfg, p->window_offset + win_h - 1, -1);
 	}
 
-	if (lineno >= 0 && LineWithinWindow(p, lineno)) {
+	if (LineWithinWindow(p, lineno) == INSIDE_WINDOW) {
 		cfg->current_link_line = lineno;
 	}
 }
