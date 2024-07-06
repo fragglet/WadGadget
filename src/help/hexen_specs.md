@@ -1,7 +1,7 @@
 
-             The Official Hexen Technical Specs
-         Author: Ben Morris (bmorris@islandnet.com)
-        Information from Raven provided by Ben Gokey
+                 The Official Hexen Technical Specs
+             Author: Ben Morris (bmorris@islandnet.com)
+            Information from Raven provided by Ben Gokey
 
 # Disclaimer
 
