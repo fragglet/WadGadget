@@ -26,6 +26,7 @@ HELP_FILES =                \
     help/pnames_editor.md   \
     help/texture_editor.md  \
     help/wad_view.md        \
+    help/hexen_specs.md     \
     help/uds.md
 
 OBJS =                      \
