@@ -78,67 +78,66 @@ write to the author at "msfell@aol.com" on the Internet.
 
 # CONTENTS
 
-[[1]](#chapter-1-introduction) Introduction
- * [[1-1]](#1-1-id-softwares-copyright-and-the-shareware-version) id Software's Copyright
- * [[1-2]](#1-2-whats-new) What's New
-[[2]](#chapter-2-basics) The Basics
- * [[2-1]](#2-1-pwads) Pwads
- * [[2-2]](#2-2-doom-versions) DOOM version information
- * [[2-3]](#2-3-terminology-conventions) Terminology conventions
-[[3]](#chapter-3-list-of-doomwad-directory-entries) List of DOOM.WAD Directory Entries
-[[4]](#chapter-4-the-levels) The Levels
- * [[4-1]](#4-1-exmy-or-mapxy) ExMy or MAPxy
- * [[4-2]](#4-2-things) THINGS
-   * [[4-2-1]](#4-2-1-thing-types) Thing Types
-   * [[4-2-2]](#4-2-2-thing-sizes) Thing Sizes
-   * [[4-2-3]](#4-2-3-thing-options) Thing Options
- * [[4-3]](#4-3-linedefs) LINEDEFS
-   * [[4-3-1]](#4-3-1-linedef-flags) Linedef Flags
-   * [[4-3-2]](#4-3-2-linedef-types) Linedef Types
- * [[4-4]](#4-4-sidedefs) SIDEDEFS
- * [[4-5]](#4-5-vertexes) VERTEXES
- * [[4-6]](#4-6-segs) SEGS
- * [[4-7]](#4-7-ssectors) SSECTORS
- * [[4-8]](#4-8-nodes) NODES
- * [[4-9]](#4-9-sectors) SECTORS
-   * [[4-9-1]](#4-9-1-special-sector-types) Special Sector Types
- * [[4-10]](#4-10-reject) REJECT
- * [[4-11]](#4-11-blockmap) BLOCKMAP
-[[5]](#chapter-5-graphics) Graphics
- * [[5-1]](#5-1-picture-format) Picture Format
-[[6]](#chapter-6-flats-floor-and-ceiling-textures) Flats (Floor and Ceiling Textures)
- * [[6-1]](#6-1-animated-flats) Animated Floors, see [[8-4-1]](#8-4-1-animated-walls)
-[[7]](#chapter-7-sounds-and-music) Sounds and Music
- * [[7-1]](#7-1-pc-speaker-sound-effects) PC Speaker Sound Effects
- * [[7-2]](#7-2-soundcard-sound-effects) Soundcard Sound Effects
- * [[7-3]](#7-3-music) Music
- * [[7-4]](#7-4-genmidi) GENMIDI
- * [[7-5]](#7-5-dmxgus) DMXGUS
-[[8]](#chapter-8-miscellaneous-lumps) Miscellaneous Lumps
- * [[8-1]](#8-1-playpal) PLAYPAL
- * [[8-2]](#8-2-colormap) COLORMAP
- * [[8-3]](#8-3-endoom) ENDOOM
- * [[8-4]](#8-4-texture1-and-texture2) TEXTURE1 and TEXTURE2
-   * [[8-4-1]](#8-4-1-animated-walls) Animated Walls
-   * [[8-4-2]](#8-4-2-the-sky-textures) The SKY Textures
- * [[8-5]](#8-5-pnames) PNAMES
- * [[8-6]](#8-6-demos) DEMOs
-   * [[8-6-1]](#8-6-1-level-changes-from-12-to-1666-doomwad) Level changes from 1.2 to 1.666 DOOM.WAD
-[[9]](#chapter-9-savegame-files) Savegame Files
-
-[[10]](#chapter-10-the-doomexe-file) The DOOM.EXE File
- * [[10-1]](#10-1-version-12-doomexe-data-segment-overview) Version 1.2 DOOM.EXE Data Segment Overview
- * [[10-1]](#10-1-version-12-doomexe-data-segment-overview) Version 1.666 DOOM.EXE Data Segment Overview
- * [[10-3]](#10-3-detail-on-some-exe-data-structures) Detail on some EXE Data Structures
+ * [[1]](#chapter-1-introduction) Introduction
+    * [[1-1]](#1-1-id-softwares-copyright-and-the-shareware-version) id Software's Copyright
+    * [[1-2]](#1-2-whats-new) What's New
+ * [[2]](#chapter-2-basics) The Basics
+    * [[2-1]](#2-1-pwads) Pwads
+    * [[2-2]](#2-2-doom-versions) DOOM version information
+    * [[2-3]](#2-3-terminology-conventions) Terminology conventions
+ * [[3]](#chapter-3-list-of-doomwad-directory-entries) List of DOOM.WAD Directory Entries
+ * [[4]](#chapter-4-the-levels) The Levels
+    * [[4-1]](#4-1-exmy-or-mapxy) ExMy or MAPxy
+    * [[4-2]](#4-2-things) THINGS
+      * [[4-2-1]](#4-2-1-thing-types) Thing Types
+      * [[4-2-2]](#4-2-2-thing-sizes) Thing Sizes
+      * [[4-2-3]](#4-2-3-thing-options) Thing Options
+    * [[4-3]](#4-3-linedefs) LINEDEFS
+      * [[4-3-1]](#4-3-1-linedef-flags) Linedef Flags
+      * [[4-3-2]](#4-3-2-linedef-types) Linedef Types
+    * [[4-4]](#4-4-sidedefs) SIDEDEFS
+    * [[4-5]](#4-5-vertexes) VERTEXES
+    * [[4-6]](#4-6-segs) SEGS
+    * [[4-7]](#4-7-ssectors) SSECTORS
+    * [[4-8]](#4-8-nodes) NODES
+    * [[4-9]](#4-9-sectors) SECTORS
+      * [[4-9-1]](#4-9-1-special-sector-types) Special Sector Types
+    * [[4-10]](#4-10-reject) REJECT
+    * [[4-11]](#4-11-blockmap) BLOCKMAP
+ * [[5]](#chapter-5-graphics) Graphics
+    * [[5-1]](#5-1-picture-format) Picture Format
+ * [[6]](#chapter-6-flats-floor-and-ceiling-textures) Flats (Floor and Ceiling Textures)
+    * [[6-1]](#6-1-animated-flats) Animated Floors, see [[8-4-1]](#8-4-1-animated-walls)
+ * [[7]](#chapter-7-sounds-and-music) Sounds and Music
+    * [[7-1]](#7-1-pc-speaker-sound-effects) PC Speaker Sound Effects
+    * [[7-2]](#7-2-soundcard-sound-effects) Soundcard Sound Effects
+    * [[7-3]](#7-3-music) Music
+    * [[7-4]](#7-4-genmidi) GENMIDI
+    * [[7-5]](#7-5-dmxgus) DMXGUS
+ * [[8]](#chapter-8-miscellaneous-lumps) Miscellaneous Lumps
+    * [[8-1]](#8-1-playpal) PLAYPAL
+    * [[8-2]](#8-2-colormap) COLORMAP
+    * [[8-3]](#8-3-endoom) ENDOOM
+    * [[8-4]](#8-4-texture1-and-texture2) TEXTURE1 and TEXTURE2
+      * [[8-4-1]](#8-4-1-animated-walls) Animated Walls
+      * [[8-4-2]](#8-4-2-the-sky-textures) The SKY Textures
+    * [[8-5]](#8-5-pnames) PNAMES
+    * [[8-6]](#8-6-demos) DEMOs
+      * [[8-6-1]](#8-6-1-level-changes-from-12-to-1666-doomwad) Level changes from 1.2 to 1.666 DOOM.WAD
+ * [[9]](#chapter-9-savegame-files) Savegame Files
+ * [[10]](#chapter-10-the-doomexe-file) The DOOM.EXE File
+    * [[10-1]](#10-1-version-12-doomexe-data-segment-overview) Version 1.2 DOOM.EXE Data Segment Overview
+    * [[10-1]](#10-1-version-12-doomexe-data-segment-overview) Version 1.666 DOOM.EXE Data Segment Overview
+    * [[10-3]](#10-3-detail-on-some-exe-data-structures) Detail on some EXE Data Structures
 
 APPENDICES
 
-[[A-1]](#appendix-a-1-backus-naur-form-definitions-of-wad-elements) Backus-Naur Form definitions of wad elements
-[[A-2]](#appendix-a-2-doom-engine-limits) Engine limits
-[[A-3]](#appendix-a-3-a-blockmap-algorithm) DOOM.WAD changes and errors
-[[A-3]](#appendix-a-3-a-blockmap-algorithm) A BLOCKMAP algorithm
-[[A-4]](#appendix-a-4-other-helpful-documents) Other helpful documents
-[[A-5]](#appendix-a-5-acknowledgments) Acknowledgments
+ * [[A-1]](#appendix-a-1-backus-naur-form-definitions-of-wad-elements) Backus-Naur Form definitions of wad elements
+ * [[A-2]](#appendix-a-2-doom-engine-limits) Engine limits
+ * [[A-3]](#appendix-a-3-a-blockmap-algorithm) DOOM.WAD changes and errors
+ * [[A-3]](#appendix-a-3-a-blockmap-algorithm) A BLOCKMAP algorithm
+ * [[A-4]](#appendix-a-4-other-helpful-documents) Other helpful documents
+ * [[A-5]](#appendix-a-5-acknowledgments) Acknowledgments
 
 
 # CHAPTER [1]: Introduction
