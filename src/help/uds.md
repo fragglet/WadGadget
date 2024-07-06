@@ -250,10 +250,10 @@ engine to use.
 
 A WAD file has three parts:
 
-1. a twelve-byte header
-2. one or more "lumps"
-3. a directory or "info table" that contains the names, offsets, and
-     sizes of all the lumps in the WAD
+ 1. a twelve-byte header
+ 2. one or more "lumps"
+ 3. a directory or "info table" that contains the names, offsets, and
+      sizes of all the lumps in the WAD
 
 The header consists of three four-byte parts:
 
@@ -382,29 +382,29 @@ version to version.
 Throughout this document, I will use the following conventions for
 numbers and variable types:
 
-1. Most numbers will be decimal. Hexadecimal numbers will usually be
-   labeled thus: 0xffff or $ffff. But sometimes I'll say "hex ...".
-   And in tablature form, a column heading "HEX" indicates all the
-   numbers in that column are hexadecimal.
-2. "byte" is of course the generic, 8 bits. It will usually mean one
-   8-bit component of a larger data type, or an 8-bit ASCII
-   character, or some such. As a number, it is an unsigned 8-bit
-   integer (0..255).
-3. "short" is a signed 16-bit integer (-32768..32767), stored in
-   lo-hi format.
-4. "ushort" or "unsigned short" is an unsigned 16-bit integer (0..65535).
-5. "integer" or "long" is a signed 32-bit integer. If you don't read
-   this first, my use of the word "integer" might not be immediately
-   apparent.
-6. "string8" or "8-byte string" is an ASCII string with length between
-   1 and 8 characters inclusive. If its length is less than 8, the
-   remaining bytes are zeros.
-7. The first byte of a file or any data structure, for addressing and
-   offset purposes, is byte #0, not byte #1.
-8. Some abbreviations I use: E1, E2, and E3 refer to episodes 1, 2, and
-   3 respectively. "The EXE" means the file DOOM.EXE.
+ 1. Most numbers will be decimal. Hexadecimal numbers will usually be
+    labeled thus: 0xffff or $ffff. But sometimes I'll say "hex ...".
+    And in tablature form, a column heading "HEX" indicates all the
+    numbers in that column are hexadecimal.
+ 2. "byte" is of course the generic, 8 bits. It will usually mean one
+    8-bit component of a larger data type, or an 8-bit ASCII
+    character, or some such. As a number, it is an unsigned 8-bit
+    integer (0..255).
+ 3. "short" is a signed 16-bit integer (-32768..32767), stored in
+    lo-hi format.
+ 4. "ushort" or "unsigned short" is an unsigned 16-bit integer (0..65535).
+ 5. "integer" or "long" is a signed 32-bit integer. If you don't read
+    this first, my use of the word "integer" might not be immediately
+    apparent.
+ 6. "string8" or "8-byte string" is an ASCII string with length between
+    1 and 8 characters inclusive. If its length is less than 8, the
+    remaining bytes are zeros.
+ 7. The first byte of a file or any data structure, for addressing and
+    offset purposes, is byte #0, not byte #1.
+ 8. Some abbreviations I use: E1, E2, and E3 refer to episodes 1, 2, and
+    3 respectively. "The EXE" means the file DOOM.EXE.
 
-666: Any reference to this number is purely intentional.
+ 666: Any reference to this number is purely intentional.
 
 # CHAPTER [3]: List of DOOM.WAD Directory Entries
 
@@ -640,16 +640,16 @@ barrels, etc. The size of each THINGS lump will be a multiple of ten,
 since each thing requires ten bytes to describe it, in five <short>
 fields:
 
-1. X position of thing (at level's inception)
-2. Y position of thing
-3. Angle the thing faces. On the automap, 0 is east, 90 is north, 180
-   is west, 270 is south. This value is only used for monsters, player
-   starts, deathmatch starts, and teleporter landing spots. Other
-   things look the same from all directions. Values are rounded to
-   the nearest 45 degree angle, so if the value is 80, it will
-   actually face 90 - north.
-4. Type of thing, see next subsection, [[4-2-1]](#4-2-1-thing-types)
-5. Thing options, see [[4-2-3]](#4-2-3-thing-options)
+ 1. X position of thing (at level's inception)
+ 2. Y position of thing
+ 3. Angle the thing faces. On the automap, 0 is east, 90 is north, 180
+    is west, 270 is south. This value is only used for monsters, player
+    starts, deathmatch starts, and teleporter landing spots. Other
+    things look the same from all directions. Values are rounded to
+    the nearest 45 degree angle, so if the value is 80, it will
+    actually face 90 - north.
+ 4. Type of thing, see next subsection, [[4-2-1]](#4-2-1-thing-types)
+ 5. Thing options, see [[4-2-3]](#4-2-3-thing-options)
 
 ### [4-2-1]: Thing Types
 
@@ -927,16 +927,16 @@ flag, or attribute).
 Each linedef represents a line from one of the VERTEXES to another,
 and each linedef's record is 14 bytes, containing 7 <short> fields:
 
-1. from the VERTEX with this number (the first vertex is 0).
-2. to the VERTEX with this number (31 is the 32nd vertex).
-3. flags, see [[4-3-1]](#4-3-1-linedef-flags) below.
-4. types, see [[4-3-2]](#4-3-2-linedef-types) below.
-5. is a "tag" or "trigger" number which ties this line's effect type
-   to all SECTORS that have the same tag number (in their last
-   field).
-6. number of the "right" SIDEDEF for this linedef.
-7. "left" SIDEDEF, if this line adjoins 2 SECTORS. Otherwise, it is
-   equal to -1 (FFFF hex).
+ 1. from the VERTEX with this number (the first vertex is 0).
+ 2. to the VERTEX with this number (31 is the 32nd vertex).
+ 3. flags, see [[4-3-1]](#4-3-1-linedef-flags) below.
+ 4. types, see [[4-3-2]](#4-3-2-linedef-types) below.
+ 5. is a "tag" or "trigger" number which ties this line's effect type
+    to all SECTORS that have the same tag number (in their last
+    field).
+ 6. number of the "right" SIDEDEF for this linedef.
+ 7. "left" SIDEDEF, if this line adjoins 2 SECTORS. Otherwise, it is
+    equal to -1 (FFFF hex).
 
 "right" and "left" are based on the direction of the linedef as
 indicated by the "from" and "to", or "start" and "end", VERTEXES.
@@ -1454,18 +1454,18 @@ player can only go where there is a sector.
 Each sidedef's record is 30 bytes, comprising 2 <short> fields, then
 3 <8-byte string> fields, then a final <short> field:
 
-1. X offset for pasting the appropriate wall texture onto the wall's
-   "space": positive offset moves into the texture, so the left
-   portion gets cut off (# of columns off left side = offset).
-   Negative offset moves texture farther right, in the wall's space.
-2. Y offset: analogous to the X, for vertical.
-3. "upper" texture name: the part above the juncture with a lower
-   ceiling of an adjacent sector.
-4. "lower" texture name: the part below a juncture with a higher
-   floored adjacent sector.
-5. "middle" texture name: the regular part of the wall. Also known as
-   "normal" or "full" texture.
-6. SECTOR that this sidedef faces or helps to surround.
+ 1. X offset for pasting the appropriate wall texture onto the wall's
+    "space": positive offset moves into the texture, so the left
+    portion gets cut off (# of columns off left side = offset).
+    Negative offset moves texture farther right, in the wall's space.
+ 2. Y offset: analogous to the X, for vertical.
+ 3. "upper" texture name: the part above the juncture with a lower
+    ceiling of an adjacent sector.
+ 4. "lower" texture name: the part below a juncture with a higher
+    floored adjacent sector.
+ 5. "middle" texture name: the regular part of the wall. Also known as
+    "normal" or "full" texture.
+ 6. SECTOR that this sidedef faces or helps to surround.
 
 The texture names are from the TEXTURE1/2 resources. The names of
 wall patches in the directory (between P_START and P_END) are not
@@ -1502,8 +1502,8 @@ lava waterfall with the hidden room at its base...hmm, maybe not...
 These are the beginning and end points for LINEDEFS and SEGS. Each
 vertice's record is 4 bytes in 2 <short> fields:
 
-1. X coordinate
-2. Y coordinate
+ 1. X coordinate
+ 2. Y coordinate
 
 On the automap within the game, with the grid on (press 'G'), the
 lines are 128 apart (0x80), two lines = 256 (0x100).
@@ -1522,23 +1522,23 @@ which are part of the NODES recursive tree.
 
 Each seg is 12 bytes in 6 <short> fields:
 
-1. start of seg is VERTEX with this number
-2. end VERTEX
-3. angle: 0= east, 16384=north, -16384=south, -32768=west.
-   In hex, it's 0000=east, 4000=north, 8000=west, c000=south.
-   This is also know as BAMS for Binary Angle Measurement.
-4. LINEDEF that this seg goes along
-5. direction: 0 if the seg goes the same direction as the linedef it
-   is on, 1 if the seg goes the opposite direction. This is the
-   same as (0 if the seg is on the RIGHT side of the linedef) or
-   (1 if the seg is on the LEFT side of the linedef).
-6. offset: distance along the linedef to the start of this seg (the
-   vertex in field 1). The offset is in the same direction as the
-   seg. If field 5 is 0, then the distance is from the "start"
-   vertex of the linedef to the "start" vertex of the seg. If field
-   5 is 1, then the offset is from the "end" vertex of the linedef
-   to the "start" vertex of the seg. So if the seg begins at one of
-   the two endpoints of the linedef, this offset will be 0.
+ 1. start of seg is VERTEX with this number
+ 2. end VERTEX
+ 3. angle: 0= east, 16384=north, -16384=south, -32768=west.
+    In hex, it's 0000=east, 4000=north, 8000=west, c000=south.
+    This is also know as BAMS for Binary Angle Measurement.
+ 4. LINEDEF that this seg goes along
+ 5. direction: 0 if the seg goes the same direction as the linedef it
+    is on, 1 if the seg goes the opposite direction. This is the
+    same as (0 if the seg is on the RIGHT side of the linedef) or
+    (1 if the seg is on the LEFT side of the linedef).
+ 6. offset: distance along the linedef to the start of this seg (the
+    vertex in field 1). The offset is in the same direction as the
+    seg. If field 5 is 0, then the distance is from the "start"
+    vertex of the linedef to the "start" vertex of the seg. If field
+    5 is 1, then the offset is from the "end" vertex of the linedef
+    to the "start" vertex of the seg. So if the seg begins at one of
+    the two endpoints of the linedef, this offset will be 0.
 
 For diagonal segs, the offset distance can be obtained from the
 formula DISTANCE = SQR((x2 - x1)^2 + (y2 - y1)^2). The angle can be
@@ -1556,8 +1556,8 @@ There will be (number of nodes + 1) ssectors.
 
 Each ssector is 4 bytes in 2 <short> fields:
 
-1. This many SEGS are in this SSECTOR...
-2. ...starting with this SEG number
+ 1. This many SEGS are in this SSECTOR...
+ 2. ...starting with this SEG number
 
 The segs in ssector 0 should be segs 0 through x, then ssector 1
 contains segs x+1 through y, ssector 2 containg segs y+1 to z, etc.
@@ -1569,26 +1569,26 @@ structure in the wad file.
 
 Each node is 28 bytes in 14 <short> fields:
 
-1.  X coordinate of partition line's start
-2.  Y coordinate of partition line's start
-3.  DX, change in X to end of partition line
-4.  DY, change in Y to end of partition line
+ 1.  X coordinate of partition line's start
+ 2.  Y coordinate of partition line's start
+ 3.  DX, change in X to end of partition line
+ 4.  DY, change in Y to end of partition line
 
 If (1) to (4) equaled 64, 128, -64, -64, the partition line would
 go from (64,128) to (0,64).
 
-5.  Y upper bound for right bounding-box.\
-6.  Y lower bound                         All SEGS in right child of node
-7.  X lower bound                         must be within this box.
-8.  X upper bound                        /
-9.  Y upper bound for left bounding box. \
-10. Y lower bound                         All SEGS in left child of node
-11. X lower bound                         must be within this box.
-12. X upper bound                        /
-13. a NODE or SSECTOR number for the right child. If bit 15 of this
-    <short> is set, then the rest of the number represents the
-    child SSECTOR. If not, the child is a recursed node.
-14. a NODE or SSECTOR number for the left child.
+ 5.  Y upper bound for right bounding-box.\
+ 6.  Y lower bound                         All SEGS in right child of node
+ 7.  X lower bound                         must be within this box.
+ 8.  X upper bound                        /
+ 9.  Y upper bound for left bounding box. \
+ 10. Y lower bound                         All SEGS in left child of node
+ 11. X lower bound                         must be within this box.
+ 12. X upper bound                        /
+ 13. a NODE or SSECTOR number for the right child. If bit 15 of this
+     <short> is set, then the rest of the number represents the
+     child SSECTOR. If not, the child is a recursed node.
+ 14. a NODE or SSECTOR number for the left child.
 
 The NODES lump is by far the most difficult to understand of all the
 data structures in DOOM. A new level won't display right without a valid
@@ -1787,20 +1787,20 @@ the other, although fairly convincing illusions are possible.
 Each sector's record is 26 bytes, comprising 2 <short> fields, then
 2 <8-byte string> fields, then 3 <short> fields:
 
-1. Floor is at this height for this sector
-2. Ceiling height
-3. name of the flat used for the floor texture, from the directory.
-4. name of the flat used for the ceiling texture.
-   All the flats in the directory between F_START and F_END work
-   as either floors or ceilings.
-5. lightlevel of this sector: 0 = total dark, 255 (0xff) = maximum
-   light. There are actually only 32 brightnesses possible (see
-   COLORMAP [[8-2]](#8-2-colormap)), so 0-7 are the same, ..., 248-255 are the same.
-6. special sector: see [[4-9-1]](#4-9-1-special-sector-types) immediately below.
-7. a "tag" number corresponding to LINEDEF(s) with the same tag
-   number. When that linedef is activated, something will usually
-   happen to this sector - its floor will rise, the lights will
-   go out, etc. See [[4-3-2]](#4-3-2-linedef-types) for the list of linedef effects.
+ 1. Floor is at this height for this sector
+ 2. Ceiling height
+ 3. name of the flat used for the floor texture, from the directory.
+ 4. name of the flat used for the ceiling texture.
+    All the flats in the directory between F_START and F_END work
+    as either floors or ceilings.
+ 5. lightlevel of this sector: 0 = total dark, 255 (0xff) = maximum
+    light. There are actually only 32 brightnesses possible (see
+    COLORMAP [[8-2]](#8-2-colormap)), so 0-7 are the same, ..., 248-255 are the same.
+ 6. special sector: see [[4-9-1]](#4-9-1-special-sector-types) immediately below.
+ 7. a "tag" number corresponding to LINEDEF(s) with the same tag
+    number. When that linedef is activated, something will usually
+    happen to this sector - its floor will rise, the lights will
+    go out, etc. See [[4-3-2]](#4-3-2-linedef-types) for the list of linedef effects.
 
 ### [4-9-1]: Special Sector Types
 
@@ -1960,10 +1960,10 @@ the blocklists.
 
 The 8-byte header contains 4 short integers:
 
-1. X coordinate of block-grid origin
-2. Y coordinate of block-grid origin
-3. number of columns (blocks in X direction)
-4. number of rows (blocks in Y direction)
+ 1. X coordinate of block-grid origin
+ 2. Y coordinate of block-grid origin
+ 3. number of columns (blocks in X direction)
+ 4. number of rows (blocks in Y direction)
 
 The block-grid origin is the bottom-left corner of the bottom-left
 (southwest) block. id's blockmap builder this origin point at 8 less
@@ -2083,12 +2083,12 @@ here is a meatier explanation of the format:
 
 (A) The header's four fields are:
 
-1. Width. The number of columns of picture data.
-2. Height. The number of rows.
-3. Left offset. The number of pixels to the left of the center;
-     where the first column gets drawn.
-4. Top offset. The number of pixels above the origin;
-     where the top row is.
+ 1. Width. The number of columns of picture data.
+ 2. Height. The number of rows.
+ 3. Left offset. The number of pixels to the left of the center;
+      where the first column gets drawn.
+ 4. Top offset. The number of pixels above the origin;
+      where the top row is.
 
 The width and height define a rectangular space or limits for drawing
 a picture within. To be "centered", (3) is usually about half of the
@@ -2205,10 +2205,10 @@ systems using soundcards.
 This data is in a RAW format for 8-bit 11 KHz mono sound - first is
 an 8-byte header composed of 4 unsigned short integers:
 
-1. 3           (means what?)
-2. 11025       (the sample rate, samples per second)
-3. N           (the number of samples)
-4. 0
+ 1. 3           (means what?)
+ 2. 11025       (the sample rate, samples per second)
+ 3. N           (the number of samples)
+ 4. 0
 
 Each sample is a single byte, since they are 8-bit samples. The
 maximum number of samples is 65535, so at 11 KHz, a little less than
@@ -2374,11 +2374,11 @@ The first (texture name) field is an 8-byte string (less than 8 byte
 names are padded with zeros), the rest of the fields are 2-byte short
 integers:
 
-1. The name of the texture, used in SIDEDEFS, e.g. "FIREWALL".
-2. always 0.
-3. always 0.
-4. total width of texture
-5. total height of texture
+ 1. The name of the texture, used in SIDEDEFS, e.g. "FIREWALL".
+ 2. always 0.
+ 3. always 0.
+ 4. total width of texture
+ 5. total height of texture
 
 The fourth and fifth fields define a "space" (usually 128 by 128
 or 64 by 72 or etc...) in which individual wall patches are placed
@@ -2386,11 +2386,11 @@ to form the overall picture. To tile vertically on a very tall wall
 without exhibiting the "Tutti Frutti" effect, a texture must have
 height 128, the maximum. There is no maximum width.
 
-6. always 0.
-7. always 0.
-8. Number of 5-field (5 <short>) patch descriptors that follow. This
-   means that each texture entry has variable length. Many entries have just
-   1 patch, the most used in DOOM in a single texture is 64.
+ 6. always 0.
+ 7. always 0.
+ 8. Number of 5-field (5 <short>) patch descriptors that follow. This
+    means that each texture entry has variable length. Many entries have just
+    1 patch, the most used in DOOM in a single texture is 64.
 
 Patch descriptor:
 
@@ -2559,9 +2559,9 @@ and deserves the .LMP extension.
 
 A DOOM demo has three parts:
 
-1. header - 7 or 13 bytes
-2. data recording player moves - 4 bytes per player per gametic
-3. quit byte - equals 128 (0x80)
+ 1. header - 7 or 13 bytes
+ 2. data recording player moves - 4 bytes per player per gametic
+ 3. quit byte - equals 128 (0x80)
 
 (1) There are two different kinds of header depending on the version of
 DOOM used to record the demo. Versions up to 1.2 use a 7-byte header:
@@ -2907,24 +2907,24 @@ for that weapon, and last is the first state of the "firing" sequence. The
 ANIMATED WALLS and FLOORS. Each is 26 bytes: an integer, a 8-byte string,
 $00, a 8-byte string, $00, and a final integer.
 
-0 NUKAGE3  NUKAGE1  8
-0 FWATER4  FWATER1  8
-0 SWATER4  SWATER1  8
-0 LAVA4    LAVA1    8
-0 BLOOD4   BLOOD1   8
-                       <---- v1.666 has four more:  0 RROCK08  RROCK05  8
-1 BLODGR4  BLODGR1  8                               0 SLIME04  SLIME01  8
-1 SLADRIP4 SLADRIP1 8                               0 SLIME08  SLIME05  8
-1 BLODRIP4 BLODRIP1 8                               0 SLIME12  SLIME09  8
-1 FIREWALL FIREWALA 8
-1 GSTFONT3 GSTFONT1 8
-1 FIRELAVA FIRELAV3 8
-1 FIREBLU2 FIREBLU1 8
-1 ROCKRED3 ROCKRED1 8
-                       <---- V1.666 has four more:  1 BFALL4   BFALL1   8
-                                                    1 SFALL4   SFALL1   8
-                                                    1 WFALL4   WFALL1   8
-                                                    1 DBRAIN4  DBRAIN1  8
+    0 NUKAGE3  NUKAGE1  8
+    0 FWATER4  FWATER1  8
+    0 SWATER4  SWATER1  8
+    0 LAVA4    LAVA1    8
+    0 BLOOD4   BLOOD1   8
+                           <---- v1.666 has four more:  0 RROCK08  RROCK05  8
+    1 BLODGR4  BLODGR1  8                               0 SLIME04  SLIME01  8
+    1 SLADRIP4 SLADRIP1 8                               0 SLIME08  SLIME05  8
+    1 BLODRIP4 BLODRIP1 8                               0 SLIME12  SLIME09  8
+    1 FIREWALL FIREWALA 8
+    1 GSTFONT3 GSTFONT1 8
+    1 FIRELAVA FIRELAV3 8
+    1 FIREBLU2 FIREBLU1 8
+    1 ROCKRED3 ROCKRED1 8
+                           <---- V1.666 has four more:  1 BFALL4   BFALL1   8
+                                                        1 SFALL4   SFALL1   8
+                                                        1 WFALL4   WFALL1   8
+                                                        1 DBRAIN4  DBRAIN1  8
 
 Obviously the 0/1 means floor or wall. The first string is the name of
 the animation cycle's LAST listed texture, the second string is the FIRST
@@ -3075,34 +3075,34 @@ Two integers: 1, 0, then 6 code-pointers.
 THING TABLE. 103 entries in v1.2 which are each 88 bytes = 22 integers.
 136 entries in v1.666, which are each 92 bytes = 23 integers.
 
-1.  Thing number, as used in maps. See [[4-2-1]](#4-2-1-thing-types). Some of them are
-    equal to -1, e.g. the players' entry, and all projectiles.
-2.  "Spawn" state. State number (from STATE TABLE) for when this
-    thing first appears.
-3.  Health. Inanimates can't be killed, so it doesn't apply to them.
-4.  "Moving" state. First state # of monsters pursuing, etc.
-5.  "See player" sound. For monsters who become activated. Also for
-    projectiles' first sound. Note that sounds are 1-..., not 0-...
-    0 indicates no sound.
-6.  Reaction Time. Lower is faster.
-7.  "Attack" sound.
-8.  "Pain" state.
-9.  Painchance. The chance out of 256 that a monster will be disrupted
-    when it gets hurt. Otherwise, they keep attacking.
-10. "Pain" sound.
-11. "Close attack" state.
-12. "Distance attack" state.
-13. "Death" state, or "explode" for projectiles.
-14. "Explosive death" state, only some monsters can be "mushed".
-15. "Death" sound, or "explode" for projectiles.
-16. Speed of movement. Projectiles' speed are * 65536.
-17. Horizontal size (radius) * 65536
-18. Height * 65536
-19. Mass
-20. Missile damage. Also, the Lost Soul has a 3 here, for it's attack.
-21. "Act" sound, for wandering monsters.
-22. Flags, see below
-23. "Respawn" state, for monsters being ressurected. VERSION 1.666 ONLY
+ 1.  Thing number, as used in maps. See [[4-2-1]](#4-2-1-thing-types). Some of them are
+     equal to -1, e.g. the players' entry, and all projectiles.
+ 2.  "Spawn" state. State number (from STATE TABLE) for when this
+     thing first appears.
+ 3.  Health. Inanimates can't be killed, so it doesn't apply to them.
+ 4.  "Moving" state. First state # of monsters pursuing, etc.
+ 5.  "See player" sound. For monsters who become activated. Also for
+     projectiles' first sound. Note that sounds are 1-..., not 0-...
+     0 indicates no sound.
+ 6.  Reaction Time. Lower is faster.
+ 7.  "Attack" sound.
+ 8.  "Pain" state.
+ 9.  Painchance. The chance out of 256 that a monster will be disrupted
+     when it gets hurt. Otherwise, they keep attacking.
+ 10. "Pain" sound.
+ 11. "Close attack" state.
+ 12. "Distance attack" state.
+ 13. "Death" state, or "explode" for projectiles.
+ 14. "Explosive death" state, only some monsters can be "mushed".
+ 15. "Death" sound, or "explode" for projectiles.
+ 16. Speed of movement. Projectiles' speed are * 65536.
+ 17. Horizontal size (radius) * 65536
+ 18. Height * 65536
+ 19. Mass
+ 20. Missile damage. Also, the Lost Soul has a 3 here, for it's attack.
+ 21. "Act" sound, for wandering monsters.
+ 22. Flags, see below
+ 23. "Respawn" state, for monsters being ressurected. VERSION 1.666 ONLY
 
 Flags. 0 = condition is false. 1 = condition is true.
 
