@@ -14,15 +14,11 @@ struct help_pager_history {
 	struct help_pager_history *next;
 };
 
-struct help_pager_link {
-	int lineno;
-};
-
 struct help_pager_config {
 	struct pager_config pc;
 	char *filename;
 	char **lines;
-	struct help_pager_link *links;
+	struct pager_link *links;
 	struct help_pager_history *history;
 };
 

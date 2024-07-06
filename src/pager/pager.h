@@ -13,11 +13,18 @@
 #include "ui/pane.h"
 
 typedef struct pager pager_t;
+struct pager_config;
+
+struct pager_link {
+	int lineno;
+};
 
 typedef void (*pager_draw_line_fn)(WINDOW *win, unsigned int line,
                                    void *user_data);
 typedef bool (*pager_keypress_fn)(pager_t *p, int c);
 typedef void (*pager_window_moved_fn)(pager_t *p);
+typedef void (*pager_get_link_fn)(struct pager_config *cfg, int idx,
+                                  struct pager_link *link);
 
 struct pager_config {
 	const char *title;
@@ -27,6 +34,7 @@ struct pager_config {
 	void *user_data;
 	size_t num_lines;
 	const struct action **actions;
+	pager_get_link_fn get_link;
 	int current_link;
 	int num_links;
 };
