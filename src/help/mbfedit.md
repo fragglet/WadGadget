@@ -3,10 +3,10 @@
 ## Contents
 
 1. [New Linedef Types](#1-new-linedef-types)
-2. [New Thing Types / Flags](#2-new-thing-types-flags)
+2. [New Thing Types / Flags](#2-new-thing-types--flags)
 3. [New Mobj Flags](#3-new-mobj-flags)
-4. [DEH/BEX Mnemonic Names](#4-deh-bex-mnemonic-names)
-5. [DEH/BEX Code Pointers](#5-deh-bex-code-pointers)
+4. [DEH/BEX Mnemonic Names](#4-dehbex-mnemonic-names)
+5. [DEH/BEX Code Pointers](#5-dehbex-code-pointers)
 6. [DEHACKED lump](#6-dehacked-lump)
 7. [OPTIONS lump](#7-options-lump)
 
