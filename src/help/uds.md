@@ -590,16 +590,16 @@ have zero size:
                     See chapter [[5]](#chapter-5-graphics) for the naming convention used here.
     S_END           is immediately after the last sprite.
     P_START         marks the beginning of the wall patches.
-    P1_START          before the first of the shareware wall patches.
-    P1_END            after the last of the shareware wall patches.
-    P2_START  r       registered wall patches.
-    P2_END    r       registered wall patches.
+    P1_START        before the first of the shareware wall patches.
+    P1_END          after the last of the shareware wall patches.
+    P2_START  r     registered wall patches.
+    P2_END    r     registered wall patches.
     P_END           marks the end of the wall patches.
     F_START         marks the beginning of the flats (floor textures).
-    F1_START          shareware flats.
-    F1_END            shareware flats.
-    F2_START  r       registered flats.
-    F2_END    r       registered flats.
+    F1_START        shareware flats.
+    F1_END          shareware flats.
+    F2_START  r     registered flats.
+    F2_END    r     registered flats.
     F_END           marks the end of the flats.
 
 # CHAPTER [4]: The Levels
