@@ -83,20 +83,20 @@ height instantly.
 
 ### Section 1.1 Door functions
 
-Open, Wait, Then Close
+**Open, Wait, Then Close**
 
 On activation, door opens fully, waits a specified period, then
 closes fully.
 
-Open and Stay Open
+**Open and Stay Open**
 
 On activation, door opens fully and remains there.
 
-Close and Stay Closed
+**Close and Stay Closed**
 
 On activation, door closes fully, and remains there.
 
-Close, Wait, Then Open
+**Close, Wait, Then Open**
 
 On activation, door closes fully, waits a specified period, then
 opens fully.
@@ -231,14 +231,14 @@ is twice as fast as slow, Fast is twice normal, Turbo is twice Fast.
 
 ### Section 2.1 Floor targets
 
-Lowest Neighbor Floor (LnF)
+**Lowest Neighbor Floor (LnF)**
 
 This means that the floor moves to the height of the lowest
 neighboring floor including the floor itself. If the floor
 direction is up (only possible with generalized floors) motion is
 instant, else at the floor's speed.
 
-Next Neighbor Floor (NnF)
+**Next Neighbor Floor (NnF)**
 
 This means that the floor moves up to the height of the lowest
 adjacent floor greater in height than the current, or down to the
@@ -246,14 +246,14 @@ height of the highest adjacent floor less in height than the current,
 as determined by the floor's direction. Instant motion is not
 possible in this case. If no such floor exists, the floor does not move.
 
-Lowest Neighbor Ceiling (LnC)
+**Lowest Neighbor Ceiling (LnC)**
 
 This means that the floor height changes to the height of the lowest
 ceiling possessed by any neighboring sector, including that floor's
 ceiling. If the target height is in the opposite direction to floor
 motion, motion is instant, otherwise at the floor action's speed.
 
-8 Under Lowest Neighbor Ceiling (8uLnC)
+**8 Under Lowest Neighbor Ceiling (8uLnC)**
 
 This means that the floor height changes to 8 less than the height
 of the lowest ceiling possessed by any neighboring sector, including
@@ -261,7 +261,7 @@ that floor's ceiling. If the target height is in the opposite
 direction to floor motion, motion is instant, otherwise at the floor
 action's speed.
 
-Highest Neighbor Floor (HnF)
+**Highest Neighbor Floor (HnF)**
 
 This means that the floor height changes to the height of the highest
 neighboring floor, excluding the floor itself. If no neighbor floor
@@ -269,7 +269,7 @@ exists, the floor moves down to -32000. If the target height is in
 the opposite direction to floor motion, the motion is instant,
 otherwise it occurs at the floor action's speed.
 
-8 Above Highest Neighbor Floor (8aHnF)
+**8 Above Highest Neighbor Floor (8aHnF)**
 
 This means that the floor height changes to 8 above the height of
 the highest neighboring floor, excluding the floor itself. If no
@@ -277,35 +277,35 @@ neighbor floor exists, the floor moves down to -31992. If the target
 height is in the opposite direction to floor motion, the motion is
 instant, otherwise it occurs at the floor action's speed.
 
-Ceiling
+**Ceiling**
 
 The floor moves up until its at ceiling height, instantly if floor
 direction is down (only available with generalized types), at the
 floor speed if the direction is up.
 
-24 Units (24)
+**24 Units (24)**
 
 The floor moves 24 units in the floor action's direction. Instant
 motion is not possible with this linedef type.
 
-32 Units (32)
+**32 Units (32)**
 
 The floor moves 32 units in the floor action's direction. Instant
 motion is not possible with this linedef type.
 
-512 Units (512)
+**512 Units (512)**
 
 The floor moves 512 units in the floor action's direction. Instant
 motion is not possible with this linedef type.
 
-Shortest Lower Texture (SLT)
+**Shortest Lower Texture (SLT)**
 
 The floor moves the height of the shortest lower texture on the
 boundary of the sector, in the floor direction. Instant motion is not
 possible with this type. In the case that there is no surrounding
 texture the motion is to -32000 or +32000 depending on direction.
 
-None
+**None**
 
 Some pure texture type changes are provided for changing the floor
 texture and/or sector type without moving the floor.
@@ -342,9 +342,9 @@ sector's type.
 
 Numeric model algorithm:
 
-1. Find all floors adjacent to the tagged floor at destination height
-2. Find the lowest numbered linedef separating those floors from that tagged
-3. The sector on the other side of that linedef is the model
+ 1. Find all floors adjacent to the tagged floor at destination height
+ 2. Find the lowest numbered linedef separating those floors from that tagged
+ 3. The sector on the other side of that linedef is the model
 
 A floor action can have the crush property, in which case players and
 monsters are crushed when the floor tries to move above the point
@@ -466,7 +466,7 @@ is twice Fast.
 
 ### Section 3.1 Ceiling Targets
 
-Highest Neighbor Ceiling (HnC)
+**Highest Neighbor Ceiling (HnC)**
 
 This means that the ceiling moves to the height of the highest
 neighboring ceiling NOT including the ceiling itself. If the ceiling
@@ -474,7 +474,7 @@ direction is down (only possible with generalized ceilings) motion is
 instant, else at the ceiling's speed. If no adjacent ceiling exists
 the ceiling moves to -32000 units.
 
-Next Neighbor Ceiling (NnC)
+**Next Neighbor Ceiling (NnC)**
 
 This means that the ceiling moves up to the height of the lowest
 adjacent ceiling greater in height than the current, or to the
@@ -483,7 +483,7 @@ as determined by the ceiling's direction. Instant motion is not
 possible in this case. If no such ceiling exists, the ceiling does
 not move.
 
-Lowest Neighbor Ceiling (LnC)
+**Lowest Neighbor Ceiling (LnC)**
 
 This means that the ceiling height changes to the height of the lowest
 ceiling possessed by any neighboring sector, NOT including itself.
@@ -491,7 +491,7 @@ If the target height is in the opposite direction to ceiling
 motion, motion is instant, otherwise at the ceiling action's speed.
 If no adjacent ceiling exists the ceiling moves to 32000 units.
 
-Highest Neighbor Floor (HnF)
+**Highest Neighbor Floor (HnF)**
 
 This means that the ceiling height changes to the height of the
 highest neighboring floor, excluding the ceiling's floor itself. If
@@ -500,30 +500,30 @@ ceiling's floor, whichever is higher. If the target height is in the
 opposite direction to ceiling motion, the motion is instant,
 otherwise it occurs at the ceiling action's speed.
 
-Floor
+**Floor**
 
 The ceiling moves down until its at floor height, instantly if
 ceiling direction is up (only available with generalized types), at
 the ceiling speed if the direction is down.
 
-8 Above Floor (8aF)
+**8 Above Floor (8aF)**
 
 This means that the ceiling height changes to 8 above the height of
 the ceiling's floor. If the target height is in the opposite direction
 to ceiling motion, the motion is instant, otherwise it occurs at the
 ceiling action's speed.
 
-24 Units (24)
+**24 Units (24)**
 
 The ceiling moves 24 units in the ceiling action's direction. Instant
 motion is not possible with this linedef type.
 
-32 Units (32)
+**32 Units (32)**
 
 The ceiling moves 32 units in the ceiling action's direction. Instant
 motion is not possible with this linedef type.
 
-Shortest Upper Texture (SUT)
+**Shortest Upper Texture (SUT)**
 
 The ceiling moves the height of the shortest upper texture on the
 boundary of the sector, in the ceiling direction. Instant motion is not
@@ -562,9 +562,9 @@ other than the sector's type.
 
 Numeric model algorithm:
 
-1. Find all ceilings adjacent to the tagged ceiling at destination height
-2. Find the lowest numbered linedef separating those ceilings from that tagged
-3. The sector on the other side of that linedef is the model
+ 1. Find all ceilings adjacent to the tagged ceiling at destination height
+ 2. Find the lowest numbered linedef separating those ceilings from that tagged
+ 3. The sector on the other side of that linedef is the model
 
 A ceiling action can have the crush property (generalized types only),
 in which case players and monsters are crushed when the ceiling tries
@@ -637,20 +637,20 @@ returns to it former height.
 
 ### Section 4.1 Platform Targets
 
-Lowest Neighbor Floor
+**Lowest Neighbor Floor**
 
 This means that the platforms "low" height is the height of the
 lowest surrounding floor, including the platform itself. The "high"
 height is the original height of the floor.
 
-Next Lowest Neighbor Floor
+**Next Lowest Neighbor Floor**
 
 This means that the platforms "low" height is the height of the
 highest surrounding floor lower than the floor itself. If no lower
 floor exists, no motion occurs as the "low" and "high" heights are
 then both equal to the floors current height.
 
-Lowest Neighbor Ceiling
+**Lowest Neighbor Ceiling**
 
 This means that the platforms "low" height is the height of the
 lowest surrounding ceiling unless this is higher than the floor
@@ -658,7 +658,7 @@ itself. If no adjacent ceiling exists, or is higher than the floor no
 motion occurs as the "low" and "high" heights are then both equal to
 the floors current height.
 
-Lowest and Highest Floor
+**Lowest and Highest Floor**
 
 This target sets the "low" height to the lowest neighboring floor,
 including the floor itself, and the "high" height to the highest
@@ -668,7 +668,7 @@ triggered this type of linedef runs permanently, even if the motion
 is temporarily suspended with a Stop type. No other floor action can
 be commanded on the sector after this type is begun.
 
-Ceiling
+**Ceiling**
 
 This target sets the "high" height to the ceiling of the sector and
 the "low" height to the floor height of the sector and is only used in
@@ -676,18 +676,18 @@ the instant toggle type that switches the floor between the ceiling
 and its original height on each activation. This is also the ONLY
 instant platform type.
 
-Raise Next Floor
+**Raise Next Floor**
 
 This means that the "high" height is the lowest surrounding floor
 higher than the platform. If no higher adjacent floor exists no
 motion will occur.
 
-Raise 24 Units
+**Raise 24 Units**
 
 The "low" height is the original floor height, the "high" height is 24
 more.
 
-Raise 32 Units
+**Raise 32 Units**
 
 The "low" height is the original floor height, the "high" height is 32
 more.
@@ -852,11 +852,11 @@ heights.
 
 The rule for stair building is as follows:
 
-1) The first step to rise or fall is the tagged sector. It rises or
+1. The first step to rise or fall is the tagged sector. It rises or
 falls by the stair stepsize, at the stair speed, in the stair
 direction..
 
-2) To find the next step (sector) affected examine each two-sided
+2. To find the next step (sector) affected examine each two-sided
 linedef with first sidedef facing into the previous step in numerical
 order. For each such linedef if the sector on the other side is
 already active, or has already risen from this stair, the linedef is
@@ -870,7 +870,7 @@ the stepsize depending on the direction the stairs build, up or down.
 If the motion is in the same direction as the stairs build, it occurs
 at stair build speed, otherwise it is instant.
 
-3) Repeat step 2 until stair building ceases.
+3. Repeat step 2 until stair building ceases.
 
 ### Section 6.1 Varieties of Stair Builders
 
@@ -936,19 +936,19 @@ either switched or walkover.
 
 ### Section 7.1 Elevator Targets
 
-Next Highest Floor
+**Next Highest Floor**
 
 The elevator floor moves to the lowest adjacent floor higher than the
 elevator's floor, the ceiling staying the same height above the floor.
 If there is no higher floor the elevator doesn't move.
 
-Next Lowest Floor
+**Next Lowest Floor**
 
 The elevator floor moves to the highest adjacent floor lower than the
 current floor, the ceiling staying the same height above the floor. If
 there is no lower floor the elevator doesn't move.
 
-Current Floor
+**Current Floor**
 
 The elevator floor moves to the height of the floor on the first
 sidedef of the triggering line, the ceiling remaining the same height
@@ -983,19 +983,19 @@ types. All are switched or walkovers.
 
 ### Section 7.1 Lighting Targets
 
-Lights to Minimum Neighbor
+**Lights to Minimum Neighbor**
 
 Each tagged sector is set to the minimum light level found in any
 adjacent sector. The tagged sectors are changed in numerical order,
 and this may influence the result.
 
-Lights to Maximum Neighbor
+**Lights to Maximum Neighbor**
 
 Each tagged sector is set to the maximum light level found in any
 adjacent sector. The tagged sectors are changed in numerical order,
 and this may influence the result.
 
-Blinking
+**Blinking**
 
 Each tagged sector begins blinking between two light levels. The
 brighter level is the light level in the tagged sector. The darker
@@ -1005,11 +1005,11 @@ time of activation. The blinking is non-synchronous, beginning 1-9
 gametics after activation, with a dark period of 1 sec (35 gametics)
 and a bright period of 1/7 sec (5 gametics).
 
-35 Units
+**35 Units**
 
 Each tagged sector is set to a light level of 35 units.
 
-255 Units
+**255 Units**
 
 Each tagged sector is set to a light level of 255 units.
 
@@ -1017,7 +1017,7 @@ Each tagged sector is set to a light level of 255 units.
 
     Regular and Extended Lighting types
     -------------------------------------------------------------------
-#     Class  Trig  Target
+    #     Class  Trig  Target
 
     139   Reg    SR    35 Units
     170   Ext    S1    35 Units
@@ -1139,7 +1139,7 @@ monsters.
 
     Regular and Extended Teleport types
     -------------------------------------------------------------------
-#     Class  Trig  Silent Mon Plyr Orient    Dest
+    #     Class  Trig  Silent Mon Plyr Orient    Dest
 
     195   Ext    SR    No     Yes Yes  Set       TP thing in tagged sector
     174   Ext    S1    No     Yes Yes  Set       TP thing in tagged sector
@@ -1187,7 +1187,7 @@ walkover.
 
     Regular and Extended Donut types
     -------------------------------------------------------------------
-#     Class  Trig
+    #     Class  Trig
 
     191   Ext    SR
     9     Reg    S1
@@ -1204,17 +1204,17 @@ to the tagged sector(s). None are triggered, they simply exist.
 
  #    Class  Trig Description
 
-213   Ext --   Set Tagged Floor Lighting to Lighting on 1st Sidedef's Sector
+**213   Ext --   Set Tagged Floor Lighting to Lighting on 1st Sidedef's Sector**
 
 Used to give the floor of a sector a different light level from the
 remainder of the sector. For example bright lava in a dark room.
 
-261   Ext --   Set Tagged Ceiling Lighting to Lighting on 1st Sidedef's Sector
+**261   Ext --   Set Tagged Ceiling Lighting to Lighting on 1st Sidedef's Sector**
 
 Used to give the ceiling of a sector a different light level from the
 remainder of the sector.
 
-260   Ext --   Make Tagged Lines (or this line if tag==0) Translucent
+**260   Ext --   Make Tagged Lines (or this line if tag==0) Translucent**
 
 Used to make 2s normal textures translucent. If tag==0, then this linedef's
 normal texture is made translucent if it's 2s, and the default translucency
@@ -1227,8 +1227,8 @@ filters to be used in different parts of the same maps. If the first side's
 normal texture is not a valid translucency filter lump name, it must be a
 valid texture name, and will be displayed as such on this linedef.
 
-242   Ext --   Set Tagged Lighting, Flats Heights to 1st Sidedef's Sector,
-               and set colormap based on sidedef textures.
+**242   Ext --   Set Tagged Lighting, Flats Heights to 1st Sidedef's Sector,
+               and set colormap based on sidedef textures.**
 
 This allows the tagged sector to have two levels -- an actual floor and
 ceiling, and another floor or ceiling where more flats are rendered. Things
@@ -1352,7 +1352,7 @@ pwads.
 
 Ceiling bleeding may occur if required upper textures are not used.
 
-223   Ext --   Length Sets Friction in tagged Sector,Sludge<100, Ice>100
+**223   Ext --   Length Sets Friction in tagged Sector,Sludge<100, Ice>100**
 
 The length of the linedef with type 223 controls the amount of friction
 experienced by the player in the tagged sector, when in contact with the
@@ -1386,10 +1386,9 @@ clearing that bit.
 Constant pushers can be combined with scrolling effects and point
 pushers.
 
-224  Ext  --   Length/Direction Sets Wind Force in tagged Sectors
+**224  Ext  --   Length/Direction Sets Wind Force in tagged Sectors**
 
-
-225  Ext  --   Length/Direction Sets Current Force in tagged Sectors
+**225  Ext  --   Length/Direction Sets Current Force in tagged Sectors**
 
 ### Point pushers
 
@@ -1415,7 +1414,7 @@ in its type. If this is turned off, the effect goes away.
 Point pushers can be combined with scrolling effects and constant
 pushers.
 
-226  Ext  --   Length Sets Point Source Wind/Current Force in Tagged Sectors
+**226  Ext  --   Length Sets Point Source Wind/Current Force in Tagged Sectors**
 
 ## Section 12 Scrolling Walls, Flats, Objects
 
@@ -1431,35 +1430,31 @@ remains constant during gameplay. However, these effects can be combined
 with, and/or canceled by, other scrollers.
 
 
-250    -- Scroll Tagged Ceiling
+**250    -- Scroll Tagged Ceiling**
 
 The ceiling of the tagged sector scrolls in the direction of the linedef
 trigger, 1 unit per frame for each 32 units of linedef trigger length.
 Objects attached to the ceiling do not move.
 
-
-251    -- Scroll Tagged Floor
+**251    -- Scroll Tagged Floor**
 
 The floor of the tagged sector scrolls in the direction of the linedef
 trigger, 1 unit per frame for each 32 units of linedef trigger length.
 Objects resting on the floor do not move.
 
-
-252    -- Carry Objects on Tagged Floor
+**252    -- Carry Objects on Tagged Floor**
 
 Objects on the floor of the tagged sector move in the direction of the
 linedef trigger, 1 unit per frame for each 32 units of linedef trigger
 length. The floor itself does not scroll.
 
-
-253    -- Scroll Tagged Floor, Carry Objects
+**253    -- Scroll Tagged Floor, Carry Objects**
 
 Both the floor of the tagged sector and objects resting on that floor
 move in the direction of the linedef trigger, 1 unit per frame for each
 32 units of linedef trigger length.
 
-
-254    -- Scroll Tagged Wall, Same as Floor/Ceiling
+**254    -- Scroll Tagged Wall, Same as Floor/Ceiling**
 
 Walls with the same tag as the linedef trigger scroll at the same
 rate as a floor or ceiling controlled by one of 250-253, allowing
@@ -1470,14 +1465,13 @@ length of the component parallel to the wall sets the horizontal
 scroll rate, the length of the component perpendicular to the wall
 sets the vertical scroll rate.
 
-
 ### Simple Static Scrollers
 
 For convenience three simpler static scroll functions are provided
 for when you just need a wall to scroll and don't need to control its
 rate and don't want to bother with proportionality.
 
-255    -- Scroll Wall Using Sidedef Offsets
+**255    -- Scroll Wall Using Sidedef Offsets**
 
 For simplicity, a static scroller is provided that scrolls the first
 sidedef of a linedef, based on its x- and y- offsets. No tag is used.
@@ -1485,17 +1479,15 @@ The x offset controls the rate of horizontal scrolling, 1 unit per
 frame per x offset, and the y offset controls the rate of vertical
 scrolling, 1 unit per frame per y offset.
 
-48     -- Animated wall, Scrolls Left
+**48     -- Animated wall, Scrolls Left**
 
 A linedef with this type scrolls its first sidedef left at a
 constant rate of 1 unit per frame.
 
-85     -- Animated wall, Scrolls Right
+**85     -- Animated wall, Scrolls Right**
 
 A linedef with this type scrolls its first sidedef right at a
 constant rate of 1 unit per frame.
-
-
 
 ### Dynamic Scrolling
 
@@ -1521,39 +1513,35 @@ each unit the floor or ceiling of the controlling sector moves. If it
 is 64 long, they move 2 units per unit of relative floor/ceiling motion
 in the controlling sector and so on.
 
-245    -- Scroll Tagged Ceiling w.r.t. 1st Side's Sector
+**245    -- Scroll Tagged Ceiling w.r.t. 1st Side's Sector**
 
 The tagged sector's ceiling texture scrolls in the direction of the
 scrolling trigger line, when the sector on the trigger's first sidedef
 changes height. The amount moved is the height change times the trigger
 length, divided by 32. Objects attached to the ceiling do not move.
 
-
-246    -- Scroll Tagged Floor w.r.t. 1st Side's Sector
+**246    -- Scroll Tagged Floor w.r.t. 1st Side's Sector**
 
 The tagged sector's floor texture scrolls in the direction of the
 scrolling trigger line when the sector on the trigger's first sidedef
 changes height. The amount moved is the height change times the trigger
 length, divided by 32. Objects on the floor do not move.
 
-
-247    -- Push Objects on Tagged Floor wrt 1st Side's Sector
+**247    -- Push Objects on Tagged Floor wrt 1st Side's Sector**
 
 Objects on the tagged sector's floor move in the direction of the
 scrolling trigger line when the sector on the trigger's first sidedef
 changes height. The amount moved is the height change times the trigger
 length, divided by 32.
 
-
-248    -- Push Objects & Tagged Floor wrt 1st Side's Sector
+**248    -- Push Objects & Tagged Floor wrt 1st Side's Sector**
 
 The tagged sector's floor texture, and objects on the floor, move in
 the direction of the scrolling trigger line when the sector on the
 trigger's first sidedef changes height.  The amount moved is the height
 change times the trigger length, divided by 32.
 
-
-249    -- Scroll Tagged Wall w.r.t 1st Side's Sector
+**249    -- Scroll Tagged Wall w.r.t 1st Side's Sector**
 
 Walls with the same tag as the linedef trigger scroll at the same
 rate as a floor or ceiling controlled by one of 245-249, allowing
@@ -1565,7 +1553,6 @@ scroll displacement, the length of the component perpendicular to
 the wall sets the vertical scroll displacement. The distance scrolled
 is the controlling sector's height change times the trigger length,
 divided by 32.
-
 
 ### Accelerative Scrollers
 
@@ -1584,8 +1571,7 @@ turns the scroll effect on initially. The accelerative scroller
 would then need to be set up to cancel the static scroller's
 effect when the controlling sector's height changes.
 
-
-214    -- Accel Tagged Ceiling w.r.t. 1st Side's Sector
+**214    -- Accel Tagged Ceiling w.r.t. 1st Side's Sector**
 
 The tagged sector's ceiling's rate of scroll changes in the direction
 of the trigger linedef (use vector addition if already scrolling) by
@@ -1595,8 +1581,7 @@ if the ceiling is motionless originally, the linedef trigger is 32
 long, and the ceiling of the controlling sector moves 1 unit, the
 tagged ceiling will start scrolling at 1 unit per frame.
 
-
-215    -- Accel Tagged Floor w.r.t. 1st Side's Sector
+**215    -- Accel Tagged Floor w.r.t. 1st Side's Sector**
 
 The tagged sector's floor's rate of scroll changes in the direction of
 the trigger linedef (use vector addition if already scrolling) by the
@@ -1606,8 +1591,7 @@ the floor is motionless originally, the linedef trigger is 32 long,
 and the ceiling of the controlling sector moves 1 unit, the tagged
 floor will start scrolling at 1 unit per frame.
 
-
-216    -- Accel Objects on Tagged Floor wrt 1st Side's Sector
+**216    -- Accel Objects on Tagged Floor wrt 1st Side's Sector**
 
 Objects on the tagged sector's floor's rate of motion changes in the
 direction of the trigger linedef (use vector addition if already
@@ -1617,8 +1601,7 @@ example, if the objects are motionless originally, the linedef trigger
 is 32 long, and the ceiling of the controlling sector moves 1 unit,
 the objects on the tagged floor will start moving at 1 unit per frame.
 
-
-217    -- Accel Objects&Tagged Floor wrt 1st Side's Sector
+**217    -- Accel Objects&Tagged Floor wrt 1st Side's Sector**
 
 The tagged sector's floor, and objects on it, change its rate of
 motion in the direction of the trigger linedef (use vector addition
@@ -1629,8 +1612,7 @@ the linedef trigger is 32 long, and the ceiling of the controlling
 sector moves 1 unit, the objects and the tagged floor will start moving
 at 1 unit per frame.
 
-
-218    -- Accel Tagged Wall w.r.t 1st Side's Sector
+**218    -- Accel Tagged Wall w.r.t 1st Side's Sector**
 
 Walls with the same tag as the linedef trigger increase their
 scroll rate in sync with a floor or ceiling controlled by one of
@@ -1641,7 +1623,6 @@ the component parallel to the wall sets the change in horizontal
 scroll rate, the length of the component perpendicular to the wall
 sets the change in vertical scroll rate. The rate change is the height
 change times the trigger length, divided by 32.
-
 
 ## Section 13 Detailed Generalized Linedef Specification
 
@@ -1714,7 +1695,7 @@ exists, no change occurs. Note that in DOOM II v1.9, no model meant
 an illegal sector type was generated.
 
 
-#### generalized floors (8192 types)
+#### Generalized floors (8192 types)
 
     field   description                       NBits   Mask     Shift
     ------------------------------------------------------------------
@@ -1740,25 +1721,25 @@ an illegal sector type was generated.
 
 Notes:
 
-1. When change is nochg, model is 1 when monsters can activate trigger
-   otherwise monsters cannot activate it.
-2. The change fields mean the following:
-   nochg   - means no texture change or type change
-   zero    - means sector type is zeroed, texture copied from model
-   txtonly - means sector type unchanged, texture copied from model
-   type    - means sector type and floor texture are copied from model
-3. down/up specifies the "normal" direction for moving. If the
-   target specifies motion in the opposite direction, motion is instant.
-   Otherwise it occurs at speed specified by speed field.
-4. Speed is 1/2/4/8 units per tic
-5. If change is nonzero then model determines which sector is copied.
-   If model is 0 its the sector on the first side of the trigger.
-   if model is 1 (numeric) then the model sector is the sector at
-   destination height on the opposite side of the lowest numbered
-   two sided linedef around the tagged sector. If it doesn't exist
-   no change occurs.
+ 1. When change is nochg, model is 1 when monsters can activate trigger
+    otherwise monsters cannot activate it.
+ 2. The change fields mean the following:
+    nochg   - means no texture change or type change
+    zero    - means sector type is zeroed, texture copied from model
+    txtonly - means sector type unchanged, texture copied from model
+    type    - means sector type and floor texture are copied from model
+ 3. down/up specifies the "normal" direction for moving. If the
+    target specifies motion in the opposite direction, motion is instant.
+    Otherwise it occurs at speed specified by speed field.
+ 4. Speed is 1/2/4/8 units per tic
+ 5. If change is nonzero then model determines which sector is copied.
+    If model is 0 its the sector on the first side of the trigger.
+    if model is 1 (numeric) then the model sector is the sector at
+    destination height on the opposite side of the lowest numbered
+    two sided linedef around the tagged sector. If it doesn't exist
+    no change occurs.
 
-#### generalized ceilings (8192 types)
+#### Generalized ceilings (8192 types)
 
     field   description                        NBits   Mask     Shift
     ------------------------------------------------------------------
@@ -1784,25 +1765,25 @@ Notes:
 
 Notes:
 
-1. When change is nochg, model is 1 when monsters can activate trigger
-   otherwise monsters cannot activate it.
-2. The change fields mean the following:
-   nochg   - means no texture change or type change
-   zero    - means sector type is zeroed, texture copied from model
-   txtonly - means sector type unchanged, texture copied from model
-   type    - means sector type and ceiling texture are copied from model
-3. down/up specifies the "normal" direction for moving. If the
-   target specifies motion in the opposite direction, motion is instant.
-   Otherwise it occurs at speed specified by speed field.
-4. Speed is 1/2/4/8 units per tic
-5. If change is nonzero then model determines which sector is copied.
-   If model is 0 its the sector on the first side of the trigger.
-   if model is 1 (numeric) then the model sector is the sector at
-   destination height on the opposite side of the lowest numbered
-   two sided linedef around the tagged sector. If it doesn't exist
-   no change occurs.
+ 1. When change is nochg, model is 1 when monsters can activate trigger
+    otherwise monsters cannot activate it.
+ 2. The change fields mean the following:
+    nochg   - means no texture change or type change
+    zero    - means sector type is zeroed, texture copied from model
+    txtonly - means sector type unchanged, texture copied from model
+    type    - means sector type and ceiling texture are copied from model
+ 3. down/up specifies the "normal" direction for moving. If the
+    target specifies motion in the opposite direction, motion is instant.
+    Otherwise it occurs at speed specified by speed field.
+ 4. Speed is 1/2/4/8 units per tic
+ 5. If change is nonzero then model determines which sector is copied.
+    If model is 0 its the sector on the first side of the trigger.
+    if model is 1 (numeric) then the model sector is the sector at
+    destination height on the opposite side of the lowest numbered
+    two sided linedef around the tagged sector. If it doesn't exist
+    no change occurs.
 
-#### generalized doors (1024 types)
+#### Generalized doors (1024 types)
 
     field   description                       NBits    Mask     Shift
     ------------------------------------------------------------------
@@ -1826,13 +1807,13 @@ Notes:
 
 Notes:
 
-1. The odc (Open, Delay, Close) and cdo (Close, Delay, Open) kinds use
-   the delay field. The o (Open and Stay) and c (Close and Stay) kinds
-   do not.
-2. The precise delay timings in gametics are: 35/150/300/1050
-3. Speed is 2/4/8/16 units per tic
+ 1. The odc (Open, Delay, Close) and cdo (Close, Delay, Open) kinds use
+    the delay field. The o (Open and Stay) and c (Close and Stay) kinds
+    do not.
+ 2. The precise delay timings in gametics are: 35/150/300/1050
+ 3. Speed is 2/4/8/16 units per tic
 
-#### generalized locked doors (1024 types)
+#### Generalized locked doors (1024 types)
 
     field   description                       NBits    Mask     Shift
     ------------------------------------------------------------------
@@ -1856,15 +1837,15 @@ Notes:
 
 Notes:
 
-1. Delay for odc kind is constant at 150 gametics or about 4.333 secs
-2. The lock field allows any key to open a door, or a specific key to
-   open a door, or all keys to open a door.
-3. If the sk=ck field is 0 (n) skull and cards are different keys,
-   otherwise they are treated identically. Hence an "all" type door
-   requires 3 keys if sk=ck is 1, and 6 keys if sk=ck is 0.
-4. Speed is 2/4/8/16 units per tic
+ 1. Delay for odc kind is constant at 150 gametics or about 4.333 secs
+ 2. The lock field allows any key to open a door, or a specific key to
+    open a door, or all keys to open a door.
+ 3. If the sk=ck field is 0 (n) skull and cards are different keys,
+    otherwise they are treated identically. Hence an "all" type door
+    requires 3 keys if sk=ck is 1, and 6 keys if sk=ck is 0.
+ 4. Speed is 2/4/8/16 units per tic
 
-#### generalized lifts (1024 types)
+#### Generalized lifts (1024 types)
 
     field   description                       NBits    Mask     Shift
     -------------------------------------------------------------------
@@ -1888,16 +1869,16 @@ Notes:
 
 Notes:
 
-1. The precise delay timings in gametics are: 35/105/165/350
-2. Speed is 1/2/4/8 units per tic
-3. If the target specified is above starting floor height, or does not
-   exist the lift does not move when triggered. NnF is Next Lowest
-   Neighbor Floor.
-4. Starting a perpetual lift between lowest and highest neighboring floors
-   locks out all other floor actions on the sector, even if it is stopped
-   with the non-extended stop perpetual floor function.
+ 1. The precise delay timings in gametics are: 35/105/165/350
+ 2. Speed is 1/2/4/8 units per tic
+ 3. If the target specified is above starting floor height, or does not
+    exist the lift does not move when triggered. NnF is Next Lowest
+    Neighbor Floor.
+ 4. Starting a perpetual lift between lowest and highest neighboring floors
+    locks out all other floor actions on the sector, even if it is stopped
+    with the non-extended stop perpetual floor function.
 
-#### generalized stairs (1024 types)
+#### Generalized stairs (1024 types)
 
     field   description                       NBits    Mask     Shift
     -------------------------------------------------------------------
@@ -1922,13 +1903,13 @@ Notes:
 
 Notes:
 
-1. Speed is .25/.5/2/4 units per tic
-2. If igntxt is 1, then the staircase will not stop building when
-   a step does not have the same texture as the previous.
-3. A retriggerable stairs builds up and down alternately on each
-   trigger.
+ 1. Speed is .25/.5/2/4 units per tic
+ 2. If igntxt is 1, then the staircase will not stop building when
+    a step does not have the same texture as the previous.
+ 3. A retriggerable stairs builds up and down alternately on each
+    trigger.
 
-#### generalized crushers (128 types)
+#### Generalized crushers (128 types)
 
     field   description                       NBits    Mask     Shift
     -------------------------------------------------------------------
@@ -1951,9 +1932,8 @@ Notes:
 
 Notes:
 
-1. Speed is 1/2/4/8 units per second, faster means slower damage as usual.
-2. If silent is 1, the crusher is totally quiet, no start/stop sounds
-
+ 1. Speed is 1/2/4/8 units per second, faster means slower damage as usual.
+ 2. If silent is 1, the crusher is totally quiet, no start/stop sounds
 
 # Part II Sector Types
 
@@ -2075,8 +2055,8 @@ If you want a thing to be only available in Single play, you set both
 the "not in DM" and "not in COOP" flags. Other combinations are
 similar.
 
-"not in DM"   is bit 5, value 32, in the thing flags word.
-"not in COOP" is bit 6, value 64, in the thing flags word.
+ * "not in DM"   is bit 5, value 32, in the thing flags word.
+ * "not in COOP" is bit 6, value 64, in the thing flags word.
 
 # Part V Thing Types
 
@@ -2125,47 +2105,47 @@ replacement purposes.
     STBR126        HUD font bargraph char, partial, 1 vertical bars
     STBR127        HUD font bargraph char, empty, 0 vertical bars
 
-    DIG0         HUD font 0 char
-    DIG1         HUD font 1 char
-    DIG2         HUD font 2 char
-    DIG3         HUD font 3 char
-    DIG4         HUD font 4 char
-    DIG5         HUD font 5 char
-    DIG6         HUD font 6 char
-    DIG7         HUD font 7 char
-    DIG8         HUD font 8 char
-    DIG9         HUD font 9 char
-    DIGA         HUD font A char
-    DIGB         HUD font B char
-    DIGC         HUD font C char
-    DIGD         HUD font D char
-    DIGE         HUD font E char
-    DIGF         HUD font F char
-    DIGG         HUD font G char
-    DIGH         HUD font H char
-    DIGI         HUD font I char
-    DIGJ         HUD font J char
-    DIGK         HUD font K char
-    DIGL         HUD font L char
-    DIGM         HUD font M char
-    DIGN         HUD font N char
-    DIGO         HUD font O char
-    DIGP         HUD font P char
-    DIGQ         HUD font Q char
-    DIGR         HUD font R char
-    DIGS         HUD font S char
-    DIGT         HUD font T char
-    DIGU         HUD font U char
-    DIGV         HUD font V char
-    DIGW         HUD font W char
-    DIGX         HUD font X char
-    DIGY         HUD font Y char
-    DIGZ         HUD font Z char
-    DIG45        HUD font - char
-    DIG47        HUD font / char
-    DIG58        HUD font : char
-    DIG91        HUD font [ char
-    DIG93        HUD font ] char
+    DIG0           HUD font 0 char
+    DIG1           HUD font 1 char
+    DIG2           HUD font 2 char
+    DIG3           HUD font 3 char
+    DIG4           HUD font 4 char
+    DIG5           HUD font 5 char
+    DIG6           HUD font 6 char
+    DIG7           HUD font 7 char
+    DIG8           HUD font 8 char
+    DIG9           HUD font 9 char
+    DIGA           HUD font A char
+    DIGB           HUD font B char
+    DIGC           HUD font C char
+    DIGD           HUD font D char
+    DIGE           HUD font E char
+    DIGF           HUD font F char
+    DIGG           HUD font G char
+    DIGH           HUD font H char
+    DIGI           HUD font I char
+    DIGJ           HUD font J char
+    DIGK           HUD font K char
+    DIGL           HUD font L char
+    DIGM           HUD font M char
+    DIGN           HUD font N char
+    DIGO           HUD font O char
+    DIGP           HUD font P char
+    DIGQ           HUD font Q char
+    DIGR           HUD font R char
+    DIGS           HUD font S char
+    DIGT           HUD font T char
+    DIGU           HUD font U char
+    DIGV           HUD font V char
+    DIGW           HUD font W char
+    DIGX           HUD font X char
+    DIGY           HUD font Y char
+    DIGZ           HUD font Z char
+    DIG45          HUD font - char
+    DIG47          HUD font / char
+    DIG58          HUD font : char
+    DIG91          HUD font [ char
+    DIG93          HUD font ] char
 
 ## Status bar
 
@@ -2175,15 +2155,15 @@ replacement purposes.
 
 ## Box chars
 
-    BOXUL        Upper left corner of box
-    BOXUC        Center of upper border of box
-    BOXUR        Upper right corner of box
-    BOXCL        Center of left border of box
-    BOXCC        Center of box
-    BOXCR        Center of right border of box
-    BOXLL        Lower left corner of box
-    BOXLC        Center of lower border of box
-    BOXLR        Lower right corner of box
+    BOXUL          Upper left corner of box
+    BOXUC          Center of upper border of box
+    BOXUR          Upper right corner of box
+    BOXCL          Center of left border of box
+    BOXCC          Center of box
+    BOXCR          Center of right border of box
+    BOXLL          Lower left corner of box
+    BOXLC          Center of lower border of box
+    BOXLR          Lower right corner of box
 
 ## Lumps missing in v1.1
 
