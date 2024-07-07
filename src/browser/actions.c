@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "browser/actions.h"
 #include "browser/browser.h"
@@ -1216,4 +1217,18 @@ static void ShowHelp(void)
 const struct action help_action = {
 	KEY_F(1), 0, "Help", "Help",
 	ShowHelp,
+};
+
+static void PerformShell(void)
+{
+	if (chdir(active_pane->dir->path) != 0) {
+		return;
+	}
+
+	RunShell();
+}
+
+const struct action open_shell_action = {
+	KEY_F(4), 0, "Shell", "Command Prompt here",
+	PerformShell,
 };

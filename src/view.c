@@ -475,3 +475,29 @@ try_again:
 		              "or program exited with an error.");
 	}
 }
+
+void RunShell(void)
+{
+	bool success;
+	char *argv[3];
+
+	// Temporarily suspend curses until the subprogram returns.
+	TF_SuspendCursesMode();
+
+	TF_ClearScreen();
+	printf("Command prompt. Type 'exit' to return to WadGadget.\n\n");
+
+	argv[0] = getenv("SHELL");
+	argv[1] = NULL;
+
+	success = _spawnv(_P_WAIT, argv[0], argv) == 0;
+
+	// Restore the curses display.
+	TF_SetCursesModes();
+	RedrawScreen();
+
+	if (!success) {
+		UI_MessageBox("Failed launching shell, or shell exited\n"
+		              "with error.");
+	}
+}

@@ -206,6 +206,7 @@ static const struct action *wad_actions[] = {
 
 static const struct action *dir_actions[] = {
 	&compact_action,
+	&open_shell_action,
 	&make_wad_action,
 	&make_wad_noconv_action,
 	&mkdir_action,

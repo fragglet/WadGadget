@@ -11,3 +11,4 @@
 #include "fs/vfs.h"
 
 void OpenDirent(struct directory *dir, struct directory_entry *ent);
+void RunShell(void);
