@@ -51,8 +51,8 @@ static const struct action exit_pager_edit_action = {
 
 static const struct action *plaintext_pager_actions[] = {
 	&exit_pager_edit_action,
-	&switch_hexdump_action,
 	&exit_pager_action,
+	&switch_hexdump_action,
 	&pager_search_action,
 	&pager_search_again_action,
 	NULL,

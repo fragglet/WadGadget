@@ -108,9 +108,9 @@ const struct action open_specs_action = {
 };
 
 static const struct action *hexdump_pager_actions[] = {
+	&exit_pager_action,
 	&switch_ascii_action,
 	&change_columns_action,
-	&exit_pager_action,
 	&pager_search_action,
 	&pager_search_again_action,
 	&open_specs_action,
