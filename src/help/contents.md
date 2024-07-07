@@ -33,3 +33,4 @@
  * [Unofficial Doom Specs](uds.md)
  * [Official Hexen Specs](hexen_specs.md)
  * [Boom Reference](boomref.md)
+ * [MBF reference](mbfedit.md)

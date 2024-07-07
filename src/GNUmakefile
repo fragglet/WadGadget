@@ -28,7 +28,8 @@ HELP_FILES =                \
     help/wad_view.md        \
     help/hexen_specs.md     \
     help/uds.md             \
-    help/boomref.md
+    help/boomref.md         \
+    help/mbfedit.md
 
 OBJS =                      \
     browser/actions.o       \
