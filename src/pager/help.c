@@ -69,31 +69,46 @@ static bool IsLinkStart(const char *p)
 	return HaveSyntaxElements(p, "[", "](", ")", NULL);
 }
 
-static const char *LineHasLink(const char *p)
+static bool IterateLinks(struct help_pager_config *cfg, int *lineno, int *col,
+                         struct pager_link *link)
 {
-	char *q = strstr(p, "[");
-	if (q != NULL && IsLinkStart(q)) {
-		return p;
+	const char *line;
+
+	while (*lineno < cfg->pc.num_lines) {
+		line = cfg->lines[*lineno];
+		while (line[*col] != '\0') {
+			if (IsLinkStart(line + *col)) {
+				link->lineno = *lineno;
+				link->column = *col;
+				// Skip past link text:
+				*col = strstr(line + *col, "](") - line;
+				return true;
+			}
+			++*col;
+		}
+
+		*col = 0;
+		++*lineno;
 	}
-	return NULL;
+
+	return false;
 }
 
 static void FindLinks(struct help_pager_config *cfg)
 {
-	int i, l, num_links;
+	int lineno = 0, col = 0, linknum;
+	struct pager_link l;
+	int num_links = 0;
 
-	for (i = 0, num_links = 0; i < cfg->pc.num_lines; i++) {
-		if (LineHasLink(cfg->lines[i])) {
-			++num_links;
-		}
+	while (IterateLinks(cfg, &lineno, &col, &l)) {
+		++num_links;
 	}
 
 	cfg->links = checked_calloc(num_links, sizeof(struct help_pager_config));
-	for (i = 0, l = 0; i < cfg->pc.num_lines; i++) {
-		if (LineHasLink(cfg->lines[i])) {
-			cfg->links[l].lineno = i;
-			++l;
-		}
+	lineno = 0, col = 0, linknum = 0;
+	while (IterateLinks(cfg, &lineno, &col, &l)) {
+		cfg->links[linknum] = l;
+		++linknum;
 	}
 
 	cfg->pc.num_links = num_links;
@@ -215,19 +230,19 @@ static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 static void PerformFollowLink(void)
 {
 	struct help_pager_config *cfg = current_pager->cfg->user_data;
+	struct pager_link *curr_link;
 	const char *line, *link_middle;
 	char *filename, *anchor = NULL, *p;
-	int lineno;
 
 	if (cfg->pc.current_link < 0
 	 || cfg->pc.current_link >= cfg->pc.num_links) {
 		return;
 	}
 
-	lineno = cfg->links[cfg->pc.current_link].lineno;
-	line = cfg->lines[lineno];
+	curr_link = &cfg->links[cfg->pc.current_link];
+	line = cfg->lines[curr_link->lineno];
 
-	link_middle = strstr(line, "](");
+	link_middle = strstr(line + curr_link->column, "](");
 	if (link_middle == NULL) {
 		return;
 	}
@@ -365,7 +380,7 @@ static const char *DrawBoldText(WINDOW *win, const char *text)
 static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 {
 	struct help_pager_config *cfg = user_data;
-	int current_link_line = -1;
+	struct pager_link *curr_link = NULL;
 	const char *line, *p;
 
 	assert(lineno < cfg->pc.num_lines);
@@ -384,13 +399,15 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 
 	if (cfg->pc.current_link >= 0
 	 && cfg->pc.current_link < cfg->pc.num_links) {
-		current_link_line = cfg->links[cfg->pc.current_link].lineno;
+		curr_link = &cfg->links[cfg->pc.current_link];
 	}
 
 	for (p = line; *p != '\0'; ++p) {
 		if (IsLinkStart(p)) {
-			// Note we only allow one link per line.
-			p = DrawLink(win, p, lineno == current_link_line);
+			bool is_curr_link = curr_link != NULL
+			                 && lineno == curr_link->lineno
+			                 && (p - line) == curr_link->column;
+			p = DrawLink(win, p, is_curr_link);
 		} else if (HaveSyntaxElements(p, "**", "**", NULL)) {
 			p = DrawBoldText(win, p);
 		} else {
