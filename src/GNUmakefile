@@ -27,7 +27,8 @@ HELP_FILES =                \
     help/texture_editor.md  \
     help/wad_view.md        \
     help/hexen_specs.md     \
-    help/uds.md
+    help/uds.md             \
+    help/boomref.md
 
 OBJS =                      \
     browser/actions.o       \
