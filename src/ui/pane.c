@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#include "common.h"
 #include "ui/actions_bar.h"
 #include "ui/colors.h"
 #include "ui/pane.h"
@@ -133,6 +134,12 @@ static struct pane *GetPrevPane(struct pane *pane)
 static void InputKeyPress(int key)
 {
 	struct pane *p;
+
+	if (key == CTRL_('L')) {
+		clearok(stdscr, TRUE);
+		wrefresh(stdscr);
+		return;
+	}
 
 	UI_PaneKeypress(actions_bar, key);
 

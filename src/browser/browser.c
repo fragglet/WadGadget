@@ -304,7 +304,6 @@ static const struct action *common_actions[] = {
 	&cmdr_mode_action,
 	&swap_panes_action,
 	&search_again_action,
-	&redraw_screen_action,
 	&reload_action,
 	&mark_action,
 	&delete_no_confirm_action,

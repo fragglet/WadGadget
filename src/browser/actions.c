@@ -913,17 +913,6 @@ const struct action quit_action = {
 	PerformQuit,
 };
 
-static void RedrawScreen(void)
-{
-	clearok(stdscr, TRUE);
-	wrefresh(stdscr);
-}
-
-const struct action redraw_screen_action = {
-        0, 'L', "Redraw", "Redraw screen",
-	RedrawScreen,
-};
-
 static void PerformReload(void)
 {
 	VFS_Refresh(active_pane->dir);
