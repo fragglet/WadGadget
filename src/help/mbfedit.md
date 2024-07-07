@@ -124,9 +124,9 @@ DOGS* sprites with frames A-I (0-8).
 
 There are three new Map Object (mobj) flags in MBF:
 
-  A. FRIEND   (0x40000000)
-  B. BOUNCES  (0x20000000)
-  C. TOUCHY   (0x10000000)
+    A. FRIEND   (0x40000000)
+    B. BOUNCES  (0x20000000)
+    C. TOUCHY   (0x10000000)
 
 ### 3A. FRIEND  (0x40000000)  Mobj Flag
 
