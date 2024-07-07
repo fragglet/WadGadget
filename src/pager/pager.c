@@ -181,7 +181,7 @@ static enum line_location LinkWithinWindow(struct pager *p, int link)
 	struct pager_link l;
 	int lineno;
 
-	if (link < 0 || link >= p->cfg->num_links - 1) {
+	if (link < 0 || link >= p->cfg->num_links) {
 		return OUTSIDE_WINDOW;
 	}
 
