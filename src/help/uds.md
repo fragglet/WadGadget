@@ -107,7 +107,7 @@ write to the author at "msfell@aol.com" on the Internet.
  * [[5]](#chapter-5-graphics) Graphics
     * [[5-1]](#5-1-picture-format) Picture Format
  * [[6]](#chapter-6-flats-floor-and-ceiling-textures) Flats (Floor and Ceiling Textures)
-    * [[6-1]](#6-1-animated-flats) Animated Floors
+    * [[6-1]](#6-1-animated-flats) Animated Floors, see [[8-4-1]](#8-4-1-animated-walls)
  * [[7]](#chapter-7-sounds-and-music) Sounds and Music
     * [[7-1]](#7-1-pc-speaker-sound-effects) PC Speaker Sound Effects
     * [[7-2]](#7-2-soundcard-sound-effects) Soundcard Sound Effects
@@ -227,9 +227,7 @@ May and July like I should have. Those updates would have been numbered
 
 Here's some of the new or revised sections since the 1.3 specs:
 
- * DOOM 2 info, especially:
-   * Thing Types ([[4-2-1]](#4-2-1-thing-types))
-   * Linedef Types ([[4-3-2]](#4-3-2-linedef-types))
+ * DOOM 2 info, especially in [[4-2-1]](#4-2-1-thing-types) and [[4-3-2]](#4-3-2-linedef-types)
  * lots of info on the DOOM.EXE file in [[10]](#chapter-10-the-doomexe-file)
  * BNF style definitions in [[A-1]](#appendix-a-1-backus-naur-form-definitions-of-wad-elements)
  * DOOM engine limits in [[A-2]](#appendix-a-2-doom-engine-limits)
@@ -241,6 +239,7 @@ Here's some of the new or revised sections since the 1.3 specs:
  * changes in terminology to reflect id's where possible, and to be
    more consistent throughout
  * reformatted again, errors and typos corrected
+
 
 # CHAPTER [2]: Basics
 
@@ -411,18 +410,11 @@ numbers and variable types:
 
 There are over 2000 entries in the DOOM.WAD directory. Most of them
 can be easily described in groups, and so are not explicitly mentioned
-in this list. This includes:
-
- * sprites (see [[4-2-1]](#4-2-1-thing-types) for sprite names)
-   * see [[5]](#chapter-5-graphics) for the sprite lump naming system
- * the wall textures:
-   * TEXTURE1 and TEXTURE2 ([[8-4]](#8-4-texture1-and-texture2))
-   * PNAMES ([[8-5]](#8-5-pnames))
- * the flats (chapter [[6]](#chapter-6-flats-floor-and-ceiling-textures))
- * the sounds and songs (chapter [[7]](#chapter-7-sounds-and-music))
- * the map data lumps (chapter [[4]](#chapter-4-the-levels)).
-
-All the others are listed here.
+in this list. This includes the sprites (see [[4-2-1]](#4-2-1-thing-types) for sprite names
+and [[5]](#chapter-5-graphics) for the sprite lump naming system), the wall patches ([[8-4]](#8-4-texture1-and-texture2) and
+[[8-5]](#8-5-pnames) have more info), the flats (chapter [[6]](#chapter-6-flats-floor-and-ceiling-textures)), the sounds and songs
+(chapter [[7]](#chapter-7-sounds-and-music)), and the map data lumps (chapter [[4]](#chapter-4-the-levels)). All the others
+are listed here.
 
 There have been several changes from version to version. The "Ver"
 column indicates in which doom versions the lump exists:
