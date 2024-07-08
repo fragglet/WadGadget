@@ -460,12 +460,15 @@ bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename)
 bool P_RunHelpPager(const char *filename)
 {
 	struct help_pager_config cfg;
+	struct pager p;
 
 	if (!P_InitHelpConfig(&cfg, filename)) {
 		return false;
 	}
 
-	P_RunPager(&cfg.pc);
+	P_InitPager(&p, &cfg.pc);
+	P_RunPager(&p);
+	P_FreePager(&p);
 	P_FreeHelpConfig(&cfg);
 
 	return true;

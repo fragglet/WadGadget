@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef PAGER_HELP_H
+#define PAGER_HELP_H
+
 struct help_pager_history {
 	char *filename;
 	int window_offset, current_link;
@@ -25,3 +28,5 @@ struct help_pager_config {
 void P_FreeHelpConfig(struct help_pager_config *cfg);
 bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename);
 bool P_RunHelpPager(const char *filename);
+
+#endif  /* #ifndef PAGER_HELP_H */

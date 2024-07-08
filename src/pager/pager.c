@@ -439,23 +439,20 @@ void P_FreePager(struct pager *p)
 	free(p->last_search);
 }
 
-void P_RunPager(struct pager_config *cfg)
+void P_RunPager(struct pager *p)
 {
 	struct saved_screen ss;
 	struct pager *old_pager;
-	struct pager p;
 
 	old_pager = current_pager;
-	current_pager = &p;
+	current_pager = p;
 
 	UI_SaveScreen(&ss);
-	UI_SetTitleBar(cfg->title);
-	UI_ActionsBarSetActions(cfg->actions);
-	P_InitPager(&p, cfg);
-	UI_PaneShow(&p);
+	UI_SetTitleBar(p->cfg->title);
+	UI_ActionsBarSetActions(p->cfg->actions);
+	UI_PaneShow(p);
 	UI_RunMainLoop();
-	UI_PaneHide(&p);
-	P_FreePager(&p);
+	UI_PaneHide(p);
 	UI_RestoreScreen(&ss);
 
 	current_pager = old_pager;

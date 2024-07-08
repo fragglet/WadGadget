@@ -158,13 +158,16 @@ bool P_InitPlaintextConfig(const char *title, bool editable,
 enum plaintext_pager_result P_RunPlaintextPager(
 	const char *title, VFILE *input, bool editable)
 {
+	struct pager p;
 	struct plaintext_pager_config cfg;
 
 	if (!P_InitPlaintextConfig(title, editable, &cfg, input)) {
 		return PLAINTEXT_PAGER_FAILURE;
 	}
 
-	P_RunPager(&cfg.pc);
+	P_InitPager(&p, &cfg.pc);
+	P_RunPager(&p);
+	P_FreePager(&p);
 	if (cfg.hexdump_config != NULL) {
 		P_FreeHexdumpConfig(cfg.hexdump_config);
 	}

@@ -100,7 +100,16 @@ const struct action change_columns_action = {
 
 static void OpenDoomSpecs(void)
 {
-	P_RunHelpPager("uds.md");
+	struct hexdump_pager_config *cfg = current_pager->cfg->user_data;
+
+	if (cfg->specs_help.pc.title == NULL) {
+		if (!P_InitHelpConfig(&cfg->specs_help, "uds.md")) {
+			cfg->specs_help.pc.title = NULL;
+			return;
+		}
+		P_InitPager(&cfg->specs_pager, &cfg->specs_help.pc);
+	}
+	P_RunPager(&cfg->specs_pager);
 }
 
 const struct action open_specs_action = {
@@ -126,6 +135,7 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 	cfg->pc.actions = hexdump_pager_actions;
 	cfg->pc.get_link = NULL;
 	cfg->plaintext_config = NULL;
+	cfg->specs_help.pc.title = NULL;
 
 	cfg->data = vfreadall(input, &cfg->data_len);
 	vfclose(input);
@@ -140,17 +150,24 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 void P_FreeHexdumpConfig(struct hexdump_pager_config *cfg)
 {
 	free(cfg->data);
+	if (cfg->specs_help.pc.title != NULL) {
+		P_FreeHelpConfig(&cfg->specs_help);
+		P_FreePager(&cfg->specs_pager);
+	}
 }
 
 bool P_RunHexdumpPager(const char *title, VFILE *input)
 {
+	struct pager p;
 	struct hexdump_pager_config cfg;
 
 	if (!P_InitHexdumpConfig(title, &cfg, input)) {
 		return false;
 	}
 
-	P_RunPager(&cfg.pc);
+	P_InitPager(&p, &cfg.pc);
+	P_RunPager(&p);
+	P_FreePager(&p);
 	if (cfg.plaintext_config != NULL) {
 		P_FreePlaintextConfig(cfg.plaintext_config);
 	}
