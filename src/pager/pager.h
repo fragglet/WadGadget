@@ -34,6 +34,7 @@ struct pager_config {
 	pager_get_link_fn get_link;
 	int current_link;
 	int num_links;
+	int current_column;
 };
 
 struct pager {

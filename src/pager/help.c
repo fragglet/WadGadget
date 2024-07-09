@@ -182,6 +182,7 @@ static void SaveToHistory(struct pager *p, struct help_pager_config *cfg)
 	h->filename = checked_strdup(cfg->filename);
 	h->window_offset = p->window_offset;
 	h->current_link = cfg->pc.current_link;
+	h->current_column = cfg->pc.current_column;
 	h->next = cfg->history;
 	cfg->history = h;
 }
@@ -223,6 +224,7 @@ static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 	UnindentLines(cfg);
 	FindLinks(cfg);
 	cfg->pc.current_link = 0;
+	cfg->pc.current_column = 0;
 
 	return true;
 }
@@ -304,7 +306,7 @@ static void PerformGoBack(void)
 }
 
 static const struct action back_action = {
-	KEY_LEFT, 'B', "Back", "Back", PerformGoBack,
+	0, 'B', "Back", "Back", PerformGoBack,
 };
 
 static void OpenTableOfContents(void)

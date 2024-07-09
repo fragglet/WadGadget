@@ -173,30 +173,21 @@ const struct action pager_prev_link_action = {
 	KEY_BTAB, 0, NULL, NULL, PerformPrevLink,
 };
 
-enum line_location { OUTSIDE_WINDOW, INSIDE_WINDOW, ON_WINDOW_EDGE };
-
-static enum line_location LinkWithinWindow(struct pager *p, int link)
+static bool LinkWithinWindow(struct pager *p, int link)
 {
 	int win_h = getmaxy(p->pane.window);
 	struct pager_link l;
 	int lineno;
 
 	if (link < 0 || link >= p->cfg->num_links) {
-		return OUTSIDE_WINDOW;
+		return false;
 	}
 
 	p->cfg->get_link(p->cfg, link, &l);
 	lineno = l.lineno;
 
-	if (lineno == p->window_offset - 1
-	 || lineno == p->window_offset + win_h) {
-		return ON_WINDOW_EDGE;
-	} else if (lineno >= p->window_offset
-	        && lineno < p->window_offset + win_h) {
-		return INSIDE_WINDOW;
-	} else {
-		return OUTSIDE_WINDOW;
-	}
+	return lineno >= p->window_offset
+	    && lineno < p->window_offset + win_h;
 }
 
 // Returns index of link with largest index and line number < lineno
@@ -237,7 +228,7 @@ static void PagerMoved(struct pager *p)
 		return;
 	}
 
-	if (LinkWithinWindow(p, cfg->current_link) == INSIDE_WINDOW) {
+	if (LinkWithinWindow(p, cfg->current_link)) {
 		return;
 	}
 
@@ -253,7 +244,7 @@ static void PagerMoved(struct pager *p)
 		new_link = FindByLineno(cfg, p->window_offset + win_h - 1);
 	}
 
-	if (LinkWithinWindow(p, new_link) == INSIDE_WINDOW) {
+	if (LinkWithinWindow(p, new_link)) {
 		cfg->current_link = new_link;
 	}
 }
@@ -333,47 +324,133 @@ static void ScrollPager(struct pager *p, int dir)
 	SetWindowOffset(p, max(lineno, 0));
 }
 
-static bool MoveLinkCursor(struct pager *p, int key)
+static struct pager_link GetLink(struct pager *p, int linknum)
+{
+	struct pager_link l;
+	p->cfg->get_link(p->cfg, linknum, &l);
+	return l;
+}
+
+static void UpKeypress(struct pager *p)
 {
 	struct pager_config *cfg = p->cfg;
-	enum line_location line_loc;
-	int new_link;
+	int new_link, old_lineno, new_lineno;
 
 	if (cfg->num_links == 0) {
-		return false;
+		ScrollPager(p, -1);
+		return;
 	}
 
-	switch (key) {
-	case KEY_UP:
-		new_link = cfg->current_link - 1;
-		if (new_link < 0) {
-			return false;
-		}
-		break;
-	case KEY_DOWN:
-		new_link = cfg->current_link + 1;
-		if (new_link >= cfg->num_links) {
-			return false;
-		}
-		break;
-	default:
-		return false;
+	old_lineno = GetLink(p, cfg->current_link).lineno;
+
+	// Scan backwards through the array until we find the first
+	// link that is on a previous line.
+	new_link = cfg->current_link;
+	while (new_link > 0 && GetLink(p, new_link).lineno == old_lineno) {
+		--new_link;
 	}
 
-	// If we return true, the window will not be scrolled. If the next
-	// link is within the current window, we jump to it and do not
-	// scroll.
-	// There is one corner case: if the next link is right on the very
-	// edge of the window (one line above or below the current window,
-	// represented by ON_WINDOW_EDGE), we want to both scroll *and*
-	// move the selection to the link on the newly-revealed line.
-	line_loc = LinkWithinWindow(p, new_link);
-	if (line_loc != OUTSIDE_WINDOW) {
+	// We now know what line we're going to land on. Keep scanning
+	// back through links on the same line until we find one that's
+	// appropriate for the currently selected column.
+	new_lineno = GetLink(p, new_link).lineno;
+	while (new_link > 0
+	    && GetLink(p, new_link - 1).lineno == new_lineno
+	    && GetLink(p, new_link).column > cfg->current_column) {
+		--new_link;
+	}
+
+	// We have a new link we'd like to jump to. But if the link is not
+	// within the window, pressing up scrolls the window instead.
+	if (new_link == cfg->current_link || !LinkWithinWindow(p, new_link)) {
+		ScrollPager(p, -1);
+	}
+
+	// If we've scrolled up, the link *might* now be inside the window.
+	if (LinkWithinWindow(p, new_link)) {
 		cfg->current_link = new_link;
-		return line_loc == INSIDE_WINDOW;
+	}
+}
+
+static void DownKeypress(struct pager *p)
+{
+	struct pager_config *cfg = p->cfg;
+	int new_link, old_lineno, new_lineno;
+
+	if (cfg->num_links == 0) {
+		ScrollPager(p, 1);
+		return;
 	}
 
-	return false;
+	old_lineno = GetLink(p, cfg->current_link).lineno;
+
+	// Scan forwards through the array until we find the first
+	// link that is on a different line.
+	new_link = cfg->current_link;
+	while (new_link < cfg->num_links - 1
+	    && GetLink(p, new_link).lineno == old_lineno) {
+		++new_link;
+	}
+
+	// We now know what line we're going to land on. Keep scanning
+	// forward through links on the same line until we find one that's
+	// appropriate for the currently selected column.
+	new_lineno = GetLink(p, new_link).lineno;
+	while (new_link < cfg->num_links - 1) {
+		struct pager_link l = GetLink(p, new_link + 1);
+		if (l.lineno != new_lineno || l.column > cfg->current_column) {
+			break;
+		}
+		++new_link;
+	}
+
+	// We have a new link we'd like to jump to. But if the link is not
+	// within the window, pressing down scrolls the window instead.
+	if (new_link == cfg->current_link || !LinkWithinWindow(p, new_link)) {
+		ScrollPager(p, 1);
+	}
+
+	// If we've scrolled down, the link *might* now be inside the window.
+	if (LinkWithinWindow(p, new_link)) {
+		cfg->current_link = new_link;
+	}
+}
+
+static void LeftKeypress(struct pager *p)
+{
+	struct pager_config *cfg = p->cfg;
+	int lineno;
+
+	if (cfg->num_links == 0) {
+		return;
+	}
+
+	lineno = GetLink(p, cfg->current_link).lineno;
+	if (cfg->current_link > 0
+	 && GetLink(p, cfg->current_link - 1).lineno == lineno) {
+		--cfg->current_link;
+	}
+
+	// If we scroll up/down, we want to aim for the same column.
+	cfg->current_column = GetLink(p, cfg->current_link).column;
+}
+
+static void RightKeypress(struct pager *p)
+{
+	struct pager_config *cfg = p->cfg;
+	int lineno;
+
+	if (cfg->num_links == 0) {
+		return;
+	}
+
+	lineno = GetLink(p, cfg->current_link).lineno;
+	if (cfg->current_link < cfg->num_links - 1
+	 && GetLink(p, cfg->current_link + 1).lineno == lineno) {
+		++cfg->current_link;
+	}
+
+	cfg->current_column = GetLink(p, cfg->current_link).column;
 }
 
 static void HandleKeypress(void *_p, int c)
@@ -381,20 +458,22 @@ static void HandleKeypress(void *_p, int c)
 	struct pager *p = _p;
 	int win_h = getmaxy(p->pane.window);
 
-	if (MoveLinkCursor(p, c)) {
-		return;
-	}
-
 	switch (c) {
 	case 'q':
 	case 'Q':
 		UI_ExitMainLoop();
 		break;
 	case KEY_UP:
-		ScrollPager(p, -1);
+		UpKeypress(p);
 		break;
 	case KEY_DOWN:
-		ScrollPager(p, 1);
+		DownKeypress(p);
+		break;
+	case KEY_LEFT:
+		LeftKeypress(p);
+		break;
+	case KEY_RIGHT:
+		RightKeypress(p);
 		break;
 	case KEY_PPAGE:
 		ScrollPager(p, -win_h);
