@@ -19,6 +19,7 @@ struct hexdump_pager_config {
 	size_t data_len;
 	void *plaintext_config;
 	int columns;
+	int record_length;
 
 	// If the user presses ^U, we bring up a help pager showing the
 	// Unofficial Doom Specs; they might use the documentation from the
