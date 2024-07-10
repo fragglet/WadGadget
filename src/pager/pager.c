@@ -571,7 +571,12 @@ void P_JumpWithinWindow(struct pager *p, int lineno)
 		win_h = getmaxy(p->pane.window);
 	}
 
-	if (lineno < p->window_offset || lineno >= p->window_offset + win_h) {
+	// We need to scroll if the line is outside the window, but we
+	// also jump if the location is in the bottom half of the screen.
+	// If the line is (for example) on the last line of the screen,
+	// we want to be able to see the surrounding context.
+	if (lineno < p->window_offset
+	 || lineno >= p->window_offset + win_h / 2) {
 		P_JumpToLine(current_pager, lineno - 5);
 	}
 }
