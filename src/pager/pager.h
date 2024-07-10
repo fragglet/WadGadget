@@ -27,6 +27,7 @@ struct pager_link {
 
 struct pager_config {
 	const char *title;
+	const char *help_file;
 	pager_draw_line_fn draw_line;
 	void *user_data;
 	size_t num_lines;
@@ -59,6 +60,7 @@ void P_ClearSearch(struct pager *p);
 
 extern struct pager *current_pager;
 extern const struct action exit_pager_action;
+extern const struct action pager_help_action;
 extern const struct action pager_search_action;
 extern const struct action pager_search_again_action;
 extern const struct action pager_prev_link_action;

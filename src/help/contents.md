@@ -25,7 +25,7 @@
 ## Other Screens
 
  * Help sytem (TODO)
- * Hexdump view (TODO)
+ * [Hexdump view](hexdump.md)
  * Plaintext view (TODO)
 
 ## References

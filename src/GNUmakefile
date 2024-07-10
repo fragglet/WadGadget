@@ -29,7 +29,8 @@ HELP_FILES =                \
     help/hexen_specs.md     \
     help/uds.md             \
     help/boomref.md         \
-    help/mbfedit.md
+    help/mbfedit.md         \
+    help/hexdump.md
 
 OBJS =                      \
     browser/actions.o       \

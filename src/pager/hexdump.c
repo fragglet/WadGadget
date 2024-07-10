@@ -262,6 +262,7 @@ const struct action open_specs_action = {
 
 static const struct action *hexdump_pager_actions[] = {
 	&exit_pager_action,
+	&pager_help_action,
 	&switch_ascii_action,
 	&change_columns_action,
 	&change_record_length_action,
@@ -292,6 +293,7 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
                          VFILE *input)
 {
 	cfg->pc.title = title;
+	cfg->pc.help_file = "hexdump.md";
 	cfg->pc.draw_line = DrawHexdumpLine;
 	cfg->pc.user_data = cfg;
 	cfg->pc.actions = hexdump_pager_actions;

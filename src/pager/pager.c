@@ -14,6 +14,7 @@
 
 #include "common.h"
 #include "pager/pager.h"
+#include "pager/help.h"
 #include "ui/actions_bar.h"
 #include "ui/dialog.h"
 #include "ui/colors.h"
@@ -171,6 +172,17 @@ static void PerformPrevLink(void)
 
 const struct action pager_prev_link_action = {
 	KEY_BTAB, 0, NULL, NULL, PerformPrevLink,
+};
+
+static void PerformPagerHelpAction(void)
+{
+	struct pager_config *cfg = current_pager->cfg;
+
+	P_RunHelpPager(cfg->help_file);
+}
+
+const struct action pager_help_action = {
+	KEY_F(1), 0, "Help", "Help", PerformPagerHelpAction,
 };
 
 static bool LinkWithinWindow(struct pager *p, int link)
