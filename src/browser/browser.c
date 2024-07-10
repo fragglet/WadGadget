@@ -141,6 +141,7 @@ static void ToggleCmdrMode(void)
 	}
 	B_ActionsPaneSet(&actions_pane, actions, current_pane == 0,
 	                 use_function_keys);
+	UI_ActionsBarSetFunctionKeys(use_function_keys);
 	UI_ActionsBarSetActions(actions);
 	UI_ActionsBarEnable(true);
 	SetWindowSizes();
