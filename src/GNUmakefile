@@ -20,6 +20,7 @@ LDFLAGS := $(shell pkg-config --libs $(REQUIRED_PKGS)) \
            $(LIBSIXEL_LDFLAGS) $(NCURSES_LDFLAGS)
 
 HELP_FILES =                \
+    ../COPYING.md           \
     help/common.md          \
     help/contents.md        \
     help/dir_view.md        \

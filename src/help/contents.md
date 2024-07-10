@@ -34,3 +34,7 @@
  * [Official Hexen Specs](hexen_specs.md)
  * [Boom Reference](boomref.md)
  * [MBF reference](mbfedit.md)
+
+## Copyright
+
+ * [GNU General Public License](COPYING.md)
