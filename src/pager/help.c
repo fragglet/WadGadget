@@ -24,6 +24,7 @@
 #include "stringlib.h"
 #include "ui/actions_bar.h"
 #include "ui/dialog.h"
+#include "ui/title_bar.h"
 
 static const char *HelpFileContents(const char *filename)
 {
@@ -243,6 +244,10 @@ static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 	FindLinks(cfg);
 	cfg->pc.current_link = 0;
 	cfg->pc.current_column = 0;
+
+	if (current_pager != NULL && current_pager->cfg == &cfg->pc) {
+		UI_SetTitleBar(cfg->pc.title);
+	}
 
 	return true;
 }
