@@ -541,6 +541,7 @@ void P_RunPager(struct pager *p)
 	UI_SaveScreen(&ss);
 	UI_SetTitleBar(p->cfg->title);
 	UI_ActionsBarSetActions(p->cfg->actions);
+	UI_ActionsBarSetFunctionKeys(false);
 	UI_PaneShow(p);
 	UI_RunMainLoop();
 	UI_PaneHide(p);
