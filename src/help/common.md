@@ -1,4 +1,3 @@
-
 # Common controls
 
 This help page is a work in progress.

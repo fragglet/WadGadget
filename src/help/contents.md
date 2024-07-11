@@ -1,4 +1,3 @@
-
 # Table of Contents
 
 ## The Browser Interface

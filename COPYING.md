@@ -1,4 +1,4 @@
-### GNU GENERAL PUBLIC LICENSE
+# GNU General Public License
 
 Version 2, June 1991
 

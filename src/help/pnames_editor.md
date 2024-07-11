@@ -1,4 +1,3 @@
-
 # PNAMES editor
 
 The PNAMES lump lists all patch names to be used within TEXTURE lumps. If a

@@ -1,4 +1,3 @@
-
 # Directory view
 
 The directory view shows a particular directory (folder) on the filesystem.

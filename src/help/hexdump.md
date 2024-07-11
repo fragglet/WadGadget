@@ -1,4 +1,3 @@
-
 # Hexdump view
 
 The hexdump view allows the raw bytes of files and lumps to be viewed.

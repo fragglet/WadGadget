@@ -1,4 +1,3 @@
-
 # Texture editor
 
 The TEXTURE lump defines all of the wall textures that are used within the game.

@@ -208,6 +208,23 @@ static void UnindentLines(struct help_pager_config *cfg)
 	}
 }
 
+// A level-1 heading on the first line is used to set the window title.
+static void SetTitle(struct help_pager_config *cfg)
+{
+	if (cfg->pc.num_lines < 1
+	 || !StringHasPrefix(cfg->lines[0], "# ")) {
+		cfg->pc.title = checked_strdup("WadGadget Help");
+		return;
+	}
+
+	cfg->pc.title =
+		StringJoin(": ", "WadGadget Help", cfg->lines[0] + 2, NULL);
+	free(cfg->lines[0]);
+	memmove(cfg->lines, cfg->lines + 1,
+	        (cfg->pc.num_lines - 1) * sizeof(char *));
+	--cfg->pc.num_lines;
+}
+
 static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 {
 	const char *contents = HelpFileContents(filename);
@@ -221,6 +238,7 @@ static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 	cfg->filename = checked_strdup(filename);
 	cfg->lines = P_PlaintextLines(contents, strlen(contents),
 	                              &cfg->pc.num_lines);
+	SetTitle(cfg);
 	UnindentLines(cfg);
 	FindLinks(cfg);
 	cfg->pc.current_link = 0;
@@ -444,7 +462,7 @@ static void HelpPagerGetLink(struct pager_config *_cfg, int idx,
 
 bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename)
 {
-	cfg->pc.title = "WadGadget help";
+	cfg->pc.title = NULL;
 	cfg->pc.draw_line = DrawHelpLine;
 	cfg->pc.get_link = HelpPagerGetLink;
 	cfg->pc.user_data = cfg;
