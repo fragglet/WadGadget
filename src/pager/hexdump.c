@@ -151,6 +151,11 @@ static int PagerWidth(struct hexdump_pager_config *cfg)
 	return result;
 }
 
+static void UpdateLineCount(struct hexdump_pager_config *cfg)
+{
+	cfg->pc.num_lines = (cfg->data_len + cfg->columns - 1) / cfg->columns;
+}
+
 static void SetDefaultColumns(struct hexdump_pager_config *cfg)
 {
 	cfg->columns = 256;
@@ -163,6 +168,7 @@ static void SetColumns(struct hexdump_pager_config *cfg)
 {
 	if (cfg->record_length == 0) {
 		SetDefaultColumns(cfg);
+		UpdateLineCount(cfg);
 		return;
 	}
 
@@ -210,7 +216,7 @@ static void ChangeRecordLength(void)
 	current_pager->window_offset =
 		current_pager->window_offset * old_cols / cfg->columns;
 
-	cfg->pc.num_lines = (cfg->data_len + cfg->columns - 1) / cfg->columns;
+	UpdateLineCount(cfg);
 }
 
 const struct action change_record_length_action = {
@@ -240,7 +246,7 @@ static void ChangeColumns(void)
 		current_pager->window_offset * cfg->columns / cols;
 
 	cfg->columns = cols;
-	cfg->pc.num_lines = (cfg->data_len + cols - 1) / cols;
+	UpdateLineCount(cfg);
 }
 
 const struct action change_columns_action = {
@@ -312,7 +318,6 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 	SetBytesPerRecord(cfg, title);
 	SetColumns(cfg);
 
-	cfg->pc.num_lines = (cfg->data_len + cfg->columns - 1) / cfg->columns;
 	cfg->pc.num_links = 0;
 	cfg->pc.current_link = -1;
 	cfg->pc.current_column = 0;
