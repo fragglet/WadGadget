@@ -63,6 +63,11 @@ static void PrintRecordNumber(struct hexdump_pager_config *cfg, WINDOW *win,
 		return;
 	}
 
+	// Only show at first line of record.
+	if ((line * cfg->columns) % cfg->record_length != 0) {
+		return;
+	}
+
 	record = (line * cfg->columns) / cfg->record_length;
 	snprintf(buf, sizeof(buf), "#%d", record);
 
