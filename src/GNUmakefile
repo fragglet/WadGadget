@@ -28,6 +28,7 @@ HELP_FILES =                \
     help/texture_editor.md  \
     help/wad_view.md        \
     help/hexen_specs.md     \
+    help/help.md            \
     help/uds.md             \
     help/boomref.md         \
     help/mbfedit.md         \

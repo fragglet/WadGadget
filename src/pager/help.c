@@ -336,6 +336,10 @@ static void OpenTableOfContents(void)
 {
 	struct help_pager_config *cfg = current_pager->cfg->user_data;
 
+	if (!strcmp(cfg->filename, "contents.md")) {
+		return;
+	}
+
 	SaveToHistory(current_pager, cfg);
 	OpenHelpFile(cfg, "contents.md");
 	current_pager->window_offset = 0;
@@ -346,9 +350,27 @@ static const struct action toc_action = {
 	0, 'T', "Contents", "Table of Contents", OpenTableOfContents,
 };
 
+static void OpenHelpOnHelp(void)
+{
+	struct help_pager_config *cfg = current_pager->cfg->user_data;
+
+	if (!strcmp(cfg->filename, "help.md")) {
+		return;
+	}
+
+	SaveToHistory(current_pager, cfg);
+	OpenHelpFile(cfg, "help.md");
+	current_pager->window_offset = 0;
+	current_pager->search_line = -1;
+}
+
+static const struct action help_on_help_action = {
+	KEY_F(1), 'H', "Help", "Help", OpenHelpOnHelp,
+};
 
 static const struct action *help_pager_actions[] = {
 	&exit_pager_action,
+	&help_on_help_action,
 	&back_action,
 	&pager_prev_link_action,
 	&pager_next_link_action,
