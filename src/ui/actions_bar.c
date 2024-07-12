@@ -297,6 +297,7 @@ const struct action **UI_ActionsBarSetActions(const struct action **actions)
 void UI_ActionsBarSetFunctionKeys(bool function_keys)
 {
 	actions_bar_singleton.function_keys = function_keys;
+	actions_bar_singleton.last_width = -1;
 }
 
 bool UI_ActionsBarEnable(bool enabled)
