@@ -14,6 +14,7 @@
 
 #include "common.h"
 #include "fs/vfile.h"
+#include "palette/palette.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
 #include "conv/vpng.h"
@@ -144,7 +145,7 @@ VFILE *V_ColormapToImageFile(VFILE *input)
 	hdr.height = buf_len / 256;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = V_WritePalettizedPNG(&hdr, buf, doom_palette, false);
+	result = V_WritePalettizedPNG(&hdr, buf, &doom_palette, false);
 
 fail:
 	free(buf);
@@ -173,7 +174,7 @@ VFILE *V_ColormapFromImageFile(VFILE *input)
 		goto fail;
 	}
 
-	palettized = V_PalettizeRGBABuffer(doom_palette, imgbuf, rowstep,
+	palettized = V_PalettizeRGBABuffer(&doom_palette, imgbuf, rowstep,
 	                                   hdr.width, hdr.height);
 	result = vfopenmem(NULL, 0);
 	assert(vfwrite(palettized, hdr.width,

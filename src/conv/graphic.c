@@ -14,6 +14,7 @@
 
 #include "common.h"
 #include "fs/vfile.h"
+#include "palette/palette.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
 #include "conv/vpng.h"
@@ -47,7 +48,7 @@ static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
 	uint8_t *palettized, *post, alpha;
 	int x, y, post_len;
 
-	palettized = V_PalettizeRGBABuffer(doom_palette, buffer, rowstep,
+	palettized = V_PalettizeRGBABuffer(&doom_palette, buffer, rowstep,
 	                                   hdr->width, hdr->height);
 
 	result = vfopenmem(NULL, 0);
@@ -138,7 +139,7 @@ static VFILE *BufferToRaw(uint8_t *imgbuf, int rowstep,
 	VFILE *result = vfopenmem(NULL, 0);
 
 	palettized = V_PalettizeRGBABuffer(
-		doom_palette, imgbuf, rowstep, hdr->width, hdr->height);
+		&doom_palette, imgbuf, rowstep, hdr->width, hdr->height);
 	assert(vfwrite(palettized, hdr->width,
 	               hdr->height, result) == hdr->height);
 	free(palettized);
@@ -283,7 +284,7 @@ VFILE *V_ToImageFile(VFILE *input)
 		goto fail;
 	}
 
-	result = V_WritePalettizedPNG(&hdr, imgbuf, doom_palette, true);
+	result = V_WritePalettizedPNG(&hdr, imgbuf, &doom_palette, true);
 
 fail:
 	free(imgbuf);
@@ -312,7 +313,7 @@ VFILE *V_FlatToImageFile(VFILE *input)
 	hdr.height = buf_len / 64;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = V_WritePalettizedPNG(&hdr, buf, doom_palette, false);
+	result = V_WritePalettizedPNG(&hdr, buf, &doom_palette, false);
 
 fail:
 	free(buf);
@@ -336,13 +337,13 @@ VFILE *V_FullscreenToImageFile(VFILE *input)
 	hdr.height = FULLSCREEN_H;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = V_WritePalettizedPNG(&hdr, buf, doom_palette, false);
+	result = V_WritePalettizedPNG(&hdr, buf, &doom_palette, false);
 	free(buf);
 
 	return result;
 }
 
-static void ReadHiresPalette(uint8_t *buf, png_color *palette)
+static void ReadHiresPalette(uint8_t *buf, struct palette *palette)
 {
 	unsigned int i, r, g, b;
 
@@ -350,13 +351,13 @@ static void ReadHiresPalette(uint8_t *buf, png_color *palette)
 		r = buf[i * 3];
 		g = buf[i * 3 + 1];
 		b = buf[i * 3 + 2];
-		palette[i].red = (r << 2) | (r >> 4);
-		palette[i].green = (g << 2) | (g >> 4);
-		palette[i].blue = (b << 2) | (b >> 4);
+		palette->entries[i].r = (r << 2) | (r >> 4);
+		palette->entries[i].g = (g << 2) | (g >> 4);
+		palette->entries[i].b = (b << 2) | (b >> 4);
 	}
 }
 
-static uint8_t *PlanarToFlat(void *src, png_color *palette)
+static uint8_t *PlanarToFlat(void *src, struct palette *palette)
 {
 	const uint8_t *srcptrs[4];
 	uint8_t srcbits[4], *dest, *result;
@@ -401,7 +402,7 @@ VFILE *V_HiresToImageFile(VFILE *input)
 	VFILE *result;
 	uint8_t *lump, *screenbuf;
 	size_t lump_len;
-	png_color palette[16];
+	struct palette palette;
 	struct patch_header hdr;
 
 	lump = vfreadall(input, &lump_len);
@@ -413,12 +414,12 @@ VFILE *V_HiresToImageFile(VFILE *input)
 		return NULL;
 	}
 
-	ReadHiresPalette(lump, palette);
-	screenbuf = PlanarToFlat(lump + 3 * 16, palette);
+	ReadHiresPalette(lump, &palette);
+	screenbuf = PlanarToFlat(lump + 3 * 16, &palette);
 
 	hdr.width = HIRES_SCREEN_W;
 	hdr.height = HIRES_SCREEN_H;
-	result = V_WritePalettizedPNG(&hdr, screenbuf, palette, false);
+	result = V_WritePalettizedPNG(&hdr, screenbuf, &palette, false);
 
 	free(screenbuf);
 	free(lump);

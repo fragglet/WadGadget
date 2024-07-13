@@ -18,9 +18,9 @@ struct png_context {
 	bool write;
 };
 
-extern const png_color doom_palette[256];
+extern const struct palette doom_palette;
 
-uint8_t *V_PalettizeRGBABuffer(const png_color *palette, uint8_t *buf,
+uint8_t *V_PalettizeRGBABuffer(const struct palette *palette, uint8_t *buf,
                                size_t rowstep, int width, int height);
 
 bool V_OpenPNGRead(struct png_context *ctx, VFILE *input);
@@ -29,4 +29,5 @@ void V_ClosePNG(struct png_context *ctx);
 
 uint8_t *V_ReadRGBAPNG(VFILE *input, struct patch_header *hdr, int *rowstep);
 VFILE *V_WritePalettizedPNG(struct patch_header *hdr, uint8_t *imgbuf,
-                            const png_color *palette, bool set_transparency);
+                            const struct palette *palette,
+                            bool set_transparency);

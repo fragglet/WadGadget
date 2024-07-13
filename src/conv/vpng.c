@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "fs/vfile.h"
+#include "palette/palette.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
 #include "conv/vpng.h"
@@ -30,7 +31,7 @@ struct offsets_chunk {
 static jmp_buf libpng_abort_jump;
 
 // TODO: Get palette from current WADs
-const png_color doom_palette[256] = {
+const struct palette doom_palette = {{
 	{0x00, 0x00, 0x00}, {0x1f, 0x17, 0x0b},
 	{0x17, 0x0f, 0x07}, {0x4b, 0x4b, 0x4b},
 	{0xff, 0xff, 0xff}, {0x1b, 0x1b, 0x1b},
@@ -159,7 +160,7 @@ const png_color doom_palette[256] = {
 	{0xff, 0x7b, 0xff}, {0xff, 0x00, 0xff},
 	{0xcf, 0x00, 0xcf}, {0x9f, 0x00, 0x9b},
 	{0x6f, 0x00, 0x6b}, {0xa7, 0x6b, 0x6b},
-};
+}};
 
 static void SwapOffsetsChunk(struct offsets_chunk *chunk)
 {
@@ -167,14 +168,14 @@ static void SwapOffsetsChunk(struct offsets_chunk *chunk)
 	SwapBE32(&chunk->topoffset);
 }
 
-static uint8_t FindColor(const png_color *pal, int r, int g, int b)
+static uint8_t FindColor(const struct palette *pal, int r, int g, int b)
 {
 	int diff, best_diff = INT_MAX, i, best_idx = -1;
 
 	for (i = 0; i < 256; i++) {
-		diff = (r - pal[i].red) * (r - pal[i].red)
-		     + (g - pal[i].green) * (g - pal[i].green)
-		     + (b - pal[i].blue) * (b - pal[i].blue);
+		diff = (r - pal->entries[i].r) * (r - pal->entries[i].r)
+		     + (g - pal->entries[i].g) * (g - pal->entries[i].g)
+		     + (b - pal->entries[i].b) * (b - pal->entries[i].b);
 		if (diff == 0) {
 			return i;
 		}
@@ -187,7 +188,7 @@ static uint8_t FindColor(const png_color *pal, int r, int g, int b)
 	return best_idx;
 }
 
-uint8_t *V_PalettizeRGBABuffer(const png_color *palette, uint8_t *buf,
+uint8_t *V_PalettizeRGBABuffer(const struct palette *pal, uint8_t *buf,
                                size_t rowstep, int width, int height)
 {
 	uint8_t *result, *pixel;
@@ -199,7 +200,7 @@ uint8_t *V_PalettizeRGBABuffer(const png_color *palette, uint8_t *buf,
 		for (x = 0; x < width; ++x) {
 			pixel = &buf[y * rowstep + x * 4];
 			result[y * width + x] = FindColor(
-				palette, pixel[0], pixel[1], pixel[2]);
+				pal, pixel[0], pixel[1], pixel[2]);
 		}
 	}
 
@@ -418,9 +419,25 @@ static void WriteOffsetChunk(png_structp ppng, const struct patch_header *hdr)
 	                sizeof(chunk));
 }
 
-VFILE *V_WritePalettizedPNG(struct patch_header *hdr, uint8_t *imgbuf,
-                            const png_color *palette, bool set_transparency)
+static png_color *MakePNGPalette(const struct palette *palette)
 {
+	png_color *result = checked_calloc(256, sizeof(png_color));
+	int i;
+
+	for (i = 0; i < 256; i++) {
+		result[i].red = palette->entries[i].r;
+		result[i].green = palette->entries[i].g;
+		result[i].blue = palette->entries[i].b;
+	}
+
+	return result;
+}
+
+VFILE *V_WritePalettizedPNG(struct patch_header *hdr, uint8_t *imgbuf,
+                            const struct palette *palette,
+                            bool set_transparency)
+{
+	png_color *png_pal = MakePNGPalette(palette);
 	VFILE *result = NULL;
 	uint8_t *alphabuf = NULL;
 	struct png_context ctx;
@@ -428,6 +445,7 @@ VFILE *V_WritePalettizedPNG(struct patch_header *hdr, uint8_t *imgbuf,
 
 	result = V_OpenPNGWrite(&ctx);
 	if (result == NULL) {
+		free(png_pal);
 		return NULL;
 	}
 
@@ -442,7 +460,7 @@ VFILE *V_WritePalettizedPNG(struct patch_header *hdr, uint8_t *imgbuf,
 
 		png_set_tRNS(ctx.ppng, ctx.pinfo, alphabuf, 256, NULL);
 	}
-	png_set_PLTE(ctx.ppng, ctx.pinfo, palette, 256);
+	png_set_PLTE(ctx.ppng, ctx.pinfo, png_pal, 256);
 	png_write_info(ctx.ppng, ctx.pinfo);
 	if (hdr->topoffset != 0 || hdr->leftoffset != 0) {
 		WriteOffsetChunk(ctx.ppng, hdr);
@@ -457,5 +475,6 @@ VFILE *V_WritePalettizedPNG(struct patch_header *hdr, uint8_t *imgbuf,
 	free(alphabuf);
 
 	V_ClosePNG(&ctx);
+	free(png_pal);
 	return result;
 }
