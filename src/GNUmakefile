@@ -58,6 +58,7 @@ OBJS =                      \
     pager/hexdump.o         \
     pager/pager.o           \
     pager/plaintext.o       \
+    palette/palfs.o         \
     textures/actions.o      \
     textures/bundle.o       \
     textures/config.o       \
