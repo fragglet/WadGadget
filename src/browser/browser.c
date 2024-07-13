@@ -215,7 +215,7 @@ static const struct action *dir_actions[] = {
 	NULL,
 };
 
-static const struct action *texture_actions[] = {
+static const struct action *txt_actions[] = {
 	&edit_textures_action,
 	&rearrange_action,
 	&sort_entries_action,
@@ -226,13 +226,17 @@ static const struct action *texture_actions[] = {
 	NULL,
 };
 
-static const struct action *pnames_actions[] = {
+static const struct action *pnm_actions[] = {
 	&edit_pnames_action,
 	&rearrange_action,
 	&sort_entries_action,
 	&new_pname_action,
 	&undo_action,
 	&redo_action,
+	NULL,
+};
+
+static const struct action *pal_actions[] = {
 	NULL,
 };
 
@@ -249,8 +253,12 @@ static const struct action *wad_to_dir[] = {
 	NULL,
 };
 
-static const struct action *wad_to_pnames[] = {
+static const struct action *wad_to_pnm[] = {
 	&copy_pnames_action,
+	NULL,
+};
+
+static const struct action *wad_to_pal[] = {
 	NULL,
 };
 
@@ -266,33 +274,45 @@ static const struct action *dir_to_dir[] = {
 	NULL,
 };
 
-static const struct action *dir_to_pnames[] = {
+static const struct action *dir_to_pnm[] = {
 	&import_texture_config,
 	NULL,
 };
 
-static const struct action *dir_to_textures[] = {
+static const struct action *dir_to_pal[] = {
+	NULL,
+};
+
+static const struct action *dir_to_txt[] = {
 	&import_texture_config,
 	NULL,
 };
 
-static const struct action *textures_to_dir[] = {
+static const struct action *txt_to_dir[] = {
 	&export_texture_config,
 	NULL,
 };
 
-static const struct action *textures_to_textures[] = {
+static const struct action *txt_to_txt[] = {
 	&copy_textures_action,
 	NULL,
 };
 
-static const struct action *pnames_to_pnames[] = {
+static const struct action *pnm_to_pnm[] = {
 	&copy_pnames_action,
 	NULL,
 };
 
-static const struct action *pnames_to_dir[] = {
+static const struct action *pnm_to_dir[] = {
 	&export_texture_config,
+	NULL,
+};
+
+static const struct action *pal_to_dir[] = {
+	NULL,
+};
+
+static const struct action *pal_to_wad[] = {
 	NULL,
 };
 
@@ -317,15 +337,16 @@ static const struct action *common_actions[] = {
 };
 
 static const struct action **type_actions[NUM_DIR_FILE_TYPES] = {
-	dir_actions, wad_actions, texture_actions, pnames_actions,
+	dir_actions, wad_actions, txt_actions, pnm_actions, pal_actions,
 };
 
 static const struct action
     **action_lists[NUM_DIR_FILE_TYPES][NUM_DIR_FILE_TYPES] = {
-	{dir_to_dir,      dir_to_wad, dir_to_textures,      dir_to_pnames},
-	{wad_to_dir,      wad_to_wad, no_actions,           wad_to_pnames},
-	{textures_to_dir, no_actions, textures_to_textures, no_actions},
-	{pnames_to_dir,   no_actions, no_actions,           pnames_to_pnames},
+	{dir_to_dir, dir_to_wad, dir_to_txt, dir_to_pnm, dir_to_pal},
+	{wad_to_dir, wad_to_wad, no_actions, wad_to_pnm, wad_to_pal},
+	{txt_to_dir, no_actions, txt_to_txt, no_actions, no_actions},
+	{pnm_to_dir, no_actions, no_actions, pnm_to_pnm, no_actions},
+	{pal_to_dir, pal_to_wad, no_actions, no_actions, no_actions},
 };
 
 static void AddActionList(const struct action **list, int *idx)
@@ -491,6 +512,7 @@ static bool DrawInfoPane(void *p)
 
 	case FILE_TYPE_TEXTURE_LIST:
 	case FILE_TYPE_PNAMES_LIST:
+	case FILE_TYPE_PALETTES:
 		UI_PrintMultilineString(pane->window, 1, 2, "List");
 		break;
 

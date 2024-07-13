@@ -175,7 +175,7 @@ struct directory *PAL_OpenDirectory(void)
 
 	pd->dir.directory_funcs = &palette_fs_functions;
 	VFS_InitDirectory(&pd->dir, path);
-	pd->dir.type = FILE_TYPE_DIR;
+	pd->dir.type = FILE_TYPE_PALETTES;
 	pd->inner = inner;
 
 	PaletteFSRefresh(pd, &pd->dir.entries, &pd->dir.num_entries);
