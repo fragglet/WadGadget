@@ -26,3 +26,6 @@ extern const struct palette doom_palette;
 
 struct palette_set *PAL_FromImageFile(VFILE *input);
 VFILE *PAL_ToImageFile(struct palette_set *set);
+VFILE *PAL_MarshalPaletteSet(const struct palette_set *set);
+struct palette_set *PAL_UnmarshalPaletteSet(VFILE *input);
+void PAL_FreePaletteSet(struct palette_set *set);

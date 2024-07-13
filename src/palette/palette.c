@@ -120,3 +120,68 @@ fail:
 	V_ClosePNG(&ctx);
 	return result;
 }
+
+VFILE *PAL_MarshalPaletteSet(const struct palette_set *set)
+{
+	VFILE *result = vfopenmem(NULL, 0);
+	const struct palette *pal;
+	int pal_num, color_num;
+	uint8_t c[3];
+
+	for (pal_num = 0; pal_num < set->num_palettes; ++pal_num) {
+		pal = &set->palettes[pal_num];
+		for (color_num = 0; color_num < 256; ++color_num) {
+			c[0] = pal->entries[color_num].r;
+			c[1] = pal->entries[color_num].g;
+			c[2] = pal->entries[color_num].b;
+			assert(vfwrite(c, 3, 1, result) == 1);
+		}
+	}
+
+	vfseek(result, 0, SEEK_SET);
+	return result;
+}
+
+struct palette_set *PAL_UnmarshalPaletteSet(VFILE *input)
+{
+	uint8_t *buf, *paldata;
+	size_t buf_len, num_palettes;
+	int pal_num, color_num;
+	struct palette *pal;
+	struct palette_set *result;
+
+	buf = vfreadall(input, &buf_len);
+	vfclose(input);
+
+	if (buf_len % PALETTE_SIZE != 0) {
+		ConversionError("Invalid length for palette lump: %d "
+		                "should be a multiple of %d",
+		                buf_len, PALETTE_SIZE);
+		free(buf);
+		return NULL;
+	}
+
+	num_palettes = buf_len / PALETTE_SIZE;
+
+	result = checked_calloc(1, sizeof(struct palette_set));
+	result->num_palettes = num_palettes;
+	result->palettes = checked_calloc(num_palettes, sizeof(struct palette));
+
+	for (pal_num = 0; pal_num < num_palettes; ++pal_num) {
+		pal = &result->palettes[pal_num];
+		paldata = buf + pal_num * PALETTE_SIZE;
+		for (color_num = 0; color_num < 256; ++color_num) {
+			pal->entries[color_num].r = paldata[color_num * 3];
+			pal->entries[color_num].g = paldata[color_num * 3 + 1];
+			pal->entries[color_num].b = paldata[color_num * 3 + 2];
+		}
+	}
+
+	return result;
+}
+
+void PAL_FreePaletteSet(struct palette_set *set)
+{
+	free(set->palettes);
+	free(set);
+}
