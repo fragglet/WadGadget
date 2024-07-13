@@ -12,7 +12,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
+
+#include "common.h"
 
 #ifdef _WIN32
 #define DIR_SEPARATOR "\\"
@@ -335,6 +339,39 @@ char *PathSanitize(const char *filename)
 	}
 
 	*dst = '\0';
+
+	return result;
+}
+
+// Join arguments to a full directory path, mkdir it and all parents.
+char *MakeDirectories(const char *first, ...)
+{
+	char *result = checked_strdup(first), *new_result;
+	va_list args;
+
+	va_start(args, first);
+
+	for (;;) {
+		const char *name;
+		int err;
+
+		err = mkdir(result, 0777);
+		if (err < 0 && errno != EEXIST) {
+			free(result);
+			result = NULL;
+			break;
+		}
+
+		name = va_arg(args, const char *);
+		if (name == NULL) {
+			break;
+		}
+		new_result = StringJoin("/", result, name, NULL);
+		free(result);
+		result = new_result;
+	}
+
+	va_end(args);
 
 	return result;
 }
