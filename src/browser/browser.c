@@ -478,8 +478,10 @@ static bool DrawInfoPane(void *p)
 	case FILE_TYPE_WAD:
 		UI_PrintMultilineString(pane->window, 1, 2, "File\n");
 		VFS_DescribeSize(ent, buf, false);
-		snprintf(buf2, sizeof(buf2), "Size: %sB", buf);
-		UI_PrintMultilineString(pane->window, 2, 2, buf2);
+		if (strlen(buf) > 0) {
+			snprintf(buf2, sizeof(buf2), "Size: %sB", buf);
+			UI_PrintMultilineString(pane->window, 2, 2, buf2);
+		}
 		break;
 
 	case FILE_TYPE_DIR:
