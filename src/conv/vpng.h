@@ -18,8 +18,6 @@ struct png_context {
 	bool write;
 };
 
-extern const struct palette doom_palette;
-
 uint8_t *V_PalettizeRGBABuffer(const struct palette *palette, uint8_t *buf,
                                size_t rowstep, int width, int height);
 

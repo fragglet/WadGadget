@@ -15,3 +15,5 @@ struct palette_entry {
 struct palette {
 	struct palette_entry entries[256];
 };
+
+extern const struct palette doom_palette;
