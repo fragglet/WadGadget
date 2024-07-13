@@ -313,6 +313,7 @@ static void PerformGoBack(void)
 	struct help_pager_history *h;
 
 	if (cfg->history == NULL) {
+		UI_ShowNotice("There is nothing go back to.");
 		return;
 	}
 
@@ -337,6 +338,7 @@ static void OpenTableOfContents(void)
 	struct help_pager_config *cfg = current_pager->cfg->user_data;
 
 	if (!strcmp(cfg->filename, "contents.md")) {
+		UI_ShowNotice("You are already viewing the table of contents.");
 		return;
 	}
 
@@ -355,6 +357,7 @@ static void OpenHelpOnHelp(void)
 	struct help_pager_config *cfg = current_pager->cfg->user_data;
 
 	if (!strcmp(cfg->filename, "help.md")) {
+		UI_ShowNotice("You are already viewing the help page.");
 		return;
 	}
 
