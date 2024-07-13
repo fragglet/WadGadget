@@ -493,6 +493,7 @@ void RunShell(void)
 	success = _spawnv(_P_WAIT, argv[0], argv) == 0;
 
 	// Restore the curses display.
+	TF_ClearScreen();
 	TF_SetCursesModes();
 	RedrawScreen();
 
