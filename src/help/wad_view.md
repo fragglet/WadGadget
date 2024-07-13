@@ -47,7 +47,7 @@ All [standard controls](common.md) are also supported.
    as files into that directory. The lumps will be converted to an appropriate
    file format depending on the type of lump.
    [See the table below for details](#file-formats).
- * Shift-F5 will export to files without performing any conversion (ie. .lmp
+ * **Shift-F5** will export to files without performing any conversion (ie. .lmp
    files). You can also this function to export music tracks as .mus files
    instead of converting to .mid.
  * Files can be imported back into WAD files by switching to the opposite pane
@@ -61,7 +61,7 @@ All [standard controls](common.md) are also supported.
 ## File formats
 
 Lumps are converted into the following formats when exporting from a WAD (unless
-Shift-F5 is used):
+**Shift-F5** is used):
 
     **Lump type                  File extension   File format**
     ---------------------------------------------------------------------------

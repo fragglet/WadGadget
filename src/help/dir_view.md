@@ -38,7 +38,7 @@ All [standard controls](common.md) are also supported.
    ([see the table below](#file-formats)). New lumps are always created, even if
    there are already other lumps with the same names. The horizontal line in the
    opposite pane shows where they will be inserted.
- * Use Shift-F5 to import into a WAD file without performing any file format
+ * Use **Shift-F5** to import into a WAD file without performing any file format
    conversion (ie. ignore filename, import files as raw lumps).
  * If another directory is in the opposite pane, **Copy (F5)** performs a normal
    file copy. Mark multiple files to copy multiple files, otherwise the
@@ -57,7 +57,7 @@ All [standard controls](common.md) are also supported.
 
 ## File formats
 
-File formats when importing to a WAD (unless Shift-F5 is used):
+File formats when importing to a WAD (unless **Shift-F5** is used):
 
     **Extension        Lump type                  Notes**
     ---------------------------------------------------------------------------
