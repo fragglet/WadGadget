@@ -59,6 +59,7 @@ OBJS =                      \
     pager/pager.o           \
     pager/plaintext.o       \
     palette/doom.o          \
+    palette/palette.o       \
     palette/palfs.o         \
     textures/actions.o      \
     textures/bundle.o       \

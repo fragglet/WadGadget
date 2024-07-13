@@ -16,4 +16,13 @@ struct palette {
 	struct palette_entry entries[256];
 };
 
+// A collection of palettes - ie. the decoded contents of a PLAYPAL lump.
+struct palette_set {
+	struct palette *palettes;
+	size_t num_palettes;
+};
+
 extern const struct palette doom_palette;
+
+struct palette_set *PAL_FromImageFile(VFILE *input);
+VFILE *PAL_ToImageFile(struct palette_set *set);

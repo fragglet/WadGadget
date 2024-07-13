@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "fs/vfile.h"
 #include "palette/palette.h"
 
 // TODO: Get palette from current WADs
