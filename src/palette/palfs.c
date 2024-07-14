@@ -185,6 +185,9 @@ struct directory *PAL_OpenDirectory(struct directory *previous)
 	pd->dir.directory_funcs = &palette_fs_functions;
 	VFS_InitDirectory(&pd->dir, path);
 	pd->dir.type = FILE_TYPE_PALETTES;
+	free(pd->dir.parent_name);
+	pd->dir.parent_name = StringJoin("", "Back to ",
+	                                 PathBaseName(previous->path), NULL);
 	pd->inner = inner;
 	pd->previous = previous;
 	VFS_DirectoryRef(pd->previous);
