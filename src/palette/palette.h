@@ -30,3 +30,4 @@ VFILE *PAL_MarshalPaletteSet(const struct palette_set *set);
 struct palette_set *PAL_UnmarshalPaletteSet(VFILE *input);
 void PAL_FreePaletteSet(struct palette_set *set);
 const char *PAL_GetPalettesPath(void);
+char *PAL_ReadDefaultPointer(void);

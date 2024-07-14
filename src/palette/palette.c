@@ -189,6 +189,38 @@ void PAL_FreePaletteSet(struct palette_set *set)
 	free(set);
 }
 
+static char *DefaultPointerPath(const char *dir)
+{
+	return StringJoin("/", dir, "default", NULL);
+}
+
+char *PAL_ReadDefaultPointer(void)
+{
+	const char *dir = PAL_GetPalettesPath();
+	char *path = DefaultPointerPath(dir);
+	size_t buf_len = 16;
+	char *buf = checked_calloc(buf_len, 1);
+	ssize_t result;
+
+	for (;;) {
+		result = readlink(path, buf, buf_len);
+		if (result < 0) {
+			free(buf);
+			buf = NULL;
+			break;
+		}
+		if (result < buf_len) {
+			break;
+		}
+
+		buf_len *= 2;
+		buf = checked_realloc(buf, buf_len);
+	}
+
+	free(path);
+	return buf;
+}
+
 static void WriteDoomPalette(const char *path)
 {
 	FILE *fs = fopen(path, "wb");
@@ -213,7 +245,7 @@ static bool FileExists(const char *path)
 
 static void AddDefaultPalette(const char *path)
 {
-	char *default_ptr = StringJoin("/", path, "default", NULL);
+	char *default_ptr = DefaultPointerPath(path);
 	char *doom_pal;
 
 	// Default pointer good?
@@ -237,7 +269,7 @@ static void AddDefaultPalette(const char *path)
 
 const char *PAL_GetPalettesPath(void)
 {
-	static char *result;
+	static char *result = NULL;
 	const char *home;
 
 	if (result != NULL) {

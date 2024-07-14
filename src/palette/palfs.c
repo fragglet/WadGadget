@@ -65,6 +65,7 @@ static void PaletteFSRefresh(void *dir, struct directory_entry **entries,
                              size_t *num_entries)
 {
 	struct palette_dir *pd = dir;
+	char *def_pal = PAL_ReadDefaultPointer();
 	int i;
 
 	VFS_Refresh(pd->inner);
@@ -85,6 +86,12 @@ static void PaletteFSRefresh(void *dir, struct directory_entry **entries,
 		ent->type = FILE_TYPE_FILE;
 		ent->name = checked_strdup(inner_ent->name);
 		*strstr(ent->name, ".png") = '\0';
+		if (!strcmp(inner_ent->name, def_pal)) {
+			char *old_name = ent->name;
+			ent->name = StringJoin("", old_name,
+			                       " [default]", NULL);
+			free(old_name);
+		}
 		ent->size = -1;
 		ent->serial_no = inner_ent->serial_no;
 
