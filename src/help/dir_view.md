@@ -14,7 +14,7 @@ editor for that file type.
 
     **        Enter   **  View/edit file
     **Ctrl-D          **  View hexdump of selected file
-    **Ctrl-P  F2      **  Compact selected WAD file
+    **Ctrl-T  F2      **  Compact selected WAD file
     **Ctrl-U  F3      **  Update
     **Ctrl-E  F4      **  Edit
     **Ctrl-O  F5      **  Copy or import files; [see below](#copying)

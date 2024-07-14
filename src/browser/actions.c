@@ -1075,7 +1075,7 @@ fail:
 }
 
 const struct action compact_action = {
-	KEY_F(2), 'P',  "Compact", "Compact WAD file",
+	KEY_F(2), 'T',  "Compact", "Compact WAD file",
 	PerformCompact,
 };
 

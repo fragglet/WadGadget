@@ -16,12 +16,12 @@ keys    mnemonic    type  function
 ^M      -           trm  Newline
 ^N      Next        std  Search again
 ^O  F5  {im,ex}pOrt alt  Copy / Import / Export
-^P      Pnames      nwt  Jump to PNAMES
-^P  F2  comPact     res  Compact WAD (directory view only)
+^P      Palette     res  Open Palette Manager
 ^Q      -           trm  XOFF
 ^R      Reload      std  Reload directory
 ^S      -           trm  XON
-^T      Texture     nwt  Jump to TEXTURE1
+^T      Texture     nwt  Jump to TEXTURE1 (WAD view only)
+^T  F2  compacT     res  Compact WAD (directory view only)
 ^U  F3  Update      alt  Update
 ^V  F2  moVe        alt  Move (rearrange) - also paste
 ^W      Word        std  Delete word (clear search)
