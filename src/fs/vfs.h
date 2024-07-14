@@ -74,7 +74,7 @@ struct directory_revision {
 struct directory {
 	enum file_type type;
 	const struct directory_funcs *directory_funcs;
-	bool has_parent;
+	char *parent_name;
 	bool readonly;
 	char *path;
 	int refcount;

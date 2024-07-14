@@ -81,6 +81,15 @@ void VFS_FreeEntries(struct directory *d)
 	d->num_entries = 0;
 }
 
+static char *ParentName(const char *path)
+{
+	char *parent = PathDirName(path);
+	char *result = StringJoin("", "Parent (", PathBaseName(parent),
+	                          ")", NULL);
+	free(parent);
+	return result;
+}
+
 void VFS_InitDirectory(struct directory *d, const char *path)
 {
 	// By default we assume no snapshot/undo capability. The directory
@@ -88,10 +97,10 @@ void VFS_InitDirectory(struct directory *d, const char *path)
 	// if it is supported.
 	d->curr_revision = NULL;
 	d->path = PathSanitize(path);
+	d->parent_name = ParentName(d->path);
 	d->refcount = 1;
 	d->entries = NULL;
 	d->num_entries = 0;
-	d->has_parent = true;
 }
 
 static struct directory *FindOpenDir(const char *path)
@@ -351,6 +360,7 @@ void VFS_DirectoryUnref(struct directory *dir)
 		FreeRevisionChainForward(dir->curr_revision);
 	}
 	VFS_FreeEntries(dir);
+	free(dir->parent_name);
 	free(dir->path);
 	free(dir);
 }

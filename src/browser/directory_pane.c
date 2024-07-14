@@ -23,7 +23,7 @@
 
 static int HeaderEntries(struct directory_pane *dp)
 {
-	if (dp->dir->has_parent) {
+	if (dp->dir->parent_name != NULL) {
 		return 1;
 	} else {
 		return 0;
@@ -57,10 +57,8 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	ent_idx = idx - HeaderEntries(dp);
 
 	if (ent_idx == -1) {
-		char *parent = PathDirName(dp->dir->path);
 		prefix = '^';
-		snprintf(buf, w, " Parent (%s) ", PathBaseName(parent));
-		free(parent);
+		snprintf(buf, w, " %s", dp->dir->parent_name);
 		wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
 		ent = &dp->dir->entries[ent_idx];
@@ -216,7 +214,7 @@ void B_DirectoryPaneSearch(void *p, const char *needle)
 		return;
 	}
 
-	if (dp->dir->has_parent && !strcmp(needle, "..")) {
+	if (dp->dir->parent_name != NULL && !strcmp(needle, "..")) {
 		dp->pane.selected = 0;
 		dp->pane.window_offset = 0;
 		return;
@@ -235,7 +233,7 @@ bool B_DirectoryPaneSearchAgain(void *p, const char *needle)
 	int start_index = dp->pane.selected;
 
 	if (strlen(needle) == 0
-	 || (dp->dir->has_parent && !strcmp(needle, ".."))) {
+	 || (dp->dir->parent_name != NULL && !strcmp(needle, ".."))) {
 		return false;
 	}
 

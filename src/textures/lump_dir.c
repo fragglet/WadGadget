@@ -130,7 +130,8 @@ bool TX_InitLumpDir(struct lump_dir *dir, const struct lump_dir_funcs *funcs,
 	dir->dir.entries = NULL;
 	dir->dir.num_entries = 0;
 	dir->dir.readonly = parent->readonly;
-	dir->dir.has_parent = true;
+	dir->dir.parent_name = StringJoin("", "Back to ",
+	                                  PathBaseName(parent->path), NULL);
 
 	dir->lump_dir_funcs = funcs;
 	dir->parent_dir = parent;
