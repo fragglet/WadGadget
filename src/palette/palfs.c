@@ -21,7 +21,12 @@
 
 struct palette_dir {
 	struct directory dir;
+	// The inner directory is the "backing" directory that stores the
+	// collection of palette files in the user's home dir.
 	struct directory *inner;
+	// The previous directory is the directory that the user will
+	// return to when exiting the palette view.
+	struct directory *previous;
 };
 
 static char *InnerName(const char *name)
@@ -45,8 +50,11 @@ static VFILE *PaletteFSOpen(void *dir, struct directory_entry *entry)
 static struct directory *PaletteFSOpenDir(void *dir,
                                           struct directory_entry *entry)
 {
+	struct palette_dir *pd = dir;
+
 	if (entry == VFS_PARENT_DIRECTORY) {
-		// TODO
+		VFS_DirectoryRef(pd->previous);
+		return pd->previous;
 	}
 
 	return NULL;
@@ -127,6 +135,7 @@ static void PaletteFSFree(void *dir)
 	struct palette_dir *pd = dir;
 
 	VFS_CloseDir(pd->inner);
+	VFS_DirectoryUnref(pd->previous);
 }
 
 static const struct directory_funcs palette_fs_functions = {
@@ -162,7 +171,7 @@ static const char *GetPalettesPath(void)
 	return result;
 }
 
-struct directory *PAL_OpenDirectory(void)
+struct directory *PAL_OpenDirectory(struct directory *previous)
 {
 	struct palette_dir *pd = checked_calloc(1, sizeof(struct palette_dir));
 	const char *path = GetPalettesPath();
@@ -177,6 +186,8 @@ struct directory *PAL_OpenDirectory(void)
 	VFS_InitDirectory(&pd->dir, path);
 	pd->dir.type = FILE_TYPE_PALETTES;
 	pd->inner = inner;
+	pd->previous = previous;
+	VFS_DirectoryRef(pd->previous);
 
 	PaletteFSRefresh(pd, &pd->dir.entries, &pd->dir.num_entries);
 

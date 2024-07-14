@@ -8,4 +8,4 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-struct directory *PAL_OpenDirectory(void);
+struct directory *PAL_OpenDirectory(struct directory *previous);
