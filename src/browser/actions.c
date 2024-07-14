@@ -24,6 +24,7 @@
 #include "pager/pager.h"
 #include "pager/help.h"
 #include "pager/hexdump.h"
+#include "palette/palfs.h"
 #include "stringlib.h"
 #include "ui/title_bar.h"
 #include "ui/ui.h"
@@ -1231,4 +1232,14 @@ static void PerformShell(void)
 const struct action open_shell_action = {
 	KEY_F(4), 0, "Shell", "Command Prompt here",
 	PerformShell,
+};
+
+static void OpenPalettes(void)
+{
+	NavigateNew(active_pane, PAL_OpenDirectory(active_pane->dir));
+}
+
+const struct action open_palettes_action = {
+	0, 'P', "Palettes", "Palettes",
+	OpenPalettes,
 };

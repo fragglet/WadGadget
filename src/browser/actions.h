@@ -51,6 +51,8 @@ extern const struct action compact_action;
 extern const struct action undo_action;
 extern const struct action redo_action;
 
+extern const struct action open_palettes_action;
+
 bool B_CheckReadOnly(struct directory *dir);
 
 #endif  /* #ifdef BROWSER_ACTIONS_H */

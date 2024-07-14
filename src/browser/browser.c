@@ -202,6 +202,7 @@ static const struct action *wad_actions[] = {
 	&redo_action,
 	&sort_entries_action,
 	&hexdump_action,
+	&open_palettes_action,
 	NULL,
 };
 
@@ -212,6 +213,7 @@ static const struct action *dir_actions[] = {
 	&make_wad_noconv_action,
 	&mkdir_action,
 	&hexdump_action,
+	&open_palettes_action,
 	NULL,
 };
 
