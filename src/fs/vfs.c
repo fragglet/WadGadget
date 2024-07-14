@@ -35,7 +35,7 @@ struct directory *VFS_OpenWadAsDirectory(const char *path);  // wad_dir.c
 #define TB(x) (GB(x) * 1000ULL)
 
 struct directory_entry _vfs_parent_directory = {
-	FILE_TYPE_DIR, "..",
+	FILE_TYPE_DIR, "..", 0, UINT64_MAX,
 };
 
 static struct directory *open_dirs = NULL;
@@ -91,6 +91,7 @@ void VFS_InitDirectory(struct directory *d, const char *path)
 	d->refcount = 1;
 	d->entries = NULL;
 	d->num_entries = 0;
+	d->has_parent = true;
 }
 
 static struct directory *FindOpenDir(const char *path)

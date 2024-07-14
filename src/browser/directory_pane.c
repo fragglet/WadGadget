@@ -21,11 +21,21 @@
 #include "stringlib.h"
 #include "ui/ui.h"
 
+static int HeaderEntries(struct directory_pane *dp)
+{
+	if (dp->dir->has_parent) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 static void DrawEntry(WINDOW *win, int idx, void *data)
 {
 	struct directory_pane *dp = data;
 	const struct directory_entry *ent;
 	static char buf[128];
+	int ent_idx;
 	unsigned int w;
 	int prefix = ' ';
 	char size[10] = "";
@@ -44,14 +54,16 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 		return;
 	}
 
-	if (idx == 0) {
+	ent_idx = idx - HeaderEntries(dp);
+
+	if (ent_idx == -1) {
 		char *parent = PathDirName(dp->dir->path);
 		prefix = '^';
 		snprintf(buf, w, " Parent (%s) ", PathBaseName(parent));
 		free(parent);
 		wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
-		ent = &dp->dir->entries[idx - 1];
+		ent = &dp->dir->entries[ent_idx];
 		switch (ent->type) {
 			case FILE_TYPE_DIR:
 				wattron(win, A_BOLD);
@@ -85,14 +97,14 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	}
 	if (dp->pane.active && idx == dp->pane.selected) {
 		wattron(win, A_REVERSE);
-	} else if (idx > 0 &&
+	} else if (ent_idx >= 0 &&
 	           VFS_SetHas(&dp->tagged,
-	                      dp->dir->entries[idx - 1].serial_no)) {
+	                      dp->dir->entries[ent_idx].serial_no)) {
 		wattron(win, COLOR_PAIR(PAIR_TAGGED));
 	}
 	mvwaddch(win, 0, 0, prefix);
 	waddstr(win, buf);
-	if (idx == 0) {
+	if (ent_idx == -1) {
 		mvwaddch(win, 0, 0, ACS_LLCORNER);
 		mvwaddch(win, 0, 1, ACS_HLINE);
 	} else {
@@ -112,13 +124,14 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 static unsigned int NumEntries(void *data)
 {
 	struct directory_pane *dp = data;
-	return dp->dir->num_entries + 1;
+	return dp->dir->num_entries + HeaderEntries(dp);
 }
 
 void B_DirectoryPaneReselect(struct directory_pane *p)
 {
-	if (p->pane.selected > p->dir->num_entries) {
-		p->pane.selected = p->dir->num_entries;
+	int num_entries = NumEntries(p);
+	if (p->pane.selected >= num_entries) {
+		p->pane.selected = num_entries - 1;
 	}
 }
 
@@ -129,7 +142,7 @@ void B_DirectoryPaneSelectEntry(struct directory_pane *p,
 	if (idx >= p->dir->num_entries) {
 		return;
 	}
-	UI_ListPaneSelect(&p->pane, idx + 1);
+	UI_ListPaneSelect(&p->pane, idx + HeaderEntries(p));
 }
 
 void B_DirectoryPaneSelectByName(struct directory_pane *p, const char *name)
@@ -159,7 +172,7 @@ static bool PrefixSearch(struct directory_pane *dp, const char *needle,
 	for (i = start_index; i < dp->dir->num_entries; i++) {
 		ent = &dp->dir->entries[i];
 		if (!strncasecmp(ent->name, needle, needle_len)) {
-			dp->pane.selected = i + 1;
+			dp->pane.selected = i + HeaderEntries(dp);
 			dp->pane.window_offset = dp->pane.selected >= 10 ?
 			    dp->pane.selected - 10 : 0;
 			return true;
@@ -184,7 +197,7 @@ static bool SubstringSearch(struct directory_pane *dp, const char *needle,
 		}
 		for (j = 0; j < haystack_len - needle_len + 1; j++) {
 			if (!strncasecmp(&ent->name[j], needle, needle_len)) {
-				dp->pane.selected = i + 1;
+				dp->pane.selected = i + HeaderEntries(dp);
 				dp->pane.window_offset = dp->pane.selected >= 10 ?
 				    dp->pane.selected - 10 : 0;
 				return true;
@@ -203,7 +216,7 @@ void B_DirectoryPaneSearch(void *p, const char *needle)
 		return;
 	}
 
-	if (!strcmp(needle, "..")) {
+	if (dp->dir->has_parent && !strcmp(needle, "..")) {
 		dp->pane.selected = 0;
 		dp->pane.window_offset = 0;
 		return;
@@ -221,7 +234,8 @@ bool B_DirectoryPaneSearchAgain(void *p, const char *needle)
 	struct directory_pane *dp = p;
 	int start_index = dp->pane.selected;
 
-	if (strlen(needle) == 0 || !strcmp(needle, "..")) {
+	if (strlen(needle) == 0
+	 || (dp->dir->has_parent && !strcmp(needle, ".."))) {
 		return false;
 	}
 
@@ -232,7 +246,7 @@ bool B_DirectoryPaneSearchAgain(void *p, const char *needle)
 
 int B_DirectoryPaneSelected(struct directory_pane *p)
 {
-	return UI_ListPaneSelected(&p->pane) - 1;
+	return UI_ListPaneSelected(&p->pane) - HeaderEntries(p);
 }
 
 struct file_set *B_DirectoryPaneTagged(struct directory_pane *p)

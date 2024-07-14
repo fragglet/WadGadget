@@ -199,6 +199,7 @@ struct directory *VFS_OpenRealDir(const char *path)
 	d->directory_funcs = &realdir_funcs;
 	VFS_InitDirectory(d, path);
 	d->type = FILE_TYPE_DIR;
+	d->has_parent = strcmp(path, "/") != 0;
 	if (!_RealDirRefresh(d, &d->entries, &d->num_entries)) {
 		VFS_CloseDir(d);
 		return NULL;
