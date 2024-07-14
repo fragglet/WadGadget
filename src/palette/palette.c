@@ -2,8 +2,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include "common.h"
+#include "stringlib.h"
 #include "fs/vfile.h"
 #include "palette/palette.h"
 #include "conv/graphic.h"
@@ -184,4 +187,70 @@ void PAL_FreePaletteSet(struct palette_set *set)
 {
 	free(set->palettes);
 	free(set);
+}
+
+static void WriteDoomPalette(const char *path)
+{
+	FILE *fs = fopen(path, "wb");
+	struct palette_set doom_palette_set =
+		{(struct palette *) &doom_palette, 1};
+	VFILE *out;
+	assert(fs != NULL);
+	out = vfwrapfile(fs);
+	vfcopy(PAL_ToImageFile(&doom_palette_set), out);
+	vfclose(out);
+}
+
+static bool FileExists(const char *path)
+{
+	FILE *fs = fopen(path, "rb");
+	if (fs == NULL) {
+		return false;
+	}
+	fclose(fs);
+	return true;
+}
+
+static void AddDefaultPalette(const char *path)
+{
+	char *default_ptr = StringJoin("/", path, "default", NULL);
+	char *doom_pal;
+
+	// Default pointer good?
+	if (FileExists(default_ptr)) {
+		free(default_ptr);
+		return;
+	}
+
+	// Pointer not good. We want to point it to the Doom palette file.
+	// Is it there?
+	doom_pal = StringJoin("/", path, "Doom.png", NULL);
+	if (!FileExists(doom_pal)) {
+		WriteDoomPalette(doom_pal);
+	}
+	free(doom_pal);
+
+	assert(unlink(default_ptr) == 0 || errno == ENOENT);
+	assert(symlink("Doom.png", default_ptr) == 0);
+	free(default_ptr);
+}
+
+const char *PAL_GetPalettesPath(void)
+{
+	static char *result;
+	const char *home;
+
+	if (result != NULL) {
+		return result;
+	}
+
+	home = getenv("HOME");
+	assert(home != NULL);
+
+	result = MakeDirectories(home, ".config", "WadGadget",
+	                         "Palettes", NULL);
+	assert(result != NULL);
+	AddDefaultPalette(result);
+
+	return result;
 }

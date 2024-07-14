@@ -17,6 +17,7 @@
 #include "common.h"
 #include "stringlib.h"
 
+#include "palette/palette.h"
 #include "palette/palfs.h"
 
 struct palette_dir {
@@ -153,28 +154,10 @@ static const struct directory_funcs palette_fs_functions = {
 	PaletteFSFree,
 };
 
-static const char *GetPalettesPath(void)
-{
-	static char *result;
-	const char *home;
-
-	if (result != NULL) {
-		return result;
-	}
-
-	home = getenv("HOME");
-	assert(home != NULL);
-
-	result = MakeDirectories(home, ".config", "WadGadget",
-	                         "Palettes", NULL);
-	assert(result != NULL);
-	return result;
-}
-
 struct directory *PAL_OpenDirectory(struct directory *previous)
 {
 	struct palette_dir *pd = checked_calloc(1, sizeof(struct palette_dir));
-	const char *path = GetPalettesPath();
+	const char *path = PAL_GetPalettesPath();
 	struct directory *inner;
 
 	inner = VFS_OpenDir(path);
