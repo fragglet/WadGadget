@@ -106,9 +106,20 @@ static bool PaletteFSRemove(void *dir, struct directory_entry *entry)
 	struct palette_dir *pd = dir;
 	struct directory_entry *inner_ent =
 		VFS_EntryBySerial(pd->inner, entry->serial_no);
+	char *def_pal;
+	bool is_default;
 
 	if (inner_ent == NULL) {
 		VFS_StoreError("%s: can't find inner entry", entry->name);
+		return false;
+	}
+
+	def_pal = PAL_ReadDefaultPointer();
+	is_default = !strcmp(def_pal, inner_ent->name);
+	free(def_pal);
+
+	if (is_default) {
+		VFS_StoreError("You can't delete the default palette.");
 		return false;
 	}
 
