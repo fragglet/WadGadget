@@ -32,3 +32,4 @@ void PAL_FreePaletteSet(struct palette_set *set);
 const char *PAL_GetPalettesPath(void);
 char *PAL_ReadDefaultPointer(void);
 const struct palette *PAL_DefaultPalette(void);
+void PAL_SetDefaultPointer(const char *full_name);

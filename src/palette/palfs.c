@@ -118,14 +118,23 @@ static void PaletteFSRename(void *dir, struct directory_entry *entry,
 	struct palette_dir *pd = dir;
 	struct directory_entry *inner_ent =
 		VFS_EntryBySerial(pd->inner, entry->serial_no);
-	char *full_name;
+	char *full_name, *def_pal;
+	bool is_default;
 
 	if (inner_ent == NULL) {
 		return;
 	}
 
+	def_pal = PAL_ReadDefaultPointer();
+	is_default = !strcmp(def_pal, inner_ent->name);
+	free(def_pal);
 	full_name = InnerName(new_name);
 	VFS_Rename(pd->inner, inner_ent, full_name);
+
+	if (is_default) {
+		PAL_SetDefaultPointer(full_name);
+	}
+
 	free(full_name);
 }
 

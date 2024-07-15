@@ -224,6 +224,20 @@ char *PAL_ReadDefaultPointer(void)
 	return buf;
 }
 
+static void SetDefaultPointer(const char *path, const char *full_name)
+{
+	char *default_ptr = DefaultPointerPath(path);
+
+	assert(unlink(default_ptr) == 0 || errno == ENOENT);
+	assert(symlink(full_name, default_ptr) == 0);
+	free(default_ptr);
+}
+
+void PAL_SetDefaultPointer(const char *full_name)
+{
+	SetDefaultPointer(PAL_GetPalettesPath(), full_name);
+}
+
 static void LoadDefaultPalette(void)
 {
 	const char *dir = PAL_GetPalettesPath();
@@ -278,10 +292,11 @@ static void AddDefaultPalette(const char *path)
 {
 	char *default_ptr = DefaultPointerPath(path);
 	char *doom_pal;
+	bool pointer_good;
 
-	// Default pointer good?
-	if (FileExists(default_ptr)) {
-		free(default_ptr);
+	pointer_good = FileExists(default_ptr);
+	free(default_ptr);
+	if (pointer_good) {
 		return;
 	}
 
@@ -293,9 +308,7 @@ static void AddDefaultPalette(const char *path)
 	}
 	free(doom_pal);
 
-	assert(unlink(default_ptr) == 0 || errno == ENOENT);
-	assert(symlink("Doom.png", default_ptr) == 0);
-	free(default_ptr);
+	SetDefaultPointer(path, "Doom.png");
 }
 
 const char *PAL_GetPalettesPath(void)
