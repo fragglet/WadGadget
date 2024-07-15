@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef STRINGS_H_INCLUDED
-#define STRINGS_H_INCLUDED
+#ifndef STRINGLIB_H_INCLUDED
+#define STRINGLIB_H_INCLUDED
 
 #include <stdarg.h>
 
@@ -30,5 +30,5 @@ const char *PathBaseName(const char *path);
 char *PathSanitize(const char *filename);
 char *MakeDirectories(const char *first, ...);
 
-#endif /* #ifndef STRINGS_H_INCLUDED */
+#endif /* #ifndef STRINGLIB_H_INCLUDED */
 
