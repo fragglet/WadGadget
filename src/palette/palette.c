@@ -15,6 +15,9 @@
 
 #define PALETTE_SIZE   (256 * 3)
 
+static bool default_palette_loaded = false;
+static struct palette default_palette;
+
 struct palette_set *PAL_FromImageFile(VFILE *input)
 {
 	struct png_context ctx;
@@ -219,6 +222,34 @@ char *PAL_ReadDefaultPointer(void)
 
 	free(path);
 	return buf;
+}
+
+static void LoadDefaultPalette(void)
+{
+	const char *dir = PAL_GetPalettesPath();
+	char *path = DefaultPointerPath(dir);
+	FILE *infile = fopen(path, "rb");
+	VFILE *in;
+	struct palette_set *set;
+
+	assert(infile != NULL);
+	in = vfwrapfile(infile);
+	set = PAL_FromImageFile(in);
+	free(path);
+
+	default_palette = set->palettes[0];
+	PAL_FreePaletteSet(set);
+
+	default_palette_loaded = true;
+}
+
+const struct palette *PAL_DefaultPalette(void)
+{
+	if (!default_palette_loaded) {
+		LoadDefaultPalette();
+	}
+
+	return &default_palette;
 }
 
 static void WriteDoomPalette(const char *path)

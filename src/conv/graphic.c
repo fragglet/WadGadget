@@ -43,12 +43,13 @@ static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
                                 struct patch_header *hdr)
 {
 	VFILE *result;
+	const struct palette *pal = PAL_DefaultPalette();
 	struct patch_header swapped_hdr;
 	uint32_t *column_offsets;
 	uint8_t *palettized, *post, alpha;
 	int x, y, post_len;
 
-	palettized = V_PalettizeRGBABuffer(&doom_palette, buffer, rowstep,
+	palettized = V_PalettizeRGBABuffer(pal, buffer, rowstep,
 	                                   hdr->width, hdr->height);
 
 	result = vfopenmem(NULL, 0);
@@ -139,7 +140,8 @@ static VFILE *BufferToRaw(uint8_t *imgbuf, int rowstep,
 	VFILE *result = vfopenmem(NULL, 0);
 
 	palettized = V_PalettizeRGBABuffer(
-		&doom_palette, imgbuf, rowstep, hdr->width, hdr->height);
+		PAL_DefaultPalette(), imgbuf, rowstep,
+		hdr->width, hdr->height);
 	assert(vfwrite(palettized, hdr->width,
 	               hdr->height, result) == hdr->height);
 	free(palettized);
@@ -284,7 +286,8 @@ VFILE *V_ToImageFile(VFILE *input)
 		goto fail;
 	}
 
-	result = V_WritePalettizedPNG(&hdr, imgbuf, &doom_palette, true);
+	result = V_WritePalettizedPNG(&hdr, imgbuf,
+	                              PAL_DefaultPalette(), true);
 
 fail:
 	free(imgbuf);
@@ -313,7 +316,7 @@ VFILE *V_FlatToImageFile(VFILE *input)
 	hdr.height = buf_len / 64;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = V_WritePalettizedPNG(&hdr, buf, &doom_palette, false);
+	result = V_WritePalettizedPNG(&hdr, buf, PAL_DefaultPalette(), false);
 
 fail:
 	free(buf);
@@ -337,7 +340,7 @@ VFILE *V_FullscreenToImageFile(VFILE *input)
 	hdr.height = FULLSCREEN_H;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = V_WritePalettizedPNG(&hdr, buf, &doom_palette, false);
+	result = V_WritePalettizedPNG(&hdr, buf, PAL_DefaultPalette(), false);
 	free(buf);
 
 	return result;

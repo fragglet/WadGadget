@@ -69,7 +69,7 @@ VFILE *V_ColormapToImageFile(VFILE *input)
 	hdr.height = buf_len / 256;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = V_WritePalettizedPNG(&hdr, buf, &doom_palette, false);
+	result = V_WritePalettizedPNG(&hdr, buf, PAL_DefaultPalette(), false);
 
 fail:
 	free(buf);
@@ -98,8 +98,8 @@ VFILE *V_ColormapFromImageFile(VFILE *input)
 		goto fail;
 	}
 
-	palettized = V_PalettizeRGBABuffer(&doom_palette, imgbuf, rowstep,
-	                                   hdr.width, hdr.height);
+	palettized = V_PalettizeRGBABuffer(PAL_DefaultPalette(), imgbuf,
+	                                   rowstep, hdr.width, hdr.height);
 	result = vfopenmem(NULL, 0);
 	assert(vfwrite(palettized, hdr.width,
 	               hdr.height, result) == hdr.height);
