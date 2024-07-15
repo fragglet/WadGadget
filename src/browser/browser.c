@@ -32,7 +32,7 @@
 #include "browser/directory_pane.h"
 #include "browser/browser.h"
 
-#define INFO_PANE_WIDTH 29
+#define INFO_PANE_WIDTH 30
 
 struct search_pane {
 	struct pane pane;

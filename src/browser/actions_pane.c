@@ -22,7 +22,7 @@ static const int key_ordering[] = {
 	KEY_F(1), KEY_F(2), KEY_F(3), KEY_F(4), KEY_F(5), KEY_F(6),
 	KEY_F(7), KEY_F(8), KEY_F(9), ' ', CTRL_('G'), KEY_F(10),
 	0,
-	'\t', '\r', CTRL_('D'),
+	'\t', CTRL_('D'), CTRL_('P'),
 	CTRL_('Z'), CTRL_('Y'),
 	27, CTRL_('J'),
 };
@@ -52,7 +52,7 @@ static int ShowAction(struct actions_pane *p, int y,
 	}
 
 	if (right_side && right_ok) {
-		x = 14;
+		x = 15;
 		--y;
 		result = 0;
 	} else {

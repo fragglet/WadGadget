@@ -1105,7 +1105,7 @@ static void PerformHexdump(void)
 }
 
 const struct action hexdump_action = {
-	0, 'D', "Hexdump", "| Hexdump",
+	0, 'D', "Hexdump", "Hexdump",
 	PerformHexdump
 };
 
@@ -1240,6 +1240,6 @@ static void OpenPalettes(void)
 }
 
 const struct action open_palettes_action = {
-	0, 'P', "Palettes", "Palettes",
+	0, 'P', "Palettes", "| Palettes",
 	OpenPalettes,
 };
