@@ -87,8 +87,10 @@ static void DrawHexdumpLine(WINDOW *win, unsigned int line, void *user_data)
 	char buf[12];
 	int i, b;
 
+	wattron(win, A_BOLD);
 	snprintf(buf, sizeof(buf), " %08x: ", line * cfg->columns);
 	waddstr(win, buf);
+	wattroff(win, A_BOLD);
 
 	b = line * cfg->columns;
 	for (i = 0; i < cfg->columns && b < cfg->data_len; ++i, ++b) {
