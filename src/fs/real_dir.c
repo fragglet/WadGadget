@@ -15,6 +15,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include <errno.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -117,12 +118,13 @@ static VFILE *RealDirOpen(void *_dir, struct directory_entry *entry)
 	FILE *fs;
 
 	fs = fopen(filename, "r+");
-	free(filename);
-
 	if (fs == NULL) {
+		VFS_StoreError("%s: %s", filename, strerror(errno));
+		free(filename);
 		return NULL;
 	}
 
+	free(filename);
 	return vfwrapfile(fs);
 }
 
@@ -140,6 +142,7 @@ struct directory *RealDirOpenDir(void *_dir, struct directory_entry *entry)
 	}
 
 	if (entry->type != FILE_TYPE_DIR && entry->type != FILE_TYPE_WAD) {
+		VFS_StoreError("%s: not a directory", entry->name);
 		return NULL;
 	}
 
@@ -149,23 +152,31 @@ struct directory *RealDirOpenDir(void *_dir, struct directory_entry *entry)
 	return result;
 }
 
-static void RealDirRemove(void *_dir, struct directory_entry *entry)
+static bool RealDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct directory *dir = _dir;
 	char *filename = VFS_EntryPath(dir, entry);
-	remove(filename);
+	bool result = remove(filename) == 0;
+	if (!result) {
+		VFS_StoreError("%s: %s", filename, strerror(errno));
+	}
 	free(filename);
+	return result;
 }
 
-static void RealDirRename(void *_dir, struct directory_entry *entry,
+static bool RealDirRename(void *_dir, struct directory_entry *entry,
                           const char *new_name)
 {
 	struct directory *dir = _dir;
 	char *filename = VFS_EntryPath(dir, entry);
 	char *full_new_name = StringJoin("/", dir->path, new_name, NULL);
-	rename(filename, full_new_name);
+	bool result = rename(filename, full_new_name) == 0;
+	if (!result) {
+		VFS_StoreError("%s: %s", filename, strerror(errno));
+	}
 	free(filename);
 	free(full_new_name);
+	return result;
 }
 
 static void RealDirDescribeEntries(char *buf, size_t buf_len, int cnt)

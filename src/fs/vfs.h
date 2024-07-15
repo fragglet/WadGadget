@@ -50,8 +50,8 @@ struct directory_funcs {
 	VFILE *(*open)(void *dir, struct directory_entry *entry);
 	struct directory *(*open_dir)(void *dir,
 	                              struct directory_entry *entry);
-	void (*remove)(void *dir, struct directory_entry *entry);
-	void (*rename)(void *dir, struct directory_entry *entry,
+	bool (*remove)(void *dir, struct directory_entry *entry);
+	bool (*rename)(void *dir, struct directory_entry *entry,
 	               const char *new_name);
 	bool (*need_commit)(void *dir);
 	void (*commit)(void *dir);
@@ -90,8 +90,8 @@ struct directory *VFS_OpenDirByEntry(struct directory *dir,
 
 VFILE *VFS_Open(const char *path);
 VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry);
-void VFS_Remove(struct directory *dir, struct directory_entry *entry);
-void VFS_Rename(struct directory *dir, struct directory_entry *entry,
+bool VFS_Remove(struct directory *dir, struct directory_entry *entry);
+bool VFS_Rename(struct directory *dir, struct directory_entry *entry,
                 const char *new_name);
 void VFS_CommitChanges(struct directory *dir, const char *msg, ...);
 int VFS_Refresh(struct directory *dir);
@@ -134,6 +134,9 @@ void VFS_ClearHistory(struct directory *dir);
 void VFS_InitDirectory(struct directory *d, const char *path);
 struct directory_revision *VFS_SaveRevision(struct directory *d);
 void VFS_FreeEntries(struct directory *d);
+
+void VFS_StoreError(const char *fmt, ...);
+const char *VFS_LastError(void);
 
 extern struct directory_entry _vfs_parent_directory;
 

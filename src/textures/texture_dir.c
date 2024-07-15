@@ -64,19 +64,23 @@ static VFILE *TextureDirOpen(void *dir, struct directory_entry *entry)
 	return NULL;
 }
 
-static void TextureDirRemove(void *_dir, struct directory_entry *entry)
+static bool TextureDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct texture_dir *dir = _dir;
 
 	TX_RemoveTexture(TEXTURES(dir), entry - dir->dir.dir.entries);
+	// TODO: Change asserts to failure result
+	return true;
 }
 
-static void TextureDirRename(void *_dir, struct directory_entry *entry,
+static bool TextureDirRename(void *_dir, struct directory_entry *entry,
                              const char *new_name)
 {
 	struct texture_dir *dir = _dir;
 
-	TX_RenameTexture(TEXTURES(dir), entry - dir->dir.dir.entries, new_name);
+	// TODO: Set an error message
+	return TX_RenameTexture(TEXTURES(dir), entry - dir->dir.dir.entries,
+	                        new_name);
 }
 
 static bool TextureDirNeedCommit(void *_dir)

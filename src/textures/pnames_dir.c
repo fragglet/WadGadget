@@ -57,16 +57,18 @@ static void PnamesDirRefresh(void *_dir, struct directory_entry **entries,
 	*entries = new_entries;
 }
 
-static void PnamesDirRemove(void *_dir, struct directory_entry *entry)
+static bool PnamesDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct pnames_dir *dir = _dir;
 	unsigned int idx = entry - dir->dir.dir.entries;
 
 	assert(idx < PNAMES(dir)->num_pnames);
 	TX_RemovePname(PNAMES(dir), idx);
+	// TODO: Change asserts to failure result
+	return true;
 }
 
-static void PnamesDirRename(void *_dir, struct directory_entry *entry,
+static bool PnamesDirRename(void *_dir, struct directory_entry *entry,
                             const char *new_name)
 {
 	struct pnames_dir *dir = _dir;
@@ -74,6 +76,8 @@ static void PnamesDirRename(void *_dir, struct directory_entry *entry,
 
 	assert(idx < PNAMES(dir)->num_pnames);
 	TX_RenamePname(PNAMES(dir), idx, new_name);
+	// TODO: Change asserts to failure result
+	return true;
 }
 
 static bool PnamesDirNeedCommit(void *_dir)

@@ -73,22 +73,29 @@ struct directory *WadDirOpenDir(void *_dir, struct directory_entry *entry)
 		free(path);
 		return result;
 	} else {
+		VFS_StoreError("%s: not a directory", entry->name);
 		return NULL;
 	}
 }
 
-static void WadDirRemove(void *_dir, struct directory_entry *entry)
+static bool WadDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct wad_directory *dir = _dir;
 	W_DeleteEntry(dir->wad_file, entry - dir->dir.entries);
+	// TODO: The asserts in W_DeleteEntries() can be reworked to allow a
+	// failure return value here.
+	return true;
 }
 
-static void WadDirRename(void *_dir, struct directory_entry *entry,
+static bool WadDirRename(void *_dir, struct directory_entry *entry,
                          const char *new_name)
 {
 	struct wad_directory *dir = _dir;
 	// TODO: Check new name is valid?
 	W_SetLumpName(dir->wad_file, entry - dir->dir.entries, new_name);
+	// TODO: The asserts in W_SetLumpName() can be reworked to allow a
+	// failure return value here.
+	return true;
 }
 
 static void WadDirCommit(void *_dir)

@@ -12,6 +12,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "browser/actions.h"
 #include "browser/browser.h"
@@ -224,9 +225,13 @@ static void PerformMkdir(void)
 	}
 	filename = StringJoin("/", active_pane->dir->path, input_filename,
 	                      NULL);
-	mkdir(filename, 0777);
-	VFS_Refresh(active_pane->dir);
-	B_DirectoryPaneSelectByName(active_pane, input_filename);
+	if (mkdir(filename, 0777) == 0) {
+		VFS_Refresh(active_pane->dir);
+		B_DirectoryPaneSelectByName(active_pane, input_filename);
+	} else {
+		UI_MessageBox("Failed to create directory:\n%s",
+		              strerror(errno));
+	}
 	free(input_filename);
 	free(filename);
 }
@@ -689,6 +694,7 @@ static void PerformRename(void)
 	int selected = B_DirectoryPaneSelected(active_pane);
 	char *old_name = active_pane->dir->entries[selected].name;
 	uint64_t serial_no = active_pane->dir->entries[selected].serial_no;
+	bool success;
 
 	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
@@ -709,9 +715,17 @@ static void PerformRename(void)
 	if (input_filename == NULL) {
 		return;
 	}
-	VFS_Rename(active_pane->dir, &active_pane->dir->entries[selected],
-		   input_filename);
-	VFS_CommitChanges(active_pane->dir, "rename");
+	success = VFS_Rename(active_pane->dir,
+	                     &active_pane->dir->entries[selected],
+	                     input_filename);
+	if (success) {
+		VFS_CommitChanges(active_pane->dir, "rename");
+	} else {
+		if (VFS_CanUndo(active_pane->dir)) {
+			VFS_Rollback(active_pane->dir);
+		}
+		UI_MessageBox("Rename failed:\n%s", VFS_LastError());
+	}
 	VFS_Refresh(active_pane->dir);
 	free(input_filename);
 	B_DirectoryPaneSelectBySerial(active_pane, serial_no);
@@ -726,6 +740,7 @@ static void PerformDeleteNoConfirm(void)
 {
 	struct directory *dir = active_pane->dir;
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
+	bool success = true;
 	char buf[64];
 	int i;
 
@@ -748,17 +763,24 @@ static void PerformDeleteNoConfirm(void)
 	// the way things are implemented here, we only ever delete one
 	// of each serial number. So the wrong file can end up being
 	// deleted, but we'll never delete both.
-	for (i = 0; i < tagged->num_entries; i++) {
+	for (i = 0; success && i < tagged->num_entries; i++) {
 		struct directory_entry *ent;
 		ent = VFS_EntryBySerial(dir, tagged->entries[i]);
 		if (ent == NULL) {
 			continue;
 		}
-		VFS_Remove(dir, ent);
+		success = VFS_Remove(dir, ent);
 	}
-	VFS_CommitChanges(dir, "delete of %s", buf);
-	UI_ShowNotice("%s deleted.", buf);
-	VFS_ClearSet(&active_pane->tagged);
+	if (success) {
+		VFS_CommitChanges(dir, "delete of %s", buf);
+		UI_ShowNotice("%s deleted.", buf);
+		VFS_ClearSet(&active_pane->tagged);
+	} else {
+		if (VFS_CanUndo(dir)) {
+			VFS_Rollback(dir);
+		}
+		UI_MessageBox("Delete failed:\n%s", VFS_LastError());
+	}
 	VFS_Refresh(dir);
 	B_DirectoryPaneReselect(active_pane);
 }

@@ -20,6 +20,8 @@
 #include "palette/palette.h"
 #include "palette/palfs.h"
 
+#include "ui/dialog.h"
+
 struct palette_dir {
 	struct directory dir;
 	// The inner directory is the "backing" directory that stores the
@@ -99,43 +101,46 @@ static void PaletteFSRefresh(void *dir, struct directory_entry **entries,
 	}
 }
 
-static void PaletteFSRemove(void *dir, struct directory_entry *entry)
+static bool PaletteFSRemove(void *dir, struct directory_entry *entry)
 {
 	struct palette_dir *pd = dir;
 	struct directory_entry *inner_ent =
 		VFS_EntryBySerial(pd->inner, entry->serial_no);
 
 	if (inner_ent == NULL) {
-		return;
+		VFS_StoreError("%s: can't find inner entry", entry->name);
+		return false;
 	}
 
-	VFS_Remove(pd->inner, inner_ent);
+	return VFS_Remove(pd->inner, inner_ent);
 }
 
-static void PaletteFSRename(void *dir, struct directory_entry *entry,
+static bool PaletteFSRename(void *dir, struct directory_entry *entry,
                             const char *new_name)
 {
 	struct palette_dir *pd = dir;
 	struct directory_entry *inner_ent =
 		VFS_EntryBySerial(pd->inner, entry->serial_no);
 	char *full_name, *def_pal;
-	bool is_default;
+	bool is_default, success;
 
 	if (inner_ent == NULL) {
-		return;
+		VFS_StoreError("%s: can't find inner entry", entry->name);
+		return false;
 	}
 
 	def_pal = PAL_ReadDefaultPointer();
 	is_default = !strcmp(def_pal, inner_ent->name);
 	free(def_pal);
 	full_name = InnerName(new_name);
-	VFS_Rename(pd->inner, inner_ent, full_name);
+	success = VFS_Rename(pd->inner, inner_ent, full_name);
 
-	if (is_default) {
+	if (is_default && success) {
 		PAL_SetDefaultPointer(full_name);
 	}
 
 	free(full_name);
+	return success;
 }
 
 static void PaletteFSDescribeEntries(char *buf, size_t buf_len, int cnt)

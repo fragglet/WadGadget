@@ -38,6 +38,7 @@ struct directory_entry _vfs_parent_directory = {
 	FILE_TYPE_DIR, "..", 0, UINT64_MAX,
 };
 
+static char last_error[128];
 static struct directory *open_dirs = NULL;
 
 static void FreeRevisionChainBackward(struct directory_revision *r)
@@ -311,30 +312,38 @@ int VFS_Refresh(struct directory *dir)
 	return result;
 }
 
-void VFS_Remove(struct directory *dir, struct directory_entry *entry)
+bool VFS_Remove(struct directory *dir, struct directory_entry *entry)
 {
 	unsigned int index = entry - dir->entries;
 
 	if (dir->readonly) {
-		return;
+		VFS_StoreError("VFS directory is read only.");
+		return false;
 	}
 
-	dir->directory_funcs->remove(dir, entry);
+	VFS_StoreError("");
+	if (!dir->directory_funcs->remove(dir, entry)) {
+		return false;
+	}
 
 	memmove(&dir->entries[index], &dir->entries[index + 1],
 	        (dir->num_entries - index - 1)
 	          * sizeof(struct directory_entry));
 	--dir->num_entries;
+
+	return true;
 }
 
-void VFS_Rename(struct directory *dir, struct directory_entry *entry,
+bool VFS_Rename(struct directory *dir, struct directory_entry *entry,
                 const char *new_name)
 {
 	if (dir->readonly) {
-		return;
+		VFS_StoreError("VFS directory is read only.");
+		return false;
 	}
 
-	dir->directory_funcs->rename(dir, entry, new_name);
+	VFS_StoreError("");
+	return dir->directory_funcs->rename(dir, entry, new_name);
 }
 
 void VFS_DirectoryRef(struct directory *dir)
@@ -495,6 +504,19 @@ void VFS_ClearHistory(struct directory *dir)
 	dir->curr_revision = VFS_SaveRevision(dir);
 	snprintf(dir->curr_revision->descr, VFS_REVISION_DESCR_LEN,
 	         "First revision");
+}
+
+void VFS_StoreError(const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	vsnprintf(last_error, sizeof(last_error), fmt, args);
+	va_end(args);
+}
+
+const char *VFS_LastError(void)
+{
+	return last_error;
 }
 
 #ifdef TEST
