@@ -17,6 +17,7 @@
 #include <errno.h>
 
 #include "common.h"
+#include "stringlib.h"
 
 #ifdef _WIN32
 #define DIR_SEPARATOR "\\"
