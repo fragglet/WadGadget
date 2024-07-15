@@ -72,15 +72,13 @@ static void LoadResponseFile(int *argc, char ***argv)
 	static char *replacement_argv[3];
 	char *buf;
 	size_t buf_len;
-	FILE *fs;
 	VFILE *vfs;
 
-	fs = fopen(RESPONSE_FILE_PATH, "r");
-	if (fs == NULL) {
+	vfs = vfwrapfile(fopen(RESPONSE_FILE_PATH, "r"));
+	if (vfs == NULL) {
 		return;
 	}
 
-	vfs = vfwrapfile(fs);
 	buf = vfreadall(vfs, &buf_len);
 	vfclose(vfs);
 

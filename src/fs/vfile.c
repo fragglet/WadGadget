@@ -157,6 +157,12 @@ static struct vfile_functions wrapped_io_functions = {
 
 VFILE *vfwrapfile(FILE *stream)
 {
+	// We pass through NULL as a convenience. This allows constructions
+	// like `vfwrapfile(fopen("foo", "r"))` without needing to check the
+	// result from `fopen` first.
+	if (stream == NULL) {
+		return NULL;
+	}
 	return vfopen(stream, &wrapped_io_functions);
 }
 

@@ -193,8 +193,7 @@ static void PerformExportConfig(void)
 {
 	struct file_set *selected;
 	char *filename = NULL, *filename2 = NULL;
-	VFILE *formatted, *out_wrapped;
-	FILE *out;
+	VFILE *formatted, *out;
 
 	if (active_pane->tagged.num_entries > 0) {
 		selected = &active_pane->tagged;
@@ -229,7 +228,7 @@ static void PerformExportConfig(void)
 	filename2 = StringJoin("/", other_pane->dir->path, filename, NULL);
 
 	// TODO: This should be written through VFS.
-	out = fopen(filename2, "w");
+	out = vfwrapfile(fopen(filename2, "w"));
 	if (out == NULL) {
 		UI_MessageBox("Failed to open file for write:\n%s",
 		              filename2);
@@ -237,9 +236,8 @@ static void PerformExportConfig(void)
 		goto cancel;
 	}
 
-	out_wrapped = vfwrapfile(out);
-	vfcopy(formatted, out_wrapped);
-	vfclose(out_wrapped);
+	vfcopy(formatted, out);
+	vfclose(out);
 
 	VFS_Refresh(other_pane->dir);
 

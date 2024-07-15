@@ -200,7 +200,6 @@ bool ExportToFile(struct directory *from, struct directory_entry *ent,
                   bool convert)
 {
 	VFILE *fromlump, *tofile;
-	FILE *f;
 
 	fromlump = VFS_OpenByEntry(from, ent);
 	if (convert) {
@@ -212,14 +211,13 @@ bool ExportToFile(struct directory *from, struct directory_entry *ent,
 	}
 
 	// TODO: This should be written through VFS.
-	f = fopen(to_filename, "wb");
-	if (f == NULL) {
+	tofile = vfwrapfile(fopen(to_filename, "wb"));
+	if (tofile == NULL) {
 		ConversionError("Failed to open '%s' for write.", ent->name);
 		vfclose(fromlump);
 		return false;
 	}
 
-	tofile = vfwrapfile(f);
 	vfcopy(fromlump, tofile);
 	vfclose(fromlump);
 	vfclose(tofile);

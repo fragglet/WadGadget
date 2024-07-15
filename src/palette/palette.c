@@ -242,12 +242,10 @@ static void LoadDefaultPalette(void)
 {
 	const char *dir = PAL_GetPalettesPath();
 	char *path = DefaultPointerPath(dir);
-	FILE *infile = fopen(path, "rb");
-	VFILE *in;
+	VFILE *in = vfwrapfile(fopen(path, "rb"));
 	struct palette_set *set;
 
-	assert(infile != NULL);
-	in = vfwrapfile(infile);
+	assert(in != NULL);
 	set = PAL_FromImageFile(in);
 	free(path);
 
@@ -268,12 +266,10 @@ const struct palette *PAL_DefaultPalette(void)
 
 static void WriteDoomPalette(const char *path)
 {
-	FILE *fs = fopen(path, "wb");
 	struct palette_set doom_palette_set =
 		{(struct palette *) &doom_palette, 1};
-	VFILE *out;
-	assert(fs != NULL);
-	out = vfwrapfile(fs);
+	VFILE *out = vfwrapfile(fopen(path, "wb"));
+	assert(out != NULL);
 	vfcopy(PAL_ToImageFile(&doom_palette_set), out);
 	vfclose(out);
 }

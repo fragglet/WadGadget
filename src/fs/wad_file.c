@@ -166,19 +166,16 @@ struct wad_file *W_OpenFile(const char *filename)
 {
 	struct wad_file *result;
 	bool readonly = false;
-	FILE *fs;
 	VFILE *vfs;
 
-	fs = fopen(filename, "r+");
-	if (fs == NULL) {
-		fs = fopen(filename, "r");
-		if (fs == NULL) {
+	vfs = vfwrapfile(fopen(filename, "r+"));
+	if (vfs == NULL) {
+		vfs = vfwrapfile(fopen(filename, "r"));
+		if (vfs == NULL) {
 			return NULL;
 		}
 		readonly = true;
 	}
-
-	vfs = vfwrapfile(fs);
 
 	result = checked_calloc(1, sizeof(struct wad_file));
 	result->readonly = readonly;

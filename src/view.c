@@ -421,13 +421,10 @@ try_again:
 	displayed = false;
 
 	if (IsTextFile(argv[1])) {
-		FILE *in;
-		VFILE *vin;
-		in = fopen(argv[1], "r");
+		VFILE *in;
+		in = vfwrapfile(fopen(argv[1], "r"));
 		assert(in != NULL);
-		vin = vfwrapfile(in);
-		assert(vin != NULL);
-		displayed = P_RunPlaintextPager(ent->name, vin, true)
+		displayed = P_RunPlaintextPager(ent->name, in, true)
 		             != PLAINTEXT_PAGER_WANT_EDIT;
 	}
 
