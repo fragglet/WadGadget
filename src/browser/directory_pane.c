@@ -78,6 +78,7 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 		// Show insert point for where we'll import into the WAD:
 		if (!dp->pane.active && idx == dp->pane.selected
 		 && dp->dir->type != FILE_TYPE_DIR
+		 && dp->dir->type != FILE_TYPE_PALETTES
 		 && dp->dir->type != FILE_TYPE_PNAMES_LIST) {
 			if ((termattrs() & A_UNDERLINE) != 0) {
 				wattron(win, A_UNDERLINE);
