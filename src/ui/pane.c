@@ -222,7 +222,7 @@ void UI_RestorePanes(struct pane *old_panes)
 	InputKeyPress(KEY_RESIZE);
 }
 
-void UI_SaveScreen(struct saved_screen *ss)
+void UI_SaveScreen(struct pane_stack *ss)
 {
 	ss->panes = UI_SavePanes();
 	ss->actions = UI_ActionsBarSetActions(NULL);
@@ -231,7 +231,7 @@ void UI_SaveScreen(struct saved_screen *ss)
 	ss->subtitle = UI_SetSubtitle(NULL);
 }
 
-void UI_RestoreScreen(struct saved_screen *ss)
+void UI_RestoreScreen(struct pane_stack *ss)
 {
 	UI_RestorePanes(ss->panes);
 	UI_ActionsBarSetActions(ss->actions);

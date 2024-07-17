@@ -537,7 +537,7 @@ void P_FreePager(struct pager *p)
 
 void P_RunPager(struct pager *p)
 {
-	struct saved_screen ss;
+	struct pane_stack ss;
 	struct pager *old_pager;
 
 	old_pager = current_pager;

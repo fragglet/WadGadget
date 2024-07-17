@@ -20,7 +20,7 @@ struct pane {
 	struct pane *next;
 };
 
-struct saved_screen {
+struct pane_stack {
 	struct pane *panes;
 	const struct action **actions;
 	bool actions_bar_enabled;
@@ -38,8 +38,8 @@ void UI_Init(void);
 
 struct pane *UI_SavePanes(void);
 void UI_RestorePanes(struct pane *old_panes);
-void UI_SaveScreen(struct saved_screen *ss);
-void UI_RestoreScreen(struct saved_screen *ss);
+void UI_SaveScreen(struct pane_stack *ss);
+void UI_RestoreScreen(struct pane_stack *ss);
 
 void UI_GetDesktopLines(int *start, int *end);
 
