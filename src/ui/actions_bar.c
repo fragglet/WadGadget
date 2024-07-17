@@ -28,7 +28,6 @@ struct actions_bar {
 	struct pane pane;
 	struct actions_accel accels[MAX_KEY_BINDINGS];
 	int last_width, spacing;
-	const struct action **actions;
 	bool function_keys;
 };
 
@@ -103,6 +102,7 @@ static void ExpandAcceleratorNames(struct actions_bar *p, int *spacing)
 static int SetAccelerators(struct actions_bar *p, const struct action **cells,
                            int columns)
 {
+	const struct action **actions = UI_CurrentStack()->actions;
 	const struct action *a;
 	struct actions_accel *accel;
 	int i, add_index, diff;
@@ -141,9 +141,9 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 	// Can we fit any more shortcuts in?
 	i = 0;
 	add_index = 10;
-	while (p->actions != NULL && p->actions[i] != NULL
+	while (actions != NULL && actions[i] != NULL
 	    && add_index < MAX_KEY_BINDINGS) {
-		a = p->actions[i];
+		a = actions[i];
 		// Don't add any function key actions; we already have them.
 		if (a == NULL || a->shortname == NULL || HasFunctionKey(a)) {
 			i++;
@@ -173,11 +173,12 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 static void RecalculateNames(struct actions_bar *p, int columns)
 {
 	const struct action *a, *cells[10];
+	const struct action **actions = UI_CurrentStack()->actions;
 	int i;
 
 	memset(cells, 0, sizeof(cells));
-	for (i = 0; p->actions != NULL && p->actions[i] != NULL; i++) {
-		a = p->actions[i];
+	for (i = 0; actions != NULL && actions[i] != NULL; i++) {
+		a = actions[i];
 		if (a != NULL && HasFunctionKey(a)) {
 			cells[a->key - KEY_F(1)] = a;
 		}
@@ -253,20 +254,20 @@ static int TranslateSpecialKey(int key)
 
 static void HandleKeypress(void *_p, int key)
 {
-	struct actions_bar *p = _p;
+	const struct action **actions = UI_CurrentStack()->actions;
 	int i;
 
-	if (p->actions == NULL) {
+	if (actions == NULL) {
 		return;
 	}
 
 	key = TranslateSpecialKey(key);
 
-	for (i = 0; p->actions[i] != NULL; i++) {
-		if (p->actions[i]->callback != NULL
-		 && (key == p->actions[i]->key
-		  || key == CTRL_(p->actions[i]->ctrl_key))) {
-			p->actions[i]->callback();
+	for (i = 0; actions[i] != NULL; i++) {
+		if (actions[i]->callback != NULL
+		 && (key == actions[i]->key
+		  || key == CTRL_(actions[i]->ctrl_key))) {
+			actions[i]->callback();
 			return;
 		}
 	}
@@ -277,7 +278,6 @@ struct pane *UI_ActionsBarInit(void)
 	actions_bar_singleton.pane.window = newwin(1, COLS, LINES - 1, 0);
 	actions_bar_singleton.pane.draw = DrawActionsBar;
 	actions_bar_singleton.pane.keypress = HandleKeypress;
-	actions_bar_singleton.actions = NULL;
 	actions_bar_singleton.function_keys = true;
 
 	return &actions_bar_singleton.pane;
@@ -285,10 +285,9 @@ struct pane *UI_ActionsBarInit(void)
 
 const struct action **UI_ActionsBarSetActions(const struct action **actions)
 {
-	const struct action **old_actions;
-
-	old_actions = actions_bar_singleton.actions;
-	actions_bar_singleton.actions = actions;
+	struct pane_stack *stack = UI_CurrentStack();
+	const struct action **old_actions = stack->actions;
+	stack->actions = actions;
 	RecalculateNames(&actions_bar_singleton, COLS);
 
 	return old_actions;
