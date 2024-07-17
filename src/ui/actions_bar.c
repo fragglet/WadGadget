@@ -29,7 +29,7 @@ struct actions_bar {
 	struct actions_accel accels[MAX_KEY_BINDINGS];
 	int last_width, spacing;
 	const struct action **actions;
-	bool enabled, function_keys;
+	bool function_keys;
 };
 
 static struct actions_bar actions_bar_singleton;
@@ -193,7 +193,7 @@ static bool DrawActionsBar(void *pane)
 	WINDOW *win = p->pane.window;
 	int i, j;
 
-	if (!p->enabled) {
+	if (!UI_CurrentStack()->actions_bar_enabled) {
 		return false;
 	}
 
@@ -302,8 +302,9 @@ void UI_ActionsBarSetFunctionKeys(bool function_keys)
 
 bool UI_ActionsBarEnable(bool enabled)
 {
-	bool result = actions_bar_singleton.enabled;
-	actions_bar_singleton.enabled = enabled;
+	struct pane_stack *stack = UI_CurrentStack();
+	bool result = stack->actions_bar_enabled;
+	stack->actions_bar_enabled = enabled;
 	return result;
 }
 
