@@ -319,6 +319,7 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 
 	SetBytesPerRecord(cfg, title);
 	SetColumns(cfg);
+	UpdateLineCount(cfg);
 
 	cfg->pc.num_links = 0;
 	cfg->pc.current_link = -1;
