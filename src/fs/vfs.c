@@ -177,18 +177,6 @@ struct directory *VFS_OpenDir(const char *path)
 	return d;
 }
 
-VFILE *VFS_Open(const char *path)
-{
-	FILE *fs;
-
-	fs = fopen(path, "r+");
-	if (fs == NULL) {
-		return NULL;
-	}
-
-	return vfwrapfile(fs);
-}
-
 VFILE *VFS_OpenByEntry(struct directory *dir, struct directory_entry *entry)
 {
 	return dir->directory_funcs->open(dir, entry);

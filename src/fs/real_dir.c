@@ -221,3 +221,12 @@ struct directory *VFS_OpenRealDir(const char *path)
 
 	return d;
 }
+
+VFILE *VFS_Open(const char *path)
+{
+	VFILE *result = vfwrapfile(fopen(path, "r+"));
+	if (result == NULL) {
+		VFS_StoreError("%s: %s", path, strerror(errno));
+	}
+	return result;
+}
