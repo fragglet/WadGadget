@@ -21,6 +21,7 @@
 
 #define MAX_SCREEN_PANES 10
 
+static struct pane_stack current_stack;
 static struct pane *actions_bar, *title_bar;
 static struct pane *bottom_pane;
 static bool main_loop_exited = false;
@@ -38,7 +39,7 @@ static struct pane **GetPanePtr(struct pane *p)
 {
 	struct pane **ptr;
 
-	ptr = &bottom_pane;
+	ptr = &current_stack.panes;
 	for (;;) {
 		if (*ptr == p) {
 			return ptr;
@@ -95,7 +96,7 @@ void UI_DrawAllPanes(void)
 	wbkgdset(newscr, COLOR_PAIR(PAIR_WHITE_BLACK));
 	werase(newscr);
 
-	for (p = bottom_pane; p != NULL; p = p->next) {
+	for (p = current_stack.panes; p != NULL; p = p->next) {
 		UI_DrawPane(p);
 	}
 
@@ -119,7 +120,7 @@ void UI_RaisePaneToTop(void *pane)
 
 static struct pane *GetPrevPane(struct pane *pane)
 {
-	struct pane *p = bottom_pane;
+	struct pane *p = current_stack.panes;
 
 	while (p != NULL) {
 		if (p->next == pane) {
@@ -207,19 +208,24 @@ void UI_Init(void)
 
 struct pane *UI_SavePanes(void)
 {
-	struct pane *result = bottom_pane;
-	bottom_pane = NULL;
+	struct pane *result = current_stack.panes;
+	current_stack.panes = NULL;
 	return result;
 }
 
 void UI_RestorePanes(struct pane *old_panes)
 {
-	while (bottom_pane != NULL) {
-		UI_PaneHide(bottom_pane);
+	while (current_stack.panes != NULL) {
+		UI_PaneHide(current_stack.panes);
 	}
 
-	bottom_pane = old_panes;
+	current_stack.panes = old_panes;
 	InputKeyPress(KEY_RESIZE);
+}
+
+struct pane_stack *UI_CurrentStack(void)
+{
+	return &current_stack;
 }
 
 void UI_SaveScreen(struct pane_stack *ss)

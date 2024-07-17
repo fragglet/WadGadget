@@ -40,6 +40,7 @@ struct pane *UI_SavePanes(void);
 void UI_RestorePanes(struct pane *old_panes);
 void UI_SaveScreen(struct pane_stack *ss);
 void UI_RestoreScreen(struct pane_stack *ss);
+struct pane_stack *UI_CurrentStack(void);
 
 void UI_GetDesktopLines(int *start, int *end);
 
