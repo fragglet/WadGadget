@@ -23,7 +23,6 @@
 
 static struct pane_stack current_stack;
 static struct pane *actions_bar, *title_bar;
-static struct pane *bottom_pane;
 static bool main_loop_exited = false;
 
 void UI_PaneKeypress(void *pane, int key)
