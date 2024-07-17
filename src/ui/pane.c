@@ -220,7 +220,6 @@ void UI_RestorePanes(struct pane *old_panes)
 
 	bottom_pane = old_panes;
 	InputKeyPress(KEY_RESIZE);
-
 }
 
 void UI_SaveScreen(struct saved_screen *ss)
@@ -239,4 +238,16 @@ void UI_RestoreScreen(struct saved_screen *ss)
 	UI_ActionsBarEnable(ss->actions_bar_enabled);
 	UI_SetTitleBar(ss->title);
 	UI_SetSubtitle(ss->subtitle);
+}
+
+void UI_GetDesktopLines(int *start, int *end)
+{
+	*start = 1;
+	*end = LINES - 1;
+
+	// If actions bar is enabled, it needs a line.
+	if (UI_ActionsBarEnable(false)) {
+		UI_ActionsBarEnable(true);
+		--*end;
+	}
 }

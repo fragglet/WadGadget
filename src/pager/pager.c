@@ -292,8 +292,13 @@ static bool DrawPager(void *_p)
 {
 	struct pager *p = _p;
 	int y, curs_y, lineno, win_h;
+	int top_line, bottom_line;
 
-	assert(wresize(p->pane.window, LINES - 2, COLS) == OK);
+	UI_GetDesktopLines(&top_line, &bottom_line);
+
+	assert(wresize(p->pane.window,
+	               bottom_line - top_line + 1, COLS) == OK);
+	assert(mvwin(p->pane.window, top_line, 0) == OK);
 	assert(wresize(p->line_win, 1, COLS) == OK);
 
 	UpdateSubtitle(p);

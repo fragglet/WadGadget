@@ -41,5 +41,7 @@ void UI_RestorePanes(struct pane *old_panes);
 void UI_SaveScreen(struct saved_screen *ss);
 void UI_RestoreScreen(struct saved_screen *ss);
 
+void UI_GetDesktopLines(int *start, int *end);
+
 #endif /* #ifndef PANE_H_INCLUDED */
 

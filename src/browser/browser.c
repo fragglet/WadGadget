@@ -49,71 +49,76 @@ static bool cmdr_mode = false, use_function_keys = true;
 struct directory_pane *browser_panes[2];
 unsigned int current_pane = 0;
 
-static void SetNwtWindowSizes(int columns, int lines)
+static void SetNwtWindowSizes(void)
 {
 	int left_width, right_width;
+	int top_line, bottom_line, lines;
+
+	UI_ActionsBarEnable(false);
+	UI_GetDesktopLines(&top_line, &bottom_line);
+	lines = bottom_line - top_line + 1;
 
 	// Note minor adjustments here because the borders of the
 	// panes overlap one another.
-	left_width = (max(columns, 80) - INFO_PANE_WIDTH + 1) / 2;
-	right_width = max(columns, 80) - left_width - INFO_PANE_WIDTH + 2;
+	left_width = (max(COLS, 80) - INFO_PANE_WIDTH + 1) / 2;
+	right_width = max(COLS, 80) - left_width - INFO_PANE_WIDTH + 2;
 
 	wresize(info_pane.window, 5, INFO_PANE_WIDTH);
-	mvwin(info_pane.window, 1, left_width - 1);
+	mvwin(info_pane.window, top_line, left_width - 1);
 	wresize(actions_pane.pane.window, 18, INFO_PANE_WIDTH);
-	mvwin(actions_pane.pane.window, 5, left_width - 1);
+	mvwin(actions_pane.pane.window, top_line + 4, left_width - 1);
 	wresize(search_pane.pane.window, 3, INFO_PANE_WIDTH);
-	mvwin(search_pane.pane.window, lines - 3,
+	mvwin(search_pane.pane.window, bottom_line - 2,
 	      left_width - 1);
 
 	UI_PaneShow(&actions_pane);
-	UI_ActionsBarEnable(false);
 
-	wresize(pane_windows[0], lines - 1, left_width);
-	mvwin(pane_windows[0], 1, 0);
-	wresize(pane_windows[1], lines - 1, right_width);
-	mvwin(pane_windows[1], 1, columns - right_width);
+	wresize(pane_windows[0], lines, left_width);
+	mvwin(pane_windows[0], top_line, 0);
+	wresize(pane_windows[1], lines, right_width);
+	mvwin(pane_windows[1], top_line, COLS - right_width);
 }
 
 // Commander mode will eventually be an alternative look that emulates
 // the look of Norton Commander & its clones. It's incomplete and for
 // now just used for small window sizes.
-static void SetCmdrWindowSizes(int columns, int lines)
+static void SetCmdrWindowSizes(void)
 {
-	int left_width = columns / 2;
-	int right_width = columns - left_width + 1;
+	int left_width = COLS / 2;
+	int right_width = COLS - left_width + 1;
+	int top_line, bottom_line, lines;
+
+	UI_ActionsBarEnable(true);
+	UI_GetDesktopLines(&top_line, &bottom_line);
+	lines = bottom_line - top_line + 1;
 
 	wresize(info_pane.window, 5,
 	        current_pane != 0 ? right_width : left_width);
-	mvwin(info_pane.window, lines - 7,
+	mvwin(info_pane.window, bottom_line - 5,
 	      current_pane != 0 ? left_width - 1 : 0);
 
 	UI_PaneHide(&actions_pane);
-	UI_ActionsBarEnable(true);
 
 	// Search pane fits along bottom of screen.
-	wresize(search_pane.pane.window, 1, columns);
-	mvwin(search_pane.pane.window, lines - 2, 0);
+	wresize(search_pane.pane.window, 1, COLS);
+	mvwin(search_pane.pane.window, bottom_line, 0);
 
-	wresize(pane_windows[0], lines - (current_pane ? 3 : 7),
+	wresize(pane_windows[0], lines - (current_pane ? 1 : 5),
 	        left_width);
-	mvwin(pane_windows[0], 1, 0);
-	wresize(pane_windows[1], lines - (current_pane ? 7 : 3),
+	mvwin(pane_windows[0], top_line, 0);
+	wresize(pane_windows[1], lines - (current_pane ? 5 : 1),
 	        right_width);
-	mvwin(pane_windows[1], 1, left_width - 1);
+	mvwin(pane_windows[1], top_line, left_width - 1);
 
 	// TODO: nc-style function keys row
 }
 
 static void SetWindowSizes(void)
 {
-	int lines, columns;
-	getmaxyx(stdscr, lines, columns);
-
-	if (!cmdr_mode && columns >= 80 && lines >= 25) {
-		SetNwtWindowSizes(columns, lines);
+	if (!cmdr_mode && COLS >= 80 && LINES >= 25) {
+		SetNwtWindowSizes();
 	} else {
-		SetCmdrWindowSizes(columns, lines);
+		SetCmdrWindowSizes();
 	}
 
 	// Panes must be in order so that titles are shown.
