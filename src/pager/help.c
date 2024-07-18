@@ -24,6 +24,7 @@
 #include "stringlib.h"
 #include "ui/actions_bar.h"
 #include "ui/dialog.h"
+#include "ui/stack.h"
 #include "ui/title_bar.h"
 
 static const char *HelpFileContents(const char *filename)

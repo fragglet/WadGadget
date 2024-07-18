@@ -138,19 +138,3 @@ void UI_ShowNotice(const char *msg, ...)
 
 	last_notice_time = time(NULL);
 }
-
-const char *UI_SetTitleBar(const char *msg)
-{
-	struct pane_stack *stack = UI_CurrentStack();
-	const char *old = stack->title;
-	stack->title = msg;
-	return old;
-}
-
-const char *UI_SetSubtitle(const char *msg)
-{
-	struct pane_stack *stack = UI_CurrentStack();
-	const char *old = stack->subtitle;
-	stack->subtitle = msg;
-	return old;
-}

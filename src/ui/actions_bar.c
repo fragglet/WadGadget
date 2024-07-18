@@ -284,28 +284,10 @@ struct pane *UI_ActionsBarInit(void)
 	return &actions_bar_singleton.pane;
 }
 
-const struct action **UI_ActionsBarSetActions(const struct action **actions)
-{
-	struct pane_stack *stack = UI_CurrentStack();
-	const struct action **old_actions = stack->actions;
-	stack->actions = actions;
-	RecalculateNames(&actions_bar_singleton, COLS);
-
-	return old_actions;
-}
-
 void UI_ActionsBarSetFunctionKeys(bool function_keys)
 {
 	actions_bar_singleton.function_keys = function_keys;
 	actions_bar_singleton.last_width = -1;
-}
-
-bool UI_ActionsBarEnable(bool enabled)
-{
-	struct pane_stack *stack = UI_CurrentStack();
-	bool result = stack->actions_bar_enabled;
-	stack->actions_bar_enabled = enabled;
-	return result;
 }
 
 const char *UI_ActionKeyDescription(const struct action *a, bool function_keys)
@@ -338,4 +320,9 @@ const char *UI_ActionKeyDescription(const struct action *a, bool function_keys)
 		return buf;
 	}
 	return "??";
+}
+
+void UI_ActionsBarRecalculate(void)
+{
+	RecalculateNames(&actions_bar_singleton, COLS);
 }

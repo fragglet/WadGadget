@@ -20,6 +20,7 @@
 #include "ui/dialog.h"
 #include "ui/pane.h"
 #include "ui/actions_bar.h"
+#include "ui/stack.h"
 #include "ui/ui.h"
 
 struct nonblocking_window {

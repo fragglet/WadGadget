@@ -61,8 +61,37 @@ void UI_GetDesktopLines(int *start, int *end)
 	*end = LINES - 1;
 
 	// If actions bar is enabled, it needs a line.
-	if (UI_ActionsBarEnable(false)) {
-		UI_ActionsBarEnable(true);
+	if (current_stack->actions_bar_enabled) {
 		--*end;
 	}
+}
+
+const struct action **UI_ActionsBarSetActions(const struct action **actions)
+{
+	const struct action **old_actions = current_stack->actions;
+	current_stack->actions = actions;
+	UI_ActionsBarRecalculate();
+
+	return old_actions;
+}
+
+bool UI_ActionsBarEnable(bool enabled)
+{
+	bool result = current_stack->actions_bar_enabled;
+	current_stack->actions_bar_enabled = enabled;
+	return result;
+}
+
+const char *UI_SetTitleBar(const char *msg)
+{
+	const char *old = current_stack->title;
+	current_stack->title = msg;
+	return old;
+}
+
+const char *UI_SetSubtitle(const char *msg)
+{
+	const char *old = current_stack->subtitle;
+	current_stack->subtitle = msg;
+	return old;
 }

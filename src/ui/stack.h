@@ -25,5 +25,10 @@ struct pane_stack *UI_SwapStack(struct pane_stack *stack);
 
 void UI_GetDesktopLines(int *start, int *end);
 
+const struct action **UI_ActionsBarSetActions(const struct action **actions);
+bool UI_ActionsBarEnable(bool enabled);
+const char *UI_SetTitleBar(const char *msg);
+const char *UI_SetSubtitle(const char *msg);
+
 #endif /* #ifndef STACK_H_INCLUDED */
 
