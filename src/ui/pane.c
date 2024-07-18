@@ -21,7 +21,8 @@
 
 #define MAX_SCREEN_PANES 10
 
-static struct pane_stack current_stack;
+static struct pane_stack main_stack;
+static struct pane_stack *current_stack = &main_stack;
 static struct pane *actions_bar, *title_bar;
 static bool main_loop_exited = false;
 
@@ -38,7 +39,7 @@ static struct pane **GetPanePtr(struct pane *p)
 {
 	struct pane **ptr;
 
-	ptr = &current_stack.panes;
+	ptr = &current_stack->panes;
 	for (;;) {
 		if (*ptr == p) {
 			return ptr;
@@ -87,17 +88,23 @@ void UI_DrawPane(struct pane *p)
 	}
 }
 
-void UI_DrawAllPanes(void)
+static void DrawStack(struct pane_stack *stack)
 {
 	struct pane *p;
+
+	for (p = stack->panes; p != NULL; p = p->next) {
+		UI_DrawPane(p);
+	}
+}
+
+void UI_DrawAllPanes(void)
+{
 	int cur_x, cur_y;
 
 	wbkgdset(newscr, COLOR_PAIR(PAIR_WHITE_BLACK));
 	werase(newscr);
 
-	for (p = current_stack.panes; p != NULL; p = p->next) {
-		UI_DrawPane(p);
-	}
+	DrawStack(current_stack);
 
 	getyx(newscr, cur_y, cur_x);
 	UI_DrawPane(actions_bar);
@@ -119,7 +126,7 @@ void UI_RaisePaneToTop(void *pane)
 
 static struct pane *GetPrevPane(struct pane *pane)
 {
-	struct pane *p = current_stack.panes;
+	struct pane *p = current_stack->panes;
 
 	while (p != NULL) {
 		if (p->next == pane) {
@@ -150,7 +157,6 @@ static void InputKeyPress(int key)
 			break;
 		}
 	}
-
 }
 
 static bool HandleKeypress(void)
@@ -207,24 +213,24 @@ void UI_Init(void)
 
 struct pane *UI_SavePanes(void)
 {
-	struct pane *result = current_stack.panes;
-	current_stack.panes = NULL;
+	struct pane *result = current_stack->panes;
+	current_stack->panes = NULL;
 	return result;
 }
 
 void UI_RestorePanes(struct pane *old_panes)
 {
-	while (current_stack.panes != NULL) {
-		UI_PaneHide(current_stack.panes);
+	while (current_stack->panes != NULL) {
+		UI_PaneHide(current_stack->panes);
 	}
 
-	current_stack.panes = old_panes;
+	current_stack->panes = old_panes;
 	InputKeyPress(KEY_RESIZE);
 }
 
 struct pane_stack *UI_CurrentStack(void)
 {
-	return &current_stack;
+	return current_stack;
 }
 
 void UI_SaveScreen(struct pane_stack *ss)
