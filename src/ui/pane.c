@@ -211,44 +211,34 @@ void UI_Init(void)
 	title_bar = UI_TitleBarInit();
 }
 
-struct pane *UI_SavePanes(void)
-{
-	struct pane *result = current_stack->panes;
-	current_stack->panes = NULL;
-	return result;
-}
-
-void UI_RestorePanes(struct pane *old_panes)
-{
-	while (current_stack->panes != NULL) {
-		UI_PaneHide(current_stack->panes);
-	}
-
-	current_stack->panes = old_panes;
-	InputKeyPress(KEY_RESIZE);
-}
-
 struct pane_stack *UI_CurrentStack(void)
 {
 	return current_stack;
 }
 
-void UI_SaveScreen(struct pane_stack *ss)
+struct pane_stack *UI_NewStack(void)
 {
-	ss->panes = UI_SavePanes();
-	ss->actions = UI_ActionsBarSetActions(NULL);
-	ss->actions_bar_enabled = UI_ActionsBarEnable(true);
-	ss->title = UI_SetTitleBar(NULL);
-	ss->subtitle = UI_SetSubtitle(NULL);
+	return checked_calloc(1, sizeof(struct pane_stack));
 }
 
-void UI_RestoreScreen(struct pane_stack *ss)
+void UI_FreeStack(struct pane_stack *stack)
 {
-	UI_RestorePanes(ss->panes);
-	UI_ActionsBarSetActions(ss->actions);
-	UI_ActionsBarEnable(ss->actions_bar_enabled);
-	UI_SetTitleBar(ss->title);
-	UI_SetSubtitle(ss->subtitle);
+	struct pane **p = &stack->panes;
+
+	while (*p != NULL) {
+		struct pane **next = &(*p)->next;
+		*p = NULL;
+		p = next;
+	}
+}
+
+struct pane_stack *UI_SwapStack(struct pane_stack *stack)
+{
+	struct pane_stack *result = current_stack;
+	current_stack = stack;
+	UI_ActionsBarSetActions(stack->actions);
+	InputKeyPress(KEY_RESIZE);
+	return result;
 }
 
 void UI_GetDesktopLines(int *start, int *end)

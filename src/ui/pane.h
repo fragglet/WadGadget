@@ -36,11 +36,10 @@ void UI_RunMainLoop(void);
 void UI_ExitMainLoop(void);
 void UI_Init(void);
 
-struct pane *UI_SavePanes(void);
-void UI_RestorePanes(struct pane *old_panes);
-void UI_SaveScreen(struct pane_stack *ss);
-void UI_RestoreScreen(struct pane_stack *ss);
 struct pane_stack *UI_CurrentStack(void);
+struct pane_stack *UI_NewStack(void);
+void UI_FreeStack(struct pane_stack *stack);
+struct pane_stack *UI_SwapStack(struct pane_stack *stack);
 
 void UI_GetDesktopLines(int *start, int *end);
 
