@@ -23,6 +23,7 @@
 #include "ui/actions_bar.h"
 #include "ui/colors.h"
 #include "ui/dialog.h"
+#include "ui/stack.h"
 #include "ui/title_bar.h"
 #include "ui/ui.h"
 #include "view.h"

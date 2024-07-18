@@ -16,6 +16,7 @@
 #include "ui/colors.h"
 #include "common.h"
 #include "stringlib.h"
+#include "ui/stack.h"
 #include "ui/ui.h"
 
 struct actions_accel {

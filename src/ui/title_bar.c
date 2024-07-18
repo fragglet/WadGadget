@@ -16,6 +16,7 @@
 #include "ui/colors.h"
 #include "common.h"
 #include "ui/pane.h"
+#include "ui/stack.h"
 #include "ui/title_bar.h"
 #include "ui/ui.h"
 

@@ -73,6 +73,7 @@ OBJS =                      \
     ui/dialog.o             \
     ui/list_pane.o          \
     ui/pane.o               \
+    ui/stack.o              \
     ui/text_input.o         \
     ui/title_bar.o          \
     ui/ui.o                 \

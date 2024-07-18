@@ -18,6 +18,7 @@
 #include "ui/actions_bar.h"
 #include "ui/dialog.h"
 #include "ui/colors.h"
+#include "ui/stack.h"
 #include "ui/title_bar.h"
 
 struct pager *current_pager;

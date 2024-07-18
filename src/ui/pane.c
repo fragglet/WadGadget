@@ -17,12 +17,11 @@
 #include "ui/actions_bar.h"
 #include "ui/colors.h"
 #include "ui/pane.h"
+#include "ui/stack.h"
 #include "ui/title_bar.h"
 
 #define MAX_SCREEN_PANES 10
 
-static struct pane_stack main_stack;
-static struct pane_stack *current_stack = &main_stack;
 static struct pane *actions_bar, *title_bar;
 static bool main_loop_exited = false;
 
@@ -35,11 +34,11 @@ void UI_PaneKeypress(void *pane, int key)
 	}
 }
 
-static struct pane **GetPanePtr(struct pane *p)
+static struct pane **GetPanePtr(struct pane_stack *stack, struct pane *p)
 {
 	struct pane **ptr;
 
-	ptr = &current_stack->panes;
+	ptr = &stack->panes;
 	for (;;) {
 		if (*ptr == p) {
 			return ptr;
@@ -60,7 +59,7 @@ void UI_PaneShow(void *_pane)
 	// at the top of the stack.
 	UI_PaneHide(pane);
 
-	top_ptr = GetPanePtr(NULL);
+	top_ptr = GetPanePtr(UI_CurrentStack(), NULL);
 	pane->next = NULL;
 	*top_ptr = pane;
 }
@@ -68,7 +67,7 @@ void UI_PaneShow(void *_pane)
 int UI_PaneHide(void *_pane)
 {
 	struct pane *pane = _pane;
-	struct pane **pane_ptr = GetPanePtr(pane);
+	struct pane **pane_ptr = GetPanePtr(UI_CurrentStack(), pane);
 
 	if (pane_ptr != NULL) {
 		*pane_ptr = pane->next;
@@ -104,7 +103,7 @@ void UI_DrawAllPanes(void)
 	wbkgdset(newscr, COLOR_PAIR(PAIR_WHITE_BLACK));
 	werase(newscr);
 
-	DrawStack(current_stack);
+	DrawStack(UI_CurrentStack());
 
 	getyx(newscr, cur_y, cur_x);
 	UI_DrawPane(actions_bar);
@@ -124,9 +123,9 @@ void UI_RaisePaneToTop(void *pane)
 	}
 }
 
-static struct pane *GetPrevPane(struct pane *pane)
+static struct pane *GetPrevPane(struct pane_stack *stack, struct pane *pane)
 {
-	struct pane *p = current_stack->panes;
+	struct pane *p = stack->panes;
 
 	while (p != NULL) {
 		if (p->next == pane) {
@@ -138,8 +137,9 @@ static struct pane *GetPrevPane(struct pane *pane)
 	return NULL;
 }
 
-static void InputKeyPress(int key)
+void UI_InputKeyPress(int key)
 {
+	struct pane_stack *stack;
 	struct pane *p;
 
 	if (key == CTRL_('L')) {
@@ -151,11 +151,15 @@ static void InputKeyPress(int key)
 	UI_PaneKeypress(actions_bar, key);
 
 	// Keypress goes to the top pane that has a keypress handler.
-	for (p = GetPrevPane(NULL); p != NULL; p = GetPrevPane(p)) {
+	stack = UI_CurrentStack();
+
+	p = GetPrevPane(stack, NULL);
+	while (p != NULL) {
 		if (p->keypress != NULL) {
 			UI_PaneKeypress(p, key);
 			break;
 		}
+		p = GetPrevPane(stack, p);
 	}
 }
 
@@ -169,7 +173,7 @@ static bool HandleKeypress(void)
 		return false;
 	}
 
-	InputKeyPress(key);
+	UI_InputKeyPress(key);
 
 	return true;
 }
@@ -209,46 +213,4 @@ void UI_Init(void)
 {
 	actions_bar = UI_ActionsBarInit();
 	title_bar = UI_TitleBarInit();
-}
-
-struct pane_stack *UI_CurrentStack(void)
-{
-	return current_stack;
-}
-
-struct pane_stack *UI_NewStack(void)
-{
-	return checked_calloc(1, sizeof(struct pane_stack));
-}
-
-void UI_FreeStack(struct pane_stack *stack)
-{
-	struct pane **p = &stack->panes;
-
-	while (*p != NULL) {
-		struct pane **next = &(*p)->next;
-		*p = NULL;
-		p = next;
-	}
-}
-
-struct pane_stack *UI_SwapStack(struct pane_stack *stack)
-{
-	struct pane_stack *result = current_stack;
-	current_stack = stack;
-	UI_ActionsBarSetActions(stack->actions);
-	InputKeyPress(KEY_RESIZE);
-	return result;
-}
-
-void UI_GetDesktopLines(int *start, int *end)
-{
-	*start = 1;
-	*end = LINES - 1;
-
-	// If actions bar is enabled, it needs a line.
-	if (UI_ActionsBarEnable(false)) {
-		UI_ActionsBarEnable(true);
-		--*end;
-	}
 }

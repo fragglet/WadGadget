@@ -20,28 +20,15 @@ struct pane {
 	struct pane *next;
 };
 
-struct pane_stack {
-	struct pane *panes;
-	const struct action **actions;
-	bool actions_bar_enabled;
-	const char *title, *subtitle;
-};
-
 void UI_PaneKeypress(void *pane, int key);
 void UI_PaneShow(void *pane);
 int UI_PaneHide(void *pane);
 void UI_DrawAllPanes(void);
 void UI_RaisePaneToTop(void *pane);
+void UI_InputKeyPress(int key);
 void UI_RunMainLoop(void);
 void UI_ExitMainLoop(void);
 void UI_Init(void);
-
-struct pane_stack *UI_CurrentStack(void);
-struct pane_stack *UI_NewStack(void);
-void UI_FreeStack(struct pane_stack *stack);
-struct pane_stack *UI_SwapStack(struct pane_stack *stack);
-
-void UI_GetDesktopLines(int *start, int *end);
 
 #endif /* #ifndef PANE_H_INCLUDED */
 
