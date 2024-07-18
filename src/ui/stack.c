@@ -75,23 +75,17 @@ const struct action **UI_ActionsBarSetActions(const struct action **actions)
 	return old_actions;
 }
 
-bool UI_ActionsBarEnable(bool enabled)
+void UI_ActionsBarEnable(bool enabled)
 {
-	bool result = current_stack->actions_bar_enabled;
 	current_stack->actions_bar_enabled = enabled;
-	return result;
 }
 
-const char *UI_SetTitleBar(const char *msg)
+void UI_SetTitleBar(const char *msg)
 {
-	const char *old = current_stack->title;
 	current_stack->title = msg;
-	return old;
 }
 
-const char *UI_SetSubtitle(const char *msg)
+void UI_SetSubtitle(const char *msg)
 {
-	const char *old = current_stack->subtitle;
 	current_stack->subtitle = msg;
-	return old;
 }
