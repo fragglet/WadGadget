@@ -53,11 +53,10 @@ unsigned int current_pane = 0;
 static void SetNwtWindowSizes(void)
 {
 	int left_width, right_width;
-	int top_line, bottom_line, lines;
+	int top_line, lines;
 
 	UI_ActionsBarEnable(false);
-	UI_GetDesktopLines(&top_line, &bottom_line);
-	lines = bottom_line - top_line + 1;
+	UI_GetDesktopLines(&top_line, &lines);
 
 	// Note minor adjustments here because the borders of the
 	// panes overlap one another.
@@ -69,7 +68,7 @@ static void SetNwtWindowSizes(void)
 	wresize(actions_pane.pane.window, 18, INFO_PANE_WIDTH);
 	mvwin(actions_pane.pane.window, top_line + 4, left_width - 1);
 	wresize(search_pane.pane.window, 3, INFO_PANE_WIDTH);
-	mvwin(search_pane.pane.window, bottom_line - 2,
+	mvwin(search_pane.pane.window, top_line + lines - 3,
 	      left_width - 1);
 
 	UI_PaneShow(&actions_pane);
@@ -87,22 +86,21 @@ static void SetCmdrWindowSizes(void)
 {
 	int left_width = COLS / 2;
 	int right_width = COLS - left_width + 1;
-	int top_line, bottom_line, lines;
+	int top_line, lines;
 
 	UI_ActionsBarEnable(true);
-	UI_GetDesktopLines(&top_line, &bottom_line);
-	lines = bottom_line - top_line + 1;
+	UI_GetDesktopLines(&top_line, &lines);
 
 	wresize(info_pane.window, 5,
 	        current_pane != 0 ? right_width : left_width);
-	mvwin(info_pane.window, bottom_line - 5,
+	mvwin(info_pane.window, top_line + lines - 6,
 	      current_pane != 0 ? left_width - 1 : 0);
 
 	UI_PaneHide(&actions_pane);
 
 	// Search pane fits along bottom of screen.
 	wresize(search_pane.pane.window, 1, COLS);
-	mvwin(search_pane.pane.window, bottom_line, 0);
+	mvwin(search_pane.pane.window, top_line + lines - 1, 0);
 
 	wresize(pane_windows[0], lines - (current_pane ? 1 : 5),
 	        left_width);
@@ -116,11 +114,11 @@ static void SetCmdrWindowSizes(void)
 
 static void SetWindowSizes(void)
 {
-	int top_line, bottom_line;
+	int top_line, lines;
 
-	UI_GetDesktopLines(&top_line, &bottom_line);
+	UI_GetDesktopLines(&top_line, &lines);
 
-	if (!cmdr_mode && COLS >= 80 && bottom_line - top_line + 1 >= 24) {
+	if (!cmdr_mode && COLS >= 80 && lines >= 24) {
 		SetNwtWindowSizes();
 	} else {
 		SetCmdrWindowSizes();

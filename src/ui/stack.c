@@ -144,11 +144,10 @@ void UI_FreeStack(struct pane_stack *stack)
 	}
 }
 
-void UI_GetDesktopLines(int *start, int *end)
+void UI_GetDesktopLines(int *top_line, int *lines)
 {
-	*start = current_stack->state.top_line + 1;
-	*end = current_stack->state.top_line
-	     + current_stack->state.lines - 1;
+	*top_line = current_stack->state.top_line + 1;
+	*lines = current_stack->state.lines - 1;
 }
 
 void UI_AddStack(struct pane_stack *stack)

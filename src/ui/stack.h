@@ -42,7 +42,7 @@ void UI_AddStack(struct pane_stack *stack);
 void UI_RemoveStack(struct pane_stack *stack);
 struct pane_stack *UI_AllStacks(void);
 
-void UI_GetDesktopLines(int *start, int *end);
+void UI_GetDesktopLines(int *top_lines, int *lines);
 
 const struct action **UI_ActionsBarSetActions(const struct action **actions);
 void UI_ActionsBarEnable(bool enabled);
