@@ -28,6 +28,7 @@ struct pane_stack {
 };
 
 struct pane_stack *UI_ActiveStack(void);
+void UI_SetCurrentStack(struct pane_stack *stack);
 struct pane_stack *UI_CurrentStack(void);
 struct pane_stack *UI_NewStack(void);
 void UI_FreeStack(struct pane_stack *stack);

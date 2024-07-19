@@ -103,9 +103,6 @@ static void DimStack(struct pane_stack *stack)
 	}
 }
 
-void UI_SetCurrentStack(struct pane_stack *stack);
-struct pane_stack *UI_ActiveStack(void);
-
 void UI_DrawAllPanes(void)
 {
 	struct pane_stack *s;
