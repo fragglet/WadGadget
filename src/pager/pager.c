@@ -526,19 +526,41 @@ void P_InitPager(struct pager *p, struct pager_config *cfg)
 	p->search_line = -1;
 	p->last_search = NULL;
 	p->cfg = cfg;
+
+	// Create the stack the pager will run in.
+	p->stack = UI_NewStack();
+	UI_SetCurrentStack(p->stack);
+	UI_SetTitleBar(p->cfg->title);
+	UI_ActionsBarSetActions(p->cfg->actions);
+	UI_ActionsBarEnable(true);
+	UI_ActionsBarSetFunctionKeys(false);
+	UI_PaneShow(p);
 }
 
 void P_FreePager(struct pager *p)
 {
+	UI_PaneHide(p);
+	UI_FreeStack(p->stack);
 	delwin(p->line_win);
 	delwin(p->pane.window);
 	delwin(p->search_pad);
 	free(p->last_search);
 }
 
+void P_OpenPager(struct pager *p)
+{
+	struct pane_stack *old_active = UI_ActiveStack();
+	UI_AddStack(p->stack);
+	UI_SetActiveStack(old_active);
+}
+
+void P_ClosePager(struct pager *p)
+{
+	UI_RemoveStack(p->stack);
+}
+
 void P_RunPager(struct pager *p, bool fullscreen)
 {
-	struct pane_stack *stack = UI_NewStack();
 	struct pager *old_pager;
 
 	old_pager = current_pager;
@@ -548,19 +570,12 @@ void P_RunPager(struct pager *p, bool fullscreen)
 	// get very cramped. In this case we should automatically run
 	// full screen instead.
 	if (fullscreen) {
-		UI_SetFullscreenStack(stack);
+		UI_SetFullscreenStack(p->stack);
 	} else {
-		UI_AddStack(stack);
+		UI_AddStack(p->stack);
 	}
-	UI_SetTitleBar(p->cfg->title);
-	UI_ActionsBarSetActions(p->cfg->actions);
-	UI_ActionsBarEnable(true);
-	UI_ActionsBarSetFunctionKeys(false);
-	UI_PaneShow(p);
 	UI_RunMainLoop();
-	UI_PaneHide(p);
-	UI_RemoveStack(stack);
-	UI_FreeStack(stack);
+	UI_RemoveStack(p->stack);
 
 	current_pager = old_pager;
 }

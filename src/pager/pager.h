@@ -45,6 +45,7 @@ struct pager {
 	unsigned int window_offset;
 	int search_line;
 	char *last_search;
+	struct pane_stack *stack;
 	struct pager_config *cfg;
 	char subtitle[15];
 };
@@ -57,6 +58,8 @@ void P_SwitchConfig(struct pager_config *cfg);
 void P_JumpToLine(struct pager *p, int lineno);
 void P_JumpWithinWindow(struct pager *p, int lineno);
 void P_ClearSearch(struct pager *p);
+void P_OpenPager(struct pager *p);
+void P_ClosePager(struct pager *p);
 
 extern struct pager *current_pager;
 extern const struct action exit_pager_action;
