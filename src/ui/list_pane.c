@@ -18,6 +18,7 @@
 #include "common.h"
 #include "ui/ui.h"
 #include "ui/list_pane.h"
+#include "ui/stack.h"
 
 static unsigned int NumEntries(struct list_pane *lp)
 {
@@ -47,9 +48,11 @@ bool UI_ListPaneDraw(void *p)
 	wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	UI_DrawWindowBox(win);
 	if (lp->title != NULL) {
+		bool is_active = lp->active
+		            && UI_ActiveStack() == UI_CurrentStack();
 		wattron(lp->subwin, COLOR_PAIR(PAIR_PANE_COLOR));
 		mvderwin(lp->subwin, 0, 0);
-		if (lp->active) {
+		if (is_active) {
 			wattron(lp->subwin, A_REVERSE);
 		}
 		mvwaddstr(lp->subwin, 0, 2, " ");
