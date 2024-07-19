@@ -14,7 +14,7 @@
 struct pane_stack;
 
 struct pane_stack_state {
-	int top_line, bottom_line;
+	int top_line, lines;
 	struct pane_stack *next;
 	// If we opened this stack full screen, all stacks that were on the
 	// screen at the time get suspended. We save the linked list in the

@@ -61,16 +61,15 @@ void UI_RecalculateStacks(void)
 	for (s = stacks; s != NULL; s = s->state.next) {
 		s->state.top_line = top_line;
 		if (s->lines == 0) {
-			top_line += flex_lines / num_flex;
-			lines -= flex_lines / num_flex;
+			s->state.lines = flex_lines / num_flex;
 		} else {
-			top_line += s->lines;
-			lines -= s->lines;
+			s->state.lines = s->lines;
 		}
-		s->state.bottom_line = top_line - 1;
+		top_line += s->state.lines;
+		lines -= s->state.lines;
 		// Last stack gets all remaining lines.
 		if (s->state.next == NULL) {
-			s->state.bottom_line += lines;
+			s->state.lines += lines;
 		}
 	}
 
@@ -82,7 +81,7 @@ void UI_RecalculateStacks(void)
 	// present. If the active pane decided it needed it, we shrink the
 	// bottom stack by one line and send another resize event.
 	if (active_stack->actions_bar_enabled && last_flex != NULL) {
-		last_flex->state.bottom_line--;
+		last_flex->state.lines--;
 		UI_StackKeypress(last_flex, KEY_RESIZE);
 	}
 
@@ -148,7 +147,8 @@ void UI_FreeStack(struct pane_stack *stack)
 void UI_GetDesktopLines(int *start, int *end)
 {
 	*start = current_stack->state.top_line + 1;
-	*end = current_stack->state.bottom_line;
+	*end = current_stack->state.top_line
+	     + current_stack->state.lines - 1;
 }
 
 void UI_AddStack(struct pane_stack *stack)

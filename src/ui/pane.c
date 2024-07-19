@@ -94,7 +94,9 @@ static void DimStack(struct pane_stack *stack)
 {
 	int x, y;
 
-	for (y = stack->state.top_line; y <= stack->state.bottom_line; y++) {
+	for (y = stack->state.top_line;
+	     y <= stack->state.top_line + stack->state.lines;
+	     y++) {
 		for (x = 0; x < COLS; ++x) {
 			chtype c = mvwinch(newscr, y, x);
 			c = (c | A_DIM) & ~A_BOLD;
