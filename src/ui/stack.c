@@ -99,6 +99,11 @@ void UI_TriggerRecalculate(void)
 	need_recalculate = true;
 }
 
+void UI_SetActiveStack(struct pane_stack *stack)
+{
+	active_stack = stack;
+}
+
 struct pane_stack *UI_ActiveStack(void)
 {
 	return active_stack;
