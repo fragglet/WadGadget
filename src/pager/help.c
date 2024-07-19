@@ -518,7 +518,7 @@ bool P_RunHelpPager(const char *filename)
 	}
 
 	P_InitPager(&p, &cfg.pc);
-	P_RunPager(&p);
+	P_RunPager(&p, false);
 	P_FreePager(&p);
 	P_FreeHelpConfig(&cfg);
 

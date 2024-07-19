@@ -167,7 +167,7 @@ enum plaintext_pager_result P_RunPlaintextPager(
 	}
 
 	P_InitPager(&p, &cfg.pc);
-	P_RunPager(&p);
+	P_RunPager(&p, true);
 	P_FreePager(&p);
 	if (cfg.hexdump_config != NULL) {
 		P_FreeHexdumpConfig(cfg.hexdump_config);

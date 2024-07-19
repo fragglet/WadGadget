@@ -536,7 +536,7 @@ void P_FreePager(struct pager *p)
 	free(p->last_search);
 }
 
-void P_RunPager(struct pager *p)
+void P_RunPager(struct pager *p, bool fullscreen)
 {
 	struct pane_stack *stack = UI_NewStack();
 	struct pager *old_pager;
@@ -544,7 +544,14 @@ void P_RunPager(struct pager *p)
 	old_pager = current_pager;
 	current_pager = p;
 
-	UI_AddStack(stack);
+	// TODO: On small screen sizes (eg. LINES=25), the pager can
+	// get very cramped. In this case we should automatically run
+	// full screen instead.
+	if (fullscreen) {
+		UI_SetFullscreenStack(stack);
+	} else {
+		UI_AddStack(stack);
+	}
 	UI_SetTitleBar(p->cfg->title);
 	UI_ActionsBarSetActions(p->cfg->actions);
 	UI_ActionsBarEnable(true);

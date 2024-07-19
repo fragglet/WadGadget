@@ -266,7 +266,9 @@ static void OpenDoomSpecs(void)
 		}
 		P_InitPager(&cfg->specs_pager, &cfg->specs_help.pc);
 	}
-	P_RunPager(&cfg->specs_pager);
+	// TODO: Allow switch back to hexdump while keeping the specs
+	// open.
+	P_RunPager(&cfg->specs_pager, false);
 }
 
 const struct action open_specs_action = {
@@ -347,7 +349,7 @@ bool P_RunHexdumpPager(const char *title, VFILE *input)
 	}
 
 	P_InitPager(&p, &cfg.pc);
-	P_RunPager(&p);
+	P_RunPager(&p, true);
 	P_FreePager(&p);
 	if (cfg.plaintext_config != NULL) {
 		P_FreePlaintextConfig(cfg.plaintext_config);
