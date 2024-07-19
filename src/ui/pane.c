@@ -90,6 +90,19 @@ void UI_DrawPane(struct pane *p)
 	}
 }
 
+static void DimStack(struct pane_stack *stack)
+{
+	int x, y;
+
+	for (y = stack->state.top_line; y <= stack->state.bottom_line; y++) {
+		for (x = 0; x < COLS; ++x) {
+			chtype c = mvwinch(newscr, y, x);
+			c = (c | A_DIM) & ~A_BOLD;
+			mvwchgat(newscr, y, x, 1, c, PAIR_NUMBER(c), NULL);
+		}
+	}
+}
+
 void UI_SetCurrentStack(struct pane_stack *stack);
 struct pane_stack *UI_ActiveStack(void);
 
@@ -116,6 +129,10 @@ void UI_DrawAllPanes(void)
 		}
 
 		UI_DrawPane(title_bar);
+
+		if (s != UI_ActiveStack()) {
+			DimStack(s);
+		}
 	}
 
 	UI_DrawPane(actions_bar);
