@@ -36,20 +36,22 @@ static struct pane_stack *active_stack = &main_stack;
 // keypresses; this changes continually during rendering etc.
 static struct pane_stack *current_stack = &main_stack;
 
+static bool need_recalculate = true;
+
 void UI_RecalculateStacks(void)
 {
-	struct pane_stack *s, *old = current_stack;
+	struct pane_stack *s, *last_flex = NULL, *old = current_stack;
 	int flex_lines = LINES, num_flex = 0;
 	int lines = LINES, top_line;
 
-	if (active_stack->actions_bar_enabled) {
-		--flex_lines;
-		--lines;
+	if (!need_recalculate) {
+		return;
 	}
 
 	for (s = stacks; s != NULL; s = s->state.next) {
 		if (s->lines == 0) {
 			++num_flex;
+			last_flex = s;
 		} else {
 			flex_lines -= s->lines;
 		}
@@ -76,7 +78,25 @@ void UI_RecalculateStacks(void)
 		UI_StackKeypress(s, KEY_RESIZE);
 	}
 
+	// We calculated with the assumption that the actions bar was not
+	// present. If the active pane decided it needed it, we shrink the
+	// bottom stack by one line and send another resize event.
+	if (active_stack->actions_bar_enabled && last_flex != NULL) {
+		last_flex->state.bottom_line--;
+		UI_StackKeypress(last_flex, KEY_RESIZE);
+	}
+
 	current_stack = old;
+	need_recalculate = false;
+
+	if (active_stack->actions_bar_enabled) {
+		UI_ActionsBarRecalculate();
+	}
+}
+
+void UI_TriggerRecalculate(void)
+{
+	need_recalculate = true;
 }
 
 struct pane_stack *UI_ActiveStack(void)
@@ -91,9 +111,6 @@ void UI_SetCurrentStack(struct pane_stack *stack)
 
 struct pane_stack *UI_CurrentStack(void)
 {
-	if (current_stack->state.bottom_line == 0) {
-		UI_RecalculateStacks();
-	}
 	return current_stack;
 }
 
@@ -115,9 +132,6 @@ void UI_FreeStack(struct pane_stack *stack)
 
 void UI_GetDesktopLines(int *start, int *end)
 {
-	if (current_stack->state.bottom_line == 0) {
-		UI_RecalculateStacks();
-	}
 	*start = current_stack->state.top_line + 1;
 	*end = current_stack->state.bottom_line;
 }
@@ -128,8 +142,7 @@ void UI_AddStack(struct pane_stack *stack)
 	stacks = stack;
 	active_stack = stack;
 	current_stack = stack;
-	UI_RecalculateStacks();
-	UI_ActionsBarRecalculate();
+	need_recalculate = true;
 }
 
 void UI_RemoveStack(struct pane_stack *stack)
@@ -148,8 +161,7 @@ void UI_RemoveStack(struct pane_stack *stack)
 	if (current_stack == stack) {
 		current_stack = stacks;
 	}
-	UI_RecalculateStacks();
-	UI_ActionsBarRecalculate();
+	need_recalculate = true;
 }
 
 struct pane_stack *UI_AllStacks(void)
@@ -160,13 +172,9 @@ struct pane_stack *UI_AllStacks(void)
 const struct action **UI_ActionsBarSetActions(const struct action **actions)
 {
 	const struct action **old_actions = current_stack->actions;
-	if (current_stack->actions == actions) {
-		return actions;
-	}
 	current_stack->actions = actions;
 	if (current_stack == active_stack) {
-		UI_RecalculateStacks();
-		UI_ActionsBarRecalculate();
+		need_recalculate = true;
 	}
 
 	return old_actions;
@@ -174,13 +182,9 @@ const struct action **UI_ActionsBarSetActions(const struct action **actions)
 
 void UI_ActionsBarEnable(bool enabled)
 {
-	if (current_stack->actions_bar_enabled == enabled) {
-		return;
-	}
 	current_stack->actions_bar_enabled = enabled;
 	if (current_stack == active_stack) {
-		UI_RecalculateStacks();
-		UI_ActionsBarRecalculate();
+		need_recalculate = true;
 	}
 }
 

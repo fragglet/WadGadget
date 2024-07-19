@@ -22,6 +22,7 @@
 
 #define MAX_SCREEN_PANES 10
 
+void UI_TriggerRecalculate(void);
 void UI_RecalculateStacks(void);
 
 static struct pane *actions_bar, *title_bar;
@@ -96,6 +97,8 @@ void UI_DrawAllPanes(void)
 {
 	struct pane_stack *s;
 	int cur_x, cur_y;
+
+	UI_RecalculateStacks();
 
 	wbkgdset(newscr, COLOR_PAIR(PAIR_WHITE_BLACK));
 	werase(newscr);
@@ -173,7 +176,7 @@ void UI_InputKeypress(int key)
 		return;
 	}
 	if (key == KEY_RESIZE) {
-		UI_RecalculateStacks();
+		UI_TriggerRecalculate();
 		return;
 	}
 
