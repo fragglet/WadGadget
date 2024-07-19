@@ -11,17 +11,29 @@
 #ifndef STACK_H_INCLUDED
 #define STACK_H_INCLUDED
 
+struct pane_stack;
+
+struct pane_stack_state {
+	int top_line, bottom_line;
+	struct pane_stack *next;
+};
+
 struct pane_stack {
+	int lines;
 	struct pane *panes;
 	const struct action **actions;
 	bool actions_bar_enabled;
 	const char *title, *subtitle;
+	struct pane_stack_state state;
 };
 
+struct pane_stack *UI_ActiveStack(void);
 struct pane_stack *UI_CurrentStack(void);
 struct pane_stack *UI_NewStack(void);
 void UI_FreeStack(struct pane_stack *stack);
-struct pane_stack *UI_SwapStack(struct pane_stack *stack);
+void UI_AddStack(struct pane_stack *stack);
+void UI_RemoveStack(struct pane_stack *stack);
+struct pane_stack *UI_AllStacks(void);
 
 void UI_GetDesktopLines(int *start, int *end);
 

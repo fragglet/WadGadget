@@ -538,14 +538,13 @@ void P_FreePager(struct pager *p)
 
 void P_RunPager(struct pager *p)
 {
-	struct pane_stack *new_stack = UI_NewStack();
-	struct pane_stack *old_stack;
+	struct pane_stack *stack = UI_NewStack();
 	struct pager *old_pager;
 
 	old_pager = current_pager;
 	current_pager = p;
 
-	old_stack = UI_SwapStack(new_stack);
+	UI_AddStack(stack);
 	UI_SetTitleBar(p->cfg->title);
 	UI_ActionsBarSetActions(p->cfg->actions);
 	UI_ActionsBarEnable(true);
@@ -553,8 +552,8 @@ void P_RunPager(struct pager *p)
 	UI_PaneShow(p);
 	UI_RunMainLoop();
 	UI_PaneHide(p);
-	UI_SwapStack(old_stack);
-	UI_FreeStack(new_stack);
+	UI_RemoveStack(stack);
+	UI_FreeStack(stack);
 
 	current_pager = old_pager;
 }

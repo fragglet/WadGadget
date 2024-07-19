@@ -103,7 +103,7 @@ static void ExpandAcceleratorNames(struct actions_bar *p, int *spacing)
 static int SetAccelerators(struct actions_bar *p, const struct action **cells,
                            int columns)
 {
-	const struct action **actions = UI_CurrentStack()->actions;
+	const struct action **actions = UI_ActiveStack()->actions;
 	const struct action *a;
 	struct actions_accel *accel;
 	int i, add_index, diff;
@@ -174,7 +174,7 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 static void RecalculateNames(struct actions_bar *p, int columns)
 {
 	const struct action *a, *cells[10];
-	const struct action **actions = UI_CurrentStack()->actions;
+	const struct action **actions = UI_ActiveStack()->actions;
 	int i;
 
 	memset(cells, 0, sizeof(cells));
@@ -195,7 +195,7 @@ static bool DrawActionsBar(void *pane)
 	WINDOW *win = p->pane.window;
 	int i, j;
 
-	if (!UI_CurrentStack()->actions_bar_enabled) {
+	if (!UI_ActiveStack()->actions_bar_enabled) {
 		return false;
 	}
 

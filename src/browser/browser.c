@@ -116,7 +116,11 @@ static void SetCmdrWindowSizes(void)
 
 static void SetWindowSizes(void)
 {
-	if (!cmdr_mode && COLS >= 80 && LINES >= 25) {
+	int top_line, bottom_line;
+
+	UI_GetDesktopLines(&top_line, &bottom_line);
+
+	if (!cmdr_mode && COLS >= 80 && bottom_line - top_line + 1 >= 24) {
 		SetNwtWindowSizes();
 	} else {
 		SetCmdrWindowSizes();

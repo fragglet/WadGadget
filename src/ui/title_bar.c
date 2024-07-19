@@ -87,6 +87,8 @@ static bool DrawTitleBar(void *_p)
 	const struct pane_stack *stack = UI_CurrentStack();
 	const char *title = stack->title, *subtitle = stack->subtitle;
 
+	mvwin(p->pane.window, stack->state.top_line, 0);
+
 	if (time(NULL) - last_notice_time < NOTICE_TIME_SECS) {
 		wbkgdset(p->pane.window, COLOR_PAIR(PAIR_NOTICE));
 		werase(p->pane.window);

@@ -22,6 +22,8 @@
 
 #define MAX_SCREEN_PANES 10
 
+void UI_RecalculateStacks(void);
+
 static struct pane *actions_bar, *title_bar;
 static bool main_loop_exited = false;
 
@@ -87,27 +89,33 @@ void UI_DrawPane(struct pane *p)
 	}
 }
 
-static void DrawStack(struct pane_stack *stack)
-{
-	struct pane *p;
-
-	for (p = stack->panes; p != NULL; p = p->next) {
-		UI_DrawPane(p);
-	}
-}
+void UI_SetCurrentStack(struct pane_stack *stack);
+struct pane_stack *UI_ActiveStack(void);
 
 void UI_DrawAllPanes(void)
 {
+	struct pane_stack *s;
 	int cur_x, cur_y;
 
 	wbkgdset(newscr, COLOR_PAIR(PAIR_WHITE_BLACK));
 	werase(newscr);
 
-	DrawStack(UI_CurrentStack());
+	for (s = UI_AllStacks(); s != NULL; s = s->state.next) {
+		struct pane *p;
 
-	getyx(newscr, cur_y, cur_x);
+		for (p = s->panes; p != NULL; p = p->next) {
+			UI_SetCurrentStack(s);
+			UI_DrawPane(p);
+		}
+
+		if (s == UI_ActiveStack()) {
+			getyx(newscr, cur_y, cur_x);
+		}
+
+		UI_DrawPane(title_bar);
+	}
+
 	UI_DrawPane(actions_bar);
-	UI_DrawPane(title_bar);
 
 	// We move the cursor to its last position in the topmost pane,
 	// but ignoring the top and bottom bars.
@@ -137,30 +145,39 @@ static struct pane *GetPrevPane(struct pane_stack *stack, struct pane *pane)
 	return NULL;
 }
 
-void UI_InputKeyPress(int key)
+void UI_StackKeypress(struct pane_stack *s, int key)
 {
-	struct pane_stack *stack;
 	struct pane *p;
 
+	UI_SetCurrentStack(s);
+	UI_PaneKeypress(actions_bar, key);
+
+	// Keypress goes to the top pane that has a keypress handler.
+
+	p = GetPrevPane(s, NULL);
+	while (p != NULL) {
+		UI_SetCurrentStack(s);
+		if (p->keypress != NULL) {
+			UI_PaneKeypress(p, key);
+			break;
+		}
+		p = GetPrevPane(s, p);
+	}
+}
+
+void UI_InputKeypress(int key)
+{
 	if (key == CTRL_('L')) {
 		clearok(stdscr, TRUE);
 		wrefresh(stdscr);
 		return;
 	}
-
-	UI_PaneKeypress(actions_bar, key);
-
-	// Keypress goes to the top pane that has a keypress handler.
-	stack = UI_CurrentStack();
-
-	p = GetPrevPane(stack, NULL);
-	while (p != NULL) {
-		if (p->keypress != NULL) {
-			UI_PaneKeypress(p, key);
-			break;
-		}
-		p = GetPrevPane(stack, p);
+	if (key == KEY_RESIZE) {
+		UI_RecalculateStacks();
+		return;
 	}
+
+	UI_StackKeypress(UI_ActiveStack(), key);
 }
 
 static bool HandleKeypress(void)
@@ -173,7 +190,7 @@ static bool HandleKeypress(void)
 		return false;
 	}
 
-	UI_InputKeyPress(key);
+	UI_InputKeypress(key);
 
 	return true;
 }
