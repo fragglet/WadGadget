@@ -89,7 +89,8 @@ static bool DrawTitleBar(void *_p)
 
 	mvwin(p->pane.window, stack->state.top_line, 0);
 
-	if (time(NULL) - last_notice_time < NOTICE_TIME_SECS) {
+	if (UI_CurrentStack() == UI_ActiveStack()
+	 && time(NULL) - last_notice_time < NOTICE_TIME_SECS) {
 		wbkgdset(p->pane.window, COLOR_PAIR(PAIR_NOTICE));
 		werase(p->pane.window);
 		mvwaddstr(p->pane.window, 0, 1, notice_buf);
