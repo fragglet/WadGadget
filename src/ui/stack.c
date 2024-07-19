@@ -124,6 +124,16 @@ struct pane_stack *UI_NewStack(void)
 	return checked_calloc(1, sizeof(struct pane_stack));
 }
 
+void UI_SetFullscreenStack(struct pane_stack *stack)
+{
+	stack->state.next = NULL;
+	stack->state.suspended_stacks = stacks;
+	stacks = stack;
+	active_stack = stack;
+	current_stack = stack;
+	need_recalculate = true;
+}
+
 void UI_FreeStack(struct pane_stack *stack)
 {
 	struct pane **p = &stack->panes;
@@ -160,10 +170,29 @@ void UI_RemoveStack(struct pane_stack *stack)
 			break;
 		}
 	}
-	if (active_stack == stack) {
+
+	stack->state.next = NULL;
+
+	if (stack->state.suspended_stacks != NULL) {
+		if (stacks == NULL) {
+			// This stack was activated as a fullscreen stack, so
+			// bring back the old stacks.
+			stacks = stack->state.suspended_stacks;
+		} else {
+			// If other stacks are still open, don't bring them
+			// back, but pass on to another stack. Once all are
+			// closed they'll be brought back.
+			stacks->state.suspended_stacks =
+				stack->state.suspended_stacks;
+		}
+		stack->state.suspended_stacks = NULL;
+	}
+
+
+	if (stack == active_stack) {
 		active_stack = stacks;
 	}
-	if (current_stack == stack) {
+	if (stack == current_stack) {
 		current_stack = stacks;
 	}
 	need_recalculate = true;

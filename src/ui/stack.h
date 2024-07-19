@@ -16,6 +16,10 @@ struct pane_stack;
 struct pane_stack_state {
 	int top_line, bottom_line;
 	struct pane_stack *next;
+	// If we opened this stack full screen, all stacks that were on the
+	// screen at the time get suspended. We save the linked list in the
+	// new stack and when it is closed we restore the old screen.
+	struct pane_stack *suspended_stacks;
 };
 
 struct pane_stack {
@@ -29,6 +33,7 @@ struct pane_stack {
 
 void UI_SetActiveStack(struct pane_stack *stack);
 struct pane_stack *UI_ActiveStack(void);
+void UI_SetFullscreenStack(struct pane_stack *stack);
 void UI_SetCurrentStack(struct pane_stack *stack);
 struct pane_stack *UI_CurrentStack(void);
 struct pane_stack *UI_NewStack(void);
