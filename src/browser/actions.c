@@ -1238,7 +1238,7 @@ static void ShowHelp(void)
 }
 
 const struct action help_action = {
-	KEY_F(1), 0, "Help", "Help",
+	KEY_F(1), 'H', "Help", "Help",
 	ShowHelp,
 };
 

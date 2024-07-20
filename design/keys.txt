@@ -9,7 +9,7 @@ keys    mnemonic    type  function
 ^E  F4  shEll       res  Command Prompt
 ^F  F9  wadFile     alt  Export WAD / Make WAD
 ^G      Glob        alt  Mark pattern
-^H  F1  -           std  Backspace; possibly usable for Help
+^H  F1  -           std  Help
 ^I      -           trm  Tab; switch panes
 ^J      -           res  Toggle Commander Mode
 ^K  F7  maKe        alt  Mkdir/Make lump
