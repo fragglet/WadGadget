@@ -1252,7 +1252,7 @@ static void PerformShell(void)
 }
 
 const struct action open_shell_action = {
-	KEY_F(4), 0, "Shell", "Command Prompt here",
+	KEY_F(4), 'E', "Shell", "Command Prompt here",
 	PerformShell,
 };
 

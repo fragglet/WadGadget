@@ -16,7 +16,7 @@ editor for that file type.
     **Ctrl-D          **  View hexdump of selected file
     **Ctrl-T  F2      **  Compact selected WAD file
     **Ctrl-U  F3      **  Update
-    **Ctrl-E  F4      **  Edit
+    **Ctrl-E  F4      **  Open command prompt in this directory
     **Ctrl-O  F5      **  Copy or import files; [see below](#copying)
     **        Shift-F5**  Import raw, no file conversion
     **Ctrl-B  F6      **  Rename selected file/directory
