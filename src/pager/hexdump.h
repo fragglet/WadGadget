@@ -30,6 +30,7 @@ struct hexdump_pager_config {
 	// If specs_help.pc.title == NULL, this is not initialized yet.
 	struct pager specs_pager;
 	struct help_pager_config specs_help;
+	bool specs_pager_open;
 };
 
 bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,

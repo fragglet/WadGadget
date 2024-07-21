@@ -18,6 +18,7 @@
 #include "pager/hexdump.h"
 #include "pager/plaintext.h"
 #include "ui/dialog.h"
+#include "ui/title_bar.h"
 
 // Record lengths for different lump types. TODO: This should probably be
 // done by lump type (lump_info.h), not by name.
@@ -259,6 +260,11 @@ static void OpenDoomSpecs(void)
 {
 	struct hexdump_pager_config *cfg = current_pager->cfg->user_data;
 
+	if (cfg->specs_pager_open) {
+		P_ClosePager(&cfg->specs_pager);
+		cfg->specs_pager_open = false;
+	}
+
 	if (cfg->specs_help.pc.title == NULL) {
 		if (!P_InitHelpConfig(&cfg->specs_help, "uds.md")) {
 			cfg->specs_help.pc.title = NULL;
@@ -266,17 +272,40 @@ static void OpenDoomSpecs(void)
 		}
 		P_InitPager(&cfg->specs_pager, &cfg->specs_help.pc);
 	}
-	// TODO: Allow switch back to hexdump while keeping the specs
-	// open.
+	cfg->specs_pager_open = true;
 	P_RunPager(&cfg->specs_pager, false);
+
+	// We leave the pager open so that the user can compare the
+	// hexdump against the specs if desired.
+	P_OpenPager(&cfg->specs_pager);
+	UI_ShowNotice("Press escape again to close the specs.");
 }
 
 const struct action open_specs_action = {
 	0, 'U', "Specs", "Open Doom Specs", OpenDoomSpecs,
 };
 
+static void CloseHexdumpPager(void)
+{
+	struct hexdump_pager_config *cfg = current_pager->cfg->user_data;
+
+	// If the specs pager is open, pressing escape first closes
+	// that window, then pressing again closes completely.
+	if (cfg->specs_pager_open) {
+		P_ClosePager(&cfg->specs_pager);
+		cfg->specs_pager_open = false;
+		return;
+	}
+
+	UI_ExitMainLoop();
+}
+
+static const struct action exit_hexdump_pager_action = {
+        27, 0, "Close", "Close", CloseHexdumpPager,
+};
+
 static const struct action *hexdump_pager_actions[] = {
-	&exit_pager_action,
+	&exit_hexdump_pager_action,
 	&pager_help_action,
 	&switch_ascii_action,
 	&change_columns_action,
@@ -315,6 +344,7 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 	cfg->pc.get_link = NULL;
 	cfg->plaintext_config = NULL;
 	cfg->specs_help.pc.title = NULL;
+	cfg->specs_pager_open = false;
 
 	cfg->data = vfreadall(input, &cfg->data_len);
 	vfclose(input);
@@ -353,6 +383,9 @@ bool P_RunHexdumpPager(const char *title, VFILE *input)
 	P_FreePager(&p);
 	if (cfg.plaintext_config != NULL) {
 		P_FreePlaintextConfig(cfg.plaintext_config);
+	}
+	if (cfg.specs_pager_open) {
+		P_ClosePager(&cfg.specs_pager);
 	}
 	P_FreeHexdumpConfig(&cfg);
 
