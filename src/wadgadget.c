@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <time.h>
 
 #include "common.h"
 #include "browser/directory_pane.h"
@@ -31,6 +32,8 @@
 "This is free software; see COPYING.md for copying conditions. There is NO\n" \
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 
+static struct sigaction old_sigint_action;
+
 // We set a custom handler for SIGTSTP. This is the signal that is sent when
 // the user types a Ctrl-Z. This allows us to use this key combo (for Undo).
 static void TermStopHandler(int unused)
@@ -45,6 +48,37 @@ static void SetTermStopHandler(void)
 	sa.sa_handler = TermStopHandler;
 	sa.sa_flags = sa.sa_flags & ~SA_RESTART;
 	sigaction(SIGTSTP, &sa, NULL);
+}
+
+// Handler for SIGINT. We set this to catch ^C keypress, but just in case,
+// we detect if ^C is pressed three times and if so, trigger an abort.
+static void SigintHandler(int unused)
+{
+	static time_t last_sigint;
+	static int count;
+	time_t now = time(NULL);
+
+	if (now - last_sigint > 1) {
+		count = 0;
+	}
+
+	++count;
+	last_sigint = now;
+	if (count == 3) {
+		old_sigint_action.sa_handler(unused);
+	}
+
+	ungetch(CTRL_('C'));
+}
+
+static void SetSigintHandler(void)
+{
+	struct sigaction sa;
+	sigaction(SIGINT, NULL, &old_sigint_action);
+	memcpy(&sa, &old_sigint_action, sizeof(struct sigaction));
+	sa.sa_handler = SigintHandler;
+	sa.sa_flags = sa.sa_flags & ~SA_RESTART;
+	sigaction(SIGINT, &sa, NULL);
 }
 
 #ifdef __APPLE__
@@ -135,6 +169,10 @@ int main(int argc, char *argv[])
 	TF_SetNewPalette();
 	TF_SetCursesModes();
 	TF_SetColorPairs();
+
+	// SIGINT action is set here, because we want to invoke the curses
+	// handler when aborting, not the default.
+	SetSigintHandler();
 
 	refresh();
 
