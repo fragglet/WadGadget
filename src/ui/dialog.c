@@ -30,13 +30,13 @@ struct nonblocking_window {
 
 static WINDOW *CenteredWindow(int w, int h)
 {
-	int scrh, scrw;
+	int top_line, num_lines;
 
-	getmaxyx(stdscr, scrh, scrw);
+	UI_GetDesktopLines(&top_line, &num_lines);
 
-	return newwin(min(h, scrh - 1), min(w, scrw),
-	              max(1, (scrh - h - 1) / 2),
-	              max(0, (scrw - w - 1) / 2));
+	return newwin(min(h, num_lines - 1), min(w, COLS),
+	              top_line + max(1, (num_lines - h - 1) / 2),
+	              max(0, (COLS - w - 1) / 2));
 }
 
 static bool DrawNonblockingWindow(void *pane)
@@ -331,4 +331,3 @@ char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
 
 	return dialog.input.input;
 }
-
