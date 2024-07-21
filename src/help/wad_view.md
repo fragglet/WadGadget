@@ -18,19 +18,19 @@ list returns to the directory containing the WAD.
 ## Keys
 
     **        Enter   **  View/edit lump
-    **Ctrl-D          **  View hexdump of selected lump
-    **Ctrl-V  F2      **  Move (rearrange) marked lumps
+    **Ctrl-D          **  View hex**d**ump of selected lump
+    **Ctrl-V  F2      **  Mo**v**e (rearrange) marked lumps
     **Ctrl-]  Shift-F2**  Sort marked lumps into alphabetical order
-    **Ctrl-U  F3      **  Update
-    **Ctrl-E  F4      **  Edit
-    **Ctrl-O  F5      **  Copy or export lumps; [see below](#copying)
+    **Ctrl-U  F3      **  **U**pdate
+    **Ctrl-E  F4      **  **E**dit
+    **Ctrl-O  F5      **  C**o**py or export lumps; [see below](#copying)
     **        Shift-F5**  Export as raw, no file conversion
-    **Ctrl-C  F6      **  Change name of selected lump
-    **Ctrl-K  F7      **  Make new lump
+    **Ctrl-C  F6      **  **C**hange name of selected lump
+    **Ctrl-K  F7      **  Ma**k**e new lump
     **Ctrl-X  F8      **  Delete lump(s)
     **        Shift-F8**  Delete lump(s) (no confirmation)
-    **Ctrl-F  F9      **  Export marked lumps to new WAD file; see below
-    **Ctrl-A  F10     **  Unmark all marked lumps
+    **Ctrl-F  F9      **  Export marked lumps to new WAD **f**ile; see below
+    **Ctrl-A  F10     **  Unmark **a**ll marked lumps
     **Ctrl-Z          **  Undo last change
     **Ctrl-Y          **  Redo change
 

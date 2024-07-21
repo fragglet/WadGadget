@@ -13,20 +13,20 @@ editor for that file type.
 ## Keys
 
     **        Enter   **  View/edit file
-    **Ctrl-D          **  View hexdump of selected file
-    **Ctrl-T  F2      **  Compact selected WAD file
-    **Ctrl-U  F3      **  Update
+    **Ctrl-D          **  View hex**d**ump of selected file
+    **Ctrl-T  F2      **  Compac**t** selected WAD file
+    **Ctrl-U  F3      **  **U**pdate
     **Ctrl-E  F4      **  Open command prompt in this directory
-    **Ctrl-O  F5      **  Copy or import files; [see below](#copying)
+    **Ctrl-O  F5      **  C**o**py or import files; [see below](#copying)
     **        Shift-F5**  Import raw, no file conversion
-    **Ctrl-C  F6      **  Change name of selected file/directory
-    **Ctrl-K  F7      **  Make directory
+    **Ctrl-C  F6      **  **C**hange name of selected file/directory
+    **Ctrl-K  F7      **  Ma**k**e directory
     **Ctrl-X  F8      **  Delete file(s)
     **        Shift-F8**  Delete file(s) (no confirmation)
-    **Ctrl-F  F9      **  Make WAD containing marked files; see below
+    **Ctrl-F  F9      **  Make WAD **f**ile containing marked files; see below
     **        Shift-F9**  Make WAD, no file conversion
-    **Ctrl-A  F10     **  Unmark all marked files
-    **Ctrl-R          **  Reload directory
+    **Ctrl-A  F10     **  Unmark **a**ll marked files
+    **Ctrl-R          **  **R**eload directory
 
 All [standard controls](common.md) are also supported.
 

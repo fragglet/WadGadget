@@ -11,14 +11,14 @@ containing the PNAMES lump.
 
 ## Keys
 
-    **Ctrl-V  F2      **  Move (rearrange) marked patch names
-    **Ctrl-E  F4      **  Edit plain text config file
-    **Ctrl-O  F5      **  Copy or export; [see below](#copying)
-    **Ctrl-C  F6      **  Change name of selected patch name
+    **Ctrl-V  F2      **  Mo**v**e (rearrange) marked patch names
+    **Ctrl-E  F4      **  **E**dit plain text config file
+    **Ctrl-O  F5      **  C**o**py or export; [see below](#copying)
+    **Ctrl-C  F6      **  **C**hange name of selected patch name
     **Ctrl-K  F7      **  Add new patch name
     **Ctrl-X  F8      **  Delete patch names(s)
     **        Shift-F8**  Delete patch names(s) (no confirmation)
-    **Ctrl-A  F10     **  Unmark all marked patch names
+    **Ctrl-A  F10     **  Unmark **a**ll marked patch names
     **Ctrl-Z          **  Undo last change
     **Ctrl-Y          **  Redo change
 
