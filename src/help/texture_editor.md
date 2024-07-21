@@ -17,7 +17,7 @@ containing the texture lump.
     **Ctrl-U  F3      **  Duplicate selected texture
     **Ctrl-E  F4      **  Edit texture config
     **Ctrl-O  F5      **  Copy or export; [see below](#copying)
-    **Ctrl-B  F6      **  Rename selected texture
+    **Ctrl-C  F6      **  Change name of selected texture
     **Ctrl-K  F7      **  Make new texture
     **Ctrl-X  F8      **  Delete texture(s)
     **        Shift-F8**  Delete texture(s) (no confirmation)

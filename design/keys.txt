@@ -2,8 +2,8 @@
 keys    mnemonic    type  function
 
 ^A F10  unm-All     alt  Unmark all
-^B  F6  nomBre      alt  Rename (Spanish)
-^C      -           trm  Terminal break
+^B      Back        res  Back to previous directory
+^C  F6  Changename  alt  Rename
 ^D      hexDump     res  Hexdump
 ^E  F4  Edit        nwt  Edit
 ^E  F4  shEll       res  Command Prompt

@@ -732,7 +732,7 @@ static void PerformRename(void)
 }
 
 const struct action rename_action = {
-	KEY_F(6), 'B', "Ren", ". Rename",
+	KEY_F(6), 'C', "Ren", ". Rename",
 	PerformRename,
 };
 

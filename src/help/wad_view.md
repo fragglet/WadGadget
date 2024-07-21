@@ -25,7 +25,7 @@ list returns to the directory containing the WAD.
     **Ctrl-E  F4      **  Edit
     **Ctrl-O  F5      **  Copy or export lumps; [see below](#copying)
     **        Shift-F5**  Export as raw, no file conversion
-    **Ctrl-B  F6      **  Rename selected lump
+    **Ctrl-C  F6      **  Change name of selected lump
     **Ctrl-K  F7      **  Make new lump
     **Ctrl-X  F8      **  Delete lump(s)
     **        Shift-F8**  Delete lump(s) (no confirmation)

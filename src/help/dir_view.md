@@ -19,7 +19,7 @@ editor for that file type.
     **Ctrl-E  F4      **  Open command prompt in this directory
     **Ctrl-O  F5      **  Copy or import files; [see below](#copying)
     **        Shift-F5**  Import raw, no file conversion
-    **Ctrl-B  F6      **  Rename selected file/directory
+    **Ctrl-C  F6      **  Change name of selected file/directory
     **Ctrl-K  F7      **  Make directory
     **Ctrl-X  F8      **  Delete file(s)
     **        Shift-F8**  Delete file(s) (no confirmation)
