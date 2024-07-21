@@ -48,6 +48,7 @@ static bool DrawNonblockingWindow(void *pane)
 	wbkgdset(win, COLOR_PAIR(PAIR_DIALOG_BOX));
 	werase(win);
 	box(win, 0, 0);
+	UI_DrawDropShadow(win);
 
 	UI_PrintMultilineString(win, 1, 2, nbw->msg);
 	wattroff(win, A_BOLD);
@@ -128,6 +129,8 @@ static bool DrawConfirmDialog(void *pane)
 	wattron(win, A_BOLD);
 	werase(win);
 	box(win, 0, 0);
+	UI_DrawDropShadow(win);
+
 	if (dialog->title != NULL) {
 		mvwaddstr(win, 0, 2, " ");
 		waddstr(win, dialog->title);
@@ -259,6 +262,8 @@ static bool DrawTextInputDialog(void *pane)
 	werase(win);
 	wattron(win, A_BOLD);
 	box(win, 0, 0);
+	UI_DrawDropShadow(win);
+
 	if (dialog->title != NULL) {
 		mvwaddstr(win, 0, 2, " ");
 		waddstr(win, dialog->title);

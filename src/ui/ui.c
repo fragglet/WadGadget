@@ -64,6 +64,35 @@ void UI_PrintMultilineString(WINDOW *win, int y, int x, const char *s)
 	}
 }
 
+void UI_DimScreenArea(int x, int y, int w, int h, int force_color_pair)
+{
+	int x1, y1, color;
+
+	for (y1 = y; y1 < y + h; y1++) {
+		for (x1 = x; x1 < x + w; ++x1) {
+			chtype c = mvwinch(newscr, y1, x1);
+			c = (c | A_DIM) & ~A_BOLD;
+			if (force_color_pair < 0) {
+				color = PAIR_NUMBER(c);
+			} else {
+				color = force_color_pair;
+			}
+			mvwchgat(newscr, y1, x1, 1, c, color, NULL);
+		}
+	}
+}
+
+void UI_DrawDropShadow(WINDOW *win)
+{
+	int x, y, w, h;
+
+	getbegyx(win, y, x);
+	getmaxyx(win, h, w);
+
+	UI_DimScreenArea(x + w, y + 1, 2, h, PAIR_WHITE_BLACK);
+	UI_DimScreenArea(x + 2, y + h, w - 2, 1, PAIR_WHITE_BLACK);
+}
+
 // These are clock hand directions. Imagine all the border characters as a
 // combination of these four directions.
 #define DIR_12_OCLOCK   0x1

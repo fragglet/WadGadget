@@ -19,6 +19,7 @@
 #include "ui/pane.h"
 #include "ui/stack.h"
 #include "ui/title_bar.h"
+#include "ui/ui.h"
 
 #define MAX_SCREEN_PANES 10
 
@@ -90,21 +91,6 @@ void UI_DrawPane(struct pane *p)
 	}
 }
 
-static void DimStack(struct pane_stack *stack)
-{
-	int x, y;
-
-	for (y = stack->state.top_line;
-	     y <= stack->state.top_line + stack->state.lines;
-	     y++) {
-		for (x = 0; x < COLS; ++x) {
-			chtype c = mvwinch(newscr, y, x);
-			c = (c | A_DIM) & ~A_BOLD;
-			mvwchgat(newscr, y, x, 1, c, PAIR_NUMBER(c), NULL);
-		}
-	}
-}
-
 void UI_DrawAllPanes(void)
 {
 	struct pane_stack *s;
@@ -130,7 +116,8 @@ void UI_DrawAllPanes(void)
 		UI_DrawPane(title_bar);
 
 		if (s != UI_ActiveStack()) {
-			DimStack(s);
+			UI_DimScreenArea(0, s->state.top_line,
+			                 COLS, s->state.lines, -1);
 		}
 	}
 

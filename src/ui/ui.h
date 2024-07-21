@@ -19,4 +19,6 @@ int UI_StringHeight(char *s);
 void UI_PrintMultilineString(WINDOW *win, int y, int x, const char *s);
 void UI_DrawBox(WINDOW *win, int x, int y, int w, int h);
 void UI_DrawWindowBox(WINDOW *win);
+void UI_DimScreenArea(int x, int y, int w, int h, int force_color_pair);
+void UI_DrawDropShadow(WINDOW *win);
 
