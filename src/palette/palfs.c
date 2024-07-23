@@ -85,7 +85,7 @@ static void PaletteFSRefresh(void *dir, struct directory_entry **entries,
 			continue;
 		}
 
-		ent->type = FILE_TYPE_FILE;
+		ent->type = FILE_TYPE_PALETTE;
 		ent->name = checked_strdup(inner_ent->name);
 		*strstr(ent->name, ".png") = '\0';
 		if (!strcmp(inner_ent->name, def_pal)) {
