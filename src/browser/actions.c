@@ -786,7 +786,7 @@ static void PerformDeleteNoConfirm(void)
 }
 
 const struct action delete_no_confirm_action = {
-	SHIFT_KEY_F(8), 0, "Del", "Delete (no confirm)",
+	SHIFT_KEY_F(8), 0, NULL, "Delete (no confirm)",
 	PerformDeleteNoConfirm,
 };
 
