@@ -853,7 +853,12 @@ const struct action mark_pattern_action = {
 
 static void PerformUnmarkAll(void)
 {
-	VFS_ClearSet(&active_pane->tagged);
+	if (active_pane->tagged.num_entries == 0) {
+		UI_ShowNotice("Nothing is marked.");
+	} else {
+		VFS_ClearSet(&active_pane->tagged);
+		UI_ShowNotice("All marks cleared.");
+	}
 }
 
 const struct action unmark_all_action = {
