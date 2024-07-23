@@ -156,8 +156,8 @@ void TF_SetRawMode(struct saved_flags *f, bool blocking)
 	struct termios raw;
 
 	// Don't block reads from stdin; we want to time out.
+	f->fcntl_opts = fcntl(0, F_GETFL);
 	if (!blocking) {
-		f->fcntl_opts = fcntl(0, F_GETFL);
 		fcntl(0, F_SETFL, f->fcntl_opts | O_NONBLOCK);
 	}
 
