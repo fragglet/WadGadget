@@ -565,10 +565,11 @@ void P_RunPager(struct pager *p, bool fullscreen)
 	old_pager = current_pager;
 	current_pager = p;
 
-	// TODO: On small screen sizes (eg. LINES=25), the pager can
-	// get very cramped. In this case we should automatically run
-	// full screen instead.
-	if (fullscreen) {
+	// On small screen sizes, the pager can get very cramped. In this
+	// case we automatically run full screen instead.
+	// TODO: This should really be based on the "predicted" height of
+	// the stack if it runs split.
+	if (fullscreen || LINES < 40) {
 		UI_SetFullscreenStack(p->stack);
 	} else {
 		UI_AddStack(p->stack);
