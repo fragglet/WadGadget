@@ -971,29 +971,12 @@ static void NavigateNew(struct directory_pane *curr_pane,
 	}
 }
 
-static void PerformView(void)
+static void ViewLump(struct directory *dir, struct directory_entry *ent)
 {
-	struct directory_entry *ent;
-
-	ent = B_DirectoryPaneEntry(active_pane);
-
-	// Change directory?
-	if (ent->type == FILE_TYPE_DIR || ent->type == FILE_TYPE_WAD) {
-		struct directory *new_dir =
-			VFS_OpenDirByEntry(active_pane->dir, ent);
-		if (new_dir == NULL) {
-			UI_MessageBox("Error when opening '%s'.", ent->name);
-			return;
-		}
-		NavigateNew(active_pane, new_dir);
-		return;
-	}
-
-	if (ent->type == FILE_TYPE_LUMP
-	 && StringHasPrefix(ent->name, "TEXTURE")) {
+	if (StringHasPrefix(ent->name, "TEXTURE")) {
 		struct directory *new_dir;
 		ClearConversionErrors();
-		new_dir = TX_OpenTextureDir(active_pane->dir, ent);
+		new_dir = TX_OpenTextureDir(dir, ent);
 		if (new_dir == NULL) {
 			UI_MessageBox("Error opening texture directory:\n%s",
 			              GetConversionError());
@@ -1003,10 +986,10 @@ static void PerformView(void)
 		return;
 	}
 
-	if (ent->type == FILE_TYPE_LUMP && !strcasecmp(ent->name, "PNAMES")) {
+	if (!strcasecmp(ent->name, "PNAMES")) {
 		struct directory *new_dir;
 		ClearConversionErrors();
-		new_dir = TX_OpenPnamesDir(active_pane->dir, ent);
+		new_dir = TX_OpenPnamesDir(dir, ent);
 		if (new_dir == NULL) {
 			UI_MessageBox("Error opening PNAMES directory:\n%s",
 			              GetConversionError());
@@ -1016,12 +999,39 @@ static void PerformView(void)
 		return;
 	}
 
-	if (ent->type == FILE_TYPE_TEXTURE || ent->type == FILE_TYPE_PNAME) {
-		// TODO: Open texture editor
-		return;
-	}
+	OpenDirent(dir, ent);
+}
 
-	OpenDirent(active_pane->dir, ent);
+static void PerformView(void)
+{
+	struct directory_entry *ent;
+
+	ent = B_DirectoryPaneEntry(active_pane);
+
+	switch (ent->type) {
+	case FILE_TYPE_DIR:
+	case FILE_TYPE_WAD:
+		// Change directory?
+		struct directory *new_dir =
+			VFS_OpenDirByEntry(active_pane->dir, ent);
+		if (new_dir == NULL) {
+			UI_MessageBox("Error when opening '%s'.", ent->name);
+			return;
+		}
+		NavigateNew(active_pane, new_dir);
+		break;
+
+	case FILE_TYPE_FILE:
+		OpenDirent(active_pane->dir, ent);
+		break;
+
+	case FILE_TYPE_LUMP:
+		ViewLump(active_pane->dir, ent);
+		break;
+
+	default:
+		break;
+	}
 }
 
 const struct action view_action = {
