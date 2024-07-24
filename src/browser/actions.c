@@ -514,12 +514,12 @@ static void PerformRearrange(void)
 	bool noop;
 	size_t cnt;
 
-	if (!B_CheckReadOnly(active_pane->dir)) {
+	if (active_pane->tagged.num_entries == 0) {
+		UI_MessageBox("You have not selected any lumps to move.");
 		return;
 	}
 
-	if (active_pane->tagged.num_entries == 0) {
-		UI_MessageBox("You have not selected any lumps to move.");
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -601,12 +601,12 @@ static void PerformSortEntries(void)
 	int i;
 	size_t num_tagged = active_pane->tagged.num_entries;
 
-	if (!B_CheckReadOnly(active_pane->dir)) {
+	if (num_tagged == 0) {
+		UI_MessageBox("You have not selected anything to sort.");
 		return;
 	}
 
-	if (num_tagged == 0) {
-		UI_MessageBox("You have not selected anything to sort.");
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -696,10 +696,6 @@ static void PerformRename(void)
 	uint64_t serial_no = active_pane->dir->entries[selected].serial_no;
 	bool success;
 
-	if (!B_CheckReadOnly(active_pane->dir)) {
-		return;
-	}
-
 	if (tagged->num_entries == 0) {
 		UI_MessageBox(
 		    "You have not selected anything to rename.");
@@ -707,6 +703,10 @@ static void PerformRename(void)
 	} else if (tagged->num_entries > 1) {
 		UI_MessageBox(
 		    "You can't rename more than one thing at once.");
+		return;
+	}
+
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -744,12 +744,12 @@ static void PerformDeleteNoConfirm(void)
 	char buf[64];
 	int i;
 
-	if (!B_CheckReadOnly(active_pane->dir)) {
+	if (tagged->num_entries == 0) {
+		UI_MessageBox("You have not selected anything to delete.");
 		return;
 	}
 
-	if (tagged->num_entries == 0) {
-		UI_MessageBox("You have not selected anything to delete.");
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -796,12 +796,12 @@ static void PerformDelete(void)
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
 	char buf[64];
 
-	if (!B_CheckReadOnly(active_pane->dir)) {
+	if (tagged->num_entries == 0) {
+		UI_MessageBox("You have not selected anything to delete.");
 		return;
 	}
 
-	if (tagged->num_entries == 0) {
-		UI_MessageBox("You have not selected anything to delete.");
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 

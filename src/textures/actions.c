@@ -148,16 +148,16 @@ static void PerformDuplicateTexture(void)
 	int idx = B_DirectoryPaneSelected(active_pane);
 	char *name;
 
-	if (!B_CheckReadOnly(active_pane->dir)) {
-		return;
-	}
-
 	if (tagged->num_entries != 1) {
 		UI_MessageBox("You can only duplicate a single texture.");
 		return;
 	}
 	if (idx < 0 || idx >= txs->num_textures) {
 		UI_MessageBox("You have not selected a texture.");
+		return;
+	}
+
+	if (!B_CheckReadOnly(active_pane->dir)) {
 		return;
 	}
 
@@ -323,10 +323,6 @@ static void PerformImportConfig(void)
 		return;
 	}
 
-	if (!B_CheckReadOnly(other_pane->dir)) {
-		return;
-	}
-
 	ent = &active_pane->dir->entries[selected];
 	in = VFS_OpenByEntry(active_pane->dir, ent);
 
@@ -334,6 +330,10 @@ static void PerformImportConfig(void)
 	if (!TX_DirParseConfig(other_pane->dir, &b, in)) {
 		UI_MessageBox("Failed to import config from '%s':\n%s",
 		              ent->name, GetConversionError());
+		return;
+	}
+
+	if (!B_CheckReadOnly(other_pane->dir)) {
 		return;
 	}
 
@@ -471,14 +471,14 @@ static void PerformCopyTextures(void)
 		return;
 	}
 
-	if (!B_CheckReadOnly(to_dir)) {
-		return;
-	}
-
 	marshaled = TX_DirFormatConfig(from_dir, tagged);
 	assert(marshaled != NULL);
 
 	assert(TX_DirParseConfig(to_dir, &b, marshaled));
+
+	if (!B_CheckReadOnly(to_dir)) {
+		return;
+	}
 
 	if (TX_BundleConfirmAddPnames(into_bundle, &b)
 	 && TX_BundleConfirmTextureOverwrite(into_bundle, &b)) {
