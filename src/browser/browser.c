@@ -186,6 +186,7 @@ static const struct action search_again_action = {
 
 static void PerformSwapPanes(void)
 {
+	struct directory_pane *active = active_pane;
 	struct directory_pane *tmp = browser_panes[0];
 	WINDOW *wintmp = pane_windows[0];
 
@@ -194,7 +195,7 @@ static void PerformSwapPanes(void)
 	pane_windows[0] = pane_windows[1];
 	pane_windows[1] = wintmp;
 
-	B_SwitchToPane(active_pane);
+	B_SwitchToPane(active);
 }
 
 static const struct action swap_panes_action = {
@@ -398,6 +399,7 @@ void B_SwitchToPane(struct directory_pane *pane)
 	unsigned int pane_num = PaneNum(pane);
 
 	active_pane->pane.active = 0;
+	other_pane->pane.active = 0;
 	current_pane = pane_num;
 	UI_RaisePaneToTop(pane);
 	pane->pane.active = 1;
