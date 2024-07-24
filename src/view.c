@@ -353,7 +353,7 @@ static void TempCleanup(struct temp_edit_context *ctx)
 }
 
 static const char *text_file_extensions[] = {
-	".txt", ".c", ".h", ".cfg", ".ini",
+	".txt", ".c", ".h", ".cfg", ".ini", ".md",
 	".deh", ".bex", ".hhe", ".seh",  // Dehacked and variants
 };
 
