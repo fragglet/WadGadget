@@ -184,7 +184,7 @@ static const struct action search_again_action = {
 	SearchAgain,
 };
 
-static void SwapPanes(void)
+static void PerformSwapPanes(void)
 {
 	struct directory_pane *tmp = browser_panes[0];
 	WINDOW *wintmp = pane_windows[0];
@@ -198,8 +198,8 @@ static void SwapPanes(void)
 }
 
 static const struct action swap_panes_action = {
-	0, '_', "Swap", "Swap panes",
-	SwapPanes,
+	KEY_BTAB, 0, NULL, "Swap panes",
+	PerformSwapPanes,
 };
 
 static const struct action *wad_actions[] = {
