@@ -522,6 +522,11 @@ static bool DrawInfoPane(void *p)
 		    "Directory");
 		break;
 
+	case FILE_TYPE_PALETTE:
+		UI_PrintMultilineString(pane->window, 1, 2,
+		    "Palette");
+		break;
+
 	case FILE_TYPE_TEXTURE_LIST:
 	case FILE_TYPE_PNAMES_LIST:
 	case FILE_TYPE_PALETTES:
