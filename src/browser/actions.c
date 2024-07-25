@@ -1009,6 +1009,7 @@ static void ViewLump(struct directory *dir, struct directory_entry *ent)
 
 static void PerformView(void)
 {
+	struct directory *new_dir;
 	struct directory_entry *ent;
 
 	ent = B_DirectoryPaneEntry(active_pane);
@@ -1017,8 +1018,7 @@ static void PerformView(void)
 	case FILE_TYPE_DIR:
 	case FILE_TYPE_WAD:
 		// Change directory?
-		struct directory *new_dir =
-			VFS_OpenDirByEntry(active_pane->dir, ent);
+		new_dir = VFS_OpenDirByEntry(active_pane->dir, ent);
 		if (new_dir == NULL) {
 			UI_MessageBox("Error when opening '%s'.", ent->name);
 			return;
