@@ -123,13 +123,13 @@ static intptr_t WaitSubprocess(pid_t pid)
 // than the Unix fork/exec. For simplicity for porting for Windows, let's
 // just emulate it where we don't have it.
 #define _P_WAIT 1
-static intptr_t _spawnv(int mode, const char *cmdname, char **argv)
+static intptr_t _spawnv(int mode, const char *cmdname, const char **argv)
 {
 	pid_t pid = fork();
 	if (pid == -1) {
 		return -1;
 	} else if (pid == 0) {
-		execvp(cmdname, argv);
+		execvp(cmdname, (char **) argv);
 		exit(-1);
 	} else {
 		return WaitSubprocess(pid);
@@ -163,6 +163,172 @@ static time_t ReadFileTime(const char *filename)
 	}
 
 	return s.st_mtime;
+}
+
+static void RaiseUsToTop(void)
+{
+#ifdef __APPLE__
+	static const struct {
+		const char *env;
+		const char *appname;
+	} terms[] = {
+		{"iTerm",            "iTerm"},
+		{"Apple_Terminal",   "Terminal"},
+		{"Hyper",            "Hyper"},
+		{"Tabby",            "Tabby"},
+		{"rio",              "rio"},
+		// Add your favorite terminal here. Not Warp though.
+	};
+	const char *termprog = getenv("TERM_PROGRAM");
+	const char *appname = NULL;
+	int i;
+
+	for (i = 0; termprog != NULL && i < arrlen(terms); i++) {
+		if (strstr(termprog, terms[i].env) != NULL) {
+			appname = terms[i].appname;
+		}
+	}
+
+	// This is a rather gross hack, but it works. We use AppleScript to
+	// bring the terminal back to the foreground.
+	if (appname != NULL) {
+		char buf[100];
+		snprintf(buf, sizeof(buf), "osascript -e 'tell "
+		         "application \"%s\" to activate' "
+		         ">/dev/null 2>/dev/null", appname);
+		system(buf);
+		return;
+	}
+#endif
+
+	// Otherwise, we can try the xterm method.
+	TF_SendRaiseWindowOp();
+}
+
+static const char *text_file_extensions[] = {
+	".txt", ".c", ".h", ".cfg", ".ini", ".md",
+	".deh", ".bex", ".hhe", ".seh",  // Dehacked and variants
+};
+
+static bool IsTextFile(const char *filename)
+{
+	int i;
+	const char *extn;
+
+	for (i = 0; i < arrlen(text_file_extensions); i++) {
+		extn = text_file_extensions[i];
+		if (StringHasSuffix(filename, extn)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static char *GetOpenCommand(const char *filename)
+{
+	char *editor = getenv("EDITOR");
+
+	// For files with text file extensions, always respect the standard
+	// Unix EDITOR environment variable. This should always work even if
+	// xdg-utils isn't installed.
+	if (editor != NULL && IsTextFile(filename)) {
+		return editor;
+	}
+
+#ifdef __APPLE__
+	return "open";
+#else
+	{
+		static bool have_xdg_utils = false;
+		have_xdg_utils = have_xdg_utils || CheckHaveXdgUtils();
+
+		if (!have_xdg_utils) {
+			TF_SetCursesModes();
+			UI_MessageBox("Sorry, can't open files; xdg-open "
+			              "command not found.\nYou should install "
+			              "the xdg-utils package.");
+			return NULL;
+		}
+	}
+	return "xdg-open";
+#endif
+}
+
+static bool EditFile(const char *filename, const struct directory_entry *ent)
+{
+	const char *argv[3];
+
+	argv[0] = GetOpenCommand(filename);
+	argv[1] = filename;
+	argv[2] = NULL;
+
+	if (argv[0] == NULL) {
+		return false;
+	}
+
+	printf("Opening %s '%s'...\n"
+	       "Waiting until program terminates.\n"
+	       "(^Z = stop waiting, continue in background)\n",
+	       ent->type == FILE_TYPE_LUMP ? "lump" : "file",
+	       ent->name);
+
+	return _spawnv(_P_WAIT, argv[0], argv) == 0;
+}
+
+static bool DisplayFile(const char *filename, const struct directory_entry *ent)
+{
+	if (StringHasSuffix(filename, ".png")) {
+		SIXEL_ClearAndPrint("Contents of '%s':\n", ent->name);
+		return SIXEL_DisplayImage(filename);
+	} else if (StringHasSuffix(filename, ".lmp")
+	        && ent->size == ENDOOM_SIZE) {
+		ENDOOM_ShowFile(filename);
+		return true;
+	}
+
+	return false;
+}
+
+enum open_result { OPEN_FAILED, OPEN_VIEWED, OPEN_EDITED };
+
+static enum open_result OpenFile(const char *filename,
+                                 const struct directory_entry *ent)
+{
+	enum open_result result;
+
+	if (IsTextFile(filename)) {
+		VFILE *in;
+		in = vfwrapfile(fopen(filename, "r"));
+		assert(in != NULL);
+		switch (P_RunPlaintextPager(ent->name, in, true)) {
+		case PLAINTEXT_PAGER_FAILURE:
+			return OPEN_FAILED;
+		case PLAINTEXT_PAGER_DONE:
+			return OPEN_VIEWED;
+		case PLAINTEXT_PAGER_WANT_EDIT:
+			// fall-through, launch editor
+			break;
+		}
+	}
+
+	// Temporarily suspend curses until the subprogram returns.
+	TF_SuspendCursesMode();
+
+	if (DisplayFile(filename, ent)) {
+		result = OPEN_VIEWED;
+	} else if (EditFile(filename, ent)) {
+		result = OPEN_EDITED;
+	} else {
+		result = OPEN_FAILED;
+	}
+
+	// Restore the curses display which may have been trashed if another
+	// curses program was opened.
+	TF_SetCursesModes();
+	RedrawScreen();
+
+	return result;
 }
 
 static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
@@ -217,60 +383,15 @@ static bool TempFileChanged(struct temp_edit_context *ctx)
 	return modtime != 0 && ctx->orig_time != 0 && modtime > ctx->orig_time;
 }
 
-static void RaiseUsToTop(void)
+// Blocks until the temporary file changes or the user presses a key.
+// Returns true if an edit was successfully detected.
+static bool WaitForEdit(struct temp_edit_context *ctx)
 {
-#ifdef __APPLE__
-	static const struct {
-		const char *env;
-		const char *appname;
-	} terms[] = {
-		{"iTerm",            "iTerm"},
-		{"Apple_Terminal",   "Terminal"},
-		{"Hyper",            "Hyper"},
-		{"Tabby",            "Tabby"},
-		{"rio",              "rio"},
-		// Add your favorite terminal here. Not Warp though.
-	};
-	const char *termprog = getenv("TERM_PROGRAM");
-	const char *appname = NULL;
-	int i;
+	bool result = true;
 
-	for (i = 0; termprog != NULL && i < arrlen(terms); i++) {
-		if (strstr(termprog, terms[i].env) != NULL) {
-			appname = terms[i].appname;
-		}
-	}
-
-	// This is a rather gross hack, but it works. We use AppleScript to
-	// bring the terminal back to the foreground.
-	if (appname != NULL) {
-		char buf[100];
-		snprintf(buf, sizeof(buf), "osascript -e 'tell "
-		         "application \"%s\" to activate' "
-		         ">/dev/null 2>/dev/null", appname);
-		system(buf);
-		return;
-	}
-#endif
-
-	// Otherwise, we can try the xterm method.
-	TF_SendRaiseWindowOp();
-}
-
-// Called after a successful edit to (if appropriate) import the changed
-// file back into the WAD.
-static bool TempMaybeImport(struct temp_edit_context *ctx)
-{
-	VFILE *from_file;
-	int do_import;
-
-	if (ctx->temp_dir == NULL) {
-		return true;
-	}
-
-	// If the edit command succeeded, there are two possibilities. One is
-	// that the editor really has run its course, and we immediately prompt
-	// the user if the file was changed. The second, if we invoked
+	// The edit command succeeded, and now there are two possibilities. One
+	// is that the editor really has run its course, and we immediately
+	// prompt the user if the file was changed. The second, if we invoked
 	// something like the Gimp, is that the file was loaded into an already
 	// running program in the background. If this happens, the command
 	// exits immediately but the user may still be editing. To handle the
@@ -284,12 +405,26 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 		int c = getch();
 		if (c != ERR) {
 			ungetch(c);
-			timeout(-1);
 			RedrawScreen();
-			return true;
+			result = false;
+			break;
 		}
 	}
 	timeout(-1);
+
+	return result;
+}
+
+// Called after a successful edit to (if appropriate) import the changed
+// file back into the WAD. Returns true if we have now finished editing.
+static bool TempMaybeImport(struct temp_edit_context *ctx)
+{
+	VFILE *from_file;
+	int do_import;
+
+	if (!WaitForEdit(ctx)) {
+		return true;
+	}
 
 	RaiseUsToTop();
 	RedrawScreen();
@@ -343,131 +478,43 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 
 static void TempCleanup(struct temp_edit_context *ctx)
 {
-	if (ctx->temp_dir == NULL) {
-		return;
-	}
 	remove(ctx->filename);
 	rmdir(ctx->temp_dir);
 	free(ctx->temp_dir);
-	// ctx->filename will be freed by OpenEntry().
+	free(ctx->filename);
 }
 
-static const char *text_file_extensions[] = {
-	".txt", ".c", ".h", ".cfg", ".ini", ".md",
-	".deh", ".bex", ".hhe", ".seh",  // Dehacked and variants
-};
-
-static bool IsTextFile(const char *filename)
+bool OpenLump(struct directory *dir, struct directory_entry *ent)
 {
-	int i;
-	const char *extn;
+	struct temp_edit_context temp_ctx = {NULL};
+	enum open_result result;
+	char *filename;
 
-	for (i = 0; i < arrlen(text_file_extensions); i++) {
-		extn = text_file_extensions[i];
-		if (StringHasSuffix(filename, extn)) {
-			return true;
-		}
+	filename = TempExport(&temp_ctx, dir, ent);
+	if (filename == NULL) {
+		return false;
 	}
 
-	return false;
-}
+	do {
+		result = OpenFile(filename, ent);
+	} while (result == OPEN_EDITED && !TempMaybeImport(&temp_ctx));
 
-static char *GetOpenCommand(const char *filename)
-{
-	char *editor = getenv("EDITOR");
+	TempCleanup(&temp_ctx);
 
-	// For files with text file extensions, always respect the standard
-	// Unix EDITOR environment variable. This should always work even if
-	// xdg-utils isn't installed.
-	if (editor != NULL && IsTextFile(filename)) {
-		return editor;
-	}
-
-#ifdef __APPLE__
-	return "open";
-#else
-	{
-		static bool have_xdg_utils = false;
-		have_xdg_utils = have_xdg_utils || CheckHaveXdgUtils();
-
-		if (!have_xdg_utils) {
-			TF_SetCursesModes();
-			UI_MessageBox("Sorry, can't open files; xdg-open "
-			              "command not found.\nYou should install "
-			              "the xdg-utils package.");
-			return NULL;
-		}
-	}
-	return "xdg-open";
-#endif
+	return result != OPEN_FAILED;
 }
 
 void OpenDirent(struct directory *dir, struct directory_entry *ent)
 {
-	struct temp_edit_context temp_ctx = {NULL};
-	bool displayed, edit_success = true;
-	char *argv[3];
+	bool success;
 
-	if (ent->type == FILE_TYPE_FILE) {
-		argv[1] = VFS_EntryPath(dir, ent);
+	if (ent->type == FILE_TYPE_LUMP) {
+		success = OpenLump(dir, ent);
 	} else {
-		argv[1] = TempExport(&temp_ctx, dir, ent);
-		if (argv[1] == NULL) {
-			return;
-		}
+		success = OpenFile(VFS_EntryPath(dir, ent), ent);
 	}
 
-try_again:
-	displayed = false;
-
-	if (IsTextFile(argv[1])) {
-		VFILE *in;
-		in = vfwrapfile(fopen(argv[1], "r"));
-		assert(in != NULL);
-		displayed = P_RunPlaintextPager(ent->name, in, true)
-		             != PLAINTEXT_PAGER_WANT_EDIT;
-	}
-
-	// Temporarily suspend curses until the subprogram returns.
-	TF_SuspendCursesMode();
-
-	if (StringHasSuffix(argv[1], ".png")) {
-		SIXEL_ClearAndPrint("Contents of '%s':\n", ent->name);
-		displayed = SIXEL_DisplayImage(argv[1]);
-	} else if (StringHasSuffix(argv[1], ".lmp")
-	        && ent->size == ENDOOM_SIZE) {
-		ENDOOM_ShowFile(argv[1]);
-		displayed = true;
-	}
-
-	if (!displayed) {
-		argv[0] = GetOpenCommand(argv[1]);
-		argv[2] = NULL;
-
-		if (argv[0] != NULL) {
-			printf("Opening %s '%s'...\n"
-			       "Waiting until program terminates.\n"
-			       "(^Z = stop waiting, continue in background)\n",
-			       ent->type == FILE_TYPE_LUMP ? "lump" : "file",
-			       ent->name);
-
-			edit_success = _spawnv(_P_WAIT, argv[0], argv) == 0;
-		}
-	}
-
-	// Restore the curses display which may have been trashed if another
-	// curses program was opened.
-	TF_SetCursesModes();
-	RedrawScreen();
-
-	if (edit_success && !TempMaybeImport(&temp_ctx)) {
-		goto try_again;
-	}
-
-	TempCleanup(&temp_ctx);
-	free(argv[1]);
-
-	if (!edit_success) {
+	if (!success) {
 		UI_MessageBox("Failed executing command to open file,\n"
 		              "or program exited with an error.");
 	}
@@ -476,7 +523,7 @@ try_again:
 void RunShell(void)
 {
 	bool success;
-	char *argv[3];
+	const char *argv[3];
 
 	// Temporarily suspend curses until the subprogram returns.
 	TF_SuspendCursesMode();
