@@ -1259,11 +1259,37 @@ const struct action help_action = {
 
 static void PerformShell(void)
 {
+	struct directory_entry *ent;
+	char *marked_env = NULL;
+	int idx = 0;
+
 	if (chdir(active_pane->dir->path) != 0) {
 		return;
 	}
 
+	while ((ent = VFS_IterateSet(active_pane->dir, &active_pane->tagged,
+	                             &idx)) != NULL) {
+		char *new_marked_env;
+
+		if (marked_env == NULL) {
+			new_marked_env = checked_strdup(ent->name);
+		} else {
+			new_marked_env = StringJoin(" ", marked_env,
+			                            ent->name, NULL);
+		}
+
+		free(marked_env);
+		marked_env = new_marked_env;
+	}
+
+	if (marked_env != NULL) {
+		assert(setenv("MARKED", marked_env, 1) == 0);
+	}
+
 	RunShell();
+
+	assert(unsetenv("MARKED") == 0);
+	free(marked_env);
 }
 
 const struct action open_shell_action = {

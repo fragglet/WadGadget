@@ -529,7 +529,14 @@ void RunShell(void)
 	TF_SuspendCursesMode();
 
 	TF_ClearScreen();
-	printf("Command prompt. Type 'exit' to return to WadGadget.\n\n");
+	printf("Command prompt. Type 'exit' to return to WadGadget.\n");
+
+	if (getenv("MARKED") != NULL) {
+		printf("The environment variable $MARKED contain all "
+		       "marked files.\n");
+	}
+
+	printf("\n");
 
 	argv[0] = getenv("SHELL");
 	argv[1] = NULL;
