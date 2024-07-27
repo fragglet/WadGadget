@@ -1011,7 +1011,7 @@ static void ViewLump(struct directory *dir, struct directory_entry *ent)
 		return;
 	}
 
-	OpenDirent(dir, ent);
+	OpenDirent(dir, ent, false);
 }
 
 static void PerformView(void)
@@ -1034,7 +1034,7 @@ static void PerformView(void)
 		break;
 
 	case FILE_TYPE_FILE:
-		OpenDirent(active_pane->dir, ent);
+		OpenDirent(active_pane->dir, ent, false);
 		break;
 
 	case FILE_TYPE_LUMP:

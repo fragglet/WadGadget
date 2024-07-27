@@ -293,11 +293,12 @@ static bool DisplayFile(const char *filename, const struct directory_entry *ent)
 enum open_result { OPEN_FAILED, OPEN_VIEWED, OPEN_EDITED };
 
 static enum open_result OpenFile(const char *filename,
-                                 const struct directory_entry *ent)
+                                 const struct directory_entry *ent,
+                                 bool force_edit)
 {
 	enum open_result result;
 
-	if (IsTextFile(filename)) {
+	if (!force_edit && IsTextFile(filename)) {
 		VFILE *in;
 		in = vfwrapfile(fopen(filename, "r"));
 		assert(in != NULL);
@@ -315,7 +316,7 @@ static enum open_result OpenFile(const char *filename,
 	// Temporarily suspend curses until the subprogram returns.
 	TF_SuspendCursesMode();
 
-	if (DisplayFile(filename, ent)) {
+	if (!force_edit && DisplayFile(filename, ent)) {
 		result = OPEN_VIEWED;
 	} else if (EditFile(filename, ent)) {
 		result = OPEN_EDITED;
@@ -484,7 +485,8 @@ static void TempCleanup(struct temp_edit_context *ctx)
 	free(ctx->filename);
 }
 
-bool OpenLump(struct directory *dir, struct directory_entry *ent)
+static bool OpenLump(struct directory *dir, struct directory_entry *ent,
+                     bool force_edit)
 {
 	struct temp_edit_context temp_ctx = {NULL};
 	enum open_result result;
@@ -496,7 +498,7 @@ bool OpenLump(struct directory *dir, struct directory_entry *ent)
 	}
 
 	do {
-		result = OpenFile(filename, ent);
+		result = OpenFile(filename, ent, force_edit);
 	} while (result == OPEN_EDITED && !TempMaybeImport(&temp_ctx));
 
 	TempCleanup(&temp_ctx);
@@ -504,14 +506,15 @@ bool OpenLump(struct directory *dir, struct directory_entry *ent)
 	return result != OPEN_FAILED;
 }
 
-void OpenDirent(struct directory *dir, struct directory_entry *ent)
+void OpenDirent(struct directory *dir, struct directory_entry *ent,
+                bool force_edit)
 {
 	bool success;
 
 	if (ent->type == FILE_TYPE_LUMP) {
-		success = OpenLump(dir, ent);
+		success = OpenLump(dir, ent, force_edit);
 	} else {
-		success = OpenFile(VFS_EntryPath(dir, ent), ent);
+		success = OpenFile(VFS_EntryPath(dir, ent), ent, force_edit);
 	}
 
 	if (!success) {

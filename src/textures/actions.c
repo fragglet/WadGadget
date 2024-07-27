@@ -107,7 +107,7 @@ static void PerformEditConfig(void)
 
 	parent = TX_DirGetParent(active_pane->dir, &ent);
 	old_rev = parent->curr_revision;
-	OpenDirent(parent, ent);
+	OpenDirent(parent, ent, true);
 
 	// Editing may have reset the readonly flag.
 	active_pane->dir->readonly = parent->readonly;
