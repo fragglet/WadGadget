@@ -300,6 +300,15 @@ int VFS_Refresh(struct directory *dir)
 	return result;
 }
 
+void VFS_RefreshAll(void)
+{
+	struct directory *d;
+
+	for (d = open_dirs; d != NULL; d = d->next) {
+		VFS_Refresh(d);
+	}
+}
+
 bool VFS_Remove(struct directory *dir, struct directory_entry *entry)
 {
 	unsigned int index = entry - dir->entries;

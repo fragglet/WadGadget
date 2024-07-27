@@ -1297,6 +1297,8 @@ static void PerformShell(void)
 
 	assert(unsetenv("MARKED") == 0);
 	free(marked_env);
+
+	VFS_RefreshAll();
 }
 
 const struct action open_shell_action = {
