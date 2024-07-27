@@ -146,6 +146,13 @@ static void CopyToWAD(bool convert)
 
 static void PerformCopy(bool convert)
 {
+	struct directory_entry *ent = B_DirectoryPaneEntry(active_pane);
+
+	if (ent != NULL && ent->type == FILE_TYPE_DIR) {
+		UI_MessageBox("Copying directories is not supported.");
+		return;
+	}
+
 	if (!B_CheckReadOnly(other_pane->dir)) {
 		return;
 	}
