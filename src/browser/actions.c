@@ -1018,6 +1018,7 @@ static void PerformView(void)
 {
 	struct directory *new_dir;
 	struct directory_entry *ent;
+	char *path;
 
 	ent = B_DirectoryPaneEntry(active_pane);
 
@@ -1039,6 +1040,12 @@ static void PerformView(void)
 
 	case FILE_TYPE_LUMP:
 		ViewLump(active_pane->dir, ent);
+		break;
+
+	case FILE_TYPE_PALETTE:
+		path = PAL_EntryPath(active_pane->dir, ent);
+		OpenFile(path, ent, false);
+		free(path);
 		break;
 
 	default:

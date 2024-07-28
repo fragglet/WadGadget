@@ -10,6 +10,11 @@
 
 #include "fs/vfs.h"
 
+enum open_result { OPEN_FAILED, OPEN_VIEWED, OPEN_EDITED };
+
+enum open_result OpenFile(const char *filename,
+                          const struct directory_entry *ent,
+                          bool force_edit);
 void OpenDirent(struct directory *dir, struct directory_entry *ent,
                 bool force_edit);
 void RunShell(void);

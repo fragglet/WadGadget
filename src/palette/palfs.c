@@ -211,3 +211,15 @@ struct directory *PAL_OpenDirectory(struct directory *previous)
 
 	return &pd->dir;
 }
+
+char *PAL_EntryPath(struct directory *dir, struct directory_entry *ent)
+{
+	struct palette_dir *pd = (struct palette_dir *) dir;
+	struct directory_entry *inner_ent;
+
+	assert(pd->dir.directory_funcs == &palette_fs_functions);
+	inner_ent = VFS_EntryBySerial(pd->inner, ent->serial_no);
+	assert(inner_ent != NULL);
+
+	return VFS_EntryPath(pd->inner, inner_ent);
+}

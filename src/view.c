@@ -34,6 +34,7 @@
 #include "ui/ui.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
+#include "view.h"
 
 #ifndef _WIN32
 
@@ -290,11 +291,9 @@ static bool DisplayFile(const char *filename, const struct directory_entry *ent)
 	return false;
 }
 
-enum open_result { OPEN_FAILED, OPEN_VIEWED, OPEN_EDITED };
-
-static enum open_result OpenFile(const char *filename,
-                                 const struct directory_entry *ent,
-                                 bool force_edit)
+enum open_result OpenFile(const char *filename,
+                          const struct directory_entry *ent,
+                          bool force_edit)
 {
 	enum open_result result;
 
