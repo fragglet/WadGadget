@@ -183,8 +183,10 @@ static void SetColumns(struct hexdump_pager_config *cfg)
 	while (PagerWidth(cfg) > COLS ||!CanShowMarkers(cfg)) {
 		--cfg->columns;
 	}
-	// Prime number?
-	if (cfg->columns == 1) {
+	// Prime numbers can cause silly results (eg. 14 byte record
+	// displayed as 7 lines of two bytes each). Guard against this
+	// by setting a limit on the number of lines.
+	if ((cfg->record_length / cfg->columns) > 5) {
 		SetDefaultColumns(cfg);
 	}
 }
