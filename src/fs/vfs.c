@@ -371,20 +371,17 @@ void VFS_DirectoryUnref(struct directory *dir)
 	free(dir);
 }
 
-void VFS_DescribeSize(const struct directory_entry *ent, char buf[10],
-                      bool shorter)
+void VFS_DescribeSize(const struct directory_entry *ent, char buf[10])
 {
-	int64_t adj_len = ent->size * (shorter ? 100 : 1);
-
-	if (adj_len < 0) {
+	if (ent->size < 0) {
 		strncpy(buf, "", 10);
-	} else if (adj_len < KB(100)) {  // up to 99999
+	} else if (ent->size < KB(100)) {  // up to 99999
 		snprintf(buf, 10, "%d", (int) ent->size);
-	} else if (adj_len < MB(10)) {  // up to 9999K
+	} else if (ent->size < MB(10)) {  // up to 9999K
 		snprintf(buf, 10, "%dK", (short) (ent->size / KB(1)));
-	} else if (adj_len < GB(10)) {  // up to 9999M
+	} else if (ent->size < GB(10)) {  // up to 9999M
 		snprintf(buf, 10, "%dM", (short) (ent->size / MB(1)));
-	} else if (adj_len < TB(10)) {  // up to 9999G
+	} else if (ent->size < TB(10)) {  // up to 9999G
 		snprintf(buf, 10, "%dG", (short) (ent->size / GB(1)));
 	} else {
 		snprintf(buf, 10, "big!");

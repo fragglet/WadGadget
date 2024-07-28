@@ -39,13 +39,11 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	unsigned int w;
 	int prefix = ' ';
 	char size[10] = "";
-	bool shorter;
 
 	w = getmaxx(win) - 2;
 	if (w > sizeof(buf)) {
 		w = sizeof(buf);
 	}
-	shorter = w < 16;
 
 	if (idx == LIST_PANE_END_MARKER) {
 		if (dp->dir->num_entries == 0) {
@@ -90,7 +88,7 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 		// We only show size for lumps (like NWT); for files it
 		// is too cluttered (plus filenames can be much longer)
 		if (ent->type == FILE_TYPE_LUMP) {
-			VFS_DescribeSize(ent, size, shorter);
+			VFS_DescribeSize(ent, size);
 		}
 		snprintf(buf, w, "%-100s", ent->name);
 	}
