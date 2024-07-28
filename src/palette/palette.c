@@ -93,10 +93,17 @@ VFILE *PAL_ToImageFile(struct palette_set *set)
 	VFILE *result = NULL;
 	struct png_context ctx;
 	uint8_t *rowbuf;
-	int w, h, x, y;
+	int w, h, x, y, idx;
 
-	w = 256;
-	h = set->num_palettes;
+	// For multi-palette sets we put one palette per line, but if it's
+	// just one palette then generate a 16x16 square.
+	if (set->num_palettes > 1) {
+		w = 256;
+		h = set->num_palettes;
+	} else {
+		w = 16;
+		h = 16;
+	}
 
 	result = V_OpenPNGWrite(&ctx);
 	if (result == NULL) {
@@ -109,11 +116,14 @@ VFILE *PAL_ToImageFile(struct palette_set *set)
 	png_write_info(ctx.ppng, ctx.pinfo);
 
 	rowbuf = checked_calloc(w, 3);
+	idx = 0;
 	for (y = 0; y < h; y++) {
 		for (x = 0; x < w; ++x) {
-			rowbuf[x * 3] = set->palettes[y].entries[x].r;
-			rowbuf[x * 3 + 1] = set->palettes[y].entries[x].g;
-			rowbuf[x * 3 + 2] = set->palettes[y].entries[x].b;
+			int p = idx / 256, e = idx % 256;
+			rowbuf[x * 3] = set->palettes[p].entries[e].r;
+			rowbuf[x * 3 + 1] = set->palettes[p].entries[e].g;
+			rowbuf[x * 3 + 2] = set->palettes[p].entries[e].b;
+			++idx;
 		}
 		png_write_row(ctx.ppng, rowbuf);
 	}
