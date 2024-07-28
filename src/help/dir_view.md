@@ -16,10 +16,10 @@ editor for that file type.
     **Ctrl-D          **  View hex**d**ump of selected file
     **Ctrl-T  F2      **  Compac**t** selected WAD file
     **Ctrl-U  F3      **  **U**pdate
-    **Ctrl-E  F4      **  Open command prompt in this directory
-    **Ctrl-O  F5      **  C**o**py or import files; [see below](#copying)
+    **Ctrl-O  F4      **  Open c**o**mmand prompt in this directory
+    **Ctrl-C  F5      **  **C**opy or import files; [see below](#copying)
     **        Shift-F5**  Import raw, no file conversion
-    **Ctrl-C  F6      **  **C**hange name of selected file/directory
+    **Ctrl-E  F6      **  R**e**name selected file/directory
     **Ctrl-K  F7      **  Ma**k**e directory
     **Ctrl-X  F8      **  Delete file(s)
     **        Shift-F8**  Delete file(s) (no confirmation)

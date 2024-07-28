@@ -183,7 +183,7 @@ static void PerformCopyNoConvert(void)
 }
 
 const struct action copy_action = {
-	KEY_F(5), 'O', "Copy", "> Copy",
+	KEY_F(5), 'C', "Copy", "> Copy",
 	PerformCopyConvert,
 };
 const struct action copy_noconv_action = {
@@ -191,7 +191,7 @@ const struct action copy_noconv_action = {
 	PerformCopyNoConvert,
 };
 const struct action export_action = {
-	KEY_F(5), 'O', "Export", "> Export",
+	KEY_F(5), 'C', "Export", "> Export",
 	PerformCopyConvert,
 };
 const struct action export_noconv_action = {
@@ -199,7 +199,7 @@ const struct action export_noconv_action = {
 	PerformCopyNoConvert,
 };
 const struct action import_action = {
-	KEY_F(5), 'O', "Import", "> Import",
+	KEY_F(5), 'C', "Import", "> Import",
 	PerformCopyConvert,
 };
 const struct action import_noconv_action = {
@@ -739,7 +739,7 @@ static void PerformRename(void)
 }
 
 const struct action rename_action = {
-	KEY_F(6), 'C', "Ren", ". Rename",
+	KEY_F(6), 'E', "Ren", ". Rename",
 	PerformRename,
 };
 
@@ -1124,11 +1124,6 @@ const struct action compact_action = {
 	PerformCompact,
 };
 
-// TODO:
-const struct action edit_action = {
-	KEY_F(4), 'E', "Edit", "Edit",
-};
-
 static void PerformHexdump(void)
 {
 	int selected = B_DirectoryPaneSelected(active_pane);
@@ -1302,7 +1297,7 @@ static void PerformShell(void)
 }
 
 const struct action open_shell_action = {
-	KEY_F(4), 'E', "Shell", "Command Prompt here",
+	KEY_F(4), 'O', "Shell", "Command Prompt here",
 	PerformShell,
 };
 

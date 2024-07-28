@@ -22,10 +22,9 @@ list returns to the directory containing the WAD.
     **Ctrl-V  F2      **  Mo**v**e (rearrange) marked lumps
     **Ctrl-]  Shift-F2**  Sort marked lumps into alphabetical order
     **Ctrl-U  F3      **  **U**pdate
-    **Ctrl-E  F4      **  **E**dit
-    **Ctrl-O  F5      **  C**o**py or export lumps; [see below](#copying)
+    **Ctrl-C  F5      **  **C**opy or export lumps; [see below](#copying)
     **        Shift-F5**  Export as raw, no file conversion
-    **Ctrl-C  F6      **  **C**hange name of selected lump
+    **Ctrl-E  F6      **  R**e**name selected lump
     **Ctrl-K  F7      **  Ma**k**e new lump
     **Ctrl-X  F8      **  Delete lump(s)
     **        Shift-F8**  Delete lump(s) (no confirmation)

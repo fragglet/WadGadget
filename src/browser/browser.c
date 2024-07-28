@@ -206,7 +206,6 @@ static const struct action swap_panes_action = {
 static const struct action *wad_actions[] = {
 	&rearrange_action,
 	&new_lump_action,
-	&edit_action,
 	&undo_action,
 	&redo_action,
 	&sort_entries_action,

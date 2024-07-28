@@ -15,9 +15,9 @@ containing the texture lump.
     **Ctrl-V  F2      **  Mo**v**e (rearrange) marked textures
     **Ctrl-]  Shift-F2**  Sort marked textures into alphabetical order
     **Ctrl-U  F3      **  D**u**plicate selected texture
-    **Ctrl-E  F4      **  **E**dit texture config
-    **Ctrl-O  F5      **  C**o**py or export; [see below](#copying)
-    **Ctrl-C  F6      **  **C**hange name of selected texture
+    **Ctrl-F  F4      **  Edit texture config **f**ile
+    **Ctrl-C  F5      **  **C**opy or export; [see below](#copying)
+    **Ctrl-E  F6      **  R**e**name selected texture
     **Ctrl-K  F7      **  Ma**k**e new texture
     **Ctrl-X  F8      **  Delete texture(s)
     **        Shift-F8**  Delete texture(s) (no confirmation)

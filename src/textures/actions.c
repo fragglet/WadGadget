@@ -131,12 +131,12 @@ static void PerformEditConfig(void)
 }
 
 const struct action edit_textures_action = {
-	KEY_F(4), 'E', "EditCfg", "Edit texture config",
+	KEY_F(4), 'F', "EditCfg", "Edit texture config",
 	PerformEditConfig,
 };
 
 const struct action edit_pnames_action = {
-	KEY_F(4), 'E', "EditCfg", "Edit PNAMES config",
+	KEY_F(4), 'F', "EditCfg", "Edit PNAMES config",
 	PerformEditConfig,
 };
 
@@ -251,7 +251,7 @@ cancel:
 }
 
 const struct action export_texture_config = {
-	KEY_F(5), 'O', "ExpCfg", "> Export config",
+	KEY_F(5), 'C', "ExpCfg", "> Export config",
 	PerformExportConfig,
 };
 
@@ -357,7 +357,7 @@ static void PerformImportConfig(void)
 }
 
 const struct action import_texture_config = {
-	KEY_F(5), 'O', "ImpCfg", "> Import config",
+	KEY_F(5), 'C', "ImpCfg", "> Import config",
 	PerformImportConfig,
 };
 
@@ -451,7 +451,7 @@ static void PerformCopyPnames(void)
 }
 
 const struct action copy_pnames_action = {
-	KEY_F(5), 'O', "Copy", "> Copy names",
+	KEY_F(5), 'C', "Copy", "> Copy names",
 	PerformCopyPnames,
 };
 
@@ -495,6 +495,6 @@ static void PerformCopyTextures(void)
 }
 
 const struct action copy_textures_action = {
-	KEY_F(5), 'O', "Copy", "> Copy textures",
+	KEY_F(5), 'C', "Copy", "> Copy textures",
 	PerformCopyTextures,
 };

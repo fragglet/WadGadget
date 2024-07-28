@@ -3,10 +3,9 @@ keys    mnemonic    type  function
 
 ^A F10  unm-All     alt  Unmark all
 ^B      Back        res  Back to previous directory
-^C  F6  Changename  alt  Rename
+^C  F5  Copy        alt  Copy / Import / Export
 ^D      hexDump     res  Hexdump
-^E  F4  Edit        nwt  Edit
-^E  F4  shEll       res  Command Prompt
+^E  F6  rEname      alt  Rename
 ^F  F9  wadFile     alt  Export WAD / Make WAD
 ^G      Glob        alt  Mark pattern
 ^H  F1  Help        std  Help
@@ -16,7 +15,7 @@ keys    mnemonic    type  function
 ^L      -           std  Redraw screen
 ^M      -           trm  Newline
 ^N      Next        std  Search again
-^O  F5  {im,ex}pOrt alt  Copy / Import / Export
+^O  F4  cOmmand     res  Command Prompt
 ^P      Palette     res  Open Palette Manager
 ^Q      -           trm  XOFF
 ^R      Reload      std  Reload directory
