@@ -428,11 +428,24 @@ static const char *DrawBoldText(WINDOW *win, const char *text)
 	return end + 1;
 }
 
+static bool IsHorizRule(const char *s)
+{
+	while (*s != '\0') {
+		if (!isspace(*s) && *s != '-') {
+			return false;
+		}
+		++s;
+	}
+
+	return true;
+}
+
 static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 {
 	struct help_pager_config *cfg = user_data;
 	struct pager_link *curr_link = NULL;
 	const char *line, *p;
+	bool is_horiz_rule;
 
 	assert(lineno < cfg->pc.num_lines);
 	line = cfg->lines[lineno];
@@ -448,6 +461,11 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 		wattroff(win, A_UNDERLINE);
 	}
 
+	// If the line only contains whitespace and '-' characters, we
+	// interpret it as a horizontal rule; we switch out the '-'
+	// characters for the horizontal line character.
+	is_horiz_rule = IsHorizRule(line);
+
 	if (cfg->pc.current_link >= 0
 	 && cfg->pc.current_link < cfg->pc.num_links) {
 		curr_link = &cfg->links[cfg->pc.current_link];
@@ -461,6 +479,8 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 			p = DrawLink(win, p, is_curr_link);
 		} else if (HaveSyntaxElements(p, "**", "**", NULL)) {
 			p = DrawBoldText(win, p);
+		} else if (is_horiz_rule && *p == '-') {
+			waddch(win, ACS_HLINE);
 		} else {
 			waddch(win, *p);
 		}
