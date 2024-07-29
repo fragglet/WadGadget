@@ -1,0 +1,50 @@
+
+Different Doom engine games have different palettes, and some WADs (eg.
+BTSX) use modified palettes. So we want to be able to change the palette
+when working with different WADs.
+
+General idea:
+ * We have a directory ~/.config/WadGadget/Palettes containing PNG files
+   containing palettes. This is the "palette database"
+ * When the directory is created we create Doom.png containing the Doom
+   palette
+ * Palettes can be imported/exported to files or WADs
+ * A symlink named default points to the default palette
+ * We can override the default for particular WADs
+
+There are two types of palette entries:
+ 1. Single palette.
+   - This is palette #0 from PLAYPAL
+   - The built-in Doom palette is just this
+   - We can work with just the basic palette for most things (converting
+     graphic files).
+   - We cannot use this to make a PLAYPAL lump - you get an error if you
+     try to copy this palette to a WAD file
+ 2. Multi-palette. This is the full contents of a PLAYPAL lump
+   - This can be copied to a WAD as a PLAYPAL lump
+
+More details:
+ * The palette database can be brought up by pressing ^P and the parent
+   directory link goes back to the previous directory
+ * Copying to/from PNG file to db preserves filename
+ * Copying from PLAYPAL to db renames to "foo.wad palette"
+ * Copying to WAD renames to PLAYPAL
+ * We can set a preferred palette for a particular WAD by copying it to
+   a lump named XPLAYPAL containing only palette #0
+   - When setting preference, update the existing XPLAYPAL lump if present
+   - If there is no such lump, create a new lump at end of directory
+
+How do we know which palette to use?
+ * If the WAD contains XPLAYPAL, use this as the palette
+ * If the WAD contains PLAYPAL, use this as the palette
+ * Otherwise use the default
+
+Keys:
+  Ent     View/edit palette
+  ^B      Back to previous directory
+  ^C  F5  Copy / Import / Export
+  ^?  F?  Use for WAD >>>
+  ^?  F?  Use as default palette
+  ^E  F6  Rename
+  ^X  F8  Delete palette
+  [Probably unnecessary] ^F  F9  Export WAD / Make WAD
