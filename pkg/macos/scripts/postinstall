@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# This script is run during package install and adds a symlink into
+# /usr/local so that "wadgadget" can be run from the command line.
+
+mkdir -p /usr/local/bin
+ln -sf /Applications/WadGadget.app/Contents/MacOS/wadgadget \
+       /usr/local/bin/wadgadget

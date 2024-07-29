@@ -25,6 +25,7 @@ staging: app
 	mkdir staging
 
 	pkgbuild --identifier org.soulsphere.wadgadget \
+	         --scripts scripts \
 	         --root app/WadGadget.app \
 	         --install-location /Applications/WadGadget.app \
 	         staging/wadgadget.pkg
