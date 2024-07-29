@@ -34,16 +34,12 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 {
 	struct directory_pane *dp = data;
 	const struct directory_entry *ent;
-	static char buf[128];
+	const char *s, *p, *prefix = " ";
 	int ent_idx;
-	unsigned int w;
-	int prefix = ' ';
+	unsigned int w, i;
 	char size[10] = "";
 
-	w = getmaxx(win) - 2;
-	if (w > sizeof(buf)) {
-		w = sizeof(buf);
-	}
+	w = getmaxx(win) - 1;
 
 	if (idx == LIST_PANE_END_MARKER) {
 		if (dp->dir->num_entries == 0) {
@@ -55,15 +51,15 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	ent_idx = idx - HeaderEntries(dp);
 
 	if (ent_idx == -1) {
-		prefix = '^';
-		snprintf(buf, w, " %s", dp->dir->parent_name);
+		prefix = "^ ";
+		s = dp->dir->parent_name;
 		wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
 		ent = &dp->dir->entries[ent_idx];
 		switch (ent->type) {
 			case FILE_TYPE_DIR:
 				wattron(win, A_BOLD);
-				prefix = '/';
+				prefix = "/";
 				break;
 			case FILE_TYPE_WAD:
 				wattron(win, COLOR_PAIR(PAIR_WAD_FILE));
@@ -81,7 +77,7 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 			if ((termattrs() & A_UNDERLINE) != 0) {
 				wattron(win, A_UNDERLINE);
 			} else {
-				prefix = '_';
+				prefix = "_";
 			}
 		}
 
@@ -90,7 +86,7 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 		if (ent->type == FILE_TYPE_LUMP) {
 			VFS_DescribeSize(ent, size);
 		}
-		snprintf(buf, w, "%-100s", ent->name);
+		s = ent->name;
 	}
 	if (dp->pane.active && idx == dp->pane.selected) {
 		wattron(win, A_REVERSE);
@@ -99,15 +95,21 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	                      dp->dir->entries[ent_idx].serial_no)) {
 		wattron(win, COLOR_PAIR(PAIR_TAGGED));
 	}
-	mvwaddch(win, 0, 0, prefix);
-	waddstr(win, buf);
+	mvwaddstr(win, 0, 0, prefix);
+	i = strlen(prefix);
+	for (p = s; i < w && *p != '\0'; i++, p++) {
+		waddch(win, *p);
+	}
+	for (; i < w; i++) {
+		waddch(win, ' ');
+	}
 	if (ent_idx == -1) {
 		mvwaddch(win, 0, 0, ACS_LLCORNER);
-		mvwaddch(win, 0, 1, ACS_HLINE);
-	} else {
-		mvwaddstr(win, 0, w - strlen(size) - 1, " ");
+		waddch(win, ACS_HLINE);
+	} else if (strlen(size) > 0) {
+		mvwaddstr(win, 0, w - strlen(size) - 2, " ");
 		waddstr(win, size);
-		waddstr(win, " ");
+		waddch(win, ' ');
 	}
 	wattroff(win, A_UNDERLINE);
 	wattroff(win, A_REVERSE);
