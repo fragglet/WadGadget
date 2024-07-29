@@ -8,7 +8,7 @@ DOC_FILES = README.md COPYING.md
 DMG = wadgadget.dmg
 ICONS = app.icns wadfile.icns
 PANDOC_FLAGS = --embed-resources --resource-path=$(TOPLEVEL) \
-               -s --template=default.html5
+               -s --template=default.html5 -H style.html
 
 $(DMG) : tmp.dmg
 	rm -f $@
