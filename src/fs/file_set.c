@@ -170,9 +170,7 @@ void VFS_DescribeSet(struct directory *dir, struct file_set *set,
 		}
 		snprintf(buf, buf_len, "'%s'", ent->name);
 	} else {
-		assert(dir->directory_funcs->describe_entries != NULL);
-		dir->directory_funcs->describe_entries(
-			buf, buf_len, set->num_entries);
+		snprintf(buf, buf_len, "%d %s", set->num_entries,
+		         dir->directory_funcs->plural);
 	}
 }
-

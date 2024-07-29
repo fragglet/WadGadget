@@ -179,16 +179,8 @@ static bool RealDirRename(void *_dir, struct directory_entry *entry,
 	return result;
 }
 
-static void RealDirDescribeEntries(char *buf, size_t buf_len, int cnt)
-{
-	if (cnt == 1) {
-		snprintf(buf, buf_len, "1 file");
-	} else {
-		snprintf(buf, buf_len, "%d files", cnt);
-	}
-}
-
 static const struct directory_funcs realdir_funcs = {
+	"file", "files",
 	RealDirRefresh,
 	RealDirOpen,
 	RealDirOpenDir,
@@ -196,7 +188,6 @@ static const struct directory_funcs realdir_funcs = {
 	RealDirRename,
 	NULL,  // need_commit
 	NULL,  // commit
-	RealDirDescribeEntries,
 	NULL,  // swap_entries
 	NULL,  // save_snapshot
 	NULL,  // restore_snapshot

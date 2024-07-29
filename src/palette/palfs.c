@@ -154,15 +154,6 @@ static bool PaletteFSRename(void *dir, struct directory_entry *entry,
 	return success;
 }
 
-static void PaletteFSDescribeEntries(char *buf, size_t buf_len, int cnt)
-{
-	if (cnt == 1) {
-		snprintf(buf, buf_len, "1 palette");
-	} else {
-		snprintf(buf, buf_len, "%d palettes", cnt);
-	}
-}
-
 static void PaletteFSFree(void *dir)
 {
 	struct palette_dir *pd = dir;
@@ -172,6 +163,7 @@ static void PaletteFSFree(void *dir)
 }
 
 static const struct directory_funcs palette_fs_functions = {
+	"palette", "palettes",
 	PaletteFSRefresh,
 	PaletteFSOpen,
 	PaletteFSOpenDir,
@@ -179,7 +171,6 @@ static const struct directory_funcs palette_fs_functions = {
 	PaletteFSRename,
 	NULL, // need_commit
 	NULL, // commit
-	PaletteFSDescribeEntries,
 	NULL, // swap_entries
 	NULL, // save_snapshot
 	NULL, // restore_snapshot

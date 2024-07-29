@@ -46,6 +46,7 @@ struct directory_entry {
 };
 
 struct directory_funcs {
+	const char *singular, *plural;
 	void (*refresh)(void *dir, struct directory_entry **entries,
 	                size_t *num_entries);
 	VFILE *(*open)(void *dir, struct directory_entry *entry);
@@ -56,7 +57,6 @@ struct directory_funcs {
 	               const char *new_name);
 	bool (*need_commit)(void *dir);
 	void (*commit)(void *dir);
-	void (*describe_entries)(char *buf, size_t buf_len, int cnt);
 	void (*swap_entries)(void *dir, unsigned int x, unsigned int y);
 	VFILE *(*save_snapshot)(void *dir);
 	void (*restore_snapshot)(void *dir, VFILE *in);

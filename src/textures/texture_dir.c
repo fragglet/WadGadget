@@ -97,15 +97,6 @@ static void TextureDirCommit(void *_dir)
 	dir->last_commit = TEXTURES(dir)->modified_count;
 }
 
-static void TextureDirDescribe(char *buf, size_t buf_len, int cnt)
-{
-	if (cnt == 1) {
-		snprintf(buf, buf_len, "1 texture");
-	} else {
-		snprintf(buf, buf_len, "%d textures", cnt);
-	}
-}
-
 static void TextureDirSwap(void *_dir, unsigned int x, unsigned int y)
 {
 	struct texture_dir *dir = _dir;
@@ -163,6 +154,7 @@ static void TextureDirFree(void *dir)
 }
 
 struct directory_funcs texture_dir_funcs = {
+	"texture", "textures",
 	TextureDirRefresh,
 	TextureDirOpen,
 	TX_LumpDirOpenDir,
@@ -170,7 +162,6 @@ struct directory_funcs texture_dir_funcs = {
 	TextureDirRename,
 	TextureDirNeedCommit,
 	TextureDirCommit,
-	TextureDirDescribe,
 	TextureDirSwap,
 	TextureDirSaveSnapshot,
 	TextureDirRestoreSnapshot,

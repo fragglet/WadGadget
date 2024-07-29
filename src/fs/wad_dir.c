@@ -104,15 +104,6 @@ static void WadDirCommit(void *_dir)
 	W_CommitChanges(dir->wad_file);
 }
 
-static void WadDirDescribeEntries(char *buf, size_t buf_len, int cnt)
-{
-	if (cnt == 1) {
-		snprintf(buf, buf_len, "1 lump");
-	} else {
-		snprintf(buf, buf_len, "%d lumps", cnt);
-	}
-}
-
 static void WadDirFree(void *_dir)
 {
 	struct wad_directory *dir = _dir;
@@ -146,6 +137,7 @@ static void WadDirRestoreSnapshot(void *_dir, VFILE *in)
 }
 
 static const struct directory_funcs waddir_funcs = {
+	"lump", "lumps",
 	WadDirectoryRefresh,
 	WadDirOpen,
 	WadDirOpenDir,
@@ -153,7 +145,6 @@ static const struct directory_funcs waddir_funcs = {
 	WadDirRename,
 	WadDirNeedCommit,
 	WadDirCommit,
-	WadDirDescribeEntries,
 	WadDirSwapEntries,
 	WadDirSaveSnapshot,
 	WadDirRestoreSnapshot,

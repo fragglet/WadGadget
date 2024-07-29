@@ -94,15 +94,6 @@ static void PnamesDirCommit(void *_dir)
 	dir->last_commit = PNAMES(dir)->modified_count;
 }
 
-static void PnamesDirDescribeEntries(char *buf, size_t buf_len, int cnt)
-{
-	if (cnt == 1) {
-		snprintf(buf, buf_len, "1 patch name");
-	} else {
-		snprintf(buf, buf_len, "%d patch names", cnt);
-	}
-}
-
 static void PnamesDirSwapEntries(void *_dir, unsigned int x, unsigned int y)
 {
 	struct pnames_dir *dir = _dir;
@@ -156,6 +147,7 @@ static void PnamesDirFree(void *dir)
 }
 
 static const struct directory_funcs pnames_dir_funcs = {
+	"pname", "pnames",
 	PnamesDirRefresh,
 	NULL,  // open
 	TX_LumpDirOpenDir,
@@ -163,7 +155,6 @@ static const struct directory_funcs pnames_dir_funcs = {
 	PnamesDirRename,
 	PnamesDirNeedCommit,
 	PnamesDirCommit,
-	PnamesDirDescribeEntries,
 	PnamesDirSwapEntries,
 	PnamesDirSaveSnapshot,
 	PnamesDirRestoreSnapshot,
