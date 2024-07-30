@@ -1016,17 +1016,22 @@ static void ViewLump(struct directory *dir, struct directory_entry *ent)
 
 static void PerformView(void)
 {
-	struct directory *new_dir;
+	struct directory *dir, *new_dir;
 	struct directory_entry *ent;
-	char *path;
 
+	dir = active_pane->dir;
 	ent = B_DirectoryPaneEntry(active_pane);
+
+	if (ent->type == FILE_TYPE_PALETTE) {
+		ent = PAL_InnerEntry(dir, ent);
+		dir = PAL_InnerDir(dir);
+	}
 
 	switch (ent->type) {
 	case FILE_TYPE_DIR:
 	case FILE_TYPE_WAD:
 		// Change directory?
-		new_dir = VFS_OpenDirByEntry(active_pane->dir, ent);
+		new_dir = VFS_OpenDirByEntry(dir, ent);
 		if (new_dir == NULL) {
 			UI_MessageBox("Error when opening '%s'.", ent->name);
 			return;
@@ -1035,17 +1040,11 @@ static void PerformView(void)
 		break;
 
 	case FILE_TYPE_FILE:
-		OpenDirent(active_pane->dir, ent, false);
+		OpenDirent(dir, ent, false);
 		break;
 
 	case FILE_TYPE_LUMP:
-		ViewLump(active_pane->dir, ent);
-		break;
-
-	case FILE_TYPE_PALETTE:
-		path = PAL_EntryPath(active_pane->dir, ent);
-		OpenFile(path, ent, false);
-		free(path);
+		ViewLump(dir, ent);
 		break;
 
 	default:

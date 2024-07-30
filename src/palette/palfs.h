@@ -9,4 +9,6 @@
 //
 
 struct directory *PAL_OpenDirectory(struct directory *previous);
-char *PAL_EntryPath(struct directory *dir, struct directory_entry *ent);
+struct directory *PAL_InnerDir(struct directory *dir);
+struct directory_entry *PAL_InnerEntry(struct directory *dir,
+                                       struct directory_entry *ent);
