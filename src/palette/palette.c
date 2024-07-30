@@ -246,6 +246,7 @@ static void SetDefaultPointer(const char *path, const char *full_name)
 void PAL_SetDefaultPointer(const char *full_name)
 {
 	SetDefaultPointer(PAL_GetPalettesPath(), full_name);
+	default_palette_loaded = false;
 }
 
 static void LoadDefaultPalette(void)
