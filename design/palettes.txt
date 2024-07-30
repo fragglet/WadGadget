@@ -30,21 +30,21 @@ More details:
  * Copying from PLAYPAL to db renames to "foo.wad palette"
  * Copying to WAD renames to PLAYPAL
  * We can set a preferred palette for a particular WAD by copying it to
-   a lump named XPLAYPAL containing only palette #0
-   - When setting preference, update the existing XPLAYPAL lump if present
+   a lump named PALPREF containing only palette #0
+   - When setting preference, update the existing PALPREF lump if present
    - If there is no such lump, create a new lump at end of directory
 
 How do we know which palette to use?
- * If the WAD contains XPLAYPAL, use this as the palette
+ * If the WAD contains PALPREF, use this as the palette
  * If the WAD contains PLAYPAL, use this as the palette
  * Otherwise use the default
 
 Keys:
   Ent     View/edit palette
   ^B      Back to previous directory
+  ^U  F3  Use for WAD >>>
+  ^D  F4  Use as default palette
   ^C  F5  Copy / Import / Export
-  ^?  F?  Use for WAD >>>
-  ^?  F?  Use as default palette
   ^E  F6  Rename
   ^X  F8  Delete palette
   [Probably unnecessary] ^F  F9  Export WAD / Make WAD
