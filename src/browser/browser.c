@@ -33,6 +33,8 @@
 #include "browser/directory_pane.h"
 #include "browser/browser.h"
 
+#include "palette/actions.h"
+
 #define INFO_PANE_WIDTH 30
 
 struct search_pane {
@@ -211,6 +213,7 @@ static const struct action *wad_actions[] = {
 	&sort_entries_action,
 	&hexdump_action,
 	&open_palettes_action,
+	&view_action,
 	NULL,
 };
 
@@ -222,6 +225,7 @@ static const struct action *dir_actions[] = {
 	&mkdir_action,
 	&hexdump_action,
 	&open_palettes_action,
+	&view_action,
 	NULL,
 };
 
@@ -247,6 +251,8 @@ static const struct action *pnm_actions[] = {
 };
 
 static const struct action *pal_actions[] = {
+	&set_default_palette_action,
+	&view_palette_action,
 	NULL,
 };
 
@@ -339,7 +345,6 @@ static const struct action *common_actions[] = {
 	&reload_action,
 	&mark_action,
 	&delete_no_confirm_action,
-	&view_action,
 	&other_pane_action,
 	&help_action,
 	&quit_action,

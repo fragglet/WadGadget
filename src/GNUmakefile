@@ -58,6 +58,7 @@ OBJS =                      \
     pager/hexdump.o         \
     pager/pager.o           \
     pager/plaintext.o       \
+    palette/actions.o       \
     palette/doom.o          \
     palette/palette.o       \
     palette/palfs.o         \

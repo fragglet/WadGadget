@@ -1022,11 +1022,6 @@ static void PerformView(void)
 	dir = active_pane->dir;
 	ent = B_DirectoryPaneEntry(active_pane);
 
-	if (ent->type == FILE_TYPE_PALETTE) {
-		ent = PAL_InnerEntry(dir, ent);
-		dir = PAL_InnerDir(dir);
-	}
-
 	switch (ent->type) {
 	case FILE_TYPE_DIR:
 	case FILE_TYPE_WAD:
