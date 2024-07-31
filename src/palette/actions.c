@@ -13,9 +13,16 @@
 #include <stdbool.h>
 
 #include "ui/actions_bar.h"
+#include "ui/dialog.h"
+#include "ui/title_bar.h"
+
 #include "browser/actions.h"
 #include "browser/browser.h"
 #include "browser/directory_pane.h"
+#include "common.h"
+#include "conv/error.h"
+#include "conv/export.h"
+#include "stringlib.h"
 #include "view.h"
 
 #include "palette/palette.h"
@@ -57,4 +64,115 @@ static void PerformSetDefault(void)
 const struct action set_default_palette_action = {
 	KEY_F(4), 'D',  "SetDef", "Set default",
 	PerformSetDefault,
+};
+
+static struct palette_set *LoadPalette(struct directory *dir,
+                                       struct directory_entry *ent)
+{
+	VFILE *input = VFS_OpenByEntry(dir, ent);
+	const struct lump_type *lt;
+
+	if (input == NULL) {
+		return NULL;
+	}
+
+	switch (ent->type) {
+	case FILE_TYPE_FILE:
+		return PAL_FromImageFile(input);
+
+	case FILE_TYPE_LUMP:
+		lt = LI_IdentifyLump(VFS_WadFile(dir), ent - dir->entries);
+		if (lt != &lump_type_palette) {
+			ConversionError("%s lump is not a palette", ent->name);
+			vfclose(input);
+			return NULL;
+		}
+		return PAL_UnmarshalPaletteSet(input);
+
+	default:
+		return NULL;
+	}
+}
+
+static struct directory *ActualDir(struct directory *dir)
+{
+	if (dir->type == FILE_TYPE_PALETTES) {
+		return PAL_InnerDir(dir);
+	}
+
+	return dir;
+}
+
+static bool CopyPaletteToDir(struct directory *from,
+                             struct directory_entry *ent, struct directory *to,
+                             struct file_set *result)
+{
+	struct palette_set *set = LoadPalette(from, ent);
+	struct directory_entry *to_ent;
+	VFILE *converted, *out;
+	char *filename, *full_path;
+
+	if (set == NULL) {
+		// TODO
+		return false;
+	}
+
+	if (from->type == FILE_TYPE_WAD) {
+		filename = StringJoin("", PathBaseName(from->path),
+		                      " palette.png", NULL);
+	} else {
+		filename = checked_strdup(PathBaseName(ent->name));
+	}
+
+	converted = PAL_ToImageFile(set);
+	full_path = StringJoin("/", to->path, filename, NULL);
+	out = vfwrapfile(fopen(full_path, "wb"));
+	assert(out != NULL); // TODO
+	free(full_path);
+	vfcopy(converted, out);
+	vfclose(converted);
+	vfclose(out);
+
+	PAL_FreePaletteSet(set);
+
+	VFS_Refresh(to);
+	to_ent = VFS_EntryByName(to, filename);
+	assert(to_ent != NULL);
+	VFS_AddToSet(result, to_ent->serial_no);
+
+	free(filename);
+
+	return true;
+}
+
+static void PerformPaletteCopyToDir(void)
+{
+	struct directory *from = ActualDir(active_pane->dir),
+	                 *to = ActualDir(other_pane->dir);
+	struct file_set *set = B_DirectoryPaneTagged(active_pane);
+	struct file_set result = EMPTY_FILE_SET;
+	struct directory_entry *ent;
+	bool success = true;
+	int idx = 0;
+
+	ClearConversionErrors();
+	while (success && (ent = VFS_IterateSet(from, set, &idx)) != NULL) {
+		success = CopyPaletteToDir(from, ent, to, &result);
+	}
+
+	if (!success) {
+		UI_MessageBox("Copy failed:\n%s", GetConversionError());
+		VFS_FreeSet(&result);
+		return;
+	}
+
+	VFS_Refresh(other_pane->dir);
+	B_DirectoryPaneSetTagged(other_pane, &result);
+	B_SwitchToPane(other_pane);
+	VFS_FreeSet(&result);
+}
+
+const struct action copy_palette_to_dir_action = {
+	KEY_F(5), 'C',  "Copy", "> Copy",
+	PerformPaletteCopyToDir,
 };

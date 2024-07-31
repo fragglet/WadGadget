@@ -275,6 +275,7 @@ static const struct action *wad_to_pnm[] = {
 };
 
 static const struct action *wad_to_pal[] = {
+	&copy_palette_to_dir_action,
 	NULL,
 };
 
@@ -296,6 +297,7 @@ static const struct action *dir_to_pnm[] = {
 };
 
 static const struct action *dir_to_pal[] = {
+	&copy_palette_to_dir_action,
 	NULL,
 };
 
@@ -325,6 +327,7 @@ static const struct action *pnm_to_dir[] = {
 };
 
 static const struct action *pal_to_dir[] = {
+	&copy_palette_to_dir_action,
 	NULL,
 };
 
