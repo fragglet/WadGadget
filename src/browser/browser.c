@@ -332,6 +332,7 @@ static const struct action *pal_to_dir[] = {
 };
 
 static const struct action *pal_to_wad[] = {
+	&copy_palette_to_wad_action,
 	NULL,
 };
 

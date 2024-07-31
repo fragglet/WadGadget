@@ -103,6 +103,91 @@ static struct directory *ActualDir(struct directory *dir)
 	return dir;
 }
 
+static bool CopyPaletteToWAD(struct directory *from,
+                             struct directory_entry *ent, struct wad_file *wf,
+                             struct file_set *result)
+{
+	struct palette_set *set = LoadPalette(from, ent);
+	VFILE *converted, *out;
+	int idx;
+
+	if (set == NULL) {
+		// TODO
+		return false;
+	}
+	if (set->num_palettes < 2) {
+		ConversionError("%s only contains a single palette, which "
+		                "is not\nenough for a complete PLAYPAL lump. "
+		                "You should\nmaybe copy a PLAYPAL lump from "
+		                "another WAD.", ent->name);
+		return false;
+	}
+
+	converted = PAL_MarshalPaletteSet(set);
+	idx = W_NumLumps(wf);
+	W_AddEntries(wf, idx, 1);
+	W_SetLumpName(wf, idx, "PLAYPAL");
+	out = W_OpenLumpRewrite(wf, idx);
+	vfcopy(converted, out);
+	vfclose(converted);
+	vfclose(out);
+
+	VFS_AddToSet(result, W_GetDirectory(wf)[idx].serial_no);
+	PAL_FreePaletteSet(set);
+
+	return true;
+}
+
+static void PerformPaletteCopyToWAD(void)
+{
+	struct directory *from = ActualDir(active_pane->dir);
+	struct file_set *set = B_DirectoryPaneTagged(active_pane);
+	struct wad_file *wf = VFS_WadFile(other_pane->dir);
+	char buf[32];
+	struct directory_entry *ent;
+	struct file_set result = EMPTY_FILE_SET;
+	bool success = true;
+	int idx = 0;
+
+	if (set->num_entries < 1) {
+		return;
+	} else if (set->num_entries > 1
+	        && !UI_ConfirmDialogBox("Confirm", "Proceed", "Cancel",
+	                                "Create multiple PLAYPAL lumps?")) {
+		return;
+	}
+
+	if (!B_CheckReadOnly(other_pane->dir)) {
+		return;
+	}
+
+	ClearConversionErrors();
+	while (success && (ent = VFS_IterateSet(from, set, &idx)) != NULL) {
+		success = CopyPaletteToWAD(from, ent, wf, &result);
+	}
+
+	if (!success) {
+		VFS_Rollback(other_pane->dir);
+		UI_MessageBox("Import to WAD failed:\n%s",
+		              GetConversionError());
+		VFS_FreeSet(&result);
+		return;
+	}
+
+	VFS_DescribeSet(from, set, buf, sizeof(buf));
+	VFS_CommitChanges(other_pane->dir, "import of %s", buf);
+	VFS_Refresh(other_pane->dir);
+
+	B_DirectoryPaneSetTagged(other_pane, &result);
+	B_SwitchToPane(other_pane);
+	VFS_FreeSet(&result);
+}
+
+const struct action copy_palette_to_wad_action = {
+	KEY_F(5), 'C',  "Copy", "> Copy",
+	PerformPaletteCopyToWAD,
+};
+
 static bool CopyPaletteToDir(struct directory *from,
                              struct directory_entry *ent, struct directory *to,
                              struct file_set *result)
