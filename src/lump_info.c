@@ -187,7 +187,7 @@ static bool SoundLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 }
 
 static void SoundLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
-                              char *descr_buf, size_t descr_buf_len)
+                            char *descr_buf, size_t descr_buf_len)
 {
 	struct sound_header sound = *((struct sound_header *) buf);
 	S_SwapSoundHeader(&sound);
@@ -433,7 +433,7 @@ const struct lump_type lump_type_dehacked = {
 static bool PaletteCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
 	return !strcasecmp(ent->name, "PLAYPAL")
-	    && (ent->size % (256 * 3)) == 0;
+	    && ent->size > 0 && (ent->size % (256 * 3)) == 0;
 }
 
 static void PaletteFormat(struct wad_file_entry *ent, uint8_t *buf,
@@ -451,7 +451,7 @@ const struct lump_type lump_type_palette = {
 
 static bool ColormapCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return (ent->size % 256) == 0
+	return ent->size > 0 && (ent->size % 256) == 0
 	    && (!strncasecmp(ent->name, "COLORMAP", 8)
 	     || !strncasecmp(ent->name, "FOGMAP", 8));
 }
@@ -681,7 +681,7 @@ const struct lump_type *LI_IdentifyLump(struct wad_file *f,
 		return &lump_type_flat;
 	}
 
-	if ((ent->size % 256) == 0
+	if (ent->size > 0 && (ent->size % 256) == 0
 	 && LI_LumpInSection(f, lump_index, &lump_section_colormaps)) {
 		return &lump_type_colormap;
 	}
