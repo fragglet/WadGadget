@@ -36,9 +36,11 @@ struct palette_set *PAL_FromImageFile(VFILE *input)
 	             &color_type, &ilace_type, &comp_type, &filter_method);
 
 	// check dimensions
+	// TODO: We ought to be able to extract the palette from a PNG
+	// if it is an indexed color file.
 	if ((width * height) % 256 != 0) {
 		ConversionError("Invalid dimensions for palette: %dx%d = "
-		                "%d pixels; should be a multiple of 256",
+		                "%d pixels;\nshould be a multiple of 256",
 		                width, height, width * height);
 		goto fail;
 	}
@@ -170,7 +172,7 @@ struct palette_set *PAL_UnmarshalPaletteSet(VFILE *input)
 	vfclose(input);
 
 	if (buf_len % PALETTE_SIZE != 0) {
-		ConversionError("Invalid length for palette lump: %d "
+		ConversionError("Invalid length for palette lump: %d\n"
 		                "should be a multiple of %d",
 		                buf_len, PALETTE_SIZE);
 		free(buf);
