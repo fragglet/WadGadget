@@ -164,8 +164,8 @@ struct textures *TX_UnmarshalTextures(VFILE *input)
 		memcpy(&start, lump + 4 + 4 * i, sizeof(uint32_t));
 		SwapLE32(&start);
 
-		if (start + TX_TextureLen(0) >= lump_len) {
-			ConversionError("Texture #%d overruns lump, start=%d"
+		if (start + TX_TextureLen(0) > lump_len) {
+			ConversionError("Texture #%d overruns lump, start=%d, "
 			                "min len=%d, lump_len=%d", i, start,
 			                (int) TX_TextureLen(0), (int) lump_len);
 			TX_FreeTextures(result);
