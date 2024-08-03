@@ -56,6 +56,7 @@ void TX_LumpDirFree(struct lump_dir *dir)
 
 		TX_DirGetParent(&dir->dir, &ent);
 		dir->lump_dir_funcs->save(dir, dir->parent_dir, ent);
+		VFS_Refresh(dir->parent_dir);
 	}
 	TX_FreeBundle(&dir->b);
 	VFS_DirectoryUnref(TX_DirGetParent(&dir->dir, NULL));
