@@ -51,10 +51,12 @@ struct directory *TX_DirGetParent(struct directory *_dir,
 
 void TX_LumpDirFree(struct lump_dir *dir)
 {
-	struct directory_entry *ent;
+	if (dir->loaded) {
+		struct directory_entry *ent;
 
-	TX_DirGetParent(&dir->dir, &ent);
-	dir->lump_dir_funcs->save(dir, dir->parent_dir, ent);
+		TX_DirGetParent(&dir->dir, &ent);
+		dir->lump_dir_funcs->save(dir, dir->parent_dir, ent);
+	}
 	TX_FreeBundle(&dir->b);
 	VFS_DirectoryUnref(TX_DirGetParent(&dir->dir, NULL));
 }
@@ -64,7 +66,7 @@ bool TX_DirReload(struct directory *_dir)
 	struct lump_dir *dir = (struct lump_dir *) _dir;
 	struct directory_entry *ent;
 	int txs_modcount, pn_modcount;
-	bool first, success;
+	bool first;
 
 	TX_DirGetParent(_dir, &ent);
 
@@ -73,15 +75,19 @@ bool TX_DirReload(struct directory *_dir)
 		txs_modcount = dir->b.txs->modified_count,
 		pn_modcount = dir->b.pn->modified_count;
 	}
-	success = dir->lump_dir_funcs->load(dir, dir->parent_dir, ent);
+	if (!dir->lump_dir_funcs->load(dir, dir->parent_dir, ent)) {
+		return false;
+	}
 	VFS_Refresh(&dir->dir);
 
-	if (success && !first) {
+	if (!first) {
 		dir->b.txs->modified_count = txs_modcount + 1;
 		dir->b.pn->modified_count = pn_modcount + 1;
 	}
 
-	return success;
+	dir->loaded = true;
+
+	return true;
 }
 
 bool TX_DirSave(struct directory *_dir)
@@ -133,6 +139,7 @@ bool TX_InitLumpDir(struct lump_dir *dir, const struct lump_dir_funcs *funcs,
 	dir->dir.parent_name = StringJoin("", "Back to ",
 	                                  PathBaseName(parent->path), NULL);
 
+	dir->loaded = false;
 	dir->lump_dir_funcs = funcs;
 	dir->parent_dir = parent;
 	VFS_DirectoryRef(dir->parent_dir);
@@ -147,5 +154,4 @@ bool TX_InitLumpDir(struct lump_dir *dir, const struct lump_dir_funcs *funcs,
 	snprintf(rev->descr, VFS_REVISION_DESCR_LEN, "Initial version");
 
 	return true;
-
 }

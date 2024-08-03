@@ -25,6 +25,7 @@ struct lump_dir {
 	struct directory *parent_dir;
 	uint64_t lump_serial;
 
+	bool loaded;
 	struct texture_bundle b;
 };
 
