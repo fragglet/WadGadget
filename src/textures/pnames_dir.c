@@ -165,7 +165,15 @@ static bool PnamesDirLoad(void *_dir, struct directory *wad_dir,
                           struct directory_entry *ent)
 {
 	struct pnames_dir *dir = _dir;
-	VFILE *in = VFS_OpenByEntry(wad_dir, ent);
+	VFILE *in;
+	if (ent->size == 0) {
+		UI_ShowNotice("Creating a new, empty PNAMES directory.");
+		dir->dir.b.txs = NULL;
+		PNAMES(dir) = TX_NewPnamesList(0);
+		++PNAMES(dir)->modified_count;
+		return true;
+	}
+	in = VFS_OpenByEntry(wad_dir, ent);
 	return TX_BundleLoadPnames(&dir->dir.b, in);
 }
 

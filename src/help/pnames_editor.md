@@ -37,3 +37,9 @@ All [standard controls](common.md) are also supported.
    line. If none are tagged, the file will contain the entire list.
  * To import such a file into the texture directory, select the file in the
    [opposite pane](dir_view.md) and use **Import config (F5)**.
+
+## Creating a new PNAMES directory
+
+To create a new PNAMES directory, simply create an empty lump named PNAMES and
+open it; a pop-up notice will confirm that a new PNAMES directory has been
+created.
