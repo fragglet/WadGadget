@@ -61,6 +61,7 @@ The following table gives a brief summary of the current state:
 | Music playback                 | ✓                    | fragglet/WadGadget#14                       | ✓                                    |
 | Music import                   | ✓                    | ✓                                           | ✓ (many formats)                     |
 | Music export                   | ✓ (MUS)              | ✓ (converts MUS to MID)                     | ✓ (many formats)                     |
+| Alternate palette support      | Doom/Heretic         | ✓ (arbitrary/custom)                        | ✓                                    |
 | Palette/colormap import        |                      | ✓ (PNG)                                     | ✓                                    |
 | Palette/colormap export        |                      | ✓ (PNG)                                     | ✓                                    |
 | Texture editor                 | ✓                    | WIP (fragglet/WadGadget#9); can be edited as text as a stopgap | ✓                 |
