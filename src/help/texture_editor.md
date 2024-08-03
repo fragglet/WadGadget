@@ -48,3 +48,9 @@ All [standard controls](common.md) are also supported.
 ## deutex texture configuration format
 
 TODO
+
+## Creating a new texture directory
+
+To create a new texture directory, simply create an empty lump named TEXTURE1
+or TEXTURE2 and open it. A pop-up notice will confirm that a new texture
+directory has been created. You may need to create a PNAMES directory first.

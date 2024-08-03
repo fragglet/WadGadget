@@ -208,6 +208,16 @@ static bool TextureDirLoad(void *_dir, struct directory *wad_dir,
 		return false;
 	}
 
+	if (ent->size == 0) {
+		UI_ShowNotice("Creating a new, empty texture directory.");
+		PNAMES(dir) = new_pn;
+		TEXTURES(dir) = TX_NewTextureList(0);
+		// TODO: For TEXTURE1 we should probably create an
+		// AASTINKY-style dummy texture as the first entry.
+		++TEXTURES(dir)->modified_count;
+		return true;
+	}
+
 	input = VFS_OpenByEntry(wad_dir, ent);
 	if (input == NULL) {
 		TX_FreePnames(new_pn);
