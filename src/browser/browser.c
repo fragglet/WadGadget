@@ -237,6 +237,7 @@ static const struct action *txt_actions[] = {
 	&dup_texture_action,
 	&undo_action,
 	&redo_action,
+	&view_action,
 	NULL,
 };
 
@@ -247,6 +248,7 @@ static const struct action *pnm_actions[] = {
 	&new_pname_action,
 	&undo_action,
 	&redo_action,
+	&view_action,
 	NULL,
 };
 
