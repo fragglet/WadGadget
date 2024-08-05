@@ -432,7 +432,8 @@ const struct lump_type lump_type_dehacked = {
 
 static bool PaletteCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return !strcasecmp(ent->name, "PLAYPAL")
+	return (!strcasecmp(ent->name, "PLAYPAL")
+	     || !strcasecmp(ent->name, "PALPREF"))
 	    && ent->size > 0 && (ent->size % (256 * 3)) == 0;
 }
 
