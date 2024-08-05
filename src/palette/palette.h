@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef INCLUDED_PALETTE_PALETTE_H
+#define INCLUDED_PALETTE_PALETTE_H
+
 struct palette_entry {
 	uint8_t r, g, b;
 };
@@ -33,3 +36,5 @@ const char *PAL_GetPalettesPath(void);
 char *PAL_ReadDefaultPointer(void);
 const struct palette *PAL_DefaultPalette(void);
 void PAL_SetDefaultPointer(const char *full_name);
+
+#endif /* #ifndef INCLUDED_PALETTE_PALETTE_H */

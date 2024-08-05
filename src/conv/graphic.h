@@ -9,17 +9,18 @@
 //
 
 #include "fs/vfile.h"
+#include "palette/palette.h"
 
 struct patch_header {
 	uint16_t width, height;
 	int16_t leftoffset, topoffset;
 };
 
-VFILE *V_ToImageFile(VFILE *input);
-VFILE *V_FromImageFile(VFILE *input);
-VFILE *V_FlatToImageFile(VFILE *input);
-VFILE *V_FlatFromImageFile(VFILE *input);
-VFILE *V_FullscreenToImageFile(VFILE *input);
-VFILE *V_FullscreenFromImageFile(VFILE *input);
+VFILE *V_ToImageFile(VFILE *input, const struct palette *pal);
+VFILE *V_FromImageFile(VFILE *input, const struct palette *pal);
+VFILE *V_FlatToImageFile(VFILE *input, const struct palette *pal);
+VFILE *V_FlatFromImageFile(VFILE *input, const struct palette *pal);
+VFILE *V_FullscreenToImageFile(VFILE *input, const struct palette *pal);
+VFILE *V_FullscreenFromImageFile(VFILE *input, const struct palette *pal);
 VFILE *V_HiresToImageFile(VFILE *input);
 void V_SwapPatchHeader(struct patch_header *hdr);

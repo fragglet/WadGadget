@@ -40,10 +40,10 @@ void V_SwapPatchHeader(struct patch_header *hdr)
 };
 
 static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
-                                struct patch_header *hdr)
+                                struct patch_header *hdr,
+                                const struct palette *pal)
 {
 	VFILE *result;
-	const struct palette *pal = PAL_DefaultPalette();
 	struct patch_header swapped_hdr;
 	uint32_t *column_offsets;
 	uint8_t *palettized, *post, alpha;
@@ -134,14 +134,14 @@ fail:
 }
 
 static VFILE *BufferToRaw(uint8_t *imgbuf, int rowstep,
-                          struct patch_header *hdr)
+                          struct patch_header *hdr,
+                          const struct palette *pal)
 {
 	uint8_t *palettized;
 	VFILE *result = vfopenmem(NULL, 0);
 
-	palettized = V_PalettizeRGBABuffer(
-		PAL_DefaultPalette(), imgbuf, rowstep,
-		hdr->width, hdr->height);
+	palettized = V_PalettizeRGBABuffer(pal, imgbuf, rowstep,
+	                                   hdr->width, hdr->height);
 	assert(vfwrite(palettized, hdr->width,
 	               hdr->height, result) == hdr->height);
 	free(palettized);
@@ -152,7 +152,7 @@ static VFILE *BufferToRaw(uint8_t *imgbuf, int rowstep,
 	return result;
 }
 
-VFILE *V_FromImageFile(VFILE *input)
+VFILE *V_FromImageFile(VFILE *input, const struct palette *pal)
 {
 	VFILE *result = NULL;
 	struct patch_header hdr;
@@ -165,13 +165,13 @@ VFILE *V_FromImageFile(VFILE *input)
 		goto fail;
 	}
 
-	result = RGBABufferToPatch(imgbuf, rowstep, &hdr);
+	result = RGBABufferToPatch(imgbuf, rowstep, &hdr, pal);
 	free(imgbuf);
 fail:
 	return result;
 }
 
-VFILE *V_FullscreenFromImageFile(VFILE *input)
+VFILE *V_FullscreenFromImageFile(VFILE *input, const struct palette *pal)
 {
 	struct patch_header hdr;
 	VFILE *result = NULL;
@@ -186,17 +186,17 @@ VFILE *V_FullscreenFromImageFile(VFILE *input)
 	// Do something sensible as a fallback.
 	if (hdr.width != FULLSCREEN_W || hdr.height != FULLSCREEN_H) {
 		vfseek(input, 0, SEEK_SET);
-		return V_FromImageFile(input);
+		return V_FromImageFile(input, pal);
 	}
 
-	result = BufferToRaw(imgbuf, rowstep, &hdr);
+	result = BufferToRaw(imgbuf, rowstep, &hdr, pal);
 fail:
 	free(imgbuf);
 	vfclose(input);
 	return result;
 }
 
-VFILE *V_FlatFromImageFile(VFILE *input)
+VFILE *V_FlatFromImageFile(VFILE *input, const struct palette *pal)
 {
 	VFILE *result = NULL;
 	struct patch_header hdr;
@@ -211,12 +211,12 @@ VFILE *V_FlatFromImageFile(VFILE *input)
 	// Most flats are 64x64. Heretic/Hexen use taller ones, but
 	// they are always 64 pixels wide.
 	if (hdr.width != 64) {
-		result = RGBABufferToPatch(imgbuf, rowstep, &hdr);
+		result = RGBABufferToPatch(imgbuf, rowstep, &hdr, pal);
 		free(imgbuf);
 		return result;
 	}
 
-	result = BufferToRaw(imgbuf, rowstep, &hdr);
+	result = BufferToRaw(imgbuf, rowstep, &hdr, pal);
 fail:
 	free(imgbuf);
 	return result;
@@ -265,7 +265,7 @@ static bool DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
 	return true;
 }
 
-VFILE *V_ToImageFile(VFILE *input)
+VFILE *V_ToImageFile(VFILE *input, const struct palette *pal)
 {
 	uint8_t *buf, *imgbuf = NULL;
 	struct patch_header hdr;
@@ -286,8 +286,7 @@ VFILE *V_ToImageFile(VFILE *input)
 		goto fail;
 	}
 
-	result = V_WritePalettizedPNG(&hdr, imgbuf,
-	                              PAL_DefaultPalette(), true);
+	result = V_WritePalettizedPNG(&hdr, imgbuf, pal, true);
 
 fail:
 	free(imgbuf);
@@ -296,7 +295,7 @@ fail:
 	return result;
 }
 
-VFILE *V_FlatToImageFile(VFILE *input)
+VFILE *V_FlatToImageFile(VFILE *input, const struct palette *pal)
 {
 	uint8_t *buf;
 	struct patch_header hdr;
@@ -316,7 +315,7 @@ VFILE *V_FlatToImageFile(VFILE *input)
 	hdr.height = buf_len / 64;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = V_WritePalettizedPNG(&hdr, buf, PAL_DefaultPalette(), false);
+	result = V_WritePalettizedPNG(&hdr, buf, pal, false);
 
 fail:
 	free(buf);
@@ -325,7 +324,7 @@ fail:
 }
 
 // For Hexen fullscreen images.
-VFILE *V_FullscreenToImageFile(VFILE *input)
+VFILE *V_FullscreenToImageFile(VFILE *input, const struct palette *pal)
 {
 	uint8_t *buf;
 	struct patch_header hdr;
@@ -340,7 +339,7 @@ VFILE *V_FullscreenToImageFile(VFILE *input)
 	hdr.height = FULLSCREEN_H;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = V_WritePalettizedPNG(&hdr, buf, PAL_DefaultPalette(), false);
+	result = V_WritePalettizedPNG(&hdr, buf, pal, false);
 	free(buf);
 
 	return result;

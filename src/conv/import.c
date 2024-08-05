@@ -127,6 +127,7 @@ fail:
 static VFILE *PerformConversion(VFILE *input, struct directory *to_wad,
                                 const char *src_name)
 {
+	const struct palette *pal = PAL_DefaultPalette();
 	src_name = PathBaseName(src_name);
 
 	if (HasExtension(src_name, lump_extensions)) {
@@ -137,13 +138,13 @@ static VFILE *PerformConversion(VFILE *input, struct directory *to_wad,
 		return V_PaletteFromImageFile(input);
 	} else if (!strcasecmp(src_name, "colormap.png")
 	        || StringHasSuffix(src_name, ".cmap.png")) {
-		return V_ColormapFromImageFile(input);
+		return V_ColormapFromImageFile(input, pal);
 	} else if (StringHasSuffix(src_name, ".flat.png")) {
-		return V_FlatFromImageFile(input);
+		return V_FlatFromImageFile(input, pal);
 	} else if (StringHasSuffix(src_name, ".fullscreen.png")) {
-		return V_FullscreenFromImageFile(input);
+		return V_FullscreenFromImageFile(input, pal);
 	} else if (StringHasSuffix(src_name, ".png")) {
-		return V_FromImageFile(input);
+		return V_FromImageFile(input, pal);
 	} else if (!strcasecmp(src_name, "PNAMES.txt")) {
 		return ConvertPnames(input);
 	} else if (!strncasecmp(src_name, "TEXTURE", 7)

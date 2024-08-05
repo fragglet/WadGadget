@@ -87,14 +87,16 @@ static VFILE *ConvertTextures(struct directory *from, VFILE *input)
 static VFILE *PerformConversion(struct directory *from, VFILE *input,
                                 const struct lump_type *lt)
 {
+	const struct palette *pal = PAL_DefaultPalette();
+
 	if (lt == &lump_type_sound) {
 		return S_ToAudioFile(input);
 	} else if (lt == &lump_type_flat) {
-		return V_FlatToImageFile(input);
+		return V_FlatToImageFile(input, pal);
 	} else if (lt == &lump_type_graphic) {
-		return V_ToImageFile(input);
+		return V_ToImageFile(input, pal);
 	} else if (lt == &lump_type_fullscreen_image) {
-		return V_FullscreenToImageFile(input);
+		return V_FullscreenToImageFile(input, pal);
 	} else if (lt == &lump_type_hexen_hires_image) {
 		return V_HiresToImageFile(input);
 	} else if (lt == &lump_type_textures) {
@@ -104,7 +106,7 @@ static VFILE *PerformConversion(struct directory *from, VFILE *input,
 	} else if (lt == &lump_type_palette) {
 		return V_PaletteToImageFile(input);
 	} else if (lt == &lump_type_colormap) {
-		return V_ColormapToImageFile(input);
+		return V_ColormapToImageFile(input, pal);
 	} else if (lt == &lump_type_mus) {
 		VFILE *result = vfopenmem(NULL, 0);
 		if (mus2mid(input, result)) {
