@@ -20,6 +20,11 @@
    * [Keys](wad_view.md#keys)
    * [Copying](wad_view.md#copying)
    * [File formats](wad_view.md#file-formats)
+ * [Palette database](palette.md)
+   * [Keys](palette.md#keys)
+   * [How the palette is selected](palette.md#how-the-palette-is-selected)
+   * [Importing palettes](palette.md#importing-palettes)
+   * [Exporting palettes](palette.md#exporting-palettes)
 
 ## Other Screens
 

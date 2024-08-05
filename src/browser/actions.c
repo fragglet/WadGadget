@@ -1241,6 +1241,7 @@ static void ShowHelp(void)
 		{FILE_TYPE_WAD, "wad_view.md"},
 		{FILE_TYPE_TEXTURE_LIST, "texture_editor.md"},
 		{FILE_TYPE_PNAMES_LIST, "pnames_editor.md"},
+		{FILE_TYPE_PALETTES, "palette.md"},
 	};
 
 	for (i = 0; i < arrlen(help_files_per_type); i++) {

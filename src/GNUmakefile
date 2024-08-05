@@ -32,7 +32,8 @@ HELP_FILES =                \
     help/uds.md             \
     help/boomref.md         \
     help/mbfedit.md         \
-    help/hexdump.md
+    help/hexdump.md         \
+    help/palette.md
 
 OBJS =                      \
     browser/actions.o       \
