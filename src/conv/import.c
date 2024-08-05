@@ -127,7 +127,7 @@ fail:
 static VFILE *PerformConversion(VFILE *input, struct directory *to_wad,
                                 const char *src_name)
 {
-	const struct palette *pal = PAL_DefaultPalette();
+	const struct palette *pal = PAL_PaletteForWAD(to_wad);
 	src_name = PathBaseName(src_name);
 
 	if (HasExtension(src_name, lump_extensions)) {

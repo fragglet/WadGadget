@@ -87,7 +87,7 @@ static VFILE *ConvertTextures(struct directory *from, VFILE *input)
 static VFILE *PerformConversion(struct directory *from, VFILE *input,
                                 const struct lump_type *lt)
 {
-	const struct palette *pal = PAL_DefaultPalette();
+	const struct palette *pal = PAL_PaletteForWAD(from);
 
 	if (lt == &lump_type_sound) {
 		return S_ToAudioFile(input);

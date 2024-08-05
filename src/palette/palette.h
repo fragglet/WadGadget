@@ -11,6 +11,8 @@
 #ifndef INCLUDED_PALETTE_PALETTE_H
 #define INCLUDED_PALETTE_PALETTE_H
 
+#include "fs/vfs.h"
+
 struct palette_entry {
 	uint8_t r, g, b;
 };
@@ -34,7 +36,9 @@ struct palette_set *PAL_UnmarshalPaletteSet(VFILE *input);
 void PAL_FreePaletteSet(struct palette_set *set);
 const char *PAL_GetPalettesPath(void);
 char *PAL_ReadDefaultPointer(void);
-const struct palette *PAL_DefaultPalette(void);
 void PAL_SetDefaultPointer(const char *full_name);
+
+const struct palette *PAL_PaletteForWAD(struct directory *dir);
+const struct palette *PAL_DefaultPalette(void);
 
 #endif /* #ifndef INCLUDED_PALETTE_PALETTE_H */

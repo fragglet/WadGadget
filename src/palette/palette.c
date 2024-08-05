@@ -277,6 +277,56 @@ const struct palette *PAL_DefaultPalette(void)
 	return &default_palette;
 }
 
+static const struct palette *LoadWADPalette(struct directory *dir)
+{
+	static struct palette result;
+	struct directory_entry *ent;
+	struct palette_set *set;
+	VFILE *in;
+
+	ent = VFS_EntryByName(dir, "PALPREF");
+	if (ent == NULL) {
+		ent = VFS_EntryByName(dir, "PLAYPAL");
+		if (ent == NULL) {
+			return PAL_DefaultPalette();
+		}
+	}
+
+	in = VFS_OpenByEntry(dir, ent);
+	set = PAL_UnmarshalPaletteSet(in);
+	if (set == NULL) {
+		return PAL_DefaultPalette();
+	}
+
+	memcpy(&result, &set->palettes[0], sizeof(struct palette));
+	PAL_FreePaletteSet(set);
+	return &result;
+}
+
+const struct palette *PAL_PaletteForWAD(struct directory *dir)
+{
+	static const struct palette *cached_result;
+	static struct directory *last_dir;
+	static struct directory_revision *last_rev;
+
+	if (dir->type != FILE_TYPE_WAD) {
+		return PAL_DefaultPalette();
+	}
+
+	// We cache the last palette we loaded. If it's the same WAD file
+	// again and it hasn't changed, there's no need to reload it.
+	if (default_palette_loaded
+	 && dir == last_dir && dir->curr_revision == last_rev) {
+		return cached_result;
+	}
+
+	cached_result = LoadWADPalette(dir);
+	last_dir = dir;
+	last_rev = dir->curr_revision;
+
+	return cached_result;
+}
+
 static void WriteDoomPalette(const char *path)
 {
 	struct palette_set doom_palette_set =
