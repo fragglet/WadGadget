@@ -37,14 +37,14 @@ The following table gives a brief summary of the current state:
 | Operating System               | DOS                  | Linux, macOS, BSD, other Unixes             | Windows, macOS, Linux                |
 | Software License               | [License-free](https://en.wikipedia.org/wiki/License-free_software); v1.3 source is public | GNU GPLv2 | GNU GPLv2 |
 | Interface                      | Text UI (80x25)      | ncurses (~any screen size)                  | GUI (wxWidgets)                      |
-| Two pane view                  | ✓ (in 1.4 beta)      | ✓                                           | ✓ (multi-tab)                        |
+| Two pane view                  | ✓ (in 1.4 beta)      | ✓                                           | Multi-tab, shows one at a time       |
 | File formats                   | WAD                  | WAD                                         | WAD, ZIP, PAK, HOG, many others      |
 | Fundamentals: Create, Delete, Rename | ✓              | ✓                                           | ✓                                    |
 | Rearrange lumps within WAD     |                      | ✓                                           | ✓                                    |
 | Filesystem navigation          | ✓                    | ✓ (fully integrated with WAD view)          | ✓                                    |
-| Basic file management          |                      | ✓ (open, copy, delete, rename files)        | ✓ (kind of, via OS file open dialog) |
+| Basic file management          |                      | ✓ (open, copy, delete, rename files)        | ✓ (open, copy, delete, rename)       |
 | Quick search within WAD        | ✓                    | ✓                                           |                                      |
-| Open/edit via external editors |                      | ✓                                           |                                      |
+| Open/edit via external editors |                      | ✓                                           | ✓ (open only)                        |
 | Quick summary of lump contents | ✓ (graphics, demos)  | ✓ (graphics, demos, SFX, PC speaker sounds) | ✓ (almost everything)                |
 | WAD clean/compact              | ✓ (via command line) | ✓                                           | ✓                                    |
 | Undo                           |                      | ✓ (multi-level, plus redo)                  | ✓ (multi-level, plus redo)           |
@@ -61,7 +61,7 @@ The following table gives a brief summary of the current state:
 | Music playback                 | ✓                    | fragglet/WadGadget#14                       | ✓                                    |
 | Music import                   | ✓                    | ✓                                           | ✓ (many formats)                     |
 | Music export                   | ✓ (MUS)              | ✓ (converts MUS to MID)                     | ✓ (many formats)                     |
-| Alternate palette support      | Doom/Heretic         | ✓ (arbitrary/custom)                        | ✓                                    |
+| Alternate palette support      | Doom/Heretic         | ✓ (arbitrary/custom)                        | ✓ (arbitrary/custom)                 |
 | Palette/colormap import        |                      | ✓ (PNG)                                     | ✓                                    |
 | Palette/colormap export        |                      | ✓ (PNG)                                     | ✓                                    |
 | Texture editor                 | ✓                    | WIP (fragglet/WadGadget#9); can be edited as text as a stopgap | ✓                 |
