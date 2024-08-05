@@ -24,6 +24,7 @@
 #include "conv/export.h"
 #include "stringlib.h"
 #include "view.h"
+#include "fs/wad_file.h"
 
 #include "palette/palette.h"
 #include "palette/palfs.h"
@@ -260,4 +261,66 @@ static void PerformPaletteCopyToDir(void)
 const struct action copy_palette_to_dir_action = {
 	KEY_F(5), 'C',  "Copy", "> Copy",
 	PerformPaletteCopyToDir,
+};
+
+static void PerformSetPalettePref(void)
+{
+	struct file_set *set = B_DirectoryPaneTagged(active_pane);
+	struct wad_file *wf = VFS_WadFile(other_pane->dir);
+	VFILE *in, *out, *marshaled;
+	struct palette_set *pal;
+	struct directory_entry *ent;
+	int idx = 0;
+
+	if (set->num_entries != 1) {
+		UI_MessageBox("You must select a single palette.");
+		return;
+	}
+
+	if (!B_CheckReadOnly(other_pane->dir)) {
+		return;
+	}
+
+	ent = VFS_EntryBySerial(active_pane->dir, set->entries[0]);
+	if (ent == NULL) {
+		return;
+	}
+
+	in = VFS_OpenByEntry(active_pane->dir, ent);
+	if (in == NULL) {
+		return;
+	}
+
+	ClearConversionErrors();
+	pal = PAL_FromImageFile(in);
+	if (pal == NULL) {
+		UI_MessageBox("Error loading palette:\n%s",
+		              GetConversionError());
+		return;
+	}
+
+	// We only include the first palette.
+	pal->num_palettes = 1;
+	marshaled = PAL_MarshalPaletteSet(pal);
+	PAL_FreePaletteSet(pal);
+
+	// Write lump.
+	// TODO: Overwrite existing PALPREF lump if one exists.
+	idx = W_NumLumps(wf);
+	W_AddEntries(wf, idx, 1);
+	W_SetLumpName(wf, idx, "PALPREF");
+	out = W_OpenLumpRewrite(wf, idx);
+	vfcopy(marshaled, out);
+	vfclose(marshaled);
+	vfclose(out);
+
+	VFS_CommitChanges(other_pane->dir, "setting preferred palette");
+	VFS_Refresh(other_pane->dir);
+	B_DirectoryPaneSelectByName(other_pane, "PALPREF");
+	B_SwitchToPane(other_pane);
+}
+
+const struct action set_palette_pref_action = {
+	KEY_F(3), 'U',  "SetPref", "> Use for WAD",
+	PerformSetPalettePref,
 };
