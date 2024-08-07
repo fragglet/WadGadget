@@ -36,6 +36,13 @@
 #include "fs/vfs.h"
 #include "view.h"
 
+// The freedeskop.org xdg-utils package includes a program named xdg-open
+// that will open files according to the user's preferences. However, other
+// systems such as macOS and Haiku have their own "open" command.
+#if !defined(__APPLE__) && !defined(__BEOS__) && !defined(__HAIKU__)
+#define USE_XDG_OPEN
+#endif
+
 #ifndef _WIN32
 
 static bool got_tstp;
@@ -138,7 +145,7 @@ static intptr_t _spawnv(int mode, const char *cmdname, const char **argv)
 }
 #endif
 
-#ifndef __APPLE__
+#ifdef USE_XDG_OPEN
 static bool CheckHaveXdgUtils(void)
 {
 	return system("xdg-open --version >/dev/null 2>&1") == 0;
@@ -237,7 +244,7 @@ static char *GetOpenCommand(const char *filename)
 		return editor;
 	}
 
-#ifdef __APPLE__
+#ifndef USE_XDG_OPEN
 	return "open";
 #else
 	{
