@@ -76,12 +76,10 @@ static bool _RealDirRefresh(struct directory *d,
 			continue;
 		}
 		path = StringJoin("/", d->path, dirent->d_name, NULL);
+		// We stat() the file, which resolves symlinks and gives
+		// additional information such as file size and type
+		// (in a portable way)
 		stat_ok = stat(path, &s) == 0;
-		// For symlinks, follow the link to get the actual file type.
-		// This ensures links to directories are handled properly.
-		if (stat_ok && dirent->d_type == DT_LNK) {
-			dirent->d_type = S_ISDIR(s.st_mode) ? DT_DIR : DT_REG;
-		}
 		free(path);
 		path = checked_strdup(dirent->d_name);
 
@@ -89,7 +87,7 @@ static bool _RealDirRefresh(struct directory *d,
 			sizeof(struct directory_entry) * (*num_entries + 1));
 		ent = *entries + *num_entries;
 		ent->name = path;
-		ent->type = dirent->d_type == DT_DIR ? FILE_TYPE_DIR :
+		ent->type = stat_ok && S_ISDIR(s.st_mode) ? FILE_TYPE_DIR :
 		            HasWadExtension(ent->name) ? FILE_TYPE_WAD :
 		            FILE_TYPE_FILE;
 		ent->size = stat_ok
