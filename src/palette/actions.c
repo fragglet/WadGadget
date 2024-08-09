@@ -304,11 +304,13 @@ static void PerformSetPalettePref(void)
 	marshaled = PAL_MarshalPaletteSet(pal);
 	PAL_FreePaletteSet(pal);
 
-	// Write lump.
-	// TODO: Overwrite existing PALPREF lump if one exists.
-	idx = W_NumLumps(wf);
-	W_AddEntries(wf, idx, 1);
-	W_SetLumpName(wf, idx, "PALPREF");
+	// Write lump. If there's an existing lump we overwrite it.
+	idx = W_GetNumForName(wf, "PALPREF");
+	if (idx < 0) {
+		idx = W_NumLumps(wf);
+		W_AddEntries(wf, idx, 1);
+		W_SetLumpName(wf, idx, "PALPREF");
+	}
 	out = W_OpenLumpRewrite(wf, idx);
 	vfcopy(marshaled, out);
 	vfclose(marshaled);
