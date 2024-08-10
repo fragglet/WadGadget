@@ -222,6 +222,95 @@ fail:
 	return result;
 }
 
+static bool HasTransparency(const struct patch_header *hdr,
+                            const uint8_t *srcbuf, size_t srcbuf_len)
+{
+	uint32_t *columnofs =
+		(uint32_t *) (srcbuf + sizeof(struct patch_header));
+	int x, y, expect_y, off, cnt;
+
+	if (hdr->height > 255) {
+		return true;
+	}
+
+	// Each column must consist of consecutive post(s) that cover the
+	// entire space of the picture.
+	// TODO: wadptr in the future might put posts out of order to achieve
+	// better compression, in which case this might mistakenly identify
+	// some pictures as having transparency.
+	for (x = 0; x < hdr->width; ++x) {
+		off = columnofs[x];
+		SwapLE32(&off);
+		expect_y = 0;
+		while (srcbuf[off] != 0xff) {
+			y = srcbuf[off];
+			if (y != expect_y) {
+				return true;
+			}
+			cnt = srcbuf[off + 1];
+			expect_y += cnt;
+			off += 4 + cnt;
+		}
+		if (expect_y != hdr->height) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+#define SET_BIT(bitset, idx) \
+	do { bitset[(idx) / 32] |= 1 << ((idx) % 32); } while(0)
+#define BIT_IS_SET(bitset, idx) \
+	((bitset[(idx) / 32] & (1 << ((idx) % 32))) != 0)
+
+static int TransparencyColor(const struct patch_header *hdr,
+                             const uint8_t *srcbuf, size_t srcbuf_len)
+{
+	uint32_t used_colors[8];
+	uint32_t *columnofs =
+		(uint32_t *) (srcbuf + sizeof(struct patch_header));
+	uint32_t off;
+	int x, y, i, cnt;
+
+	// Examine every pixel in the image; used_colors will be the result,
+	// a bit-set indicating which colors have been found.
+
+	memset(used_colors, 0, sizeof(used_colors));
+
+	for (x = 0; x < hdr->width; ++x) {
+		off = columnofs[x];
+		SwapLE32(&off);
+		while (srcbuf[off] != 0xff) {
+			y = srcbuf[off];
+			cnt = srcbuf[off + 1];
+			off += 3;
+			for (i = 0; i < cnt; i++, y++) {
+				SET_BIT(used_colors, srcbuf[off]);
+				off++;
+			}
+			off++;
+		}
+	}
+
+	// Try Doom's duplicate black color, "traditionally" used by modders
+	// as the transparency color.
+	if (!BIT_IS_SET(used_colors, 247)) {
+		return 247;
+	}
+
+	// Otherwise, look for any color that doesn't appear in the image.
+	for (i = 255; i >= 0; i--) {
+		if (!BIT_IS_SET(used_colors, i)) {
+			return i;
+		}
+	}
+
+	// TODO: Uh oh, now we're in trouble.
+
+	return 0;
+}
+
 static bool ValidatePatch(const struct patch_header *hdr,
                           const uint8_t *srcbuf, size_t srcbuf_len)
 {
@@ -254,14 +343,14 @@ static bool ValidatePatch(const struct patch_header *hdr,
 }
 
 static void DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
-                      size_t srcbuf_len, uint8_t *dstbuf)
+                      size_t srcbuf_len, uint8_t *dstbuf, int trans_color)
 {
 	uint32_t *columnofs =
 		(uint32_t *) (srcbuf + sizeof(struct patch_header));
 	uint32_t off;
 	int x, y, i, cnt;
 
-	memset(dstbuf, PALETTE_TRANSPARENT, hdr->width * hdr->height);
+	memset(dstbuf, trans_color, hdr->width * hdr->height);
 
 	for (x = 0; x < hdr->width; ++x) {
 		off = columnofs[x];
@@ -287,6 +376,8 @@ VFILE *V_ToImageFile(VFILE *input, const struct palette *pal)
 	uint8_t *buf, *imgbuf = NULL;
 	struct patch_header hdr;
 	size_t buf_len;
+	bool has_transparency;
+	int transparent_color = 0;
 	VFILE *result = NULL;
 
 	buf = vfreadall(input, &buf_len);
@@ -303,9 +394,15 @@ VFILE *V_ToImageFile(VFILE *input, const struct palette *pal)
 		goto fail;
 	}
 
-	DrawPatch(&hdr, buf, buf_len, imgbuf);
+	has_transparency = HasTransparency(&hdr, buf, buf_len);
+	if (has_transparency) {
+		transparent_color = TransparencyColor(&hdr, buf, buf_len);
+	}
 
-	result = V_WritePalettizedPNG(&hdr, imgbuf, pal, true);
+	DrawPatch(&hdr, buf, buf_len, imgbuf, transparent_color);
+
+	result = V_WritePalettizedPNG(&hdr, imgbuf, pal,
+	                              has_transparency, transparent_color);
 
 fail:
 	free(imgbuf);
@@ -334,7 +431,7 @@ VFILE *V_FlatToImageFile(VFILE *input, const struct palette *pal)
 	hdr.height = buf_len / 64;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = V_WritePalettizedPNG(&hdr, buf, pal, false);
+	result = V_WritePalettizedPNG(&hdr, buf, pal, false, 0);
 
 fail:
 	free(buf);
@@ -358,7 +455,7 @@ VFILE *V_FullscreenToImageFile(VFILE *input, const struct palette *pal)
 	hdr.height = FULLSCREEN_H;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = V_WritePalettizedPNG(&hdr, buf, pal, false);
+	result = V_WritePalettizedPNG(&hdr, buf, pal, false, 0);
 	free(buf);
 
 	return result;
@@ -440,7 +537,7 @@ VFILE *V_HiresToImageFile(VFILE *input)
 
 	hdr.width = HIRES_SCREEN_W;
 	hdr.height = HIRES_SCREEN_H;
-	result = V_WritePalettizedPNG(&hdr, screenbuf, &palette, false);
+	result = V_WritePalettizedPNG(&hdr, screenbuf, &palette, false, 0);
 
 	free(screenbuf);
 	free(lump);

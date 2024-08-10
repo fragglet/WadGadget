@@ -10,8 +10,6 @@
 
 #include <png.h>
 
-#define PALETTE_TRANSPARENT   247
-
 struct png_context {
 	png_structp ppng;
 	png_infop pinfo;
@@ -28,4 +26,4 @@ void V_ClosePNG(struct png_context *ctx);
 uint8_t *V_ReadRGBAPNG(VFILE *input, struct patch_header *hdr, int *rowstep);
 VFILE *V_WritePalettizedPNG(struct patch_header *hdr, uint8_t *imgbuf,
                             const struct palette *palette,
-                            bool set_transparency);
+                            bool set_transparency, int transparent_color);

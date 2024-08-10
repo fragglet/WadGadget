@@ -69,7 +69,7 @@ VFILE *V_ColormapToImageFile(VFILE *input, const struct palette *pal)
 	hdr.height = buf_len / 256;
 	hdr.topoffset = 0;
 	hdr.leftoffset = 0;
-	result = V_WritePalettizedPNG(&hdr, buf, pal, false);
+	result = V_WritePalettizedPNG(&hdr, buf, pal, false, 0);
 
 fail:
 	free(buf);

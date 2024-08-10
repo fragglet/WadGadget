@@ -303,7 +303,7 @@ static png_color *MakePNGPalette(const struct palette *palette)
 
 VFILE *V_WritePalettizedPNG(struct patch_header *hdr, uint8_t *imgbuf,
                             const struct palette *palette,
-                            bool set_transparency)
+                            bool set_transparency, int transparent_color)
 {
 	png_color *png_pal = MakePNGPalette(palette);
 	VFILE *result = NULL;
@@ -324,7 +324,7 @@ VFILE *V_WritePalettizedPNG(struct patch_header *hdr, uint8_t *imgbuf,
 	if (set_transparency) {
 		alphabuf = checked_malloc(256);
 		memset(alphabuf, 0xff, 256);
-		alphabuf[PALETTE_TRANSPARENT] = 0;
+		alphabuf[transparent_color] = 0;
 
 		png_set_tRNS(ctx.ppng, ctx.pinfo, alphabuf, 256, NULL);
 	}
