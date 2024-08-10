@@ -222,15 +222,13 @@ fail:
 	return result;
 }
 
-static bool DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
-                      size_t srcbuf_len, uint8_t *dstbuf)
+static bool ValidatePatch(const struct patch_header *hdr,
+                          const uint8_t *srcbuf, size_t srcbuf_len)
 {
 	uint32_t *columnofs =
 		(uint32_t *) (srcbuf + sizeof(struct patch_header));
 	uint32_t off;
-	int x, y, i, cnt;
-
-	memset(dstbuf, PALETTE_TRANSPARENT, hdr->width * hdr->height);
+	int x;
 
 	for (x = 0; x < hdr->width; ++x) {
 		off = columnofs[x];
@@ -248,6 +246,27 @@ static bool DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
 				                "overruns the end of lump", x);
 				return false;
 			}
+			off += 4 + srcbuf[off + 1];
+		}
+	}
+
+	return true;
+}
+
+static void DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
+                      size_t srcbuf_len, uint8_t *dstbuf)
+{
+	uint32_t *columnofs =
+		(uint32_t *) (srcbuf + sizeof(struct patch_header));
+	uint32_t off;
+	int x, y, i, cnt;
+
+	memset(dstbuf, PALETTE_TRANSPARENT, hdr->width * hdr->height);
+
+	for (x = 0; x < hdr->width; ++x) {
+		off = columnofs[x];
+		SwapLE32(&off);
+		while (srcbuf[off] != 0xff) {
 			y = srcbuf[off];
 			cnt = srcbuf[off + 1];
 			off += 3;
@@ -261,8 +280,6 @@ static bool DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
 			off++;
 		}
 	}
-
-	return true;
 }
 
 VFILE *V_ToImageFile(VFILE *input, const struct palette *pal)
@@ -282,9 +299,11 @@ VFILE *V_ToImageFile(VFILE *input, const struct palette *pal)
 	hdr = *((struct patch_header *) buf);
 	V_SwapPatchHeader(&hdr);
 	imgbuf = checked_malloc(hdr.width * hdr.height);
-	if (!DrawPatch(&hdr, buf, buf_len, imgbuf)) {
+	if (!ValidatePatch(&hdr, buf, buf_len)) {
 		goto fail;
 	}
+
+	DrawPatch(&hdr, buf, buf_len, imgbuf);
 
 	result = V_WritePalettizedPNG(&hdr, imgbuf, pal, true);
 
