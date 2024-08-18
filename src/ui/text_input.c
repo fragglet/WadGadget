@@ -64,7 +64,7 @@ int UI_TextInputKeypress(struct text_input_box *input, int keypress)
 		input->input[strlen(input->input) - 1] = '\0';
 		return 1;
 	}
-	if (keypress == CTRL_('U')) {
+	if (keypress == CTRL_('W')) {
 		UI_TextInputClear(input);
 		return 1;
 	}
