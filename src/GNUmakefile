@@ -19,6 +19,10 @@ CFLAGS := -g -MMD -Wall -I. -O2 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
 LDFLAGS := $(shell pkg-config --libs $(REQUIRED_PKGS)) \
            $(LIBSIXEL_LDFLAGS) $(NCURSES_LDFLAGS)
 
+IWYU = iwyu
+IWYU_FLAGS = --error --mapping_file=.iwyu-overrides.imp
+IWYU_TRANSFORMED_FLAGS = $(patsubst %,-Xiwyu %,$(IWYU_FLAGS)) $(CFLAGS)
+
 HELP_FILES =                \
     ../COPYING.md           \
     help/common.md          \
@@ -95,6 +99,11 @@ wadgadget : $(OBJS)
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+fixincludes:
+	for d in $(patsubst %.o,%.c,$(OBJS)); do \
+		$(IWYU) $(IWYU_TRANSFORMED_FLAGS) 2>&1 $$d | fix_include; \
+	done
 
 help_text.c: $(HELP_FILES) help/make_help.py
 	help/make_help.py $(HELP_FILES) > $@
