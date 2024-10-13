@@ -1,17 +1,24 @@
 
+#include "palette/palette.h"
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <sys/types.h>
 
 #include "common.h"
 #include "stringlib.h"
 #include "fs/vfile.h"
-#include "palette/palette.h"
-#include "conv/graphic.h"
 #include "conv/error.h"
 #include "conv/vpng.h"
+#include "fs/vfs.h"
+#include "png.h"
+#include "pngconf.h"
 
 #define PALETTE_SIZE   (256 * 3)
 

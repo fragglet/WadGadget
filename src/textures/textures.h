@@ -11,6 +11,16 @@
 #ifndef TEXTURES__TEXTURES_H_INCLUDED
 #define TEXTURES__TEXTURES_H_INCLUDED
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "fs/vfile.h"
+
+struct directory;
+struct directory_entry;
+struct file_set;
+
 typedef char pname[8];
 
 struct pnames {

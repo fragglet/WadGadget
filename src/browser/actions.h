@@ -11,8 +11,12 @@
 #ifndef BROWSER__ACTIONS_H_INCLUDED
 #define BROWSER__ACTIONS_H_INCLUDED
 
+#include <stdbool.h>
+
 #include "browser/directory_pane.h"
 #include "ui/actions_bar.h"
+
+struct directory;
 
 extern const struct action copy_action;
 extern const struct action copy_noconv_action;

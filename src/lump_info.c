@@ -8,16 +8,20 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
+#include <stdio.h>
+#include <strings.h>
 
 #include "common.h"
 #include "conv/audio.h"
 #include "conv/graphic.h"
 #include "stringlib.h"
 #include "fs/wad_file.h"
+
+struct wad_file;
 
 struct lump_section {
 	const char *start1, *start2;

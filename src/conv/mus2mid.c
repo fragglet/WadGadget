@@ -13,12 +13,12 @@
 // mus2mid.c - Ben Ryves 2006 - http://benryves.com - benryves@benryves.com
 // Use to convert a MUS file into a single track, type 0 MIDI file.
 
+#include "conv/mus2mid.h"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "common.h"
-#include "conv/mus2mid.h"
 #include "fs/vfile.h"
 
 // TODO

@@ -11,7 +11,13 @@
 #ifndef PALETTE__PALETTE_H_INCLUDED
 #define PALETTE__PALETTE_H_INCLUDED
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include "fs/vfs.h"
+#include "fs/vfile.h"
+
+struct directory;
 
 struct palette_entry {
 	uint8_t r, g, b;

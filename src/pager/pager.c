@@ -8,12 +8,15 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "pager/pager.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
+#include <stdio.h>
 
 #include "common.h"
-#include "pager/pager.h"
 #include "pager/help.h"
 #include "ui/actions_bar.h"
 #include "ui/dialog.h"

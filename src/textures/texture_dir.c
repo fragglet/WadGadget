@@ -9,11 +9,10 @@
 //
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <ctype.h>
 #include <assert.h>
+#include <stdint.h>
 
 #include "common.h"
 #include "conv/error.h"
@@ -21,10 +20,9 @@
 #include "fs/vfs.h"
 #include "stringlib.h"
 #include "ui/title_bar.h"
-#include "ui/ui.h"
-
 #include "textures/textures.h"
 #include "textures/internal.h"
+#include "fs/wad_file.h"
 
 // Implementation of a VFS directory that is backed by a textures list.
 // Currently incomplete.

@@ -11,6 +11,10 @@
 #ifndef PAGER__HELP_H_INCLUDED
 #define PAGER__HELP_H_INCLUDED
 
+#include <stdbool.h>
+
+#include "pager/pager.h"
+
 struct help_pager_history {
 	char *filename;
 	int window_offset, current_link, current_column;

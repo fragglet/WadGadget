@@ -8,17 +8,23 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "pager/hexdump.h"
+
 #include <stdlib.h>
-#include <string.h>
+#include <assert.h>
+#include <curses.h>
+#include <stdio.h>
+#include <strings.h>
 
 #include "common.h"
 #include "fs/vfile.h"
 #include "pager/pager.h"
 #include "pager/help.h"
-#include "pager/hexdump.h"
 #include "pager/plaintext.h"
 #include "ui/dialog.h"
 #include "ui/title_bar.h"
+#include "ui/actions_bar.h"
+#include "ui/pane.h"
 
 // Record lengths for different lump types. TODO: This should probably be
 // done by lump type (lump_info.h), not by name.

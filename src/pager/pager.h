@@ -12,6 +12,9 @@
 #define PAGER__PAGER_H_INCLUDED
 
 #include <curses.h>
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "ui/actions_bar.h"
 #include "ui/pane.h"
 

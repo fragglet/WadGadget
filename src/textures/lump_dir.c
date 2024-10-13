@@ -10,17 +10,13 @@
 //
 // Common code shared between texture and pnames directories.
 
-#include <stdint.h>
-#include <stdlib.h>
 #include <stdbool.h>
-#include <string.h>
 #include <assert.h>
+#include <stdio.h>
 
-#include "common.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "stringlib.h"
-
 #include "textures/textures.h"
 #include "textures/internal.h"
 

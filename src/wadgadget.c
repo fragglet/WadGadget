@@ -13,13 +13,13 @@
 #include <signal.h>
 #include <string.h>
 #include <time.h>
+#include <stdio.h>
 
 #include "common.h"
-#include "browser/directory_pane.h"
 #include "browser/browser.h"
 #include "sixel_display.h"
 #include "termfuncs.h"
-#include "ui/ui.h"
+#include "ui/pane.h"
 
 #define RESPONSE_FILE_PATH "/tmp/wadgadget-paths.txt"
 

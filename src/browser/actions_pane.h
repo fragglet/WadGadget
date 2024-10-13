@@ -11,6 +11,9 @@
 #ifndef BROWSER__ACTIONS_PANE_H_INCLUDED
 #define BROWSER__ACTIONS_PANE_H_INCLUDED
 
+#include <curses.h>
+#include <stdbool.h>
+
 #include "ui/actions_bar.h"
 #include "ui/pane.h"
 

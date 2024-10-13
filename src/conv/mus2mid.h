@@ -16,6 +16,8 @@
 #ifndef CONV__MUS2MID_H_INCLUDED
 #define CONV__MUS2MID_H_INCLUDED
 
+#include <stdbool.h>
+
 #include "fs/vfile.h"
 
 bool mus2mid(VFILE *musinput, VFILE *midioutput);

@@ -11,6 +11,8 @@
 #ifndef CONV__AUDIO_H_INCLUDED
 #define CONV__AUDIO_H_INCLUDED
 
+#include <stdint.h>
+
 #include "fs/vfile.h"
 
 struct sound_header {

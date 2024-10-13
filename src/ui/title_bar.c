@@ -8,17 +8,18 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <stdlib.h>
+#include "ui/title_bar.h"
+
 #include <string.h>
 #include <curses.h>
 #include <time.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 #include "ui/colors.h"
-#include "common.h"
 #include "ui/pane.h"
 #include "ui/stack.h"
-#include "ui/title_bar.h"
-#include "ui/ui.h"
 
 #define MAX_NOTICE_LEN    100
 #define NOTICE_TIME_SECS    2

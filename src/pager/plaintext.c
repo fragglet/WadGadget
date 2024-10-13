@@ -8,15 +8,19 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "pager/plaintext.h"
+
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include <curses.h>
 
 #include "common.h"
 #include "fs/vfile.h"
 #include "pager/pager.h"
 #include "pager/hexdump.h"
-#include "pager/plaintext.h"
 #include "ui/actions_bar.h"
+#include "ui/pane.h"
 
 static void SwitchToHexdump(void)
 {

@@ -11,19 +11,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <string.h>
-#include <assert.h>
-#include <ctype.h>
-
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <dirent.h>
 
 #include "common.h"
 #include "stringlib.h"
 #include "fs/vfs.h"
 #include "fs/wad_file.h"
+#include "fs/vfile.h"
 
 struct wad_directory {
 	struct directory dir;

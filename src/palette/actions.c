@@ -9,25 +9,28 @@
 //
 
 #include <stdlib.h>
-#include <string.h>
 #include <stdbool.h>
+#include <assert.h>
+#include <curses.h>
+#include <stdio.h>
 
 #include "ui/actions_bar.h"
 #include "ui/dialog.h"
-#include "ui/title_bar.h"
-
 #include "browser/actions.h"
 #include "browser/browser.h"
 #include "browser/directory_pane.h"
 #include "common.h"
 #include "conv/error.h"
-#include "conv/export.h"
 #include "stringlib.h"
 #include "view.h"
 #include "fs/wad_file.h"
-
 #include "palette/palette.h"
 #include "palette/palfs.h"
+#include "fs/vfile.h"
+#include "fs/vfs.h"
+#include "lump_info.h"
+
+struct wad_file;
 
 static void PerformViewPalette(void)
 {

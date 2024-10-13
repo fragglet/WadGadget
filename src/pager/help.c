@@ -11,16 +11,20 @@
 // Help viewer. This implements a very restricted subset of the Markdown
 // syntax.
 
+#include "pager/help.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
+#include <curses.h>
+#include <stdarg.h>
+#include <strings.h>
 
 #include "common.h"
-#include "fs/vfile.h"
 #include "help_text.h"
 #include "pager/pager.h"
 #include "pager/plaintext.h"
-#include "pager/help.h"
 #include "stringlib.h"
 #include "ui/actions_bar.h"
 #include "ui/dialog.h"

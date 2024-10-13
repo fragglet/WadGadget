@@ -10,18 +10,18 @@
 
 #ifdef HAVE_LIBSIXEL
 
+#include "sixel_display.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <sys/time.h>
-
 #include <sixel.h>
+#include <unistd.h>
 
 #include "termfuncs.h"
-#include "sixel_display.h"
 #include "stringlib.h"
 
 #define SEND_ATTRIBUTES_ESCAPE  "\x1b[c"
@@ -177,8 +177,6 @@ bool SIXEL_DisplayImage(const char *filename)
 }
 
 #else
-
-#include <stdbool.h>
 
 bool SIXEL_CheckSupported(void)
 {

@@ -8,12 +8,11 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "struct.h"
+
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-
-#include "struct.h"
 
 #define arrlen(x) (sizeof(x) / sizeof(*(x)))
 

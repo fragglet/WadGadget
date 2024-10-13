@@ -11,16 +11,22 @@
 // Basic libpng wrapper functions for reading and writing PNG files
 // through the VFILE interface.
 
+#include "conv/vpng.h"
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <limits.h>
+#include <setjmp.h>
+#include <stdio.h>
 
 #include "common.h"
 #include "fs/vfile.h"
 #include "palette/palette.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
-#include "conv/vpng.h"
+#include "png.h"
+#include "pngconf.h"
 
 #define OFFSET_CHUNK_NAME  "grAb"
 

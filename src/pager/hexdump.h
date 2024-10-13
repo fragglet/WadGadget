@@ -11,7 +11,13 @@
 #ifndef PAGER__HEXDUMP_H_INCLUDED
 #define PAGER__HEXDUMP_H_INCLUDED
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "pager/help.h"
+#include "fs/vfile.h"
+#include "pager/pager.h"
 
 struct hexdump_pager_config {
 	struct pager_config pc;

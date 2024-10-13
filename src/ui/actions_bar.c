@@ -8,16 +8,18 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "ui/actions_bar.h"
+
 #include <string.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <curses.h>
+#include <stdio.h>
 
-#include "ui/actions_bar.h"
 #include "ui/colors.h"
 #include "common.h"
-#include "stringlib.h"
 #include "ui/stack.h"
-#include "ui/ui.h"
+#include "ui/pane.h"
 
 struct actions_accel {
 	const char *name;

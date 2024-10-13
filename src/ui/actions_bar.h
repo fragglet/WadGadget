@@ -11,6 +11,8 @@
 #ifndef UI__ACTIONS_BAR_H_INCLUDED
 #define UI__ACTIONS_BAR_H_INCLUDED
 
+#include <stdbool.h>
+
 #define MAX_KEY_BINDINGS 30
 
 struct action {

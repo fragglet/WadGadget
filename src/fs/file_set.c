@@ -13,15 +13,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <assert.h>
 #include <ctype.h>
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <dirent.h>
-
 #include "common.h"
-#include "stringlib.h"
 #include "fs/vfs.h"
 
 void VFS_ClearSet(struct file_set *l)

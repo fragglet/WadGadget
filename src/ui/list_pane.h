@@ -12,6 +12,9 @@
 #define UI__LIST_PANE_H_INCLUDED
 
 #include <limits.h>
+#include <curses.h>
+#include <stdbool.h>
+
 #include "ui/pane.h"
 
 #define LIST_PANE_END_MARKER  INT_MAX

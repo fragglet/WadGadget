@@ -8,15 +8,19 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "conv/graphic.h"
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 #include "common.h"
 #include "fs/vfile.h"
 #include "palette/palette.h"
 #include "conv/error.h"
-#include "conv/graphic.h"
 #include "conv/vpng.h"
 
 // Hexen loading screen

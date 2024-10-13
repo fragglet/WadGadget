@@ -8,19 +8,18 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <stdarg.h>
-#include <stdint.h>
+#include "palette/palfs.h"
+
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include <stdbool.h>
 
 #include "fs/vfs.h"
 #include "common.h"
 #include "stringlib.h"
-
 #include "palette/palette.h"
-#include "palette/palfs.h"
-
-#include "ui/dialog.h"
+#include "fs/vfile.h"
 
 struct palette_dir {
 	struct directory dir;

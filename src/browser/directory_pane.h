@@ -11,6 +11,10 @@
 #ifndef BROWSER__DIRECTORY_PANE_H_INCLUDED
 #define BROWSER__DIRECTORY_PANE_H_INCLUDED
 
+#include <curses.h>
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "ui/list_pane.h"
 #include "fs/vfs.h"
 

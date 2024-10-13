@@ -11,6 +11,8 @@
 #ifndef STRUCT_H_INCLUDED
 #define STRUCT_H_INCLUDED
 
+#include <stddef.h>
+
 struct struct_field;
 
 struct struct_field_type {

@@ -8,17 +8,21 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "termfuncs.h"
+
 #include <curses.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #include "ui/colors.h"
 #include "common.h"
-#include "termfuncs.h"
+
+struct timeval;
 
 #define CLEAR_SCREEN_ESCAPE "\x1b[H\x1b[2J"
 #define XTERM_RAISE_ESCAPE  "\x1b[5t"  /* xterm WindowOp to raise window */

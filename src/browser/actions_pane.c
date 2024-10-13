@@ -8,14 +8,13 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "browser/actions_pane.h"
+
 #include <string.h>
-#include <limits.h>
 #include <stdbool.h>
 
-#include "browser/actions_pane.h"
 #include "ui/colors.h"
 #include "common.h"
-#include "stringlib.h"
 #include "ui/ui.h"
 
 static const int key_ordering[] = {

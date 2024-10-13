@@ -8,6 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "view.h"
+
 #include <curses.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -16,6 +18,10 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <sys/types.h>
 
 #include "browser/actions.h"
 #include "common.h"
@@ -25,16 +31,15 @@
 #include "conv/export.h"
 #include "conv/import.h"
 #include "lump_info.h"
-#include "pager/pager.h"
 #include "pager/plaintext.h"
 #include "sixel_display.h"
 #include "stringlib.h"
 #include "termfuncs.h"
 #include "ui/title_bar.h"
-#include "ui/ui.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
-#include "view.h"
+#include "fs/wad_file.h"
+#include "ui/pane.h"
 
 // The freedeskop.org xdg-utils package includes a program named xdg-open
 // that will open files according to the user's preferences. However, other

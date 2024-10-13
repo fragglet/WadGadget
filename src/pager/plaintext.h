@@ -11,6 +11,13 @@
 #ifndef PAGER__PLAINTEXT_H_INCLUDED
 #define PAGER__PLAINTEXT_H_INCLUDED
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "fs/vfile.h"
+#include "pager/pager.h"
+
 struct plaintext_pager_config {
 	struct pager_config pc;
 	char **lines;

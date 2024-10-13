@@ -11,7 +11,10 @@
 #ifndef UI__STACK_H_INCLUDED
 #define UI__STACK_H_INCLUDED
 
+#include <stdbool.h>
+
 struct pane_stack;
+struct action;
 
 struct pane_stack_state {
 	int top_line, lines;

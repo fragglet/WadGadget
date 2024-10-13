@@ -8,16 +8,16 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "ui/list_pane.h"
+
 #include <curses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include "ui/colors.h"
 #include "common.h"
 #include "ui/ui.h"
-#include "ui/list_pane.h"
 #include "ui/stack.h"
 
 static unsigned int NumEntries(struct list_pane *lp)

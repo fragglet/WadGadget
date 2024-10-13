@@ -8,17 +8,15 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "ui/stack.h"
+
 #include <stdlib.h>
-#include <string.h>
 #include <stdbool.h>
-#include <assert.h>
+#include <curses.h>
 
 #include "common.h"
 #include "ui/actions_bar.h"
-#include "ui/colors.h"
 #include "ui/pane.h"
-#include "ui/stack.h"
-#include "ui/title_bar.h"
 
 #define MAX_SCREEN_PANES 10
 

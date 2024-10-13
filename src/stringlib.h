@@ -12,6 +12,7 @@
 #define STRINGLIB_H_INCLUDED
 
 #include <stdarg.h>
+#include <stddef.h>
 
 char *StringDuplicate(const char *orig);
 int StringCopy(char *dest, const char *src, size_t dest_size);

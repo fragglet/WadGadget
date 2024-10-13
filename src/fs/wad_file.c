@@ -8,19 +8,20 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "fs/wad_file.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <stdarg.h>
 #include <ctype.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <strings.h>
 
 #include "common.h"
 #include "ui/dialog.h"
 #include "fs/vfile.h"
-#include "fs/wad_file.h"
 
 #define REVISION_DESCR_LEN  40
 #define WAD_FILE_ENTRY_LEN  16

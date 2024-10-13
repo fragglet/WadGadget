@@ -11,6 +11,10 @@
 #ifndef FS__WAD_FILE_H_INCLUDED
 #define FS__WAD_FILE_H_INCLUDED
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "fs/vfile.h"
 
 #define LUMP_HEADER_LEN 8

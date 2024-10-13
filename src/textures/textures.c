@@ -8,19 +8,19 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "textures/textures.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include <strings.h>
 
 #include "common.h"
 #include "conv/error.h"
 #include "fs/vfile.h"
-#include "fs/vfs.h"
-
-#include "textures/textures.h"
 
 static void SwapTexture(struct texture *t)
 {

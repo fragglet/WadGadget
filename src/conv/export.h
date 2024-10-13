@@ -11,8 +11,15 @@
 #ifndef CONV__EXPORT_H_INCLUDED
 #define CONV__EXPORT_H_INCLUDED
 
+#include <stdbool.h>
+
 #include "lump_info.h"
 #include "fs/vfs.h"
+
+struct directory;
+struct directory_entry;
+struct file_set;
+struct lump_type;
 
 bool ExportToFile(struct directory *from, struct directory_entry *ent,
                   const struct lump_type *lt, const char *to_filename,

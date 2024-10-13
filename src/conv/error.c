@@ -8,13 +8,12 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "conv/error.h"
+
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <stdbool.h>
-
-#include "conv/error.h"
 
 #define MAX_ERROR_LEN  256
 

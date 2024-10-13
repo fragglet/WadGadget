@@ -11,6 +11,8 @@
 #ifndef SIXEL_DISPLAY_H_INCLUDED
 #define SIXEL_DISPLAY_H_INCLUDED
 
+#include <stdbool.h>
+
 bool SIXEL_CheckSupported(void);
 void SIXEL_ClearAndPrint(const char *msg, ...);
 bool SIXEL_DisplayImage(const char *filename);

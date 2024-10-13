@@ -11,6 +11,8 @@
 #ifndef UI__UI_H_INCLUDED
 #define UI__UI_H_INCLUDED
 
+#include <curses.h>
+
 #include "ui/pane.h"
 #include "ui/text_input.h"
 

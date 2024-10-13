@@ -8,20 +8,22 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "ui/dialog.h"
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdarg.h>
 #include <curses.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdio.h>
 
 #include "ui/colors.h"
 #include "common.h"
-#include "ui/dialog.h"
 #include "ui/pane.h"
-#include "ui/actions_bar.h"
 #include "ui/stack.h"
 #include "ui/ui.h"
+#include "ui/text_input.h"
 
 struct nonblocking_window {
 	struct pane pane;

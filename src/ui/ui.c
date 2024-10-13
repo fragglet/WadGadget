@@ -8,15 +8,14 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "ui/ui.h"
+
 #include <stdlib.h>
-#include <string.h>
 #include <curses.h>
-#include <time.h>
+#include <stdbool.h>
 
 #include "ui/colors.h"
 #include "common.h"
-#include "ui/pane.h"
-#include "ui/ui.h"
 
 int UI_StringWidth(char *s)
 {

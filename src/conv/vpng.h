@@ -12,6 +12,14 @@
 #define CONV__VPNG_H_INCLUDED
 
 #include <png.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include "fs/vfile.h"
+
+struct palette;
+struct patch_header;
 
 struct png_context {
 	png_structp ppng;

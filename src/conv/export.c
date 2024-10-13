@@ -8,15 +8,15 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <curses.h>
+#include "conv/export.h"
+
 #include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
+#include <stdio.h>
 
 #include "conv/audio.h"
 #include "conv/error.h"
 #include "ui/dialog.h"
-#include "conv/export.h"
 #include "conv/graphic.h"
 #include "conv/palette.h"
 #include "lump_info.h"
@@ -24,7 +24,11 @@
 #include "stringlib.h"
 #include "textures/textures.h"
 #include "ui/title_bar.h"
-#include "ui/ui.h"
+#include "fs/vfile.h"
+#include "fs/vfs.h"
+#include "palette/palette.h"
+
+struct lump_type;
 
 static VFILE *ConvertPnames(VFILE *input)
 {

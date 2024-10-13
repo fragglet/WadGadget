@@ -11,6 +11,9 @@
 #ifndef PALETTE__PALFS_H_INCLUDED
 #define PALETTE__PALFS_H_INCLUDED
 
+struct directory;
+struct directory_entry;
+
 struct directory *PAL_OpenDirectory(struct directory *previous);
 struct directory *PAL_InnerDir(struct directory *dir);
 struct directory_entry *PAL_InnerEntry(struct directory *dir,

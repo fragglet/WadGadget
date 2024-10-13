@@ -11,7 +11,12 @@
 #ifndef VIEW_H_INCLUDED
 #define VIEW_H_INCLUDED
 
+#include <stdbool.h>
+
 #include "fs/vfs.h"
+
+struct directory;
+struct directory_entry;
 
 enum open_result { OPEN_FAILED, OPEN_VIEWED, OPEN_EDITED };
 

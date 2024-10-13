@@ -8,11 +8,14 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "conv/audio.h"
+
 #include <stdlib.h>
 #include <sndfile.h>
 #include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
 
-#include "conv/audio.h"
 #include "conv/error.h"
 #include "common.h"
 

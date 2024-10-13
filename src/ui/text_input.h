@@ -12,6 +12,7 @@
 #define UI__TEXT_INPUT_H_INCLUDED
 
 #include <curses.h>
+#include <stddef.h>
 
 struct text_input_box {
 	WINDOW *win, *parent_win;

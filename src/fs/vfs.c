@@ -8,6 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "fs/vfs.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -15,15 +17,10 @@
 #include <stdarg.h>
 #include <string.h>
 #include <assert.h>
-#include <ctype.h>
-
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <dirent.h>
+#include <strings.h>
 
 #include "common.h"
 #include "stringlib.h"
-#include "fs/vfs.h"
 
 struct directory *VFS_OpenRealDir(const char *path);  // real_dir.c
 struct directory *VFS_OpenWadAsDirectory(const char *path);  // wad_dir.c

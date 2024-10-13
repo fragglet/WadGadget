@@ -11,8 +11,12 @@
 #ifndef CONV__GRAPHIC_H_INCLUDED
 #define CONV__GRAPHIC_H_INCLUDED
 
+#include <stdint.h>
+
 #include "fs/vfile.h"
 #include "palette/palette.h"
+
+struct palette;
 
 struct patch_header {
 	uint16_t width, height;

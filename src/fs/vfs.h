@@ -11,6 +11,10 @@
 #ifndef FS__VFS_H_INCLUDED
 #define FS__VFS_H_INCLUDED
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "fs/vfile.h"
 #include "fs/wad_file.h"
 

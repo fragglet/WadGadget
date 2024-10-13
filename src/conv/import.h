@@ -11,7 +11,13 @@
 #ifndef CONV__IMPORT_H_INCLUDED
 #define CONV__IMPORT_H_INCLUDED
 
+#include <stdbool.h>
+
 #include "fs/vfs.h"
+#include "fs/vfile.h"
+
+struct directory;
+struct file_set;
 
 bool ImportFromFile(VFILE *from_file, const char *src_name,
                     struct directory *to_wad, int lumpnum, bool convert);

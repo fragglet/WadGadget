@@ -12,6 +12,7 @@
 #define UI__PANE_H_INCLUDED
 
 #include <curses.h>
+#include <stdbool.h>
 
 struct pane_stack;
 

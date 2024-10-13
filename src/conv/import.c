@@ -8,22 +8,23 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "conv/import.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <stdint.h>
-#include <limits.h>
+#include <strings.h>
 
-#include "common.h"
 #include "conv/audio.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
-#include "conv/import.h"
 #include "conv/palette.h"
-#include "lump_info.h"
 #include "stringlib.h"
 #include "textures/textures.h"
 #include "ui/dialog.h"
+#include "fs/vfs.h"
+#include "fs/wad_file.h"
+#include "palette/palette.h"
 
 static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 {

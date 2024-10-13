@@ -8,21 +8,18 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <stdint.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 
 #include "common.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
-#include "stringlib.h"
 #include "ui/title_bar.h"
-#include "ui/ui.h"
-
 #include "textures/textures.h"
 #include "textures/internal.h"
+#include "fs/wad_file.h"
 
 struct pnames_dir {
 	struct lump_dir dir;

@@ -11,6 +11,10 @@
 #ifndef BROWSER__BROWSER_H_INCLUDED
 #define BROWSER__BROWSER_H_INCLUDED
 
+#include <stdbool.h>
+
+struct directory_pane;
+
 void B_SwitchToPane(struct directory_pane *pane);
 void B_ReplacePane(struct directory_pane *old_pane,
                    struct directory_pane *new_pane);

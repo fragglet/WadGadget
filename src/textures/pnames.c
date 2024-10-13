@@ -10,16 +10,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include <stdint.h>
+#include <strings.h>
 
 #include "common.h"
 #include "conv/error.h"
 #include "fs/vfile.h"
-#include "fs/vfs.h"
-
 #include "textures/textures.h"
 
 void TX_FreePnames(struct pnames *pnames)

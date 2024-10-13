@@ -8,15 +8,14 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "ui/pane.h"
+
 #include <stdlib.h>
-#include <string.h>
 #include <stdbool.h>
-#include <assert.h>
 
 #include "common.h"
 #include "ui/actions_bar.h"
 #include "ui/colors.h"
-#include "ui/pane.h"
 #include "ui/stack.h"
 #include "ui/title_bar.h"
 #include "ui/ui.h"

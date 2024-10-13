@@ -12,6 +12,8 @@
 #define COMMON_H_INCLUDED
 
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #define CTRL_(x) ((x) & 0x1f)

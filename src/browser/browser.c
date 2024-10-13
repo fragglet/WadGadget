@@ -8,32 +8,31 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "browser/browser.h"
+
 #include <curses.h>
 #include <stdlib.h>
-#include <signal.h>
 #include <string.h>
+#include <assert.h>
+#include <stdio.h>
 
 #include "common.h"
 #include "fs/vfs.h"
 #include "lump_info.h"
-#include "sixel_display.h"
-#include "stringlib.h"
 #include "termfuncs.h"
 #include "textures/textures.h"
 #include "ui/actions_bar.h"
 #include "ui/colors.h"
-#include "ui/dialog.h"
 #include "ui/stack.h"
 #include "ui/title_bar.h"
 #include "ui/ui.h"
-#include "view.h"
-
 #include "browser/actions_pane.h"
 #include "browser/actions.h"
 #include "browser/directory_pane.h"
-#include "browser/browser.h"
-
 #include "palette/actions.h"
+#include "ui/list_pane.h"
+#include "ui/pane.h"
+#include "ui/text_input.h"
 
 #define INFO_PANE_WIDTH 30
 

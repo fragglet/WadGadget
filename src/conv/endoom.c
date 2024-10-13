@@ -9,16 +9,16 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "conv/endoom.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <curses.h>
-#include <sys/time.h>
 
 #include "common.h"
-#include "conv/endoom.h"
 #include "termfuncs.h"
 
 static const char *cp437_to_utf8[256] = {

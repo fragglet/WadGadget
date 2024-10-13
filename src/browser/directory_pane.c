@@ -8,18 +8,17 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "browser/directory_pane.h"
+
 #include <curses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+#include <strings.h>
 
 #include "ui/colors.h"
-#include "browser/directory_pane.h"
-#include "common.h"
-#include "ui/dialog.h"
 #include "stringlib.h"
-#include "ui/ui.h"
+#include "ui/pane.h"
 
 static int HeaderEntries(struct directory_pane *dp)
 {

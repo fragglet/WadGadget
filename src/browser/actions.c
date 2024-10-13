@@ -8,13 +8,18 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "browser/actions.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
+#include <assert.h>
+#include <curses.h>
+#include <stdint.h>
+#include <strings.h>
 
-#include "browser/actions.h"
 #include "browser/browser.h"
 #include "common.h"
 #include "conv/error.h"
@@ -22,16 +27,19 @@
 #include "ui/dialog.h"
 #include "conv/export.h"
 #include "ui/pane.h"
-#include "pager/pager.h"
 #include "pager/help.h"
 #include "pager/hexdump.h"
 #include "palette/palfs.h"
 #include "stringlib.h"
 #include "ui/title_bar.h"
-#include "ui/ui.h"
 #include "fs/vfs.h"
 #include "textures/textures.h"
 #include "view.h"
+#include "browser/directory_pane.h"
+#include "fs/vfile.h"
+#include "fs/wad_file.h"
+#include "ui/actions_bar.h"
+#include "ui/list_pane.h"
 
 #define WAD_JUNK_THRESHOLD_KB  500
 

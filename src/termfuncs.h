@@ -14,6 +14,10 @@
 #include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
+#include <curses.h>
+#include <stdbool.h>
+
+struct timeval;
 
 #define COLORX_DARKGREY       (COLOR_BLACK + 8)
 #define COLORX_BRIGHTBLUE     (COLOR_BLUE + 8)

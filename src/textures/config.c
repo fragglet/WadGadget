@@ -17,12 +17,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include <stdint.h>
 
 #include "common.h"
 #include "conv/error.h"
 #include "fs/vfile.h"
-#include "fs/vfs.h"
-
 #include "textures/textures.h"
 
 #define TEXTURE_CONFIG_HEADER "; deutex format texture lump configuration\n"
