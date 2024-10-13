@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "browser/browser.h"
+#include "fs/vfile.h"  // IWYU pragma: keep
 #include "sixel_display.h"
 #include "termfuncs.h"
 #include "ui/pane.h"
