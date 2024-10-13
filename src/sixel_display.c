@@ -8,13 +8,12 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifdef HAVE_LIBSIXEL
-
 #include "sixel_display.h"
+
+#ifdef HAVE_LIBSIXEL
 
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
 #include <sys/time.h>
