@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef PALETTE_ACTIONS_H
-#define PALETTE_ACTIONS_H
+#ifndef PALETTE__ACTIONS_H_INCLUDED
+#define PALETTE__ACTIONS_H_INCLUDED
 
 extern const struct action view_palette_action;
 extern const struct action set_default_palette_action;
@@ -17,4 +17,4 @@ extern const struct action copy_palette_to_wad_action;
 extern const struct action copy_palette_to_dir_action;
 extern const struct action set_palette_pref_action;
 
-#endif  /* #ifdef PALETTE_ACTIONS_H */
+#endif /* #ifndef PALETTE__ACTIONS_H_INCLUDED */

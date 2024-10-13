@@ -8,9 +8,14 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef HELP_TEXT_H_INCLUDED
+#define HELP_TEXT_H_INCLUDED
+
 struct help_file {
 	const char *filename;
 	const char *contents;
 };
 
 extern const struct help_file help_files[];
+
+#endif /* #ifndef HELP_TEXT_H_INCLUDED */

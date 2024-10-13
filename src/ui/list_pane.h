@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef INCLUDE_LIST_PANE_H
-#define INCLUDE_LIST_PANE_H
+#ifndef UI__LIST_PANE_H_INCLUDED
+#define UI__LIST_PANE_H_INCLUDED
 
 #include <limits.h>
 #include "ui/pane.h"
@@ -42,5 +42,4 @@ unsigned int UI_ListPaneLines(struct list_pane *lp);
 void UI_ListPaneSetTitle(struct list_pane *lp, const char *title);
 void UI_ListPaneSelect(struct list_pane *p, unsigned int idx);
 
-#endif /* #ifndef INCLUDE_LIST_PANE_H */
-
+#endif /* #ifndef UI__LIST_PANE_H_INCLUDED */

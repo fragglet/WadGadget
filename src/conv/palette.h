@@ -8,7 +8,12 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef CONV__PALETTE_H_INCLUDED
+#define CONV__PALETTE_H_INCLUDED
+
 VFILE *V_PaletteFromImageFile(VFILE *input);
 VFILE *V_PaletteToImageFile(VFILE *input);
 VFILE *V_ColormapToImageFile(VFILE *input, const struct palette *pal);
 VFILE *V_ColormapFromImageFile(VFILE *input, const struct palette *pal);
+
+#endif /* #ifndef CONV__PALETTE_H_INCLUDED */

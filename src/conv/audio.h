@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef CONV__AUDIO_H_INCLUDED
+#define CONV__AUDIO_H_INCLUDED
+
 #include "fs/vfile.h"
 
 struct sound_header {
@@ -20,3 +23,4 @@ VFILE *S_FromAudioFile(VFILE *input);
 VFILE *S_ToAudioFile(VFILE *input);
 void S_SwapSoundHeader(struct sound_header *hdr);
 
+#endif /* #ifndef CONV__AUDIO_H_INCLUDED */

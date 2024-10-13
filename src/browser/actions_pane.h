@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef BROWSER__ACTIONS_PANE_H_INCLUDED
+#define BROWSER__ACTIONS_PANE_H_INCLUDED
+
 #include "ui/actions_bar.h"
 #include "ui/pane.h"
 
@@ -22,3 +25,5 @@ void B_ActionsPaneInit(struct actions_pane *pane, WINDOW *win);
 void B_ActionsPaneSet(struct actions_pane *pane,
                       const struct action **actions, bool left_to_right,
                       bool function_keys);
+
+#endif /* #ifndef BROWSER__ACTIONS_PANE_H_INCLUDED */

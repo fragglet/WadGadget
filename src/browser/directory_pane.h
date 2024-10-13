@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef INCLUDE_DIRECTORY_PANE_H
-#define INCLUDE_DIRECTORY_PANE_H
+#ifndef BROWSER__DIRECTORY_PANE_H_INCLUDED
+#define BROWSER__DIRECTORY_PANE_H_INCLUDED
 
 #include "ui/list_pane.h"
 #include "fs/vfs.h"
@@ -39,4 +39,4 @@ void B_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set);
 struct directory_pane *UI_NewDirectoryPane(
 	WINDOW *pane, struct directory *dir);
 
-#endif /* #ifndef INCLUDE_DIRECTORY_PANE_H */
+#endif /* #ifndef BROWSER__DIRECTORY_PANE_H_INCLUDED */

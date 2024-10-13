@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef WAD_FILE_INCLUDED
-#define WAD_FILE_INCLUDED
+#ifndef FS__WAD_FILE_H_INCLUDED
+#define FS__WAD_FILE_H_INCLUDED
 
 #include "fs/vfile.h"
 
@@ -70,5 +70,4 @@ bool W_CompactWAD(struct wad_file *f);
 VFILE *W_SaveSnapshot(struct wad_file *wf);
 void W_RestoreSnapshot(struct wad_file *wf, VFILE *in);
 
-#endif /* #ifndef WAD_FILE_INCLUDED */
-
+#endif /* #ifndef FS__WAD_FILE_H_INCLUDED */

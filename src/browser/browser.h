@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef BROWSER__BROWSER_H_INCLUDED
+#define BROWSER__BROWSER_H_INCLUDED
+
 void B_SwitchToPane(struct directory_pane *pane);
 void B_ReplacePane(struct directory_pane *old_pane,
                    struct directory_pane *new_pane);
@@ -21,3 +24,4 @@ extern unsigned int current_pane;
 #define active_pane  (browser_panes[current_pane])
 #define other_pane   (browser_panes[!current_pane])
 
+#endif /* #ifndef BROWSER__BROWSER_H_INCLUDED */

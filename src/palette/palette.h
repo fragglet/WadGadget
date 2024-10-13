@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef INCLUDED_PALETTE_PALETTE_H
-#define INCLUDED_PALETTE_PALETTE_H
+#ifndef PALETTE__PALETTE_H_INCLUDED
+#define PALETTE__PALETTE_H_INCLUDED
 
 #include "fs/vfs.h"
 
@@ -41,4 +41,4 @@ void PAL_SetDefaultPointer(const char *full_name);
 const struct palette *PAL_PaletteForWAD(struct directory *dir);
 const struct palette *PAL_DefaultPalette(void);
 
-#endif /* #ifndef INCLUDED_PALETTE_PALETTE_H */
+#endif /* #ifndef PALETTE__PALETTE_H_INCLUDED */

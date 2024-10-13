@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef UI_TEXT_INPUT_H
-#define UI_TEXT_INPUT_H
+#ifndef UI__TEXT_INPUT_H_INCLUDED
+#define UI__TEXT_INPUT_H_INCLUDED
 
 #include <curses.h>
 
@@ -25,4 +25,4 @@ void UI_TextInputDraw(struct text_input_box *input);
 int UI_TextInputKeypress(struct text_input_box *input, int keypress);
 void UI_TextInputClear(struct text_input_box *input);
 
-#endif  /* #ifndef UI_TEXT_INPUT_H */
+#endif /* #ifndef UI__TEXT_INPUT_H_INCLUDED */

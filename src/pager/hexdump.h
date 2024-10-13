@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef PAGER_HEXDUMP_H
-#define PAGER_HEXDUMP_H
+#ifndef PAGER__HEXDUMP_H_INCLUDED
+#define PAGER__HEXDUMP_H_INCLUDED
 
 #include "pager/help.h"
 
@@ -38,4 +38,4 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 void P_FreeHexdumpConfig(struct hexdump_pager_config *cfg);
 bool P_RunHexdumpPager(const char *title, VFILE *input);
 
-#endif /* #ifndef PAGER_HEXDUMP_H */
+#endif /* #ifndef PAGER__HEXDUMP_H_INCLUDED */

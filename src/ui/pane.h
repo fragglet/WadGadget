@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef PANE_H_INCLUDED
-#define PANE_H_INCLUDED
+#ifndef UI__PANE_H_INCLUDED
+#define UI__PANE_H_INCLUDED
 
 #include <curses.h>
 
@@ -33,5 +33,4 @@ void UI_RunMainLoop(void);
 void UI_ExitMainLoop(void);
 void UI_Init(void);
 
-#endif /* #ifndef PANE_H_INCLUDED */
-
+#endif /* #ifndef UI__PANE_H_INCLUDED */

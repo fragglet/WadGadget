@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef STACK_H_INCLUDED
-#define STACK_H_INCLUDED
+#ifndef UI__STACK_H_INCLUDED
+#define UI__STACK_H_INCLUDED
 
 struct pane_stack;
 
@@ -49,4 +49,4 @@ void UI_ActionsBarEnable(bool enabled);
 void UI_SetTitleBar(const char *msg);
 void UI_SetSubtitle(const char *msg);
 
-#endif /* #ifndef STACK_H_INCLUDED */
+#endif /* #ifndef UI__STACK_H_INCLUDED */

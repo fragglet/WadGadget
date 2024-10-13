@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef UI__UI_H_INCLUDED
+#define UI__UI_H_INCLUDED
+
 #include "ui/pane.h"
 #include "ui/text_input.h"
 
@@ -22,3 +25,4 @@ void UI_DrawWindowBox(WINDOW *win);
 void UI_DimScreenArea(int x, int y, int w, int h, int force_color_pair);
 void UI_DrawDropShadow(WINDOW *win);
 
+#endif /* #ifndef UI__UI_H_INCLUDED */

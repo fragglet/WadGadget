@@ -8,6 +8,11 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef CONV__ERROR_H_INCLUDED
+#define CONV__ERROR_H_INCLUDED
+
 void ClearConversionErrors(void);
 void ConversionError(char *fmt, ...);
 const char *GetConversionError(void);
+
+#endif /* #ifndef CONV__ERROR_H_INCLUDED */

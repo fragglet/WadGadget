@@ -8,6 +8,11 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef CONV__ENDOOM_H_INCLUDED
+#define CONV__ENDOOM_H_INCLUDED
+
 #define ENDOOM_SIZE 4000
 
 void ENDOOM_ShowFile(const char *filename);
+
+#endif /* #ifndef CONV__ENDOOM_H_INCLUDED */

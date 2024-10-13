@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef TEXTURES__INTERNAL_H_INCLUDED
+#define TEXTURES__INTERNAL_H_INCLUDED
+
 struct lump_dir_funcs {
 	bool (*load)(void *dir, struct directory *wad_dir,
 	             struct directory_entry *ent);
@@ -40,3 +43,5 @@ struct pnames *TX_GetDirPnames(struct directory *dir);
 bool TX_InitLumpDir(struct lump_dir *dir, const struct lump_dir_funcs *funcs,
                     struct directory *parent, struct directory_entry *ent);
 size_t TX_TextureLen(size_t patchcount);
+
+#endif /* #ifndef TEXTURES__INTERNAL_H_INCLUDED */

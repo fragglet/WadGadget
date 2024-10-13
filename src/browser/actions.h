@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef BROWSER_ACTIONS_H
-#define BROWSER_ACTIONS_H
+#ifndef BROWSER__ACTIONS_H_INCLUDED
+#define BROWSER__ACTIONS_H_INCLUDED
 
 #include "browser/directory_pane.h"
 #include "ui/actions_bar.h"
@@ -54,4 +54,4 @@ extern const struct action open_palettes_action;
 
 bool B_CheckReadOnly(struct directory *dir);
 
-#endif  /* #ifdef BROWSER_ACTIONS_H */
+#endif /* #ifndef BROWSER__ACTIONS_H_INCLUDED */

@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef LUMP_INFO_H_INCLUDED
+#define LUMP_INFO_H_INCLUDED
+
 #include "fs/wad_file.h"
 
 struct lump_type;
@@ -45,3 +48,4 @@ const char *LI_GetExtension(const struct lump_type *lt, bool convert);
 bool LI_LumpInSection(struct wad_file *wf, unsigned int lump_index,
                       const struct lump_section *section);
 
+#endif /* #ifndef LUMP_INFO_H_INCLUDED */

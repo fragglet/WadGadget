@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef CONV__IMPORT_H_INCLUDED
+#define CONV__IMPORT_H_INCLUDED
+
 #include "fs/vfs.h"
 
 bool ImportFromFile(VFILE *from_file, const char *src_name,
@@ -16,3 +19,4 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
                    struct directory *to, int to_index,
                    struct file_set *result, bool convert);
 
+#endif /* #ifndef CONV__IMPORT_H_INCLUDED */

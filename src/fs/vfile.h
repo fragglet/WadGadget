@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef INCLUDED_VFILE_H
-#define INCLUDED_VFILE_H
+#ifndef FS__VFILE_H_INCLUDED
+#define FS__VFILE_H_INCLUDED
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -65,5 +65,4 @@ VFILE_CONTEXT *vfswitchcontext(VFILE *f, VFILE_CONTEXT *ctx);
 		vfswitchcontext(vf, saved_ctx); \
 	} while (0)
 
-#endif /* #ifndef INCLUDED_VFILE_H */
-
+#endif /* #ifndef FS__VFILE_H_INCLUDED */

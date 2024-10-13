@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef CONV__EXPORT_H_INCLUDED
+#define CONV__EXPORT_H_INCLUDED
+
 #include "lump_info.h"
 #include "fs/vfs.h"
 
@@ -17,3 +20,4 @@ bool ExportToFile(struct directory *from, struct directory_entry *ent,
 bool PerformExport(struct directory *from, struct file_set *from_set,
                    struct directory *to, struct file_set *result, bool convert);
 
+#endif /* #ifndef CONV__EXPORT_H_INCLUDED */

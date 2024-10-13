@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef PAGER__PAGER_H_INCLUDED
+#define PAGER__PAGER_H_INCLUDED
+
 #include <curses.h>
 #include "ui/actions_bar.h"
 #include "ui/pane.h"
@@ -68,3 +71,5 @@ extern const struct action pager_search_action;
 extern const struct action pager_search_again_action;
 extern const struct action pager_prev_link_action;
 extern const struct action pager_next_link_action;
+
+#endif /* #ifndef PAGER__PAGER_H_INCLUDED */

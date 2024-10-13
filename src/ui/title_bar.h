@@ -8,8 +8,13 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef UI__TITLE_BAR_H_INCLUDED
+#define UI__TITLE_BAR_H_INCLUDED
+
 #include "ui/pane.h"
 #include "ui/text_input.h"
 
 struct pane *UI_TitleBarInit(void);
 void UI_ShowNotice(const char *msg, ...);
+
+#endif /* #ifndef UI__TITLE_BAR_H_INCLUDED */

@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef CONV__GRAPHIC_H_INCLUDED
+#define CONV__GRAPHIC_H_INCLUDED
+
 #include "fs/vfile.h"
 #include "palette/palette.h"
 
@@ -24,3 +27,5 @@ VFILE *V_FullscreenToImageFile(VFILE *input, const struct palette *pal);
 VFILE *V_FullscreenFromImageFile(VFILE *input, const struct palette *pal);
 VFILE *V_HiresToImageFile(VFILE *input);
 void V_SwapPatchHeader(struct patch_header *hdr);
+
+#endif /* #ifndef CONV__GRAPHIC_H_INCLUDED */

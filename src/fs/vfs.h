@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef INCLUDED_VFS_H
-#define INCLUDED_VFS_H
+#ifndef FS__VFS_H_INCLUDED
+#define FS__VFS_H_INCLUDED
 
 #include "fs/vfile.h"
 #include "fs/wad_file.h"
@@ -141,4 +141,4 @@ const char *VFS_LastError(void);
 
 extern struct directory_entry _vfs_parent_directory;
 
-#endif /* #ifndef INCLUDED_VFS_H */
+#endif /* #ifndef FS__VFS_H_INCLUDED */

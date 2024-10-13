@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef UI__COLORS_H_INCLUDED
+#define UI__COLORS_H_INCLUDED
+
 #define PAIR_PANE_COLOR  1
 #define PAIR_HEADER      2
 #define PAIR_DIRECTORY   3
@@ -17,3 +20,4 @@
 #define PAIR_TAGGED      7
 #define PAIR_NOTICE      8
 
+#endif /* #ifndef UI__COLORS_H_INCLUDED */

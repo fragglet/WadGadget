@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef COMMON_H_INCLUDED
+#define COMMON_H_INCLUDED
+
 #include <stdint.h>
 #include <assert.h>
 
@@ -68,3 +71,4 @@ static inline void SwapBE16(void *i)
 	*i16 = (b[0] << 8) | b[1];
 }
 
+#endif /* #ifndef COMMON_H_INCLUDED */

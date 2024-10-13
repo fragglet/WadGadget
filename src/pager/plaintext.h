@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef PAGER__PLAINTEXT_H_INCLUDED
+#define PAGER__PLAINTEXT_H_INCLUDED
+
 struct plaintext_pager_config {
 	struct pager_config pc;
 	char **lines;
@@ -29,3 +32,5 @@ void P_FreePlaintextConfig(struct plaintext_pager_config *cfg);
 char **P_PlaintextLines(const char *data, size_t data_len, size_t *num_lines);
 enum plaintext_pager_result P_RunPlaintextPager(
 	const char *title, VFILE *input, bool editable);
+
+#endif /* #ifndef PAGER__PLAINTEXT_H_INCLUDED */

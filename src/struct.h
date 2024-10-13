@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef INCLUDED_STRUCT_H
-#define INCLUDED_STRUCT_H
+#ifndef STRUCT_H_INCLUDED
+#define STRUCT_H_INCLUDED
 
 struct struct_field;
 
@@ -40,5 +40,4 @@ extern const struct struct_field_type field_type_uint16;
 extern const struct struct_field_type field_type_uint32;
 extern const struct struct_field_type field_type_string;
 
-#endif /* #ifndef INCLUDED_STRUCT_H */
-
+#endif /* #ifndef STRUCT_H_INCLUDED */

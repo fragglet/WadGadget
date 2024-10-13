@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef TERMFUNCS_H_INCLUDED
+#define TERMFUNCS_H_INCLUDED
+
 #include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
@@ -46,3 +49,5 @@ int TF_PollingReadChar(struct timeval *start);
 
 void TF_ClearScreen(void);
 void TF_SendRaiseWindowOp(void);
+
+#endif /* #ifndef TERMFUNCS_H_INCLUDED */

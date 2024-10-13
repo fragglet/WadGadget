@@ -8,8 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef UI_ACTIONS_BAR_H
-#define UI_ACTIONS_BAR_H
+#ifndef UI__ACTIONS_BAR_H_INCLUDED
+#define UI__ACTIONS_BAR_H_INCLUDED
 
 #define MAX_KEY_BINDINGS 30
 
@@ -33,4 +33,4 @@ void UI_ActionsBarRecalculate(void);
 
 const char *UI_ActionKeyDescription(const struct action *a, bool function_keys);
 
-#endif  /* #ifndef UI_ACTIONS_BAR_H */
+#endif /* #ifndef UI__ACTIONS_BAR_H_INCLUDED */

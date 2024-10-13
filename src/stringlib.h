@@ -31,4 +31,3 @@ char *PathSanitize(const char *filename);
 char *MakeDirectories(const char *first, ...);
 
 #endif /* #ifndef STRINGLIB_H_INCLUDED */
-

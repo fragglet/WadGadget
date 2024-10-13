@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef TEXTURES__TEXTURES_H_INCLUDED
+#define TEXTURES__TEXTURES_H_INCLUDED
+
 typedef char pname[8];
 
 struct pnames {
@@ -126,3 +129,5 @@ struct texture_bundle_merge_result {
 void TX_BundleMerge(struct texture_bundle *into, unsigned int position,
                     struct texture_bundle *from,
                     struct texture_bundle_merge_result *result);
+
+#endif /* #ifndef TEXTURES__TEXTURES_H_INCLUDED */

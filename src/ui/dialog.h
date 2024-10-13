@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef UI__DIALOG_H_INCLUDED
+#define UI__DIALOG_H_INCLUDED
+
 #include <time.h>
 
 struct progress_window {
@@ -30,3 +33,4 @@ void UI_MessageBox(const char *msg, ...);
 char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
                             char *msg, ...);
 
+#endif /* #ifndef UI__DIALOG_H_INCLUDED */

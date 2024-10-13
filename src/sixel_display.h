@@ -8,7 +8,11 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef SIXEL_DISPLAY_H_INCLUDED
+#define SIXEL_DISPLAY_H_INCLUDED
+
 bool SIXEL_CheckSupported(void);
 void SIXEL_ClearAndPrint(const char *msg, ...);
 bool SIXEL_DisplayImage(const char *filename);
 
+#endif /* #ifndef SIXEL_DISPLAY_H_INCLUDED */

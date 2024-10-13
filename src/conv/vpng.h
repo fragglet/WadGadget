@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef CONV__VPNG_H_INCLUDED
+#define CONV__VPNG_H_INCLUDED
+
 #include <png.h>
 
 struct png_context {
@@ -27,3 +30,5 @@ uint8_t *V_ReadRGBAPNG(VFILE *input, struct patch_header *hdr, int *rowstep);
 VFILE *V_WritePalettizedPNG(struct patch_header *hdr, uint8_t *imgbuf,
                             const struct palette *palette,
                             bool set_transparency, int transparent_color);
+
+#endif /* #ifndef CONV__VPNG_H_INCLUDED */
