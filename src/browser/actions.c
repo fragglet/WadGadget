@@ -798,6 +798,7 @@ static void PerformDeleteNoConfirm(void)
 	}
 	VFS_Refresh(dir);
 	B_DirectoryPaneReselect(active_pane);
+	B_DirectoryPaneReselect(other_pane);
 }
 
 const struct action delete_no_confirm_action = {
@@ -1304,6 +1305,8 @@ static void PerformShell(void)
 	free(marked_env);
 
 	VFS_RefreshAll();
+	B_DirectoryPaneReselect(active_pane);
+	B_DirectoryPaneReselect(other_pane);
 }
 
 const struct action open_shell_action = {
