@@ -230,6 +230,42 @@ static bool DrawActionsBar(void *pane)
 	return true;
 }
 
+static struct actions_accel *AccelForColumn(struct actions_bar *p, int x)
+{
+	int i, ax = 0, next_ax;
+
+	// It's important the logic in this loop matches DrawActionsBar above:
+	for (i = 0; i < MAX_KEY_BINDINGS; ++i) {
+		if (p->accels[i].action == NULL) {
+			continue;
+		}
+		next_ax = ax + p->spacing;
+		next_ax += strlen(p->accels[i].key);
+		next_ax += strlen(p->accels[i].name);
+
+		if (x >= ax && x < next_ax) {
+			return &p->accels[i];
+		}
+		ax = next_ax;
+	}
+	return NULL;
+}
+
+static void HandleMousePress(struct actions_bar *p)
+{
+	struct actions_accel *a;
+	int x, y;
+
+	if (!UI_GetMousePosition(&p->pane, &x, &y) || y != 0) {
+		return;
+	}
+
+	a = AccelForColumn(p, x);
+	if (a != NULL && a->action->callback != NULL) {
+		a->action->callback();
+	}
+}
+
 // This function is a hack to support the Ins and Del keys, plus some
 // other weirder ones, if by some miracle they're ever encountered.
 static int TranslateSpecialKey(int key)
@@ -255,12 +291,17 @@ static int TranslateSpecialKey(int key)
 	}
 }
 
-static void HandleKeypress(void *_p, int key)
+static void HandleKeypress(void *p, int key)
 {
 	const struct action **actions = UI_CurrentStack()->actions;
 	int i;
 
 	if (actions == NULL) {
+		return;
+	}
+
+	if (key == KEY_MOUSE) {
+		HandleMousePress(p);
 		return;
 	}
 
