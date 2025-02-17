@@ -25,6 +25,7 @@
 void UI_TriggerRecalculate(void);
 void UI_RecalculateStacks(void);
 
+static struct pane_stack *mouse_cur_stack;
 static struct pane *mouse_cur_pane;
 static int mouse_cur_x, mouse_cur_y;
 static struct pane *actions_bar, *title_bar;
@@ -216,6 +217,7 @@ static bool UpdateMousePosition(void)
 
 	if (UI_ActiveStack()->actions_bar_enabled
 	 && CheckMouseInPane(&ev, actions_bar)) {
+		mouse_cur_stack = UI_ActiveStack();
 		return true;
 	}
 
@@ -226,12 +228,14 @@ static bool UpdateMousePosition(void)
 
 		for (p = s->panes; p != NULL; p = p->next) {
 			if (CheckMouseInPane(&ev, p)) {
+				mouse_cur_stack = s;
 				return true;
 			}
 		}
 	}
 
 	// No current pane
+	mouse_cur_stack = NULL;
 	mouse_cur_pane = NULL;
 	return false;
 }
@@ -251,6 +255,7 @@ static bool HandleKeypress(void)
 	// pane and skip the usual logic used for real keypresses.
 	if (key == KEY_MOUSE) {
 		if (UpdateMousePosition() && mouse_cur_pane->keypress != NULL) {
+			UI_SetCurrentStack(mouse_cur_stack);
 			UI_PaneKeypress(mouse_cur_pane, KEY_MOUSE);
 		}
 
