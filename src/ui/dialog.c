@@ -170,36 +170,28 @@ static bool InButtonRange(struct dialog_button *b, int x, int y)
 	return y == b->y && x >= b->x && x < b->x + DialogButtonWidth(b);
 }
 
-static void ConfirmDialogMousePress(struct confirm_dialog_box *d)
+static bool CheckButtonPress(struct pane *p, struct dialog_button *b, int key)
 {
-	int x, y;
+	if (key == KEY_MOUSE) {
+		int x, y;
 
-	if (!UI_GetMousePosition(&d->pane, &x, &y)) {
-		return;
+		if (!UI_GetMousePosition(p, &x, &y)) {
+			return false;
+		}
+		return InButtonRange(b, x, y);
 	}
-	if (InButtonRange(&d->left, x, y)) {
-		d->result = 0;
-		UI_ExitMainLoop();
-	} else if (InButtonRange(&d->right, x, y)) {
-		d->result = 1;
-		UI_ExitMainLoop();
-	}
+
+	return b->key != 0 && toupper(key) == toupper(b->key);
 }
 
 static void ConfirmDialogKeypress(void *dialog, int key)
 {
 	struct confirm_dialog_box *d = dialog;
 
-	if (key == KEY_MOUSE) {
-		ConfirmDialogMousePress(d);
-		return;
-	}
-
-	if (d->left.key != 0 && toupper(key) == toupper(d->left.key)) {
+	if (CheckButtonPress(&d->pane, &d->left, key)) {
 		d->result = 0;
 		UI_ExitMainLoop();
-	}
-	if (d->right.key != 0 && toupper(key) == toupper(d->right.key)) {
+	} else if (CheckButtonPress(&d->pane, &d->right, key)) {
 		d->result = 1;
 		UI_ExitMainLoop();
 	}
@@ -320,16 +312,15 @@ static void TextInputDialogKeypress(void *dialog, int key)
 {
 	struct text_input_dialog_box *d = dialog;
 
-	if (key == 27) {
+	if (CheckButtonPress(&d->pane, &d->left, key)) {
 		d->result = 0;
 		UI_ExitMainLoop();
-		return;
-	}
-	if (key == '\r') {
+	} else if (CheckButtonPress(&d->pane, &d->right, key)) {
 		d->result = 1;
 		UI_ExitMainLoop();
+	} else {
+		UI_TextInputKeypress(&d->input, key);
 	}
-	UI_TextInputKeypress(&d->input, key);
 }
 
 char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
@@ -353,11 +344,13 @@ char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
 	dialog.result = 0;
 
 	snprintf(dialog.left.key_label, 8, "Esc");
+	dialog.left.key = 27;
 	dialog.left.label = "Cancel";
 	dialog.left.x = 1;
 	dialog.left.y = h - 2;
 
 	snprintf(dialog.right.key_label, 8, "Ent");
+	dialog.right.key = '\r';
 	dialog.right.label = action;
 	dialog.right.x = w - DialogButtonWidth(&dialog.right) - 1;
 	dialog.right.y = h - 2;
