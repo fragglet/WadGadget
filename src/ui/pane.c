@@ -226,7 +226,8 @@ static bool UpdateMousePosition(void)
 	for (s = UI_AllStacks(); s != NULL; s = s->state.next) {
 		struct pane *p;
 
-		for (p = s->panes; p != NULL; p = p->next) {
+		for (p = GetPrevPane(s, NULL);
+		     p != NULL; p = GetPrevPane(s, p)) {
 			if (CheckMouseInPane(&ev, p)) {
 				mouse_cur_stack = s;
 				return true;
