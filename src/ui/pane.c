@@ -187,14 +187,36 @@ void UI_InputKeypress(int key)
 	UI_StackKeypress(UI_ActiveStack(), key);
 }
 
+static bool CheckMouseInPane(MEVENT *ev, struct pane *p)
+{
+	int px, py, pw, ph;
+
+	getbegyx(p->window, py, px);
+	getmaxyx(p->window, ph, pw);
+
+	if (ev->x >= px && ev->x < px + pw
+	 && ev->y >= py && ev->y < py + ph) {
+		mouse_cur_pane = p;
+		mouse_cur_x = ev->x - px;
+		mouse_cur_y = ev->y - py;
+		return true;
+	}
+
+	return false;
+}
+
 static bool UpdateMousePosition(void)
 {
 	struct pane_stack *s;
-	int px, py, pw, ph;
 	MEVENT ev;
 
 	if (getmouse(&ev) != OK) {
 		return false;
+	}
+
+	if (UI_ActiveStack()->actions_bar_enabled
+	 && CheckMouseInPane(&ev, actions_bar)) {
+		return true;
 	}
 
 	// Walk through all panes until we find the first pane that contains
@@ -203,14 +225,7 @@ static bool UpdateMousePosition(void)
 		struct pane *p;
 
 		for (p = s->panes; p != NULL; p = p->next) {
-			getbegyx(p->window, py, px);
-			getmaxyx(p->window, ph, pw);
-
-			if (ev.x >= px && ev.x < px + pw
-			 && ev.y >= py && ev.y < py + ph) {
-				mouse_cur_pane = p;
-				mouse_cur_x = ev.x - px;
-				mouse_cur_y = ev.y - py;
+			if (CheckMouseInPane(&ev, p)) {
 				return true;
 			}
 		}
