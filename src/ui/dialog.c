@@ -108,6 +108,7 @@ void UI_UpdateProgressWindow(struct progress_window *win, const char *ctx)
 struct dialog_button {
 	char key_label[8];
 	const char *label;
+	int x, y;
 	int key;
 };
 
@@ -127,13 +128,22 @@ static int DialogButtonWidth(struct dialog_button *b)
 	return 5 + strlen(b->label) + strlen(b->key_label);
 }
 
+static void DrawDialogButton(WINDOW *win, struct dialog_button *b)
+{
+	if (b->label == NULL) {
+		return;
+	}
+	mvwaddstr(win, b->y, b->x, " ");
+	waddstr(win, b->key_label);
+	waddstr(win, " - ");
+	waddstr(win, b->label);
+	waddstr(win, " ");
+}
+
 static bool DrawConfirmDialog(void *pane)
 {
 	struct confirm_dialog_box *dialog = pane;
 	WINDOW *win = dialog->pane.window;
-	int w, h;
-
-	getmaxyx(win, h, w);
 
 	wbkgdset(win, COLOR_PAIR(PAIR_DIALOG_BOX));
 	wattron(win, A_BOLD);
@@ -148,47 +158,31 @@ static bool DrawConfirmDialog(void *pane)
 	}
 
 	UI_PrintMultilineString(win, 1, 2, dialog->msg);
-	if (dialog->left.label != NULL) {
-		mvwaddstr(win, h - 2, 1, " ");
-		waddstr(win, dialog->left.key_label);
-		waddstr(win, " - ");
-		waddstr(win, dialog->left.label);
-		waddstr(win, " ");
-	}
-	if (dialog->right.label != NULL) {
-		int x = w - DialogButtonWidth(&dialog->right) - 1;
-		mvwaddstr(win, h - 2, x, " ");
-		waddstr(win, dialog->right.key_label);
-		waddstr(win, " - ");
-		waddstr(win, dialog->right.label);
-		waddstr(win, " ");
-	}
+	DrawDialogButton(win, &dialog->left);
+	DrawDialogButton(win, &dialog->right);
 	wattroff(win, A_BOLD);
 
 	return true;
 }
 
+static bool InButtonRange(struct dialog_button *b, int x, int y)
+{
+	return y == b->y && x >= b->x && x < b->x + DialogButtonWidth(b);
+}
+
 static void ConfirmDialogMousePress(struct confirm_dialog_box *d)
 {
-	int x, y, w, h, bw;
+	int x, y;
 
-	getmaxyx(d->pane.window, h, w);
-
-	if (!UI_GetMousePosition(&d->pane, &x, &y) || y != h - 2) {
+	if (!UI_GetMousePosition(&d->pane, &x, &y)) {
 		return;
 	}
-
-	bw = DialogButtonWidth(&d->left);
-	if (x >= 1 && x < bw + 1) {
+	if (InButtonRange(&d->left, x, y)) {
 		d->result = 0;
 		UI_ExitMainLoop();
-		return;
-	}
-	bw = DialogButtonWidth(&d->right);
-	if (x >= w - bw - 1 && bw < w) {
+	} else if (InButtonRange(&d->right, x, y)) {
 		d->result = 1;
 		UI_ExitMainLoop();
-		return;
 	}
 }
 
@@ -223,7 +217,11 @@ static void InitDialogBox(struct confirm_dialog_box *dialog,
 	dialog->pane.keypress = ConfirmDialogKeypress;
 	dialog->title = title;
 	dialog->left.label = NULL;
+	dialog->left.x = 1;
+	dialog->left.y = h - 2;
 	dialog->right.label = NULL;
+	dialog->right.x = w - 1;
+	dialog->right.y = h - 2;
 }
 
 int UI_ConfirmDialogBox(const char *title, const char *yes,
@@ -246,6 +244,7 @@ int UI_ConfirmDialogBox(const char *title, const char *yes,
 	dialog.right.label = yes;
 	snprintf(dialog.right.key_label, sizeof(dialog.right.key_label), "Y");
 	dialog.right.key = 'Y';
+	dialog.right.x -= DialogButtonWidth(&dialog.right);
 
 	UI_PaneShow(&dialog);
 	UI_RunMainLoop();
@@ -270,6 +269,7 @@ void UI_MessageBox(const char *msg, ...)
 	dialog.right.label = "Close";
 	snprintf(dialog.right.key_label, sizeof(dialog.right.key_label), "Esc");
 	dialog.right.key = 27;
+	dialog.right.x -= DialogButtonWidth(&dialog.right);
 
 	UI_PaneShow(&dialog);
 	UI_RunMainLoop();
