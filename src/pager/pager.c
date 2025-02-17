@@ -473,6 +473,44 @@ static void RightKeypress(struct pager *p)
 	cfg->current_column = GetLink(p, cfg->current_link).column;
 }
 
+static void MousePress(struct pager *p)
+{
+	int x, y, idx, lineno;
+	int min = 0, max = p->cfg->num_links;
+	struct pager_link l;
+
+	if (!UI_GetMousePosition(&p->pane, &x, &y)) {
+		return;
+	}
+
+	lineno = p->window_offset + y;
+
+	while (min < max) {
+		idx = (min + max) / 2;
+		p->cfg->get_link(p->cfg, idx, &l);
+
+		// TODO: The x < l.column compare here does not actually work
+		// properly, because on eg. the help pager the .column field
+		// is misleadingly named, and is actually "character offset
+		// into the markdown text"
+		if (lineno < l.lineno
+		 || (lineno == l.lineno && x < l.column)) {
+			max = idx;
+		} else {
+			min = idx + 1;
+		}
+	}
+
+	if (min > 0) {
+		p->cfg->get_link(p->cfg, min - 1, &l);
+		if (lineno == l.lineno) {
+			p->cfg->current_link = min - 1;
+		}
+
+		// TODO: Double click to activate the link?
+	}
+}
+
 static void HandleKeypress(void *_p, int c)
 {
 	struct pager *p = _p;
@@ -482,6 +520,9 @@ static void HandleKeypress(void *_p, int c)
 	case 'q':
 	case 'Q':
 		UI_ExitMainLoop();
+		break;
+	case KEY_MOUSE:
+		MousePress(p);
 		break;
 	case KEY_UP:
 		UpKeypress(p);
