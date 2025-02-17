@@ -281,9 +281,9 @@ void UI_MessageBox(const char *msg, ...)
 struct text_input_dialog_box {
 	struct pane pane;
 	char *title;
-	const char *action;
 	char msg[128];
 	int result;
+	struct dialog_button left, right;
 	struct text_input_box input;
 };
 
@@ -291,9 +291,6 @@ static bool DrawTextInputDialog(void *pane)
 {
 	struct text_input_dialog_box *dialog = pane;
 	WINDOW *win = dialog->pane.window;
-	int w, h;
-
-	getmaxyx(win, h, w);
 
 	wbkgdset(win, COLOR_PAIR(PAIR_DIALOG_BOX));
 	wattron(win, A_BOLD);
@@ -310,10 +307,8 @@ static bool DrawTextInputDialog(void *pane)
 
 	UI_PrintMultilineString(win, 1, 2, dialog->msg);
 
-	mvwaddstr(win, h - 2, 1, " Esc - Cancel ");
-	mvwaddstr(win, h - 2, w - strlen(dialog->action) - 9, " Ent - ");
-	waddstr(win, dialog->action);
-	waddstr(win, " ");
+	DrawDialogButton(win, &dialog->left);
+	DrawDialogButton(win, &dialog->right);
 
 	wattroff(win, A_BOLD);
 	UI_TextInputDraw(&dialog->input);
@@ -355,8 +350,18 @@ char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
 	dialog.pane.draw = DrawTextInputDialog;
 	dialog.pane.keypress = TextInputDialogKeypress;
 	dialog.title = title;
-	dialog.action = action;
 	dialog.result = 0;
+
+	snprintf(dialog.left.key_label, 8, "Esc");
+	dialog.left.label = "Cancel";
+	dialog.left.x = 1;
+	dialog.left.y = h - 2;
+
+	snprintf(dialog.right.key_label, 8, "Ent");
+	dialog.right.label = action;
+	dialog.right.x = w - DialogButtonWidth(&dialog.right) - 1;
+	dialog.right.y = h - 2;
+
 	UI_TextInputInit(&dialog.input, dialog.pane.window, max_chars);
 	mvderwin(dialog.input.win, h - 4, 2);
 	wresize(dialog.input.win, 1, w - 4);
