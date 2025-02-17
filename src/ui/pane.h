@@ -33,5 +33,6 @@ void UI_InputKeypress(int key);
 void UI_RunMainLoop(void);
 void UI_ExitMainLoop(void);
 void UI_Init(void);
+bool UI_GetMousePosition(struct pane *if_pane, int *x, int *y);
 
 #endif /* #ifndef UI__PANE_H_INCLUDED */

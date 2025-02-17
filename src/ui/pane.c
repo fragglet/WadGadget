@@ -25,6 +25,8 @@
 void UI_TriggerRecalculate(void);
 void UI_RecalculateStacks(void);
 
+static struct pane *mouse_cur_pane;
+static int mouse_cur_x, mouse_cur_y;
 static struct pane *actions_bar, *title_bar;
 static bool main_loop_exited = false;
 
@@ -185,6 +187,40 @@ void UI_InputKeypress(int key)
 	UI_StackKeypress(UI_ActiveStack(), key);
 }
 
+static bool UpdateMousePosition(void)
+{
+	struct pane_stack *s;
+	int px, py, pw, ph;
+	MEVENT ev;
+
+	if (getmouse(&ev) != OK) {
+		return false;
+	}
+
+	// Walk through all panes until we find the first pane that contains
+	// the current mouse cursor position.
+	for (s = UI_AllStacks(); s != NULL; s = s->state.next) {
+		struct pane *p;
+
+		for (p = s->panes; p != NULL; p = p->next) {
+			getbegyx(p->window, py, px);
+			getmaxyx(p->window, ph, pw);
+
+			if (ev.x >= px && ev.x < px + pw
+			 && ev.y >= py && ev.y < py + ph) {
+				mouse_cur_pane = p;
+				mouse_cur_x = ev.x - px;
+				mouse_cur_y = ev.y - py;
+				return true;
+			}
+		}
+	}
+
+	// No current pane
+	mouse_cur_pane = NULL;
+	return false;
+}
+
 static bool HandleKeypress(void)
 {
 	int key;
@@ -193,6 +229,17 @@ static bool HandleKeypress(void)
 	key = getch();
 	if (key == ERR) {
 		return false;
+	}
+
+	// If the user clicked the mouse, they must have clicked within a pane,
+	// otherwise we ignore the click. We only send the keypress to that
+	// pane and skip the usual logic used for real keypresses.
+	if (key == KEY_MOUSE) {
+		if (UpdateMousePosition() && mouse_cur_pane->keypress != NULL) {
+			UI_PaneKeypress(mouse_cur_pane, KEY_MOUSE);
+		}
+
+		return true;
 	}
 
 	UI_InputKeypress(key);
@@ -216,6 +263,19 @@ static void HandleKeypresses(void)
 	}
 }
 
+bool UI_GetMousePosition(struct pane *if_pane, int *x, int *y)
+{
+	if (!has_mouse() || mouse_cur_pane == NULL
+	 || if_pane != mouse_cur_pane) {
+		*x = -1;
+		*y = -1;
+		return false;
+	}
+	*x = mouse_cur_x;
+	*y = mouse_cur_y;
+	return true;
+}
+
 void UI_RunMainLoop(void)
 {
 	while (!main_loop_exited) {
@@ -233,6 +293,8 @@ void UI_ExitMainLoop(void)
 
 void UI_Init(void)
 {
+	mousemask(BUTTON1_PRESSED, NULL);
+
 	actions_bar = UI_ActionsBarInit();
 	title_bar = UI_TitleBarInit();
 }
