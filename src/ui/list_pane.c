@@ -110,12 +110,37 @@ void UI_ListPaneSelect(struct list_pane *p, unsigned int idx)
 	}
 }
 
+static void ListPaneMousePress(struct list_pane *lp)
+{
+	int selection;
+	int x, y;
+	int w, h;
+
+	if (!UI_GetMousePosition(&lp->pane, &x, &y)) {
+		return;
+	}
+
+	getmaxyx(lp->pane.window, h, w);
+	if (x < 1 || y < 1 || x >= w - 2 || y >= h - 1) {
+		// TODO: Scroll bars
+		return;
+	}
+
+	selection = lp->window_offset + y - 1;
+	if (selection >= 0 && selection < NumEntries(lp)) {
+		UI_ListPaneSelect(lp, selection);
+	}
+}
+
 void UI_ListPaneKeypress(void *p, int key)
 {
 	struct list_pane *lp = p;
 	unsigned int i, lines;
 
 	switch (key) {
+	case KEY_MOUSE:
+		ListPaneMousePress(lp);
+		return;
 	case KEY_UP:
 		if (lp->selected > 0) {
 			--lp->selected;
