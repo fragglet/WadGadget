@@ -119,6 +119,14 @@ struct confirm_dialog_box {
 	int result;
 };
 
+static int DialogButtonWidth(struct dialog_button *b)
+{
+	if (b->label == NULL) {
+		return 0;
+	}
+	return 5 + strlen(b->label) + strlen(b->key_label);
+}
+
 static bool DrawConfirmDialog(void *pane)
 {
 	struct confirm_dialog_box *dialog = pane;
@@ -148,8 +156,7 @@ static bool DrawConfirmDialog(void *pane)
 		waddstr(win, " ");
 	}
 	if (dialog->right.label != NULL) {
-		int x = w - strlen(dialog->right.label)
-		      - strlen(dialog->right.key_label) - 6;
+		int x = w - DialogButtonWidth(&dialog->right) - 1;
 		mvwaddstr(win, h - 2, x, " ");
 		waddstr(win, dialog->right.key_label);
 		waddstr(win, " - ");
@@ -161,9 +168,38 @@ static bool DrawConfirmDialog(void *pane)
 	return true;
 }
 
+static void ConfirmDialogMousePress(struct confirm_dialog_box *d)
+{
+	int x, y, w, h, bw;
+
+	getmaxyx(d->pane.window, h, w);
+
+	if (!UI_GetMousePosition(&d->pane, &x, &y) || y != h - 2) {
+		return;
+	}
+
+	bw = DialogButtonWidth(&d->left);
+	if (x >= 1 && x < bw + 1) {
+		d->result = 0;
+		UI_ExitMainLoop();
+		return;
+	}
+	bw = DialogButtonWidth(&d->right);
+	if (x >= w - bw - 1 && bw < w) {
+		d->result = 1;
+		UI_ExitMainLoop();
+		return;
+	}
+}
+
 static void ConfirmDialogKeypress(void *dialog, int key)
 {
 	struct confirm_dialog_box *d = dialog;
+
+	if (key == KEY_MOUSE) {
+		ConfirmDialogMousePress(d);
+		return;
+	}
 
 	if (d->left.key != 0 && toupper(key) == toupper(d->left.key)) {
 		d->result = 0;
