@@ -28,7 +28,7 @@
 
 ## Other Screens
 
- * [Help sytem](help.md)
+ * [Help system](help.md)
  * [Hexdump view](hexdump.md)
  * Plaintext view (TODO)
 
