@@ -473,9 +473,58 @@ static void RightKeypress(struct pager *p)
 	cfg->current_column = GetLink(p, cfg->current_link).column;
 }
 
+#define SCRATCHPAD_BUFFER_WIDTH 120
+static bool LinkColumnRange(struct pager_config *cfg, int link_num,
+                            int *start_x, int *end_x)
+{
+	int saved_curr_link = cfg->current_link;
+	static WINDOW *scratchpad1 = NULL, *scratchpad2;
+	struct pager_link l;
+	int x;
+
+	if (scratchpad1 == NULL) {
+		scratchpad1 = newpad(1, SCRATCHPAD_BUFFER_WIDTH);
+		scratchpad2 = newpad(1, SCRATCHPAD_BUFFER_WIDTH);
+	}
+
+	// Draw the line containing the link twice; once when it is selected
+	// and once when it is not.
+	cfg->get_link(cfg, link_num, &l);
+	cfg->current_link = -1;
+	werase(scratchpad1);
+	cfg->draw_line(scratchpad1, l.lineno, cfg->user_data);
+	cfg->current_link = link_num;
+	werase(scratchpad2);
+	cfg->draw_line(scratchpad2, l.lineno, cfg->user_data);
+	cfg->current_link = saved_curr_link;
+
+	// We assume that the link is highlighted in some way using
+	// character attributes (bold, underline, etc.), so scan until
+	// we find the first place where attributes differ:
+	for (x = 0; x < SCRATCHPAD_BUFFER_WIDTH; x++) {
+		chtype c1 = mvwinch(scratchpad1, 0, x);
+		chtype c2 = mvwinch(scratchpad2, 0, x);
+		if ((c1 & A_ATTRIBUTES) != (c2 & A_ATTRIBUTES)) {
+			break;
+		}
+	}
+	*start_x = x;
+	// Now continue; the link ends when the attributes match again.
+	for (; x < SCRATCHPAD_BUFFER_WIDTH; x++) {
+		chtype c1 = mvwinch(scratchpad1, 0, x);
+		chtype c2 = mvwinch(scratchpad2, 0, x);
+		if ((c1 & A_ATTRIBUTES) == (c2 & A_ATTRIBUTES)) {
+			break;
+		}
+	}
+	*end_x = x;
+
+	return *start_x < SCRATCHPAD_BUFFER_WIDTH;
+}
+
 static void MousePress(struct pager *p)
 {
-	int x, y, idx, lineno;
+	int x, y, idx, lineno, start_x, end_x;
 	int min = 0, max = p->cfg->num_links;
 	struct pager_link l;
 
@@ -485,25 +534,36 @@ static void MousePress(struct pager *p)
 
 	lineno = p->window_offset + y;
 
+	// Binary search to find what area of the document we clicked in;
+	// we consider it to be divided up into (num_links+1) sections;
+	// each section #i is "the text before the start of link #i"
 	while (min < max) {
 		idx = (min + max) / 2;
 		p->cfg->get_link(p->cfg, idx, &l);
 
-		// TODO: The x < l.column compare here does not actually work
-		// properly, because on eg. the help pager the .column field
-		// is misleadingly named, and is actually "character offset
-		// into the markdown text"
+		// Note: The `pager_link` does not tell us the actual
+		// x column range of the link; LinkColumnRange determines
+		// this for us.
 		if (lineno < l.lineno
-		 || (lineno == l.lineno && x < l.column)) {
+		 || (lineno == l.lineno &&
+		     LinkColumnRange(p->cfg, idx, &start_x, &end_x) &&
+		     x < start_x)) {
 			max = idx;
 		} else {
 			min = idx + 1;
 		}
 	}
 
+	// We clicked within section `#min`, which is "the text before
+	// the start of link #min", and therefore contains link #(min-1);
+	// unless we clicked in the area before the start of the first link:
 	if (min > 0) {
 		p->cfg->get_link(p->cfg, min - 1, &l);
-		if (lineno == l.lineno) {
+		// Check we clicked on the exact line and column area where the
+		// link is located.
+		if (lineno == l.lineno &&
+		    LinkColumnRange(p->cfg, min - 1, &start_x, &end_x) &&
+		    x >= start_x && x < end_x) {
 			p->cfg->current_link = min - 1;
 		}
 
