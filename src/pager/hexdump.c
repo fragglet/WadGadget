@@ -363,7 +363,7 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 
 	cfg->pc.num_links = 0;
 	cfg->pc.current_link = -1;
-	cfg->pc.current_column = 0;
+	cfg->pc.current_offset = 0;
 
 	return cfg->data != NULL;
 }

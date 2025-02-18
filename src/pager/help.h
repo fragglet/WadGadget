@@ -17,7 +17,7 @@
 
 struct help_pager_history {
 	char *filename;
-	int window_offset, current_link, current_column;
+	int window_offset, current_link, current_offset;
 	struct help_pager_history *next;
 };
 

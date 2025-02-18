@@ -372,11 +372,11 @@ static void UpKeypress(struct pager *p)
 
 	// We now know what line we're going to land on. Keep scanning
 	// back through links on the same line until we find one that's
-	// appropriate for the currently selected column.
+	// appropriate for the currently selected offset.
 	new_lineno = GetLink(p, new_link).lineno;
 	while (new_link > 0
 	    && GetLink(p, new_link - 1).lineno == new_lineno
-	    && GetLink(p, new_link).column > cfg->current_column) {
+	    && GetLink(p, new_link).offset > cfg->current_offset) {
 		--new_link;
 	}
 
@@ -414,11 +414,11 @@ static void DownKeypress(struct pager *p)
 
 	// We now know what line we're going to land on. Keep scanning
 	// forward through links on the same line until we find one that's
-	// appropriate for the currently selected column.
+	// appropriate for the currently selected offset.
 	new_lineno = GetLink(p, new_link).lineno;
 	while (new_link < cfg->num_links - 1) {
 		struct pager_link l = GetLink(p, new_link + 1);
-		if (l.lineno != new_lineno || l.column > cfg->current_column) {
+		if (l.lineno != new_lineno || l.offset > cfg->current_offset) {
 			break;
 		}
 		++new_link;
@@ -451,8 +451,8 @@ static void LeftKeypress(struct pager *p)
 		--cfg->current_link;
 	}
 
-	// If we scroll up/down, we want to aim for the same column.
-	cfg->current_column = GetLink(p, cfg->current_link).column;
+	// If we scroll up/down, we want to aim for the same offset.
+	cfg->current_offset = GetLink(p, cfg->current_link).offset;
 }
 
 static void RightKeypress(struct pager *p)
@@ -470,7 +470,7 @@ static void RightKeypress(struct pager *p)
 		++cfg->current_link;
 	}
 
-	cfg->current_column = GetLink(p, cfg->current_link).column;
+	cfg->current_offset = GetLink(p, cfg->current_link).offset;
 }
 
 #define SCRATCHPAD_BUFFER_WIDTH 120

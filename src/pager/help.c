@@ -75,25 +75,25 @@ static bool IsLinkStart(const char *p)
 	return HaveSyntaxElements(p, "[", "](", ")", NULL);
 }
 
-static bool IterateLinks(struct help_pager_config *cfg, int *lineno, int *col,
+static bool IterateLinks(struct help_pager_config *cfg, int *lineno, int *off,
                          struct pager_link *link)
 {
 	const char *line;
 
 	while (*lineno < cfg->pc.num_lines) {
 		line = cfg->lines[*lineno];
-		while (line[*col] != '\0') {
-			if (IsLinkStart(line + *col)) {
+		while (line[*off] != '\0') {
+			if (IsLinkStart(line + *off)) {
 				link->lineno = *lineno;
-				link->column = *col;
+				link->offset = *off;
 				// Skip past link text:
-				*col = strstr(line + *col, "](") - line;
+				*off = strstr(line + *off, "](") - line;
 				return true;
 			}
-			++*col;
+			++*off;
 		}
 
-		*col = 0;
+		*off = 0;
 		++*lineno;
 	}
 
@@ -102,17 +102,17 @@ static bool IterateLinks(struct help_pager_config *cfg, int *lineno, int *col,
 
 static void FindLinks(struct help_pager_config *cfg)
 {
-	int lineno = 0, col = 0, linknum;
+	int lineno = 0, off = 0, linknum;
 	struct pager_link l;
 	int num_links = 0;
 
-	while (IterateLinks(cfg, &lineno, &col, &l)) {
+	while (IterateLinks(cfg, &lineno, &off, &l)) {
 		++num_links;
 	}
 
 	cfg->links = checked_calloc(num_links, sizeof(struct help_pager_config));
-	lineno = 0, col = 0, linknum = 0;
-	while (IterateLinks(cfg, &lineno, &col, &l)) {
+	lineno = 0, off = 0, linknum = 0;
+	while (IterateLinks(cfg, &lineno, &off, &l)) {
 		cfg->links[linknum] = l;
 		++linknum;
 	}
@@ -188,7 +188,7 @@ static void SaveToHistory(struct pager *p, struct help_pager_config *cfg)
 	h->filename = checked_strdup(cfg->filename);
 	h->window_offset = p->window_offset;
 	h->current_link = cfg->pc.current_link;
-	h->current_column = cfg->pc.current_column;
+	h->current_offset = cfg->pc.current_offset;
 	h->next = cfg->history;
 	cfg->history = h;
 }
@@ -248,7 +248,7 @@ static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 	UnindentLines(cfg);
 	FindLinks(cfg);
 	cfg->pc.current_link = 0;
-	cfg->pc.current_column = 0;
+	cfg->pc.current_offset = 0;
 
 	if (current_pager != NULL && current_pager->cfg == &cfg->pc) {
 		UI_SetTitleBar(cfg->pc.title);
@@ -272,7 +272,7 @@ static void PerformFollowLink(void)
 	curr_link = &cfg->links[cfg->pc.current_link];
 	line = cfg->lines[curr_link->lineno];
 
-	link_middle = strstr(line + curr_link->column, "](");
+	link_middle = strstr(line + curr_link->offset, "](");
 	if (link_middle == NULL) {
 		return;
 	}
@@ -479,7 +479,7 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 		if (IsLinkStart(p)) {
 			bool is_curr_link = curr_link != NULL
 			                 && lineno == curr_link->lineno
-			                 && (p - line) == curr_link->column;
+			                 && (p - line) == curr_link->offset;
 			p = DrawLink(win, p, is_curr_link);
 		} else if (HaveSyntaxElements(p, "**", "**", NULL)) {
 			p = DrawBoldText(win, p);
