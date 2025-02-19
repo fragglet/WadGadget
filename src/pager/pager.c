@@ -451,7 +451,7 @@ static void UpKeypress(struct pager *p)
 	new_lineno = GetLink(p, new_link).lineno;
 	while (new_link > 0
 	    && GetLink(p, new_link - 1).lineno == new_lineno
-	    && LinkStartColumn(cfg, new_link) > cfg->current_column) {
+	    && LinkStartColumn(cfg, new_link) > p->current_column) {
 		--new_link;
 	}
 
@@ -494,7 +494,7 @@ static void DownKeypress(struct pager *p)
 	while (new_link < cfg->num_links - 1) {
 		struct pager_link l = GetLink(p, new_link + 1);
 		if (l.lineno != new_lineno
-		 || LinkStartColumn(cfg, new_link + 1) > cfg->current_column) {
+		 || LinkStartColumn(cfg, new_link + 1) > p->current_column) {
 			break;
 		}
 		++new_link;
@@ -528,7 +528,7 @@ static void LeftKeypress(struct pager *p)
 	}
 
 	// If we scroll up/down, we want to aim for the same offset.
-	cfg->current_column = LinkStartColumn(cfg, cfg->current_link);
+	p->current_column = LinkStartColumn(cfg, cfg->current_link);
 }
 
 static void RightKeypress(struct pager *p)
@@ -547,7 +547,7 @@ static void RightKeypress(struct pager *p)
 	}
 
 	// If we scroll up/down, we want to aim for the same offset.
-	cfg->current_column = LinkStartColumn(cfg, cfg->current_link);
+	p->current_column = LinkStartColumn(cfg, cfg->current_link);
 }
 
 static void MousePress(struct pager *p)
@@ -716,6 +716,7 @@ void P_SwitchConfig(struct pager_config *cfg)
 {
 	assert(current_pager != NULL);
 	current_pager->cfg = cfg;
+	current_pager->current_column = 0;
 	SetWindowOffset(current_pager, 0);
 	P_ClearSearch(current_pager);
 	UI_ActionsBarSetActions(cfg->actions);

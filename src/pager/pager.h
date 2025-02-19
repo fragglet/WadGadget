@@ -42,9 +42,9 @@ struct pager_config {
 	const struct action **actions;
 	pager_get_link_fn get_link;
 	pager_activate_link_fn activate_link;
+	// TODO: this belongs with `current_column` in `struct pager`:
 	int current_link;
 	int num_links;
-	int current_column;
 };
 
 struct pager {
@@ -57,6 +57,8 @@ struct pager {
 	struct pane_stack *stack;
 	struct pager_config *cfg;
 	char subtitle[15];
+	// X position of the last link we moved to using the left/right keys:
+	int current_column;
 };
 
 void P_InitPager(struct pager *p, struct pager_config *cfg);

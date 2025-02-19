@@ -145,7 +145,6 @@ bool P_InitPlaintextConfig(const char *title, bool editable,
 	cfg->pc.get_link = NULL;
 	cfg->pc.activate_link = NULL;
 	cfg->pc.current_link = -1;
-	cfg->pc.current_column = 0;
 	cfg->want_edit = false;
 
 	cfg->data = vfreadall(input, &cfg->data_len);
