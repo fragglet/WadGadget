@@ -189,6 +189,7 @@ void UI_ListPaneInit(struct list_pane *p, WINDOW *w,
 	p->pane.window = w;
 	p->pane.draw = UI_ListPaneDraw;
 	p->pane.keypress = UI_ListPaneKeypress;
+	p->pane.mouse_click = NULL;
 	p->subwin = NULL;
 	p->funcs = funcs;
 	p->data = data;

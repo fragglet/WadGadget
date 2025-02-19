@@ -20,6 +20,7 @@ struct pane {
 	WINDOW *window;
 	bool (*draw)(void *pane);
 	void (*keypress)(void *pane, int key);
+	void (*mouse_click)(void *pane, int x, int y);
 	struct pane *next;
 };
 

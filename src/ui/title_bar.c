@@ -128,6 +128,7 @@ struct pane *UI_TitleBarInit(void)
 	title_bar_singleton.pane.window = newwin(1, COLS, 0, 0);
 	title_bar_singleton.pane.draw = DrawTitleBar;
 	title_bar_singleton.pane.keypress = NULL;
+	title_bar_singleton.pane.mouse_click = NULL;
 
 	return &title_bar_singleton.pane;
 }

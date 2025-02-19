@@ -322,6 +322,7 @@ struct pane *UI_ActionsBarInit(void)
 	actions_bar_singleton.pane.window = newwin(1, COLS, LINES - 1, 0);
 	actions_bar_singleton.pane.draw = DrawActionsBar;
 	actions_bar_singleton.pane.keypress = HandleKeypress;
+	actions_bar_singleton.pane.mouse_click = NULL;
 	actions_bar_singleton.function_keys = true;
 
 	return &actions_bar_singleton.pane;

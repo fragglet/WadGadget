@@ -113,6 +113,7 @@ void B_ActionsPaneInit(struct actions_pane *pane, WINDOW *win)
 	pane->pane.window = win;
 	pane->pane.draw = DrawActionsPane;
 	pane->pane.keypress = NULL;
+	pane->pane.mouse_click = NULL;
 	pane->function_keys = true;
 	memset(pane->actions, 0, sizeof(pane->actions));
 }

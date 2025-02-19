@@ -613,6 +613,7 @@ static void InitInfoPane(WINDOW *win)
 	info_pane.window = win;
 	info_pane.draw = DrawInfoPane;
 	info_pane.keypress = NULL;
+	info_pane.mouse_click = NULL;
 }
 
 static void InitSearchPane(WINDOW *win)
@@ -620,6 +621,7 @@ static void InitSearchPane(WINDOW *win)
 	search_pane.pane.window = win;
 	search_pane.pane.draw = DrawSearchPane;
 	search_pane.pane.keypress = SearchPaneKeypress;
+	search_pane.pane.mouse_click = NULL;
 	UI_TextInputInit(&search_pane.input, win, 256);
 }
 

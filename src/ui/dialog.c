@@ -77,6 +77,7 @@ void UI_ShowNonblockingWindow(const char *msg, ...)
 	nbw.pane.window = CenteredWindow(w, h);
 	nbw.pane.draw = DrawNonblockingWindow;
 	nbw.pane.keypress = NULL;
+	nbw.pane.mouse_click = NULL;
 
 	UI_PaneShow(&nbw);
 	UI_DrawAllPanes();
@@ -207,6 +208,7 @@ static void InitDialogBox(struct confirm_dialog_box *dialog,
 	dialog->pane.window = CenteredWindow(w, h);
 	dialog->pane.draw = DrawConfirmDialog;
 	dialog->pane.keypress = ConfirmDialogKeypress;
+	dialog->pane.mouse_click = NULL;
 	dialog->title = title;
 	dialog->left.label = NULL;
 	dialog->left.x = 1;
@@ -340,6 +342,7 @@ char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
 	dialog.pane.window = CenteredWindow(w, h);
 	dialog.pane.draw = DrawTextInputDialog;
 	dialog.pane.keypress = TextInputDialogKeypress;
+	dialog.pane.mouse_click = NULL;
 	dialog.title = title;
 	dialog.result = 0;
 

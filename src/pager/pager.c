@@ -651,6 +651,7 @@ void P_InitPager(struct pager *p, struct pager_config *cfg)
 
 	p->pane.window = newwin(LINES - 2, COLS, 1, 0);
 	p->pane.keypress = HandleKeypress;
+	p->pane.mouse_click = NULL;
 	p->pane.draw = DrawPager;
 	p->line_win = derwin(p->pane.window, 1, COLS, 0, 0);
 	p->search_pad = newpad(1, 120);
