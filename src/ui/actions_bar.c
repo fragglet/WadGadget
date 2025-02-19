@@ -251,19 +251,21 @@ static struct actions_accel *AccelForColumn(struct actions_bar *p, int x)
 	return NULL;
 }
 
-static void HandleMousePress(void *_p, int x, int y)
+static doubleclick_continuation HandleMousePress(void *_p, int x, int y)
 {
 	struct actions_bar *p = _p;
 	struct actions_accel *a;
 
 	if (y != 0) {
-		return;
+		return NULL;
 	}
 
 	a = AccelForColumn(p, x);
 	if (a != NULL && a->action->callback != NULL) {
 		a->action->callback();
 	}
+
+	return NULL;
 }
 
 // This function is a hack to support the Ins and Del keys, plus some

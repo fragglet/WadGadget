@@ -110,7 +110,7 @@ void UI_ListPaneSelect(struct list_pane *p, unsigned int idx)
 	}
 }
 
-void UI_ListPaneMouseClick(void *_lp, int x, int y)
+doubleclick_continuation UI_ListPaneMouseClick(void *_lp, int x, int y)
 {
 	struct list_pane *lp = _lp;
 	int selection;
@@ -119,13 +119,16 @@ void UI_ListPaneMouseClick(void *_lp, int x, int y)
 	getmaxyx(lp->pane.window, h, w);
 	if (x < 1 || y < 1 || x >= w - 2 || y >= h - 1) {
 		// TODO: Scroll bars
-		return;
+		return NULL;
 	}
 
 	selection = lp->window_offset + y - 1;
 	if (selection >= 0 && selection < NumEntries(lp)) {
 		UI_ListPaneSelect(lp, selection);
+		// TODO: Return doubleclick continuation
 	}
+
+	return NULL;
 }
 
 void UI_ListPaneKeypress(void *p, int key)

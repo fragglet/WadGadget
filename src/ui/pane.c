@@ -40,13 +40,15 @@ void UI_PaneKeypress(void *pane, int key)
 	}
 }
 
-void UI_PaneMouseClick(void *pane, int x, int y)
+doubleclick_continuation UI_PaneMouseClick(void *pane, int x, int y)
 {
 	struct pane *p = pane;
 
 	if (p->mouse_click != NULL) {
-		p->mouse_click(p, x, y);
+		return p->mouse_click(p, x, y);
 	}
+
+	return NULL;
 }
 
 static struct pane **GetPanePtr(struct pane_stack *stack, struct pane *p)

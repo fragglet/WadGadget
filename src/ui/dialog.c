@@ -194,11 +194,13 @@ static void ConfirmDialogKeypress(void *dialog, int key)
 	CheckButtonPress(&d->right, key, &d->result);
 }
 
-static void ConfirmDialogMouseClick(void *dialog, int x, int y)
+static doubleclick_continuation
+ConfirmDialogMouseClick(void *dialog, int x, int y)
 {
 	struct confirm_dialog_box *d = dialog;
 	CheckButtonClick(&d->left, x, y, &d->result);
 	CheckButtonClick(&d->right, x, y, &d->result);
+	return NULL;
 }
 
 static void InitDialogBox(struct confirm_dialog_box *dialog,
@@ -325,12 +327,14 @@ static void TextInputDialogKeypress(void *dialog, int key)
 	}
 }
 
-static void TextInputDialogMouseClick(void *dialog, int x, int y)
+static doubleclick_continuation
+TextInputDialogMouseClick(void *dialog, int x, int y)
 {
 	struct text_input_dialog_box *d = dialog;
 
 	CheckButtonClick(&d->left, x, y, &d->result);
 	CheckButtonClick(&d->right, x, y, &d->result);
+	return NULL;
 }
 
 char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
