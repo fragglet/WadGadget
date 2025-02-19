@@ -550,15 +550,12 @@ static void RightKeypress(struct pager *p)
 	p->current_column = LinkStartColumn(cfg, cfg->current_link);
 }
 
-static void MousePress(struct pager *p)
+static void HandleMouseClick(void *_p, int x, int y)
 {
-	int x, y, idx, lineno, start_x, end_x;
+	struct pager *p = _p;
+	int idx, lineno, start_x, end_x;
 	int min = 0, max = p->cfg->num_links;
 	struct pager_link l;
-
-	if (!UI_GetMousePosition(&p->pane, &x, &y)) {
-		return;
-	}
 
 	lineno = p->window_offset + y;
 
@@ -609,9 +606,6 @@ static void HandleKeypress(void *_p, int c)
 	case 'Q':
 		UI_ExitMainLoop();
 		break;
-	case KEY_MOUSE:
-		MousePress(p);
-		break;
 	case KEY_UP:
 		UpKeypress(p);
 		break;
@@ -651,7 +645,7 @@ void P_InitPager(struct pager *p, struct pager_config *cfg)
 
 	p->pane.window = newwin(LINES - 2, COLS, 1, 0);
 	p->pane.keypress = HandleKeypress;
-	p->pane.mouse_click = NULL;
+	p->pane.mouse_click = HandleMouseClick;
 	p->pane.draw = DrawPager;
 	p->line_win = derwin(p->pane.window, 1, COLS, 0, 0);
 	p->search_pad = newpad(1, 120);

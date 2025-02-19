@@ -29,6 +29,7 @@ int UI_PaneHide(void *pane);
 void UI_DrawAllPanes(void);
 void UI_RaisePaneToTop(void *pane);
 void UI_PaneKeypress(void *pane, int key);
+void UI_PaneMouseClick(void *pane, int x, int y);
 void UI_StackKeypress(struct pane_stack *s, int key);
 void UI_InputKeypress(int key);
 void UI_RunMainLoop(void);

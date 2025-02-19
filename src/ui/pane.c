@@ -40,6 +40,15 @@ void UI_PaneKeypress(void *pane, int key)
 	}
 }
 
+void UI_PaneMouseClick(void *pane, int x, int y)
+{
+	struct pane *p = pane;
+
+	if (p->mouse_click != NULL) {
+		p->mouse_click(p, x, y);
+	}
+}
+
 static struct pane **GetPanePtr(struct pane_stack *stack, struct pane *p)
 {
 	struct pane **ptr;
@@ -255,8 +264,11 @@ static bool HandleKeypress(void)
 	// otherwise we ignore the click. We only send the keypress to that
 	// pane and skip the usual logic used for real keypresses.
 	if (key == KEY_MOUSE) {
-		if (UpdateMousePosition() && mouse_cur_pane->keypress != NULL) {
+		if (UpdateMousePosition()) {
 			UI_SetCurrentStack(mouse_cur_stack);
+			UI_PaneMouseClick(mouse_cur_pane, mouse_cur_x,
+			                  mouse_cur_y);
+			// TODO: Don't send KEY_MOUSE keypress
 			UI_PaneKeypress(mouse_cur_pane, KEY_MOUSE);
 		}
 
