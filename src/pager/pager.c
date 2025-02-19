@@ -236,6 +236,23 @@ const struct action pager_prev_link_action = {
 	KEY_BTAB, 0, NULL, NULL, PerformPrevLink,
 };
 
+static void PerformOpenLink(void)
+{
+	struct pager_config *cfg = current_pager->cfg;
+
+	if (cfg->current_link <= 0) {
+		return;
+	}
+
+	if (cfg->activate_link != NULL) {
+		cfg->activate_link(current_pager, cfg->current_link);
+	}
+}
+
+const struct action open_link_action = {
+	'\r', 0, "Open", "Open Link", PerformOpenLink,
+};
+
 static void PerformPagerHelpAction(void)
 {
 	struct pager_config *cfg = current_pager->cfg;

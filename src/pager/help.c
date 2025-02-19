@@ -257,19 +257,20 @@ static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 	return true;
 }
 
-static void PerformFollowLink(void)
+static void HelpPagerActivateLink(struct pager *p, int link_num)
 {
-	struct help_pager_config *cfg = current_pager->cfg->user_data;
+	// TODO: This function should really take a pager_config *,
+	// not a pager *
+	struct help_pager_config *cfg = p->cfg->user_data;
 	struct pager_link *curr_link;
 	const char *line, *link_middle;
-	char *filename, *anchor = NULL, *p;
+	char *filename, *anchor = NULL, *ptr;
 
-	if (cfg->pc.current_link < 0
-	 || cfg->pc.current_link >= cfg->pc.num_links) {
+	if (link_num < 0 || link_num >= cfg->pc.num_links) {
 		return;
 	}
 
-	curr_link = &cfg->links[cfg->pc.current_link];
+	curr_link = &cfg->links[link_num];
 	line = cfg->lines[curr_link->lineno];
 
 	link_middle = strstr(line + curr_link->offset, "](");
@@ -278,39 +279,35 @@ static void PerformFollowLink(void)
 	}
 
 	filename = checked_strdup(link_middle + 2);
-	p = strchr(filename, ')');
-	if (p == NULL) {
+	ptr = strchr(filename, ')');
+	if (ptr == NULL) {
 		return;
 	}
 
-	*p = '\0';
+	*ptr = '\0';
 
-	p = strchr(filename, '#');
-	if (p != NULL) {
-		anchor = p + 1;
-		*p = '\0';
+	ptr = strchr(filename, '#');
+	if (ptr != NULL) {
+		anchor = ptr + 1;
+		*ptr = '\0';
 	}
 
-	SaveToHistory(current_pager, cfg);
+	SaveToHistory(p, cfg);
 
 	if (strlen(filename) > 0) {
 		OpenHelpFile(cfg, filename);
-		current_pager->window_offset = 0;
-		current_pager->search_line = -1;
-		P_ClearSearch(current_pager);
+		p->window_offset = 0;
+		p->search_line = -1;
+		P_ClearSearch(p);
 	}
 	if (anchor != NULL) {
-		int anchor_line = JumpToAnchor(current_pager, anchor);
+		int anchor_line = JumpToAnchor(p, anchor);
 		if (anchor_line >= 0) {
-			current_pager->search_line = anchor_line;
+			p->search_line = anchor_line;
 		}
 	}
 	free(filename);
 }
-
-static const struct action follow_link_action = {
-	'\r', 0, "Open", "Open Link", PerformFollowLink,
-};
 
 static void PerformGoBack(void)
 {
@@ -382,7 +379,7 @@ static const struct action *help_pager_actions[] = {
 	&back_action,
 	&pager_prev_link_action,
 	&pager_next_link_action,
-	&follow_link_action,
+	&open_link_action,
 	&toc_action,
 	&pager_search_action,
 	&pager_search_again_action,
@@ -520,6 +517,7 @@ bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename)
 	cfg->pc.title = NULL;
 	cfg->pc.draw_line = DrawHelpLine;
 	cfg->pc.get_link = HelpPagerGetLink;
+	cfg->pc.activate_link = HelpPagerActivateLink;
 	cfg->pc.user_data = cfg;
 	cfg->pc.actions = help_pager_actions;
 	cfg->lines = NULL;

@@ -350,6 +350,7 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 	cfg->pc.user_data = cfg;
 	cfg->pc.actions = hexdump_pager_actions;
 	cfg->pc.get_link = NULL;
+	cfg->pc.activate_link = NULL;
 	cfg->plaintext_config = NULL;
 	cfg->specs_help.pc.title = NULL;
 	cfg->specs_pager_open = false;
