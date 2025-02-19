@@ -251,12 +251,12 @@ static struct actions_accel *AccelForColumn(struct actions_bar *p, int x)
 	return NULL;
 }
 
-static void HandleMousePress(struct actions_bar *p)
+static void HandleMousePress(void *_p, int x, int y)
 {
+	struct actions_bar *p = _p;
 	struct actions_accel *a;
-	int x, y;
 
-	if (!UI_GetMousePosition(&p->pane, &x, &y) || y != 0) {
+	if (y != 0) {
 		return;
 	}
 
@@ -300,11 +300,6 @@ static void HandleKeypress(void *p, int key)
 		return;
 	}
 
-	if (key == KEY_MOUSE) {
-		HandleMousePress(p);
-		return;
-	}
-
 	key = TranslateSpecialKey(key);
 
 	for (i = 0; actions[i] != NULL; i++) {
@@ -322,7 +317,7 @@ struct pane *UI_ActionsBarInit(void)
 	actions_bar_singleton.pane.window = newwin(1, COLS, LINES - 1, 0);
 	actions_bar_singleton.pane.draw = DrawActionsBar;
 	actions_bar_singleton.pane.keypress = HandleKeypress;
-	actions_bar_singleton.pane.mouse_click = NULL;
+	actions_bar_singleton.pane.mouse_click = HandleMousePress;
 	actions_bar_singleton.function_keys = true;
 
 	return &actions_bar_singleton.pane;
