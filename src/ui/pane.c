@@ -270,8 +270,6 @@ static bool HandleKeypress(void)
 			UI_SetCurrentStack(mouse_cur_stack);
 			UI_PaneMouseClick(mouse_cur_pane, mouse_cur_x,
 			                  mouse_cur_y);
-			// TODO: Don't send KEY_MOUSE keypress
-			UI_PaneKeypress(mouse_cur_pane, KEY_MOUSE);
 		}
 
 		return true;
