@@ -28,6 +28,8 @@ void UI_RecalculateStacks(void);
 static struct pane_stack *mouse_cur_stack;
 static struct pane *mouse_cur_pane;
 static int mouse_cur_x, mouse_cur_y;
+static doubleclick_continuation mouse_click_continuation;
+
 static struct pane *actions_bar, *title_bar;
 static bool main_loop_exited = false;
 
@@ -202,19 +204,32 @@ void UI_InputKeypress(int key)
 static bool CheckMouseInPane(MEVENT *ev, struct pane *p)
 {
 	int px, py, pw, ph;
+	int relx, rely;
 
 	getbegyx(p->window, py, px);
 	getmaxyx(p->window, ph, pw);
 
-	if (ev->x >= px && ev->x < px + pw
-	 && ev->y >= py && ev->y < py + ph) {
-		mouse_cur_pane = p;
-		mouse_cur_x = ev->x - px;
-		mouse_cur_y = ev->y - py;
-		return true;
+	if (ev->x < px || ev->x >= px + pw
+	 || ev->y < py || ev->y >= py + ph) {
+		return false;
+
 	}
 
-	return false;
+	relx = ev->x - px;
+	rely = ev->y - py;
+
+	// Double clicks are only valid if the clicks go to the
+	// same screen location each time.
+	if (mouse_click_continuation != NULL
+	 && (p != mouse_cur_pane || relx != mouse_cur_x
+	  || rely != mouse_cur_y)) {
+		mouse_click_continuation = NULL;
+	}
+
+	mouse_cur_pane = p;
+	mouse_cur_x = relx;
+	mouse_cur_y = rely;
+	return true;
 }
 
 static bool UpdateMousePosition(void)
@@ -252,6 +267,24 @@ static bool UpdateMousePosition(void)
 	return false;
 }
 
+static void HandleMouseClick(void)
+{
+	if (!UpdateMousePosition()) {
+		return;
+	}
+
+	UI_SetCurrentStack(mouse_cur_stack);
+	if (mouse_click_continuation != NULL) {
+		// Handle as a doubleclick by calling the continuation.
+		// TODO: We should enforce a time limit between clicks
+		mouse_click_continuation(mouse_cur_pane);
+		mouse_click_continuation = NULL;
+	} else {
+		mouse_click_continuation = UI_PaneMouseClick(
+			mouse_cur_pane, mouse_cur_x, mouse_cur_y);
+	}
+}
+
 static bool HandleKeypress(void)
 {
 	int key;
@@ -266,14 +299,11 @@ static bool HandleKeypress(void)
 	// otherwise we ignore the click. We only send the keypress to that
 	// pane and skip the usual logic used for real keypresses.
 	if (key == KEY_MOUSE) {
-		if (UpdateMousePosition()) {
-			UI_SetCurrentStack(mouse_cur_stack);
-			UI_PaneMouseClick(mouse_cur_pane, mouse_cur_x,
-			                  mouse_cur_y);
-		}
-
+		HandleMouseClick();
 		return true;
 	}
+
+	mouse_click_continuation = NULL;
 
 	UI_InputKeypress(key);
 

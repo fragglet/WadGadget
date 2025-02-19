@@ -550,6 +550,15 @@ static void RightKeypress(struct pager *p)
 	p->current_column = LinkStartColumn(cfg, cfg->current_link);
 }
 
+static void HandleDoubleClick(void *_p)
+{
+	struct pager *p = _p;
+
+	if (p->cfg->activate_link != NULL) {
+		p->cfg->activate_link(p, p->cfg->current_link);
+	}
+}
+
 static doubleclick_continuation HandleMouseClick(void *_p, int x, int y)
 {
 	struct pager *p = _p;
@@ -590,8 +599,7 @@ static doubleclick_continuation HandleMouseClick(void *_p, int x, int y)
 		    LinkColumnRange(p->cfg, min - 1, &start_x, &end_x) &&
 		    x >= start_x && x < end_x) {
 			p->cfg->current_link = min - 1;
-
-			// TODO: Return doubleclick continuation
+			return HandleDoubleClick;
 		}
 	}
 
