@@ -110,15 +110,11 @@ void UI_ListPaneSelect(struct list_pane *p, unsigned int idx)
 	}
 }
 
-static void ListPaneMousePress(struct list_pane *lp)
+void UI_ListPaneMouseClick(void *_lp, int x, int y)
 {
+	struct list_pane *lp = _lp;
 	int selection;
-	int x, y;
 	int w, h;
-
-	if (!UI_GetMousePosition(&lp->pane, &x, &y)) {
-		return;
-	}
 
 	getmaxyx(lp->pane.window, h, w);
 	if (x < 1 || y < 1 || x >= w - 2 || y >= h - 1) {
@@ -138,9 +134,6 @@ void UI_ListPaneKeypress(void *p, int key)
 	unsigned int i, lines;
 
 	switch (key) {
-	case KEY_MOUSE:
-		ListPaneMousePress(lp);
-		return;
 	case KEY_UP:
 		if (lp->selected > 0) {
 			--lp->selected;
@@ -189,7 +182,7 @@ void UI_ListPaneInit(struct list_pane *p, WINDOW *w,
 	p->pane.window = w;
 	p->pane.draw = UI_ListPaneDraw;
 	p->pane.keypress = UI_ListPaneKeypress;
-	p->pane.mouse_click = NULL;
+	p->pane.mouse_click = UI_ListPaneMouseClick;
 	p->subwin = NULL;
 	p->funcs = funcs;
 	p->data = data;
