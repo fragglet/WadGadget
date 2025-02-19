@@ -111,6 +111,7 @@ struct dialog_button {
 	const char *label;
 	int x, y;
 	int key;
+	int result;
 };
 
 struct confirm_dialog_box {
@@ -141,6 +142,26 @@ static void DrawDialogButton(WINDOW *win, struct dialog_button *b)
 	waddstr(win, " ");
 }
 
+static bool CheckButtonPress(struct dialog_button *b, int key, int *result)
+{
+	if (b->key != 0 && toupper(key) == toupper(b->key)) {
+		*result = b->result;
+		UI_ExitMainLoop();
+		return true;
+	}
+
+	return false;
+}
+
+static void CheckButtonClick(struct dialog_button *b, int x, int y,
+                             int *result)
+{
+	if (y == b->y && x >= b->x && x < b->x + DialogButtonWidth(b)) {
+		*result = b->result;
+		UI_ExitMainLoop();
+	}
+}
+
 static bool DrawConfirmDialog(void *pane)
 {
 	struct confirm_dialog_box *dialog = pane;
@@ -166,36 +187,18 @@ static bool DrawConfirmDialog(void *pane)
 	return true;
 }
 
-static bool InButtonRange(struct dialog_button *b, int x, int y)
-{
-	return y == b->y && x >= b->x && x < b->x + DialogButtonWidth(b);
-}
-
-static bool CheckButtonPress(struct pane *p, struct dialog_button *b, int key)
-{
-	if (key == KEY_MOUSE) {
-		int x, y;
-
-		if (!UI_GetMousePosition(p, &x, &y)) {
-			return false;
-		}
-		return InButtonRange(b, x, y);
-	}
-
-	return b->key != 0 && toupper(key) == toupper(b->key);
-}
-
 static void ConfirmDialogKeypress(void *dialog, int key)
 {
 	struct confirm_dialog_box *d = dialog;
+	CheckButtonPress(&d->left, key, &d->result);
+	CheckButtonPress(&d->right, key, &d->result);
+}
 
-	if (CheckButtonPress(&d->pane, &d->left, key)) {
-		d->result = 0;
-		UI_ExitMainLoop();
-	} else if (CheckButtonPress(&d->pane, &d->right, key)) {
-		d->result = 1;
-		UI_ExitMainLoop();
-	}
+static void ConfirmDialogMouseClick(void *dialog, int x, int y)
+{
+	struct confirm_dialog_box *d = dialog;
+	CheckButtonClick(&d->left, x, y, &d->result);
+	CheckButtonClick(&d->right, x, y, &d->result);
 }
 
 static void InitDialogBox(struct confirm_dialog_box *dialog,
@@ -208,14 +211,16 @@ static void InitDialogBox(struct confirm_dialog_box *dialog,
 	dialog->pane.window = CenteredWindow(w, h);
 	dialog->pane.draw = DrawConfirmDialog;
 	dialog->pane.keypress = ConfirmDialogKeypress;
-	dialog->pane.mouse_click = NULL;
+	dialog->pane.mouse_click = ConfirmDialogMouseClick;
 	dialog->title = title;
 	dialog->left.label = NULL;
 	dialog->left.x = 1;
 	dialog->left.y = h - 2;
+	dialog->left.result = 0;
 	dialog->right.label = NULL;
 	dialog->right.x = w - 1;
 	dialog->right.y = h - 2;
+	dialog->right.result = 1;
 }
 
 int UI_ConfirmDialogBox(const char *title, const char *yes,
@@ -314,15 +319,18 @@ static void TextInputDialogKeypress(void *dialog, int key)
 {
 	struct text_input_dialog_box *d = dialog;
 
-	if (CheckButtonPress(&d->pane, &d->left, key)) {
-		d->result = 0;
-		UI_ExitMainLoop();
-	} else if (CheckButtonPress(&d->pane, &d->right, key)) {
-		d->result = 1;
-		UI_ExitMainLoop();
-	} else {
+	if (!CheckButtonPress(&d->left, key, &d->result)
+	 && !CheckButtonPress(&d->right, key, &d->result)) {
 		UI_TextInputKeypress(&d->input, key);
 	}
+}
+
+static void TextInputDialogMouseClick(void *dialog, int x, int y)
+{
+	struct text_input_dialog_box *d = dialog;
+
+	CheckButtonClick(&d->left, x, y, &d->result);
+	CheckButtonClick(&d->right, x, y, &d->result);
 }
 
 char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
@@ -342,7 +350,7 @@ char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
 	dialog.pane.window = CenteredWindow(w, h);
 	dialog.pane.draw = DrawTextInputDialog;
 	dialog.pane.keypress = TextInputDialogKeypress;
-	dialog.pane.mouse_click = NULL;
+	dialog.pane.mouse_click = TextInputDialogMouseClick;
 	dialog.title = title;
 	dialog.result = 0;
 
@@ -351,12 +359,14 @@ char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
 	dialog.left.label = "Cancel";
 	dialog.left.x = 1;
 	dialog.left.y = h - 2;
+	dialog.left.result = 0;
 
 	snprintf(dialog.right.key_label, 8, "Ent");
 	dialog.right.key = '\r';
 	dialog.right.label = action;
 	dialog.right.x = w - DialogButtonWidth(&dialog.right) - 1;
 	dialog.right.y = h - 2;
+	dialog.right.result = 1;
 
 	UI_TextInputInit(&dialog.input, dialog.pane.window, max_chars);
 	mvderwin(dialog.input.win, h - 4, 2);
