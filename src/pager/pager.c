@@ -30,6 +30,64 @@ const struct action exit_pager_action = {
 	27, 0, "Close", "Close", UI_ExitMainLoop,
 };
 
+#define SCRATCHPAD_BUFFER_WIDTH 120
+static bool LinkColumnRange(struct pager_config *cfg, int link_num,
+                            int *start_x, int *end_x)
+{
+	int saved_curr_link = cfg->current_link;
+	static WINDOW *scratchpad1 = NULL, *scratchpad2;
+	struct pager_link l;
+	int x;
+
+	if (scratchpad1 == NULL) {
+		scratchpad1 = newpad(1, SCRATCHPAD_BUFFER_WIDTH);
+		scratchpad2 = newpad(1, SCRATCHPAD_BUFFER_WIDTH);
+	}
+
+	// Draw the line containing the link twice; once when it is selected
+	// and once when it is not.
+	cfg->get_link(cfg, link_num, &l);
+	cfg->current_link = -1;
+	werase(scratchpad1);
+	cfg->draw_line(scratchpad1, l.lineno, cfg->user_data);
+	cfg->current_link = link_num;
+	werase(scratchpad2);
+	cfg->draw_line(scratchpad2, l.lineno, cfg->user_data);
+	cfg->current_link = saved_curr_link;
+
+	// We assume that the link is highlighted in some way using
+	// character attributes (bold, underline, etc.), so scan until
+	// we find the first place where attributes differ:
+	for (x = 0; x < SCRATCHPAD_BUFFER_WIDTH; x++) {
+		chtype c1 = mvwinch(scratchpad1, 0, x);
+		chtype c2 = mvwinch(scratchpad2, 0, x);
+		if ((c1 & A_ATTRIBUTES) != (c2 & A_ATTRIBUTES)) {
+			break;
+		}
+	}
+	*start_x = x;
+	// Now continue; the link ends when the attributes match again.
+	for (; x < SCRATCHPAD_BUFFER_WIDTH; x++) {
+		chtype c1 = mvwinch(scratchpad1, 0, x);
+		chtype c2 = mvwinch(scratchpad2, 0, x);
+		if ((c1 & A_ATTRIBUTES) == (c2 & A_ATTRIBUTES)) {
+			break;
+		}
+	}
+	*end_x = x;
+
+	return *start_x < SCRATCHPAD_BUFFER_WIDTH;
+}
+
+static int LinkStartColumn(struct pager_config *cfg, int link_num)
+{
+	int start_x, end_x;
+	if (!LinkColumnRange(cfg, link_num, &start_x, &end_x)) {
+		return -1;
+	}
+	return start_x;
+}
+
 static bool LineContainsString(struct pager *p, unsigned int lineno,
                                const char *needle)
 {
@@ -376,7 +434,7 @@ static void UpKeypress(struct pager *p)
 	new_lineno = GetLink(p, new_link).lineno;
 	while (new_link > 0
 	    && GetLink(p, new_link - 1).lineno == new_lineno
-	    && GetLink(p, new_link).offset > cfg->current_offset) {
+	    && LinkStartColumn(cfg, new_link) > cfg->current_column) {
 		--new_link;
 	}
 
@@ -418,7 +476,8 @@ static void DownKeypress(struct pager *p)
 	new_lineno = GetLink(p, new_link).lineno;
 	while (new_link < cfg->num_links - 1) {
 		struct pager_link l = GetLink(p, new_link + 1);
-		if (l.lineno != new_lineno || l.offset > cfg->current_offset) {
+		if (l.lineno != new_lineno
+		 || LinkStartColumn(cfg, new_link + 1) > cfg->current_column) {
 			break;
 		}
 		++new_link;
@@ -452,7 +511,7 @@ static void LeftKeypress(struct pager *p)
 	}
 
 	// If we scroll up/down, we want to aim for the same offset.
-	cfg->current_offset = GetLink(p, cfg->current_link).offset;
+	cfg->current_column = LinkStartColumn(cfg, cfg->current_link);
 }
 
 static void RightKeypress(struct pager *p)
@@ -470,56 +529,8 @@ static void RightKeypress(struct pager *p)
 		++cfg->current_link;
 	}
 
-	cfg->current_offset = GetLink(p, cfg->current_link).offset;
-}
-
-#define SCRATCHPAD_BUFFER_WIDTH 120
-static bool LinkColumnRange(struct pager_config *cfg, int link_num,
-                            int *start_x, int *end_x)
-{
-	int saved_curr_link = cfg->current_link;
-	static WINDOW *scratchpad1 = NULL, *scratchpad2;
-	struct pager_link l;
-	int x;
-
-	if (scratchpad1 == NULL) {
-		scratchpad1 = newpad(1, SCRATCHPAD_BUFFER_WIDTH);
-		scratchpad2 = newpad(1, SCRATCHPAD_BUFFER_WIDTH);
-	}
-
-	// Draw the line containing the link twice; once when it is selected
-	// and once when it is not.
-	cfg->get_link(cfg, link_num, &l);
-	cfg->current_link = -1;
-	werase(scratchpad1);
-	cfg->draw_line(scratchpad1, l.lineno, cfg->user_data);
-	cfg->current_link = link_num;
-	werase(scratchpad2);
-	cfg->draw_line(scratchpad2, l.lineno, cfg->user_data);
-	cfg->current_link = saved_curr_link;
-
-	// We assume that the link is highlighted in some way using
-	// character attributes (bold, underline, etc.), so scan until
-	// we find the first place where attributes differ:
-	for (x = 0; x < SCRATCHPAD_BUFFER_WIDTH; x++) {
-		chtype c1 = mvwinch(scratchpad1, 0, x);
-		chtype c2 = mvwinch(scratchpad2, 0, x);
-		if ((c1 & A_ATTRIBUTES) != (c2 & A_ATTRIBUTES)) {
-			break;
-		}
-	}
-	*start_x = x;
-	// Now continue; the link ends when the attributes match again.
-	for (; x < SCRATCHPAD_BUFFER_WIDTH; x++) {
-		chtype c1 = mvwinch(scratchpad1, 0, x);
-		chtype c2 = mvwinch(scratchpad2, 0, x);
-		if ((c1 & A_ATTRIBUTES) == (c2 & A_ATTRIBUTES)) {
-			break;
-		}
-	}
-	*end_x = x;
-
-	return *start_x < SCRATCHPAD_BUFFER_WIDTH;
+	// If we scroll up/down, we want to aim for the same offset.
+	cfg->current_column = LinkStartColumn(cfg, cfg->current_link);
 }
 
 static void MousePress(struct pager *p)

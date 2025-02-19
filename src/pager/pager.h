@@ -28,7 +28,7 @@ typedef void (*pager_get_link_fn)(struct pager_config *cfg, int idx,
 
 struct pager_link {
 	int lineno;
-	int offset;  // Offset within line, not necessarily column number
+	int offset;  // Per-line ID, not used by the main pager code
 };
 
 struct pager_config {
@@ -41,7 +41,7 @@ struct pager_config {
 	pager_get_link_fn get_link;
 	int current_link;
 	int num_links;
-	int current_offset;
+	int current_column;
 };
 
 struct pager {
