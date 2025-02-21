@@ -149,12 +149,37 @@ static bool DrawActionsPane(void *pane)
 	return true;
 }
 
+static doubleclick_continuation ActionsPaneMouseClick(void *_p, int x, int y)
+{
+	struct actions_pane *p = _p;
+	struct action_iter it;
+	const struct action *a, *matched = NULL;
+	struct action_options opts;
+	int ax, ay;
+
+	BeginActionIter(p, &it);
+	while ((a = NextActionIter(&it, &ax, &ay, &opts)) != NULL
+	    && ay <= y) {
+		// If there are multiple actions on the line, we want to end
+		// up with the last one on the line with x <= mouse x
+		if (y == ay && x >= ax) {
+			matched = a;
+		}
+	}
+
+	if (matched != NULL) {
+		matched->callback();
+	}
+
+	return NULL;
+}
+
 void B_ActionsPaneInit(struct actions_pane *pane, WINDOW *win)
 {
 	pane->pane.window = win;
 	pane->pane.draw = DrawActionsPane;
 	pane->pane.keypress = NULL;
-	pane->pane.mouse_click = NULL;
+	pane->pane.mouse_click = ActionsPaneMouseClick;
 	pane->function_keys = true;
 	memset(pane->actions, 0, sizeof(pane->actions));
 }
