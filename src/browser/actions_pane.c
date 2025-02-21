@@ -81,28 +81,16 @@ static void DrawAction(struct actions_pane *p, int x, int y,
 	}
 }
 
-static int ShowAction(struct actions_pane *p, int y,
-                      const struct action *action,
-                      const struct action_options *opts, bool right_ok)
+static void PositionAction(struct actions_pane *p, int *x, int *y,
+                           const struct action *action,
+                           const struct action_options *opts, bool right_ok)
 {
-	int x, result;
-
-	if (action->key == 0 && action->ctrl_key == 0) {
-		return 0;
-	}
-
 	if (opts->right_side && right_ok) {
-		x = 15;
-		--y;
-		result = 0;
+		*x = 15;
+		--*y;
 	} else {
-		x = 2;
-		result = 1;
+		*x = 2;
 	}
-
-	DrawAction(p, x, y, action, opts);
-
-	return result;
 }
 
 static bool DrawActionsPane(void *pane)
@@ -111,7 +99,7 @@ static bool DrawActionsPane(void *pane)
 	const struct action *a;
 	WINDOW *win = p->pane.window;
 	struct action_options opts;
-	int i, y, last_idx = -1;
+	int i, x, y, last_idx = -1;
 
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);
@@ -120,9 +108,11 @@ static bool DrawActionsPane(void *pane)
 
 	for (i = 0, y = 1; i < arrlen(key_ordering); i++) {
 		a = p->actions[i];
-		if (a != NULL) {
+		if (a != NULL && (a->key != 0 || a->ctrl_key != 0)) {
 			ExtractOptions(a->description, &opts);
-			y += ShowAction(p, y, a, &opts, last_idx == i - 1);
+			PositionAction(p, &x, &y, a, &opts, last_idx == i - 1);
+			DrawAction(p, x, y, a, &opts);
+			++y;
 		}
 		if (key_ordering[i] == 0) {
 			y++;
