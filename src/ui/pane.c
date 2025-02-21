@@ -296,6 +296,8 @@ static void HandleMouseEvent(void)
 	case BUTTON4_PRESSED:
 		UI_PaneKeypress(mouse_cur_pane, KEY_SR);
 		break;
+#endif
+#ifdef BUTTON5_PRESSED
 	case BUTTON5_PRESSED:
 		UI_PaneKeypress(mouse_cur_pane, KEY_SF);
 		break;
@@ -376,7 +378,10 @@ void UI_Init(void)
 {
 	int mask = BUTTON1_PRESSED;
 #ifdef BUTTON4_PRESSED
-	mask |= BUTTON4_PRESSED|BUTTON5_PRESSED;
+	mask |= BUTTON4_PRESSED;
+#endif
+#ifdef BUTTON5_PRESSED
+	mask |= BUTTON5_PRESSED;
 #endif
 	mousemask(mask, NULL);
 
