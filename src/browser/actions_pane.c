@@ -54,6 +54,52 @@ static void ExtractOptions(const char *desc, struct action_options *opts)
 	opts->desc = desc;
 }
 
+struct action_iter {
+	struct actions_pane *p;
+	int i, y, last_idx;
+};
+
+static void BeginActionIter(struct actions_pane *p, struct action_iter *it)
+{
+	it->p = p;
+	it->i = 0;
+	it->y = 1;
+	it->last_idx = -1;
+}
+
+static const struct action *
+NextActionIter(struct action_iter *it, int *x, int *y,
+               struct action_options *opts)
+{
+	const struct action *a, *result = NULL;
+
+	while (it->i < arrlen(key_ordering)) {
+		a = it->p->actions[it->i];
+		if (a != NULL && (a->key != 0 || a->ctrl_key != 0)) {
+			ExtractOptions(a->description, opts);
+			if (opts->right_side && it->last_idx == it->i - 1) {
+				*x = 15;
+				*y = it->y - 1;
+			} else {
+				*x = 2;
+				*y = it->y;
+				++it->y;
+			}
+			result = a;
+		}
+		if (key_ordering[it->i] == 0) {
+			++it->y;
+		}
+		it->last_idx = it->i;
+		++it->i;
+		if (result != NULL) {
+			return result;
+		}
+	}
+
+	return NULL;
+}
+
 static void DrawAction(struct actions_pane *p, int x, int y,
                        const struct action *action,
                        const struct action_options *opts)
@@ -87,30 +133,17 @@ static bool DrawActionsPane(void *pane)
 	const struct action *a;
 	WINDOW *win = p->pane.window;
 	struct action_options opts;
-	int i, x, y, last_idx = -1;
+	struct action_iter it;
+	int x, y;
 
 	wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	werase(win);
 	UI_DrawWindowBox(win);
 	mvwaddstr(win, 0, 2, " Actions ");
 
-	for (i = 0, y = 1; i < arrlen(key_ordering); i++) {
-		a = p->actions[i];
-		if (a != NULL && (a->key != 0 || a->ctrl_key != 0)) {
-			ExtractOptions(a->description, &opts);
-			if (opts.right_side && last_idx == i - 1) {
-				x = 15;
-				--y;
-			} else {
-				x = 2;
-			}
-			DrawAction(p, x, y, a, &opts);
-			++y;
-		}
-		if (key_ordering[i] == 0) {
-			y++;
-		}
-		last_idx = i;
+	BeginActionIter(p, &it);
+	while ((a = NextActionIter(&it, &x, &y, &opts)) != NULL) {
+		DrawAction(p, x, y, a, &opts);
 	}
 
 	return true;
