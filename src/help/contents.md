@@ -5,6 +5,7 @@
  * [Marking Entries](common.md#marking-entries)
  * [Searching](common.md#searching)
  * [Commander Mode](common.md#commander-mode)
+ * [Using the Mouse](common.md#using-the-mouse)
  * [Directory view](dir_view.md)
    * [Keys](dir_view.md#keys)
    * [Copying](dir_view.md#copying)
@@ -29,6 +30,7 @@
 ## Other Screens
 
  * [Help system](help.md)
+   * [Using the Mouse](help.md#using-the-mouse)
  * [Hexdump view](hexdump.md)
  * Plaintext view (TODO)
 

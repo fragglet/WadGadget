@@ -20,3 +20,17 @@ Press **Ctrl-B** to return back to the page you were previously looking at.
     **Ctrl-T      **  Open [Table of Contents](contents.md)
     **Ctrl-F     /**  Search for text
     **Ctrl-N     n**  Next search result
+
+## Using the Mouse
+
+You may find it convenient to use the mouse when navigating the help system.
+Doing so is relatively straightforward. If your mouse has a scroll wheel, you
+can use this to scroll the page up and down; otherwise, clicking the right-most
+column of the window acts as scroll bar that can be used to navigate the
+currently-shown document.
+
+Clicking on a link will select it and double clicking will activate the link,
+bringing you to a different document. To go back, click the "Back" option in
+the actions bar at the bottom of the screen. You can also click on any of the
+other various commands listed there, to perform searches, open the table of
+contents and so on.
