@@ -26,31 +26,48 @@ static const int key_ordering[] = {
 	27, CTRL_('J'),
 };
 
-static int ShowAction(struct actions_pane *p, int y,
-                      const struct action *action, bool right_ok)
+struct action_options {
+	bool arrows;
+	bool right_side;
+	bool ellipsis;
+	const char *desc;
+};
+
+static void ExtractOptions(const char *desc, struct action_options *opts)
 {
-	WINDOW *win = p->pane.window;
-	bool arrows = false, ellipsis = false, right_side = false;
-	int x, result;
-	char *desc;
+	opts->arrows = false;
+	opts->ellipsis = false;
+	opts->right_side = false;
 
-	if (action->key == 0 && action->ctrl_key == 0) {
-		return 0;
-	}
-
-	for (desc = action->description;; ++desc) {
+	for (;; ++desc) {
 		if (*desc == '>') {
-			arrows = true;
+			opts->arrows = true;
 		} else if (*desc == '|') {
-			right_side = true;
+			opts->right_side = true;
 		} else if (*desc == '.') {
-			ellipsis = true;
+			opts->ellipsis = true;
 		} else if (*desc != ' ') {
 			break;
 		}
 	}
 
-	if (right_side && right_ok) {
+	opts->desc = desc;
+}
+
+static int ShowAction(struct actions_pane *p, int y,
+                      const struct action *action, bool right_ok)
+{
+	WINDOW *win = p->pane.window;
+	struct action_options opts;
+	int x, result;
+
+	if (action->key == 0 && action->ctrl_key == 0) {
+		return 0;
+	}
+
+	ExtractOptions(action->description, &opts);
+
+	if (opts.right_side && right_ok) {
 		x = 15;
 		--y;
 		result = 0;
@@ -64,16 +81,16 @@ static int ShowAction(struct actions_pane *p, int y,
 	wattroff(win, A_BOLD);
 	waddstr(win, " - ");
 
-	if (arrows && !p->left_to_right) {
+	if (opts.arrows && !p->left_to_right) {
 		wattron(win, A_BOLD);
 		waddstr(win, "<<< ");
 		wattroff(win, A_BOLD);
 	}
-	waddstr(win, desc);
-	if (ellipsis) {
+	waddstr(win, opts.desc);
+	if (opts.ellipsis) {
 		waddstr(win, "...");
 	}
-	if (arrows && p->left_to_right) {
+	if (opts.arrows && p->left_to_right) {
 		wattron(win, A_BOLD);
 		waddstr(win, " >>>");
 		wattroff(win, A_BOLD);
