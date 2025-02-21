@@ -114,7 +114,7 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 
 	memset(p->accels, 0, sizeof(p->accels));
 
-	for (i = 0; i < 10; ++i) {
+	for (i = 0; i < 11; ++i) {
 		a = cells[i];
 		if (a == NULL || a->shortname == NULL) {
 			continue;
@@ -122,8 +122,8 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 		accel = &p->accels[i];
 		accel->action = a;
 		accel->name = a->shortname;
-		if (p->function_keys) {
-			snprintf(accel->key, sizeof(accel->key), "%d", i + 1);
+		if (p->function_keys && HasFunctionKey(a)) {
+			snprintf(accel->key, sizeof(accel->key), "%d", i);
 		} else {
 			snprintf(accel->key, sizeof(accel->key), "%s",
 			         UI_ActionKeyDescription(a, p->function_keys));
@@ -143,7 +143,7 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 
 	// Can we fit any more shortcuts in?
 	i = 0;
-	add_index = 10;
+	add_index = 11;
 	while (actions != NULL && actions[i] != NULL
 	    && add_index < MAX_KEY_BINDINGS) {
 		a = actions[i];
@@ -175,15 +175,19 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 
 static void RecalculateNames(struct actions_bar *p, int columns)
 {
-	const struct action *a, *cells[10];
+	// cells[0] = escape key; cells[1-10] = F1-F10
+	const struct action *a, *cells[11];
 	const struct action **actions = UI_ActiveStack()->actions;
 	int i;
 
 	memset(cells, 0, sizeof(cells));
 	for (i = 0; actions != NULL && actions[i] != NULL; i++) {
 		a = actions[i];
-		if (a != NULL && HasFunctionKey(a)) {
-			cells[a->key - KEY_F(1)] = a;
+		if (a == NULL) {
+		} else if (a->key == 27) {
+			cells[0] = a;
+		} else if (a != NULL && HasFunctionKey(a)) {
+			cells[a->key - KEY_F(1) + 1] = a;
 		}
 	}
 
