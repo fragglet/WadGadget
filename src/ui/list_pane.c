@@ -110,6 +110,12 @@ void UI_ListPaneSelect(struct list_pane *p, unsigned int idx)
 	}
 }
 
+void UI_ListPaneDoubleClick(void *lp)
+{
+	// No-op, but list_pane subclasses can use this function as a value
+	// to substitute their own behavior.
+}
+
 doubleclick_continuation UI_ListPaneMouseClick(void *_lp, int x, int y)
 {
 	struct list_pane *lp = _lp;
@@ -126,6 +132,7 @@ doubleclick_continuation UI_ListPaneMouseClick(void *_lp, int x, int y)
 	if (selection >= 0 && selection < NumEntries(lp)) {
 		UI_ListPaneSelect(lp, selection);
 		// TODO: Return doubleclick continuation
+		return UI_ListPaneDoubleClick;
 	}
 
 	return NULL;

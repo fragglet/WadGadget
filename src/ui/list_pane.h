@@ -40,6 +40,7 @@ void UI_ListPaneInit(struct list_pane *p, WINDOW *w,
 bool UI_ListPaneDraw(void *p);
 void UI_ListPaneKeypress(void *p, int key);
 doubleclick_continuation UI_ListPaneMouseClick(void *_lp, int x, int y);
+void UI_ListPaneDoubleClick(void *lp);
 void UI_ListPaneFree(struct list_pane *p);
 int UI_ListPaneSelected(struct list_pane *p);
 unsigned int UI_ListPaneLines(struct list_pane *lp);
