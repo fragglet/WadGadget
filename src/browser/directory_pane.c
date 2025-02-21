@@ -8,6 +8,7 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "browser/browser.h"
 #include "browser/directory_pane.h"
 
 #include <curses.h>
@@ -337,6 +338,15 @@ static bool DrawPane(void *p)
 	return true;
 }
 
+doubleclick_continuation B_DirectoryPaneMouseClick(void *_dp, int x, int y)
+{
+	struct directory_pane *dp = _dp;
+
+	B_SwitchToPane(dp);
+
+	return UI_ListPaneMouseClick(dp, x, y);
+}
+
 struct directory_pane *UI_NewDirectoryPane(
 	WINDOW *w, struct directory *dir)
 {
@@ -345,6 +355,7 @@ struct directory_pane *UI_NewDirectoryPane(
 	p = calloc(1, sizeof(struct directory_pane));
 	UI_ListPaneInit(&p->pane, w, &directory_pane_funcs, p);
 	p->pane.pane.draw = DrawPane;
+	p->pane.pane.mouse_click = B_DirectoryPaneMouseClick;
 	// TODO: Free
 	UI_ListPaneSetTitle(&p->pane, PathBaseName(dir->path));
 	p->dir = dir;
