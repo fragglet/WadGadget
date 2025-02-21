@@ -148,6 +148,13 @@ void UI_GetDesktopLines(int *top_line, int *lines)
 	*lines = current_stack->state.lines - 1;
 }
 
+struct pane *UI_SetExclusiveFocus(struct pane *p)
+{
+	struct pane *result = current_stack->exclusive_focus;
+	current_stack->exclusive_focus = p;
+	return result;
+}
+
 void UI_AddStack(struct pane_stack *stack)
 {
 	stack->state.next = stacks;

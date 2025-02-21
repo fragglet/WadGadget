@@ -269,7 +269,13 @@ static bool UpdateMousePosition(void)
 
 static void HandleMouseClick(void)
 {
+	struct pane_stack *s = UI_ActiveStack();
+
 	if (!UpdateMousePosition()) {
+		return;
+	}
+
+	if (s->exclusive_focus != NULL && mouse_cur_pane != s->exclusive_focus) {
 		return;
 	}
 

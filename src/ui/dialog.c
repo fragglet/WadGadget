@@ -229,6 +229,7 @@ int UI_ConfirmDialogBox(const char *title, const char *yes,
                         const char *no, const char *msg, ...)
 {
 	const struct action **saved_actions = UI_ActionsBarSetActions(NULL);
+	struct pane *old_focus;
 	struct confirm_dialog_box dialog;
 	va_list args;
 
@@ -248,7 +249,9 @@ int UI_ConfirmDialogBox(const char *title, const char *yes,
 	dialog.right.x -= DialogButtonWidth(&dialog.right);
 
 	UI_PaneShow(&dialog);
+	old_focus = UI_SetExclusiveFocus(&dialog.pane);
 	UI_RunMainLoop();
+	UI_SetExclusiveFocus(old_focus);
 	UI_PaneHide(&dialog);
 
 	UI_ActionsBarSetActions(saved_actions);
@@ -260,6 +263,7 @@ void UI_MessageBox(const char *msg, ...)
 {
 	const struct action **saved_actions = UI_ActionsBarSetActions(NULL);
 	struct confirm_dialog_box dialog;
+	struct pane *old_focus;
 	va_list args;
 
 	va_start(args, msg);
@@ -273,7 +277,9 @@ void UI_MessageBox(const char *msg, ...)
 	dialog.right.x -= DialogButtonWidth(&dialog.right);
 
 	UI_PaneShow(&dialog);
+	old_focus = UI_SetExclusiveFocus(&dialog.pane);
 	UI_RunMainLoop();
+	UI_SetExclusiveFocus(old_focus);
 	UI_PaneHide(&dialog);
 
 	UI_ActionsBarSetActions(saved_actions);
@@ -342,6 +348,7 @@ char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
 {
 	const struct action **saved_actions = UI_ActionsBarSetActions(NULL);
 	struct text_input_dialog_box dialog;
+	struct pane *old_focus;
 	int w, h;
 	va_list args;
 
@@ -377,7 +384,9 @@ char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
 	wresize(dialog.input.win, 1, w - 4);
 
 	UI_PaneShow(&dialog);
+	old_focus = UI_SetExclusiveFocus(&dialog.pane);
 	UI_RunMainLoop();
+	UI_SetExclusiveFocus(old_focus);
 	UI_PaneHide(&dialog);
 
 	UI_ActionsBarSetActions(saved_actions);

@@ -32,6 +32,7 @@ struct pane_stack {
 	bool actions_bar_enabled;
 	const char *title, *subtitle;
 	struct pane_stack_state state;
+	struct pane *exclusive_focus;
 };
 
 void UI_SetActiveStack(struct pane_stack *stack);
@@ -46,6 +47,7 @@ void UI_RemoveStack(struct pane_stack *stack);
 struct pane_stack *UI_AllStacks(void);
 
 void UI_GetDesktopLines(int *top_lines, int *lines);
+struct pane *UI_SetExclusiveFocus(struct pane *p);
 
 const struct action **UI_ActionsBarSetActions(const struct action **actions);
 void UI_ActionsBarEnable(bool enabled);
