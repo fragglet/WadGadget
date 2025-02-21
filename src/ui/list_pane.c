@@ -156,6 +156,11 @@ void UI_ListPaneKeypress(void *p, int key)
 	unsigned int i, lines;
 
 	switch (key) {
+	case KEY_SR:
+		if (lp->window_offset > 0) {
+			--lp->window_offset;
+		}
+		return;
 	case KEY_UP:
 		if (lp->selected > 0) {
 			--lp->selected;
@@ -172,6 +177,11 @@ void UI_ListPaneKeypress(void *p, int key)
 	case KEY_HOME:
 		lp->selected = 0;
 		lp->window_offset = 0;
+		return;
+	case KEY_SF:
+		if (lp->window_offset + 1 < NumEntries(lp)) {
+			++lp->window_offset;
+		}
 		return;
 	case KEY_DOWN:
 		if (lp->selected + 1 < NumEntries(lp)) {

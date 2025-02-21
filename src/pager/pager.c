@@ -636,8 +636,14 @@ static void HandleKeypress(void *_p, int c)
 	case KEY_RIGHT:
 		RightKeypress(p);
 		break;
+	case KEY_SR:
+		ScrollPager(p, -1);
+		break;
 	case KEY_PPAGE:
 		ScrollPager(p, -win_h);
+		break;
+	case KEY_SF:
+		ScrollPager(p, 1);
 		break;
 	case KEY_NPAGE:
 		ScrollPager(p, win_h);

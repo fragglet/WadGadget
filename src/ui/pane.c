@@ -293,10 +293,10 @@ static void HandleMouseEvent(void)
 		HandleMouseClick();
 		break;
 	case BUTTON4_PRESSED:
-		UI_PaneKeypress(mouse_cur_pane, KEY_UP);
+		UI_PaneKeypress(mouse_cur_pane, KEY_SR);
 		break;
 	case BUTTON5_PRESSED:
-		UI_PaneKeypress(mouse_cur_pane, KEY_DOWN);
+		UI_PaneKeypress(mouse_cur_pane, KEY_SF);
 		break;
 	}
 }
