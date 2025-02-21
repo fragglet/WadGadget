@@ -232,17 +232,12 @@ static bool CheckMouseInPane(MEVENT *ev, struct pane *p)
 	return true;
 }
 
-static bool UpdateMousePosition(void)
+static bool UpdateMousePosition(MEVENT *ev)
 {
 	struct pane_stack *s;
-	MEVENT ev;
-
-	if (getmouse(&ev) != OK) {
-		return false;
-	}
 
 	if (UI_ActiveStack()->actions_bar_enabled
-	 && CheckMouseInPane(&ev, actions_bar)) {
+	 && CheckMouseInPane(ev, actions_bar)) {
 		mouse_cur_stack = UI_ActiveStack();
 		return true;
 	}
@@ -254,7 +249,7 @@ static bool UpdateMousePosition(void)
 
 		for (p = GetPrevPane(s, NULL);
 		     p != NULL; p = GetPrevPane(s, p)) {
-			if (CheckMouseInPane(&ev, p)) {
+			if (CheckMouseInPane(ev, p)) {
 				mouse_cur_stack = s;
 				return true;
 			}
@@ -269,17 +264,6 @@ static bool UpdateMousePosition(void)
 
 static void HandleMouseClick(void)
 {
-	struct pane_stack *s = UI_ActiveStack();
-
-	if (!UpdateMousePosition()) {
-		return;
-	}
-
-	if (s->exclusive_focus != NULL && mouse_cur_pane != s->exclusive_focus) {
-		return;
-	}
-
-	UI_SetCurrentStack(mouse_cur_stack);
 	if (mouse_click_continuation != NULL) {
 		// Handle as a doubleclick by calling the continuation.
 		// TODO: We should enforce a time limit between clicks
@@ -288,6 +272,32 @@ static void HandleMouseClick(void)
 	} else {
 		mouse_click_continuation = UI_PaneMouseClick(
 			mouse_cur_pane, mouse_cur_x, mouse_cur_y);
+	}
+}
+
+static void HandleMouseEvent(void)
+{
+	struct pane_stack *s = UI_ActiveStack();
+	MEVENT ev;
+
+	if (getmouse(&ev) != OK || !UpdateMousePosition(&ev)) {
+		return;
+	}
+	if (s->exclusive_focus != NULL && mouse_cur_pane != s->exclusive_focus) {
+		return;
+	}
+
+	UI_SetCurrentStack(mouse_cur_stack);
+	switch (ev.bstate) {
+	case BUTTON1_PRESSED:
+		HandleMouseClick();
+		break;
+	case BUTTON4_PRESSED:
+		UI_PaneKeypress(mouse_cur_pane, KEY_UP);
+		break;
+	case BUTTON5_PRESSED:
+		UI_PaneKeypress(mouse_cur_pane, KEY_DOWN);
+		break;
 	}
 }
 
@@ -305,7 +315,7 @@ static bool HandleKeypress(void)
 	// otherwise we ignore the click. We only send the keypress to that
 	// pane and skip the usual logic used for real keypresses.
 	if (key == KEY_MOUSE) {
-		HandleMouseClick();
+		HandleMouseEvent();
 		return true;
 	}
 
@@ -362,7 +372,7 @@ void UI_ExitMainLoop(void)
 
 void UI_Init(void)
 {
-	mousemask(BUTTON1_PRESSED, NULL);
+	mousemask(BUTTON1_PRESSED|BUTTON4_PRESSED|BUTTON5_PRESSED, NULL);
 
 	actions_bar = UI_ActionsBarInit();
 	title_bar = UI_TitleBarInit();
