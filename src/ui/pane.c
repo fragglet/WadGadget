@@ -292,12 +292,14 @@ static void HandleMouseEvent(void)
 	case BUTTON1_PRESSED:
 		HandleMouseClick();
 		break;
+#ifdef BUTTON4_PRESSED
 	case BUTTON4_PRESSED:
 		UI_PaneKeypress(mouse_cur_pane, KEY_SR);
 		break;
 	case BUTTON5_PRESSED:
 		UI_PaneKeypress(mouse_cur_pane, KEY_SF);
 		break;
+#endif
 	}
 }
 
@@ -372,7 +374,11 @@ void UI_ExitMainLoop(void)
 
 void UI_Init(void)
 {
-	mousemask(BUTTON1_PRESSED|BUTTON4_PRESSED|BUTTON5_PRESSED, NULL);
+	int mask = BUTTON1_PRESSED;
+#ifdef BUTTON4_PRESSED
+	mask |= BUTTON4_PRESSED|BUTTON5_PRESSED;
+#endif
+	mousemask(mask, NULL);
 
 	actions_bar = UI_ActionsBarInit();
 	title_bar = UI_TitleBarInit();
