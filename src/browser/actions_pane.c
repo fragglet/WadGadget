@@ -54,10 +54,36 @@ static void ExtractOptions(const char *desc, struct action_options *opts)
 	opts->desc = desc;
 }
 
+static void DrawAction(struct actions_pane *p, int x, int y,
+                       const struct action *action,
+                       const struct action_options *opts)
+{
+	WINDOW *win = p->pane.window;
+
+	wattron(win, A_BOLD);
+	mvwaddstr(win, y, x, UI_ActionKeyDescription(action, p->function_keys));
+	wattroff(win, A_BOLD);
+	waddstr(win, " - ");
+
+	if (opts->arrows && !p->left_to_right) {
+		wattron(win, A_BOLD);
+		waddstr(win, "<<< ");
+		wattroff(win, A_BOLD);
+	}
+	waddstr(win, opts->desc);
+	if (opts->ellipsis) {
+		waddstr(win, "...");
+	}
+	if (opts->arrows && p->left_to_right) {
+		wattron(win, A_BOLD);
+		waddstr(win, " >>>");
+		wattroff(win, A_BOLD);
+	}
+}
+
 static int ShowAction(struct actions_pane *p, int y,
                       const struct action *action, bool right_ok)
 {
-	WINDOW *win = p->pane.window;
 	struct action_options opts;
 	int x, result;
 
@@ -76,25 +102,7 @@ static int ShowAction(struct actions_pane *p, int y,
 		result = 1;
 	}
 
-	wattron(win, A_BOLD);
-	mvwaddstr(win, y, x, UI_ActionKeyDescription(action, p->function_keys));
-	wattroff(win, A_BOLD);
-	waddstr(win, " - ");
-
-	if (opts.arrows && !p->left_to_right) {
-		wattron(win, A_BOLD);
-		waddstr(win, "<<< ");
-		wattroff(win, A_BOLD);
-	}
-	waddstr(win, opts.desc);
-	if (opts.ellipsis) {
-		waddstr(win, "...");
-	}
-	if (opts.arrows && p->left_to_right) {
-		wattron(win, A_BOLD);
-		waddstr(win, " >>>");
-		wattroff(win, A_BOLD);
-	}
+	DrawAction(p, x, y, action, &opts);
 
 	return result;
 }
