@@ -564,9 +564,17 @@ static doubleclick_continuation HandleMouseClick(void *_p, int x, int y)
 	struct pager *p = _p;
 	int idx, lineno, start_x, end_x;
 	int min = 0, max = p->cfg->num_links;
+	int win_w = getmaxx(p->pane.window), win_h = getmaxy(p->pane.window);
 	struct pager_link l;
 
 	lineno = p->window_offset + y;
+
+	// Scroll bar clicks jump to that location:
+	if (x == win_w - 1 && p->cfg->num_lines > win_h) {
+		int range = p->cfg->num_lines - win_h;
+		SetWindowOffset(p, (y * range + win_h - 2) / (win_h - 1));
+		return NULL;
+	}
 
 	// Binary search to find what area of the document we clicked in;
 	// we consider it to be divided up into (num_links+1) sections;

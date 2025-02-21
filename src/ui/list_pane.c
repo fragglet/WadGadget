@@ -123,9 +123,21 @@ doubleclick_continuation UI_ListPaneMouseClick(void *_lp, int x, int y)
 	int w, h;
 
 	getmaxyx(lp->pane.window, h, w);
-	if (x < 1 || y < 1 || x >= w - 2 || y >= h - 1) {
-		// TODO: Scroll bars
+	if (x < 1 || y < 1 || x >= w - 1 || y >= h - 1) {
 		return NULL;
+	}
+	// Scroll bar click jumps to location:
+	if (x == w - 2) {
+		int num_entries = NumEntries(lp),
+		    num_lines = UI_ListPaneLines(lp);
+		if (num_entries >= num_lines * 2) {
+			int range = num_entries - num_lines;
+			lp->window_offset = ((y - 1) * range + num_lines - 2)
+			                  / (num_lines - 1);
+			lp->selected = ((y - 1) * (num_entries - 1) + num_lines - 2)
+			             / (num_lines - 1);
+			return NULL;
+		}
 	}
 
 	selection = lp->window_offset + y - 1;
