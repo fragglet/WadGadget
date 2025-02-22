@@ -67,6 +67,8 @@ jobs:
       if: runner.os == 'Linux' && matrix.config.sixel
       run: sudo apt -q install libsixel-dev
 
+    - uses: actions/checkout@v4
+
     - name: Build pdcurses
       if: matrix.config.build_pdcurses
       run: |
@@ -76,8 +78,6 @@ jobs:
         ./configure --prefix=/tmp/pdcinst
         make
         make install
-
-    - uses: actions/checkout@v4
 
     - name: Find Git version
       id: version
