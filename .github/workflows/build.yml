@@ -72,7 +72,7 @@ jobs:
     - name: Build pdcurses
       if: matrix.config.build_pdcurses
       run: |
-        sudo apt -q install libxt-dev
+        sudo apt -q install libxt-dev libxaw7-dev
         git submodule update --init pdcurses
         cd pdcurses/x11
         sed -i.bak "s/-lc//" Makefile.in
