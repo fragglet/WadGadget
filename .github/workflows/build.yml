@@ -74,7 +74,7 @@ jobs:
       run: |
         git submodule update --init pdcurses
         cd pdcurses/x11
-        sed -i .bak "s/-lc//" Makefile.in
+        sed -i.bak "s/-lc//" Makefile.in
         ./configure --prefix=/tmp/pdcinst
         make
         make install
