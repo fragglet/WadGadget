@@ -78,8 +78,10 @@ void TF_SetCursesModes(void)
 	noecho();
 	nonl();
 	intrflush(stdscr, FALSE);
+#ifndef PDCURSES
 	// See https://github.com/tmux/tmux/issues/3844
 	set_escdelay(10);
+#endif
 	keypad(stdscr, TRUE);
 	TF_SetPalette(&nwt_palette);
 }
