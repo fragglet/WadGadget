@@ -30,7 +30,7 @@ jobs:
           - name: Linux (pdcurses)
             os: ubuntu-latest
             shell: bash
-            make_opts: "-DUSE_PDCURSES=1"
+            make_opts: "USE_PDCURSES=1"
             suffix: ""
             sixel: false
             build_pdcurses: true
