@@ -610,6 +610,7 @@ static void SearchPaneKeypress(void *pane, int key)
 
 static void InitInfoPane(WINDOW *win)
 {
+	assert(win != NULL);
 	info_pane.window = win;
 	info_pane.draw = DrawInfoPane;
 	info_pane.keypress = NULL;
@@ -618,6 +619,7 @@ static void InitInfoPane(WINDOW *win)
 
 static void InitSearchPane(WINDOW *win)
 {
+	assert(win != NULL);
 	search_pane.pane.window = win;
 	search_pane.pane.draw = DrawSearchPane;
 	search_pane.pane.keypress = SearchPaneKeypress;
@@ -653,6 +655,7 @@ void B_Init(const char *path1, const char *path2)
 	UI_PaneShow(&actions_pane);
 
 	pane_windows[0] = newwin(24, 27, 1, 0);
+	assert(pane_windows[0] != NULL);
 	dir = VFS_OpenDir(path1);
 	if (dir == NULL) {
 		B_Shutdown();
@@ -663,6 +666,7 @@ void B_Init(const char *path1, const char *path2)
 	UI_PaneShow(browser_panes[0]);
 
 	pane_windows[1] = newwin(24, 27, 1, 53);
+	assert(pane_windows[1] != NULL);
 	dir = VFS_OpenDir(path2);
 	if (dir == NULL) {
 		B_Shutdown();
