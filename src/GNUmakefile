@@ -5,19 +5,31 @@ LIBSIXEL_CFLAGS = \
 LIBSIXEL_LDFLAGS = \
     $(shell pkg-config --silence-errors --libs libsixel)
 
+ifdef USE_PDCURSES
+
+# Options for buiding under pdcurses. We define `newscr` to `curscr` as a
+# temporary hack until we can find a better way to do this.
+CURSES_CFLAGS = -DPDC_NCMOUSE=1 $(shell xcurses-config --cflags) \
+                -Dnewscr=curscr
+CURSES_LDFLAGS = $(shell xcurses-config --libs)
+
+else
+
 # Ideally we use the version of ncurses pkg-config tells us about, but
 # some systems (eg. BSDs) ship ncurses as part of the base OS without the
 # accompanying .pc file. So fall back to just providing -lncurses.
-NCURSES_CFLAGS = \
+CURSES_CFLAGS = \
     $(shell pkg-config --silence-errors --cflags ncurses)
-NCURSES_LDFLAGS = \
+CURSES_LDFLAGS = \
     $(shell pkg-config --silence-errors --libs ncurses || echo -lncurses)
+
+endif
 
 REQUIRED_PKGS = sndfile libpng
 CFLAGS := -g -MMD -Wall -I. -O2 $(shell pkg-config --cflags $(REQUIRED_PKGS)) \
-          $(LIBSIXEL_CFLAGS) $(NCURSES_CFLAGS)
+          $(LIBSIXEL_CFLAGS) $(CURSES_CFLAGS)
 LDFLAGS := $(shell pkg-config --libs $(REQUIRED_PKGS)) \
-           $(LIBSIXEL_LDFLAGS) $(NCURSES_LDFLAGS)
+           $(LIBSIXEL_LDFLAGS) $(CURSES_LDFLAGS)
 
 IWYU = iwyu
 IWYU_FLAGS = --error --mapping_file=.iwyu-overrides.imp
