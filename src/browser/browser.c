@@ -648,13 +648,13 @@ void B_Init(const char *path1, const char *path2)
 	InitInfoPane(newwin(5, 26, 1, 27));
 	UI_PaneShow(&info_pane);
 
-	InitSearchPane(newwin(4, 26, 20, 27));
+	InitSearchPane(newwin(4, 26, LINES - 5, 27));
 	UI_PaneShow(&search_pane);
 
 	B_ActionsPaneInit(&actions_pane, newwin(15, 26, 6, 27));
 	UI_PaneShow(&actions_pane);
 
-	pane_windows[0] = newwin(24, 27, 1, 0);
+	pane_windows[0] = newwin(LINES - 1, 27, 1, 0);
 	assert(pane_windows[0] != NULL);
 	dir = VFS_OpenDir(path1);
 	if (dir == NULL) {
@@ -665,7 +665,7 @@ void B_Init(const char *path1, const char *path2)
 	browser_panes[0] = UI_NewDirectoryPane(pane_windows[0], dir);
 	UI_PaneShow(browser_panes[0]);
 
-	pane_windows[1] = newwin(24, 27, 1, 53);
+	pane_windows[1] = newwin(LINES - 1, 27, 1, COLS - 27);
 	assert(pane_windows[1] != NULL);
 	dir = VFS_OpenDir(path2);
 	if (dir == NULL) {
