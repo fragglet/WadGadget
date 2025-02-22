@@ -1,0 +1,4 @@
+[submodule "pdcurses"]
+	path = pdcurses
+	url = https://github.com/wmcbrine/PDCurses
+	shallow = true
