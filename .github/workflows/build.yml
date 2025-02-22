@@ -70,6 +70,7 @@ jobs:
     - name: Build pdcurses
       if: matrix.config.build_pdcurses
       run: |
+        git submodule update --init pdcurses
         cd pdcurses/x11
         sed -i .bak "s/-lc//" Makefile.in
         ./configure --prefix=/tmp/pdcinst
