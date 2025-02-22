@@ -27,6 +27,14 @@ jobs:
             suffix: ""
             sixel: false
 
+          - name: Linux (pdcurses)
+            os: ubuntu-latest
+            shell: bash
+            make_opts: "-DUSE_PDCURSES=1"
+            suffix: ""
+            sixel: false
+            build_pdcurses: true
+
           - name: macOS arm64
             os: macos-13
             shell: bash
@@ -59,6 +67,15 @@ jobs:
       if: runner.os == 'Linux' && matrix.config.sixel
       run: sudo apt -q install libsixel-dev
 
+    - name: Build pdcurses
+      if: matrix.config.build_pdcurses
+      run: |
+        cd pdcurses/x11
+        sed -i .bak "s/-lc//" Makefile.in
+        ./configure --prefix=/tmp/pdcinst
+        make
+        make install
+
     - uses: actions/checkout@v4
 
     - name: Find Git version
@@ -74,7 +91,9 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
     - name: make
-      run: make -C src -j8
+      run: |
+        PATH="/tmp/pdcinst/bin:$PATH" \
+            make -C src -j8 ${{matrix.config.make_opts}}
 
     - name: Build package (macOS)
       if: runner.os == 'macOS'
