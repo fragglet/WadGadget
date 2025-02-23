@@ -112,6 +112,10 @@ wadgadget : $(OBJS)
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+format:
+	rm -f help_text.c
+	clang-format -i *.[ch] */*.[ch]
+
 fixincludes:
 	for d in $(patsubst %.o,%.c,$(OBJS)); do \
 		$(IWYU) $(IWYU_TRANSFORMED_FLAGS) 2>&1 $$d | fix_include; \
