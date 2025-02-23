@@ -11,6 +11,8 @@
 #ifndef TEXTURES__INTERNAL_H_INCLUDED
 #define TEXTURES__INTERNAL_H_INCLUDED
 
+#include "textures/textures.h"
+
 struct lump_dir_funcs {
 	bool (*load)(void *dir, struct directory *wad_dir,
 	             struct directory_entry *ent);
