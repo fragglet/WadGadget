@@ -10,20 +10,20 @@
 
 #include "ui/dialog.h"
 
-#include <stdlib.h>
-#include <stdbool.h>
-#include <stdarg.h>
-#include <curses.h>
-#include <string.h>
 #include <ctype.h>
+#include <curses.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "ui/colors.h"
 #include "common.h"
+#include "ui/colors.h"
 #include "ui/pane.h"
 #include "ui/stack.h"
-#include "ui/ui.h"
 #include "ui/text_input.h"
+#include "ui/ui.h"
 
 struct nonblocking_window {
 	struct pane pane;
@@ -99,9 +99,8 @@ void UI_UpdateProgressWindow(struct progress_window *win, const char *ctx)
 
 	++win->count;
 	if (now - win->last_update > (CLOCKS_PER_SEC / 4)) {
-		UI_ShowNonblockingWindow("%s (%d / %d)...\n%s",
-		                         win->operation, win->count,
-		                         win->total, ctx);
+		UI_ShowNonblockingWindow("%s (%d / %d)...\n%s", win->operation,
+		                         win->count, win->total, ctx);
 		win->last_update = now;
 	}
 }
@@ -153,8 +152,7 @@ static bool CheckButtonPress(struct dialog_button *b, int key, int *result)
 	return false;
 }
 
-static void CheckButtonClick(struct dialog_button *b, int x, int y,
-                             int *result)
+static void CheckButtonClick(struct dialog_button *b, int x, int y, int *result)
 {
 	if (y == b->y && x >= b->x && x < b->x + DialogButtonWidth(b)) {
 		*result = b->result;
@@ -194,8 +192,8 @@ static void ConfirmDialogKeypress(void *dialog, int key)
 	CheckButtonPress(&d->right, key, &d->result);
 }
 
-static doubleclick_continuation
-ConfirmDialogMouseClick(void *dialog, int x, int y)
+static doubleclick_continuation ConfirmDialogMouseClick(void *dialog, int x,
+                                                        int y)
 {
 	struct confirm_dialog_box *d = dialog;
 	CheckButtonClick(&d->left, x, y, &d->result);
@@ -203,8 +201,8 @@ ConfirmDialogMouseClick(void *dialog, int x, int y)
 	return NULL;
 }
 
-static void InitDialogBox(struct confirm_dialog_box *dialog,
-                          const char *title, const char *msg)
+static void InitDialogBox(struct confirm_dialog_box *dialog, const char *title,
+                          const char *msg)
 {
 	int w, h;
 
@@ -225,8 +223,8 @@ static void InitDialogBox(struct confirm_dialog_box *dialog,
 	dialog->right.result = 1;
 }
 
-int UI_ConfirmDialogBox(const char *title, const char *yes,
-                        const char *no, const char *msg, ...)
+int UI_ConfirmDialogBox(const char *title, const char *yes, const char *no,
+                        const char *msg, ...)
 {
 	const struct action **saved_actions = UI_ActionsBarSetActions(NULL);
 	struct pane *old_focus;
@@ -327,14 +325,14 @@ static void TextInputDialogKeypress(void *dialog, int key)
 {
 	struct text_input_dialog_box *d = dialog;
 
-	if (!CheckButtonPress(&d->left, key, &d->result)
-	 && !CheckButtonPress(&d->right, key, &d->result)) {
+	if (!CheckButtonPress(&d->left, key, &d->result) &&
+	    !CheckButtonPress(&d->right, key, &d->result)) {
 		UI_TextInputKeypress(&d->input, key);
 	}
 }
 
-static doubleclick_continuation
-TextInputDialogMouseClick(void *dialog, int x, int y)
+static doubleclick_continuation TextInputDialogMouseClick(void *dialog, int x,
+                                                          int y)
 {
 	struct text_input_dialog_box *d = dialog;
 

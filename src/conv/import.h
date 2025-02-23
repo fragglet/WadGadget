@@ -13,8 +13,8 @@
 
 #include <stdbool.h>
 
-#include "fs/vfs.h"
 #include "fs/vfile.h"
+#include "fs/vfs.h"
 
 struct directory;
 struct file_set;
@@ -22,7 +22,7 @@ struct file_set;
 bool ImportFromFile(VFILE *from_file, const char *src_name,
                     struct directory *to_wad, int lumpnum, bool convert);
 bool PerformImport(struct directory *from, struct file_set *from_set,
-                   struct directory *to, int to_index,
-                   struct file_set *result, bool convert);
+                   struct directory *to, int to_index, struct file_set *result,
+                   bool convert);
 
 #endif /* #ifndef CONV__IMPORT_H_INCLUDED */

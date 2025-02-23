@@ -10,21 +10,21 @@
 
 #include "pager/hexdump.h"
 
-#include <stdlib.h>
 #include <assert.h>
 #include <curses.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <strings.h>
 
 #include "common.h"
 #include "fs/vfile.h"
-#include "pager/pager.h"
 #include "pager/help.h"
+#include "pager/pager.h"
 #include "pager/plaintext.h"
-#include "ui/dialog.h"
-#include "ui/title_bar.h"
 #include "ui/actions_bar.h"
+#include "ui/dialog.h"
 #include "ui/pane.h"
+#include "ui/title_bar.h"
 
 // Record lengths for different lump types. TODO: This should probably be
 // done by lump type (lump_info.h), not by name.
@@ -32,22 +32,22 @@ static const struct {
 	const char *lump_name;
 	int record_length;
 } lump_types[] = {
-	{"PLAYPAL",  256 * 3},
-	{"COLORMAP", 256},
-	{"ENDOOM",   80 * 2},
-	{"THINGS",   10},
-	{"LINEDEFS", 14},
-	{"LINEDEFS", 16},  // Hexen / Doom 64
-	{"SIDEDEFS", 30},
-	{"SIDEDEFS", 12},  // Doom 64
-	{"SECTORS",  26},
-	{"SECTORS",  28},  // PSX
-	{"SECTORS",  16},  // PSX Final Doom
-	{"SECTORS",  24},  // Doom 64
-	{"VERTEXES",  4},
-	{"SSECTORS",  4},
-	{"NODES",    28},
-	{"SEGS",     12},
+    {"PLAYPAL",  256 * 3},
+    {"COLORMAP", 256    },
+    {"ENDOOM",   80 * 2 },
+    {"THINGS",   10     },
+    {"LINEDEFS", 14     },
+    {"LINEDEFS", 16     }, // Hexen / Doom 64
+    {"SIDEDEFS", 30     },
+    {"SIDEDEFS", 12     }, // Doom 64
+    {"SECTORS",  26     },
+    {"SECTORS",  28     }, // PSX
+    {"SECTORS",  16     }, // PSX Final Doom
+    {"SECTORS",  24     }, // Doom 64
+    {"VERTEXES", 4      },
+    {"SSECTORS", 4      },
+    {"NODES",    28     },
+    {"SEGS",     12     },
 };
 
 static bool CanShowMarkers(struct hexdump_pager_config *cfg)
@@ -55,9 +55,9 @@ static bool CanShowMarkers(struct hexdump_pager_config *cfg)
 	// Number of columns must be a factor of the record length (each
 	// record split over one or more lines), or vice versa (multiple
 	// records per line).
-	return cfg->record_length > 0
-	    && (cfg->columns % cfg->record_length == 0
-	     || cfg->record_length % cfg->columns == 0);
+	return cfg->record_length > 0 &&
+	       (cfg->columns % cfg->record_length == 0 ||
+	        cfg->record_length % cfg->columns == 0);
 }
 
 static void PrintRecordNumber(struct hexdump_pager_config *cfg, WINDOW *win,
@@ -80,8 +80,9 @@ static void PrintRecordNumber(struct hexdump_pager_config *cfg, WINDOW *win,
 
 	mvwaddstr(win, 0, cfg->columns * 4 + 14, buf);
 
-	end_record = min((line + 1) * cfg->columns, cfg->data_len)
-	           / cfg->record_length - 1;
+	end_record =
+	    min((line + 1) * cfg->columns, cfg->data_len) / cfg->record_length -
+	    1;
 	if (end_record > record) {
 		snprintf(buf, sizeof(buf), "-%d", end_record);
 		waddstr(win, buf);
@@ -143,7 +144,7 @@ static void SwitchToASCII(void)
 }
 
 const struct action switch_ascii_action = {
-	0, 'D', "ASCII", "View as ASCII", SwitchToASCII,
+    0, 'D', "ASCII", "View as ASCII", SwitchToASCII,
 };
 
 static int PagerWidth(struct hexdump_pager_config *cfg)
@@ -186,7 +187,7 @@ static void SetColumns(struct hexdump_pager_config *cfg)
 	// need to reduce further to ensure that the column count
 	// is either a factor or multiple of the record length.
 	cfg->columns = COLS / 4;
-	while (PagerWidth(cfg) > COLS ||!CanShowMarkers(cfg)) {
+	while (PagerWidth(cfg) > COLS || !CanShowMarkers(cfg)) {
 		--cfg->columns;
 	}
 	// Prime numbers can cause silly results (eg. 14 byte record
@@ -209,8 +210,8 @@ static void ChangeRecordLength(void)
 	}
 
 	answer = UI_TextInputDialogBox(
-		"Change record length", "Set length", 3,
-		"Enter the number of bytes per record:%s", curr_buf);
+	    "Change record length", "Set length", 3,
+	    "Enter the number of bytes per record:%s", curr_buf);
 	if (answer == NULL) {
 		return;
 	}
@@ -225,13 +226,13 @@ static void ChangeRecordLength(void)
 	cfg->record_length = len;
 	SetColumns(cfg);
 	current_pager->window_offset =
-		current_pager->window_offset * old_cols / cfg->columns;
+	    current_pager->window_offset * old_cols / cfg->columns;
 
 	UpdateLineCount(cfg);
 }
 
 const struct action change_record_length_action = {
-	0, 'R', "RecordLen", "Record Length", ChangeRecordLength,
+    0, 'R', "RecordLen", "Record Length", ChangeRecordLength,
 };
 
 static void ChangeColumns(void)
@@ -241,8 +242,8 @@ static void ChangeColumns(void)
 	int cols;
 
 	answer = UI_TextInputDialogBox(
-		"Change columns per line", "Set columns", 2,
-		"Enter the number of columns\nto display per line:");
+	    "Change columns per line", "Set columns", 2,
+	    "Enter the number of columns\nto display per line:");
 	if (answer == NULL) {
 		return;
 	}
@@ -254,14 +255,14 @@ static void ChangeColumns(void)
 	}
 
 	current_pager->window_offset =
-		current_pager->window_offset * cfg->columns / cols;
+	    current_pager->window_offset * cfg->columns / cols;
 
 	cfg->columns = cols;
 	UpdateLineCount(cfg);
 }
 
 const struct action change_columns_action = {
-	0, 'O', "Columns", "Columns", ChangeColumns,
+    0, 'O', "Columns", "Columns", ChangeColumns,
 };
 
 static void OpenDoomSpecs(void)
@@ -290,7 +291,7 @@ static void OpenDoomSpecs(void)
 }
 
 const struct action open_specs_action = {
-	0, 'U', "Specs", "Open Doom Specs", OpenDoomSpecs,
+    0, 'U', "Specs", "Open Doom Specs", OpenDoomSpecs,
 };
 
 static void CloseHexdumpPager(void)
@@ -309,19 +310,19 @@ static void CloseHexdumpPager(void)
 }
 
 static const struct action exit_hexdump_pager_action = {
-        27, 0, "Close", "Close", CloseHexdumpPager,
+    27, 0, "Close", "Close", CloseHexdumpPager,
 };
 
 static const struct action *hexdump_pager_actions[] = {
-	&exit_hexdump_pager_action,
-	&pager_help_action,
-	&switch_ascii_action,
-	&change_columns_action,
-	&change_record_length_action,
-	&pager_search_action,
-	&pager_search_again_action,
-	&open_specs_action,
-	NULL,
+    &exit_hexdump_pager_action,
+    &pager_help_action,
+    &switch_ascii_action,
+    &change_columns_action,
+    &change_record_length_action,
+    &pager_search_action,
+    &pager_search_again_action,
+    &open_specs_action,
+    NULL,
 };
 
 static void SetBytesPerRecord(struct hexdump_pager_config *cfg,
@@ -331,8 +332,8 @@ static void SetBytesPerRecord(struct hexdump_pager_config *cfg,
 
 	for (i = 0; i < arrlen(lump_types); i++) {
 		int bpr = lump_types[i].record_length;
-		if (!strcasecmp(lump_name, lump_types[i].lump_name)
-		 && cfg->data_len % bpr == 0) {
+		if (!strcasecmp(lump_name, lump_types[i].lump_name) &&
+		    cfg->data_len % bpr == 0) {
 			cfg->record_length = bpr;
 			return;
 		}

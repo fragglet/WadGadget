@@ -10,11 +10,11 @@
 
 #include "ui/text_input.h"
 
-#include <string.h>
 #include <ctype.h>
+#include <string.h>
 
-#include "ui/colors.h"
 #include "common.h"
+#include "ui/colors.h"
 
 void UI_TextInputInit(struct text_input_box *input, WINDOW *win,
                       size_t max_chars)
@@ -50,8 +50,7 @@ void UI_TextInputDraw(struct text_input_box *input)
 	wattroff(input->win, COLOR_PAIR(PAIR_WHITE_BLACK));
 
 	// Cursor needs to be set via parent window
-	mvwaddstr(input->parent_win,
-	          getcury(input->win) + getpary(input->win),
+	mvwaddstr(input->parent_win, getcury(input->win) + getpary(input->win),
 	          getcurx(input->win) + getparx(input->win), "");
 }
 
@@ -59,8 +58,8 @@ int UI_TextInputKeypress(struct text_input_box *input, int keypress)
 {
 	size_t pos;
 
-	if ((keypress == KEY_BACKSPACE || keypress == 0x7f)
-	 && strlen(input->input) > 0) {
+	if ((keypress == KEY_BACKSPACE || keypress == 0x7f) &&
+	    strlen(input->input) > 0) {
 		input->input[strlen(input->input) - 1] = '\0';
 		return 1;
 	}
@@ -86,4 +85,3 @@ void UI_TextInputClear(struct text_input_box *input)
 {
 	input->input[0] = '\0';
 }
-

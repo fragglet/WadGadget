@@ -30,7 +30,7 @@ typedef void (*pager_activate_link_fn)(struct pager *p, int idx);
 
 struct pager_link {
 	int lineno;
-	int offset;  // Per-line ID, not used by the main pager code
+	int offset; // Per-line ID, not used by the main pager code
 };
 
 struct pager_config {

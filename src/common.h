@@ -11,12 +11,12 @@
 #ifndef COMMON_H_INCLUDED
 #define COMMON_H_INCLUDED
 
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
-#define CTRL_(x) ((x) & 0x1f)
+#define CTRL_(x)       ((x) &0x1f)
 #define SHIFT_KEY_F(n) KEY_F(n + 12)
 
 #define arrlen(x) (sizeof(x) / sizeof(*(x)))
@@ -32,17 +32,13 @@ static inline void *check_allocation_result(void *x)
 	return x;
 }
 
-#define checked_malloc(size) \
-    check_allocation_result(malloc(size))
+#define checked_malloc(size) check_allocation_result(malloc(size))
 
-#define checked_calloc(nmemb, size) \
-    check_allocation_result(calloc(nmemb, size))
+#define checked_calloc(nmemb, size) check_allocation_result(calloc(nmemb, size))
 
-#define checked_realloc(ptr, size) \
-    check_allocation_result(realloc(ptr, size))
+#define checked_realloc(ptr, size) check_allocation_result(realloc(ptr, size))
 
-#define checked_strdup(s) \
-    check_allocation_result(strdup(s))
+#define checked_strdup(s) check_allocation_result(strdup(s))
 
 // Endianness conversions.
 static inline void SwapLE32(void *i)

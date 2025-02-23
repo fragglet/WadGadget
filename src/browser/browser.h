@@ -25,7 +25,7 @@ bool B_CheckPathPaste(void);
 extern struct directory_pane *browser_panes[2];
 extern unsigned int current_pane;
 
-#define active_pane  (browser_panes[current_pane])
-#define other_pane   (browser_panes[!current_pane])
+#define active_pane (browser_panes[current_pane])
+#define other_pane  (browser_panes[!current_pane])
 
 #endif /* #ifndef BROWSER__BROWSER_H_INCLUDED */

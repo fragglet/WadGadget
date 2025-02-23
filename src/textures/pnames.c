@@ -8,12 +8,12 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include <assert.h>
+#include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <assert.h>
-#include <stdint.h>
 #include <strings.h>
 
 #include "common.h"
@@ -76,8 +76,8 @@ VFILE *TX_MarshalPnames(struct pnames *pn)
 		return NULL;
 	}
 
-	if (vfwrite(pn->pnames, sizeof(pname),
-	            pn->num_pnames, result) != pn->num_pnames) {
+	if (vfwrite(pn->pnames, sizeof(pname), pn->num_pnames, result) !=
+	    pn->num_pnames) {
 		ConversionError("Failed to write names.");
 		vfclose(result);
 		return NULL;
@@ -90,8 +90,8 @@ int TX_AppendPname(struct pnames *pn, const char *name)
 {
 	int result;
 
-	pn->pnames = checked_realloc(pn->pnames,
-	                             sizeof(pname) * (pn->num_pnames + 1));
+	pn->pnames =
+	    checked_realloc(pn->pnames, sizeof(pname) * (pn->num_pnames + 1));
 	strncpy(pn->pnames[pn->num_pnames], name, 8);
 	result = pn->num_pnames;
 	++pn->num_pnames;

@@ -12,20 +12,20 @@
 // By always working in terms of bundles, we can reuse code between the
 // texture and pnames directories.
 
+#include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
-#include <assert.h>
-#include <stdint.h>
 
 #include "conv/error.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
-#include "ui/dialog.h"
-#include "textures/textures.h"
-#include "textures/internal.h"
 #include "fs/wad_file.h"
+#include "textures/internal.h"
+#include "textures/textures.h"
+#include "ui/dialog.h"
 
 void TX_FreeBundle(struct texture_bundle *b)
 {
@@ -178,17 +178,18 @@ bool TX_BundleConfirmAddPnames(struct texture_bundle *into,
 
 	// We only prompt the user to confirm if there are PNAMES to add,
 	// but not if it's PNAMEs we're merging anyway.
-	return missing == 0
-	    || (into->txs->num_textures == 0 && from->txs->num_textures == 0)
-	    || UI_ConfirmDialogBox("Update PNAMES?", "Update", "Cancel",
+	return missing == 0 ||
+	       (into->txs->num_textures == 0 && from->txs->num_textures == 0) ||
+	       UI_ConfirmDialogBox("Update PNAMES?", "Update", "Cancel",
 	                           "%d patch names need to be added "
-	                           "to PNAMES.\nProceed?", missing);
+	                           "to PNAMES.\nProceed?",
+	                           missing);
 }
 
 static bool TexturesIdentical(const struct texture *x, const struct texture *y)
 {
-	return x->patchcount == y->patchcount
-	    && !memcmp(x, y, TX_TextureLen(x->patchcount));
+	return x->patchcount == y->patchcount &&
+	       !memcmp(x, y, TX_TextureLen(x->patchcount));
 }
 
 bool TX_BundleConfirmTextureOverwrite(struct texture_bundle *into,
@@ -210,8 +211,8 @@ bool TX_BundleConfirmTextureOverwrite(struct texture_bundle *into,
 		}
 
 		tnum = TX_TextureForName(into->txs, tx->name);
-		if (tnum >= 0
-		 && !TexturesIdentical(into->txs->textures[tnum], tx)) {
+		if (tnum >= 0 &&
+		    !TexturesIdentical(into->txs->textures[tnum], tx)) {
 			++differing;
 		}
 
@@ -220,10 +221,11 @@ bool TX_BundleConfirmTextureOverwrite(struct texture_bundle *into,
 
 	// We only prompt the user to confirm if there are PNAMES to add,
 	// but not if it's PNAMEs we're merging anyway.
-	return differing == 0
-	    || UI_ConfirmDialogBox("Overwrite textures?", "Overwrite", "Cancel",
+	return differing == 0 ||
+	       UI_ConfirmDialogBox("Overwrite textures?", "Overwrite", "Cancel",
 	                           "%d textures already exist.\n"
-	                           "Overwrite them?", differing);
+	                           "Overwrite them?",
+	                           differing);
 }
 
 void TX_BundleMerge(struct texture_bundle *into, unsigned int position,
@@ -261,8 +263,8 @@ void TX_BundleMerge(struct texture_bundle *into, unsigned int position,
 			free(tx);
 			++position;
 			++result->textures_added;
-		} else if (TexturesIdentical(
-		               into->txs->textures[existing_tnum], tx)) {
+		} else if (TexturesIdentical(into->txs->textures[existing_tnum],
+		                             tx)) {
 			free(tx);
 			++result->textures_present;
 		} else {

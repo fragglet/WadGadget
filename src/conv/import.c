@@ -10,21 +10,21 @@
 
 #include "conv/import.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 #include <strings.h>
 
 #include "conv/audio.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
 #include "conv/palette.h"
-#include "stringlib.h"
-#include "textures/textures.h"
-#include "ui/dialog.h"
 #include "fs/vfs.h"
 #include "fs/wad_file.h"
 #include "palette/palette.h"
+#include "stringlib.h"
+#include "textures/textures.h"
+#include "ui/dialog.h"
 
 static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 {
@@ -54,15 +54,17 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 }
 
 static const char *audio_extensions[] = {
-	// All the formats supported by libsndfile, except lossily-
-	// compressed formats, because you shouldn't be using those.
-	".aiff", ".wav", ".voc", ".flac", ".aiff", ".svx", ".au", ".paf",
-	".sf", ".w64", ".pvf", ".xi", ".caf", ".wve", ".dwd", ".txw",
-	".sds", ".avr", ".htk", ".rex", ".rx2", ".snd", NULL,
+    // All the formats supported by libsndfile, except lossily-
+    // compressed formats, because you shouldn't be using those.
+    ".aiff", ".wav", ".voc", ".flac", ".aiff", ".svx", ".au",  ".paf",
+    ".sf",   ".w64", ".pvf", ".xi",   ".caf",  ".wve", ".dwd", ".txw",
+    ".sds",  ".avr", ".htk", ".rex",  ".rx2",  ".snd", NULL,
 };
 
 static const char *lump_extensions[] = {
-	".lmp", ".mus", NULL,
+    ".lmp",
+    ".mus",
+    NULL,
 };
 
 static bool HasExtension(const char *filename, const char **exts)
@@ -137,8 +139,8 @@ static VFILE *PerformConversion(VFILE *input, struct directory *to_wad,
 		return S_FromAudioFile(input);
 	} else if (!strcasecmp(src_name, "playpal.png")) {
 		return V_PaletteFromImageFile(input);
-	} else if (!strcasecmp(src_name, "colormap.png")
-	        || StringHasSuffix(src_name, ".cmap.png")) {
+	} else if (!strcasecmp(src_name, "colormap.png") ||
+	           StringHasSuffix(src_name, ".cmap.png")) {
 		return V_ColormapFromImageFile(input, pal);
 	} else if (StringHasSuffix(src_name, ".flat.png")) {
 		return V_FlatFromImageFile(input, pal);
@@ -148,8 +150,8 @@ static VFILE *PerformConversion(VFILE *input, struct directory *to_wad,
 		return V_FromImageFile(input, pal);
 	} else if (!strcasecmp(src_name, "PNAMES.txt")) {
 		return ConvertPnames(input);
-	} else if (!strncasecmp(src_name, "TEXTURE", 7)
-	        && StringHasSuffix(src_name, ".txt")) {
+	} else if (!strncasecmp(src_name, "TEXTURE", 7) &&
+	           StringHasSuffix(src_name, ".txt")) {
 		return ImportTextures(input, to_wad);
 	}
 
@@ -177,8 +179,8 @@ bool ImportFromFile(VFILE *from_file, const char *src_name,
 }
 
 bool PerformImport(struct directory *from, struct file_set *from_set,
-                   struct directory *to, int to_index,
-                   struct file_set *result, bool convert)
+                   struct directory *to, int to_index, struct file_set *result,
+                   bool convert)
 {
 	VFILE *from_file;
 	struct directory_entry *ent;
@@ -188,9 +190,9 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	char namebuf[9];
 	int idx, lumpnum;
 
-	UI_InitProgressWindow(
-		&progress, from_set->num_entries,
-		from->type == FILE_TYPE_DIR ? "Importing" : "Copying");
+	UI_InitProgressWindow(&progress, from_set->num_entries,
+	                      from->type == FILE_TYPE_DIR ? "Importing"
+	                                                  : "Copying");
 
 	// TODO: Update/overwrite existing lump instead of creating a new
 	// lump.

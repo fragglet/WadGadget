@@ -10,38 +10,38 @@
 
 #include "browser/actions.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <errno.h>
 #include <assert.h>
 #include <curses.h>
+#include <errno.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include <strings.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "browser/browser.h"
+#include "browser/directory_pane.h"
 #include "common.h"
 #include "conv/error.h"
-#include "conv/import.h"
-#include "ui/dialog.h"
 #include "conv/export.h"
-#include "ui/pane.h"
+#include "conv/import.h"
+#include "fs/vfile.h"
+#include "fs/vfs.h"
+#include "fs/wad_file.h"
 #include "pager/help.h"
 #include "pager/hexdump.h"
 #include "palette/palfs.h"
 #include "stringlib.h"
-#include "ui/title_bar.h"
-#include "fs/vfs.h"
 #include "textures/textures.h"
-#include "view.h"
-#include "browser/directory_pane.h"
-#include "fs/vfile.h"
-#include "fs/wad_file.h"
 #include "ui/actions_bar.h"
+#include "ui/dialog.h"
 #include "ui/list_pane.h"
+#include "ui/pane.h"
+#include "ui/title_bar.h"
+#include "view.h"
 
-#define WAD_JUNK_THRESHOLD_KB  500
+#define WAD_JUNK_THRESHOLD_KB 500
 
 bool B_CheckReadOnly(struct directory *dir)
 {
@@ -49,14 +49,14 @@ bool B_CheckReadOnly(struct directory *dir)
 
 	// If this is a directory list, it's the enclosing WAD we actually
 	// want to check.
-	if (dir->type == FILE_TYPE_TEXTURE_LIST
-	 || dir->type == FILE_TYPE_PNAMES_LIST) {
+	if (dir->type == FILE_TYPE_TEXTURE_LIST ||
+	    dir->type == FILE_TYPE_PNAMES_LIST) {
 		dir = TX_DirGetParent(dir, NULL);
 	}
 
 	// We req
-	if (dir->type == FILE_TYPE_WAD
-	 && dir->readonly && !W_IsReadOnly(VFS_WadFile(dir))) {
+	if (dir->type == FILE_TYPE_WAD && dir->readonly &&
+	    !W_IsReadOnly(VFS_WadFile(dir))) {
 		if (!UI_ConfirmDialogBox("Edit IWAD?", "Edit IWAD", "Cancel",
 		                         "'%s' is an IWAD file. Are you\n"
 		                         "sure you want to modify it?",
@@ -191,28 +191,22 @@ static void PerformCopyNoConvert(void)
 }
 
 const struct action copy_action = {
-	KEY_F(5), 'C', "Copy", "> Copy",
-	PerformCopyConvert,
+    KEY_F(5), 'C', "Copy", "> Copy", PerformCopyConvert,
 };
 const struct action copy_noconv_action = {
-	SHIFT_KEY_F(5), 0, NULL, "> Copy (no convert)",
-	PerformCopyNoConvert,
+    SHIFT_KEY_F(5), 0, NULL, "> Copy (no convert)", PerformCopyNoConvert,
 };
 const struct action export_action = {
-	KEY_F(5), 'C', "Export", "> Export",
-	PerformCopyConvert,
+    KEY_F(5), 'C', "Export", "> Export", PerformCopyConvert,
 };
 const struct action export_noconv_action = {
-	SHIFT_KEY_F(5), 0, NULL, "> Export (no convert)",
-	PerformCopyNoConvert,
+    SHIFT_KEY_F(5), 0, NULL, "> Export (no convert)", PerformCopyNoConvert,
 };
 const struct action import_action = {
-	KEY_F(5), 'C', "Import", "> Import",
-	PerformCopyConvert,
+    KEY_F(5), 'C', "Import", "> Import", PerformCopyConvert,
 };
 const struct action import_noconv_action = {
-	SHIFT_KEY_F(5), 0, NULL, "> Import (no convert)",
-	PerformCopyNoConvert,
+    SHIFT_KEY_F(5), 0, NULL, "> Import (no convert)", PerformCopyNoConvert,
 };
 
 static void PerformUpdate(void)
@@ -221,8 +215,7 @@ static void PerformUpdate(void)
 }
 
 const struct action update_action = {
-	KEY_F(3), 'U', "Upd", "> Update",
-	PerformUpdate,
+    KEY_F(3), 'U', "Upd", "> Update", PerformUpdate,
 };
 
 static void PerformMkdir(void)
@@ -233,13 +226,13 @@ static void PerformMkdir(void)
 		return;
 	}
 
-	input_filename = UI_TextInputDialogBox(
-	    "Make directory", "Create", 30, "Name for new directory?");
+	input_filename = UI_TextInputDialogBox("Make directory", "Create", 30,
+	                                       "Name for new directory?");
 	if (input_filename == NULL) {
 		return;
 	}
-	filename = StringJoin("/", active_pane->dir->path, input_filename,
-	                      NULL);
+	filename =
+	    StringJoin("/", active_pane->dir->path, input_filename, NULL);
 	if (mkdir(filename, 0777) == 0) {
 		VFS_Refresh(active_pane->dir);
 		B_DirectoryPaneSelectByName(active_pane, input_filename);
@@ -252,8 +245,7 @@ static void PerformMkdir(void)
 }
 
 const struct action mkdir_action = {
-	KEY_F(7), 'K', "Mkdir", ". Make directory",
-	PerformMkdir,
+    KEY_F(7), 'K', "Mkdir", ". Make directory", PerformMkdir,
 };
 
 static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
@@ -264,9 +256,8 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 	char *filename, *filename2;
 
 	filename = UI_TextInputDialogBox(
-		from_set->num_entries > 0 ? "Make new WAD"
-		                          : "Make new empty WAD",
-		"Create", 30, "Enter name for new WAD file:");
+	    from_set->num_entries > 0 ? "Make new WAD" : "Make new empty WAD",
+	    "Create", 30, "Enter name for new WAD file:");
 
 	if (filename == NULL) {
 		return NULL;
@@ -279,8 +270,8 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 		filename = filename2;
 	}
 
-	if (VFS_EntryByName(to, filename) != NULL
-	 && !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
+	if (VFS_EntryByName(to, filename) != NULL &&
+	    !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
 	                         "Overwrite existing '%s'?", filename)) {
 		free(filename);
 		return NULL;
@@ -308,8 +299,7 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 
 	if (PerformImport(from, from_set, newfile, 0, &result, convert)) {
 		VFS_CommitChanges(newfile, "new WAD");
-		UI_ShowNotice("New WAD contains %d lumps.",
-		              result.num_entries);
+		UI_ShowNotice("New WAD contains %d lumps.", result.num_entries);
 	} else {
 		if (strlen(GetConversionError()) > 0) {
 			UI_MessageBox("Failed importing to new WAD:\n%s",
@@ -331,8 +321,8 @@ static void CreateWad(bool convert)
 	struct file_set *import_set;
 	char *filename;
 
-	if (active_pane->dir->type == FILE_TYPE_WAD
-	 && other_pane->dir->type == FILE_TYPE_DIR) {
+	if (active_pane->dir->type == FILE_TYPE_WAD &&
+	    other_pane->dir->type == FILE_TYPE_DIR) {
 		// Export from existing WAD to new WAD
 		from_pane = active_pane;
 		to_pane = other_pane;
@@ -350,8 +340,8 @@ static void CreateWad(bool convert)
 	}
 
 	import_set = &from_pane->tagged;
-	filename = CreateWadInDir(from_pane->dir, import_set, to_pane->dir,
-	                          convert);
+	filename =
+	    CreateWadInDir(from_pane->dir, import_set, to_pane->dir, convert);
 	if (filename != NULL) {
 		B_DirectoryPaneSearch(to_pane, filename);
 		free(filename);
@@ -370,16 +360,13 @@ static void CreateWadNoConvert(void)
 }
 
 const struct action make_wad_action = {
-	KEY_F(9), 'F', "MkWAD", ". Make WAD",
-	CreateWadConvert,
+    KEY_F(9), 'F', "MkWAD", ". Make WAD", CreateWadConvert,
 };
 const struct action make_wad_noconv_action = {
-	SHIFT_KEY_F(9), 0, NULL, ". Make WAD (no convert)",
-	CreateWadNoConvert,
+    SHIFT_KEY_F(9), 0, NULL, ". Make WAD (no convert)", CreateWadNoConvert,
 };
 const struct action export_wad_action = {
-	KEY_F(9), 'F', "ExpWAD", ".> Export as WAD",
-	CreateWadConvert,
+    KEY_F(9), 'F', "ExpWAD", ".> Export as WAD", CreateWadConvert,
 };
 
 static unsigned int *IndexesForTagged(struct directory *dir,
@@ -503,22 +490,21 @@ static void MoveEntries(struct directory *dir, struct file_set *fs,
 static bool NullTextureCheck(struct directory *dir, struct file_set *tagged,
                              const char *operation, const char *yes)
 {
-	if (dir->num_entries == 0
-	 || !VFS_SetHas(tagged, dir->entries[0].serial_no)
-	 || dir->entries[0].type != FILE_TYPE_TEXTURE
-	 || !StringHasPrefix(dir->entries[0].name, "AA")
-	 || !StringHasSuffix(dir->path, "/TEXTURE1")) {
+	if (dir->num_entries == 0 ||
+	    !VFS_SetHas(tagged, dir->entries[0].serial_no) ||
+	    dir->entries[0].type != FILE_TYPE_TEXTURE ||
+	    !StringHasPrefix(dir->entries[0].name, "AA") ||
+	    !StringHasSuffix(dir->path, "/TEXTURE1")) {
 		return true;
 	}
 
-	return UI_ConfirmDialogBox(
-		"Null texture warning", yes, "Cancel",
-		"The '%s' texture is a dummy that\n"
-		"needs be the first texture in the list.\n"
-		"If you %s it, whatever texture becomes\n"
-		"first in the list will not work properly.\n"
-		"\nAre you sure you want to %s it?",
-		dir->entries[0].name, operation, operation);
+	return UI_ConfirmDialogBox("Null texture warning", yes, "Cancel",
+	                           "The '%s' texture is a dummy that\n"
+	                           "needs be the first texture in the list.\n"
+	                           "If you %s it, whatever texture becomes\n"
+	                           "first in the list will not work properly.\n"
+	                           "\nAre you sure you want to %s it?",
+	                           dir->entries[0].name, operation, operation);
 }
 
 static void PerformRearrange(void)
@@ -540,9 +526,9 @@ static void PerformRearrange(void)
 
 	indexes = IndexesForTagged(dir, &active_pane->tagged, &cnt);
 	insert_point = B_DirectoryPaneSelected(active_pane) + 1;
-	noop = IndexesAreContiguous(indexes, cnt)
-	    && insert_point >= indexes[0]
-	    && insert_point <= indexes[cnt - 1] + 1;
+	noop = IndexesAreContiguous(indexes, cnt) &&
+	       insert_point >= indexes[0] &&
+	       insert_point <= indexes[cnt - 1] + 1;
 	free(indexes);
 
 	VFS_DescribeSet(dir, &active_pane->tagged, descr, sizeof(descr));
@@ -561,8 +547,7 @@ static void PerformRearrange(void)
 }
 
 const struct action rearrange_action = {
-	KEY_F(2), 'V', "Rearr", "Move (rearrange)",
-	PerformRearrange,
+    KEY_F(2), 'V', "Rearr", "Move (rearrange)", PerformRearrange,
 };
 
 static int CompareEntries(struct directory *dir, unsigned int i1,
@@ -629,8 +614,8 @@ static void PerformSortEntries(void)
 
 	// Sanity check; it usually doesn't make sense to sort if they're
 	// not a contiguous sequence.
-	if (!IndexesAreContiguous(indexes, num_tagged)
-	 && !UI_ConfirmDialogBox("Sort", "Continue", "Cancel",
+	if (!IndexesAreContiguous(indexes, num_tagged) &&
+	    !UI_ConfirmDialogBox("Sort", "Continue", "Cancel",
 	                         "Tagged items are not contiguous.\n"
 	                         "Continue?")) {
 		free(indexes);
@@ -651,7 +636,8 @@ static void PerformSortEntries(void)
 		UI_ShowNotice("%s sorted.", descr);
 	} else if (UI_ConfirmDialogBox("Sort", "Sort", "Cancel",
 	                               "%s already sorted.\nSort into "
-	                               "reverse order?", descr)) {
+	                               "reverse order?",
+	                               descr)) {
 		// Reverse sort doesn't even require using SortEntries(). The
 		// lumps are already sorted, so we just need to reverse
 		// them.
@@ -669,8 +655,7 @@ static void PerformSortEntries(void)
 }
 
 const struct action sort_entries_action = {
-	SHIFT_KEY_F(2), ']', "Sort", "Sort",
-	PerformSortEntries,
+    SHIFT_KEY_F(2), ']', "Sort", "Sort", PerformSortEntries,
 };
 
 static void PerformNewLump(void)
@@ -682,9 +667,8 @@ static void PerformNewLump(void)
 		return;
 	}
 
-	char *name = UI_TextInputDialogBox(
-		"New lump", "Create", 8,
-		"Enter name for new lump:");
+	char *name = UI_TextInputDialogBox("New lump", "Create", 8,
+	                                   "Enter name for new lump:");
 	if (name == NULL) {
 		return;
 	}
@@ -698,8 +682,7 @@ static void PerformNewLump(void)
 }
 
 const struct action new_lump_action = {
-	KEY_F(7), 'K', "NewLump", ". New lump",
-	PerformNewLump,
+    KEY_F(7), 'K', "NewLump", ". New lump", PerformNewLump,
 };
 
 static void PerformRename(void)
@@ -712,12 +695,10 @@ static void PerformRename(void)
 	bool success;
 
 	if (tagged->num_entries == 0) {
-		UI_MessageBox(
-		    "You have not selected anything to rename.");
+		UI_MessageBox("You have not selected anything to rename.");
 		return;
 	} else if (tagged->num_entries > 1) {
-		UI_MessageBox(
-		    "You can't rename more than one thing at once.");
+		UI_MessageBox("You can't rename more than one thing at once.");
 		return;
 	}
 
@@ -725,14 +706,14 @@ static void PerformRename(void)
 		return;
 	}
 
-	input_filename = UI_TextInputDialogBox(
-	    "Rename", "Rename", 30, "New name for '%s'?", old_name);
+	input_filename = UI_TextInputDialogBox("Rename", "Rename", 30,
+	                                       "New name for '%s'?", old_name);
 	if (input_filename == NULL) {
 		return;
 	}
-	success = VFS_Rename(active_pane->dir,
-	                     &active_pane->dir->entries[selected],
-	                     input_filename);
+	success =
+	    VFS_Rename(active_pane->dir, &active_pane->dir->entries[selected],
+	               input_filename);
 	if (success) {
 		VFS_CommitChanges(active_pane->dir, "rename");
 	} else {
@@ -747,8 +728,7 @@ static void PerformRename(void)
 }
 
 const struct action rename_action = {
-	KEY_F(6), 'E', "Ren", ". Rename",
-	PerformRename,
+    KEY_F(6), 'E', "Ren", ". Rename", PerformRename,
 };
 
 static void PerformDeleteNoConfirm(void)
@@ -802,8 +782,7 @@ static void PerformDeleteNoConfirm(void)
 }
 
 const struct action delete_no_confirm_action = {
-	SHIFT_KEY_F(8), 0, NULL, "Delete (no confirm)",
-	PerformDeleteNoConfirm,
+    SHIFT_KEY_F(8), 0, NULL, "Delete (no confirm)", PerformDeleteNoConfirm,
 };
 
 static void PerformDelete(void)
@@ -834,8 +813,7 @@ static void PerformDelete(void)
 }
 
 const struct action delete_action = {
-	KEY_F(8), 'X', "Del", "Delete",
-	PerformDelete,
+    KEY_F(8), 'X', "Del", "Delete", PerformDelete,
 };
 
 static void PerformMarkPattern(void)
@@ -843,15 +821,15 @@ static void PerformMarkPattern(void)
 	struct directory_entry *first_match;
 	size_t old_cnt;
 
-	char *glob = UI_TextInputDialogBox(
-		"Mark pattern", "Mark", 15,
-		"Enter a wildcard pattern (eg. *.png):");
+	char *glob =
+	    UI_TextInputDialogBox("Mark pattern", "Mark", 15,
+	                          "Enter a wildcard pattern (eg. *.png):");
 	if (glob == NULL) {
 		return;
 	}
 	old_cnt = active_pane->tagged.num_entries;
-	first_match = VFS_AddGlobToSet(active_pane->dir,
-	                               &active_pane->tagged, glob);
+	first_match =
+	    VFS_AddGlobToSet(active_pane->dir, &active_pane->tagged, glob);
 	if (first_match == NULL) {
 		UI_ShowNotice("No matches found.");
 	} else {
@@ -863,8 +841,7 @@ static void PerformMarkPattern(void)
 }
 
 const struct action mark_pattern_action = {
-	0, 'G', "MarkPat", ". Mark pattern",
-	PerformMarkPattern,
+    0, 'G', "MarkPat", ". Mark pattern", PerformMarkPattern,
 };
 
 static void PerformUnmarkAll(void)
@@ -878,8 +855,7 @@ static void PerformUnmarkAll(void)
 }
 
 const struct action unmark_all_action = {
-	KEY_F(10), 'A', "UnmrkAll", "Unmark all",
-	PerformUnmarkAll,
+    KEY_F(10), 'A', "UnmrkAll", "Unmark all", PerformUnmarkAll,
 };
 
 static void PerformMark(void)
@@ -906,8 +882,7 @@ static void PerformMark(void)
 }
 
 const struct action mark_action = {
-	' ', 0, "Un/mark", "Mark/unmark",
-	PerformMark,
+    ' ', 0, "Un/mark", "Mark/unmark", PerformMark,
 };
 
 // Called when closing a file to check if it needs cleaning out.
@@ -932,9 +907,9 @@ static void CheckCompactWad(struct directory_pane *pane)
 	}
 	filename = PathBaseName(pane->dir->path);
 	if (!UI_ConfirmDialogBox(
-		"Compact WAD", "Compact", "Ignore",
-		"'%s' contains %dKB of junk data.\nCompact now?",
-		filename, junk_bytes_kb)) {
+	        "Compact WAD", "Compact", "Ignore",
+	        "'%s' contains %dKB of junk data.\nCompact now?", filename,
+	        junk_bytes_kb)) {
 		return;
 	}
 	if (W_CompactWAD(wf)) {
@@ -954,8 +929,7 @@ static void PerformQuit(void)
 }
 
 const struct action quit_action = {
-	27, 'Q', "Quit", "Quit",
-	PerformQuit,
+    27, 'Q', "Quit", "Quit", PerformQuit,
 };
 
 static void PerformReload(void)
@@ -964,8 +938,7 @@ static void PerformReload(void)
 }
 
 const struct action reload_action = {
-	0, 'R', "Reload", "Reload",
-	PerformReload,
+    0, 'R', "Reload", "Reload", PerformReload,
 };
 
 static void NavigateNew(struct directory_pane *curr_pane,
@@ -1057,8 +1030,7 @@ static void PerformView(void)
 }
 
 const struct action view_action = {
-	'\r', 0,  "View", "View",
-	PerformView,
+    '\r', 0, "View", "View", PerformView,
 };
 
 static void PerformCompact(void)
@@ -1107,7 +1079,8 @@ static void PerformCompact(void)
 	if (!UI_ConfirmDialogBox("Compact WAD", "Compact", "Cancel",
 	                         "'%s' contains %d junk bytes.\n"
 	                         "Compact WAD? This operation cannot\n"
-	                         "be undone.", ent->name, junk_bytes)) {
+	                         "be undone.",
+	                         ent->name, junk_bytes)) {
 		goto fail;
 	}
 	if (!B_CheckReadOnly(wad_dir)) {
@@ -1130,8 +1103,7 @@ fail:
 }
 
 const struct action compact_action = {
-	KEY_F(2), 'T',  "Compact", "Compact WAD file",
-	PerformCompact,
+    KEY_F(2), 'T', "Compact", "Compact WAD file", PerformCompact,
 };
 
 static void PerformHexdump(void)
@@ -1153,10 +1125,8 @@ static void PerformHexdump(void)
 	P_RunHexdumpPager(ent->name, input);
 }
 
-const struct action hexdump_action = {
-	0, 'D', "Hexdump", "Hexdump",
-	PerformHexdump
-};
+const struct action hexdump_action = {0, 'D', "Hexdump", "Hexdump",
+                                      PerformHexdump};
 
 static void PerformUndo(void)
 {
@@ -1200,8 +1170,7 @@ static void PerformUndo(void)
 }
 
 const struct action undo_action = {
-	0, 'Z', "Undo", "Undo",
-	PerformUndo,
+    0, 'Z', "Undo", "Undo", PerformUndo,
 };
 
 static void PerformRedo(void)
@@ -1235,8 +1204,7 @@ static void PerformRedo(void)
 }
 
 const struct action redo_action = {
-	0, 'Y', "Redo", "| Redo",
-	PerformRedo,
+    0, 'Y', "Redo", "| Redo", PerformRedo,
 };
 
 static void ShowHelp(void)
@@ -1246,11 +1214,11 @@ static void ShowHelp(void)
 		enum file_type ft;
 		const char *fn;
 	} help_files_per_type[] = {
-		{FILE_TYPE_DIR, "dir_view.md"},
-		{FILE_TYPE_WAD, "wad_view.md"},
-		{FILE_TYPE_TEXTURE_LIST, "texture_editor.md"},
-		{FILE_TYPE_PNAMES_LIST, "pnames_editor.md"},
-		{FILE_TYPE_PALETTES, "palette.md"},
+	    {FILE_TYPE_DIR,          "dir_view.md"      },
+	    {FILE_TYPE_WAD,          "wad_view.md"      },
+	    {FILE_TYPE_TEXTURE_LIST, "texture_editor.md"},
+	    {FILE_TYPE_PNAMES_LIST,  "pnames_editor.md" },
+	    {FILE_TYPE_PALETTES,     "palette.md"       },
 	};
 
 	for (i = 0; i < arrlen(help_files_per_type); i++) {
@@ -1266,8 +1234,7 @@ static void ShowHelp(void)
 }
 
 const struct action help_action = {
-	KEY_F(1), 'H', "Help", "Help",
-	ShowHelp,
+    KEY_F(1), 'H', "Help", "Help", ShowHelp,
 };
 
 static void PerformShell(void)
@@ -1287,8 +1254,8 @@ static void PerformShell(void)
 		if (marked_env == NULL) {
 			new_marked_env = checked_strdup(ent->name);
 		} else {
-			new_marked_env = StringJoin(" ", marked_env,
-			                            ent->name, NULL);
+			new_marked_env =
+			    StringJoin(" ", marked_env, ent->name, NULL);
 		}
 
 		free(marked_env);
@@ -1310,8 +1277,7 @@ static void PerformShell(void)
 }
 
 const struct action open_shell_action = {
-	KEY_F(4), 'O', "Shell", "Command Prompt here",
-	PerformShell,
+    KEY_F(4), 'O', "Shell", "Command Prompt here", PerformShell,
 };
 
 static void OpenPalettes(void)
@@ -1320,6 +1286,5 @@ static void OpenPalettes(void)
 }
 
 const struct action open_palettes_action = {
-	0, 'P', "Palettes", "| Palettes",
-	OpenPalettes,
+    0, 'P', "Palettes", "| Palettes", OpenPalettes,
 };

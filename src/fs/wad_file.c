@@ -10,21 +10,21 @@
 
 #include "fs/wad_file.h"
 
+#include <assert.h>
+#include <ctype.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
-#include <ctype.h>
-#include <assert.h>
-#include <stdbool.h>
 #include <strings.h>
 
 #include "common.h"
-#include "ui/dialog.h"
 #include "fs/vfile.h"
+#include "ui/dialog.h"
 
-#define REVISION_DESCR_LEN  40
-#define WAD_FILE_ENTRY_LEN  16
+#define REVISION_DESCR_LEN 40
+#define WAD_FILE_ENTRY_LEN 16
 
 struct snapshot {
 	struct wad_file_header header;
@@ -114,14 +114,14 @@ static int ReadDirectory(struct wad_file *wf)
 	new_num_lumps = wf->header.num_lumps;
 	first_change = new_num_lumps;
 	assert(vfseek(wf->vfs, wf->header.table_offset, SEEK_SET) == 0);
-	new_directory = checked_calloc(
-		new_num_lumps, sizeof(struct wad_file_entry));
+	new_directory =
+	    checked_calloc(new_num_lumps, sizeof(struct wad_file_entry));
 
 	for (i = 0, j = 0; i < new_num_lumps; i++) {
 		struct wad_file_entry *ent = &new_directory[i], *oldent;
-		if (vfread(&ent->position, 4, 1, wf->vfs) != 1
-		 || vfread(&ent->size, 4, 1, wf->vfs) != 1
-		 || vfread(&ent->name, 8, 1, wf->vfs) != 1) {
+		if (vfread(&ent->position, 4, 1, wf->vfs) != 1 ||
+		    vfread(&ent->size, 4, 1, wf->vfs) != 1 ||
+		    vfread(&ent->name, 8, 1, wf->vfs) != 1) {
 			free(new_directory);
 			return -1;
 		}
@@ -139,8 +139,8 @@ static int ReadDirectory(struct wad_file *wf)
 		oldent = NULL;
 		for (k = j; k < min(j + LOOKAHEAD, wf->num_lumps); k++) {
 			oldent = &wf->directory[k];
-			if (ent->position == oldent->position
-			 && ent->size == oldent->size) {
+			if (ent->position == oldent->position &&
+			    ent->size == oldent->size) {
 				old_lump_index = k;
 				break;
 			}
@@ -184,9 +184,10 @@ struct wad_file *W_OpenFile(const char *filename)
 	result->directory = NULL;
 	result->num_lumps = 0;
 
-	if (vfread(&result->header, sizeof(struct wad_file_header), 1, vfs) != 1
-	 || (strncmp(result->header.id, "IWAD", 4) != 0
-	  && strncmp(result->header.id, "PWAD", 4) != 0)) {
+	if (vfread(&result->header, sizeof(struct wad_file_header), 1, vfs) !=
+	        1 ||
+	    (strncmp(result->header.id, "IWAD", 4) != 0 &&
+	     strncmp(result->header.id, "PWAD", 4) != 0)) {
 		W_CloseFile(result);
 		return NULL;
 	}
@@ -271,8 +272,8 @@ void W_AddEntries(struct wad_file *f, unsigned int before_index,
 
 	// We need to rearrange both the WAD directory and the lump headers
 	// array to make room for the new entries.
-	f->directory = realloc(f->directory,
-	    (f->num_lumps + count) * sizeof(struct wad_file_entry));
+	f->directory = realloc(f->directory, (f->num_lumps + count) *
+	                                         sizeof(struct wad_file_entry));
 	memmove(&f->directory[before_index + count],
 	        &f->directory[before_index],
 	        (f->num_lumps - before_index) * sizeof(struct wad_file_entry));
@@ -322,8 +323,8 @@ void W_SetLumpName(struct wad_file *f, unsigned int index, const char *name)
 	f->dirty = true;
 }
 
-size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index,
-                        uint8_t *buf, size_t buf_len)
+size_t W_ReadLumpHeader(struct wad_file *f, unsigned int index, uint8_t *buf,
+                        size_t buf_len)
 {
 	assert(index < f->num_lumps);
 	buf_len = min(buf_len, min(LUMP_HEADER_LEN, f->directory[index].size));
@@ -470,8 +471,8 @@ void W_CommitChanges(struct wad_file *f)
 
 static uint32_t MinimumWADSize(struct wad_file *f)
 {
-	size_t result = sizeof(struct wad_file_header)
-	              + WAD_FILE_ENTRY_LEN * f->num_lumps;
+	size_t result =
+	    sizeof(struct wad_file_header) + WAD_FILE_ENTRY_LEN * f->num_lumps;
 	int i;
 
 	for (i = 0; i < f->num_lumps; i++) {
@@ -589,8 +590,8 @@ VFILE *W_SaveSnapshot(struct wad_file *wf)
 
 	assert(vfwrite(&s, sizeof(struct snapshot), 1, result) == 1);
 	for (i = 0; i < wf->header.num_lumps; i++) {
-		assert(vfwrite(&wf->directory[i].serial_no,
-		               sizeof(uint64_t), 1, result) == 1);
+		assert(vfwrite(&wf->directory[i].serial_no, sizeof(uint64_t), 1,
+		               result) == 1);
 	}
 
 	assert(vfseek(result, 0, SEEK_SET) == 0);
@@ -615,8 +616,8 @@ void W_RestoreSnapshot(struct wad_file *wf, VFILE *in)
 
 	// Read back old serial numbers.
 	for (i = 0; i < wf->header.num_lumps; i++) {
-		assert(vfread(&wf->directory[i].serial_no,
-		              sizeof(uint64_t), 1, in) == 1);
+		assert(vfread(&wf->directory[i].serial_no, sizeof(uint64_t), 1,
+		              in) == 1);
 	}
 	vfclose(in);
 

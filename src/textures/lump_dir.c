@@ -10,15 +10,15 @@
 //
 // Common code shared between texture and pnames directories.
 
-#include <stdbool.h>
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "stringlib.h"
-#include "textures/textures.h"
 #include "textures/internal.h"
+#include "textures/textures.h"
 
 struct directory *TX_LumpDirOpenDir(void *_dir, struct directory_entry *ent)
 {
@@ -133,8 +133,8 @@ bool TX_InitLumpDir(struct lump_dir *dir, const struct lump_dir_funcs *funcs,
 	dir->dir.entries = NULL;
 	dir->dir.num_entries = 0;
 	dir->dir.readonly = parent->readonly;
-	dir->dir.parent_name = StringJoin("", "Back to ",
-	                                  PathBaseName(parent->path), NULL);
+	dir->dir.parent_name =
+	    StringJoin("", "Back to ", PathBaseName(parent->path), NULL);
 
 	dir->loaded = false;
 	dir->lump_dir_funcs = funcs;

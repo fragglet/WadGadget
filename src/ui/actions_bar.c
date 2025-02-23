@@ -10,16 +10,16 @@
 
 #include "ui/actions_bar.h"
 
-#include <string.h>
-#include <stdbool.h>
-#include <limits.h>
 #include <curses.h>
+#include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
-#include "ui/colors.h"
 #include "common.h"
-#include "ui/stack.h"
+#include "ui/colors.h"
 #include "ui/pane.h"
+#include "ui/stack.h"
 
 struct actions_accel {
 	const char *name;
@@ -79,15 +79,16 @@ static void ExpandAcceleratorNames(struct actions_bar *p, int *spacing)
 		int best = -1, best_diff = INT_MAX, diff;
 		const char *longname;
 
-		for (i = 0; i < arrlen(p->accels) && *spacing > num_accels; i++) {
+		for (i = 0; i < arrlen(p->accels) && *spacing > num_accels;
+		     i++) {
 			accel = &p->accels[i];
 			if (accel->action == NULL) {
 				continue;
 			}
 			longname = LongName(accel->action);
 			diff = strlen(longname) - strlen(p->accels[i].name);
-			if (diff > 0 && diff < best_diff
-			 && *spacing - diff >= num_accels) {
+			if (diff > 0 && diff < best_diff &&
+			    *spacing - diff >= num_accels) {
 				best_diff = diff;
 				best = i;
 			}
@@ -144,8 +145,8 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 	// Can we fit any more shortcuts in?
 	i = 0;
 	add_index = 11;
-	while (actions != NULL && actions[i] != NULL
-	    && add_index < MAX_KEY_BINDINGS) {
+	while (actions != NULL && actions[i] != NULL &&
+	       add_index < MAX_KEY_BINDINGS) {
 		a = actions[i];
 		// Don't add any function key actions; we already have them.
 		if (a == NULL || a->shortname == NULL || HasFunctionKey(a)) {
@@ -277,23 +278,40 @@ static doubleclick_continuation HandleMousePress(void *_p, int x, int y)
 static int TranslateSpecialKey(int key)
 {
 	switch (key) {
-	case KEY_HELP:    return KEY_F(1);        // help
-	case KEY_MOVE:    return KEY_F(2);        // move
-	case KEY_SMOVE:   return SHIFT_KEY_F(2);  // shift-move
-	case KEY_COPY:    return KEY_F(5);        // copy
-	case KEY_SCOPY:   return SHIFT_KEY_F(5);  // shift-copy
-	case KEY_IC:      return KEY_F(7);        // insert
-	case KEY_DC:      return KEY_F(8);        // delete
-	case KEY_SDC:     return SHIFT_KEY_F(8);  // shift-delete
-	case KEY_CREATE:  return KEY_F(9);        // create
-	case KEY_EXIT:    return 27;              // exit
-	case KEY_MARK:    return ' ';             // mark
-	case KEY_NEXT:    return CTRL_('N');      // next
-	case KEY_UNDO:    return CTRL_('Z');      // undo
-	case KEY_REDO:    return CTRL_('Y');      // redo
-	case KEY_REFRESH: return CTRL_('R');      // refresh
-	case KEY_BEG:     return KEY_HOME;        // begin
-	default:          return key;
+	case KEY_HELP:
+		return KEY_F(1); // help
+	case KEY_MOVE:
+		return KEY_F(2); // move
+	case KEY_SMOVE:
+		return SHIFT_KEY_F(2); // shift-move
+	case KEY_COPY:
+		return KEY_F(5); // copy
+	case KEY_SCOPY:
+		return SHIFT_KEY_F(5); // shift-copy
+	case KEY_IC:
+		return KEY_F(7); // insert
+	case KEY_DC:
+		return KEY_F(8); // delete
+	case KEY_SDC:
+		return SHIFT_KEY_F(8); // shift-delete
+	case KEY_CREATE:
+		return KEY_F(9); // create
+	case KEY_EXIT:
+		return 27; // exit
+	case KEY_MARK:
+		return ' '; // mark
+	case KEY_NEXT:
+		return CTRL_('N'); // next
+	case KEY_UNDO:
+		return CTRL_('Z'); // undo
+	case KEY_REDO:
+		return CTRL_('Y'); // redo
+	case KEY_REFRESH:
+		return CTRL_('R'); // refresh
+	case KEY_BEG:
+		return KEY_HOME; // begin
+	default:
+		return key;
 	}
 }
 
@@ -309,9 +327,9 @@ static void HandleKeypress(void *p, int key)
 	key = TranslateSpecialKey(key);
 
 	for (i = 0; actions[i] != NULL; i++) {
-		if (actions[i]->callback != NULL
-		 && (key == actions[i]->key
-		  || key == CTRL_(actions[i]->ctrl_key))) {
+		if (actions[i]->callback != NULL &&
+		    (key == actions[i]->key ||
+		     key == CTRL_(actions[i]->ctrl_key))) {
 			actions[i]->callback();
 			return;
 		}
@@ -338,26 +356,41 @@ void UI_ActionsBarSetFunctionKeys(bool function_keys)
 const char *UI_ActionKeyDescription(const struct action *a, bool function_keys)
 {
 	int key = a->key;
-	if (!function_keys && a->key >= KEY_F(1) && a->key <= KEY_F(10)
-	 && a->ctrl_key != 0) {
+	if (!function_keys && a->key >= KEY_F(1) && a->key <= KEY_F(10) &&
+	    a->ctrl_key != 0) {
 		key = 0;
 	}
 	switch (key) {
-	case KEY_F(1): return "F1";
-	case KEY_F(2): return "F2";
-	case KEY_F(3): return "F3";
-	case KEY_F(4): return "F4";
-	case KEY_F(5): return "F5";
-	case KEY_F(6): return "F6";
-	case KEY_F(7): return "F7";
-	case KEY_F(8): return "F8";
-	case KEY_F(9): return "F9";
-	case KEY_F(10): return "F10";
-	case ' ': return "Space";
-	case '\t': return "Tab";
-	case '\r': return "Ent";
-	case 27: return "Esc";
-	default: break;
+	case KEY_F(1):
+		return "F1";
+	case KEY_F(2):
+		return "F2";
+	case KEY_F(3):
+		return "F3";
+	case KEY_F(4):
+		return "F4";
+	case KEY_F(5):
+		return "F5";
+	case KEY_F(6):
+		return "F6";
+	case KEY_F(7):
+		return "F7";
+	case KEY_F(8):
+		return "F8";
+	case KEY_F(9):
+		return "F9";
+	case KEY_F(10):
+		return "F10";
+	case ' ':
+		return "Space";
+	case '\t':
+		return "Tab";
+	case '\r':
+		return "Ent";
+	case 27:
+		return "Esc";
+	default:
+		break;
 	}
 	if (a->ctrl_key) {
 		static char buf[3];

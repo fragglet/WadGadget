@@ -11,13 +11,13 @@
 // Functions related to deutex-format texture config files.
 //
 
+#include <assert.h>
+#include <ctype.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
-#include <ctype.h>
-#include <assert.h>
-#include <stdint.h>
 
 #include "common.h"
 #include "conv/error.h"
@@ -25,7 +25,7 @@
 #include "textures/textures.h"
 
 #define TEXTURE_CONFIG_HEADER "; deutex format texture lump configuration\n"
-#define PNAMES_CONFIG_HEADER "; patch names lump configuration\n\n"
+#define PNAMES_CONFIG_HEADER  "; patch names lump configuration\n\n"
 
 static bool CheckTextureConfig(struct textures *txs, struct pnames *pn)
 {
@@ -37,9 +37,10 @@ static bool CheckTextureConfig(struct textures *txs, struct pnames *pn)
 		for (j = 0; j < t->patchcount; j++) {
 			if (t->patches[j].patch >= pn->num_pnames) {
 				ConversionError(
-					"Texture %.8s patch #%d has invalid "
-					"PNAMES index %d >= %d", t->name, j,
-					t->patches[j].patch, pn->num_pnames);
+				    "Texture %.8s patch #%d has invalid "
+				    "PNAMES index %d >= %d",
+				    t->name, j, t->patches[j].patch,
+				    pn->num_pnames);
 				return false;
 			}
 		}
@@ -62,8 +63,8 @@ VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn,
 		return NULL;
 	}
 
-	assert(vfwrite(TEXTURE_CONFIG_HEADER,
-	               strlen(TEXTURE_CONFIG_HEADER), 1, result) == 1);
+	assert(vfwrite(TEXTURE_CONFIG_HEADER, strlen(TEXTURE_CONFIG_HEADER), 1,
+	               result) == 1);
 
 	if (comment != NULL) {
 		assert(vfwrite("; ", 2, 1, result) == 1);
@@ -83,8 +84,7 @@ VFILE *TX_FormatTexturesConfig(struct textures *txs, struct pnames *pn,
 		for (j = 0; j < t->patchcount; j++) {
 			const struct patch *p = &t->patches[j];
 			snprintf(buf, sizeof(buf), "* %-8.8s %6d %8d\n",
-			         pn->pnames[p->patch], p->originx,
-			         p->originy);
+			         pn->pnames[p->patch], p->originx, p->originy);
 			assert(vfwrite(buf, strlen(buf), 1, result) == 1);
 		}
 	}
@@ -100,8 +100,8 @@ VFILE *TX_FormatPnamesConfig(struct pnames *p)
 	char buf[32];
 	int i;
 
-	assert(vfwrite(PNAMES_CONFIG_HEADER,
-	               strlen(PNAMES_CONFIG_HEADER), 1, result) == 1);
+	assert(vfwrite(PNAMES_CONFIG_HEADER, strlen(PNAMES_CONFIG_HEADER), 1,
+	               result) == 1);
 
 	for (i = 0; i < p->num_pnames; i++) {
 		snprintf(buf, sizeof(buf), "%.8s\n", p->pnames[i]);
@@ -143,8 +143,8 @@ static char *ReadLine(uint8_t *buf, size_t buf_len, unsigned int *offset)
 	}
 
 	// Skip leading spaces.
-	while (*offset < buf_len && buf[*offset] != '\n'
-	    && isspace(buf[*offset])) {
+	while (*offset < buf_len && buf[*offset] != '\n' &&
+	       isspace(buf[*offset])) {
 		++*offset;
 	}
 
@@ -175,8 +175,8 @@ static char *ReadLine(uint8_t *buf, size_t buf_len, unsigned int *offset)
 	return result;
 }
 
-static int ScanLine(char *line, const char *fmt, char *name,
-                    int *x, int *y, int *token_cols, int *error_col)
+static int ScanLine(char *line, const char *fmt, char *name, int *x, int *y,
+                    int *token_cols, int *error_col)
 {
 	int nfields;
 
@@ -207,7 +207,11 @@ static int ScanLine(char *line, const char *fmt, char *name,
 	return nfields;
 }
 
-enum parse_result { ERROR, NO_MATCH, MATCH };
+enum parse_result {
+	ERROR,
+	NO_MATCH,
+	MATCH
+};
 
 static enum parse_result MaybeAddTexture(struct textures *txs, char *line,
                                          int *error_col)
@@ -217,8 +221,8 @@ static enum parse_result MaybeAddTexture(struct textures *txs, char *line,
 	char namebuf[10];
 	int w, h, n;
 
-	n = ScanLine(line, "%n%9s %n%d %n%d %n", namebuf, &w, &h,
-	             token_cols, error_col);
+	n = ScanLine(line, "%n%9s %n%d %n%d %n", namebuf, &w, &h, token_cols,
+	             error_col);
 	if (n < 0) {
 		return ERROR;
 	}
@@ -243,8 +247,8 @@ static enum parse_result MaybeAddTexture(struct textures *txs, char *line,
 	t->height = h;
 	t->patchcount = 0;
 
-	txs->textures = checked_realloc(txs->textures,
-		(txs->num_textures + 1) * sizeof(struct texture *));
+	txs->textures = checked_realloc(
+	    txs->textures, (txs->num_textures + 1) * sizeof(struct texture *));
 	txs->textures[txs->num_textures] = t;
 	++txs->num_textures;
 
@@ -260,8 +264,8 @@ static enum parse_result MaybeAddPatch(struct textures *txs, char *line,
 	struct patch p;
 	int x, y, n;
 
-	n = ScanLine(line, "* %n%9s %n%d %n%d %n", namebuf, &x, &y,
-	             token_cols, error_col);
+	n = ScanLine(line, "* %n%9s %n%d %n%d %n", namebuf, &x, &y, token_cols,
+	             error_col);
 	if (n < 0) {
 		return ERROR;
 	}
@@ -349,8 +353,8 @@ fail:
 	} else {
 		highlight = checked_strdup("");
 	}
-	ConversionError("Syntax error on line #%d:\n\n%s\n%s",
-	                lineno, line, highlight);
+	ConversionError("Syntax error on line #%d:\n\n%s\n%s", lineno, line,
+	                highlight);
 	free(line);
 	free(highlight);
 	TX_FreeTextures(result);

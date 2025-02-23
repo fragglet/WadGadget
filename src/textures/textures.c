@@ -10,12 +10,12 @@
 
 #include "textures/textures.h"
 
+#include <assert.h>
+#include <ctype.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
-#include <ctype.h>
-#include <assert.h>
 #include <strings.h>
 
 #include "common.h"
@@ -47,8 +47,7 @@ static void SwapTexturePatches(struct texture *t)
 
 size_t TX_TextureLen(size_t patchcount)
 {
-	return sizeof(struct texture)
-	     + sizeof(struct patch) * (patchcount - 1);
+	return sizeof(struct texture) + sizeof(struct patch) * (patchcount - 1);
 }
 
 struct texture *TX_AllocTexture(size_t patchcount)
@@ -124,8 +123,8 @@ struct textures *TX_NewTextureList(int num_textures)
 {
 	struct textures *result = checked_calloc(1, sizeof(struct textures));
 	if (num_textures > 0) {
-		result->textures = checked_calloc(num_textures,
-		                                  sizeof(struct texture *));
+		result->textures =
+		    checked_calloc(num_textures, sizeof(struct texture *));
 	}
 	result->num_textures = num_textures;
 	return result;
@@ -151,8 +150,8 @@ struct textures *TX_UnmarshalTextures(VFILE *input)
 	min_len = 4 + 4 * num_textures;
 	if (lump_len < min_len) {
 		ConversionError("Number of textures %d too large for lump "
-		                "size:\n%d < %d", num_textures,
-		                (int) lump_len, (int) min_len);
+		                "size:\n%d < %d",
+		                num_textures, (int) lump_len, (int) min_len);
 		goto fail;
 	}
 
@@ -166,15 +165,16 @@ struct textures *TX_UnmarshalTextures(VFILE *input)
 
 		if (start + TX_TextureLen(0) > lump_len) {
 			ConversionError("Texture #%d overruns lump, start=%d, "
-			                "min len=%d, lump_len=%d", i, start,
-			                (int) TX_TextureLen(0), (int) lump_len);
+			                "min len=%d, lump_len=%d",
+			                i, start, (int) TX_TextureLen(0),
+			                (int) lump_len);
 			TX_FreeTextures(result);
 			result = NULL;
 			goto fail;
 		}
 
 		result->textures[i] =
-			UnmarshalTexture(lump + start, lump_len - start);
+		    UnmarshalTexture(lump + start, lump_len - start);
 		if (result->textures[i] == NULL) {
 			ConversionError("Failed to unmarshal texture #%d", i);
 			TX_FreeTextures(result);
@@ -193,8 +193,7 @@ fail:
 VFILE *TX_MarshalTextures(struct textures *txs)
 {
 	VFILE *result = vfopenmem(NULL, 0);
-	uint32_t *offsets =
-		checked_calloc(txs->num_textures, sizeof(uint32_t));
+	uint32_t *offsets = checked_calloc(txs->num_textures, sizeof(uint32_t));
 	uint32_t num_textures = txs->num_textures;
 	size_t lump_len = 4 + 4 * txs->num_textures;
 	int i;
@@ -207,8 +206,8 @@ VFILE *TX_MarshalTextures(struct textures *txs)
 
 	SwapLE32(&num_textures);
 	assert(vfwrite(&num_textures, sizeof(uint32_t), 1, result) == 1);
-	assert(vfwrite(offsets, sizeof(uint32_t),
-	               txs->num_textures, result) == txs->num_textures);
+	assert(vfwrite(offsets, sizeof(uint32_t), txs->num_textures, result) ==
+	       txs->num_textures);
 
 	for (i = 0; i < txs->num_textures; i++) {
 		struct texture *swapped = TX_DupTexture(txs->textures[i]);
@@ -270,14 +269,14 @@ bool TX_AddTexture(struct textures *txs, unsigned int pos, struct texture *t)
 		return false;
 	}
 
-	txs->textures = checked_realloc(txs->textures,
-		(txs->num_textures + 1) * sizeof(struct texture *));
+	txs->textures = checked_realloc(
+	    txs->textures, (txs->num_textures + 1) * sizeof(struct texture *));
 	memmove(&txs->textures[pos + 1], &txs->textures[pos],
 	        (txs->num_textures - pos) * sizeof(struct texture *));
 	txs->textures[pos] = TX_DupTexture(t);
 
-	txs->serial_nos = checked_realloc(txs->serial_nos,
-		(txs->num_textures + 1) * sizeof(uint64_t));
+	txs->serial_nos = checked_realloc(
+	    txs->serial_nos, (txs->num_textures + 1) * sizeof(uint64_t));
 	memmove(&txs->serial_nos[pos + 1], &txs->serial_nos[pos],
 	        (txs->num_textures - pos) * sizeof(uint64_t));
 	txs->serial_nos[pos] = NewSerialNo();

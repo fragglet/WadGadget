@@ -13,8 +13,8 @@
 
 #include <stdbool.h>
 
-#include "lump_info.h"
 #include "fs/vfs.h"
+#include "lump_info.h"
 
 struct directory;
 struct directory_entry;

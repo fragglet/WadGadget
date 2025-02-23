@@ -13,12 +13,12 @@
 
 #include "pager/help.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 #include <assert.h>
+#include <ctype.h>
 #include <curses.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 #include <strings.h>
 
 #include "common.h"
@@ -110,7 +110,8 @@ static void FindLinks(struct help_pager_config *cfg)
 		++num_links;
 	}
 
-	cfg->links = checked_calloc(num_links, sizeof(struct help_pager_config));
+	cfg->links =
+	    checked_calloc(num_links, sizeof(struct help_pager_config));
 	lineno = 0, off = 0, linknum = 0;
 	while (IterateLinks(cfg, &lineno, &off, &l)) {
 		cfg->links[linknum] = l;
@@ -217,14 +218,13 @@ static void UnindentLines(struct help_pager_config *cfg)
 // A level-1 heading on the first line is used to set the window title.
 static void SetTitle(struct help_pager_config *cfg)
 {
-	if (cfg->pc.num_lines < 1
-	 || !StringHasPrefix(cfg->lines[0], "# ")) {
+	if (cfg->pc.num_lines < 1 || !StringHasPrefix(cfg->lines[0], "# ")) {
 		cfg->pc.title = checked_strdup("WadGadget Help");
 		return;
 	}
 
 	cfg->pc.title =
-		StringJoin(": ", "WadGadget Help", cfg->lines[0] + 2, NULL);
+	    StringJoin(": ", "WadGadget Help", cfg->lines[0] + 2, NULL);
 	free(cfg->lines[0]);
 	memmove(cfg->lines, cfg->lines + 1,
 	        (cfg->pc.num_lines - 1) * sizeof(char *));
@@ -242,8 +242,8 @@ static bool OpenHelpFile(struct help_pager_config *cfg, const char *filename)
 	FreeLines(cfg);
 	free(cfg->filename);
 	cfg->filename = checked_strdup(filename);
-	cfg->lines = P_PlaintextLines(contents, strlen(contents),
-	                              &cfg->pc.num_lines);
+	cfg->lines =
+	    P_PlaintextLines(contents, strlen(contents), &cfg->pc.num_lines);
 	SetTitle(cfg);
 	UnindentLines(cfg);
 	FindLinks(cfg);
@@ -331,7 +331,7 @@ static void PerformGoBack(void)
 }
 
 static const struct action back_action = {
-	0, 'B', "Back", "Back", PerformGoBack,
+    0, 'B', "Back", "Back", PerformGoBack,
 };
 
 static void OpenTableOfContents(void)
@@ -350,7 +350,7 @@ static void OpenTableOfContents(void)
 }
 
 static const struct action toc_action = {
-	0, 'T', "Contents", "Table of Contents", OpenTableOfContents,
+    0, 'T', "Contents", "Table of Contents", OpenTableOfContents,
 };
 
 static void OpenHelpOnHelp(void)
@@ -369,20 +369,20 @@ static void OpenHelpOnHelp(void)
 }
 
 static const struct action help_on_help_action = {
-	KEY_F(1), 'H', "Help", "Help", OpenHelpOnHelp,
+    KEY_F(1), 'H', "Help", "Help", OpenHelpOnHelp,
 };
 
 static const struct action *help_pager_actions[] = {
-	&exit_pager_action,
-	&help_on_help_action,
-	&back_action,
-	&pager_prev_link_action,
-	&pager_next_link_action,
-	&open_link_action,
-	&toc_action,
-	&pager_search_action,
-	&pager_search_again_action,
-	NULL,
+    &exit_pager_action,
+    &help_on_help_action,
+    &back_action,
+    &pager_prev_link_action,
+    &pager_next_link_action,
+    &open_link_action,
+    &toc_action,
+    &pager_search_action,
+    &pager_search_again_action,
+    NULL,
 };
 
 static const char *DrawLink(WINDOW *win, const char *link, bool highlighted)
@@ -466,16 +466,16 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 	// characters for the horizontal line character.
 	is_horiz_rule = IsHorizRule(line);
 
-	if (cfg->pc.current_link >= 0
-	 && cfg->pc.current_link < cfg->pc.num_links) {
+	if (cfg->pc.current_link >= 0 &&
+	    cfg->pc.current_link < cfg->pc.num_links) {
 		curr_link = &cfg->links[cfg->pc.current_link];
 	}
 
 	for (p = line; *p != '\0'; ++p) {
 		if (IsLinkStart(p)) {
-			bool is_curr_link = curr_link != NULL
-			                 && lineno == curr_link->lineno
-			                 && (p - line) == curr_link->offset;
+			bool is_curr_link = curr_link != NULL &&
+			                    lineno == curr_link->lineno &&
+			                    (p - line) == curr_link->offset;
 			p = DrawLink(win, p, is_curr_link);
 		} else if (HaveSyntaxElements(p, "**", "**", NULL)) {
 			p = DrawBoldText(win, p);

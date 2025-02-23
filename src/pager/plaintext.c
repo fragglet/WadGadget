@@ -10,15 +10,15 @@
 
 #include "pager/plaintext.h"
 
-#include <stdlib.h>
-#include <string.h>
 #include <assert.h>
 #include <curses.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "common.h"
 #include "fs/vfile.h"
-#include "pager/pager.h"
 #include "pager/hexdump.h"
+#include "pager/pager.h"
 #include "ui/actions_bar.h"
 #include "ui/pane.h"
 
@@ -39,7 +39,7 @@ static void SwitchToHexdump(void)
 }
 
 static const struct action switch_hexdump_action = {
-	0, 'D', "Hexdump", "View Hexdump", SwitchToHexdump,
+    0, 'D', "Hexdump", "View Hexdump", SwitchToHexdump,
 };
 
 static void ExitPagerAndEdit(void)
@@ -50,16 +50,12 @@ static void ExitPagerAndEdit(void)
 }
 
 static const struct action exit_pager_edit_action = {
-	0, 'E', "Edit", "Edit",  ExitPagerAndEdit,
+    0, 'E', "Edit", "Edit", ExitPagerAndEdit,
 };
 
 static const struct action *plaintext_pager_actions[] = {
-	&exit_pager_edit_action,
-	&exit_pager_action,
-	&switch_hexdump_action,
-	&pager_search_action,
-	&pager_search_again_action,
-	NULL,
+    &exit_pager_edit_action, &exit_pager_action,         &switch_hexdump_action,
+    &pager_search_action,    &pager_search_again_action, NULL,
 };
 
 static void DrawPlaintextLine(WINDOW *win, unsigned int line, void *user_data)
@@ -139,8 +135,8 @@ bool P_InitPlaintextConfig(const char *title, bool editable,
 	cfg->pc.title = title;
 	cfg->pc.draw_line = DrawPlaintextLine;
 	cfg->pc.user_data = cfg;
-	cfg->pc.actions = editable ? plaintext_pager_actions
-	                           : plaintext_pager_actions + 1;
+	cfg->pc.actions =
+	    editable ? plaintext_pager_actions : plaintext_pager_actions + 1;
 	cfg->hexdump_config = NULL;
 	cfg->pc.get_link = NULL;
 	cfg->pc.activate_link = NULL;
@@ -160,8 +156,8 @@ bool P_InitPlaintextConfig(const char *title, bool editable,
 	return true;
 }
 
-enum plaintext_pager_result P_RunPlaintextPager(
-	const char *title, VFILE *input, bool editable)
+enum plaintext_pager_result P_RunPlaintextPager(const char *title, VFILE *input,
+                                                bool editable)
 {
 	struct pager p;
 	struct plaintext_pager_config cfg;
@@ -178,6 +174,5 @@ enum plaintext_pager_result P_RunPlaintextPager(
 	}
 	P_FreePlaintextConfig(&cfg);
 
-	return cfg.want_edit ? PLAINTEXT_PAGER_WANT_EDIT
-	                     : PLAINTEXT_PAGER_DONE;
+	return cfg.want_edit ? PLAINTEXT_PAGER_WANT_EDIT : PLAINTEXT_PAGER_DONE;
 }

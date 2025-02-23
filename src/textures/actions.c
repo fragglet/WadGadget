@@ -8,27 +8,27 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
 #include <assert.h>
 #include <curses.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "ui/actions_bar.h"
 #include "browser/actions.h"
-#include "browser/directory_pane.h"
 #include "browser/browser.h"
+#include "browser/directory_pane.h"
 #include "conv/error.h"
-#include "stringlib.h"
-#include "ui/dialog.h"
-#include "ui/title_bar.h"
-#include "view.h"
-#include "textures/textures.h"
-#include "textures/internal.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
+#include "stringlib.h"
+#include "textures/internal.h"
+#include "textures/textures.h"
+#include "ui/actions_bar.h"
+#include "ui/dialog.h"
 #include "ui/list_pane.h"
+#include "ui/title_bar.h"
+#include "view.h"
 
 static bool CheckExistingTexture(struct textures *txs, const char *name)
 {
@@ -52,11 +52,10 @@ static void PerformNewTexture(void)
 		return;
 	}
 
-	if (pos < 1
-	 && txs->num_textures > 0
-	 && StringHasPrefix(txs->textures[0]->name, "AA")
-	 && StringHasSuffix(active_pane->dir->path, "/TEXTURE1")
-	 && !UI_ConfirmDialogBox("New texture", "Create here", "Cancel",
+	if (pos < 1 && txs->num_textures > 0 &&
+	    StringHasPrefix(txs->textures[0]->name, "AA") &&
+	    StringHasSuffix(active_pane->dir->path, "/TEXTURE1") &&
+	    !UI_ConfirmDialogBox("New texture", "Create here", "Cancel",
 	                         "You are trying to insert a new texture\n"
 	                         "before the '%.8s' dummy texture. This\n"
 	                         "needs to be the first in the list, or\n"
@@ -89,8 +88,7 @@ static void PerformNewTexture(void)
 }
 
 const struct action new_texture_action = {
-	KEY_F(7), 'K', "NewTxt", ". New texture",
-	PerformNewTexture,
+    KEY_F(7), 'K', "NewTxt", ". New texture", PerformNewTexture,
 };
 
 static void PerformEditConfig(void)
@@ -118,8 +116,8 @@ static void PerformEditConfig(void)
 	// If the current revision of the WAD has changed since the call to
 	// `OpenDirent()`, we know it imported a new version of the lump.
 	// So detect this case and import it into the current directory.
-	if (!parent->readonly && parent->curr_revision != old_rev
-	 && TX_DirReload(active_pane->dir)) {
+	if (!parent->readonly && parent->curr_revision != old_rev &&
+	    TX_DirReload(active_pane->dir)) {
 		VFS_CommitChanges(active_pane->dir, "edit via text editor");
 		VFS_ClearSet(&active_pane->tagged);
 	}
@@ -134,13 +132,11 @@ static void PerformEditConfig(void)
 }
 
 const struct action edit_textures_action = {
-	KEY_F(4), 'F', "EditCfg", "Edit texture config",
-	PerformEditConfig,
+    KEY_F(4), 'F', "EditCfg", "Edit texture config", PerformEditConfig,
 };
 
 const struct action edit_pnames_action = {
-	KEY_F(4), 'F', "EditCfg", "Edit PNAMES config",
-	PerformEditConfig,
+    KEY_F(4), 'F', "EditCfg", "Edit PNAMES config", PerformEditConfig,
 };
 
 static void PerformDuplicateTexture(void)
@@ -188,8 +184,7 @@ static void PerformDuplicateTexture(void)
 }
 
 const struct action dup_texture_action = {
-	KEY_F(3), 'U', "DupTxt", ". Duplicate texture",
-	PerformDuplicateTexture,
+    KEY_F(3), 'U', "DupTxt", ". Duplicate texture", PerformDuplicateTexture,
 };
 
 static void PerformExportConfig(void)
@@ -201,9 +196,9 @@ static void PerformExportConfig(void)
 	if (active_pane->tagged.num_entries > 0) {
 		selected = &active_pane->tagged;
 	} else if (!UI_ConfirmDialogBox(
-	                "Export config", "Export", "Cancel",
-	                "You have not selected any textures to\n"
-	                "export. Export the entire directory?")) {
+	               "Export config", "Export", "Cancel",
+	               "You have not selected any textures to\n"
+	               "export. Export the entire directory?")) {
 		return;
 	} else {
 		selected = NULL;
@@ -214,16 +209,15 @@ static void PerformExportConfig(void)
 		return;
 	}
 
-	filename = UI_TextInputDialogBox(
-		"Export config",
-		"Export", 30, "Enter filename to export:");
+	filename = UI_TextInputDialogBox("Export config", "Export", 30,
+	                                 "Enter filename to export:");
 
 	if (filename == NULL) {
 		goto cancel;
 	}
 
-	if (VFS_EntryByName(other_pane->dir, filename) != NULL
-	 && !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
+	if (VFS_EntryByName(other_pane->dir, filename) != NULL &&
+	    !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
 	                         "Overwrite existing '%s'?", filename)) {
 		goto cancel;
 	}
@@ -233,8 +227,7 @@ static void PerformExportConfig(void)
 	// TODO: This should be written through VFS.
 	out = vfwrapfile(fopen(filename2, "w"));
 	if (out == NULL) {
-		UI_MessageBox("Failed to open file for write:\n%s",
-		              filename2);
+		UI_MessageBox("Failed to open file for write:\n%s", filename2);
 		vfclose(formatted);
 		goto cancel;
 	}
@@ -254,8 +247,7 @@ cancel:
 }
 
 const struct action export_texture_config = {
-	KEY_F(5), 'C', "ExpCfg", "> Export config",
-	PerformExportConfig,
+    KEY_F(5), 'C', "ExpCfg", "> Export config", PerformExportConfig,
 };
 
 static void MergeTexturesResultNotice(struct texture_bundle_merge_result *r)
@@ -305,8 +297,7 @@ static void MergePnamesResultNotice(struct texture_bundle_merge_result *r)
 	buf_len -= cnt;
 
 	if (r->pnames_present > 0) {
-		snprintf(p, buf_len, ", %d already present",
-		         r->pnames_present);
+		snprintf(p, buf_len, ", %d already present", r->pnames_present);
 	}
 
 	UI_ShowNotice("%s", buf);
@@ -340,8 +331,8 @@ static void PerformImportConfig(void)
 		return;
 	}
 
-	if (TX_BundleConfirmAddPnames(into, &b)
-	 && TX_BundleConfirmTextureOverwrite(into, &b)) {
+	if (TX_BundleConfirmAddPnames(into, &b) &&
+	    TX_BundleConfirmTextureOverwrite(into, &b)) {
 		TX_BundleMerge(into, insert_pos, &b, &merge_stats);
 		VFS_CommitChanges(other_pane->dir, "import from '%s'",
 		                  ent->name);
@@ -360,8 +351,7 @@ static void PerformImportConfig(void)
 }
 
 const struct action import_texture_config = {
-	KEY_F(5), 'C', "ImpCfg", "> Import config",
-	PerformImportConfig,
+    KEY_F(5), 'C', "ImpCfg", "> Import config", PerformImportConfig,
 };
 
 static void PerformNewPname(void)
@@ -401,8 +391,7 @@ static void PerformNewPname(void)
 }
 
 const struct action new_pname_action = {
-	KEY_F(7), 'K', "NewPname", ". New pname",
-	PerformNewPname,
+    KEY_F(7), 'K', "NewPname", ". New pname", PerformNewPname,
 };
 
 static void PerformCopyPnames(void)
@@ -454,8 +443,7 @@ static void PerformCopyPnames(void)
 }
 
 const struct action copy_pnames_action = {
-	KEY_F(5), 'C', "Copy", "> Copy names",
-	PerformCopyPnames,
+    KEY_F(5), 'C', "Copy", "> Copy names", PerformCopyPnames,
 };
 
 static void PerformCopyTextures(void)
@@ -483,21 +471,20 @@ static void PerformCopyTextures(void)
 		return;
 	}
 
-	if (TX_BundleConfirmAddPnames(into_bundle, &b)
-	 && TX_BundleConfirmTextureOverwrite(into_bundle, &b)) {
+	if (TX_BundleConfirmAddPnames(into_bundle, &b) &&
+	    TX_BundleConfirmTextureOverwrite(into_bundle, &b)) {
 		TX_BundleMerge(into_bundle, insert_pos, &b, &merge_stats);
 	}
 
 	TX_FreeBundle(&b);
 	VFS_CommitChanges(to_dir, "copy of %d textures",
 	                  merge_stats.textures_added +
-	                  merge_stats.textures_overwritten);
+	                      merge_stats.textures_overwritten);
 	VFS_Refresh(to_dir);
 
 	MergeTexturesResultNotice(&merge_stats);
 }
 
 const struct action copy_textures_action = {
-	KEY_F(5), 'C', "Copy", "> Copy textures",
-	PerformCopyTextures,
+    KEY_F(5), 'C', "Copy", "> Copy textures", PerformCopyTextures,
 };

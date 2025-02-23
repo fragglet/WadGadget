@@ -8,19 +8,19 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include <dirent.h>
+#include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <dirent.h>
 #include <strings.h>
+#include <sys/stat.h>
 
 #include "common.h"
-#include "stringlib.h"
-#include "fs/vfs.h"
 #include "fs/vfile.h"
+#include "fs/vfs.h"
+#include "stringlib.h"
 
 static int HasWadExtension(const char *name)
 {
@@ -36,8 +36,7 @@ static int OrderByName(const void *x, const void *y)
 {
 	const struct directory_entry *dx = x, *dy = y;
 	// Directories get listed before files.
-	int cmp = (dy->type == FILE_TYPE_DIR)
-	        - (dx->type == FILE_TYPE_DIR);
+	int cmp = (dy->type == FILE_TYPE_DIR) - (dx->type == FILE_TYPE_DIR);
 	if (cmp != 0) {
 		return cmp;
 	}
@@ -79,15 +78,16 @@ static bool _RealDirRefresh(struct directory *d,
 		free(path);
 		path = checked_strdup(dirent->d_name);
 
-		*entries = checked_realloc(*entries,
-			sizeof(struct directory_entry) * (*num_entries + 1));
+		*entries =
+		    checked_realloc(*entries, sizeof(struct directory_entry) *
+		                                  (*num_entries + 1));
 		ent = *entries + *num_entries;
 		ent->name = path;
-		ent->type = stat_ok && S_ISDIR(s.st_mode) ? FILE_TYPE_DIR :
-		            HasWadExtension(ent->name) ? FILE_TYPE_WAD :
-		            FILE_TYPE_FILE;
-		ent->size = stat_ok
-		         && ent->type != FILE_TYPE_DIR ? s.st_size : -1;
+		ent->type = stat_ok && S_ISDIR(s.st_mode) ? FILE_TYPE_DIR
+		          : HasWadExtension(ent->name)    ? FILE_TYPE_WAD
+		                                          : FILE_TYPE_FILE;
+		ent->size =
+		    stat_ok && ent->type != FILE_TYPE_DIR ? s.st_size : -1;
 		ent->serial_no = dirent->d_ino;
 		++*num_entries;
 	}
@@ -174,18 +174,14 @@ static bool RealDirRename(void *_dir, struct directory_entry *entry,
 }
 
 static const struct directory_funcs realdir_funcs = {
-	"file", "files",
-	RealDirRefresh,
-	RealDirOpen,
-	RealDirOpenDir,
-	RealDirRemove,
-	RealDirRename,
-	NULL,  // need_commit
-	NULL,  // commit
-	NULL,  // swap_entries
-	NULL,  // save_snapshot
-	NULL,  // restore_snapshot
-	NULL,  // free
+    "file",         "files",       RealDirRefresh, RealDirOpen,
+    RealDirOpenDir, RealDirRemove, RealDirRename,
+    NULL, // need_commit
+    NULL, // commit
+    NULL, // swap_entries
+    NULL, // save_snapshot
+    NULL, // restore_snapshot
+    NULL, // free
 };
 
 struct directory *VFS_OpenRealDir(const char *path)

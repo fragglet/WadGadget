@@ -10,14 +10,14 @@
 
 #include "stringlib.h"
 
+#include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
+#include <strings.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <errno.h>
-#include <strings.h>
 
 #include "common.h"
 
@@ -74,15 +74,15 @@ int StringConcat(char *dest, const char *src, size_t dest_size)
 // Returns non-zero if 's' begins with the specified prefix.
 int StringHasPrefix(const char *s, const char *prefix)
 {
-	return strlen(s) >= strlen(prefix)
-	    && strncmp(s, prefix, strlen(prefix)) == 0;
+	return strlen(s) >= strlen(prefix) &&
+	       strncmp(s, prefix, strlen(prefix)) == 0;
 }
 
 // Returns non-zero if 's' ends with the specified suffix.
 int StringHasSuffix(const char *s, const char *suffix)
 {
-	return strlen(s) >= strlen(suffix)
-	    && strcmp(s + strlen(s) - strlen(suffix), suffix) == 0;
+	return strlen(s) >= strlen(suffix) &&
+	       strcmp(s + strlen(s) - strlen(suffix), suffix) == 0;
 }
 
 // Case-insensitive version of strstr()
@@ -107,7 +107,6 @@ const char *StrCaseStr(const char *haystack, const char *needle)
 
 	return NULL;
 }
-
 
 // Returns a copy of `haystack` with `needle` replaced by `replacement`.
 char *StringReplace(const char *haystack, const char *needle,
@@ -136,7 +135,8 @@ char *StringReplace(const char *haystack, const char *needle,
 
 	// Construct new string.
 	result = CheckAllocation(malloc(result_len));
-	dst = result; dst_len = result_len;
+	dst = result;
+	dst_len = result_len;
 	p = haystack;
 
 	while (*p != '\0') {
@@ -147,7 +147,8 @@ char *StringReplace(const char *haystack, const char *needle,
 			dst_len -= strlen(replacement);
 		} else {
 			*dst = *p;
-			++dst; --dst_len;
+			++dst;
+			--dst_len;
 			++p;
 		}
 	}
@@ -181,7 +182,8 @@ char *StringJoin(const char *sep, const char *s, ...)
 	StringCopy(result, s, result_len);
 
 	va_start(args, s);
-	r = result; r_len = result_len;
+	r = result;
+	r_len = result_len;
 	for (;;) {
 		size_t v_len;
 		v = va_arg(args, const char *);
@@ -190,11 +192,13 @@ char *StringJoin(const char *sep, const char *s, ...)
 		}
 
 		StringConcat(r, sep, r_len);
-		r += sep_len; r_len -= sep_len;
+		r += sep_len;
+		r_len -= sep_len;
 
 		v_len = strlen(v);
 		StringConcat(r, v, r_len);
-		r += v_len; r_len -= v_len;
+		r += v_len;
+		r_len -= v_len;
 	}
 	va_end(args);
 
@@ -292,7 +296,7 @@ char *PathSanitize(const char *filename)
 	const char *src_filename, *src;
 
 	if (filename[0] == '/') {
-		result = StringJoin("/",  filename, "", NULL);
+		result = StringJoin("/", filename, "", NULL);
 		src_filename = filename;
 	} else {
 		char cwd[128];
@@ -333,11 +337,12 @@ char *PathSanitize(const char *filename)
 		// path starts with "\" -> "X:\" (X from WD)
 		// path starts "X:" (not "X:\") -> WD on X:
 		*dst = *src;
-		++dst; ++src;
+		++dst;
+		++src;
 	}
 
 	// No trailing '/', except in the case of root dir.
-	while (dst > result + 1 && *(dst-1) == '/') {
+	while (dst > result + 1 && *(dst - 1) == '/') {
 		--dst;
 	}
 

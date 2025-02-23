@@ -11,13 +11,13 @@
 #ifndef UI__LIST_PANE_H_INCLUDED
 #define UI__LIST_PANE_H_INCLUDED
 
-#include <limits.h>
 #include <curses.h>
+#include <limits.h>
 #include <stdbool.h>
 
 #include "ui/pane.h"
 
-#define LIST_PANE_END_MARKER  INT_MAX
+#define LIST_PANE_END_MARKER INT_MAX
 
 struct list_pane_funcs {
 	void (*draw_element)(WINDOW *w, int index, void *data);
@@ -27,7 +27,7 @@ struct list_pane_funcs {
 struct list_pane {
 	struct pane pane;
 	const struct list_pane_funcs *funcs;
-	void *data;  // for funcs
+	void *data; // for funcs
 	char *title;
 	unsigned int window_offset, selected;
 	int active;

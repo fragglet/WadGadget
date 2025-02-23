@@ -17,8 +17,8 @@ struct struct_field;
 
 struct struct_field_type {
 	const char *type_name;
-	void (*decode)(const struct struct_field *field, void *data,
-	               char *buf, size_t buf_len);
+	void (*decode)(const struct struct_field *field, void *data, char *buf,
+	               size_t buf_len);
 	size_t (*size)(const struct struct_field *field);
 };
 

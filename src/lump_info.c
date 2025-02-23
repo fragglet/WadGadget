@@ -8,18 +8,18 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
-#include <assert.h>
 #include <stdio.h>
+#include <string.h>
 #include <strings.h>
 
 #include "common.h"
 #include "conv/audio.h"
 #include "conv/graphic.h"
-#include "stringlib.h"
 #include "fs/wad_file.h"
+#include "stringlib.h"
 
 struct wad_file;
 
@@ -45,61 +45,73 @@ struct sized_lump {
 };
 
 const struct lump_section lump_section_sprites = {
-	"S_START", "SS_START", "S_END", "SS_END",
+    "S_START",
+    "SS_START",
+    "S_END",
+    "SS_END",
 };
 
 const struct lump_section lump_section_patches = {
-	"P_START", "PP_START", "P_END", "PP_END",
+    "P_START",
+    "PP_START",
+    "P_END",
+    "PP_END",
 };
 
 const struct lump_section lump_section_flats = {
-	"F_START", "FF_START", "F_END", "FF_END",
+    "F_START",
+    "FF_START",
+    "F_END",
+    "FF_END",
 };
 
 const struct lump_section lump_section_colormaps = {
-	"C_START", "C_START", "C_END", "C_END",
+    "C_START",
+    "C_START",
+    "C_END",
+    "C_END",
 };
 
 static const struct lump_description special_lumps[] = {
-	{"TINTTAB",   "Translucency table"},
-	{"XLATAB",    "Translucency table"},
-	{"AUTOPAGE",  "Map background texture"},
-	{"GENMIDI",   "OPL FM synth instrs."},
-	{NULL, NULL},
+    {"TINTTAB",  "Translucency table"    },
+    {"XLATAB",   "Translucency table"    },
+    {"AUTOPAGE", "Map background texture"},
+    {"GENMIDI",  "OPL FM synth instrs."  },
+    {NULL,       NULL                    },
 };
 
 static const struct lump_description level_lumps[] = {
-	{"THINGS",    "Level things data"},
-	{"LINEDEFS",  "Level linedef data"},
-	{"SIDEDEFS",  "Level sidedef data"},
-	{"VERTEXES",  "Level vertex data"},
-	{"SEGS",      "Level wall segments"},
-	{"SSECTORS",  "Level subsectors"},
-	{"NODES",     "Level BSP nodes"},
-	{"SECTORS",   "Level sector data"},
-	{"REJECT",    "Level reject table"},
-	{"BLOCKMAP",  "Level blockmap data"},
-	{"BEHAVIOR",  "Hexen compiled scripts"},
-	{"SCRIPTS",   "Hexen script source"},
-	{"LEAFS",     "PSX/D64 node leaves"},
-	{"LIGHTS",    "PSX/D64 colored lights"},
-	{"MACROS",    "Doom 64 Macros"},
-	{"GL_VERT",   "OpenGL extra vertices"},
-	{"GL_SEGS",   "OpenGL line segments"},
-	{"GL_SSECT",  "OpenGL subsectors"},
-	{"GL_NODES",  "OpenGL BSP nodes"},
-	{"GL_PVS",    "Potential Vis. Set"},
-	{"TEXTMAP",   "UDMF level data"},
-	{"DIALOGUE",  "Strife conversations"},
-	{"ZNODES",    "UDMF BSP data"},
-	{"ENDMAP",    "UDMF end of level"},
-	{NULL, NULL},
+    {"THINGS",   "Level things data"     },
+    {"LINEDEFS", "Level linedef data"    },
+    {"SIDEDEFS", "Level sidedef data"    },
+    {"VERTEXES", "Level vertex data"     },
+    {"SEGS",     "Level wall segments"   },
+    {"SSECTORS", "Level subsectors"      },
+    {"NODES",    "Level BSP nodes"       },
+    {"SECTORS",  "Level sector data"     },
+    {"REJECT",   "Level reject table"    },
+    {"BLOCKMAP", "Level blockmap data"   },
+    {"BEHAVIOR", "Hexen compiled scripts"},
+    {"SCRIPTS",  "Hexen script source"   },
+    {"LEAFS",    "PSX/D64 node leaves"   },
+    {"LIGHTS",   "PSX/D64 colored lights"},
+    {"MACROS",   "Doom 64 Macros"        },
+    {"GL_VERT",  "OpenGL extra vertices" },
+    {"GL_SEGS",  "OpenGL line segments"  },
+    {"GL_SSECT", "OpenGL subsectors"     },
+    {"GL_NODES", "OpenGL BSP nodes"      },
+    {"GL_PVS",   "Potential Vis. Set"    },
+    {"TEXTMAP",  "UDMF level data"       },
+    {"DIALOGUE", "Strife conversations"  },
+    {"ZNODES",   "UDMF BSP data"         },
+    {"ENDMAP",   "UDMF end of level"     },
+    {NULL,       NULL                    },
 };
 
 static const struct sized_lump lumps_by_size[] = {
-	{4000,   "Text mode screen"},
-	{256,    "Color translation table"},
-	{0,      "Empty"},
+    {4000, "Text mode screen"       },
+    {256,  "Color translation table"},
+    {0,    "Empty"                  },
 };
 
 bool LI_LumpInSection(struct wad_file *wf, unsigned int lump_index,
@@ -110,8 +122,8 @@ bool LI_LumpInSection(struct wad_file *wf, unsigned int lump_index,
 	int i;
 
 	for (i = lump_index; i >= 0 && i < num_lumps; i--) {
-		if (!strncasecmp(dir[i].name, section->start1, 8)
-		 || !strncasecmp(dir[i].name, section->start2, 8)) {
+		if (!strncasecmp(dir[i].name, section->start1, 8) ||
+		    !strncasecmp(dir[i].name, section->start2, 8)) {
 			break;
 		}
 	}
@@ -119,8 +131,8 @@ bool LI_LumpInSection(struct wad_file *wf, unsigned int lump_index,
 		return false;
 	}
 	for (i = lump_index + 1; i < num_lumps; i++) {
-		if (!strncasecmp(dir[i].name, section->end1, 8)
-		 || !strncasecmp(dir[i].name, section->end2, 8)) {
+		if (!strncasecmp(dir[i].name, section->end1, 8) ||
+		    !strncasecmp(dir[i].name, section->end2, 8)) {
 			return true;
 		}
 	}
@@ -156,8 +168,8 @@ static void LevelLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_level = {
-	LevelLumpCheck,
-	LevelLumpFormat,
+    LevelLumpCheck,
+    LevelLumpFormat,
 };
 
 // "Special" one-of-a-kind lumps that are listed in the special_lumps array.
@@ -175,8 +187,8 @@ static void SpecialLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_special = {
-	SpecialLumpCheck,
-	SpecialLumpFormat,
+    SpecialLumpCheck,
+    SpecialLumpFormat,
 };
 
 // PCM sound effects.
@@ -185,9 +197,9 @@ static bool SoundLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
 	struct sound_header sound = *((struct sound_header *) buf);
 	S_SwapSoundHeader(&sound);
-	return ent->size >= 16 && sound.format == 3
-	   && (sound.sample_rate == 8000 || sound.sample_rate == 11025
-	    || sound.sample_rate == 22050 || sound.sample_rate == 44100);
+	return ent->size >= 16 && sound.format == 3 &&
+	       (sound.sample_rate == 8000 || sound.sample_rate == 11025 ||
+	        sound.sample_rate == 22050 || sound.sample_rate == 44100);
 }
 
 static void SoundLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
@@ -203,9 +215,9 @@ static void SoundLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_sound = {
-	SoundLumpCheck,
-	SoundLumpFormat,
-	".wav",
+    SoundLumpCheck,
+    SoundLumpFormat,
+    ".wav",
 };
 
 // Graphic lump (sprite, texture, etc.)
@@ -215,10 +227,10 @@ static bool GraphicLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 	struct patch_header patch = *((struct patch_header *) buf);
 	V_SwapPatchHeader(&patch);
 
-	return ent->size >= 8 && patch.width > 0 && patch.height > 0
-	    && patch.width <= 320 && patch.height <= 200
-	    && patch.leftoffset >= -256 && patch.leftoffset < 256
-	    && patch.topoffset >= -256 && patch.topoffset < 256;
+	return ent->size >= 8 && patch.width > 0 && patch.height > 0 &&
+	       patch.width <= 320 && patch.height <= 200 &&
+	       patch.leftoffset >= -256 && patch.leftoffset < 256 &&
+	       patch.topoffset >= -256 && patch.topoffset < 256;
 }
 
 static void GraphicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
@@ -228,15 +240,14 @@ static void GraphicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	V_SwapPatchHeader(&patch);
 
 	snprintf(descr_buf, descr_buf_len,
-	         "Graphic\nDimensions: %dx%d\nOffsets: %d, %d",
-	         patch.width, patch.height,
-	         patch.leftoffset, patch.topoffset);
+	         "Graphic\nDimensions: %dx%d\nOffsets: %d, %d", patch.width,
+	         patch.height, patch.leftoffset, patch.topoffset);
 }
 
 const struct lump_type lump_type_graphic = {
-	GraphicLumpCheck,
-	GraphicLumpFormat,
-	".png",
+    GraphicLumpCheck,
+    GraphicLumpFormat,
+    ".png",
 };
 
 // Floor/ceiling texture.
@@ -255,9 +266,9 @@ static void FlatLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_flat = {
-	FlatLumpCheck,
-	FlatLumpFormat,
-	".flat.png",
+    FlatLumpCheck,
+    FlatLumpFormat,
+    ".flat.png",
 };
 
 // DMX .MUS format.
@@ -274,9 +285,9 @@ static void MusLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_mus = {
-	MusLumpCheck,
-	MusLumpFormat,
-	".mid",
+    MusLumpCheck,
+    MusLumpFormat,
+    ".mid",
 };
 
 // Embedded MIDI file (also supported by DMX)
@@ -293,9 +304,9 @@ static void MidiLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_midi = {
-	MidiLumpCheck,
-	MidiLumpFormat,
-	".mid",
+    MidiLumpCheck,
+    MidiLumpFormat,
+    ".mid",
 };
 
 // DMX GUS instrument mappings.
@@ -311,20 +322,20 @@ static void DmxGusFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_dmxgus = {
-	DmxGusCheck,
-	DmxGusFormat,
-	".ini",
+    DmxGusCheck,
+    DmxGusFormat,
+    ".ini",
 };
 
 static const struct {
 	int code;
 	const char *str;
 } versions[] = {
-	{106, "v1.666"},
-	{107, "v1.7/1.7a"},
-	{108, "v1.8"},
-	{109, "v1.9"},
-	{0},
+    {106, "v1.666"},
+    {107, "v1.7/1.7a"},
+    {108, "v1.8"},
+    {109, "v1.9"},
+    {0},
 };
 
 static const char *VersionCodeString(int code)
@@ -356,29 +367,30 @@ static void DemoLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	const char *modestr;
 	int ep, map;
 
-	ep = buf[2]; map = buf[3];
+	ep = buf[2];
+	map = buf[3];
 	if (ep != 1) {
 		snprintf(level_buf, sizeof(level_buf), "E%dM%d", ep, map);
 	} else if (map < 10) {
-		snprintf(level_buf, sizeof(level_buf),
-		         "E1M%d or MAP%02d", map, map);
+		snprintf(level_buf, sizeof(level_buf), "E1M%d or MAP%02d", map,
+		         map);
 	} else {
 		snprintf(level_buf, sizeof(level_buf), "MAP%02d", map);
 	}
 
 	switch (buf[4]) {
-		case 0:
-			modestr = "SP/Coop";
-			break;
-		case 1:
-			modestr = "Deathmatch";
-			break;
-		case 2:
-			modestr = "Altdeath";
-			break;
-		default:
-			modestr = "";
-			break;
+	case 0:
+		modestr = "SP/Coop";
+		break;
+	case 1:
+		modestr = "Deathmatch";
+		break;
+	case 2:
+		modestr = "Altdeath";
+		break;
+	default:
+		modestr = "";
+		break;
 	}
 
 	snprintf(descr_buf, descr_buf_len,
@@ -387,8 +399,8 @@ static void DemoLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_demo = {
-	DemoLumpCheck,
-	DemoLumpFormat,
+    DemoLumpCheck,
+    DemoLumpFormat,
 };
 
 static bool PcSpeakerLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
@@ -404,17 +416,17 @@ static bool PcSpeakerLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 }
 
 static void PcSpeakerLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
-                           char *descr_buf, size_t descr_buf_len)
+                                char *descr_buf, size_t descr_buf_len)
 {
 	size_t len = buf[2] | (buf[3] << 8);
 
-	snprintf(descr_buf, descr_buf_len,
-	         "PC speaker sound\nLength: %0.02fs", (float) len / 140);
+	snprintf(descr_buf, descr_buf_len, "PC speaker sound\nLength: %0.02fs",
+	         (float) len / 140);
 }
 
 const struct lump_type lump_type_pcspeaker = {
-	PcSpeakerLumpCheck,
-	PcSpeakerLumpFormat,
+    PcSpeakerLumpCheck,
+    PcSpeakerLumpFormat,
 };
 
 static bool DehackedLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
@@ -429,16 +441,16 @@ static void DehackedLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_dehacked = {
-	DehackedLumpCheck,
-	DehackedLumpFormat,
-	".deh",
+    DehackedLumpCheck,
+    DehackedLumpFormat,
+    ".deh",
 };
 
 static bool PaletteCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return (!strcasecmp(ent->name, "PLAYPAL")
-	     || !strcasecmp(ent->name, "PALPREF"))
-	    && ent->size > 0 && (ent->size % (256 * 3)) == 0;
+	return (!strcasecmp(ent->name, "PLAYPAL") ||
+	        !strcasecmp(ent->name, "PALPREF")) &&
+	       ent->size > 0 && (ent->size % (256 * 3)) == 0;
 }
 
 static void PaletteFormat(struct wad_file_entry *ent, uint8_t *buf,
@@ -449,29 +461,29 @@ static void PaletteFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_palette = {
-	PaletteCheck,
-	PaletteFormat,
-	".png",
+    PaletteCheck,
+    PaletteFormat,
+    ".png",
 };
 
 static bool ColormapCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return ent->size > 0 && (ent->size % 256) == 0
-	    && (!strncasecmp(ent->name, "COLORMAP", 8)
-	     || !strncasecmp(ent->name, "FOGMAP", 8));
+	return ent->size > 0 && (ent->size % 256) == 0 &&
+	       (!strncasecmp(ent->name, "COLORMAP", 8) ||
+	        !strncasecmp(ent->name, "FOGMAP", 8));
 }
 
 static void ColormapFormat(struct wad_file_entry *ent, uint8_t *buf,
-                          char *descr_buf, size_t descr_buf_len)
+                           char *descr_buf, size_t descr_buf_len)
 {
 	snprintf(descr_buf, descr_buf_len, "Colormap (%d maps)",
 	         ent->size / 256);
 }
 
 const struct lump_type lump_type_colormap = {
-	ColormapCheck,
-	ColormapFormat,
-	".cmap.png",
+    ColormapCheck,
+    ColormapFormat,
+    ".cmap.png",
 };
 
 // Lump types identified by fixed size. This type is last in the identification
@@ -497,15 +509,15 @@ static bool SizedLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 }
 
 static void SizedLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
-                           char *descr_buf, size_t descr_buf_len)
+                            char *descr_buf, size_t descr_buf_len)
 {
 	const struct sized_lump *lt = LumpTypeForSize(ent->size);
 	snprintf(descr_buf, descr_buf_len, "%s", lt->description);
 }
 
 const struct lump_type lump_type_sized = {
-	SizedLumpCheck,
-	SizedLumpFormat,
+    SizedLumpCheck,
+    SizedLumpFormat,
 };
 
 // Plain text lumps, as found in Hexen IWAD and also used by source ports.
@@ -528,8 +540,8 @@ static bool IsPlainText(const unsigned char *buf, size_t buf_len)
 
 static bool PlainTextLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return ent->size >= LUMP_HEADER_LEN
-	    && IsPlainText(buf, LUMP_HEADER_LEN);
+	return ent->size >= LUMP_HEADER_LEN &&
+	       IsPlainText(buf, LUMP_HEADER_LEN);
 }
 
 static void PlainTextLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
@@ -539,9 +551,9 @@ static void PlainTextLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_plaintext = {
-	PlainTextLumpCheck,
-	PlainTextLumpFormat,
-	".txt",
+    PlainTextLumpCheck,
+    PlainTextLumpFormat,
+    ".txt",
 };
 
 // TEXTURE1 etc.
@@ -561,9 +573,9 @@ static void TexturesFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_textures = {
-	TexturesCheck,
-	TexturesFormat,
-	".txt",
+    TexturesCheck,
+    TexturesFormat,
+    ".txt",
 };
 
 // Patch names list lump
@@ -583,9 +595,9 @@ static void PnamesFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_pnames = {
-	PnamesCheck,
-	PnamesFormat,
-	".txt",
+    PnamesCheck,
+    PnamesFormat,
+    ".txt",
 };
 
 // Hexen fullscreen image
@@ -595,16 +607,16 @@ static bool FullscreenImageCheck(struct wad_file_entry *ent, uint8_t *buf)
 }
 
 static void FullscreenImageFormat(struct wad_file_entry *ent, uint8_t *buf,
-                         char *descr_buf, size_t descr_buf_len)
+                                  char *descr_buf, size_t descr_buf_len)
 {
 	snprintf(descr_buf, descr_buf_len,
 	         "Hexen fullscreen image\nDimensions: 320x200");
 }
 
 const struct lump_type lump_type_fullscreen_image = {
-	FullscreenImageCheck,
-	FullscreenImageFormat,
-	".fullscreen.png",
+    FullscreenImageCheck,
+    FullscreenImageFormat,
+    ".fullscreen.png",
 };
 
 // Hexen hires loading screen
@@ -621,9 +633,9 @@ static void HexenHiresImageFormat(struct wad_file_entry *ent, uint8_t *buf,
 }
 
 const struct lump_type lump_type_hexen_hires_image = {
-	HexenHiresImageCheck,
-	HexenHiresImageFormat,
-	".hires.png",
+    HexenHiresImageCheck,
+    HexenHiresImageFormat,
+    ".hires.png",
 };
 
 // Fallback, "generic lump"
@@ -634,39 +646,38 @@ static bool UnknownLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 }
 
 static void UnknownLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
-                            char *descr_buf, size_t descr_buf_len)
+                              char *descr_buf, size_t descr_buf_len)
 {
 	snprintf(descr_buf, descr_buf_len,
-	         "%02x %02x %02x %02x %02x %02x %02x %02x",
-	         buf[0], buf[1], buf[2], buf[3],
-	         buf[4], buf[5], buf[6], buf[7]);
+	         "%02x %02x %02x %02x %02x %02x %02x %02x", buf[0], buf[1],
+	         buf[2], buf[3], buf[4], buf[5], buf[6], buf[7]);
 }
 
 const struct lump_type lump_type_unknown = {
-	UnknownLumpCheck,
-	UnknownLumpFormat,
+    UnknownLumpCheck,
+    UnknownLumpFormat,
 };
 
 static const struct lump_type *lump_types[] = {
-	&lump_type_dehacked,
-	&lump_type_level,
-	&lump_type_special,
-	&lump_type_sound,
-	&lump_type_textures,
-	&lump_type_pnames,
-	&lump_type_graphic,
-	&lump_type_mus,
-	&lump_type_dmxgus,
-	&lump_type_midi,
-	&lump_type_demo,
-	&lump_type_pcspeaker,
-	&lump_type_fullscreen_image,
-	&lump_type_hexen_hires_image,
-	&lump_type_palette,
-	&lump_type_colormap,
-	&lump_type_sized,
-	&lump_type_plaintext,
-	&lump_type_unknown,
+    &lump_type_dehacked,
+    &lump_type_level,
+    &lump_type_special,
+    &lump_type_sound,
+    &lump_type_textures,
+    &lump_type_pnames,
+    &lump_type_graphic,
+    &lump_type_mus,
+    &lump_type_dmxgus,
+    &lump_type_midi,
+    &lump_type_demo,
+    &lump_type_pcspeaker,
+    &lump_type_fullscreen_image,
+    &lump_type_hexen_hires_image,
+    &lump_type_palette,
+    &lump_type_colormap,
+    &lump_type_sized,
+    &lump_type_plaintext,
+    &lump_type_unknown,
 };
 
 const struct lump_type *LI_IdentifyLump(struct wad_file *f,
@@ -681,13 +692,13 @@ const struct lump_type *LI_IdentifyLump(struct wad_file *f,
 	// Flats are a special case where we look at lump size but also
 	// check the section of the WAD; it must be between
 	// F_START/F_END markers.
-	if (ent->size >= 4096 && (ent->size % 64) == 0
-	 && LI_LumpInSection(f, lump_index, &lump_section_flats)) {
+	if (ent->size >= 4096 && (ent->size % 64) == 0 &&
+	    LI_LumpInSection(f, lump_index, &lump_section_flats)) {
 		return &lump_type_flat;
 	}
 
-	if (ent->size > 0 && (ent->size % 256) == 0
-	 && LI_LumpInSection(f, lump_index, &lump_section_colormaps)) {
+	if (ent->size > 0 && (ent->size % 256) == 0 &&
+	    LI_LumpInSection(f, lump_index, &lump_section_colormaps)) {
 		return &lump_type_colormap;
 	}
 

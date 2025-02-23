@@ -33,14 +33,14 @@ struct patch {
 	int16_t originx, originy;
 	uint16_t patch;
 	uint16_t stepdir;  // unused
-	uint16_t colormap;  // unused
+	uint16_t colormap; // unused
 };
 
 struct texture {
 	char name[8];
-	uint32_t masked;  // unused
+	uint32_t masked; // unused
 	uint16_t width, height;
-	uint32_t columndirectory;  // unused
+	uint32_t columndirectory; // unused
 	uint16_t patchcount;
 	struct patch patches[1];
 };
@@ -76,8 +76,7 @@ struct pnames *TX_UnmarshalPnames(VFILE *f);
 int TX_AppendPname(struct pnames *pn, const char *name);
 int TX_GetPnameIndex(struct pnames *pn, const char *name);
 void TX_RemovePname(struct pnames *pn, unsigned int idx);
-void TX_RenamePname(struct pnames *pn, unsigned int idx,
-                    const char *name);
+void TX_RenamePname(struct pnames *pn, unsigned int idx, const char *name);
 uint64_t TX_PnameSerialNo(const char *pname);
 void TX_FreePnames(struct pnames *t);
 
@@ -129,11 +128,11 @@ bool TX_BundleConfirmTextureOverwrite(struct texture_bundle *into,
                                       struct texture_bundle *from);
 
 struct texture_bundle_merge_result {
-	int pnames_added;  // Number of PNAMEs added to directory
-	int pnames_present;  // Number of PNAMEs already present in directory
-	int textures_added;  // Number of new tetxures added
-	int textures_overwritten;  // Number of new textures overwritten
-	int textures_present;  // Number of new textures present & identical
+	int pnames_added;   // Number of PNAMEs added to directory
+	int pnames_present; // Number of PNAMEs already present in directory
+	int textures_added; // Number of new tetxures added
+	int textures_overwritten; // Number of new textures overwritten
+	int textures_present;     // Number of new textures present & identical
 };
 
 void TX_BundleMerge(struct texture_bundle *into, unsigned int position,

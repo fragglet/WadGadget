@@ -11,8 +11,8 @@
 #ifndef FS__VFILE_H_INCLUDED
 #define FS__VFILE_H_INCLUDED
 
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 typedef struct _VFILE VFILE;
 typedef struct _VFILE_CONTEXT VFILE_CONTEXT;
@@ -23,8 +23,8 @@ struct _VFILE_CONTEXT {
 
 struct vfile_functions {
 	size_t (*read)(void *ptr, size_t size, size_t nitems, void *handle);
-	size_t (*write)(const void *ptr, size_t size,
-	                size_t nitems, void *handle);
+	size_t (*write)(const void *ptr, size_t size, size_t nitems,
+	                void *handle);
 
 	int (*seek)(void *handle, long offset, int whence);
 	long (*tell)(void *handle);
@@ -59,10 +59,11 @@ void vfsync(VFILE *stream);
 void vfclose(VFILE *stream);
 VFILE_CONTEXT *vfswitchcontext(VFILE *f, VFILE_CONTEXT *ctx);
 
-#define WITH_VFCONTEXT(vf, ctx, statement) do { \
-		VFILE_CONTEXT *saved_ctx = vfswitchcontext(vf, ctx); \
-		statement; \
-		vfswitchcontext(vf, saved_ctx); \
+#define WITH_VFCONTEXT(vf, ctx, statement)                                     \
+	do {                                                                   \
+		VFILE_CONTEXT *saved_ctx = vfswitchcontext(vf, ctx);           \
+		statement;                                                     \
+		vfswitchcontext(vf, saved_ctx);                                \
 	} while (0)
 
 #endif /* #ifndef FS__VFILE_H_INCLUDED */

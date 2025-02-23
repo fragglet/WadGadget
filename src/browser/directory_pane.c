@@ -18,9 +18,9 @@
 
 #include "browser/actions.h"
 #include "browser/browser.h"
-#include "ui/colors.h"
 #include "stringlib.h"
 #include "ui/actions_bar.h"
+#include "ui/colors.h"
 #include "ui/pane.h"
 
 static int HeaderEntries(struct directory_pane *dp)
@@ -59,23 +59,23 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 	} else {
 		ent = &dp->dir->entries[ent_idx];
 		switch (ent->type) {
-			case FILE_TYPE_DIR:
-				wattron(win, A_BOLD);
-				prefix = "/";
-				break;
-			case FILE_TYPE_WAD:
-				wattron(win, COLOR_PAIR(PAIR_WAD_FILE));
-				break;
-			default:
-				wattron(win, COLOR_PAIR(PAIR_WHITE_BLACK));
-				break;
+		case FILE_TYPE_DIR:
+			wattron(win, A_BOLD);
+			prefix = "/";
+			break;
+		case FILE_TYPE_WAD:
+			wattron(win, COLOR_PAIR(PAIR_WAD_FILE));
+			break;
+		default:
+			wattron(win, COLOR_PAIR(PAIR_WHITE_BLACK));
+			break;
 		}
 
 		// Show insert point for where we'll import into the WAD:
-		if (!dp->pane.active && idx == dp->pane.selected
-		 && dp->dir->type != FILE_TYPE_DIR
-		 && dp->dir->type != FILE_TYPE_PALETTES
-		 && dp->dir->type != FILE_TYPE_PNAMES_LIST) {
+		if (!dp->pane.active && idx == dp->pane.selected &&
+		    dp->dir->type != FILE_TYPE_DIR &&
+		    dp->dir->type != FILE_TYPE_PALETTES &&
+		    dp->dir->type != FILE_TYPE_PNAMES_LIST) {
 			if ((termattrs() & A_UNDERLINE) != 0) {
 				wattron(win, A_UNDERLINE);
 			} else {
@@ -154,8 +154,7 @@ void B_DirectoryPaneSelectByName(struct directory_pane *p, const char *name)
 	}
 }
 
-void B_DirectoryPaneSelectBySerial(struct directory_pane *p,
-                                   uint64_t serial_no)
+void B_DirectoryPaneSelectBySerial(struct directory_pane *p, uint64_t serial_no)
 {
 	struct directory_entry *entry = VFS_EntryBySerial(p->dir, serial_no);
 	if (entry != NULL) {
@@ -174,8 +173,9 @@ static bool PrefixSearch(struct directory_pane *dp, const char *needle,
 		ent = &dp->dir->entries[i];
 		if (!strncasecmp(ent->name, needle, needle_len)) {
 			dp->pane.selected = i + HeaderEntries(dp);
-			dp->pane.window_offset = dp->pane.selected >= 10 ?
-			    dp->pane.selected - 10 : 0;
+			dp->pane.window_offset = dp->pane.selected >= 10
+			                           ? dp->pane.selected - 10
+			                           : 0;
 			return true;
 		}
 	}
@@ -199,8 +199,10 @@ static bool SubstringSearch(struct directory_pane *dp, const char *needle,
 		for (j = 0; j < haystack_len - needle_len + 1; j++) {
 			if (!strncasecmp(&ent->name[j], needle, needle_len)) {
 				dp->pane.selected = i + HeaderEntries(dp);
-				dp->pane.window_offset = dp->pane.selected >= 10 ?
-				    dp->pane.selected - 10 : 0;
+				dp->pane.window_offset =
+				    dp->pane.selected >= 10
+				        ? dp->pane.selected - 10
+				        : 0;
 				return true;
 			}
 		}
@@ -235,14 +237,14 @@ bool B_DirectoryPaneSearchAgain(void *p, const char *needle)
 	struct directory_pane *dp = p;
 	int start_index = dp->pane.selected;
 
-	if (strlen(needle) == 0
-	 || (dp->dir->parent_name != NULL && !strcmp(needle, ".."))) {
+	if (strlen(needle) == 0 ||
+	    (dp->dir->parent_name != NULL && !strcmp(needle, ".."))) {
 		return false;
 	}
 
 	// When searching again, we only do substring matches.
-	return SubstringSearch(dp, needle, start_index)
-	    || SubstringSearch(dp, needle, 0);
+	return SubstringSearch(dp, needle, start_index) ||
+	       SubstringSearch(dp, needle, 0);
 }
 
 int B_DirectoryPaneSelected(struct directory_pane *p)
@@ -284,8 +286,8 @@ void B_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set)
 }
 
 static const struct list_pane_funcs directory_pane_funcs = {
-	DrawEntry,
-	NumEntries,
+    DrawEntry,
+    NumEntries,
 };
 
 struct directory_entry *B_DirectoryPaneEntry(struct directory_pane *p)
@@ -358,8 +360,7 @@ doubleclick_continuation B_DirectoryPaneMouseClick(void *_dp, int x, int y)
 	return NULL;
 }
 
-struct directory_pane *UI_NewDirectoryPane(
-	WINDOW *w, struct directory *dir)
+struct directory_pane *UI_NewDirectoryPane(WINDOW *w, struct directory *dir)
 {
 	struct directory_pane *p;
 

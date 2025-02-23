@@ -18,8 +18,8 @@
 #include "fs/vfile.h"
 #include "fs/wad_file.h"
 
-#define VFS_REVISION_DESCR_LEN  40
-#define VFS_PARENT_DIRECTORY (&_vfs_parent_directory)
+#define VFS_REVISION_DESCR_LEN 40
+#define VFS_PARENT_DIRECTORY   (&_vfs_parent_directory)
 
 enum file_type {
 	FILE_TYPE_DIR,
@@ -35,7 +35,10 @@ enum file_type {
 	FILE_TYPE_PALETTE,
 };
 
-#define EMPTY_FILE_SET {NULL, 0}
+#define EMPTY_FILE_SET                                                         \
+	{                                                                      \
+		NULL, 0                                                        \
+	}
 
 struct file_set {
 	uint64_t *entries;
@@ -54,8 +57,7 @@ struct directory_funcs {
 	void (*refresh)(void *dir, struct directory_entry **entries,
 	                size_t *num_entries);
 	VFILE *(*open)(void *dir, struct directory_entry *entry);
-	struct directory *(*open_dir)(void *dir,
-	                              struct directory_entry *entry);
+	struct directory *(*open_dir)(void *dir, struct directory_entry *entry);
 	bool (*remove)(void *dir, struct directory_entry *entry);
 	bool (*rename)(void *dir, struct directory_entry *entry,
 	               const char *new_name);
@@ -74,7 +76,6 @@ struct directory_revision {
 	size_t snapshot_len;
 	struct directory_revision *prev, *next;
 };
-
 
 struct directory {
 	enum file_type type;
@@ -109,8 +110,8 @@ struct directory_entry *VFS_EntryByName(struct directory *dir,
                                         const char *name);
 struct directory_entry *VFS_IterateSet(struct directory *dir,
                                        struct file_set *set, int *idx);
-void VFS_DescribeSet(struct directory *dir, struct file_set *set,
-                     char *buf, size_t buf_len);
+void VFS_DescribeSet(struct directory *dir, struct file_set *set, char *buf,
+                     size_t buf_len);
 void VFS_DescribeSize(const struct directory_entry *ent, char buf[10]);
 bool VFS_SwapEntries(struct directory *dir, unsigned int x, unsigned int y);
 
@@ -121,8 +122,8 @@ void VFS_DirectoryUnref(struct directory *dir);
 void VFS_ClearSet(struct file_set *l);
 void VFS_AddToSet(struct file_set *l, uint64_t serial_no);
 void VFS_RemoveFromSet(struct file_set *l, uint64_t serial_no);
-struct directory_entry *VFS_AddGlobToSet(
-	struct directory *dir, struct file_set *l, const char *glob);
+struct directory_entry *VFS_AddGlobToSet(struct directory *dir,
+                                         struct file_set *l, const char *glob);
 bool VFS_SetHas(struct file_set *l, uint64_t serial_no);
 void VFS_CopySet(struct file_set *to, struct file_set *from);
 void VFS_FreeSet(struct file_set *set);

@@ -8,9 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <stdlib.h>
 #include <assert.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -47,11 +47,10 @@ static void SwitchSavedPos(VFILE *stream, bool do_seek)
 		return;
 	}
 
-	stream->last_ctx->pos =
-		stream->functions->tell(stream->handle);
+	stream->last_ctx->pos = stream->functions->tell(stream->handle);
 	if (do_seek) {
-		stream->functions->seek(
-			stream->handle, stream->current_ctx->pos, SEEK_SET);
+		stream->functions->seek(stream->handle,
+		                        stream->current_ctx->pos, SEEK_SET);
 	}
 	stream->last_ctx = stream->current_ctx;
 }
@@ -113,8 +112,8 @@ static size_t wrapped_fread(void *ptr, size_t size, size_t nitems, void *handle)
 	return fread(ptr, size, nitems, handle);
 }
 
-static size_t wrapped_fwrite(const void *ptr, size_t size,
-                             size_t nitems, void *handle)
+static size_t wrapped_fwrite(const void *ptr, size_t size, size_t nitems,
+                             void *handle)
 {
 	return fwrite(ptr, size, nitems, handle);
 }
@@ -146,13 +145,8 @@ static void wrapped_fclose(void *handle)
 }
 
 static struct vfile_functions wrapped_io_functions = {
-	wrapped_fread,
-	wrapped_fwrite,
-	wrapped_fseek,
-	wrapped_ftell,
-	wrapped_ftruncate,
-	wrapped_fclose,
-	wrapped_fsync,
+    wrapped_fread,     wrapped_fwrite, wrapped_fseek, wrapped_ftell,
+    wrapped_ftruncate, wrapped_fclose, wrapped_fsync,
 };
 
 VFILE *vfwrapfile(FILE *stream)
@@ -180,7 +174,8 @@ struct restricted_vfile {
 	int ro;
 };
 
-static size_t restricted_vfread(void *ptr, size_t size, size_t nitems, void *handle)
+static size_t restricted_vfread(void *ptr, size_t size, size_t nitems,
+                                void *handle)
 {
 	struct restricted_vfile *restricted = handle;
 	size_t nreadable, result;
@@ -197,7 +192,7 @@ static size_t restricted_vfread(void *ptr, size_t size, size_t nitems, void *han
 	}
 
 	WITH_VFCONTEXT(restricted->inner, &restricted->ctx,
-		result = vfread(ptr, size, nitems, restricted->inner));
+	               result = vfread(ptr, size, nitems, restricted->inner));
 	if (result < 0) {
 		return -1;
 	}
@@ -206,8 +201,8 @@ static size_t restricted_vfread(void *ptr, size_t size, size_t nitems, void *han
 	return result;
 }
 
-static size_t restricted_fwrite(const void *ptr, size_t size,
-                                size_t nitems, void *handle)
+static size_t restricted_fwrite(const void *ptr, size_t size, size_t nitems,
+                                void *handle)
 {
 	struct restricted_vfile *restricted = handle;
 	size_t nwriteable, result;
@@ -217,8 +212,9 @@ static size_t restricted_fwrite(const void *ptr, size_t size,
 	}
 
 	if (restricted->end >= 0) {
-		nwriteable = (restricted->end - restricted->start
-		            - restricted->pos) / size;
+		nwriteable =
+		    (restricted->end - restricted->start - restricted->pos) /
+		    size;
 		if (nitems > nwriteable) {
 			nitems = nwriteable;
 		}
@@ -228,7 +224,7 @@ static size_t restricted_fwrite(const void *ptr, size_t size,
 	}
 
 	WITH_VFCONTEXT(restricted->inner, &restricted->ctx,
-		result = vfwrite(ptr, size, nitems, restricted->inner));
+	               result = vfwrite(ptr, size, nitems, restricted->inner));
 	if (result < 0) {
 		return -1;
 	}
@@ -252,7 +248,8 @@ static int restricted_vfseek(void *handle, long offset, int whence)
 	}
 
 	WITH_VFCONTEXT(restricted->inner, &restricted->ctx,
-		result = vfseek(restricted->inner, adjusted_offset, whence));
+	               result =
+	                   vfseek(restricted->inner, adjusted_offset, whence));
 
 	if (result < 0) {
 		return -1;
@@ -277,7 +274,7 @@ static void restricted_vfsync(void *handle)
 {
 	struct restricted_vfile *restricted = handle;
 	WITH_VFCONTEXT(restricted->inner, &restricted->ctx,
-		vfsync(restricted->inner));
+	               vfsync(restricted->inner));
 }
 
 static void restricted_vfclose(void *handle)
@@ -290,13 +287,9 @@ static void restricted_vfclose(void *handle)
 }
 
 static struct vfile_functions restricted_io_functions = {
-	restricted_vfread,
-	restricted_fwrite,
-	restricted_vfseek,
-	restricted_vftell,
-	restricted_vftruncate,
-	restricted_vfclose,
-	restricted_vfsync,
+    restricted_vfread, restricted_fwrite,     restricted_vfseek,
+    restricted_vftell, restricted_vftruncate, restricted_vfclose,
+    restricted_vfsync,
 };
 
 // Create restricted file slice starting at given offset. end=-1 mean no limit
@@ -340,8 +333,8 @@ static size_t memory_vfread(void *ptr, size_t size, size_t nitems, void *handle)
 	return nitems;
 }
 
-static size_t memory_vfwrite(const void *ptr, size_t size,
-                             size_t nitems, void *handle)
+static size_t memory_vfwrite(const void *ptr, size_t size, size_t nitems,
+                             void *handle)
 {
 	struct memory_vfile *f = handle;
 	size_t num_bytes = size * nitems;
@@ -407,13 +400,8 @@ static void memory_vfclose(void *handle)
 }
 
 static struct vfile_functions memory_io_functions = {
-	memory_vfread,
-	memory_vfwrite,
-	memory_vfseek,
-	memory_vftell,
-	memory_vftruncate,
-	memory_vfclose,
-	memory_vfsync,
+    memory_vfread,     memory_vfwrite, memory_vfseek, memory_vftell,
+    memory_vftruncate, memory_vfclose, memory_vfsync,
 };
 
 VFILE *vfopenmem(const void *buf, size_t buf_len)
@@ -464,7 +452,7 @@ void *vfreadall(VFILE *input, size_t *len)
 	void *result;
 
 	vfcopy(input, tmp);
-	memfile	= tmp->handle;
+	memfile = tmp->handle;
 	result = memfile->buf;
 	if (len != NULL) {
 		*len = memfile->buf_len;

@@ -1,26 +1,26 @@
 
 #include "palette/palette.h"
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
 #include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include "common.h"
-#include "stringlib.h"
-#include "fs/vfile.h"
 #include "conv/error.h"
 #include "conv/vpng.h"
+#include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "png.h"
 #include "pngconf.h"
+#include "stringlib.h"
 
-#define PALETTE_SIZE   (256 * 3)
+#define PALETTE_SIZE (256 * 3)
 
 static bool default_palette_loaded = false;
 static struct palette default_palette;
@@ -81,7 +81,7 @@ struct palette_set *PAL_FromImageFile(VFILE *input)
 			int pal_num = pixel_num / 256;
 			int color_num = pixel_num % 256;
 			struct palette_entry *ent =
-				&result->palettes[pal_num].entries[color_num];
+			    &result->palettes[pal_num].entries[color_num];
 			ent->r = rowbuf[x * 3];
 			ent->g = rowbuf[x * 3 + 1];
 			ent->b = rowbuf[x * 3 + 2];
@@ -322,8 +322,8 @@ const struct palette *PAL_PaletteForWAD(struct directory *dir)
 
 	// We cache the last palette we loaded. If it's the same WAD file
 	// again and it hasn't changed, there's no need to reload it.
-	if (default_palette_loaded
-	 && dir == last_dir && dir->curr_revision == last_rev) {
+	if (default_palette_loaded && dir == last_dir &&
+	    dir->curr_revision == last_rev) {
 		return cached_result;
 	}
 
@@ -336,8 +336,8 @@ const struct palette *PAL_PaletteForWAD(struct directory *dir)
 
 static void WriteDoomPalette(const char *path)
 {
-	struct palette_set doom_palette_set =
-		{(struct palette *) &doom_palette, 1};
+	struct palette_set doom_palette_set = {(struct palette *) &doom_palette,
+	                                       1};
 	VFILE *out = vfwrapfile(fopen(path, "wb"));
 	assert(out != NULL);
 	vfcopy(PAL_ToImageFile(&doom_palette_set), out);
@@ -389,8 +389,8 @@ const char *PAL_GetPalettesPath(void)
 	home = getenv("HOME");
 	assert(home != NULL);
 
-	result = MakeDirectories(home, ".config", "WadGadget",
-	                         "Palettes", NULL);
+	result =
+	    MakeDirectories(home, ".config", "WadGadget", "Palettes", NULL);
 	assert(result != NULL);
 	AddDefaultPalette(result);
 

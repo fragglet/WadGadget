@@ -11,22 +11,22 @@
 #include "conv/export.h"
 
 #include <stdbool.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "conv/audio.h"
 #include "conv/error.h"
-#include "ui/dialog.h"
 #include "conv/graphic.h"
-#include "conv/palette.h"
-#include "lump_info.h"
 #include "conv/mus2mid.h"
-#include "stringlib.h"
-#include "textures/textures.h"
-#include "ui/title_bar.h"
+#include "conv/palette.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
+#include "lump_info.h"
 #include "palette/palette.h"
+#include "stringlib.h"
+#include "textures/textures.h"
+#include "ui/dialog.h"
+#include "ui/title_bar.h"
 
 struct lump_type;
 
@@ -195,8 +195,8 @@ static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
 	}
 
 	VFS_DescribeSet(to, &overwrite_set, buf, sizeof(buf));
-	result = UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite",
-	                             "Cancel", "Overwrite %s?", buf);
+	result = UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
+	                             "Overwrite %s?", buf);
 	VFS_FreeSet(&overwrite_set);
 	return result;
 }
@@ -250,11 +250,10 @@ static bool DuplicateFile(struct directory *dir, struct file_set *from_set,
 		return false;
 	}
 
-	filename = UI_TextInputDialogBox(
-		"Duplicate file", "Duplicate", 30,
-		"To make a copy of '%s', enter\n"
-		"a new filename:",
-		ent->name);
+	filename = UI_TextInputDialogBox("Duplicate file", "Duplicate", 30,
+	                                 "To make a copy of '%s', enter\n"
+	                                 "a new filename:",
+	                                 ent->name);
 	if (filename == NULL) {
 		return false;
 	}
@@ -265,8 +264,8 @@ static bool DuplicateFile(struct directory *dir, struct file_set *from_set,
 		return false;
 	}
 
-	if (ent2 != NULL
-	 && !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
+	if (ent2 != NULL &&
+	    !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
 	                         "Overwrite '%s'?", filename)) {
 		free(filename);
 		return false;
@@ -292,8 +291,7 @@ static bool DuplicateFile(struct directory *dir, struct file_set *from_set,
 }
 
 bool PerformExport(struct directory *from, struct file_set *from_set,
-                   struct directory *to, struct file_set *result,
-                   bool convert)
+                   struct directory *to, struct file_set *result, bool convert)
 {
 	char *filename, *filename2;
 	struct directory_entry *ent, *ent2;
@@ -309,9 +307,9 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 		return false;
 	}
 
-	UI_InitProgressWindow(
-		&progress, from_set->num_entries,
-		from->type == FILE_TYPE_DIR ? "Copying" : "Exporting");
+	UI_InitProgressWindow(&progress, from_set->num_entries,
+	                      from->type == FILE_TYPE_DIR ? "Copying"
+	                                                  : "Exporting");
 
 	idx = 0;
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {

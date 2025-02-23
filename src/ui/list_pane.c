@@ -15,10 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ui/colors.h"
 #include "common.h"
-#include "ui/ui.h"
+#include "ui/colors.h"
 #include "ui/stack.h"
+#include "ui/ui.h"
 
 static unsigned int NumEntries(struct list_pane *lp)
 {
@@ -48,8 +48,8 @@ bool UI_ListPaneDraw(void *p)
 	wattron(win, COLOR_PAIR(PAIR_PANE_COLOR));
 	UI_DrawWindowBox(win);
 	if (lp->title != NULL) {
-		bool is_active = lp->active
-		            && UI_ActiveStack() == UI_CurrentStack();
+		bool is_active =
+		    lp->active && UI_ActiveStack() == UI_CurrentStack();
 		wattron(lp->subwin, COLOR_PAIR(PAIR_PANE_COLOR));
 		mvderwin(lp->subwin, 0, 0);
 		if (is_active) {
@@ -132,10 +132,11 @@ doubleclick_continuation UI_ListPaneMouseClick(void *_lp, int x, int y)
 		    num_lines = UI_ListPaneLines(lp);
 		if (num_entries >= num_lines * 2) {
 			int range = num_entries - num_lines;
-			lp->window_offset = ((y - 1) * range + num_lines - 2)
-			                  / (num_lines - 1);
-			lp->selected = ((y - 1) * (num_entries - 1) + num_lines - 2)
-			             / (num_lines - 1);
+			lp->window_offset =
+			    ((y - 1) * range + num_lines - 2) / (num_lines - 1);
+			lp->selected =
+			    ((y - 1) * (num_entries - 1) + num_lines - 2) /
+			    (num_lines - 1);
 			return NULL;
 		}
 	}
@@ -187,7 +188,8 @@ void UI_ListPaneKeypress(void *p, int key)
 		if (lp->selected + 1 < NumEntries(lp)) {
 			++lp->selected;
 		}
-		if (lp->selected > lp->window_offset + UI_ListPaneLines(lp) - 1) {
+		if (lp->selected >
+		    lp->window_offset + UI_ListPaneLines(lp) - 1) {
 			++lp->window_offset;
 		}
 		return;

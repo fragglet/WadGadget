@@ -8,21 +8,21 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "common.h"
 #include "conv/error.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
-#include "stringlib.h"
-#include "ui/title_bar.h"
-#include "textures/textures.h"
-#include "textures/internal.h"
 #include "fs/wad_file.h"
+#include "stringlib.h"
+#include "textures/internal.h"
+#include "textures/textures.h"
+#include "ui/title_bar.h"
 
 // Implementation of a VFS directory that is backed by a textures list.
 // Currently incomplete.
@@ -34,7 +34,7 @@ struct texture_dir {
 };
 
 #define TEXTURES(dir) ((dir)->dir.b.txs)
-#define PNAMES(dir) ((dir)->dir.b.pn)
+#define PNAMES(dir)   ((dir)->dir.b.pn)
 
 static void TextureDirRefresh(void *_dir, struct directory_entry **entries,
                               size_t *num_entries)
@@ -43,8 +43,8 @@ static void TextureDirRefresh(void *_dir, struct directory_entry **entries,
 	unsigned int i;
 
 	*num_entries = TEXTURES(dir)->num_textures;
-	*entries = checked_calloc(
-		TEXTURES(dir)->num_textures, sizeof(struct directory_entry));
+	*entries = checked_calloc(TEXTURES(dir)->num_textures,
+	                          sizeof(struct directory_entry));
 
 	for (i = 0; i < TEXTURES(dir)->num_textures; i++) {
 		struct directory_entry *ent = *entries + i;
@@ -120,8 +120,8 @@ static VFILE *TextureDirSaveSnapshot(void *_dir)
 	struct texture_dir *dir = _dir;
 	VFILE *tmp, *result = vfopenmem(NULL, 0);
 
-	assert(vfwrite(&TEXTURES(dir)->modified_count,
-	               sizeof(int), 1, result) == 1);
+	assert(vfwrite(&TEXTURES(dir)->modified_count, sizeof(int), 1,
+	               result) == 1);
 
 	tmp = TX_MarshalTextures(TEXTURES(dir));
 	vfcopy(tmp, result);
@@ -152,18 +152,19 @@ static void TextureDirFree(void *dir)
 }
 
 struct directory_funcs texture_dir_funcs = {
-	"texture", "textures",
-	TextureDirRefresh,
-	TextureDirOpen,
-	TX_LumpDirOpenDir,
-	TextureDirRemove,
-	TextureDirRename,
-	TextureDirNeedCommit,
-	TextureDirCommit,
-	TextureDirSwap,
-	TextureDirSaveSnapshot,
-	TextureDirRestoreSnapshot,
-	TextureDirFree,
+    "texture",
+    "textures",
+    TextureDirRefresh,
+    TextureDirOpen,
+    TX_LumpDirOpenDir,
+    TextureDirRemove,
+    TextureDirRename,
+    TextureDirNeedCommit,
+    TextureDirCommit,
+    TextureDirSwap,
+    TextureDirSaveSnapshot,
+    TextureDirRestoreSnapshot,
+    TextureDirFree,
 };
 
 static struct pnames *LoadPnames(struct texture_dir *dir)
@@ -171,7 +172,7 @@ static struct pnames *LoadPnames(struct texture_dir *dir)
 	VFILE *input;
 	struct pnames *pn;
 	struct directory_entry *ent =
-		VFS_EntryByName(dir->dir.parent_dir, "PNAMES");
+	    VFS_EntryByName(dir->dir.parent_dir, "PNAMES");
 
 	if (ent == NULL) {
 		ConversionError("WAD does not contain a PNAMES lump.");
@@ -226,7 +227,6 @@ static bool TextureDirLoad(void *_dir, struct directory *wad_dir,
 	if (new_txs == NULL) {
 		TX_FreePnames(new_pn);
 		return false;
-
 	}
 	PNAMES(dir) = new_pn;
 	TEXTURES(dir) = new_txs;
@@ -313,17 +313,16 @@ static VFILE *TextureDirFormatConfig(void *_dir, struct file_set *selected)
 }
 
 static const struct lump_dir_funcs texture_lump_dir_funcs = {
-	TextureDirLoad,
-	TextureDirSave,
-	TextureDirFormatConfig,
-	TX_BundleParseTextures,
+    TextureDirLoad,
+    TextureDirSave,
+    TextureDirFormatConfig,
+    TX_BundleParseTextures,
 };
 
 struct directory *TX_OpenTextureDir(struct directory *parent,
                                     struct directory_entry *ent)
 {
-	struct texture_dir *dir =
-		checked_calloc(1, sizeof(struct texture_dir));
+	struct texture_dir *dir = checked_calloc(1, sizeof(struct texture_dir));
 
 	dir->dir.dir.type = FILE_TYPE_TEXTURE_LIST;
 	dir->dir.dir.directory_funcs = &texture_dir_funcs;

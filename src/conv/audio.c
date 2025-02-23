@@ -10,14 +10,14 @@
 
 #include "conv/audio.h"
 
-#include <stdlib.h>
-#include <sndfile.h>
 #include <assert.h>
+#include <sndfile.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "conv/error.h"
 #include "common.h"
+#include "conv/error.h"
 
 void S_SwapSoundHeader(struct sound_header *hdr)
 {
@@ -60,11 +60,8 @@ static sf_count_t SoundFileTell(void *user_data)
 }
 
 static struct SF_VIRTUAL_IO virt_ops = {
-	SoundFileGetLen,
-	SoundFileSeek,
-	SoundFileRead,
-	SoundFileWrite,
-	SoundFileTell,
+    SoundFileGetLen, SoundFileSeek, SoundFileRead,
+    SoundFileWrite,  SoundFileTell,
 };
 
 static bool ReadNextSample(SF_INFO *sf_info, SNDFILE *sndfile, short *buf,
@@ -118,8 +115,8 @@ VFILE *S_FromAudioFile(VFILE *input)
 	nsamples = 0;
 	buf_len = 0;
 	while (nsamples < sf_info.frames) {
-		success = ReadNextSample(&sf_info, virt, framebuf,
-		                         &buf[buf_len]);
+		success =
+		    ReadNextSample(&sf_info, virt, framebuf, &buf[buf_len]);
 		if (!success) {
 			ConversionError("unexpected end of file");
 			break;
@@ -174,7 +171,7 @@ VFILE *S_ToAudioFile(VFILE *input)
 	sf_info.frames = hdr.num_samples;
 	sf_info.samplerate = hdr.sample_rate;
 	sf_info.channels = 1;
-	sf_info.format = SF_FORMAT_WAV|SF_FORMAT_PCM_U8;
+	sf_info.format = SF_FORMAT_WAV | SF_FORMAT_PCM_U8;
 
 	out = sf_open_virtual(&virt_ops, SFM_WRITE, &sf_info, result);
 	if (out == NULL) {
@@ -188,7 +185,8 @@ VFILE *S_ToAudioFile(VFILE *input)
 		success = vfread(&sample, 1, 1, input) == 1;
 		if (!success) {
 			ConversionError("unexpected end of lump, "
-			                "only %d samples read", i);
+			                "only %d samples read",
+			                i);
 			break;
 		}
 		sample16 = (((short) sample) - 128) * 256;

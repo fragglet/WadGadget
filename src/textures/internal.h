@@ -34,8 +34,7 @@ struct lump_dir {
 	struct texture_bundle b;
 };
 
-struct directory *TX_LumpDirOpenDir(void *_dir,
-                                    struct directory_entry *ent);
+struct directory *TX_LumpDirOpenDir(void *_dir, struct directory_entry *ent);
 struct directory *TX_DirGetParent(struct directory *_dir,
                                   struct directory_entry **ent);
 bool TX_DirReload(struct directory *dir);

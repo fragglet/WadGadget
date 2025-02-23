@@ -8,19 +8,19 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <stdlib.h>
-#include <stdint.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "fs/vfile.h"
-#include "palette/palette.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
 #include "conv/vpng.h"
+#include "fs/vfile.h"
+#include "palette/palette.h"
 
-#define PALETTE_SIZE   (256 * 3)
+#define PALETTE_SIZE (256 * 3)
 
 VFILE *V_PaletteFromImageFile(VFILE *input)
 {
@@ -62,7 +62,8 @@ VFILE *V_ColormapToImageFile(VFILE *input, const struct palette *pal)
 
 	if (buf_len % 256 != 0) {
 		ConversionError("Invalid colormap length: %d is not a "
-		                "multiple of 256", buf_len);
+		                "multiple of 256",
+		                buf_len);
 		goto fail;
 	}
 
@@ -94,16 +95,16 @@ VFILE *V_ColormapFromImageFile(VFILE *input, const struct palette *pal)
 	if ((hdr.width * hdr.height) % 256 != 0) {
 		ConversionError("Invalid dimensions to make a colormap "
 		                "lump; %dx%d = %d pixels, not a multiple "
-		                "of 256.", hdr.width, hdr.height,
-		                hdr.width * hdr.height);
+		                "of 256.",
+		                hdr.width, hdr.height, hdr.width * hdr.height);
 		goto fail;
 	}
 
-	palettized = V_PalettizeRGBABuffer(pal, imgbuf, rowstep,
-	                                   hdr.width, hdr.height);
+	palettized =
+	    V_PalettizeRGBABuffer(pal, imgbuf, rowstep, hdr.width, hdr.height);
 	result = vfopenmem(NULL, 0);
-	assert(vfwrite(palettized, hdr.width,
-	               hdr.height, result) == hdr.height);
+	assert(vfwrite(palettized, hdr.width, hdr.height, result) ==
+	       hdr.height);
 	vfseek(result, 0, SEEK_SET);
 	free(palettized);
 fail:

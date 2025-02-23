@@ -10,30 +10,30 @@
 
 #include "conv/graphic.h"
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "common.h"
-#include "fs/vfile.h"
-#include "palette/palette.h"
 #include "conv/error.h"
 #include "conv/vpng.h"
+#include "fs/vfile.h"
+#include "palette/palette.h"
 
 // Hexen loading screen
-#define HIRES_SCREEN_W  640
-#define HIRES_SCREEN_H  480
-#define HIRES_MIN_LENGTH  ((HIRES_SCREEN_W * HIRES_SCREEN_H / 2) + (16 * 3))
+#define HIRES_SCREEN_W   640
+#define HIRES_SCREEN_H   480
+#define HIRES_MIN_LENGTH ((HIRES_SCREEN_W * HIRES_SCREEN_H / 2) + (16 * 3))
 
 // Heretic/Hexen raw fullscreen images.
 #define FULLSCREEN_W  320
 #define FULLSCREEN_H  200
 #define FULLSCREEN_SZ (320 * 200)
 
-#define MAX_POST_LEN  0x80
+#define MAX_POST_LEN 0x80
 
 void V_SwapPatchHeader(struct patch_header *hdr)
 {
@@ -53,8 +53,8 @@ static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
 	uint8_t *palettized, *post, alpha;
 	int x, y, post_len;
 
-	palettized = V_PalettizeRGBABuffer(pal, buffer, rowstep,
-	                                   hdr->width, hdr->height);
+	palettized = V_PalettizeRGBABuffer(pal, buffer, rowstep, hdr->width,
+	                                   hdr->height);
 
 	result = vfopenmem(NULL, 0);
 
@@ -98,7 +98,7 @@ static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
 			// post length to reach 0x80, because that is the limit
 			// of what vanilla supports for post height.
 			post_len = 0;
-			post[0] = y;  // topdelta
+			post[0] = y; // topdelta
 			while (y < hdr->height && post_len < MAX_POST_LEN) {
 				alpha = buffer[y * rowstep + x * 4 + 3];
 				if (alpha != 0xff) {
@@ -106,7 +106,7 @@ static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
 					break;
 				}
 				post[post_len + 3] =
-					palettized[y * hdr->width + x];
+				    palettized[y * hdr->width + x];
 				y++;
 				post_len++;
 			}
@@ -138,16 +138,15 @@ fail:
 }
 
 static VFILE *BufferToRaw(uint8_t *imgbuf, int rowstep,
-                          struct patch_header *hdr,
-                          const struct palette *pal)
+                          struct patch_header *hdr, const struct palette *pal)
 {
 	uint8_t *palettized;
 	VFILE *result = vfopenmem(NULL, 0);
 
-	palettized = V_PalettizeRGBABuffer(pal, imgbuf, rowstep,
-	                                   hdr->width, hdr->height);
-	assert(vfwrite(palettized, hdr->width,
-	               hdr->height, result) == hdr->height);
+	palettized = V_PalettizeRGBABuffer(pal, imgbuf, rowstep, hdr->width,
+	                                   hdr->height);
+	assert(vfwrite(palettized, hdr->width, hdr->height, result) ==
+	       hdr->height);
 	free(palettized);
 
 	// Rewind so that the caller can read from the stream.
@@ -230,7 +229,7 @@ static bool HasTransparency(const struct patch_header *hdr,
                             const uint8_t *srcbuf, size_t srcbuf_len)
 {
 	uint32_t *columnofs =
-		(uint32_t *) (srcbuf + sizeof(struct patch_header));
+	    (uint32_t *) (srcbuf + sizeof(struct patch_header));
 	int x, y, expect_y, off, cnt;
 
 	if (hdr->height > 255) {
@@ -263,9 +262,11 @@ static bool HasTransparency(const struct patch_header *hdr,
 	return false;
 }
 
-#define SET_BIT(bitset, idx) \
-	do { bitset[(idx) / 32] |= 1 << ((idx) % 32); } while(0)
-#define BIT_IS_SET(bitset, idx) \
+#define SET_BIT(bitset, idx)                                                   \
+	do {                                                                   \
+		bitset[(idx) / 32] |= 1 << ((idx) % 32);                       \
+	} while (0)
+#define BIT_IS_SET(bitset, idx)                                                \
 	((bitset[(idx) / 32] & (1 << ((idx) % 32))) != 0)
 
 static int TransparencyColor(const struct patch_header *hdr,
@@ -273,7 +274,7 @@ static int TransparencyColor(const struct patch_header *hdr,
 {
 	uint32_t used_colors[8];
 	uint32_t *columnofs =
-		(uint32_t *) (srcbuf + sizeof(struct patch_header));
+	    (uint32_t *) (srcbuf + sizeof(struct patch_header));
 	uint32_t off;
 	int x, y, i, cnt;
 
@@ -315,11 +316,11 @@ static int TransparencyColor(const struct patch_header *hdr,
 	return 0;
 }
 
-static bool ValidatePatch(const struct patch_header *hdr,
-                          const uint8_t *srcbuf, size_t srcbuf_len)
+static bool ValidatePatch(const struct patch_header *hdr, const uint8_t *srcbuf,
+                          size_t srcbuf_len)
 {
 	uint32_t *columnofs =
-		(uint32_t *) (srcbuf + sizeof(struct patch_header));
+	    (uint32_t *) (srcbuf + sizeof(struct patch_header));
 	uint32_t off;
 	int x;
 
@@ -333,10 +334,11 @@ static bool ValidatePatch(const struct patch_header *hdr,
 			return false;
 		}
 		while (srcbuf[off] != 0xff) {
-			if (off >= srcbuf_len - 2
-			 || off + srcbuf[off + 1] + 4 >= srcbuf_len) {
+			if (off >= srcbuf_len - 2 ||
+			    off + srcbuf[off + 1] + 4 >= srcbuf_len) {
 				ConversionError("Corrupted patch: column %d "
-				                "overruns the end of lump", x);
+				                "overruns the end of lump",
+				                x);
 				return false;
 			}
 			off += 4 + srcbuf[off + 1];
@@ -350,7 +352,7 @@ static void DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
                       size_t srcbuf_len, uint8_t *dstbuf, int trans_color)
 {
 	uint32_t *columnofs =
-		(uint32_t *) (srcbuf + sizeof(struct patch_header));
+	    (uint32_t *) (srcbuf + sizeof(struct patch_header));
 	uint32_t off;
 	int x, y, i, cnt;
 
@@ -366,7 +368,7 @@ static void DrawPatch(const struct patch_header *hdr, uint8_t *srcbuf,
 			for (i = 0; i < cnt; i++, y++) {
 				if (y < hdr->height) {
 					dstbuf[y * hdr->width + x] =
-						srcbuf[off];
+					    srcbuf[off];
 				}
 				off++;
 			}
@@ -405,8 +407,8 @@ VFILE *V_ToImageFile(VFILE *input, const struct palette *pal)
 
 	DrawPatch(&hdr, buf, buf_len, imgbuf, transparent_color);
 
-	result = V_WritePalettizedPNG(&hdr, imgbuf, pal,
-	                              has_transparency, transparent_color);
+	result = V_WritePalettizedPNG(&hdr, imgbuf, pal, has_transparency,
+	                              transparent_color);
 
 fail:
 	free(imgbuf);
@@ -507,8 +509,8 @@ static uint8_t *PlanarToFlat(void *src, struct palette *palette)
 			}
 
 			// Reassemble the pixel value
-			*dest = (srcbits[0] << 0) | (srcbits[1] << 1)
-			      | (srcbits[2] << 2) | (srcbits[3] << 3);
+			*dest = (srcbits[0] << 0) | (srcbits[1] << 1) |
+			        (srcbits[2] << 2) | (srcbits[3] << 3);
 
 			// Next pixel!
 			++dest;

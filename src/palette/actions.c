@@ -8,27 +8,27 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <stdlib.h>
-#include <stdbool.h>
 #include <assert.h>
 #include <curses.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "ui/actions_bar.h"
-#include "ui/dialog.h"
 #include "browser/actions.h"
 #include "browser/browser.h"
 #include "browser/directory_pane.h"
 #include "common.h"
 #include "conv/error.h"
-#include "stringlib.h"
-#include "view.h"
-#include "fs/wad_file.h"
-#include "palette/palette.h"
-#include "palette/palfs.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
+#include "fs/wad_file.h"
 #include "lump_info.h"
+#include "palette/palette.h"
+#include "palette/palfs.h"
+#include "stringlib.h"
+#include "ui/actions_bar.h"
+#include "ui/dialog.h"
+#include "view.h"
 
 struct wad_file;
 
@@ -47,8 +47,7 @@ static void PerformViewPalette(void)
 }
 
 const struct action view_palette_action = {
-	'\r', 0,  "View", "View",
-	PerformViewPalette,
+    '\r', 0, "View", "View", PerformViewPalette,
 };
 
 static void PerformSetDefault(void)
@@ -66,8 +65,7 @@ static void PerformSetDefault(void)
 }
 
 const struct action set_default_palette_action = {
-	KEY_F(4), 'D',  "SetDef", "Set default",
-	PerformSetDefault,
+    KEY_F(4), 'D', "SetDef", "Set default", PerformSetDefault,
 };
 
 static struct palette_set *LoadPalette(struct directory *dir,
@@ -123,7 +121,8 @@ static bool CopyPaletteToWAD(struct directory *from,
 		ConversionError("%s only contains a single palette, which "
 		                "is not\nenough for a complete PLAYPAL lump. "
 		                "You should\nmaybe copy a PLAYPAL lump from "
-		                "another WAD.", ent->name);
+		                "another WAD.",
+		                ent->name);
 		return false;
 	}
 
@@ -155,8 +154,8 @@ static void PerformPaletteCopyToWAD(void)
 
 	if (set->num_entries < 1) {
 		return;
-	} else if (set->num_entries > 1
-	        && !UI_ConfirmDialogBox("Confirm", "Proceed", "Cancel",
+	} else if (set->num_entries > 1 &&
+	           !UI_ConfirmDialogBox("Confirm", "Proceed", "Cancel",
 	                                "Create multiple PLAYPAL lumps?")) {
 		return;
 	}
@@ -188,8 +187,7 @@ static void PerformPaletteCopyToWAD(void)
 }
 
 const struct action copy_palette_to_wad_action = {
-	KEY_F(5), 'C',  "Copy", "> Copy",
-	PerformPaletteCopyToWAD,
+    KEY_F(5), 'C', "Copy", "> Copy", PerformPaletteCopyToWAD,
 };
 
 static bool CopyPaletteToDir(struct directory *from,
@@ -262,8 +260,7 @@ static void PerformPaletteCopyToDir(void)
 }
 
 const struct action copy_palette_to_dir_action = {
-	KEY_F(5), 'C',  "Copy", "> Copy",
-	PerformPaletteCopyToDir,
+    KEY_F(5), 'C', "Copy", "> Copy", PerformPaletteCopyToDir,
 };
 
 static void PerformSetPalettePref(void)
@@ -326,6 +323,5 @@ static void PerformSetPalettePref(void)
 }
 
 const struct action set_palette_pref_action = {
-	KEY_F(3), 'U',  "SetPref", "> Use for WAD",
-	PerformSetPalettePref,
+    KEY_F(3), 'U', "SetPref", "> Use for WAD", PerformSetPalettePref,
 };

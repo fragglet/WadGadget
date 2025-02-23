@@ -15,8 +15,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "ui/list_pane.h"
 #include "fs/vfs.h"
+#include "ui/list_pane.h"
 
 struct directory_pane {
 	struct list_pane pane;
@@ -40,7 +40,6 @@ int B_DirectoryPaneSelected(struct directory_pane *p);
 struct file_set *B_DirectoryPaneTagged(struct directory_pane *p);
 void B_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set);
 
-struct directory_pane *UI_NewDirectoryPane(
-	WINDOW *pane, struct directory *dir);
+struct directory_pane *UI_NewDirectoryPane(WINDOW *pane, struct directory *dir);
 
 #endif /* #ifndef BROWSER__DIRECTORY_PANE_H_INCLUDED */

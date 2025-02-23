@@ -10,16 +10,16 @@
 
 #include "palette/palfs.h"
 
-#include <stdlib.h>
-#include <string.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "fs/vfs.h"
 #include "common.h"
-#include "stringlib.h"
-#include "palette/palette.h"
 #include "fs/vfile.h"
+#include "fs/vfs.h"
+#include "palette/palette.h"
+#include "stringlib.h"
 
 struct palette_dir {
 	struct directory dir;
@@ -40,7 +40,7 @@ static VFILE *PaletteFSOpen(void *dir, struct directory_entry *entry)
 {
 	struct palette_dir *pd = dir;
 	struct directory_entry *inner_ent =
-		VFS_EntryBySerial(pd->inner, entry->serial_no);
+	    VFS_EntryBySerial(pd->inner, entry->serial_no);
 
 	if (inner_ent == NULL) {
 		return NULL;
@@ -79,8 +79,8 @@ static void PaletteFSRefresh(void *dir, struct directory_entry **entries,
 		struct directory_entry *inner_ent = &pd->inner->entries[i];
 		struct directory_entry *ent = &(*entries)[*num_entries];
 
-		if (inner_ent->type != FILE_TYPE_FILE
-		 || !StringHasSuffix(inner_ent->name, ".png")) {
+		if (inner_ent->type != FILE_TYPE_FILE ||
+		    !StringHasSuffix(inner_ent->name, ".png")) {
 			continue;
 		}
 
@@ -89,8 +89,8 @@ static void PaletteFSRefresh(void *dir, struct directory_entry **entries,
 		*strstr(ent->name, ".png") = '\0';
 		if (!strcmp(inner_ent->name, def_pal)) {
 			char *old_name = ent->name;
-			ent->name = StringJoin("", old_name,
-			                       " [default]", NULL);
+			ent->name =
+			    StringJoin("", old_name, " [default]", NULL);
 			free(old_name);
 		}
 		ent->size = -1;
@@ -104,7 +104,7 @@ static bool PaletteFSRemove(void *dir, struct directory_entry *entry)
 {
 	struct palette_dir *pd = dir;
 	struct directory_entry *inner_ent =
-		VFS_EntryBySerial(pd->inner, entry->serial_no);
+	    VFS_EntryBySerial(pd->inner, entry->serial_no);
 	char *def_pal;
 	bool is_default;
 
@@ -130,7 +130,7 @@ static bool PaletteFSRename(void *dir, struct directory_entry *entry,
 {
 	struct palette_dir *pd = dir;
 	struct directory_entry *inner_ent =
-		VFS_EntryBySerial(pd->inner, entry->serial_no);
+	    VFS_EntryBySerial(pd->inner, entry->serial_no);
 	char *full_name, *def_pal;
 	bool is_default, success;
 
@@ -162,18 +162,19 @@ static void PaletteFSFree(void *dir)
 }
 
 static const struct directory_funcs palette_fs_functions = {
-	"palette", "palettes",
-	PaletteFSRefresh,
-	PaletteFSOpen,
-	PaletteFSOpenDir,
-	PaletteFSRemove,
-	PaletteFSRename,
-	NULL, // need_commit
-	NULL, // commit
-	NULL, // swap_entries
-	NULL, // save_snapshot
-	NULL, // restore_snapshot
-	PaletteFSFree,
+    "palette",
+    "palettes",
+    PaletteFSRefresh,
+    PaletteFSOpen,
+    PaletteFSOpenDir,
+    PaletteFSRemove,
+    PaletteFSRename,
+    NULL, // need_commit
+    NULL, // commit
+    NULL, // swap_entries
+    NULL, // save_snapshot
+    NULL, // restore_snapshot
+    PaletteFSFree,
 };
 
 struct directory *PAL_OpenDirectory(struct directory *previous)
@@ -191,8 +192,8 @@ struct directory *PAL_OpenDirectory(struct directory *previous)
 	VFS_InitDirectory(&pd->dir, path);
 	pd->dir.type = FILE_TYPE_PALETTES;
 	free(pd->dir.parent_name);
-	pd->dir.parent_name = StringJoin("", "Back to ",
-	                                 PathBaseName(previous->path), NULL);
+	pd->dir.parent_name =
+	    StringJoin("", "Back to ", PathBaseName(previous->path), NULL);
 	pd->inner = inner;
 	pd->previous = previous;
 	VFS_DirectoryRef(pd->previous);
@@ -213,7 +214,7 @@ struct directory_entry *PAL_InnerEntry(struct directory *dir,
                                        struct directory_entry *ent)
 {
 	struct directory_entry *result =
-		VFS_EntryBySerial(PAL_InnerDir(dir), ent->serial_no);
+	    VFS_EntryBySerial(PAL_InnerDir(dir), ent->serial_no);
 	assert(result != NULL);
 	return result;
 }

@@ -10,12 +10,12 @@
 
 #include "conv/error.h"
 
-#include <stdio.h>
-#include <string.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
-#define MAX_ERROR_LEN  256
+#define MAX_ERROR_LEN 256
 
 static bool have_error;
 static char conversion_error[MAX_ERROR_LEN];

@@ -10,9 +10,9 @@
 
 #include "ui/stack.h"
 
-#include <stdlib.h>
-#include <stdbool.h>
 #include <curses.h>
+#include <stdbool.h>
+#include <stdlib.h>
 
 #include "common.h"
 #include "ui/actions_bar.h"
@@ -187,11 +187,10 @@ void UI_RemoveStack(struct pane_stack *stack)
 			// back, but pass on to another stack. Once all are
 			// closed they'll be brought back.
 			stacks->state.suspended_stacks =
-				stack->state.suspended_stacks;
+			    stack->state.suspended_stacks;
 		}
 		stack->state.suspended_stacks = NULL;
 	}
-
 
 	if (stack == active_stack) {
 		active_stack = stacks;

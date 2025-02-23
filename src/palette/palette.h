@@ -14,8 +14,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "fs/vfs.h"
 #include "fs/vfile.h"
+#include "fs/vfs.h"
 
 struct directory;
 

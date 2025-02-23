@@ -8,16 +8,16 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 
 #include "common.h"
-#include "stringlib.h"
+#include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "fs/wad_file.h"
-#include "fs/vfile.h"
+#include "stringlib.h"
 
 struct wad_directory {
 	struct directory dir;
@@ -131,25 +131,26 @@ static void WadDirRestoreSnapshot(void *_dir, VFILE *in)
 }
 
 static const struct directory_funcs waddir_funcs = {
-	"lump", "lumps",
-	WadDirectoryRefresh,
-	WadDirOpen,
-	WadDirOpenDir,
-	WadDirRemove,
-	WadDirRename,
-	WadDirNeedCommit,
-	WadDirCommit,
-	WadDirSwapEntries,
-	WadDirSaveSnapshot,
-	WadDirRestoreSnapshot,
-	WadDirFree,
+    "lump",
+    "lumps",
+    WadDirectoryRefresh,
+    WadDirOpen,
+    WadDirOpenDir,
+    WadDirRemove,
+    WadDirRename,
+    WadDirNeedCommit,
+    WadDirCommit,
+    WadDirSwapEntries,
+    WadDirSaveSnapshot,
+    WadDirRestoreSnapshot,
+    WadDirFree,
 };
 
 struct directory *VFS_OpenWadAsDirectory(const char *path)
 {
 	struct directory_revision *rev;
 	struct wad_directory *d =
-		checked_calloc(1, sizeof(struct wad_directory));
+	    checked_calloc(1, sizeof(struct wad_directory));
 
 	d->dir.directory_funcs = &waddir_funcs;
 	VFS_InitDirectory(&d->dir, path);

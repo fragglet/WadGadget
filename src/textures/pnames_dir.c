@@ -8,18 +8,18 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <stdbool.h>
-#include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "common.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
-#include "ui/title_bar.h"
-#include "textures/textures.h"
-#include "textures/internal.h"
 #include "fs/wad_file.h"
+#include "textures/internal.h"
+#include "textures/textures.h"
+#include "ui/title_bar.h"
 
 struct pnames_dir {
 	struct lump_dir dir;
@@ -38,8 +38,8 @@ static void PnamesDirRefresh(void *_dir, struct directory_entry **entries,
 	int i;
 
 	*num_entries = PNAMES(dir)->num_pnames;
-	new_entries = checked_calloc(*num_entries,
-	                             sizeof(struct directory_entry));
+	new_entries =
+	    checked_calloc(*num_entries, sizeof(struct directory_entry));
 	for (i = 0; i < *num_entries; i++) {
 		new_entries[i].name = checked_calloc(9, 1);
 		memcpy(new_entries[i].name, PNAMES(dir)->pnames[i], 8);
@@ -48,7 +48,7 @@ static void PnamesDirRefresh(void *_dir, struct directory_entry **entries,
 		new_entries[i].type = FILE_TYPE_PNAME;
 		new_entries[i].size = 0;
 		new_entries[i].serial_no =
-			TX_PnameSerialNo(PNAMES(dir)->pnames[i]);
+		    TX_PnameSerialNo(PNAMES(dir)->pnames[i]);
 	}
 
 	*entries = new_entries;
@@ -111,8 +111,8 @@ static VFILE *PnamesDirSaveSnapshot(void *_dir)
 	struct pnames_dir *dir = _dir;
 	VFILE *tmp, *result = vfopenmem(NULL, 0);
 
-	assert(vfwrite(&PNAMES(dir)->modified_count,
-	               sizeof(int), 1, result) == 1);
+	assert(vfwrite(&PNAMES(dir)->modified_count, sizeof(int), 1, result) ==
+	       1);
 
 	tmp = TX_MarshalPnames(PNAMES(dir));
 
@@ -144,18 +144,19 @@ static void PnamesDirFree(void *dir)
 }
 
 static const struct directory_funcs pnames_dir_funcs = {
-	"pname", "pnames",
-	PnamesDirRefresh,
-	NULL,  // open
-	TX_LumpDirOpenDir,
-	PnamesDirRemove,
-	PnamesDirRename,
-	PnamesDirNeedCommit,
-	PnamesDirCommit,
-	PnamesDirSwapEntries,
-	PnamesDirSaveSnapshot,
-	PnamesDirRestoreSnapshot,
-	PnamesDirFree,
+    "pname",
+    "pnames",
+    PnamesDirRefresh,
+    NULL, // open
+    TX_LumpDirOpenDir,
+    PnamesDirRemove,
+    PnamesDirRename,
+    PnamesDirNeedCommit,
+    PnamesDirCommit,
+    PnamesDirSwapEntries,
+    PnamesDirSaveSnapshot,
+    PnamesDirRestoreSnapshot,
+    PnamesDirFree,
 };
 
 static bool PnamesDirLoad(void *_dir, struct directory *wad_dir,
@@ -240,21 +241,20 @@ static VFILE *PnamesDirFormatConfig(void *_dir, struct file_set *selected)
 }
 
 static const struct lump_dir_funcs pnames_lump_dir_funcs = {
-	PnamesDirLoad,
-	PnamesDirSave,
-	PnamesDirFormatConfig,
-	TX_BundleParsePnames,
+    PnamesDirLoad,
+    PnamesDirSave,
+    PnamesDirFormatConfig,
+    TX_BundleParsePnames,
 };
 
 struct directory *TX_OpenPnamesDir(struct directory *parent,
                                    struct directory_entry *ent)
 {
-	struct pnames_dir *dir =
-		checked_calloc(1, sizeof(struct pnames_dir));
+	struct pnames_dir *dir = checked_calloc(1, sizeof(struct pnames_dir));
 
 	dir->dir.dir.type = FILE_TYPE_PNAMES_LIST;
 	dir->dir.dir.directory_funcs = &pnames_dir_funcs;
-	if (!TX_InitLumpDir(&dir->dir, &pnames_lump_dir_funcs,  parent, ent)) {
+	if (!TX_InitLumpDir(&dir->dir, &pnames_lump_dir_funcs, parent, ent)) {
 		return NULL;
 	}
 

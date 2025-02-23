@@ -13,22 +13,22 @@
 
 #include "conv/vpng.h"
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
 #include <limits.h>
 #include <setjmp.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "common.h"
-#include "fs/vfile.h"
-#include "palette/palette.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
+#include "fs/vfile.h"
+#include "palette/palette.h"
 #include "png.h"
 #include "pngconf.h"
 
-#define OFFSET_CHUNK_NAME  "grAb"
+#define OFFSET_CHUNK_NAME "grAb"
 
 struct offsets_chunk {
 	int32_t leftoffset, topoffset;
@@ -47,9 +47,9 @@ static uint8_t FindColor(const struct palette *pal, int r, int g, int b)
 	int diff, best_diff = INT_MAX, i, best_idx = -1;
 
 	for (i = 0; i < 256; i++) {
-		diff = (r - pal->entries[i].r) * (r - pal->entries[i].r)
-		     + (g - pal->entries[i].g) * (g - pal->entries[i].g)
-		     + (b - pal->entries[i].b) * (b - pal->entries[i].b);
+		diff = (r - pal->entries[i].r) * (r - pal->entries[i].r) +
+		       (g - pal->entries[i].g) * (g - pal->entries[i].g) +
+		       (b - pal->entries[i].b) * (b - pal->entries[i].b);
 		if (diff == 0) {
 			return i;
 		}
@@ -73,8 +73,8 @@ uint8_t *V_PalettizeRGBABuffer(const struct palette *pal, uint8_t *buf,
 	for (y = 0; y < height; ++y) {
 		for (x = 0; x < width; ++x) {
 			pixel = &buf[y * rowstep + x * 4];
-			result[y * width + x] = FindColor(
-				pal, pixel[0], pixel[1], pixel[2]);
+			result[y * width + x] =
+			    FindColor(pal, pixel[0], pixel[1], pixel[2]);
 		}
 	}
 
@@ -195,16 +195,16 @@ static int UserChunkCallback(png_structp ppng, png_unknown_chunkp chunk)
 	struct patch_header *hdr = png_get_user_chunk_ptr(ppng);
 	struct offsets_chunk offs;
 
-	if (strncmp((const char *) chunk->name, OFFSET_CHUNK_NAME, 4) != 0
-	 || chunk->size < sizeof(struct offsets_chunk)) {
+	if (strncmp((const char *) chunk->name, OFFSET_CHUNK_NAME, 4) != 0 ||
+	    chunk->size < sizeof(struct offsets_chunk)) {
 		return 1;
 	}
 
 	offs = *((const struct offsets_chunk *) chunk->data);
 	SwapOffsetsChunk(&offs);
 
-	if (hdr->leftoffset >= INT16_MIN && hdr->leftoffset <= INT16_MAX
-	 && hdr->topoffset >= INT16_MIN && hdr->topoffset <= INT16_MAX) {
+	if (hdr->leftoffset >= INT16_MIN && hdr->leftoffset <= INT16_MAX &&
+	    hdr->topoffset >= INT16_MIN && hdr->topoffset <= INT16_MAX) {
 		hdr->leftoffset = offs.leftoffset;
 		hdr->topoffset = offs.topoffset;
 	}
@@ -233,8 +233,8 @@ uint8_t *V_ReadRGBAPNG(VFILE *input, struct patch_header *hdr, int *rowstep)
 
 	// Sanity check.
 	if (width >= UINT16_MAX || height >= UINT16_MAX) {
-		ConversionError("PNG dimensions too large: %d, %d",
-		                (int) width, (int) height);
+		ConversionError("PNG dimensions too large: %d, %d", (int) width,
+		                (int) height);
 		goto fail2;
 	}
 
@@ -264,13 +264,13 @@ uint8_t *V_ReadRGBAPNG(VFILE *input, struct patch_header *hdr, int *rowstep)
 		png_read_row(ctx.ppng, imgbuf + y * *rowstep, NULL);
 		/* debugging code
 		{
-			int x;
-			printf("%5d: ", y);
-			for (x = 0; x < width; ++x) {
-				int c = imgbuf[y * rowstep + x * 4];
-				printf("%c", c ? '#' : ' ');
-			}
-			printf("\r\n");
+		        int x;
+		        printf("%5d: ", y);
+		        for (x = 0; x < width; ++x) {
+		                int c = imgbuf[y * rowstep + x * 4];
+		                printf("%c", c ? '#' : ' ');
+		        }
+		        printf("\r\n");
 		}*/
 	}
 
@@ -289,8 +289,7 @@ static void WriteOffsetChunk(png_structp ppng, const struct patch_header *hdr)
 	chunk.topoffset = hdr->topoffset;
 	SwapOffsetsChunk(&chunk);
 	png_write_chunk(ppng, (png_const_bytep) OFFSET_CHUNK_NAME,
-	                (png_const_bytep) &chunk,
-	                sizeof(chunk));
+	                (png_const_bytep) &chunk, sizeof(chunk));
 }
 
 static png_color *MakePNGPalette(const struct palette *palette)

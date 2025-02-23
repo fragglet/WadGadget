@@ -10,36 +10,36 @@
 
 #include "view.h"
 
-#include <curses.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
 #include <assert.h>
+#include <curses.h>
+#include <errno.h>
+#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "browser/actions.h"
 #include "common.h"
-#include "ui/dialog.h"
 #include "conv/endoom.h"
 #include "conv/error.h"
 #include "conv/export.h"
 #include "conv/import.h"
+#include "fs/vfile.h"
+#include "fs/vfs.h"
+#include "fs/wad_file.h"
 #include "lump_info.h"
 #include "pager/plaintext.h"
 #include "sixel_display.h"
 #include "stringlib.h"
 #include "termfuncs.h"
-#include "ui/title_bar.h"
-#include "fs/vfile.h"
-#include "fs/vfs.h"
-#include "fs/wad_file.h"
+#include "ui/dialog.h"
 #include "ui/pane.h"
+#include "ui/title_bar.h"
 
 // The freedeskop.org xdg-utils package includes a program named xdg-open
 // that will open files according to the user's preferences. However, other
@@ -209,9 +209,11 @@ static void RaiseUsToTop(void)
 	// bring the terminal back to the foreground.
 	if (appname != NULL) {
 		char buf[100];
-		snprintf(buf, sizeof(buf), "osascript -e 'tell "
+		snprintf(buf, sizeof(buf),
+		         "osascript -e 'tell "
 		         "application \"%s\" to activate' "
-		         ">/dev/null 2>/dev/null", appname);
+		         ">/dev/null 2>/dev/null",
+		         appname);
 		system(buf);
 		return;
 	}
@@ -222,8 +224,17 @@ static void RaiseUsToTop(void)
 }
 
 static const char *text_file_extensions[] = {
-	".txt", ".c", ".h", ".cfg", ".ini", ".md",
-	".deh", ".bex", ".hhe", ".seh",  // Dehacked and variants
+    ".txt",
+    ".c",
+    ".h",
+    ".cfg",
+    ".ini",
+    ".md",
+    // Dehacked and variants:
+    ".deh",
+    ".bex",
+    ".hhe",
+    ".seh",
 };
 
 static bool IsTextFile(const char *filename)
@@ -286,8 +297,7 @@ static bool EditFile(const char *filename, const struct directory_entry *ent)
 	printf("Opening %s '%s'...\n"
 	       "Waiting until program terminates.\n"
 	       "(^Z = stop waiting, continue in background)\n",
-	       ent->type == FILE_TYPE_LUMP ? "lump" : "file",
-	       ent->name);
+	       ent->type == FILE_TYPE_LUMP ? "lump" : "file", ent->name);
 
 	return _spawnv(_P_WAIT, argv[0], argv) == 0;
 }
@@ -297,8 +307,8 @@ static bool DisplayFile(const char *filename, const struct directory_entry *ent)
 	if (StringHasSuffix(filename, ".png")) {
 		SIXEL_ClearAndPrint("Contents of '%s':\n", ent->name);
 		return SIXEL_DisplayImage(filename);
-	} else if (StringHasSuffix(filename, ".lmp")
-	        && ent->size == ENDOOM_SIZE) {
+	} else if (StringHasSuffix(filename, ".lmp") &&
+	           ent->size == ENDOOM_SIZE) {
 		ENDOOM_ShowFile(filename);
 		return true;
 	}
@@ -307,8 +317,7 @@ static bool DisplayFile(const char *filename, const struct directory_entry *ent)
 }
 
 enum open_result OpenFile(const char *filename,
-                          const struct directory_entry *ent,
-                          bool force_edit)
+                          const struct directory_entry *ent, bool force_edit)
 {
 	enum open_result result;
 
@@ -411,10 +420,10 @@ static bool WaitForEdit(struct temp_edit_context *ctx)
 	// running program in the background. If this happens, the command
 	// exits immediately but the user may still be editing. To handle the
 	// latter case, we return back to the normal browsing screen, but
-	// continue to silently keep checking in the background to see if the file
-	// changes. As soon as the user presses a key we give up and stop, but
-	// if the file does get changed in the background we can still take the
-	// opportunity to prompt.
+	// continue to silently keep checking in the background to see if the
+	// file changes. As soon as the user presses a key we give up and stop,
+	// but if the file does get changed in the background we can still take
+	// the opportunity to prompt.
 	timeout(100);
 	while (!TempFileChanged(ctx)) {
 		int c = getch();
@@ -454,9 +463,9 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 		return true;
 	}
 
-	do_import = UI_ConfirmDialogBox(
-		"Update WAD?", "Import", "Ignore",
-		"File was changed. Import back into WAD?");
+	do_import =
+	    UI_ConfirmDialogBox("Update WAD?", "Import", "Ignore",
+	                        "File was changed. Import back into WAD?");
 	if (!do_import) {
 		return true;
 	}
@@ -477,12 +486,12 @@ static bool TempMaybeImport(struct temp_edit_context *ctx)
 
 	ClearConversionErrors();
 
-	if (!ImportFromFile(from_file, ctx->filename, ctx->from,
-	                    ctx->lumpnum, true)) {
-		return !UI_ConfirmDialogBox(
-			"Error", "Edit", "Abort", "Import failed. "
-			"Error:\n%s\n\nEdit file again?",
-			GetConversionError());
+	if (!ImportFromFile(from_file, ctx->filename, ctx->from, ctx->lumpnum,
+	                    true)) {
+		return !UI_ConfirmDialogBox("Error", "Edit", "Abort",
+		                            "Import failed. "
+		                            "Error:\n%s\n\nEdit file again?",
+		                            GetConversionError());
 	}
 	VFS_CommitChanges(ctx->from, "import of '%s'", ctx->ent->name);
 	UI_ShowNotice("'%s' updated.", ctx->ent->name);

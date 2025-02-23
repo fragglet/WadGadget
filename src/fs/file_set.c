@@ -8,12 +8,12 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "common.h"
 #include "fs/vfs.h"
@@ -49,13 +49,13 @@ void VFS_AddToSet(struct file_set *l, uint64_t serial_no)
 	unsigned int entries_index = SearchForTag(l, serial_no);
 
 	// Already in list?
-	if (entries_index < l->num_entries
-	 && l->entries[entries_index] == serial_no) {
+	if (entries_index < l->num_entries &&
+	    l->entries[entries_index] == serial_no) {
 		return;
 	}
 
 	l->entries = checked_realloc(l->entries,
-		sizeof(uint64_t) * (l->num_entries + 1));
+	                             sizeof(uint64_t) * (l->num_entries + 1));
 	memmove(&l->entries[entries_index + 1], &l->entries[entries_index],
 	        sizeof(uint64_t) * (l->num_entries - entries_index));
 	l->entries[entries_index] = serial_no;
@@ -66,21 +66,21 @@ static bool GlobMatch(const char *pattern, const char *s)
 {
 	switch (*pattern) {
 	case '*':
-		return GlobMatch(pattern + 1, s)
-		    || (*s != '\0' && GlobMatch(pattern, s + 1));
+		return GlobMatch(pattern + 1, s) ||
+		       (*s != '\0' && GlobMatch(pattern, s + 1));
 	case '\0':
 		return *s == '\0';
 	case '?':
 		return *s != '\0' && GlobMatch(pattern + 1, s + 1);
 	default:
-		return tolower(*s) == tolower(*pattern)
-		    && GlobMatch(pattern + 1, s + 1);
+		return tolower(*s) == tolower(*pattern) &&
+		       GlobMatch(pattern + 1, s + 1);
 	}
 }
 
 // Mark all entries matching glob pattern. Returns first entry matched.
-struct directory_entry *VFS_AddGlobToSet(
-	struct directory *dir, struct file_set *l, const char *glob)
+struct directory_entry *VFS_AddGlobToSet(struct directory *dir,
+                                         struct file_set *l, const char *glob)
 {
 	struct directory_entry *ent, *result = NULL;
 	int i = 0;
@@ -102,8 +102,8 @@ void VFS_RemoveFromSet(struct file_set *l, uint64_t serial_no)
 	unsigned int entries_index = SearchForTag(l, serial_no);
 
 	// Not in list?
-	if (entries_index >= l->num_entries
-	 || l->entries[entries_index] != serial_no) {
+	if (entries_index >= l->num_entries ||
+	    l->entries[entries_index] != serial_no) {
 		return;
 	}
 
@@ -116,17 +116,15 @@ bool VFS_SetHas(struct file_set *l, uint64_t serial_no)
 {
 	unsigned int entries_index = SearchForTag(l, serial_no);
 
-	return entries_index < l->num_entries
-	    && l->entries[entries_index] == serial_no;
+	return entries_index < l->num_entries &&
+	       l->entries[entries_index] == serial_no;
 }
-
 
 void VFS_CopySet(struct file_set *to, struct file_set *from)
 {
 	to->num_entries = from->num_entries;
 	to->entries = checked_calloc(to->num_entries, sizeof(uint64_t));
-	memcpy(to->entries, from->entries,
-	       to->num_entries * sizeof(uint64_t));
+	memcpy(to->entries, from->entries, to->num_entries * sizeof(uint64_t));
 }
 
 void VFS_FreeSet(struct file_set *set)
@@ -150,12 +148,13 @@ struct directory_entry *VFS_IterateSet(struct directory *dir,
 	return NULL;
 }
 
-void VFS_DescribeSet(struct directory *dir, struct file_set *set,
-                     char *buf, size_t buf_len)
+void VFS_DescribeSet(struct directory *dir, struct file_set *set, char *buf,
+                     size_t buf_len)
 {
 	if (set->num_entries == 0) {
 		snprintf(buf, buf_len, "nothing");
-	} if (set->num_entries == 1) {
+	}
+	if (set->num_entries == 1) {
 		struct directory_entry *ent;
 		ent = VFS_EntryBySerial(dir, set->entries[0]);
 		if (ent == NULL) {

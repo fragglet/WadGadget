@@ -10,24 +10,24 @@
 
 #include "pager/pager.h"
 
+#include <assert.h>
+#include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <assert.h>
-#include <stdio.h>
 
 #include "common.h"
 #include "pager/help.h"
 #include "ui/actions_bar.h"
-#include "ui/dialog.h"
 #include "ui/colors.h"
+#include "ui/dialog.h"
 #include "ui/stack.h"
 #include "ui/title_bar.h"
 
 struct pager *current_pager;
 
 const struct action exit_pager_action = {
-	27, 0, "Close", "Close", UI_ExitMainLoop,
+    27, 0, "Close", "Close", UI_ExitMainLoop,
 };
 
 #define SCRATCHPAD_BUFFER_WIDTH 120
@@ -145,8 +145,8 @@ static void PerformSearch(void)
 {
 	char *needle;
 
-	needle = UI_TextInputDialogBox(
-		"Search", "Search", 32, "Enter search string:");
+	needle = UI_TextInputDialogBox("Search", "Search", 32,
+	                               "Enter search string:");
 
 	if (needle == NULL) {
 		current_pager->search_line = -1;
@@ -172,7 +172,7 @@ static void PerformSearch(void)
 }
 
 const struct action pager_search_action = {
-	'/', 'F', "Search", "Search", PerformSearch,
+    '/', 'F', "Search", "Search", PerformSearch,
 };
 
 static void PerformSearchAgain(void)
@@ -194,7 +194,7 @@ static void PerformSearchAgain(void)
 }
 
 const struct action pager_search_again_action = {
-	'n', 'N', "Next", "Search Again", PerformSearchAgain,
+    'n', 'N', "Next", "Search Again", PerformSearchAgain,
 };
 
 static void PerformNextLink(void)
@@ -214,7 +214,7 @@ static void PerformNextLink(void)
 }
 
 const struct action pager_next_link_action = {
-        '\t', 0, "NextLink", "Next Link", PerformNextLink,
+    '\t', 0, "NextLink", "Next Link", PerformNextLink,
 };
 
 static void PerformPrevLink(void)
@@ -233,7 +233,7 @@ static void PerformPrevLink(void)
 }
 
 const struct action pager_prev_link_action = {
-	KEY_BTAB, 0, NULL, NULL, PerformPrevLink,
+    KEY_BTAB, 0, NULL, NULL, PerformPrevLink,
 };
 
 static void PerformOpenLink(void)
@@ -250,7 +250,7 @@ static void PerformOpenLink(void)
 }
 
 const struct action open_link_action = {
-	'\r', 0, "Open", "Open Link", PerformOpenLink,
+    '\r', 0, "Open", "Open Link", PerformOpenLink,
 };
 
 static void PerformPagerHelpAction(void)
@@ -261,7 +261,7 @@ static void PerformPagerHelpAction(void)
 }
 
 const struct action pager_help_action = {
-	KEY_F(1), 0, "Help", "Help", PerformPagerHelpAction,
+    KEY_F(1), 0, "Help", "Help", PerformPagerHelpAction,
 };
 
 static bool LinkWithinWindow(struct pager *p, int link)
@@ -277,8 +277,7 @@ static bool LinkWithinWindow(struct pager *p, int link)
 	p->cfg->get_link(p->cfg, link, &l);
 	lineno = l.lineno;
 
-	return lineno >= p->window_offset
-	    && lineno < p->window_offset + win_h;
+	return lineno >= p->window_offset && lineno < p->window_offset + win_h;
 }
 
 // Returns index of link with largest index and line number < lineno
@@ -355,8 +354,7 @@ static void UpdateSubtitle(struct pager *p)
 	int range, win_h;
 
 	win_h = getmaxy(p->pane.window);
-	range = p->cfg->num_lines > win_h ?
-	        p->cfg->num_lines - win_h : 0;
+	range = p->cfg->num_lines > win_h ? p->cfg->num_lines - win_h : 0;
 	SetWindowOffset(p, min(p->window_offset, range));
 	if (range > 0) {
 		snprintf(p->subtitle, sizeof(p->subtitle), "%d%%",
@@ -399,8 +397,8 @@ static bool DrawPager(void *_p)
 	}
 
 	if (p->cfg->num_lines > win_h) {
-		curs_y = (p->window_offset * (win_h - 1))
-		       / (p->cfg->num_lines - win_h);
+		curs_y = (p->window_offset * (win_h - 1)) /
+		         (p->cfg->num_lines - win_h);
 	} else {
 		curs_y = win_h - 1;
 	}
@@ -449,9 +447,8 @@ static void UpKeypress(struct pager *p)
 	// back through links on the same line until we find one that's
 	// appropriate for the currently selected offset.
 	new_lineno = GetLink(p, new_link).lineno;
-	while (new_link > 0
-	    && GetLink(p, new_link - 1).lineno == new_lineno
-	    && LinkStartColumn(cfg, new_link) > p->current_column) {
+	while (new_link > 0 && GetLink(p, new_link - 1).lineno == new_lineno &&
+	       LinkStartColumn(cfg, new_link) > p->current_column) {
 		--new_link;
 	}
 
@@ -482,8 +479,8 @@ static void DownKeypress(struct pager *p)
 	// Scan forwards through the array until we find the first
 	// link that is on a different line.
 	new_link = cfg->current_link;
-	while (new_link < cfg->num_links - 1
-	    && GetLink(p, new_link).lineno == old_lineno) {
+	while (new_link < cfg->num_links - 1 &&
+	       GetLink(p, new_link).lineno == old_lineno) {
 		++new_link;
 	}
 
@@ -493,8 +490,8 @@ static void DownKeypress(struct pager *p)
 	new_lineno = GetLink(p, new_link).lineno;
 	while (new_link < cfg->num_links - 1) {
 		struct pager_link l = GetLink(p, new_link + 1);
-		if (l.lineno != new_lineno
-		 || LinkStartColumn(cfg, new_link + 1) > p->current_column) {
+		if (l.lineno != new_lineno ||
+		    LinkStartColumn(cfg, new_link + 1) > p->current_column) {
 			break;
 		}
 		++new_link;
@@ -522,8 +519,8 @@ static void LeftKeypress(struct pager *p)
 	}
 
 	lineno = GetLink(p, cfg->current_link).lineno;
-	if (cfg->current_link > 0
-	 && GetLink(p, cfg->current_link - 1).lineno == lineno) {
+	if (cfg->current_link > 0 &&
+	    GetLink(p, cfg->current_link - 1).lineno == lineno) {
 		--cfg->current_link;
 	}
 
@@ -541,8 +538,8 @@ static void RightKeypress(struct pager *p)
 	}
 
 	lineno = GetLink(p, cfg->current_link).lineno;
-	if (cfg->current_link < cfg->num_links - 1
-	 && GetLink(p, cfg->current_link + 1).lineno == lineno) {
+	if (cfg->current_link < cfg->num_links - 1 &&
+	    GetLink(p, cfg->current_link + 1).lineno == lineno) {
 		++cfg->current_link;
 	}
 
@@ -586,8 +583,8 @@ static doubleclick_continuation HandleMouseClick(void *_p, int x, int y)
 		// Note: The `pager_link` does not tell us the actual
 		// x column range of the link; LinkColumnRange determines
 		// this for us.
-		if (lineno < l.lineno
-		 || (lineno == l.lineno &&
+		if (lineno < l.lineno ||
+		    (lineno == l.lineno &&
 		     LinkColumnRange(p->cfg, idx, &start_x, &end_x) &&
 		     x < start_x)) {
 			max = idx;
@@ -770,8 +767,8 @@ void P_JumpWithinWindow(struct pager *p, int lineno)
 	// also jump if the location is in the bottom half of the screen.
 	// If the line is (for example) on the last line of the screen,
 	// we want to be able to see the surrounding context.
-	if (lineno < p->window_offset
-	 || lineno >= p->window_offset + win_h / 2) {
+	if (lineno < p->window_offset ||
+	    lineno >= p->window_offset + win_h / 2) {
 		P_JumpToLine(current_pager, lineno - 5);
 	}
 }

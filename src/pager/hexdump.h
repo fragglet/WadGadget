@@ -15,8 +15,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "pager/help.h"
 #include "fs/vfile.h"
+#include "pager/help.h"
 #include "pager/pager.h"
 
 struct hexdump_pager_config {

@@ -10,20 +10,20 @@
 
 #include "fs/vfs.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <assert.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <strings.h>
 
 #include "common.h"
 #include "stringlib.h"
 
-struct directory *VFS_OpenRealDir(const char *path);  // real_dir.c
-struct directory *VFS_OpenWadAsDirectory(const char *path);  // wad_dir.c
+struct directory *VFS_OpenRealDir(const char *path);        // real_dir.c
+struct directory *VFS_OpenWadAsDirectory(const char *path); // wad_dir.c
 
 // Yes, Si units, not binary ones.
 #define KB(x) (x * 1000ULL)
@@ -32,7 +32,10 @@ struct directory *VFS_OpenWadAsDirectory(const char *path);  // wad_dir.c
 #define TB(x) (GB(x) * 1000ULL)
 
 struct directory_entry _vfs_parent_directory = {
-	FILE_TYPE_DIR, "..", 0, UINT64_MAX,
+    FILE_TYPE_DIR,
+    "..",
+    0,
+    UINT64_MAX,
 };
 
 static char last_error[128];
@@ -82,8 +85,8 @@ void VFS_FreeEntries(struct directory *d)
 static char *ParentName(const char *path)
 {
 	char *parent = PathDirName(path);
-	char *result = StringJoin("", "Parent (", PathBaseName(parent),
-	                          ")", NULL);
+	char *result =
+	    StringJoin("", "Parent (", PathBaseName(parent), ")", NULL);
 	free(parent);
 	return result;
 }
@@ -199,8 +202,7 @@ struct directory_entry *VFS_EntryBySerial(struct directory *dir,
 	return NULL;
 }
 
-struct directory_entry *VFS_EntryByName(struct directory *dir,
-                                        const char *name)
+struct directory_entry *VFS_EntryByName(struct directory *dir, const char *name)
 {
 	int i;
 
@@ -252,10 +254,9 @@ void VFS_CommitChanges(struct directory *dir, const char *msg, ...)
 	struct directory_revision *rev;
 	va_list args;
 
-	if (dir->readonly
-	 || dir->directory_funcs->commit == NULL
-	 || dir->directory_funcs->need_commit == NULL
-	 || !dir->directory_funcs->need_commit(dir)) {
+	if (dir->readonly || dir->directory_funcs->commit == NULL ||
+	    dir->directory_funcs->need_commit == NULL ||
+	    !dir->directory_funcs->need_commit(dir)) {
 		return;
 	}
 
@@ -282,9 +283,9 @@ int VFS_Refresh(struct directory *dir)
 	// Find the first entry to have changed between the old and new.
 	result = -1;
 	for (i = 0; i < num_entries; i++) {
-		if (i >= dir->num_entries
-		 || strcmp(entries[i].name, dir->entries[i].name) != 0
-		 || entries[i].size != dir->entries[i].size) {
+		if (i >= dir->num_entries ||
+		    strcmp(entries[i].name, dir->entries[i].name) != 0 ||
+		    entries[i].size != dir->entries[i].size) {
 			result = i;
 			break;
 		}
@@ -321,8 +322,8 @@ bool VFS_Remove(struct directory *dir, struct directory_entry *entry)
 	}
 
 	memmove(&dir->entries[index], &dir->entries[index + 1],
-	        (dir->num_entries - index - 1)
-	          * sizeof(struct directory_entry));
+	        (dir->num_entries - index - 1) *
+	            sizeof(struct directory_entry));
 	--dir->num_entries;
 
 	return true;
@@ -372,13 +373,13 @@ void VFS_DescribeSize(const struct directory_entry *ent, char buf[10])
 {
 	if (ent->size < 0) {
 		strncpy(buf, "", 10);
-	} else if (ent->size < KB(100)) {  // up to 99999
+	} else if (ent->size < KB(100)) { // up to 99999
 		snprintf(buf, 10, "%d", (int) ent->size);
-	} else if (ent->size < MB(10)) {  // up to 9999K
+	} else if (ent->size < MB(10)) { // up to 9999K
 		snprintf(buf, 10, "%dK", (short) (ent->size / KB(1)));
-	} else if (ent->size < GB(10)) {  // up to 9999M
+	} else if (ent->size < GB(10)) { // up to 9999M
 		snprintf(buf, 10, "%dM", (short) (ent->size / MB(1)));
-	} else if (ent->size < TB(10)) {  // up to 9999G
+	} else if (ent->size < TB(10)) { // up to 9999G
 		snprintf(buf, 10, "%dG", (short) (ent->size / GB(1)));
 	} else {
 		snprintf(buf, 10, "big!");
@@ -403,9 +404,8 @@ int VFS_CanUndo(struct directory *dir)
 	struct directory_revision *r = dir->curr_revision;
 	int result = 0;
 
-	if (dir->readonly
-	 || dir->curr_revision == NULL
-	 || dir->directory_funcs->restore_snapshot == NULL) {
+	if (dir->readonly || dir->curr_revision == NULL ||
+	    dir->directory_funcs->restore_snapshot == NULL) {
 		return 0;
 	}
 
@@ -441,9 +441,8 @@ int VFS_CanRedo(struct directory *dir)
 	struct directory_revision *r = dir->curr_revision;
 	int result = 0;
 
-	if (dir->readonly
-	 || dir->curr_revision == NULL
-	 || dir->directory_funcs->restore_snapshot == NULL) {
+	if (dir->readonly || dir->curr_revision == NULL ||
+	    dir->directory_funcs->restore_snapshot == NULL) {
 		return 0;
 	}
 

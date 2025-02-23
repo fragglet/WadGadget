@@ -10,29 +10,29 @@
 
 #include "browser/browser.h"
 
+#include <assert.h>
 #include <curses.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include <stdio.h>
 
+#include "browser/actions.h"
+#include "browser/actions_pane.h"
+#include "browser/directory_pane.h"
 #include "common.h"
 #include "fs/vfs.h"
 #include "lump_info.h"
+#include "palette/actions.h"
 #include "termfuncs.h"
 #include "textures/textures.h"
 #include "ui/actions_bar.h"
 #include "ui/colors.h"
-#include "ui/stack.h"
-#include "ui/title_bar.h"
-#include "ui/ui.h"
-#include "browser/actions_pane.h"
-#include "browser/actions.h"
-#include "browser/directory_pane.h"
-#include "palette/actions.h"
 #include "ui/list_pane.h"
 #include "ui/pane.h"
+#include "ui/stack.h"
 #include "ui/text_input.h"
+#include "ui/title_bar.h"
+#include "ui/ui.h"
 
 #define INFO_PANE_WIDTH 30
 
@@ -69,8 +69,7 @@ static void SetNwtWindowSizes(void)
 	wresize(actions_pane.pane.window, 18, INFO_PANE_WIDTH);
 	mvwin(actions_pane.pane.window, top_line + 4, left_width - 1);
 	wresize(search_pane.pane.window, 3, INFO_PANE_WIDTH);
-	mvwin(search_pane.pane.window, top_line + lines - 3,
-	      left_width - 1);
+	mvwin(search_pane.pane.window, top_line + lines - 3, left_width - 1);
 
 	UI_PaneShow(&actions_pane);
 
@@ -103,11 +102,9 @@ static void SetCmdrWindowSizes(void)
 	wresize(search_pane.pane.window, 1, COLS);
 	mvwin(search_pane.pane.window, top_line + lines - 1, 0);
 
-	wresize(pane_windows[0], lines - (current_pane ? 1 : 5),
-	        left_width);
+	wresize(pane_windows[0], lines - (current_pane ? 1 : 5), left_width);
 	mvwin(pane_windows[0], top_line, 0);
-	wresize(pane_windows[1], lines - (current_pane ? 5 : 1),
-	        right_width);
+	wresize(pane_windows[1], lines - (current_pane ? 5 : 1), right_width);
 	mvwin(pane_windows[1], top_line, left_width - 1);
 
 	// TODO: nc-style function keys row
@@ -138,8 +135,7 @@ static void PerformSwitchPane(void)
 }
 
 static const struct action other_pane_action = {
-	'\t', 0, "Other", "> Other pane",
-	PerformSwitchPane,
+    '\t', 0, "Other", "> Other pane", PerformSwitchPane,
 };
 
 static void ToggleCmdrMode(void)
@@ -157,8 +153,7 @@ static void ToggleCmdrMode(void)
 }
 
 static const struct action cmdr_mode_action = {
-	0, 'J', "CmdrMode", "| CmdrMode",
-	ToggleCmdrMode,
+    0, 'J', "CmdrMode", "| CmdrMode", ToggleCmdrMode,
 };
 
 static void SearchAgain(void)
@@ -166,8 +161,8 @@ static void SearchAgain(void)
 	int old_selected = active_pane->pane.selected;
 	bool found;
 
-	found = B_DirectoryPaneSearchAgain(active_pane,
-	                                   search_pane.input.input);
+	found =
+	    B_DirectoryPaneSearchAgain(active_pane, search_pane.input.input);
 
 	if (active_pane->pane.selected < old_selected) {
 		UI_ShowNotice("Searched to the end; returning to the start.");
@@ -181,8 +176,7 @@ static void SearchAgain(void)
 }
 
 static const struct action search_again_action = {
-	0, 'N', "Next", "Search again",
-	SearchAgain,
+    0, 'N', "Next", "Search again", SearchAgain,
 };
 
 static void PerformSwapPanes(void)
@@ -200,174 +194,144 @@ static void PerformSwapPanes(void)
 }
 
 static const struct action swap_panes_action = {
-	KEY_BTAB, 0, NULL, "Swap panes",
-	PerformSwapPanes,
+    KEY_BTAB, 0, NULL, "Swap panes", PerformSwapPanes,
 };
 
 static const struct action *wad_actions[] = {
-	&rearrange_action,
-	&new_lump_action,
-	&undo_action,
-	&redo_action,
-	&sort_entries_action,
-	&hexdump_action,
-	&open_palettes_action,
-	&view_action,
-	NULL,
+    &rearrange_action,     &new_lump_action,     &undo_action,
+    &redo_action,          &sort_entries_action, &hexdump_action,
+    &open_palettes_action, &view_action,         NULL,
 };
 
 static const struct action *dir_actions[] = {
-	&compact_action,
-	&open_shell_action,
-	&make_wad_action,
-	&make_wad_noconv_action,
-	&mkdir_action,
-	&hexdump_action,
-	&open_palettes_action,
-	&view_action,
-	NULL,
+    &compact_action,         &open_shell_action, &make_wad_action,
+    &make_wad_noconv_action, &mkdir_action,      &hexdump_action,
+    &open_palettes_action,   &view_action,       NULL,
 };
 
 static const struct action *txt_actions[] = {
-	&edit_textures_action,
-	&rearrange_action,
-	&sort_entries_action,
-	&new_texture_action,
-	&dup_texture_action,
-	&undo_action,
-	&redo_action,
-	&view_action,
-	NULL,
+    &edit_textures_action, &rearrange_action,   &sort_entries_action,
+    &new_texture_action,   &dup_texture_action, &undo_action,
+    &redo_action,          &view_action,        NULL,
 };
 
 static const struct action *pnm_actions[] = {
-	&edit_pnames_action,
-	&rearrange_action,
-	&sort_entries_action,
-	&new_pname_action,
-	&undo_action,
-	&redo_action,
-	&view_action,
-	NULL,
+    &edit_pnames_action,  &rearrange_action,
+    &sort_entries_action, &new_pname_action,
+    &undo_action,         &redo_action,
+    &view_action,         NULL,
 };
 
 static const struct action *pal_actions[] = {
-	&set_default_palette_action,
-	&view_palette_action,
-	NULL,
+    &set_default_palette_action,
+    &view_palette_action,
+    NULL,
 };
 
 static const struct action *wad_to_wad[] = {
-	&update_action,
-	&copy_action,
-	NULL,
+    &update_action,
+    &copy_action,
+    NULL,
 };
 
 static const struct action *wad_to_dir[] = {
-	&export_wad_action,
-	&export_action,
-	&export_noconv_action,
-	NULL,
+    &export_wad_action,
+    &export_action,
+    &export_noconv_action,
+    NULL,
 };
 
 static const struct action *wad_to_pnm[] = {
-	&copy_pnames_action,
-	NULL,
+    &copy_pnames_action,
+    NULL,
 };
 
 static const struct action *wad_to_pal[] = {
-	&copy_palette_to_dir_action,
-	NULL,
+    &copy_palette_to_dir_action,
+    NULL,
 };
 
 static const struct action *dir_to_wad[] = {
-	&update_action,
-	&import_action,
-	&import_noconv_action,
-	NULL,
+    &update_action,
+    &import_action,
+    &import_noconv_action,
+    NULL,
 };
 
 static const struct action *dir_to_dir[] = {
-	&copy_action,
-	NULL,
+    &copy_action,
+    NULL,
 };
 
 static const struct action *dir_to_pnm[] = {
-	&import_texture_config,
-	NULL,
+    &import_texture_config,
+    NULL,
 };
 
 static const struct action *dir_to_pal[] = {
-	&copy_palette_to_dir_action,
-	NULL,
+    &copy_palette_to_dir_action,
+    NULL,
 };
 
 static const struct action *dir_to_txt[] = {
-	&import_texture_config,
-	NULL,
+    &import_texture_config,
+    NULL,
 };
 
 static const struct action *txt_to_dir[] = {
-	&export_texture_config,
-	NULL,
+    &export_texture_config,
+    NULL,
 };
 
 static const struct action *txt_to_txt[] = {
-	&copy_textures_action,
-	NULL,
+    &copy_textures_action,
+    NULL,
 };
 
 static const struct action *pnm_to_pnm[] = {
-	&copy_pnames_action,
-	NULL,
+    &copy_pnames_action,
+    NULL,
 };
 
 static const struct action *pnm_to_dir[] = {
-	&export_texture_config,
-	NULL,
+    &export_texture_config,
+    NULL,
 };
 
 static const struct action *pal_to_dir[] = {
-	&copy_palette_to_dir_action,
-	NULL,
+    &copy_palette_to_dir_action,
+    NULL,
 };
 
 static const struct action *pal_to_wad[] = {
-	&copy_palette_to_wad_action,
-	&set_palette_pref_action,
-	NULL,
+    &copy_palette_to_wad_action,
+    &set_palette_pref_action,
+    NULL,
 };
 
 static const struct action *no_actions[] = {NULL};
 
 static const struct action *common_actions[] = {
-	&rename_action,
-	&delete_action,
-	&mark_pattern_action,
-	&unmark_all_action,
-	&cmdr_mode_action,
-	&swap_panes_action,
-	&search_again_action,
-	&reload_action,
-	&mark_action,
-	&delete_no_confirm_action,
-	&other_pane_action,
-	&help_action,
-	&quit_action,
-	NULL,
+    &rename_action,       &delete_action,
+    &mark_pattern_action, &unmark_all_action,
+    &cmdr_mode_action,    &swap_panes_action,
+    &search_again_action, &reload_action,
+    &mark_action,         &delete_no_confirm_action,
+    &other_pane_action,   &help_action,
+    &quit_action,         NULL,
 };
 
 static const struct action **type_actions[NUM_DIR_FILE_TYPES] = {
-	dir_actions, wad_actions, txt_actions, pnm_actions, pal_actions,
+    dir_actions, wad_actions, txt_actions, pnm_actions, pal_actions,
 };
 
-static const struct action
-    **action_lists[NUM_DIR_FILE_TYPES][NUM_DIR_FILE_TYPES] = {
-	{dir_to_dir, dir_to_wad, dir_to_txt, dir_to_pnm, dir_to_pal},
-	{wad_to_dir, wad_to_wad, no_actions, wad_to_pnm, wad_to_pal},
-	{txt_to_dir, no_actions, txt_to_txt, no_actions, no_actions},
-	{pnm_to_dir, no_actions, no_actions, pnm_to_pnm, no_actions},
-	{pal_to_dir, pal_to_wad, no_actions, no_actions, no_actions},
+static const struct action *
+    *action_lists[NUM_DIR_FILE_TYPES][NUM_DIR_FILE_TYPES] = {
+        {dir_to_dir, dir_to_wad, dir_to_txt, dir_to_pnm, dir_to_pal},
+        {wad_to_dir, wad_to_wad, no_actions, wad_to_pnm, wad_to_pal},
+        {txt_to_dir, no_actions, txt_to_txt, no_actions, no_actions},
+        {pnm_to_dir, no_actions, no_actions, pnm_to_pnm, no_actions},
+        {pal_to_dir, pal_to_wad, no_actions, no_actions, no_actions},
 };
 
 static void AddActionList(const struct action **list, int *idx)
@@ -514,7 +478,7 @@ static bool DrawInfoPane(void *p)
 		wf = VFS_WadFile(dir);
 		lt = LI_IdentifyLump(wf, idx);
 		UI_PrintMultilineString(pane->window, 1, 2,
-		    LI_DescribeLump(lt, wf, idx));
+		                        LI_DescribeLump(lt, wf, idx));
 		break;
 
 	case FILE_TYPE_FILE:
@@ -528,13 +492,11 @@ static bool DrawInfoPane(void *p)
 		break;
 
 	case FILE_TYPE_DIR:
-		UI_PrintMultilineString(pane->window, 1, 2,
-		    "Directory");
+		UI_PrintMultilineString(pane->window, 1, 2, "Directory");
 		break;
 
 	case FILE_TYPE_PALETTE:
-		UI_PrintMultilineString(pane->window, 1, 2,
-		    "Palette");
+		UI_PrintMultilineString(pane->window, 1, 2, "Palette");
 		break;
 
 	case FILE_TYPE_TEXTURE_LIST:
@@ -547,8 +509,8 @@ static bool DrawInfoPane(void *p)
 		txs = TX_TextureList(dir);
 		t = txs->textures[idx];
 		snprintf(buf2, sizeof(buf2),
-		         "Texture\nDimensions: %dx%d\nPatches: %d",
-		         t->width, t->height, t->patchcount);
+		         "Texture\nDimensions: %dx%d\nPatches: %d", t->width,
+		         t->height, t->patchcount);
 		UI_PrintMultilineString(pane->window, 1, 2, buf2);
 		break;
 

@@ -13,20 +13,20 @@
 #include <curses.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
-#include <stdio.h>
 #include <unistd.h>
 
-#include "ui/colors.h"
 #include "common.h"
+#include "ui/colors.h"
 
 struct timeval;
 
 #define CLEAR_SCREEN_ESCAPE "\x1b[H\x1b[2J"
-#define XTERM_RAISE_ESCAPE  "\x1b[5t"  /* xterm WindowOp to raise window */
-#define RESPONSE_TIMEOUT 1000 /* ms */
+#define XTERM_RAISE_ESCAPE  "\x1b[5t" /* xterm WindowOp to raise window */
+#define RESPONSE_TIMEOUT    1000      /* ms */
 
 // We use the curses init_color() function to set a custom color palette
 // that matches the palette from NWT; these values are from the ScreenPal[]
@@ -34,39 +34,39 @@ struct timeval;
 #define V(x) ((x * 1000) / 63)
 
 static struct palette nwt_palette = {
-	16,
-	{
-		{COLOR_BLACK,          V( 0), V( 0), V( 0)},
-		{COLOR_BLUE,           V( 0), V( 0), V(25)},
-		{COLOR_GREEN,          V( 0), V(42), V( 0)},
-		{COLOR_CYAN,           V( 0), V(42), V(42)},
-		{COLOR_RED,            V(42), V( 0), V( 0)},
-		{COLOR_MAGENTA,        V(42), V( 0), V(42)},
-		{COLOR_YELLOW,         V(42), V(42), V( 0)},
-		{COLOR_WHITE,          V(34), V(34), V(34)},
+    16,
+    {
+      {COLOR_BLACK, V(0), V(0), V(0)},
+      {COLOR_BLUE, V(0), V(0), V(25)},
+      {COLOR_GREEN, V(0), V(42), V(0)},
+      {COLOR_CYAN, V(0), V(42), V(42)},
+      {COLOR_RED, V(42), V(0), V(0)},
+      {COLOR_MAGENTA, V(42), V(0), V(42)},
+      {COLOR_YELLOW, V(42), V(42), V(0)},
+      {COLOR_WHITE, V(34), V(34), V(34)},
 
-		{COLORX_DARKGREY,      V( 0), V( 0), V(13)},
-		{COLORX_BRIGHTBLUE,    V( 0), V( 0), V(55)},
-		{COLORX_BRIGHTGREEN,   V( 0), V(34), V(13)},
-		{COLORX_BRIGHTCYAN,    V( 0), V(34), V(55)},
-		{COLORX_BRIGHTRED,     V(34), V( 0), V(13)},
-		{COLORX_BRIGHTMAGENTA, V(34), V( 0), V(55)},
-		{COLORX_BRIGHTYELLOW,  V(34), V(34), V(13)},
-		{COLORX_BRIGHTWHITE,   V(55), V(55), V(55)},
-	},
+      {COLORX_DARKGREY, V(0), V(0), V(13)},
+      {COLORX_BRIGHTBLUE, V(0), V(0), V(55)},
+      {COLORX_BRIGHTGREEN, V(0), V(34), V(13)},
+      {COLORX_BRIGHTCYAN, V(0), V(34), V(55)},
+      {COLORX_BRIGHTRED, V(34), V(0), V(13)},
+      {COLORX_BRIGHTMAGENTA, V(34), V(0), V(55)},
+      {COLORX_BRIGHTYELLOW, V(34), V(34), V(13)},
+      {COLORX_BRIGHTWHITE, V(55), V(55), V(55)},
+      },
 };
 
 static const struct {
 	int pair_index, fg, bg;
 } color_pairs[] = {
-	{PAIR_WHITE_BLACK, COLORX_BRIGHTWHITE, COLOR_BLACK},
-	{PAIR_PANE_COLOR,  COLORX_BRIGHTWHITE, COLOR_BLUE},
-	{PAIR_HEADER,      COLOR_BLACK,        COLORX_BRIGHTCYAN},
-	{PAIR_DIRECTORY,   COLOR_WHITE,        COLOR_BLACK},
-	{PAIR_WAD_FILE,    COLOR_RED,          COLOR_BLACK},
-	{PAIR_DIALOG_BOX,  COLORX_BRIGHTWHITE, COLOR_MAGENTA},
-	{PAIR_TAGGED,      COLORX_BRIGHTWHITE, COLOR_RED},
-	{PAIR_NOTICE,      COLOR_BLACK,        COLOR_YELLOW},
+    {PAIR_WHITE_BLACK, COLORX_BRIGHTWHITE, COLOR_BLACK      },
+    {PAIR_PANE_COLOR,  COLORX_BRIGHTWHITE, COLOR_BLUE       },
+    {PAIR_HEADER,      COLOR_BLACK,        COLORX_BRIGHTCYAN},
+    {PAIR_DIRECTORY,   COLOR_WHITE,        COLOR_BLACK      },
+    {PAIR_WAD_FILE,    COLOR_RED,          COLOR_BLACK      },
+    {PAIR_DIALOG_BOX,  COLORX_BRIGHTWHITE, COLOR_MAGENTA    },
+    {PAIR_TAGGED,      COLORX_BRIGHTWHITE, COLOR_RED        },
+    {PAIR_NOTICE,      COLOR_BLACK,        COLOR_YELLOW     },
 };
 
 // Old palette we saved and restore on quit.
@@ -142,8 +142,7 @@ void TF_SetColorPairs(void)
 	}
 
 	for (i = 0; i < arrlen(color_pairs); i++) {
-		init_pair(color_pairs[i].pair_index,
-		          color_pairs[i].fg & mask,
+		init_pair(color_pairs[i].pair_index, color_pairs[i].fg & mask,
 		          color_pairs[i].bg & mask);
 	}
 }
@@ -184,8 +183,8 @@ void TF_RestoreNormalMode(struct saved_flags *f)
 
 static int TimeDiffMs(struct timeval *a, struct timeval *b)
 {
-	return (a->tv_sec - b->tv_sec) * 1000
-	     + (a->tv_usec - b->tv_usec) / 1000;
+	return (a->tv_sec - b->tv_sec) * 1000 +
+	       (a->tv_usec - b->tv_usec) / 1000;
 }
 
 // Read a character from stdin, timing out if no response is received

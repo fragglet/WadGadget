@@ -10,20 +10,18 @@
 
 #include "browser/actions_pane.h"
 
-#include <string.h>
 #include <stdbool.h>
+#include <string.h>
 
-#include "ui/colors.h"
 #include "common.h"
+#include "ui/colors.h"
 #include "ui/ui.h"
 
 static const int key_ordering[] = {
-	KEY_F(1), KEY_F(2), KEY_F(3), KEY_F(4), KEY_F(5), KEY_F(6),
-	KEY_F(7), KEY_F(8), KEY_F(9), ' ', CTRL_('G'), KEY_F(10),
-	0,
-	'\t', CTRL_('D'), CTRL_('P'),
-	CTRL_('Z'), CTRL_('Y'),
-	27, CTRL_('J'),
+    KEY_F(1),   KEY_F(2),   KEY_F(3),   KEY_F(4), KEY_F(5),
+    KEY_F(6),   KEY_F(7),   KEY_F(8),   KEY_F(9), ' ',
+    CTRL_('G'), KEY_F(10),  0,          '\t',     CTRL_('D'),
+    CTRL_('P'), CTRL_('Z'), CTRL_('Y'), 27,       CTRL_('J'),
 };
 
 struct action_options {
@@ -67,9 +65,8 @@ static void BeginActionIter(struct actions_pane *p, struct action_iter *it)
 	it->last_idx = -1;
 }
 
-static const struct action *
-NextActionIter(struct action_iter *it, int *x, int *y,
-               struct action_options *opts)
+static const struct action *NextActionIter(struct action_iter *it, int *x,
+                                           int *y, struct action_options *opts)
 {
 	const struct action *a, *result = NULL;
 
@@ -158,8 +155,7 @@ static doubleclick_continuation ActionsPaneMouseClick(void *_p, int x, int y)
 	int ax, ay;
 
 	BeginActionIter(p, &it);
-	while ((a = NextActionIter(&it, &ax, &ay, &opts)) != NULL
-	    && ay <= y) {
+	while ((a = NextActionIter(&it, &ax, &ay, &opts)) != NULL && ay <= y) {
 		// If there are multiple actions on the line, we want to end
 		// up with the last one on the line with x <= mouse x
 		if (y == ay && x >= ax) {
@@ -184,9 +180,8 @@ void B_ActionsPaneInit(struct actions_pane *pane, WINDOW *win)
 	memset(pane->actions, 0, sizeof(pane->actions));
 }
 
-void B_ActionsPaneSet(struct actions_pane *pane,
-                      const struct action **actions, bool left_to_right,
-                      bool function_keys)
+void B_ActionsPaneSet(struct actions_pane *pane, const struct action **actions,
+                      bool left_to_right, bool function_keys)
 {
 	const struct action *a;
 	int i, j;
@@ -198,9 +193,9 @@ void B_ActionsPaneSet(struct actions_pane *pane,
 	for (i = 0; actions[i] != NULL; i++) {
 		a = actions[i];
 		for (j = 0; j < arrlen(key_ordering); ++j) {
-			if (key_ordering[j] != 0
-			 && (key_ordering[j] == a->key
-			  || key_ordering[j] == CTRL_(a->ctrl_key))) {
+			if (key_ordering[j] != 0 &&
+			    (key_ordering[j] == a->key ||
+			     key_ordering[j] == CTRL_(a->ctrl_key))) {
 				pane->actions[j] = a;
 				break;
 			}

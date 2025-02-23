@@ -10,8 +10,8 @@
 
 #include "ui/pane.h"
 
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "common.h"
 #include "ui/actions_bar.h"
@@ -131,8 +131,8 @@ void UI_DrawAllPanes(void)
 		UI_DrawPane(title_bar);
 
 		if (s != UI_ActiveStack()) {
-			UI_DimScreenArea(0, s->state.top_line,
-			                 COLS, s->state.lines, -1);
+			UI_DimScreenArea(0, s->state.top_line, COLS,
+			                 s->state.lines, -1);
 		}
 	}
 
@@ -209,10 +209,8 @@ static bool CheckMouseInPane(MEVENT *ev, struct pane *p)
 	getbegyx(p->window, py, px);
 	getmaxyx(p->window, ph, pw);
 
-	if (ev->x < px || ev->x >= px + pw
-	 || ev->y < py || ev->y >= py + ph) {
+	if (ev->x < px || ev->x >= px + pw || ev->y < py || ev->y >= py + ph) {
 		return false;
-
 	}
 
 	relx = ev->x - px;
@@ -220,9 +218,9 @@ static bool CheckMouseInPane(MEVENT *ev, struct pane *p)
 
 	// Double clicks are only valid if the clicks go to the
 	// same screen location each time.
-	if (mouse_click_continuation != NULL
-	 && (p != mouse_cur_pane || relx != mouse_cur_x
-	  || rely != mouse_cur_y)) {
+	if (mouse_click_continuation != NULL &&
+	    (p != mouse_cur_pane || relx != mouse_cur_x ||
+	     rely != mouse_cur_y)) {
 		mouse_click_continuation = NULL;
 	}
 
@@ -236,8 +234,8 @@ static bool UpdateMousePosition(MEVENT *ev)
 {
 	struct pane_stack *s;
 
-	if (UI_ActiveStack()->actions_bar_enabled
-	 && CheckMouseInPane(ev, actions_bar)) {
+	if (UI_ActiveStack()->actions_bar_enabled &&
+	    CheckMouseInPane(ev, actions_bar)) {
 		mouse_cur_stack = UI_ActiveStack();
 		return true;
 	}
@@ -247,8 +245,8 @@ static bool UpdateMousePosition(MEVENT *ev)
 	for (s = UI_AllStacks(); s != NULL; s = s->state.next) {
 		struct pane *p;
 
-		for (p = GetPrevPane(s, NULL);
-		     p != NULL; p = GetPrevPane(s, p)) {
+		for (p = GetPrevPane(s, NULL); p != NULL;
+		     p = GetPrevPane(s, p)) {
 			if (CheckMouseInPane(ev, p)) {
 				mouse_cur_stack = s;
 				return true;
@@ -270,8 +268,8 @@ static void HandleMouseClick(void)
 		mouse_click_continuation(mouse_cur_pane);
 		mouse_click_continuation = NULL;
 	} else {
-		mouse_click_continuation = UI_PaneMouseClick(
-			mouse_cur_pane, mouse_cur_x, mouse_cur_y);
+		mouse_click_continuation =
+		    UI_PaneMouseClick(mouse_cur_pane, mouse_cur_x, mouse_cur_y);
 	}
 }
 
@@ -283,7 +281,8 @@ static void HandleMouseEvent(void)
 	if (getmouse(&ev) != OK || !UpdateMousePosition(&ev)) {
 		return;
 	}
-	if (s->exclusive_focus != NULL && mouse_cur_pane != s->exclusive_focus) {
+	if (s->exclusive_focus != NULL &&
+	    mouse_cur_pane != s->exclusive_focus) {
 		return;
 	}
 
@@ -348,8 +347,8 @@ static void HandleKeypresses(void)
 
 bool UI_GetMousePosition(struct pane *if_pane, int *x, int *y)
 {
-	if (!has_mouse() || mouse_cur_pane == NULL
-	 || if_pane != mouse_cur_pane) {
+	if (!has_mouse() || mouse_cur_pane == NULL ||
+	    if_pane != mouse_cur_pane) {
 		*x = -1;
 		*y = -1;
 		return false;

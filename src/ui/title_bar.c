@@ -10,33 +10,45 @@
 
 #include "ui/title_bar.h"
 
-#include <string.h>
 #include <curses.h>
-#include <time.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
+#include <time.h>
 
 #include "ui/colors.h"
 #include "ui/pane.h"
 #include "ui/stack.h"
 
-#define MAX_NOTICE_LEN    100
-#define NOTICE_TIME_SECS    2
+#define MAX_NOTICE_LEN   100
+#define NOTICE_TIME_SECS 2
 
 static char notice_buf[MAX_NOTICE_LEN + 1];
 static time_t last_notice_time;
 
 // What games use the WAD format?
 static const char *games[] = {
-	"Doom", "[Doom II", "[Final Doom", "Heretic", "Hexen", "Strife",
-	"[Chex Quest", "[Freedoom", "[Rise of the Triad", "[HACX",
-	"[Amulets & Armor", "[Duke Nukem 3D", "[Tank Wars",
-	"[Birthright: The Gorgon's Alliance", "[Doom 2D", NULL,
+    "Doom",
+    "[Doom II",
+    "[Final Doom",
+    "Heretic",
+    "Hexen",
+    "Strife",
+    "[Chex Quest",
+    "[Freedoom",
+    "[Rise of the Triad",
+    "[HACX",
+    "[Amulets & Armor",
+    "[Duke Nukem 3D",
+    "[Tank Wars",
+    "[Birthright: The Gorgon's Alliance",
+    "[Doom 2D",
+    NULL,
 };
 
 #define START_STR "= WadGadget for "
-#define END_STR "\b\b and the rest ="
+#define END_STR   "\b\b and the rest ="
 
 struct title_bar {
 	struct pane pane;
@@ -90,8 +102,8 @@ static bool DrawTitleBar(void *_p)
 
 	mvwin(p->pane.window, stack->state.top_line, 0);
 
-	if (UI_CurrentStack() == UI_ActiveStack()
-	 && time(NULL) - last_notice_time < NOTICE_TIME_SECS) {
+	if (UI_CurrentStack() == UI_ActiveStack() &&
+	    time(NULL) - last_notice_time < NOTICE_TIME_SECS) {
 		wbkgdset(p->pane.window, COLOR_PAIR(PAIR_NOTICE));
 		werase(p->pane.window);
 		mvwaddstr(p->pane.window, 0, 1, notice_buf);
