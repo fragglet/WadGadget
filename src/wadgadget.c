@@ -24,14 +24,15 @@
 
 #define RESPONSE_FILE_PATH "/tmp/wadgadget-paths.txt"
 
-#define VERSION_OUTPUT \
-"WadGadget version ?\n" \
-"Copyright (C) 2022-2024 Simon Howard\n" \
-"License GPLv2+: GNU GPL version 2 or later:\n" \
-"<https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>\n" \
-"\n" \
-"This is free software; see COPYING.md for copying conditions. There is NO\n" \
-"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
+#define VERSION_OUTPUT                                                         \
+	"WadGadget version ?\n"                                                \
+	"Copyright (C) 2022-2024 Simon Howard\n"                               \
+	"License GPLv2+: GNU GPL version 2 or later:\n"                        \
+	"<https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>\n"           \
+	"\n"                                                                   \
+	"This is free software; see COPYING.md for copying conditions. There " \
+	"is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A "      \
+	"PARTICULAR PURPOSE.\n"
 
 static struct sigaction old_sigint_action;
 
