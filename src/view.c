@@ -178,20 +178,23 @@ static time_t ReadFileTime(const char *filename)
 	return s.st_mtime;
 }
 
+#ifdef __APPLE__
+static const struct {
+	const char *env;
+	const char *appname;
+} terms[] = {
+    {"iTerm",          "iTerm"   },
+    {"Apple_Terminal", "Terminal"},
+    {"Hyper",          "Hyper"   },
+    {"Tabby",          "Tabby"   },
+    {"rio",            "rio"     },
+ // Add your favorite terminal here. Not Warp though.
+};
+#endif
+
 static void RaiseUsToTop(void)
 {
 #ifdef __APPLE__
-	static const struct {
-		const char *env;
-		const char *appname;
-	} terms[] = {
-		{"iTerm",            "iTerm"},
-		{"Apple_Terminal",   "Terminal"},
-		{"Hyper",            "Hyper"},
-		{"Tabby",            "Tabby"},
-		{"rio",              "rio"},
-		// Add your favorite terminal here. Not Warp though.
-	};
 	const char *termprog = getenv("TERM_PROGRAM");
 	const char *appname = NULL;
 	int i;
