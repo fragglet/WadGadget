@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{3539e14a-f850-425a-a511-02821f00f49e}</ProjectGuid>
+    <RootNamespace>WadGadget</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\src</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\src</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\src</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\src</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\browser\actions.h" />
+    <ClInclude Include="..\src\browser\actions_pane.h" />
+    <ClInclude Include="..\src\browser\browser.h" />
+    <ClInclude Include="..\src\browser\directory_pane.h" />
+    <ClInclude Include="..\src\common.h" />
+    <ClInclude Include="..\src\conv\audio.h" />
+    <ClInclude Include="..\src\conv\endoom.h" />
+    <ClInclude Include="..\src\conv\error.h" />
+    <ClInclude Include="..\src\conv\export.h" />
+    <ClInclude Include="..\src\conv\graphic.h" />
+    <ClInclude Include="..\src\conv\import.h" />
+    <ClInclude Include="..\src\conv\mus2mid.h" />
+    <ClInclude Include="..\src\conv\palette.h" />
+    <ClInclude Include="..\src\conv\vpng.h" />
+    <ClInclude Include="..\src\fs\vfile.h" />
+    <ClInclude Include="..\src\fs\vfs.h" />
+    <ClInclude Include="..\src\fs\wad_file.h" />
+    <ClInclude Include="..\src\help_text.h" />
+    <ClInclude Include="..\src\lump_info.h" />
+    <ClInclude Include="..\src\pager\help.h" />
+    <ClInclude Include="..\src\pager\hexdump.h" />
+    <ClInclude Include="..\src\pager\pager.h" />
+    <ClInclude Include="..\src\pager\plaintext.h" />
+    <ClInclude Include="..\src\palette\actions.h" />
+    <ClInclude Include="..\src\palette\palette.h" />
+    <ClInclude Include="..\src\palette\palfs.h" />
+    <ClInclude Include="..\src\sixel_display.h" />
+    <ClInclude Include="..\src\stringlib.h" />
+    <ClInclude Include="..\src\struct.h" />
+    <ClInclude Include="..\src\termfuncs.h" />
+    <ClInclude Include="..\src\textures\internal.h" />
+    <ClInclude Include="..\src\textures\textures.h" />
+    <ClInclude Include="..\src\ui\actions_bar.h" />
+    <ClInclude Include="..\src\ui\colors.h" />
+    <ClInclude Include="..\src\ui\dialog.h" />
+    <ClInclude Include="..\src\ui\list_pane.h" />
+    <ClInclude Include="..\src\ui\pane.h" />
+    <ClInclude Include="..\src\ui\stack.h" />
+    <ClInclude Include="..\src\ui\text_input.h" />
+    <ClInclude Include="..\src\ui\title_bar.h" />
+    <ClInclude Include="..\src\ui\ui.h" />
+    <ClInclude Include="..\src\view.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\browser\actions.c">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(RelativeDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\browser\actions_pane.c" />
+    <ClCompile Include="..\src\browser\browser.c" />
+    <ClCompile Include="..\src\browser\directory_pane.c" />
+    <ClCompile Include="..\src\conv\audio.c" />
+    <ClCompile Include="..\src\conv\endoom.c" />
+    <ClCompile Include="..\src\conv\error.c" />
+    <ClCompile Include="..\src\conv\export.c" />
+    <ClCompile Include="..\src\conv\graphic.c" />
+    <ClCompile Include="..\src\conv\import.c" />
+    <ClCompile Include="..\src\conv\mus2mid.c" />
+    <ClCompile Include="..\src\conv\palette.c">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(RelativeDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\conv\vpng.c" />
+    <ClCompile Include="..\src\fs\file_set.c" />
+    <ClCompile Include="..\src\fs\real_dir.c" />
+    <ClCompile Include="..\src\fs\vfile.c" />
+    <ClCompile Include="..\src\fs\vfs.c" />
+    <ClCompile Include="..\src\fs\wad_dir.c" />
+    <ClCompile Include="..\src\fs\wad_file.c" />
+    <ClCompile Include="..\src\lump_info.c" />
+    <ClCompile Include="..\src\pager\help.c" />
+    <ClCompile Include="..\src\pager\hexdump.c" />
+    <ClCompile Include="..\src\pager\pager.c" />
+    <ClCompile Include="..\src\pager\plaintext.c" />
+    <ClCompile Include="..\src\palette\actions.c">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(RelativeDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\palette\doom.c" />
+    <ClCompile Include="..\src\palette\palette.c">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(RelativeDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\palette\palfs.c" />
+    <ClCompile Include="..\src\sixel_display.c" />
+    <ClCompile Include="..\src\stringlib.c" />
+    <ClCompile Include="..\src\struct.c" />
+    <ClCompile Include="..\src\termfuncs.c" />
+    <ClCompile Include="..\src\textures\actions.c">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)%(RelativeDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)%(RelativeDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\src\textures\bundle.c" />
+    <ClCompile Include="..\src\textures\config.c" />
+    <ClCompile Include="..\src\textures\lump_dir.c" />
+    <ClCompile Include="..\src\textures\pnames.c" />
+    <ClCompile Include="..\src\textures\pnames_dir.c" />
+    <ClCompile Include="..\src\textures\textures.c" />
+    <ClCompile Include="..\src\textures\texture_dir.c" />
+    <ClCompile Include="..\src\ui\actions_bar.c" />
+    <ClCompile Include="..\src\ui\dialog.c" />
+    <ClCompile Include="..\src\ui\list_pane.c" />
+    <ClCompile Include="..\src\ui\pane.c" />
+    <ClCompile Include="..\src\ui\stack.c" />
+    <ClCompile Include="..\src\ui\text_input.c" />
+    <ClCompile Include="..\src\ui\title_bar.c" />
+    <ClCompile Include="..\src\ui\ui.c" />
+    <ClCompile Include="..\src\view.c" />
+    <ClCompile Include="..\src\wadgadget.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,339 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Quelldateien">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Ressourcendateien">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Headerdateien\browser">
+      <UniqueIdentifier>{690293b7-3523-40e8-9a2e-b9714c7b7ab6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\conv">
+      <UniqueIdentifier>{4ad17f59-cab7-43c3-9b34-023ab753a99a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\fs">
+      <UniqueIdentifier>{b365f47b-75f1-4f80-b2e0-5bc2195f773e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\ui">
+      <UniqueIdentifier>{6764ecad-e321-4908-bbaa-d96a899e2b4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\browser">
+      <UniqueIdentifier>{7b154119-09a5-43b3-a614-613c95d3fcc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\conv">
+      <UniqueIdentifier>{1f0f7b51-04a7-443d-977f-106c4aa81636}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\fs">
+      <UniqueIdentifier>{02286b9b-a6c8-463f-ad06-f908a84e60be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\ui">
+      <UniqueIdentifier>{ab01ae5e-5a9f-4209-8c80-7f316bd41fda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\textures">
+      <UniqueIdentifier>{618338aa-77c8-46a3-a73f-ef1817e0a87f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\palette">
+      <UniqueIdentifier>{6eb95a7d-c5e7-402e-8d6e-6a4091dd7ee5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quelldateien\pager">
+      <UniqueIdentifier>{9cc27ec4-cfaf-42ab-81ec-48e705ee3bb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\pager">
+      <UniqueIdentifier>{46982220-e080-4e56-a99b-641f3533f65a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\palette">
+      <UniqueIdentifier>{5a3cd407-b9a9-49da-9b73-2737f0cefda9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\textures">
+      <UniqueIdentifier>{f22c9eca-ae07-4fa2-93e5-7d28cc3bfc1c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\common.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\help_text.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\lump_info.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\sixel_display.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\stringlib.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\struct.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\termfuncs.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\view.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\browser\actions.h">
+      <Filter>Headerdateien\browser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\browser\actions_pane.h">
+      <Filter>Headerdateien\browser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\browser\browser.h">
+      <Filter>Headerdateien\browser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\browser\directory_pane.h">
+      <Filter>Headerdateien\browser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\conv\audio.h">
+      <Filter>Headerdateien\conv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\conv\endoom.h">
+      <Filter>Headerdateien\conv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\conv\error.h">
+      <Filter>Headerdateien\conv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\conv\export.h">
+      <Filter>Headerdateien\conv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\conv\graphic.h">
+      <Filter>Headerdateien\conv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\conv\import.h">
+      <Filter>Headerdateien\conv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\conv\mus2mid.h">
+      <Filter>Headerdateien\conv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\conv\palette.h">
+      <Filter>Headerdateien\conv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\conv\vpng.h">
+      <Filter>Headerdateien\conv</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\fs\vfile.h">
+      <Filter>Headerdateien\fs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\fs\vfs.h">
+      <Filter>Headerdateien\fs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\fs\wad_file.h">
+      <Filter>Headerdateien\fs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\pager\help.h">
+      <Filter>Headerdateien\pager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\pager\hexdump.h">
+      <Filter>Headerdateien\pager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\pager\pager.h">
+      <Filter>Headerdateien\pager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\pager\plaintext.h">
+      <Filter>Headerdateien\pager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\palette\actions.h">
+      <Filter>Headerdateien\palette</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\palette\palette.h">
+      <Filter>Headerdateien\palette</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\palette\palfs.h">
+      <Filter>Headerdateien\palette</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\textures\internal.h">
+      <Filter>Headerdateien\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\textures\textures.h">
+      <Filter>Headerdateien\textures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\actions_bar.h">
+      <Filter>Headerdateien\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\colors.h">
+      <Filter>Headerdateien\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\dialog.h">
+      <Filter>Headerdateien\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\list_pane.h">
+      <Filter>Headerdateien\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\pane.h">
+      <Filter>Headerdateien\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\stack.h">
+      <Filter>Headerdateien\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\text_input.h">
+      <Filter>Headerdateien\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\title_bar.h">
+      <Filter>Headerdateien\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ui\ui.h">
+      <Filter>Headerdateien\ui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\lump_info.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sixel_display.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\stringlib.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\struct.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\termfuncs.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\view.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\wadgadget.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\browser\actions.c">
+      <Filter>Quelldateien\browser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\browser\actions_pane.c">
+      <Filter>Quelldateien\browser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\browser\browser.c">
+      <Filter>Quelldateien\browser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\browser\directory_pane.c">
+      <Filter>Quelldateien\browser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\conv\audio.c">
+      <Filter>Quelldateien\conv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\conv\endoom.c">
+      <Filter>Quelldateien\conv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\conv\error.c">
+      <Filter>Quelldateien\conv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\conv\export.c">
+      <Filter>Quelldateien\conv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\conv\graphic.c">
+      <Filter>Quelldateien\conv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\conv\import.c">
+      <Filter>Quelldateien\conv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\conv\mus2mid.c">
+      <Filter>Quelldateien\conv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\conv\palette.c">
+      <Filter>Quelldateien\conv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\conv\vpng.c">
+      <Filter>Quelldateien\conv</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fs\file_set.c">
+      <Filter>Quelldateien\fs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fs\real_dir.c">
+      <Filter>Quelldateien\fs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fs\vfile.c">
+      <Filter>Quelldateien\fs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fs\vfs.c">
+      <Filter>Quelldateien\fs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fs\wad_dir.c">
+      <Filter>Quelldateien\fs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fs\wad_file.c">
+      <Filter>Quelldateien\fs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pager\help.c">
+      <Filter>Quelldateien\pager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pager\hexdump.c">
+      <Filter>Quelldateien\pager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pager\pager.c">
+      <Filter>Quelldateien\pager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\pager\plaintext.c">
+      <Filter>Quelldateien\pager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\palette\actions.c">
+      <Filter>Quelldateien\palette</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\palette\doom.c">
+      <Filter>Quelldateien\palette</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\palette\palette.c">
+      <Filter>Quelldateien\palette</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\palette\palfs.c">
+      <Filter>Quelldateien\palette</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\textures\actions.c">
+      <Filter>Quelldateien\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\textures\bundle.c">
+      <Filter>Quelldateien\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\textures\config.c">
+      <Filter>Quelldateien\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\textures\lump_dir.c">
+      <Filter>Quelldateien\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\textures\pnames.c">
+      <Filter>Quelldateien\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\textures\pnames_dir.c">
+      <Filter>Quelldateien\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\textures\texture_dir.c">
+      <Filter>Quelldateien\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\textures\textures.c">
+      <Filter>Quelldateien\textures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui\actions_bar.c">
+      <Filter>Quelldateien\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui\dialog.c">
+      <Filter>Quelldateien\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui\list_pane.c">
+      <Filter>Quelldateien\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui\pane.c">
+      <Filter>Quelldateien\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui\stack.c">
+      <Filter>Quelldateien\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui\text_input.c">
+      <Filter>Quelldateien\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui\title_bar.c">
+      <Filter>Quelldateien\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ui\ui.c">
+      <Filter>Quelldateien\ui</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
