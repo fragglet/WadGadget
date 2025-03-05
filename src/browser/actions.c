@@ -16,9 +16,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifndef _WIN32
 #include <strings.h>
-#include <sys/stat.h>
 #include <unistd.h>
+#endif //_WIN32
+
+#include <sys/stat.h>
 
 #include "browser/browser.h"
 #include "browser/directory_pane.h"
@@ -42,6 +46,10 @@
 #include "view.h"
 
 #define WAD_JUNK_THRESHOLD_KB 500
+
+#ifdef _MSC_VER
+#define strdup _strdup
+#endif //_MSC_VER
 
 bool B_CheckReadOnly(struct directory *dir)
 {

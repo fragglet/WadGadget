@@ -15,7 +15,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <termios.h>
+
+#ifndef _WIN32
 #include <unistd.h>
+#endif//_WIN32
 
 struct timeval;
 

@@ -14,7 +14,10 @@
 #include <curses.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifndef _WIN32
 #include <strings.h>
+#endif //_WIN32
 
 #include "common.h"
 #include "fs/vfile.h"

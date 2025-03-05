@@ -38,6 +38,10 @@ static inline void *check_allocation_result(void *x)
 
 #define checked_realloc(ptr, size) check_allocation_result(realloc(ptr, size))
 
+#ifdef _MSC_VER
+#define strdup _strdup
+#endif //_MSC_VER
+
 #define checked_strdup(s) check_allocation_result(strdup(s))
 
 // Endianness conversions.

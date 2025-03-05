@@ -17,6 +17,10 @@
 #include "common.h"
 #include "ui/colors.h"
 
+#ifdef _WIN32
+#define newscr curscr
+#endif //_WIN32
+
 int UI_StringWidth(char *s)
 {
 	int max_width = 0, cur_width = 0;

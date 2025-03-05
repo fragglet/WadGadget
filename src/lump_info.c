@@ -13,7 +13,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+
+#ifndef _WIN32
 #include <strings.h>
+#endif //_WIN32
 
 #include "common.h"
 #include "conv/audio.h"

@@ -12,10 +12,17 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifndef _WIN32
 #include <unistd.h>
+#endif //_WIN32
 
 #include "common.h"
 #include "fs/vfile.h"
+
+#ifdef _MSC_VER
+#define fileno _fileno
+#endif //_MSC_VER
 
 struct _VFILE {
 	const struct vfile_functions *functions;

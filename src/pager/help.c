@@ -19,7 +19,10 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifndef _WIN32
 #include <strings.h>
+#endif //_WIN32
 
 #include "common.h"
 #include "help_text.h"

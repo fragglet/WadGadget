@@ -20,8 +20,11 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#ifndef _WIN32
 #include <sys/wait.h>
 #include <unistd.h>
+#endif //_WIN32
 
 #include "browser/actions.h"
 #include "common.h"

@@ -14,7 +14,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifndef _WIN32
 #include <strings.h>
+#endif//_WIN32
+
 #include <sys/stat.h>
 
 #include "common.h"

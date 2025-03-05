@@ -33,6 +33,10 @@ static doubleclick_continuation mouse_click_continuation;
 static struct pane *actions_bar, *title_bar;
 static bool main_loop_exited = false;
 
+#ifdef _WIN32
+#define newscr curscr
+#endif//_WIN32
+
 void UI_PaneKeypress(void *pane, int key)
 {
 	struct pane *p = pane;
