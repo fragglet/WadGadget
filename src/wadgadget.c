@@ -34,7 +34,9 @@
 	"is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A "      \
 	"PARTICULAR PURPOSE.\n"
 
+#ifndef _WIN32
 static struct sigaction old_sigint_action;
+#endif //_WIN32
 
 // We set a custom handler for SIGTSTP. This is the signal that is sent when
 // the user types a Ctrl-Z. This allows us to use this key combo (for Undo).
@@ -43,6 +45,7 @@ static void TermStopHandler(int unused)
 	ungetch(CTRL_('Z'));
 }
 
+#ifndef _WIN32
 static void SetTermStopHandler(void)
 {
 	struct sigaction sa;
@@ -82,6 +85,7 @@ static void SetSigintHandler(void)
 	sa.sa_flags = sa.sa_flags & ~SA_RESTART;
 	sigaction(SIGINT, &sa, NULL);
 }
+#endif //_WIN32
 
 #ifdef __APPLE__
 static char *NextLine(char **buf, size_t *buf_len)

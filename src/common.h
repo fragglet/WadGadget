@@ -40,6 +40,8 @@ static inline void *check_allocation_result(void *x)
 
 #ifdef _MSC_VER
 #define strdup _strdup
+#define strncasecmp _strnicmp
+#define strcasecmp  _stricmp
 #endif //_MSC_VER
 
 #define checked_strdup(s) check_allocation_result(strdup(s))

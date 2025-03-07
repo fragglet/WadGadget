@@ -17,6 +17,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif//_WIN32
+
 #ifndef _WIN32
 #include <sys/time.h>
 #include <unistd.h>
@@ -161,6 +165,7 @@ void TF_RestoreOldPalette(void)
 	TF_SetPalette(&old_palette);
 }
 
+#ifndef _WIN32
 void TF_SetRawMode(struct saved_flags *f, bool blocking)
 {
 	struct termios raw;
@@ -183,6 +188,7 @@ void TF_RestoreNormalMode(struct saved_flags *f)
 	fcntl(0, F_SETFL, f->fcntl_opts);
 	tcsetattr(0, TCSAFLUSH, &f->termios);
 }
+#endif //_WIN32
 
 static int TimeDiffMs(struct timeval *a, struct timeval *b)
 {
@@ -190,6 +196,7 @@ static int TimeDiffMs(struct timeval *a, struct timeval *b)
 	       (a->tv_usec - b->tv_usec) / 1000;
 }
 
+#ifndef _WIN32
 // Read a character from stdin, timing out if no response is received
 // in RESPONSE_TIMEOUT milliseconds.
 int TF_PollingReadChar(struct timeval *start)
@@ -214,6 +221,7 @@ int TF_PollingReadChar(struct timeval *start)
 		return c;
 	}
 }
+#endif //_WIN32
 
 void TF_ClearScreen(void)
 {

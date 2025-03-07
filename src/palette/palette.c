@@ -225,6 +225,10 @@ char *PAL_ReadDefaultPointer(void)
 	char *path = DefaultPointerPath(dir);
 	size_t buf_len = 16;
 	char *buf = checked_calloc(buf_len, 1);
+
+#ifdef _WIN32
+	// Todo find solution for Windows
+#else
 	ssize_t result;
 
 	for (;;) {
@@ -244,13 +248,19 @@ char *PAL_ReadDefaultPointer(void)
 
 	free(path);
 	return buf;
+#endif //_WIN32
 }
 
 static void SetDefaultPointer(const char *path, const char *full_name)
 {
 	char *default_ptr = DefaultPointerPath(path);
 
+#ifdef _WIN32
+// Todo find solution for Windows
+#else
 	assert(unlink(default_ptr) == 0 || errno == ENOENT);
+#endif //_WIN32
+
 	assert(symlink(full_name, default_ptr) == 0);
 	free(default_ptr);
 }

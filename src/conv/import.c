@@ -28,6 +28,7 @@
 #include "stringlib.h"
 #include "textures/textures.h"
 #include "ui/dialog.h"
+#include "common.h"
 
 static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 {

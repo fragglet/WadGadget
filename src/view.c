@@ -302,7 +302,13 @@ static bool EditFile(const char *filename, const struct directory_entry *ent)
 	       "(^Z = stop waiting, continue in background)\n",
 	       ent->type == FILE_TYPE_LUMP ? "lump" : "file", ent->name);
 
+#ifndef _WIN32
 	return _spawnv(_P_WAIT, argv[0], argv) == 0;
+#endif //_WIN32
+
+#ifdef _WIN32
+	return _spawnv(0, argv[0], argv) == 0; //Todo find solution for Windows
+#endif //_WIN32
 }
 
 static bool DisplayFile(const char *filename, const struct directory_entry *ent)
@@ -570,7 +576,13 @@ void RunShell(void)
 	argv[0] = getenv("SHELL");
 	argv[1] = NULL;
 
+#ifndef _WIN32
 	success = _spawnv(_P_WAIT, argv[0], argv) == 0;
+#endif //_WIN32
+
+#ifdef _WIN32
+	success = _spawnv(0, argv[0], argv) == 0; //Todo find solution for Windows
+#endif //_WIN32
 
 	// Restore the curses display.
 	TF_ClearScreen();

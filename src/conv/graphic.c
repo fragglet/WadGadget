@@ -490,7 +490,11 @@ static uint8_t *PlanarToFlat(void *src, struct palette *palette)
 	// Set up source pointers to read from source buffer - each 4-bit
 	// pixel has its bits split into four sub-buffers
 	for (i = 0; i < 4; ++i) {
+#ifdef _MSC_VER
+		srcptrs[i] = (uint8_t *) src + (i * HIRES_SCREEN_W * HIRES_SCREEN_H / 8);
+#else
 		srcptrs[i] = src + (i * HIRES_SCREEN_W * HIRES_SCREEN_H / 8);
+#endif //_MSC_VER
 	}
 
 	// Draw each pixel

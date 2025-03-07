@@ -14,10 +14,10 @@
 #include <curses.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <termios.h>
 
 #ifndef _WIN32
 #include <unistd.h>
+#include <termios.h>
 #endif//_WIN32
 
 struct timeval;
@@ -38,10 +38,12 @@ struct palette {
 	} colors[16];
 };
 
+#ifndef _WIN32
 struct saved_flags {
 	int fcntl_opts;
 	struct termios termios;
 };
+#endif //_WIN32
 
 void TF_SetCursesModes(void);
 void TF_SuspendCursesMode(void);

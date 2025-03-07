@@ -25,6 +25,7 @@
 #include "ui/actions_bar.h"
 #include "ui/colors.h"
 #include "ui/pane.h"
+#include "common.h"
 
 static int HeaderEntries(struct directory_pane *dp)
 {
