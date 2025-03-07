@@ -144,7 +144,10 @@ int main(int argc, char *argv[])
 {
 	const char *start_path1 = ".", *start_path2 = ".";
 
+#ifndef _WIN32
 	SetTermStopHandler();
+#endif //_WIN32
+
 #ifdef SIGIO
 	signal(SIGIO, SIG_IGN);
 #endif
@@ -176,9 +179,11 @@ int main(int argc, char *argv[])
 	TF_SetCursesModes();
 	TF_SetColorPairs();
 
+#ifndef _WIN32
 	// SIGINT action is set here, because we want to invoke the curses
 	// handler when aborting, not the default.
 	SetSigintHandler();
+#endif //_WIN32
 
 	refresh();
 

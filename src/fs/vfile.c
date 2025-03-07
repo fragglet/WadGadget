@@ -22,6 +22,8 @@
 
 #ifdef _MSC_VER
 #define fileno _fileno
+#define ftruncate _chsize_s
+#define fsync _commit
 #endif //_MSC_VER
 
 struct _VFILE {

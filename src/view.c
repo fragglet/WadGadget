@@ -153,6 +153,15 @@ static intptr_t _spawnv(int mode, const char *cmdname, const char **argv)
 }
 #endif
 
+#ifdef _WIN32
+static void RedrawScreen(void)
+{
+	clearok(stdscr, TRUE);
+	wrefresh(stdscr);
+	UI_DrawAllPanes();
+}
+#endif //_WIN32
+
 #ifdef USE_XDG_OPEN
 static bool CheckHaveXdgUtils(void)
 {
@@ -379,7 +388,12 @@ static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
 		temp_dir = "/tmp";
 	}
 	ctx->temp_dir = StringJoin("/", temp_dir, "wadgadget-XXXXXX", NULL);
+
+#ifdef _WIN32
+	mkdir(ctx->temp_dir);
+#else
 	ctx->temp_dir = mkdtemp(ctx->temp_dir);
+#endif //_WIN32
 
 	ctx->lumpnum = ent - from->entries;
 	ctx->lt = LI_IdentifyLump(VFS_WadFile(from), ctx->lumpnum);

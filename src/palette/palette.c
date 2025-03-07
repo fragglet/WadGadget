@@ -259,9 +259,9 @@ static void SetDefaultPointer(const char *path, const char *full_name)
 // Todo find solution for Windows
 #else
 	assert(unlink(default_ptr) == 0 || errno == ENOENT);
+	assert(symlink(full_name, default_ptr) == 0);
 #endif //_WIN32
 
-	assert(symlink(full_name, default_ptr) == 0);
 	free(default_ptr);
 }
 

@@ -1276,7 +1276,10 @@ static void PerformShell(void)
 
 	RunShell();
 
+#ifndef _WIN32
 	assert(unsetenv("MARKED") == 0);
+#endif //_WIN32
+	
 	free(marked_env);
 
 	VFS_RefreshAll();
