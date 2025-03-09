@@ -251,6 +251,38 @@ int StringPrintf(char *buf, size_t buf_len, const char *s, ...)
 	return result;
 }
 
+// Replaces given character with another given character from string.
+char *StringReplaceChar(char *p, char f, char r)
+{
+	char *cur_pos = strchr(p, f);
+
+	while (cur_pos) {
+		*cur_pos = r;
+		cur_pos = strchr(cur_pos, f);
+	}
+
+	return p;
+}
+
+// Removes given character from string.
+void StringRemoveChar(char *p, char c)
+{
+	if (NULL == p)
+		return;
+
+	char *pDest = p;
+
+	while (*p) {
+		if (*p != c) {
+			*pDest++ = *p;
+		}
+
+		p++;
+	}
+
+	*pDest = '\0';
+}
+
 // Returns the directory portion of the given path, without the trailing
 // slash separator character. If no directory is described in the path,
 // the string "." is returned. In either case, the result is newly allocated
@@ -284,6 +316,17 @@ const char *PathBaseName(const char *path)
 	if (!strcmp(path, "/")) {
 		return "/";
 	}
+	
+#ifdef _WIN32
+	if (strlen(path) == 2 || strlen(path) == 3) {
+		p = malloc(strlen(path) + 1);
+		if (p != NULL) {
+			strcpy(p, path);
+		}
+		StringRemoveChar(p, '\\');
+		return p;
+	}
+#endif
 
 	p = strrchr(path, DIR_SEPARATOR[0]);
 	if (p == NULL) {
@@ -299,7 +342,14 @@ char *PathSanitize(const char *filename)
 	char *result, *dst;
 	const char *src_filename, *src;
 
+#ifdef _WIN32
+	if (filename[3] == '/') {
+		StringRemoveChar(filename, '/');
+	}
+	if (filename[1] == ':' && filename[2] == '\\') {
+#else
 	if (filename[0] == '/') {
+#endif //_WIN32
 		result = StringJoin("/", filename, "", NULL);
 		src_filename = filename;
 	} else {
@@ -351,6 +401,15 @@ char *PathSanitize(const char *filename)
 	}
 
 	*dst = '\0';
+
+#ifdef _WIN32
+	result = StringReplaceChar(result, '/', '\\');
+
+	if (strcmp(&result[(strlen(result) - 1)], ":") == 0) {
+		result = strcpy(result, &result[(strlen(result) - 2)]);
+		strcat(result, "\\");
+	}
+#endif //_WIN32
 
 	return result;
 }

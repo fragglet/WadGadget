@@ -228,6 +228,7 @@ char *PAL_ReadDefaultPointer(void)
 
 #ifdef _WIN32
 	// Todo find solution for Windows
+	return buf;
 #else
 	ssize_t result;
 
