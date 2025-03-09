@@ -220,6 +220,7 @@
     <ClCompile Include="..\src\fs\vfs.c" />
     <ClCompile Include="..\src\fs\wad_dir.c" />
     <ClCompile Include="..\src\fs\wad_file.c" />
+    <ClCompile Include="..\src\help_text.c" />
     <ClCompile Include="..\src\lump_info.c" />
     <ClCompile Include="..\src\pager\help.c" />
     <ClCompile Include="..\src\pager\hexdump.c" />

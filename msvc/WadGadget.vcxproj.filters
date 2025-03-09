@@ -335,5 +335,8 @@
     <ClCompile Include="..\src\ui\ui.c">
       <Filter>Quelldateien\ui</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\help_text.c">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
