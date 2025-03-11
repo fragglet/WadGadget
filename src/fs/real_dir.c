@@ -47,6 +47,41 @@ static int OrderByName(const void *x, const void *y)
 	return strcasecmp(dx->name, dy->name);
 }
 
+#ifdef _WIN32
+// This function is added under Windows as a replacement for dirent inode.
+static uint64_t GetSerial(const char *ent_name)
+{
+	HANDLE hfile;
+	BY_HANDLE_FILE_INFORMATION fi;
+
+	hfile = CreateFileA(ent_name, 0x00, 0x00, NULL, OPEN_EXISTING,
+	                    FILE_ATTRIBUTE_READONLY, NULL);
+
+	if (hfile != INVALID_HANDLE_VALUE) {
+		GetFileInformationByHandle(hfile, &fi);
+
+		CloseHandle(hfile);
+		return fi.nFileIndexLow;
+	}
+	// When invalid handle value we calculate a serial based on the entry
+	// name.
+	else {
+		const char *p = ent_name;
+		uint64_t serialno = 0;
+		char c;
+
+		for (; *p; ++p) {
+			c = (char) tolower(*p);
+			serialno = (serialno << 7) + serialno + c;
+		}
+		CloseHandle(hfile);
+		return serialno + (p - ent_name);
+	}
+
+	CloseHandle(hfile);
+}
+#endif //_WIN32
+
 static bool _RealDirRefresh(struct directory *d,
                             struct directory_entry **entries,
                             size_t *num_entries)
@@ -92,7 +127,12 @@ static bool _RealDirRefresh(struct directory *d,
 		                                          : FILE_TYPE_FILE;
 		ent->size =
 		    stat_ok && ent->type != FILE_TYPE_DIR ? s.st_size : -1;
+#ifdef _WIN32
+		ent->serial_no =
+		    GetSerial(StringJoin("/", d->path, dirent->d_name, NULL));
+#else
 		ent->serial_no = dirent->d_ino;
+#endif //_WIN32
 		++*num_entries;
 	}
 
