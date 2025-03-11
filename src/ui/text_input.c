@@ -19,7 +19,11 @@
 void UI_TextInputInit(struct text_input_box *input, WINDOW *win,
                       size_t max_chars)
 {
+#ifdef _WIN32
+	input->win = derwin(win, 1, 24, 2, 2);
+#else
 	input->win = derwin(win, 1, 10, 0, 0);
+#endif //_WIN32
 	input->parent_win = win;
 	input->input_sz = max_chars + 1;
 	input->input = checked_calloc(input->input_sz, 1);
