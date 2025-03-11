@@ -58,8 +58,14 @@ int UI_TextInputKeypress(struct text_input_box *input, int keypress)
 {
 	size_t pos;
 
+#ifdef _WIN32
+	if ((keypress == KEY_BACKSPACE || keypress == 0x7f ||
+	     keypress == 0x08) &&
+	    strlen(input->input) > 0) {
+#else
 	if ((keypress == KEY_BACKSPACE || keypress == 0x7f) &&
 	    strlen(input->input) > 0) {
+#endif //_WIN32
 		input->input[strlen(input->input) - 1] = '\0';
 		return 1;
 	}

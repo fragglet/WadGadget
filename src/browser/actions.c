@@ -1242,7 +1242,11 @@ static void ShowHelp(void)
 }
 
 const struct action help_action = {
+#ifdef _WIN32
+    KEY_F(1), 0, "Help", "Help", ShowHelp,
+#else
     KEY_F(1), 'H', "Help", "Help", ShowHelp,
+#endif //_WIN32
 };
 
 static void PerformShell(void)
