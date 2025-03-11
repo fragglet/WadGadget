@@ -400,11 +400,23 @@ const char *PAL_GetPalettesPath(void)
 		return result;
 	}
 
+#ifdef _WIN32
+	const char *homedrive;
+	char homepath[260];
+	homedrive = getenv("HOMEDRIVE");
+	home = getenv("HOMEPATH");
+	assert(homedrive != NULL);
+	assert(home != NULL);
+	sprintf(homepath, "%s%s", homedrive, home);
+	result =
+	    MakeDirectories(homepath, ".config", "WadGadget", "Palettes", NULL);
+#else
 	home = getenv("HOME");
 	assert(home != NULL);
 
 	result =
 	    MakeDirectories(home, ".config", "WadGadget", "Palettes", NULL);
+#endif //_WIN32
 	assert(result != NULL);
 	AddDefaultPalette(result);
 
