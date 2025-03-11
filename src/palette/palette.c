@@ -216,7 +216,31 @@ void PAL_FreePaletteSet(struct palette_set *set)
 
 static char *DefaultPointerPath(const char *dir)
 {
+#ifdef _WIN32
+	// Under Windows we read the path to the standard palette from the
+	// configuration file default.
+	FILE *pfile;
+	char *defbuf;
+	char *filename;
+	filename = StringJoin("/", dir, "default", NULL);
+	pfile = fopen(filename, "r");
+	defbuf = malloc(260);
+	// If default not exists write standard path to config file.
+	if (!pfile) {
+		pfile = fopen(filename, "w");
+		defbuf = StringJoin("/", dir, "Doom.png", NULL);
+		fputs(defbuf, pfile);
+		fclose(pfile);
+		return (defbuf);
+	}
+	if (defbuf != NULL) {
+		fgets(defbuf, 260, pfile);
+	}
+	fclose(pfile);
+	return defbuf;
+#else
 	return StringJoin("/", dir, "default", NULL);
+#endif //_WIN32
 }
 
 char *PAL_ReadDefaultPointer(void)
@@ -227,8 +251,15 @@ char *PAL_ReadDefaultPointer(void)
 	char *buf = checked_calloc(buf_len, 1);
 
 #ifdef _WIN32
-	// Todo find solution for Windows
-	return buf;
+	if (strrchr(path, '\\') != NULL) {
+		path = strrchr(path, '\\');
+		strcpy(path, path + 1);
+	}
+	if (strrchr(path, '/') != NULL) {
+		path = strrchr(path, '/');
+		strcpy(path, path + 1);
+	}
+	return path;
 #else
 	ssize_t result;
 
@@ -254,11 +285,17 @@ char *PAL_ReadDefaultPointer(void)
 
 static void SetDefaultPointer(const char *path, const char *full_name)
 {
-	char *default_ptr = DefaultPointerPath(path);
-
 #ifdef _WIN32
-// Todo find solution for Windows
+	char *default_ptr = StringJoin("/", path, "default", NULL);
+	FILE *pfile;
+	char *defbuf;
+	pfile = fopen(default_ptr, "w");
+	defbuf = StringJoin("/", path, full_name, NULL);
+	fputs(defbuf, pfile);
+	fclose(pfile);
+	free(defbuf);
 #else
+	char *default_ptr = DefaultPointerPath(path);
 	assert(unlink(default_ptr) == 0 || errno == ENOENT);
 	assert(symlink(full_name, default_ptr) == 0);
 #endif //_WIN32
