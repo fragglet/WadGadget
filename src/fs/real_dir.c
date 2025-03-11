@@ -115,7 +115,11 @@ static VFILE *RealDirOpen(void *_dir, struct directory_entry *entry)
 	char *filename = VFS_EntryPath(dir, entry);
 	FILE *fs;
 
+#ifdef _WIN32
+	fs = fopen(filename, "rb+");
+#else
 	fs = fopen(filename, "r+");
+#endif //_WIN32
 	if (fs == NULL) {
 		VFS_StoreError("%s: %s", filename, strerror(errno));
 		free(filename);
@@ -213,7 +217,11 @@ struct directory *VFS_OpenRealDir(const char *path)
 
 VFILE *VFS_Open(const char *path)
 {
+#ifdef _WIN32
+	VFILE *result = vfwrapfile(fopen(path, "rb+"));
+#else
 	VFILE *result = vfwrapfile(fopen(path, "r+"));
+#endif //_WIN32
 	if (result == NULL) {
 		VFS_StoreError("%s: %s", path, strerror(errno));
 	}
