@@ -158,7 +158,16 @@ static bool RealDirRemove(void *_dir, struct directory_entry *entry)
 {
 	struct directory *dir = _dir;
 	char *filename = VFS_EntryPath(dir, entry);
+	
+#ifdef _WIN32
+	bool result;
+	if (entry->type == FILE_TYPE_DIR)
+		result = _rmdir(filename) == 0;
+	else
+		result = remove(filename) == 0;
+#else
 	bool result = remove(filename) == 0;
+#endif //_WIN32
 	if (!result) {
 		VFS_StoreError("%s: %s", filename, strerror(errno));
 	}
