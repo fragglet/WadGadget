@@ -583,7 +583,11 @@ void RunShell(void)
 
 	printf("\n");
 
+#ifdef _WIN32
+	argv[0] = getenv("COMSPEC");
+#else
 	argv[0] = getenv("SHELL");
+#endif //_WIN32
 	argv[1] = NULL;
 
 	success = _spawnv(_P_WAIT, argv[0], argv) == 0;
