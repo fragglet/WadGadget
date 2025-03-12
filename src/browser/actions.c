@@ -1276,7 +1276,7 @@ static void PerformShell(void)
 
 	if (marked_env != NULL) {
 #ifdef _MSC_VER
-		assert(_putenv("MARKED", marked_env) == 0);
+		assert(_putenv_s("MARKED", marked_env) == 0);
 #else
 		assert(setenv("MARKED", marked_env, 1) == 0);
 #endif //_MSC_VER
@@ -1284,9 +1284,11 @@ static void PerformShell(void)
 
 	RunShell();
 
-#ifndef _WIN32
+#ifdef _MSC_VER
+	assert(_putenv_s("MARKED", "") == 0);
+#else
 	assert(unsetenv("MARKED") == 0);
-#endif //_WIN32
+#endif //_MSC_VER
 	
 	free(marked_env);
 
