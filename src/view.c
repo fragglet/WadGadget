@@ -300,7 +300,7 @@ static char *GetOpenCommand(const char *filename)
 	return "xdg-open";
 #endif
 #else
-	return 0;
+	return "start";
 #endif //_WIN32
 }
 
