@@ -268,7 +268,11 @@ static bool IsTextFile(const char *filename)
 
 static char *GetOpenCommand(const char *filename)
 {
+#ifdef _WIN32
+	const char *editor = "notepad";
+#else
 	char *editor = getenv("EDITOR");
+#endif //_WIN32
 
 	// For files with text file extensions, always respect the standard
 	// Unix EDITOR environment variable. This should always work even if
@@ -277,6 +281,7 @@ static char *GetOpenCommand(const char *filename)
 		return editor;
 	}
 
+#ifndef _WIN32
 #ifndef USE_XDG_OPEN
 	return "open";
 #else
@@ -294,6 +299,9 @@ static char *GetOpenCommand(const char *filename)
 	}
 	return "xdg-open";
 #endif
+#else
+	return 0;
+#endif //_WIN32
 }
 
 static bool EditFile(const char *filename, const struct directory_entry *ent)
@@ -313,7 +321,15 @@ static bool EditFile(const char *filename, const struct directory_entry *ent)
 	       "(^Z = stop waiting, continue in background)\n",
 	       ent->type == FILE_TYPE_LUMP ? "lump" : "file", ent->name);
 
+#ifdef _WIN32
+	char command[260];
+	strcpy(command, argv[0]);
+	strcat(command, " ");
+	strcat(command, argv[1]);
+	return system(command) == 0;
+#else
 	return _spawnv(_P_WAIT, argv[0], argv) == 0;
+#endif //_WIN32
 }
 
 static bool DisplayFile(const char *filename, const struct directory_entry *ent)
