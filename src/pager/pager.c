@@ -375,7 +375,11 @@ static bool DrawPager(void *_p)
 
 	assert(wresize(p->pane.window, lines, COLS) == OK);
 	assert(mvwin(p->pane.window, top_line, 0) == OK);
+#ifdef _WIN32
+	wresize(p->line_win, 1, COLS);
+#else
 	assert(wresize(p->line_win, 1, COLS) == OK);
+#endif //_WIN32
 
 	UpdateSubtitle(p);
 
