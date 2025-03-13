@@ -198,6 +198,11 @@ void UI_InputKeypress(int key)
 		return;
 	}
 	if (key == KEY_RESIZE) {
+#ifdef _WIN32
+		resize_term(0, 0);
+		refresh();
+		UI_Init();
+#endif //_WIN32
 		UI_TriggerRecalculate();
 		return;
 	}

@@ -39,9 +39,13 @@ bool UI_ListPaneDraw(void *p)
 
 	wx = getmaxx(lp->pane.window);
 
+#ifdef _WIN32
+	lp->subwin = derwin(win, 1, wx - 1, 0, 0);
+#else
 	if (lp->subwin == NULL) {
 		lp->subwin = derwin(win, 1, wx - 1, 0, 0);
 	}
+#endif //_WIN32
 	wresize(lp->subwin, 1, wx - 1);
 
 	werase(win);
