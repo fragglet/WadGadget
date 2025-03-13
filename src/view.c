@@ -380,6 +380,9 @@ enum open_result OpenFile(const char *filename,
 	// Restore the curses display which may have been trashed if another
 	// curses program was opened.
 	TF_SetCursesModes();
+#ifdef _WIN32
+	resize_term(LINES, COLS);
+#endif //_WIN32
 	RedrawScreen();
 
 	return result;
