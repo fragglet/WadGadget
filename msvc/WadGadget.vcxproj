@@ -86,7 +86,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;PDC_NCMOUSE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\external\libpng\include;..\external\libsndfile-1.2.2-win32\include;..\external\dirent\include;..\external\PDCurses;..\src</AdditionalIncludeDirectories>
     </ClCompile>
@@ -102,7 +102,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;PDC_NCMOUSE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\external\libpng\include;..\external\libsndfile-1.2.2-win32\include;..\external\dirent\include;..\external\PDCurses;..\src</AdditionalIncludeDirectories>
     </ClCompile>
@@ -118,7 +118,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;PDC_NCMOUSE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\external\libpng\include;..\external\libsndfile-1.2.2-win64\include;..\external\dirent\include;..\external\PDCurses;..\src</AdditionalIncludeDirectories>
     </ClCompile>
@@ -134,7 +134,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;PDC_NCMOUSE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\external\libpng\include;..\external\libsndfile-1.2.2-win64\include;..\external\dirent\include;..\external\PDCurses;..\src</AdditionalIncludeDirectories>
     </ClCompile>
