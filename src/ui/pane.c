@@ -391,7 +391,12 @@ void UI_Init(void)
 #ifdef BUTTON5_PRESSED
 	mask |= BUTTON5_PRESSED;
 #endif
+#ifdef _WIN32
+	mouseinterval(0);
+	mousemask(ALL_MOUSE_EVENTS, NULL);
+#else
 	mousemask(mask, NULL);
+#endif //_WIN32
 
 	actions_bar = UI_ActionsBarInit();
 	title_bar = UI_TitleBarInit();
