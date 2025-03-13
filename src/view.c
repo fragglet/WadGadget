@@ -614,6 +614,9 @@ void RunShell(void)
 	// Restore the curses display.
 	TF_ClearScreen();
 	TF_SetCursesModes();
+#ifdef _WIN32
+	resize_term(LINES, COLS);
+#endif //_WIN32
 	RedrawScreen();
 
 	if (!success) {
