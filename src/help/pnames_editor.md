@@ -25,7 +25,7 @@ containing the PNAMES lump.
     **Ctrl-Z          **  Undo last change
     **Ctrl-Y          **  Redo change
 
-All [standard controls](browser.md) are also supported.
+All [standard controls](browser.md#keys) are also supported.
 
 ## Copying
 

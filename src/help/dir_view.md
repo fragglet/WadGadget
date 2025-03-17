@@ -31,7 +31,7 @@ editor for that file type.
     **Ctrl-A  F10     **  Unmark **a**ll marked files
     **Ctrl-R          **  **R**eload directory
 
-All [standard controls](browser.md) are also supported.
+All [standard controls](browser.md#keys) are also supported.
 
 ## Copying
 

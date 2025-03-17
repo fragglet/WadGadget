@@ -28,7 +28,7 @@ the "Back to..." item at the top of the list.
     **Ctrl-X  F8      **  Delete palette
     **Ctrl-A  F10     **  Unmark **a**ll marked palette
 
-All [standard controls](browser.md) are also supported.
+All [standard controls](browser.md#keys) are also supported.
 
 ## How the palette is selected
 
