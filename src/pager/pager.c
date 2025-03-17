@@ -240,7 +240,7 @@ static void PerformOpenLink(void)
 {
 	struct pager_config *cfg = current_pager->cfg;
 
-	if (cfg->current_link <= 0) {
+	if (cfg->current_link < 0) {
 		return;
 	}
 
