@@ -160,7 +160,7 @@ static int JumpToAnchor(struct pager *p, const char *anchor)
 		if (curr != NULL) {
 			if (!strcasecmp(curr, anchor)) {
 				free(curr);
-				P_JumpWithinWindow(p, i);
+				P_JumpToLine(p, i > 0 ? i - 1 : 0);
 				return i;
 			}
 			free(curr);
