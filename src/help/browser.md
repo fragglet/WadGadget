@@ -58,13 +58,23 @@ To clear all marks, type **Ctrl-A** or **F10**.
 ## Using the Mouse
 
 While WadGadget was designed as a keyboard-driven application, you can also use
-the mouse. Click on an item to select it, and double-click to open it
-(equivalent to pressing the enter key). If your mouse has a scroll wheel, you
-can use the wheel to scroll a directory listing up and down (you can do this
-without switching the active pane).
+the mouse:
 
-Clicking on a keyboard action within the actions list will perform that action.
-Again this is equivalent to typing the keyboard shortcut that is shown.
+* Click on an item to select it, and double-click to open it (equivalent to
+  pressing the enter key).
+* If your mouse has a scroll wheel, you can use the wheel to scroll a
+  directory listing up and down (you can do this without switching the active
+  pane).
+* Clicking on a keyboard action within the actions list will perform that
+  action. Again this is equivalent to typing the keyboard shortcut that is
+  shown.
+
+If mouse clicks do not work within your terminal, you may need to enable them
+in the configuration settings. For XTerm-based terminals, you might need to
+set the "allowMouseOps" X resource. to do this, add a line like the following
+to your `.Xresources` file (and then re-run xrdb):
+
+   *VT100*allowMouseOps: true
 
 ## Searching
 
