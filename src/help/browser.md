@@ -1,6 +1,19 @@
-# Common controls
+# Browser interface
 
-This help page is a work in progress.
+The browser is the main interface presented by WadGadget. It provides a
+two-pane Orthodox file management interface which provides a consistent
+interface for navigating the filesystem, WAD files and lumps.
+The following pages provide more specific information:
+
+ * [Directory view](dir_view.md)
+ * [PNAMES editor](pnames_editor.md)
+ * [Texture editor](texture_editor.md)
+ * [WAD view](wad_view.md)
+ * [Palette database](palette.md)
+
+## Keys
+
+The following are standard keys that always work in the browser interface:
 
     **        Tab**   Switch between panes
     **  Shift-Tab**   Swap panes
@@ -12,6 +25,18 @@ This help page is a work in progress.
     **Ctrl-J     **   Toggle [Commander Mode](#commander-mode)
     **Ctrl-L     **   Redraw screen
     **        Esc**   Quit
+
+The following are *common* keys which work in many places, but are not
+always supported:
+
+    **        Enter   **  View/edit object
+    **Ctrl-C  F5      **  **C**opy
+    **Ctrl-D          **  View hex**d**ump
+    **Ctrl-E  F6      **  R**e**name
+    **Ctrl-K  F7      **  Add new object
+    **Ctrl-X  F8      **  Delete
+    **Ctrl-Y          **  Redo change
+    **Ctrl-Z          **  Undo last change
 
 ## Marking entries
 

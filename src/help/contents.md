@@ -2,10 +2,10 @@
 
 ## The Browser Interface
 
- * [Marking Entries](common.md#marking-entries)
- * [Searching](common.md#searching)
- * [Commander Mode](common.md#commander-mode)
- * [Using the Mouse](common.md#using-the-mouse)
+ * [Marking Entries](browser.md#marking-entries)
+ * [Searching](browser.md#searching)
+ * [Commander Mode](browser.md#commander-mode)
+ * [Using the Mouse](browser.md#using-the-mouse)
  * [Directory view](dir_view.md)
    * [Keys](dir_view.md#keys)
    * [Copying](dir_view.md#copying)

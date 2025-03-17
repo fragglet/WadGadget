@@ -1,5 +1,8 @@
 # Texture editor
 
+[This page shows help about browsing TEXTURE lumps. For help on the browser
+interface in general, [see here](browser.md).]
+
 The TEXTURE lump defines all of the wall textures that are used within the game.
 These are the textures that are specified on sidedefs when editing a level. A
 texture has a width and height, and is composed of one or more patches; they
@@ -25,7 +28,7 @@ containing the texture lump.
     **Ctrl-Z          **  Undo last change
     **Ctrl-Y          **  Redo change
 
-All [standard controls](common.md) are also supported.
+All [standard controls](browser.md) are also supported.
 
 ## Copying
 

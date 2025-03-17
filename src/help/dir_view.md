@@ -1,5 +1,8 @@
 # Directory view
 
+[This page shows help about browsing filesystem directories. For help
+on the browser interface in general, [see here](browser.md).]
+
 The directory view shows a particular directory (folder) on the filesystem.
 Selecting a directory and pressing enter will navigate into that directory;
 doing this for the first entry in the list will navigate to the parent
@@ -28,7 +31,7 @@ editor for that file type.
     **Ctrl-A  F10     **  Unmark **a**ll marked files
     **Ctrl-R          **  **R**eload directory
 
-All [standard controls](common.md) are also supported.
+All [standard controls](browser.md) are also supported.
 
 ## Copying
 

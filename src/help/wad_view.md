@@ -1,5 +1,8 @@
 # WAD file editor
 
+[This page shows help about browsing WAD files. For help on the browser
+interface in general, [see here](browser.md).]
+
 WAD files ("Where's All the Data?") contain all of the artwork, levels, sound
 effects and music used by Doom. Doom mods are usually constructed as "Patch WAD"
 (PWAD) files that replace some of the lumps within the main "IWAD" file (which
@@ -33,7 +36,7 @@ list returns to the directory containing the WAD.
     **Ctrl-Z          **  Undo last change
     **Ctrl-Y          **  Redo change
 
-All [standard controls](common.md) are also supported.
+All [standard controls](browser.md) are also supported.
 
 ## Copying
 

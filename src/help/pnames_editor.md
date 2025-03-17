@@ -1,5 +1,8 @@
 # PNAMES editor
 
+[This page shows help about browsing PNAMES lumps. For help on the browser
+interface in general, [see here](browser.md).]
+
 The PNAMES lump lists all patch names to be used within TEXTURE lumps. If a
 patch is not listed in PNAMES, it cannot be used in a texture. The TEXTURE
 and PNAMES lumps are therefore closely related. Conceptually the PNAMES lump
@@ -22,7 +25,7 @@ containing the PNAMES lump.
     **Ctrl-Z          **  Undo last change
     **Ctrl-Y          **  Redo change
 
-All [standard controls](common.md) are also supported.
+All [standard controls](browser.md) are also supported.
 
 ## Copying
 
