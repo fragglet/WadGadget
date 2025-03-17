@@ -33,7 +33,8 @@ All [standard controls](browser.md) are also supported.
    add the selected name (or tagged names) into the other list. Duplicate
    names will not be added.
  * Patch names corresponding to lumps can be added to the list by opening the
-   same WAD in the opposite pane, selecting the lumps and using **Copy names (F5)**.
+   same WAD in the opposite pane, selecting the lumps and using
+   **Copy names (F5)**.
  * New patch names are always added to the end of the directory.
  * If a directory is in the opposite pane, **Export config (F5**) will create a
    plain text file in that directory that contains the tagged names, one per

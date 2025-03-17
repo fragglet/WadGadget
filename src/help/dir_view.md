@@ -39,21 +39,21 @@ All [standard controls](browser.md) are also supported.
    (or tagged files) into the WAD. The files will be automatically converted
    into the WAD native format based on the file's name and extension;
    ([see the table below](#file-formats)). New lumps are always created, even if
-   there are already other lumps with the same names. The horizontal line in the
-   opposite pane shows where they will be inserted.
+   there are already other lumps with the same names. The horizontal line in
+   the opposite pane shows where they will be inserted.
  * Use **Shift-F5** to import into a WAD file without performing any file format
    conversion (ie. ignore filename, import files as raw lumps).
  * If another directory is in the opposite pane, **Copy (F5)** performs a normal
    file copy. Mark multiple files to copy multiple files, otherwise the
    currently selected file is copied. You cannot copy directories.
- * If the same directory is in the opposite pane, **Copy (F5)** will make a duplicate
-   copy of the selected file; you will be prompted to enter a name for the new
-   file. You cannot do this with multiple files at the same time.
- * If a texture directory is in the opposite pane, **Import config (F5)** will parse
-   the selected file as a deutex plain text texture file, and then insert the
-   textures into the texture directory. Existing textures with the same names
-   will be overwritten; any new textures will be inserted at the position
-   indicated by a horizontal line in the opposite pane.
+ * If the same directory is in the opposite pane, **Copy (F5)** will make a
+   duplicate copy of the selected file; you will be prompted to enter a name
+   for the new file. You cannot do this with multiple files at the same time.
+ * If a texture directory is in the opposite pane, **Import config (F5)** will
+   parse the selected file as a deutex plain text texture file, and then
+   insert the textures into the texture directory. Existing textures with the
+   same names will be overwritten; any new textures will be inserted at the
+   position indicated by a horizontal line in the opposite pane.
  * **Make WAD (F9)** creates a new .wad file in the same directory and copies the
    marked files into the .wad file. If no files are marked, an empty .wad file
    is created.
