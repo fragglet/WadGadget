@@ -9,23 +9,55 @@
 # of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 
-import json
 import os
 import re
 import sys
+import array
 
+# Print the header files.
 print("// This file is auto-generated.")
 print("#include <stdlib.h>")
 print('#include "help_text.h"')
 
-help_files = []
+# Print all md files as char arrays in hex format.
 for filename in sys.argv[1:]:
-	with open(filename, "r") as f:
-		text = f.read()
+      
+        bytes = array.array('B', open(filename, "rb").read())
+        size = len(bytes)
+        
+        filename = os.path.basename(filename)
+        sanfilename = filename.replace('.','')
+        
+        print("")
+        output = "const char %s[%d] = {\n" % (sanfilename, size)
 
-	help_files.append((os.path.basename(filename), text))
+        pos = 0
+        size = len(bytes)
+        for byte in bytes:
+                if (pos % 11) == 0:
+                        output += "        "
+                output += "0x%02x" % (byte)
+                if (pos + 1) == size:
+                        output += '\n'
+                elif (pos % 11) == 10:
+                        output += ',\n'
+                elif (pos + 1) < size:
+                        output += ", "
+                pos += 1
 
-print("const struct help_file help_files[] = {\n%s\t{NULL, NULL}\n};" % (
-	"".join("\t{%s, %s},\n" % (json.dumps(filename), json.dumps(text))
-	        for filename, text in help_files),
-))
+        output += "};"
+
+        print(output)
+        
+# Finally, print the struct that contains all md filenames
+# and char array names.
+print("")
+print("const struct help_file help_files[] = {")
+
+for filename in sys.argv[1:]:
+        filename = os.path.basename(filename)
+        sanfilename = filename.replace('.','')
+        print('        {"'+str(filename)+str('",'),sanfilename+str('},'))
+       
+print("        {NULL, NULL}")
+print("};")
