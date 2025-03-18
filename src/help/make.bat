@@ -1,0 +1,1 @@
+python make_help.py ../../COPYING.md browser.md contents.md dir_view.md pnames_editor.md texture_editor.md wad_view.md hexen_specs.md help.md uds.md boomref.md mbfedit.md hexdump.md palette.md > ../help_text.c
