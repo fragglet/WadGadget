@@ -115,7 +115,9 @@ static bool PaletteFSRemove(void *dir, struct directory_entry *entry)
 
 	def_pal = PAL_ReadDefaultPointer();
 	is_default = !strcmp(def_pal, inner_ent->name);
+#ifndef _WIN32
 	free(def_pal);
+#endif //_WIN32
 
 	if (is_default) {
 		VFS_StoreError("You can't delete the default palette.");
@@ -141,7 +143,9 @@ static bool PaletteFSRename(void *dir, struct directory_entry *entry,
 
 	def_pal = PAL_ReadDefaultPointer();
 	is_default = !strcmp(def_pal, inner_ent->name);
+#ifndef _WIN32
 	free(def_pal);
+#endif //_WIN32
 	full_name = InnerName(new_name);
 	success = VFS_Rename(pd->inner, inner_ent, full_name);
 

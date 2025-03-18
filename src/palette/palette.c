@@ -247,8 +247,6 @@ char *PAL_ReadDefaultPointer(void)
 {
 	const char *dir = PAL_GetPalettesPath();
 	char *path = DefaultPointerPath(dir);
-	size_t buf_len = 16;
-	char *buf = checked_calloc(buf_len, 1);
 
 #ifdef _WIN32
 	if (strrchr(path, '\\') != NULL) {
@@ -261,6 +259,8 @@ char *PAL_ReadDefaultPointer(void)
 	}
 	return path;
 #else
+	size_t buf_len = 16;
+	char *buf = checked_calloc(buf_len, 1);
 	ssize_t result;
 
 	for (;;) {
