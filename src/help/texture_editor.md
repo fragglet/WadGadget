@@ -1,11 +1,14 @@
 # Texture editor
 
-The TEXTURE lump defines all of the wall textures that are used within the game.
-These are the textures that are specified on sidedefs when editing a level. A
-texture has a width and height, and is composed of one or more patches; they
-are layered on top of each other as a kind of collage. Any patches must be
-listed in the PNAMES lump; see the [PNAMES editor](pnames_editor.md) for more
-details.
+[This page shows help about browsing TEXTURE lumps. For help on the browser
+interface in general, [see here](browser.md).]
+
+The TEXTURE lump defines all of the wall textures that are used within the
+game.  These are the textures that are specified on sidedefs when editing a
+level. A texture has a width and height, and is composed of one or more
+patches; they are layered on top of each other as a kind of collage.
+Any patches must be listed in the PNAMES lump; see the [PNAMES editor](pnames_editor.md)
+for more details.
 
 The first entry in the window saves all changes and returns to the WAD file
 containing the texture lump.
@@ -25,7 +28,7 @@ containing the texture lump.
     **Ctrl-Z          **  Undo last change
     **Ctrl-Y          **  Redo change
 
-All [standard controls](common.md) are also supported.
+All [standard controls](browser.md#keys) are also supported.
 
 ## Copying
 
@@ -37,8 +40,8 @@ All [standard controls](common.md) are also supported.
    line in the opposite pane.
  * If a directory is in the opposite pane, **Export config (F5)** will create a
    plain text file in that directory, containing the tagged textures in the
-   deutex plain text format. If no textures are tagged, the entire directory is
-   exported.
+   deutex plain text format. If no textures are tagged, the entire directory
+   is exported.
  * To import such a text file back into the texture directory, switch to the
    [opposite pane](dir_view.md) and use **Import config (F5)**.
  * Texture directories go hand-in-hand with PNAMES lumps. If you add textures

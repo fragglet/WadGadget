@@ -1,11 +1,14 @@
 # Table of Contents
 
-## The Browser Interface
+ * [The Browser Interface](browser.md)
+   * [Common Keys](browser.md#keys)
+   * [Marking Entries](browser.md#marking-entries)
+   * [Searching](browser.md#searching)
+   * [Commander Mode](browser.md#commander-mode)
+   * [Using the Mouse](browser.md#using-the-mouse)
 
- * [Marking Entries](common.md#marking-entries)
- * [Searching](common.md#searching)
- * [Commander Mode](common.md#commander-mode)
- * [Using the Mouse](common.md#using-the-mouse)
+Particular views of the browser interface:
+
  * [Directory view](dir_view.md)
    * [Keys](dir_view.md#keys)
    * [Copying](dir_view.md#copying)

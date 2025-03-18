@@ -1,5 +1,8 @@
 # PNAMES editor
 
+[This page shows help about browsing PNAMES lumps. For help on the browser
+interface in general, [see here](browser.md).]
+
 The PNAMES lump lists all patch names to be used within TEXTURE lumps. If a
 patch is not listed in PNAMES, it cannot be used in a texture. The TEXTURE
 and PNAMES lumps are therefore closely related. Conceptually the PNAMES lump
@@ -22,7 +25,7 @@ containing the PNAMES lump.
     **Ctrl-Z          **  Undo last change
     **Ctrl-Y          **  Redo change
 
-All [standard controls](common.md) are also supported.
+All [standard controls](browser.md#keys) are also supported.
 
 ## Copying
 
@@ -30,7 +33,8 @@ All [standard controls](common.md) are also supported.
    add the selected name (or tagged names) into the other list. Duplicate
    names will not be added.
  * Patch names corresponding to lumps can be added to the list by opening the
-   same WAD in the opposite pane, selecting the lumps and using **Copy names (F5)**.
+   same WAD in the opposite pane, selecting the lumps and using
+   **Copy names (F5)**.
  * New patch names are always added to the end of the directory.
  * If a directory is in the opposite pane, **Export config (F5**) will create a
    plain text file in that directory that contains the tagged names, one per

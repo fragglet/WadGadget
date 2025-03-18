@@ -1,15 +1,18 @@
 # WAD file editor
 
+[This page shows help about browsing WAD files. For help on the browser
+interface in general, [see here](browser.md).]
+
 WAD files ("Where's All the Data?") contain all of the artwork, levels, sound
-effects and music used by Doom. Doom mods are usually constructed as "Patch WAD"
-(PWAD) files that replace some of the lumps within the main "IWAD" file (which
-is usually named doom.wad, doom2.wad or similar depending on the game). You
-should usually not be modifying the IWAD file.
+effects and music used by Doom. Doom mods are usually constructed as "Patch
+WAD" (PWAD) files that replace some of the lumps within the main "IWAD" file
+(which is usually named doom.wad, doom2.wad or similar depending on the game).
+You should usually not be modifying the IWAD file.
 
 The WAD editor allows WAD files to be created and edited. Most importantly it
 allows new resources to be [imported](#copying) into the WAD from files, or to be copied
-from other WAD files. Each WAD file consists of a number of named "lumps"; they
-contain different kinds of data depending on their purpose.
+from other WAD files. Each WAD file consists of a number of named "lumps";
+they contain different kinds of data depending on their purpose.
 
 It is possible to navigate inside of certain lump types (the [texture editor](texture_editor.md)
 and [PNAMES editor](pnames_editor.md)). Selecting the first entry in the WAD
@@ -33,15 +36,15 @@ list returns to the directory containing the WAD.
     **Ctrl-Z          **  Undo last change
     **Ctrl-Y          **  Redo change
 
-All [standard controls](common.md) are also supported.
+All [standard controls](browser.md#keys) are also supported.
 
 ## Copying
 
  * If a WAD file is in the opposite pane, **Copy (F5)** copies the selected lump
    (or tagged lumps) to the other file. The lumps will be inserted into the
-   other WAD as new lumps, even if there are already lumps with the same names.
-   A horizontal line in the opposite pane shows where the copied lumps will be
-   inserted.
+   other WAD as new lumps, even if there are already lumps with the same
+   names.  A horizontal line in the opposite pane shows where the copied lumps
+   will be inserted.
  * If a directory is in the opposite pane, **Export (F5)** will export those lumps
    as files into that directory. The lumps will be converted to an appropriate
    file format depending on the type of lump.
@@ -52,15 +55,15 @@ All [standard controls](common.md) are also supported.
  * Files can be imported back into WAD files by switching to the opposite pane
    and using **Import (F5)**.
  * If a patch names list is in the opposite pane, **Copy names (F5)** will copy the
-   names of the tagged lumps into the list. This is useful if you imported some
-   new patches into your WAD and need to add them to PNAMES.
+   names of the tagged lumps into the list. This is useful if you imported
+   some new patches into your WAD and need to add them to PNAMES.
  * **Export as WAD (F9)** will create a new .wad file in the directory in the
    opposite pane. All marked lumps will be copied into the new .wad.
 
 ## File formats
 
-Lumps are converted into the following formats when exporting from a WAD (unless
-**Shift-F5** is used):
+Lumps are converted into the following formats when exporting from a WAD
+(unless **Shift-F5** is used):
 
     **Lump type                  File extension   File format**
     ---------------------------------------------------------------------------
