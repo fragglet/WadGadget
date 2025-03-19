@@ -268,6 +268,9 @@
     <ClCompile Include="..\src\view.c" />
     <ClCompile Include="..\src\wadgadget.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\pkg\win\Resources\resource.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
