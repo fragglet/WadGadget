@@ -195,17 +195,29 @@ void UI_StackKeypress(struct pane_stack *s, int key)
 #ifdef _WIN32
 // This function must be called before UI_RunMainLoop with
 // flag = 1, LINES and COLS values and directly after
-// with flag = 0 to restore the cmd size to the old values.
+// with flag = 0 to restore the cmd size.
 void UI_NotResize(bool flag, int get_lines, int get_cols)
 {
 	notresize = flag;
+	int cur_lines, cur_cols;
+	cur_lines = PDC_get_rows();
+	cur_cols = PDC_get_columns();
 
-	// If notresize = 0 restore to the old cmd size.
+	// If notresize = 0 restore the cmd size.
 	if (!notresize) {
-		clear();
-		refresh();
-		resize_term(old_lines, old_cols);
-		refresh();
+		if (cur_lines < old_lines || cur_cols < old_cols) {
+			clear();
+			refresh();
+			resize_term(old_lines, old_cols);
+			refresh();
+			return;
+		} else if (cur_lines > old_lines || cur_cols > old_cols) {
+			resize_term(0, 0);
+			refresh();
+			UI_Init();
+		} else {
+			resize_term(old_lines, old_cols);
+		}
 	}
 
 	old_lines = get_lines;
@@ -226,6 +238,12 @@ void UI_InputKeypress(int key)
 			resize_term(0, 0);
 			refresh();
 			UI_Init();
+		} else {
+			int cur_lines = PDC_get_rows();
+			int cur_cols = PDC_get_columns();
+			if (cur_lines >= old_lines && cur_cols >= old_cols) {
+				resize_term(0, 0);
+			}
 		}
 #endif //_WIN32
 		UI_TriggerRecalculate();
