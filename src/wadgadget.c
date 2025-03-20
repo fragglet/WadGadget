@@ -175,6 +175,7 @@ int main(int argc, char *argv[])
 
 	initscr();
 #ifdef _WIN32
+	PDC_set_title("WadGadget");
 	curs_set(2);
 #endif //_WIN32
 	start_color();
