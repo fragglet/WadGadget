@@ -42,5 +42,8 @@ void UI_RunMainLoop(void);
 void UI_ExitMainLoop(void);
 void UI_Init(void);
 bool UI_GetMousePosition(struct pane *if_pane, int *x, int *y);
+#ifdef _WIN32
+void UI_NotResize(bool flag, int get_lines, int get_cols);
+#endif //_WIN32
 
 #endif /* #ifndef UI__PANE_H_INCLUDED */

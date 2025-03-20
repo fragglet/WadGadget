@@ -248,7 +248,13 @@ int UI_ConfirmDialogBox(const char *title, const char *yes, const char *no,
 
 	UI_PaneShow(&dialog);
 	old_focus = UI_SetExclusiveFocus(&dialog.pane);
+#ifdef _WIN32
+	UI_NotResize(1, LINES, COLS);
 	UI_RunMainLoop();
+	UI_NotResize(0, -1, -1);
+#else
+	UI_RunMainLoop();
+#endif //_WIN32
 	UI_SetExclusiveFocus(old_focus);
 	UI_PaneHide(&dialog);
 
@@ -276,7 +282,13 @@ void UI_MessageBox(const char *msg, ...)
 
 	UI_PaneShow(&dialog);
 	old_focus = UI_SetExclusiveFocus(&dialog.pane);
+#ifdef _WIN32
+	UI_NotResize(1, LINES, COLS);
 	UI_RunMainLoop();
+	UI_NotResize(0, -1, -1);
+#else
+	UI_RunMainLoop();
+#endif //_WIN32
 	UI_SetExclusiveFocus(old_focus);
 	UI_PaneHide(&dialog);
 
@@ -383,7 +395,13 @@ char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
 
 	UI_PaneShow(&dialog);
 	old_focus = UI_SetExclusiveFocus(&dialog.pane);
+#ifdef _WIN32
+	UI_NotResize(1, LINES, COLS);
 	UI_RunMainLoop();
+	UI_NotResize(0, -1, -1);
+#else
+	UI_RunMainLoop();
+#endif //_WIN32
 	UI_SetExclusiveFocus(old_focus);
 	UI_PaneHide(&dialog);
 

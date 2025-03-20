@@ -35,7 +35,9 @@ static bool main_loop_exited = false;
 
 #ifdef _WIN32
 #define newscr curscr
-#endif//_WIN32
+static bool notresize;
+static int old_lines, old_cols;
+#endif //_WIN32
 
 void UI_PaneKeypress(void *pane, int key)
 {
@@ -190,6 +192,27 @@ void UI_StackKeypress(struct pane_stack *s, int key)
 	}
 }
 
+#ifdef _WIN32
+// This function must be called before UI_RunMainLoop with
+// flag = 1, LINES and COLS values and directly after
+// with flag = 0 to restore the cmd size to the old values.
+void UI_NotResize(bool flag, int get_lines, int get_cols)
+{
+	notresize = flag;
+
+	// If notresize = 0 restore to the old cmd size.
+	if (!notresize) {
+		clear();
+		refresh();
+		resize_term(old_lines, old_cols);
+		refresh();
+	}
+
+	old_lines = get_lines;
+	old_cols = get_cols;
+}
+#endif //_WIN32
+
 void UI_InputKeypress(int key)
 {
 	if (key == CTRL_('L')) {
@@ -199,9 +222,11 @@ void UI_InputKeypress(int key)
 	}
 	if (key == KEY_RESIZE) {
 #ifdef _WIN32
-		resize_term(0, 0);
-		refresh();
-		UI_Init();
+		if (!notresize) {
+			resize_term(0, 0);
+			refresh();
+			UI_Init();
+		}
 #endif //_WIN32
 		UI_TriggerRecalculate();
 		return;
