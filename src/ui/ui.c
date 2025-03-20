@@ -78,7 +78,11 @@ void UI_DimScreenArea(int x, int y, int w, int h, int force_color_pair)
 			if (force_color_pair < 0) {
 				color = PAIR_NUMBER(c);
 			} else {
+#ifdef _WIN32
+				color = -1;
+#else
 				color = force_color_pair;
+#endif //_WIN32
 			}
 			mvwchgat(newscr, y1, x1, 1, c, color, NULL);
 		}
