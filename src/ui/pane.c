@@ -198,8 +198,8 @@ void UI_StackKeypress(struct pane_stack *s, int key)
 // with flag = 0 to restore the cmd size.
 void UI_NotResize(bool flag, int get_lines, int get_cols)
 {
-	notresize = flag;
 	int cur_lines, cur_cols;
+	notresize = flag;
 	cur_lines = PDC_get_rows();
 	cur_cols = PDC_get_columns();
 
@@ -210,8 +210,7 @@ void UI_NotResize(bool flag, int get_lines, int get_cols)
 			refresh();
 			resize_term(old_lines, old_cols);
 			refresh();
-			return;
-		} else if (cur_lines > old_lines || cur_cols > old_cols) {
+		} else if (cur_lines > old_lines && cur_cols > old_cols) {
 			resize_term(0, 0);
 			refresh();
 			UI_Init();
