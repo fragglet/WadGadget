@@ -208,8 +208,15 @@ void UI_NotResize(bool flag, int get_lines, int get_cols)
 		if (cur_lines < old_lines || cur_cols < old_cols) {
 			clear();
 			refresh();
-			resize_term(old_lines, old_cols);
-			refresh();
+			if (cur_lines > 10 && cur_cols > 10) {
+				resize_term(0, 0);
+				refresh();
+				UI_Init();
+			} else {
+				resize_term(10, 40);
+				refresh();
+				UI_Init();
+			}
 		} else if (cur_lines > old_lines && cur_cols > old_cols) {
 			resize_term(0, 0);
 			refresh();
@@ -234,15 +241,16 @@ void UI_InputKeypress(int key)
 	if (key == KEY_RESIZE) {
 #ifdef _WIN32
 		if (!notresize) {
+			// Not resize when cmd size is to small.
+			while (PDC_get_rows() < 10 || PDC_get_columns() < 10) {
+			}
+			refresh();
 			resize_term(0, 0);
 			refresh();
 			UI_Init();
-		} else {
-			int cur_lines = PDC_get_rows();
-			int cur_cols = PDC_get_columns();
-			if (cur_lines >= old_lines && cur_cols >= old_cols) {
-				resize_term(0, 0);
-			}
+		} else if (PDC_get_rows() >= old_lines &&
+		           PDC_get_columns() >= old_cols) {
+			resize_term(0, 0);
 		}
 #endif //_WIN32
 		UI_TriggerRecalculate();
