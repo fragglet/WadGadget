@@ -46,6 +46,7 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 		if (p != NULL) {
 			*p = '\0';
 		}
+		StringUpper(namebuf);
 		break;
 	default:
 		ConversionError("File type %d cannot be imported", ent->type);
@@ -184,7 +185,7 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 {
 	VFILE *from_file;
 	struct directory_entry *ent;
-	struct wad_file *to_wad;
+	struct wad_file *to_wad = VFS_WadFile(to);
 	struct wad_file_entry *waddir;
 	struct progress_window progress;
 	char namebuf[9];
@@ -197,7 +198,6 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	// TODO: Update/overwrite existing lump instead of creating a new
 	// lump.
 
-	to_wad = VFS_WadFile(to);
 	lumpnum = to_index;
 	W_AddEntries(to_wad, lumpnum, from_set->num_entries);
 	VFS_Refresh(to);
@@ -228,5 +228,136 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	}
 
 	VFS_Refresh(to);
+	return true;
+}
+
+struct update_mapping {
+	struct directory_entry *from_ent;
+	int to_lumpnum;
+};
+
+// BuildUpdateMapping is used by PerformUpdateWAD below to generate a mapping
+// list, from the source file (from_ent) to the index lump# in the destination
+// WAD. It might need to create new lumps if they are missing.
+static struct update_mapping *BuildUpdateMapping(
+	struct directory *from, struct file_set *from_set,
+	struct directory *to, int insert_index)
+{
+	struct wad_file *wf;
+	struct directory_entry *ent;
+	struct file_set missing_lumps = EMPTY_FILE_SET;
+	struct update_mapping *result;
+	char buf[64];
+	char namebuf[9];
+	int idx, m, lumpnum;
+
+	result = calloc(from_set->num_entries, sizeof(struct update_mapping));
+
+	idx = 0;
+	m = 0;
+	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
+		struct directory_entry *to_ent;
+
+		LumpNameForEntry(namebuf, ent);
+		result[m].from_ent = ent;
+		// TODO: Check for duplicate lumps with the same name
+		// TODO: Correctly handle lumps belonging to levels. For
+		// example, if I select MAP01/LINEDEFS and hit update, it
+		// should *only* update to MAP01/LINEDEFS on the other side,
+		// not any other random LINEDEFS lump.
+		to_ent = VFS_EntryByName(to, namebuf);
+
+		if (to_ent != NULL) {
+			result[m].to_lumpnum = to_ent - to->entries;
+			++m;
+		} else {
+			VFS_AddToSet(&missing_lumps, ent->serial_no);
+		}
+	}
+
+	VFS_DescribeSet(from, &missing_lumps, buf, sizeof(buf));
+
+	if (missing_lumps.num_entries > 0
+	 && !UI_ConfirmDialogBox("Confirm Add Lumps", "Add Lumps", "Cancel",
+	                         "%s not found in destination WAD.\n"
+	                         "Add missing lump(s)?", buf)) {
+		VFS_FreeSet(&missing_lumps);
+		free(result);
+		return NULL;
+	}
+
+	// Create the missing lumps
+	lumpnum = insert_index;
+	wf = VFS_WadFile(to);
+	W_AddEntries(wf, insert_index, missing_lumps.num_entries);
+
+	// Now we need to fix up the lump indexes we set above:
+	for (idx = 0; idx < m; ++idx) {
+		if (result[idx].to_lumpnum >= insert_index) {
+			result[idx].to_lumpnum += missing_lumps.num_entries;
+		}
+	}
+
+	// Set the lump names and add to result list:
+	idx = 0;
+	while ((ent = VFS_IterateSet(from, &missing_lumps, &idx)) != NULL) {
+		LumpNameForEntry(namebuf, ent);
+		result[m].from_ent = ent;
+		result[m].to_lumpnum = lumpnum;
+		W_SetLumpName(wf, lumpnum, namebuf);
+		++m;
+		++lumpnum;
+	}
+
+	VFS_Refresh(to);
+	VFS_FreeSet(&missing_lumps);
+
+	return result;
+}
+
+bool PerformUpdateWAD(struct directory *from, struct file_set *from_set,
+                      struct directory *to, int to_index,
+                      struct file_set *result, bool convert)
+{
+	struct wad_file_entry *waddir;
+	struct update_mapping *um;
+	VFILE *from_file;
+	struct directory_entry *ent;
+	struct wad_file *to_wad = VFS_WadFile(to);
+	struct progress_window progress;
+	int i, lumpnum, um_len;
+
+	UI_InitProgressWindow(&progress, from_set->num_entries, "Updating");
+
+	um = BuildUpdateMapping(from, from_set, to, to_index);
+	if (um == NULL) {
+		return false;
+	}
+
+	// We only ever do conversions when importing from files.
+	convert = convert && from->type == FILE_TYPE_DIR;
+	waddir = W_GetDirectory(to_wad);
+	um_len = from_set->num_entries;
+
+	for (i = 0; i < um_len; ++i) {
+		ent = um[i].from_ent;
+		lumpnum = um[i].to_lumpnum;
+		from_file = VFS_OpenByEntry(from, ent);
+
+		if (!ImportFromFile(from_file, ent->name, to, lumpnum,
+		                    convert)) {
+			VFS_Rollback(to);
+			return false;
+		}
+
+		VFS_AddToSet(result, waddir[lumpnum].serial_no);
+		++lumpnum;
+
+		VFS_RemoveFromSet(from_set, ent->serial_no);
+		UI_UpdateProgressWindow(&progress, ent->name);
+	}
+
+	VFS_Refresh(to);
+	free(um);
 	return true;
 }

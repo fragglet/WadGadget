@@ -287,13 +287,62 @@ const struct action file_move_action = {
     KEY_F(3), 'V', "Move", "> Move", PerformFileMove,
 };
 
-static void PerformUpdate(void)
+static void PerformUpdate(bool convert)
 {
-	UI_MessageBox("Sorry, not implemented yet.");
+	struct directory *from = active_pane->dir, *to = other_pane->dir;
+	struct file_set *import_set = B_DirectoryPaneTagged(active_pane);
+	int to_point = B_DirectoryPaneSelected(other_pane) + 1;
+	struct file_set result = EMPTY_FILE_SET;
+	char buf[32];
+
+	if (!B_CheckReadOnly(other_pane->dir)) {
+		return;
+	}
+
+	ClearConversionErrors();
+
+	if (import_set->num_entries < 1) {
+		UI_MessageBox("You have not selected anything to import.");
+		VFS_FreeSet(&result);
+		return;
+	}
+
+	if (!PerformUpdateWAD(from, import_set, to, to_point, &result,
+	                      convert)) {
+		if (strlen(GetConversionError()) > 0) {
+			UI_MessageBox("Error during import:\n%s",
+			              GetConversionError());
+		}
+		VFS_FreeSet(&result);
+		VFS_Rollback(to);
+		VFS_Refresh(to);
+		return;
+	}
+
+	B_DirectoryPaneSetTagged(other_pane, &result);
+	B_SwitchToPane(other_pane);
+	VFS_DescribeSet(to, &result, buf, sizeof(buf));
+	VFS_CommitChanges(to, "update of %s", buf);
+	UI_ShowNotice("%s updated.", buf);
+
+	VFS_FreeSet(&result);
+}
+
+static void PerformUpdateConvert(void)
+{
+	PerformUpdate(true);
+}
+
+static void PerformUpdateNoConvert(void)
+{
+	PerformUpdate(false);
 }
 
 const struct action update_action = {
-    KEY_F(3), 'U', "Upd", "> Update", PerformUpdate,
+    KEY_F(3), 'U', "Upd", "> Update", PerformUpdateConvert,
+};
+const struct action update_noconv_action = {
+    SHIFT_KEY_F(3), 0, NULL, "> Update (no convert)", PerformUpdateNoConvert,
 };
 
 static void PerformMkdir(void)
