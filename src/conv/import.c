@@ -186,9 +186,10 @@ struct update_mapping {
 
 // AddLumpsMapping inserts new lumps for all entries in `from_set` and returns
 // an update mapping that will update those new lumps.
-static struct update_mapping *AddLumpsMapping(
-	struct directory *from, struct file_set *from_set,
-	struct directory *to, int insert_index)
+static struct update_mapping *AddLumpsMapping(struct directory *from,
+                                              struct file_set *from_set,
+                                              struct directory *to,
+                                              int insert_index)
 {
 	struct update_mapping *result;
 	struct directory_entry *ent;
@@ -196,8 +197,8 @@ static struct update_mapping *AddLumpsMapping(
 	int lumpnum, idx, m;
 	char namebuf[9];
 
-	result = calloc(from_set->num_entries + 1,
-	                sizeof(struct update_mapping));
+	result =
+	    calloc(from_set->num_entries + 1, sizeof(struct update_mapping));
 
 	lumpnum = insert_index;
 	wf = VFS_WadFile(to);
@@ -221,8 +222,7 @@ static struct update_mapping *AddLumpsMapping(
 
 static bool ApplyUpdateMapping(struct progress_window *progress,
                                struct directory *from,
-                               struct file_set *from_set,
-                               struct directory *to,
+                               struct file_set *from_set, struct directory *to,
                                struct update_mapping *um,
                                struct file_set *result, bool convert)
 {
@@ -275,8 +275,8 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 		return false;
 	}
 
-	success = ApplyUpdateMapping(&progress, from, from_set, to,
-	                             um, result, convert);
+	success = ApplyUpdateMapping(&progress, from, from_set, to, um, result,
+	                             convert);
 	free(um);
 
 	return success;
@@ -285,17 +285,18 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 // BuildUpdateMapping is used by PerformUpdateWAD below to generate a mapping
 // list, from the source file (from_ent) to the index lump# in the destination
 // WAD. Any that can't be matched are stored in missing_lumps.
-static struct update_mapping *BuildUpdateMapping(
-	struct directory *from, struct file_set *from_set,
-	struct directory *to, struct file_set *missing_lumps)
+static struct update_mapping *BuildUpdateMapping(struct directory *from,
+                                                 struct file_set *from_set,
+                                                 struct directory *to,
+                                                 struct file_set *missing_lumps)
 {
 	struct directory_entry *ent;
 	struct update_mapping *result;
 	char namebuf[9];
 	int idx, m;
 
-	result = calloc(from_set->num_entries + 1,
-	                sizeof(struct update_mapping));
+	result =
+	    calloc(from_set->num_entries + 1, sizeof(struct update_mapping));
 
 	idx = 0;
 	m = 0;
@@ -341,23 +342,24 @@ bool PerformUpdateWAD(struct directory *from, struct file_set *from_set,
 
 	VFS_DescribeSet(from, &missing_lumps, buf, sizeof(buf));
 
-	if (missing_lumps.num_entries > 0
-	 && !UI_ConfirmDialogBox("Confirm Add Lumps", "Add Lumps", "Cancel",
+	if (missing_lumps.num_entries > 0 &&
+	    !UI_ConfirmDialogBox("Confirm Add Lumps", "Add Lumps", "Cancel",
 	                         "%s not found in destination WAD.\n"
-	                         "Add missing lump(s)?", buf)) {
+	                         "Add missing lump(s)?",
+	                         buf)) {
 		VFS_FreeSet(&missing_lumps);
 		free(um);
 		return false;
 	}
 
-	success = ApplyUpdateMapping(&progress, from, from_set, to,
-	                             um, result, convert);
+	success = ApplyUpdateMapping(&progress, from, from_set, to, um, result,
+	                             convert);
 	free(um);
 
 	if (success && missing_lumps.num_entries > 0) {
 		um = AddLumpsMapping(from, &missing_lumps, to, to_index);
-		success = ApplyUpdateMapping(&progress, from, from_set, to,
-		                             um, result, convert);
+		success = ApplyUpdateMapping(&progress, from, from_set, to, um,
+		                             result, convert);
 		free(um);
 	}
 

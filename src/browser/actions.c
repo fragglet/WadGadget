@@ -219,8 +219,8 @@ static void PerformFileMove(void)
 	char buf[64];
 	int idx = 0;
 
-	if (active_pane == other_pane || !B_CheckReadOnly(other_pane->dir)
-	 || tagged->num_entries == 0) {
+	if (active_pane == other_pane || !B_CheckReadOnly(other_pane->dir) ||
+	    tagged->num_entries == 0) {
 		return;
 	}
 
@@ -229,8 +229,9 @@ static void PerformFileMove(void)
 		if (ent2 != NULL) {
 			if (ent2->type == FILE_TYPE_DIR) {
 				UI_MessageBox(
-					"Can't overwrite existing directory\n"
-					"named '%s'.", ent2->name);
+				    "Can't overwrite existing directory\n"
+				    "named '%s'.",
+				    ent2->name);
 				VFS_FreeSet(&to_overwrite);
 				return;
 			}
@@ -238,8 +239,7 @@ static void PerformFileMove(void)
 		}
 	}
 
-	VFS_DescribeSet(other_pane->dir, &to_overwrite, buf,
-	                sizeof(buf));
+	VFS_DescribeSet(other_pane->dir, &to_overwrite, buf, sizeof(buf));
 
 	if (to_overwrite.num_entries > 0 &&
 	    !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
@@ -252,8 +252,8 @@ static void PerformFileMove(void)
 	while ((ent = VFS_IterateSet(active_pane->dir, tagged, &idx)) != NULL) {
 		bool success;
 		char *from = VFS_EntryPath(active_pane->dir, ent);
-		char *to = StringJoin("/", other_pane->dir->path, ent->name,
-		                      NULL);
+		char *to =
+		    StringJoin("/", other_pane->dir->path, ent->name, NULL);
 		success = rename(from, to) == 0;
 		free(from);
 		free(to);

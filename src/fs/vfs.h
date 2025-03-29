@@ -35,10 +35,7 @@ enum file_type {
 	FILE_TYPE_PALETTE,
 };
 
-#define EMPTY_FILE_SET                                                         \
-	{                                                                      \
-		NULL, 0                                                        \
-	}
+#define EMPTY_FILE_SET {NULL, 0}
 
 struct file_set {
 	uint64_t *entries;
