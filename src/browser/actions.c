@@ -214,6 +214,8 @@ static void PerformFileMove(void)
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
 	struct directory_entry *ent, *ent2;
 	struct file_set to_overwrite = EMPTY_FILE_SET;
+	struct file_set moved = EMPTY_FILE_SET;
+	int last_fail_errno;
 	char buf[64];
 	int idx = 0;
 
@@ -254,23 +256,30 @@ static void PerformFileMove(void)
 		success = rename(from, to) == 0;
 		free(from);
 		free(to);
-		if (!success) {
-			UI_MessageBox("Error moving %s: %s", ent->name,
-			              strerror(errno));
-			VFS_RefreshAll();
-			return;
+		if (success) {
+			VFS_AddToSet(&moved, ent->serial_no);
+			VFS_RemoveFromSet(tagged, ent->serial_no);
+		} else {
+			last_fail_errno = errno;
 		}
 	}
 
 	VFS_Refresh(active_pane->dir);
 	VFS_Refresh(other_pane->dir);
 
-	// Since inode numbers don't change, we can just copy the tag set
-	// to the other pane to highlight the moved files.
-	VFS_DescribeSet(other_pane->dir, tagged, buf, sizeof(buf));
-	B_DirectoryPaneSetTagged(other_pane, tagged);
-	B_SwitchToPane(other_pane);
-	UI_ShowNotice("%s moved.", buf);
+	// Any entries left in the original set, we failed to move.
+	if (tagged->num_entries > 0) {
+		VFS_DescribeSet(active_pane->dir, tagged, buf, sizeof(buf));
+		UI_MessageBox("Error moving %s: %s", buf,
+		              strerror(last_fail_errno));
+	}
+	if (moved.num_entries > 0) {
+		B_DirectoryPaneSetTagged(other_pane, &moved);
+		VFS_DescribeSet(other_pane->dir, &moved, buf, sizeof(buf));
+		UI_ShowNotice("%s moved.", buf);
+		B_SwitchToPane(other_pane);
+	}
+	VFS_FreeSet(&moved);
 }
 
 const struct action file_move_action = {
