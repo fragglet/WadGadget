@@ -179,6 +179,50 @@ bool ImportFromFile(VFILE *from_file, const char *src_name,
 	return true;
 }
 
+struct update_mapping {
+	struct directory_entry *from_ent;
+	int to_lumpnum;
+};
+
+static bool ApplyUpdateMapping(struct progress_window *progress,
+                               struct directory *from,
+                               struct file_set *from_set,
+                               struct directory *to,
+                               struct update_mapping *um,
+                               struct file_set *result, bool convert)
+{
+	struct wad_file_entry *waddir;
+	VFILE *from_file;
+	struct directory_entry *ent;
+	struct wad_file *to_wad = VFS_WadFile(to);
+	int i, lumpnum;
+
+	// We only ever do conversions when importing from files.
+	convert = convert && from->type == FILE_TYPE_DIR;
+	waddir = W_GetDirectory(to_wad);
+
+	for (i = 0; um[i].from_ent != NULL; ++i) {
+		ent = um[i].from_ent;
+		lumpnum = um[i].to_lumpnum;
+		from_file = VFS_OpenByEntry(from, ent);
+
+		if (!ImportFromFile(from_file, ent->name, to, lumpnum,
+		                    convert)) {
+			VFS_Rollback(to);
+			return false;
+		}
+
+		VFS_AddToSet(result, waddir[lumpnum].serial_no);
+		++lumpnum;
+
+		VFS_RemoveFromSet(from_set, ent->serial_no);
+		UI_UpdateProgressWindow(progress, ent->name);
+	}
+
+	VFS_Refresh(to);
+	return true;
+}
+
 bool PerformImport(struct directory *from, struct file_set *from_set,
                    struct directory *to, int to_index, struct file_set *result,
                    bool convert)
@@ -231,11 +275,6 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	return true;
 }
 
-struct update_mapping {
-	struct directory_entry *from_ent;
-	int to_lumpnum;
-};
-
 // BuildUpdateMapping is used by PerformUpdateWAD below to generate a mapping
 // list, from the source file (from_ent) to the index lump# in the destination
 // WAD. It might need to create new lumps if they are missing.
@@ -251,7 +290,8 @@ static struct update_mapping *BuildUpdateMapping(
 	char namebuf[9];
 	int idx, m, lumpnum;
 
-	result = calloc(from_set->num_entries, sizeof(struct update_mapping));
+	result = calloc(from_set->num_entries + 1,
+	                sizeof(struct update_mapping));
 
 	idx = 0;
 	m = 0;
@@ -319,13 +359,9 @@ bool PerformUpdateWAD(struct directory *from, struct file_set *from_set,
                       struct directory *to, int to_index,
                       struct file_set *result, bool convert)
 {
-	struct wad_file_entry *waddir;
 	struct update_mapping *um;
-	VFILE *from_file;
-	struct directory_entry *ent;
-	struct wad_file *to_wad = VFS_WadFile(to);
+	bool success;
 	struct progress_window progress;
-	int i, lumpnum, um_len;
 
 	UI_InitProgressWindow(&progress, from_set->num_entries, "Updating");
 
@@ -334,30 +370,9 @@ bool PerformUpdateWAD(struct directory *from, struct file_set *from_set,
 		return false;
 	}
 
-	// We only ever do conversions when importing from files.
-	convert = convert && from->type == FILE_TYPE_DIR;
-	waddir = W_GetDirectory(to_wad);
-	um_len = from_set->num_entries;
-
-	for (i = 0; i < um_len; ++i) {
-		ent = um[i].from_ent;
-		lumpnum = um[i].to_lumpnum;
-		from_file = VFS_OpenByEntry(from, ent);
-
-		if (!ImportFromFile(from_file, ent->name, to, lumpnum,
-		                    convert)) {
-			VFS_Rollback(to);
-			return false;
-		}
-
-		VFS_AddToSet(result, waddir[lumpnum].serial_no);
-		++lumpnum;
-
-		VFS_RemoveFromSet(from_set, ent->serial_no);
-		UI_UpdateProgressWindow(&progress, ent->name);
-	}
-
-	VFS_Refresh(to);
+	success = ApplyUpdateMapping(&progress, from, from_set, to,
+	                             um, result, convert);
 	free(um);
-	return true;
+
+	return success;
 }
