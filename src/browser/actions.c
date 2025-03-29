@@ -219,7 +219,8 @@ static void PerformFileMove(void)
 	char buf[64];
 	int idx = 0;
 
-	if (active_pane == other_pane || !B_CheckReadOnly(other_pane->dir)) {
+	if (active_pane == other_pane || !B_CheckReadOnly(other_pane->dir)
+	 || tagged->num_entries == 0) {
 		return;
 	}
 
