@@ -282,6 +282,24 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	return success;
 }
 
+static int LumpByNameUnique(struct wad_file *wf, const char *name)
+{
+	struct wad_file_entry *waddir = W_GetDirectory(wf);
+	int i, result = -1;
+
+	for (i = 0; i < W_NumLumps(wf); ++i) {
+		if (!strncasecmp(name, waddir[i].name, 8)) {
+			// Duplicate found?
+			if (result != -1) {
+				return -2;
+			}
+			result = i;
+		}
+	}
+
+	return result;
+}
+
 // BuildUpdateMapping is used by PerformUpdateWAD below to generate a mapping
 // list, from the source file (from_ent) to the index lump# in the destination
 // WAD. Any that can't be matched are stored in missing_lumps.
@@ -293,7 +311,7 @@ static struct update_mapping *BuildUpdateMapping(struct directory *from,
 	struct directory_entry *ent;
 	struct update_mapping *result;
 	char namebuf[9];
-	int idx, m;
+	int idx, lumpnum, m;
 
 	result =
 	    calloc(from_set->num_entries + 1, sizeof(struct update_mapping));
@@ -301,22 +319,27 @@ static struct update_mapping *BuildUpdateMapping(struct directory *from,
 	idx = 0;
 	m = 0;
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
-		struct directory_entry *to_ent;
-
 		LumpNameForEntry(namebuf, ent);
-		// TODO: Check for duplicate lumps with the same name
 		// TODO: Correctly handle lumps belonging to levels. For
 		// example, if I select MAP01/LINEDEFS and hit update, it
 		// should *only* update to MAP01/LINEDEFS on the other side,
 		// not any other random LINEDEFS lump.
-		to_ent = VFS_EntryByName(to, namebuf);
-
-		if (to_ent != NULL) {
-			result[m].from_ent = ent;
-			result[m].to_lumpnum = to_ent - to->entries;
-			++m;
-		} else {
+		lumpnum = LumpByNameUnique(VFS_WadFile(to), namebuf);
+		switch (lumpnum) {
+		case -2:
+			UI_MessageBox("Refusing to proceed with update:\n"
+			              "more than one existing lump exists\n"
+			              "named '%s'.", namebuf);
+			free(result);
+			return NULL;
+		case -1:
 			VFS_AddToSet(missing_lumps, ent->serial_no);
+			break;
+		default:
+			result[m].from_ent = ent;
+			result[m].to_lumpnum = lumpnum;
+			++m;
+			break;
 		}
 	}
 
