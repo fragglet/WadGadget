@@ -25,6 +25,7 @@ char *StringReplace(const char *haystack, const char *needle,
 char *StringJoin(const char *sep, const char *s, ...);
 int VStringPrintf(char *buf, size_t buf_len, const char *s, va_list args);
 int StringPrintf(char *buf, size_t buf_len, const char *s, ...);
+void StringUpper(char *s);
 
 char *PathDirName(const char *path);
 const char *PathBaseName(const char *path);

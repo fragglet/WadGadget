@@ -10,6 +10,7 @@
 
 #include "stringlib.h"
 
+#include <ctype.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -245,6 +246,14 @@ int StringPrintf(char *buf, size_t buf_len, const char *s, ...)
 	result = VStringPrintf(buf, buf_len, s, args);
 	va_end(args);
 	return result;
+}
+
+void StringUpper(char *s)
+{
+	char *p;
+	for (p = s; *p != '\0'; ++p) {
+		*p = toupper(*p);
+	}
 }
 
 // Returns the directory portion of the given path, without the trailing
