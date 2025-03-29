@@ -262,52 +262,24 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
                    struct directory *to, int to_index, struct file_set *result,
                    bool convert)
 {
-	VFILE *from_file;
-	struct directory_entry *ent;
-	struct wad_file *to_wad = VFS_WadFile(to);
-	struct wad_file_entry *waddir;
+	struct update_mapping *um;
+	bool success;
 	struct progress_window progress;
-	char namebuf[9];
-	int idx, lumpnum;
 
 	UI_InitProgressWindow(&progress, from_set->num_entries,
 	                      from->type == FILE_TYPE_DIR ? "Importing"
 	                                                  : "Copying");
 
-	// TODO: Update/overwrite existing lump instead of creating a new
-	// lump.
-
-	lumpnum = to_index;
-	W_AddEntries(to_wad, lumpnum, from_set->num_entries);
-	VFS_Refresh(to);
-	waddir = W_GetDirectory(to_wad);
-
-	// We only ever do conversions when importing from files.
-	convert = convert && from->type == FILE_TYPE_DIR;
-
-	idx = 0;
-	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
-
-		LumpNameForEntry(namebuf, ent);
-		W_SetLumpName(to_wad, lumpnum, namebuf);
-
-		from_file = VFS_OpenByEntry(from, ent);
-
-		if (!ImportFromFile(from_file, ent->name, to, lumpnum,
-		                    convert)) {
-			VFS_Rollback(to);
-			return false;
-		}
-
-		VFS_AddToSet(result, waddir[lumpnum].serial_no);
-		++lumpnum;
-
-		VFS_RemoveFromSet(from_set, ent->serial_no);
-		UI_UpdateProgressWindow(&progress, ent->name);
+	um = AddLumpsMapping(from, from_set, to, to_index);
+	if (um == NULL) {
+		return false;
 	}
 
-	VFS_Refresh(to);
-	return true;
+	success = ApplyUpdateMapping(&progress, from, from_set, to,
+	                             um, result, convert);
+	free(um);
+
+	return success;
 }
 
 // BuildUpdateMapping is used by PerformUpdateWAD below to generate a mapping
