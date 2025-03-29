@@ -184,6 +184,41 @@ struct update_mapping {
 	int to_lumpnum;
 };
 
+// AddLumpsMapping inserts new lumps for all entries in `from_set` and returns
+// an update mapping that will update those new lumps.
+static struct update_mapping *AddLumpsMapping(
+	struct directory *from, struct file_set *from_set,
+	struct directory *to, int insert_index)
+{
+	struct update_mapping *result;
+	struct directory_entry *ent;
+	struct wad_file *wf;
+	int lumpnum, idx, m;
+	char namebuf[9];
+
+	result = calloc(from_set->num_entries + 1,
+	                sizeof(struct update_mapping));
+
+	lumpnum = insert_index;
+	wf = VFS_WadFile(to);
+	W_AddEntries(wf, insert_index, from_set->num_entries);
+
+	idx = 0;
+	m = 0;
+	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
+		LumpNameForEntry(namebuf, ent);
+		result[m].from_ent = ent;
+		result[m].to_lumpnum = lumpnum;
+		W_SetLumpName(wf, lumpnum, namebuf);
+		++m;
+		++lumpnum;
+	}
+
+	VFS_Refresh(to);
+
+	return result;
+}
+
 static bool ApplyUpdateMapping(struct progress_window *progress,
                                struct directory *from,
                                struct file_set *from_set,
@@ -277,18 +312,15 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 
 // BuildUpdateMapping is used by PerformUpdateWAD below to generate a mapping
 // list, from the source file (from_ent) to the index lump# in the destination
-// WAD. It might need to create new lumps if they are missing.
+// WAD. Any that can't be matched are stored in missing_lumps.
 static struct update_mapping *BuildUpdateMapping(
 	struct directory *from, struct file_set *from_set,
-	struct directory *to, int insert_index)
+	struct directory *to, struct file_set *missing_lumps)
 {
-	struct wad_file *wf;
 	struct directory_entry *ent;
-	struct file_set missing_lumps = EMPTY_FILE_SET;
 	struct update_mapping *result;
-	char buf[64];
 	char namebuf[9];
-	int idx, m, lumpnum;
+	int idx, m;
 
 	result = calloc(from_set->num_entries + 1,
 	                sizeof(struct update_mapping));
@@ -299,7 +331,6 @@ static struct update_mapping *BuildUpdateMapping(
 		struct directory_entry *to_ent;
 
 		LumpNameForEntry(namebuf, ent);
-		result[m].from_ent = ent;
 		// TODO: Check for duplicate lumps with the same name
 		// TODO: Correctly handle lumps belonging to levels. For
 		// example, if I select MAP01/LINEDEFS and hit update, it
@@ -308,49 +339,13 @@ static struct update_mapping *BuildUpdateMapping(
 		to_ent = VFS_EntryByName(to, namebuf);
 
 		if (to_ent != NULL) {
+			result[m].from_ent = ent;
 			result[m].to_lumpnum = to_ent - to->entries;
 			++m;
 		} else {
-			VFS_AddToSet(&missing_lumps, ent->serial_no);
+			VFS_AddToSet(missing_lumps, ent->serial_no);
 		}
 	}
-
-	VFS_DescribeSet(from, &missing_lumps, buf, sizeof(buf));
-
-	if (missing_lumps.num_entries > 0
-	 && !UI_ConfirmDialogBox("Confirm Add Lumps", "Add Lumps", "Cancel",
-	                         "%s not found in destination WAD.\n"
-	                         "Add missing lump(s)?", buf)) {
-		VFS_FreeSet(&missing_lumps);
-		free(result);
-		return NULL;
-	}
-
-	// Create the missing lumps
-	lumpnum = insert_index;
-	wf = VFS_WadFile(to);
-	W_AddEntries(wf, insert_index, missing_lumps.num_entries);
-
-	// Now we need to fix up the lump indexes we set above:
-	for (idx = 0; idx < m; ++idx) {
-		if (result[idx].to_lumpnum >= insert_index) {
-			result[idx].to_lumpnum += missing_lumps.num_entries;
-		}
-	}
-
-	// Set the lump names and add to result list:
-	idx = 0;
-	while ((ent = VFS_IterateSet(from, &missing_lumps, &idx)) != NULL) {
-		LumpNameForEntry(namebuf, ent);
-		result[m].from_ent = ent;
-		result[m].to_lumpnum = lumpnum;
-		W_SetLumpName(wf, lumpnum, namebuf);
-		++m;
-		++lumpnum;
-	}
-
-	VFS_Refresh(to);
-	VFS_FreeSet(&missing_lumps);
 
 	return result;
 }
@@ -362,17 +357,39 @@ bool PerformUpdateWAD(struct directory *from, struct file_set *from_set,
 	struct update_mapping *um;
 	bool success;
 	struct progress_window progress;
+	struct file_set missing_lumps = EMPTY_FILE_SET;
+	char buf[64];
 
 	UI_InitProgressWindow(&progress, from_set->num_entries, "Updating");
 
-	um = BuildUpdateMapping(from, from_set, to, to_index);
+	um = BuildUpdateMapping(from, from_set, to, &missing_lumps);
 	if (um == NULL) {
+		return false;
+	}
+
+	VFS_DescribeSet(from, &missing_lumps, buf, sizeof(buf));
+
+	if (missing_lumps.num_entries > 0
+	 && !UI_ConfirmDialogBox("Confirm Add Lumps", "Add Lumps", "Cancel",
+	                         "%s not found in destination WAD.\n"
+	                         "Add missing lump(s)?", buf)) {
+		VFS_FreeSet(&missing_lumps);
+		free(um);
 		return false;
 	}
 
 	success = ApplyUpdateMapping(&progress, from, from_set, to,
 	                             um, result, convert);
 	free(um);
+
+	if (success && missing_lumps.num_entries > 0) {
+		um = AddLumpsMapping(from, &missing_lumps, to, to_index);
+		success = ApplyUpdateMapping(&progress, from, from_set, to,
+		                             um, result, convert);
+		free(um);
+	}
+
+	VFS_FreeSet(&missing_lumps);
 
 	return success;
 }
