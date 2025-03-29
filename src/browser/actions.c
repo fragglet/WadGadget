@@ -209,6 +209,74 @@ const struct action import_noconv_action = {
     SHIFT_KEY_F(5), 0, NULL, "> Import (no convert)", PerformCopyNoConvert,
 };
 
+static void PerformFileMove(void)
+{
+	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
+	struct directory_entry *ent, *ent2;
+	struct file_set to_overwrite = EMPTY_FILE_SET;
+	char buf[64];
+	int idx = 0;
+
+	if (active_pane == other_pane || !B_CheckReadOnly(other_pane->dir)) {
+		return;
+	}
+
+	while ((ent = VFS_IterateSet(active_pane->dir, tagged, &idx)) != NULL) {
+		ent2 = VFS_EntryByName(other_pane->dir, ent->name);
+		if (ent2 != NULL) {
+			if (ent2->type == FILE_TYPE_DIR) {
+				UI_MessageBox(
+					"Can't overwrite existing directory\n"
+					"named '%s'.", ent2->name);
+				VFS_FreeSet(&to_overwrite);
+				return;
+			}
+			VFS_AddToSet(&to_overwrite, ent2->serial_no);
+		}
+	}
+
+	VFS_DescribeSet(other_pane->dir, &to_overwrite, buf,
+	                sizeof(buf));
+
+	if (to_overwrite.num_entries > 0 &&
+	    !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
+	                         "Overwrite %s?", buf)) {
+		VFS_FreeSet(&to_overwrite);
+		return;
+	}
+
+	idx = 0;
+	while ((ent = VFS_IterateSet(active_pane->dir, tagged, &idx)) != NULL) {
+		bool success;
+		char *from = VFS_EntryPath(active_pane->dir, ent);
+		char *to = StringJoin("/", other_pane->dir->path, ent->name,
+		                      NULL);
+		success = rename(from, to) == 0;
+		free(from);
+		free(to);
+		if (!success) {
+			UI_MessageBox("Error moving %s: %s", ent->name,
+			              strerror(errno));
+			VFS_RefreshAll();
+			return;
+		}
+	}
+
+	VFS_Refresh(active_pane->dir);
+	VFS_Refresh(other_pane->dir);
+
+	// Since inode numbers don't change, we can just copy the tag set
+	// to the other pane to highlight the moved files.
+	VFS_DescribeSet(other_pane->dir, tagged, buf, sizeof(buf));
+	B_DirectoryPaneSetTagged(other_pane, tagged);
+	B_SwitchToPane(other_pane);
+	UI_ShowNotice("%s moved.", buf);
+}
+
+const struct action file_move_action = {
+    KEY_F(3), 'V', "Move", "> Move", PerformFileMove,
+};
+
 static void PerformUpdate(void)
 {
 	UI_MessageBox("Sorry, not implemented yet.");

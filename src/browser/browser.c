@@ -260,6 +260,7 @@ static const struct action *dir_to_wad[] = {
 
 static const struct action *dir_to_dir[] = {
     &copy_action,
+    &file_move_action,
     NULL,
 };
 
