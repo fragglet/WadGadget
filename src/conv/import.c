@@ -21,6 +21,7 @@
 #include "conv/palette.h"
 #include "fs/vfs.h"
 #include "fs/wad_file.h"
+#include "lump_info.h"
 #include "palette/palette.h"
 #include "stringlib.h"
 #include "textures/textures.h"
@@ -300,6 +301,72 @@ static int LumpByNameUnique(struct wad_file *wf, const char *name)
 	return result;
 }
 
+// Each directory entry has an equivalent "key" entry, the name of which
+// is used to look up the matching key entry in the other WAD file. For
+// most, the key entry is the entry itself; the exception is in the case
+// of levels, where the level header (eg. "MAP01") is the key.
+static struct directory_entry *KeyEntry(struct directory *from,
+                                        struct directory_entry *ent)
+{
+	struct wad_file *wf = VFS_WadFile(from);
+	unsigned int lumpnum;
+
+	if (ent->type != FILE_TYPE_LUMP) {
+		return ent;
+	}
+
+	lumpnum = ent - from->entries;
+
+	while (LI_IdentifyLump(wf, lumpnum) == &lump_type_level) {
+		if (lumpnum == 0) {
+			return NULL;
+		}
+		--lumpnum;
+	}
+
+	return &from->entries[lumpnum];
+}
+
+static int SubLump(struct wad_file *wf, int key_lumpnum, const char *name)
+{
+	struct wad_file_entry *waddir = W_GetDirectory(wf);
+	int lumpnum;
+
+	for (lumpnum = key_lumpnum + 1; lumpnum < W_NumLumps(wf); ++lumpnum) {
+		if (LI_IdentifyLump(wf, lumpnum) != &lump_type_level) {
+			break;
+		}
+		if (!strncasecmp(waddir[lumpnum].name, name, 8)) {
+			return lumpnum;
+		}
+	}
+
+	return -1;
+}
+
+static int LumpnumForUpdate(struct directory *from, struct directory_entry *ent,
+                            struct directory *to)
+{
+	struct directory_entry *key_lump = KeyEntry(from, ent);
+	char namebuf[9];
+	int lumpnum;
+
+	if (key_lump == NULL) {
+		return -1;
+	}
+
+	LumpNameForEntry(namebuf, key_lump);
+	lumpnum = LumpByNameUnique(VFS_WadFile(to), namebuf);
+
+	if (lumpnum < 0) {
+		return lumpnum;
+	} else if (ent != key_lump) {
+		return SubLump(VFS_WadFile(to), lumpnum, ent->name);
+	}
+
+	return lumpnum;
+}
+
 // BuildUpdateMapping is used by PerformUpdateWAD below to generate a mapping
 // list, from the source file (from_ent) to the index lump# in the destination
 // WAD. Any that can't be matched are stored in missing_lumps.
@@ -310,8 +377,8 @@ static struct update_mapping *BuildUpdateMapping(struct directory *from,
 {
 	struct directory_entry *ent;
 	struct update_mapping *result;
-	char namebuf[9];
 	int idx, lumpnum, m;
+	char namebuf[9];
 
 	result =
 	    calloc(from_set->num_entries + 1, sizeof(struct update_mapping));
@@ -319,14 +386,10 @@ static struct update_mapping *BuildUpdateMapping(struct directory *from,
 	idx = 0;
 	m = 0;
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
-		LumpNameForEntry(namebuf, ent);
-		// TODO: Correctly handle lumps belonging to levels. For
-		// example, if I select MAP01/LINEDEFS and hit update, it
-		// should *only* update to MAP01/LINEDEFS on the other side,
-		// not any other random LINEDEFS lump.
-		lumpnum = LumpByNameUnique(VFS_WadFile(to), namebuf);
+		lumpnum = LumpnumForUpdate(from, ent, to);
 		switch (lumpnum) {
 		case -2:
+			LumpNameForEntry(namebuf, ent);
 			UI_MessageBox("Refusing to proceed with update:\n"
 			              "more than one existing lump exists\n"
 			              "named '%s'.", namebuf);
