@@ -24,7 +24,7 @@ list returns to the directory containing the WAD.
     **Ctrl-D          **  View hex**d**ump of selected lump
     **Ctrl-V  F2      **  Mo**v**e (rearrange) marked lumps
     **Ctrl-]  Shift-F2**  Sort marked lumps into alphabetical order
-    **Ctrl-U  F3      **  **U**pdate
+    **Ctrl-U  F3      **  **U**pdate WAD lumps; [see below](#updating)
     **Ctrl-C  F5      **  **C**opy or export lumps; [see below](#copying)
     **        Shift-F5**  Export as raw, no file conversion
     **Ctrl-E  F6      **  R**e**name selected lump
@@ -59,6 +59,36 @@ All [standard controls](browser.md#keys) are also supported.
    some new patches into your WAD and need to add them to PNAMES.
  * **Export as WAD (F9)** will create a new .wad file in the directory in the
    opposite pane. All marked lumps will be copied into the new .wad.
+
+## Updating
+
+Copying into a WAD (importing) will always add new lumps, even if lumps
+already exist with the same name. If your aim is to replace the content of an
+existing lump (or lumps), you might instead want to use **Update (F3)**.
+
+**Update** does essentially the same thing as **Import**, except that it will search
+for an existing lump with the same name and try to replace its contents. To
+use, switch to the other pane and mark the files or lumps you wish to import,
+then press **F3**.
+
+There are the following corner cases:
+
+ * Duplicate entries are not tolerated. For example, suppose you are trying to
+   import a file named **TITLEPIC.png** and there are two lumps named **TITLEPIC**
+   already present in the WAD. The update function will refuse to proceed; it
+   will not risk potentially overwriting the wrong lump. You can resolve this
+   either by removing the duplicate lumps or by importing manually (use the
+   regular **Import** function and delete the old lump).
+
+ * If some of the lumps to update cannot be found, the update function will
+   prompt you as to whether to add those as new lumps (the behavior in this
+   case is identical to the **Import** function). If you say no, nothing gets
+   updated.
+
+ * Level lumps are handled correctly if you are updating a WAD with the
+   contents of another WAD. For example, if you select the **LINEDEFS** lump that
+   belongs to **MAP08**, it is smart enough to find the matching lump in the WAD
+   being updated.
 
 ## File formats
 

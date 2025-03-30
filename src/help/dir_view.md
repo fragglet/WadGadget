@@ -18,7 +18,7 @@ editor for that file type.
     **        Enter   **  View/edit file
     **Ctrl-D          **  View hex**d**ump of selected file
     **Ctrl-T  F2      **  Compac**t** selected WAD file
-    **Ctrl-U  F3      **  **U**pdate
+    **Ctrl-U  F3      **  **U**pdate WAD lumps; [see here](wad_view.md#updating)
     **Ctrl-V  F3      **  Mo**v**e file(s)
     **Ctrl-O  F4      **  Open c**o**mmand prompt in this directory
     **Ctrl-C  F5      **  **C**opy or import files; [see below](#copying)
