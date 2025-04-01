@@ -202,7 +202,7 @@ static const struct {
     {"Hyper",          "Hyper"   },
     {"Tabby",          "Tabby"   },
     {"rio",            "rio"     },
- // Add your favorite terminal here. Not Warp though.
+    // Add your favorite terminal here. Not Warp though.
 };
 #endif
 

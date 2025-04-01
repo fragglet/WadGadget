@@ -27,6 +27,7 @@ extern const struct action import_noconv_action;
 extern const struct action make_wad_action;
 extern const struct action make_wad_noconv_action;
 extern const struct action export_wad_action;
+extern const struct action file_move_action;
 
 extern const struct action rename_action;
 extern const struct action delete_action;
@@ -44,6 +45,7 @@ extern const struct action sort_entries_action;
 extern const struct action new_lump_action;
 extern const struct action mkdir_action;
 extern const struct action update_action;
+extern const struct action update_noconv_action;
 
 extern const struct action help_action;
 extern const struct action open_shell_action;

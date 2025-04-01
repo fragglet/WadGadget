@@ -22,6 +22,7 @@
 #include "common.h"
 #include "conv/error.h"
 #include "fs/vfile.h"
+#include "stringlib.h"
 #include "textures/textures.h"
 
 #define TEXTURE_CONFIG_HEADER "; deutex format texture lump configuration\n"
@@ -122,14 +123,6 @@ static void StripTrailingSpaces(char *line)
 			break;
 		}
 		*p = '\0';
-	}
-}
-
-static void StringUpper(char *line)
-{
-	char *p;
-	for (p = line; *p != '\0'; ++p) {
-		*p = toupper(*p);
 	}
 }
 

@@ -217,13 +217,140 @@ const struct action import_noconv_action = {
     SHIFT_KEY_F(5), 0, NULL, "> Import (no convert)", PerformCopyNoConvert,
 };
 
-static void PerformUpdate(void)
+static void PerformFileMove(void)
 {
-	UI_MessageBox("Sorry, not implemented yet.");
+	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
+	struct directory_entry *ent, *ent2;
+	struct file_set to_overwrite = EMPTY_FILE_SET;
+	struct file_set moved = EMPTY_FILE_SET;
+	int last_fail_errno;
+	char buf[64];
+	int idx = 0;
+
+	if (active_pane == other_pane || !B_CheckReadOnly(other_pane->dir) ||
+	    tagged->num_entries == 0) {
+		return;
+	}
+
+	while ((ent = VFS_IterateSet(active_pane->dir, tagged, &idx)) != NULL) {
+		ent2 = VFS_EntryByName(other_pane->dir, ent->name);
+		if (ent2 != NULL) {
+			if (ent2->type == FILE_TYPE_DIR) {
+				UI_MessageBox(
+				    "Can't overwrite existing directory\n"
+				    "named '%s'.",
+				    ent2->name);
+				VFS_FreeSet(&to_overwrite);
+				return;
+			}
+			VFS_AddToSet(&to_overwrite, ent2->serial_no);
+		}
+	}
+
+	VFS_DescribeSet(other_pane->dir, &to_overwrite, buf, sizeof(buf));
+
+	if (to_overwrite.num_entries > 0 &&
+	    !UI_ConfirmDialogBox("Confirm Overwrite", "Overwrite", "Cancel",
+	                         "Overwrite %s?", buf)) {
+		VFS_FreeSet(&to_overwrite);
+		return;
+	}
+
+	idx = 0;
+	while ((ent = VFS_IterateSet(active_pane->dir, tagged, &idx)) != NULL) {
+		bool success;
+		char *from = VFS_EntryPath(active_pane->dir, ent);
+		char *to =
+		    StringJoin("/", other_pane->dir->path, ent->name, NULL);
+		success = rename(from, to) == 0;
+		free(from);
+		free(to);
+		if (success) {
+			VFS_AddToSet(&moved, ent->serial_no);
+			VFS_RemoveFromSet(tagged, ent->serial_no);
+		} else {
+			last_fail_errno = errno;
+		}
+	}
+
+	VFS_Refresh(active_pane->dir);
+	VFS_Refresh(other_pane->dir);
+
+	// Any entries left in the original set, we failed to move.
+	if (tagged->num_entries > 0) {
+		VFS_DescribeSet(active_pane->dir, tagged, buf, sizeof(buf));
+		UI_MessageBox("Error moving %s: %s", buf,
+		              strerror(last_fail_errno));
+	}
+	if (moved.num_entries > 0) {
+		B_DirectoryPaneSetTagged(other_pane, &moved);
+		VFS_DescribeSet(other_pane->dir, &moved, buf, sizeof(buf));
+		UI_ShowNotice("%s moved.", buf);
+		B_SwitchToPane(other_pane);
+	}
+	VFS_FreeSet(&moved);
+}
+
+const struct action file_move_action = {
+    KEY_F(3), 'V', "Move", "> Move", PerformFileMove,
+};
+
+static void PerformUpdate(bool convert)
+{
+	struct directory *from = active_pane->dir, *to = other_pane->dir;
+	struct file_set *import_set = B_DirectoryPaneTagged(active_pane);
+	int to_point = B_DirectoryPaneSelected(other_pane) + 1;
+	struct file_set result = EMPTY_FILE_SET;
+	char buf[32];
+
+	if (!B_CheckReadOnly(other_pane->dir)) {
+		return;
+	}
+
+	ClearConversionErrors();
+
+	if (import_set->num_entries < 1) {
+		UI_MessageBox("You have not selected anything to import.");
+		VFS_FreeSet(&result);
+		return;
+	}
+
+	if (!PerformUpdateWAD(from, import_set, to, to_point, &result,
+	                      convert)) {
+		if (strlen(GetConversionError()) > 0) {
+			UI_MessageBox("Error during import:\n%s",
+			              GetConversionError());
+		}
+		VFS_FreeSet(&result);
+		VFS_Rollback(to);
+		VFS_Refresh(to);
+		return;
+	}
+
+	B_DirectoryPaneSetTagged(other_pane, &result);
+	B_SwitchToPane(other_pane);
+	VFS_DescribeSet(to, &result, buf, sizeof(buf));
+	VFS_CommitChanges(to, "update of %s", buf);
+	UI_ShowNotice("%s updated.", buf);
+
+	VFS_FreeSet(&result);
+}
+
+static void PerformUpdateConvert(void)
+{
+	PerformUpdate(true);
+}
+
+static void PerformUpdateNoConvert(void)
+{
+	PerformUpdate(false);
 }
 
 const struct action update_action = {
-    KEY_F(3), 'U', "Upd", "> Update", PerformUpdate,
+    KEY_F(3), 'U', "Upd", "> Update", PerformUpdateConvert,
+};
+const struct action update_noconv_action = {
+    SHIFT_KEY_F(3), 0, NULL, "> Update (no convert)", PerformUpdateNoConvert,
 };
 
 static void PerformMkdir(void)

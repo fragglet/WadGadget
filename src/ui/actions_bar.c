@@ -149,7 +149,8 @@ static int SetAccelerators(struct actions_bar *p, const struct action **cells,
 	       add_index < MAX_KEY_BINDINGS) {
 		a = actions[i];
 		// Don't add any function key actions; we already have them.
-		if (a == NULL || a->shortname == NULL || HasFunctionKey(a)) {
+		if (a == NULL || a->shortname == NULL || HasFunctionKey(a) ||
+		    a->key == 27) {
 			i++;
 			continue;
 		}

@@ -10,6 +10,7 @@
 
 #include "stringlib.h"
 
+#include <ctype.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -281,6 +282,14 @@ void StringRemoveChar(char *p, char c)
 	}
 
 	*pDest = '\0';
+}
+
+void StringUpper(char *s)
+{
+	char *p;
+	for (p = s; *p != '\0'; ++p) {
+		*p = toupper(*p);
+	}
 }
 
 // Returns the directory portion of the given path, without the trailing

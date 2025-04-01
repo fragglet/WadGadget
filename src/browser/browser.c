@@ -230,6 +230,7 @@ static const struct action *pal_actions[] = {
 
 static const struct action *wad_to_wad[] = {
     &update_action,
+    &update_noconv_action,
     &copy_action,
     NULL,
 };
@@ -252,14 +253,14 @@ static const struct action *wad_to_pal[] = {
 };
 
 static const struct action *dir_to_wad[] = {
-    &update_action,
-    &import_action,
-    &import_noconv_action,
+    &update_action, &update_noconv_action,
+    &import_action, &import_noconv_action,
     NULL,
 };
 
 static const struct action *dir_to_dir[] = {
     &copy_action,
+    &file_move_action,
     NULL,
 };
 
