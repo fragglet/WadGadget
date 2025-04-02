@@ -310,8 +310,6 @@ static const struct action *pal_to_wad[] = {
     NULL,
 };
 
-static const struct action *no_actions[] = {NULL};
-
 static const struct action *common_actions[] = {
     &rename_action,       &delete_action,
     &mark_pattern_action, &unmark_all_action,
@@ -326,13 +324,29 @@ static const struct action **type_actions[NUM_DIR_FILE_TYPES] = {
     dir_actions, wad_actions, txt_actions, pnm_actions, pal_actions,
 };
 
-static const struct action *
-    *action_lists[NUM_DIR_FILE_TYPES][NUM_DIR_FILE_TYPES] = {
-        {dir_to_dir, dir_to_wad, dir_to_txt, dir_to_pnm, dir_to_pal},
-        {wad_to_dir, wad_to_wad, no_actions, wad_to_pnm, wad_to_pal},
-        {txt_to_dir, no_actions, txt_to_txt, no_actions, no_actions},
-        {pnm_to_dir, no_actions, no_actions, pnm_to_pnm, no_actions},
-        {pal_to_dir, pal_to_wad, no_actions, no_actions, no_actions},
+static const struct {
+	enum file_type from, to;
+	const struct action **actions;
+} action_type_mappings[] = {
+	{FILE_TYPE_DIR, FILE_TYPE_DIR, dir_to_dir},
+	{FILE_TYPE_DIR, FILE_TYPE_WAD, dir_to_wad},
+	{FILE_TYPE_DIR, FILE_TYPE_TEXTURE_LIST, dir_to_txt},
+	{FILE_TYPE_DIR, FILE_TYPE_PNAMES_LIST, dir_to_pnm},
+	{FILE_TYPE_DIR, FILE_TYPE_PALETTES, dir_to_pal},
+
+	{FILE_TYPE_WAD, FILE_TYPE_DIR, wad_to_dir},
+	{FILE_TYPE_WAD, FILE_TYPE_WAD, wad_to_wad},
+	{FILE_TYPE_WAD, FILE_TYPE_PNAMES_LIST, wad_to_pnm},
+	{FILE_TYPE_WAD, FILE_TYPE_PALETTES, wad_to_pal},
+
+	{FILE_TYPE_TEXTURE_LIST, FILE_TYPE_DIR, txt_to_dir},
+	{FILE_TYPE_TEXTURE_LIST, FILE_TYPE_TEXTURE_LIST, txt_to_txt},
+
+	{FILE_TYPE_PNAMES_LIST, FILE_TYPE_DIR, pnm_to_dir},
+	{FILE_TYPE_PNAMES_LIST, FILE_TYPE_PNAMES_LIST, pnm_to_pnm},
+
+	{FILE_TYPE_PALETTES, FILE_TYPE_DIR, pal_to_dir},
+	{FILE_TYPE_PALETTES, FILE_TYPE_WAD, pal_to_wad},
 };
 
 static void AddActionList(const struct action **list, int *idx)
@@ -349,15 +363,19 @@ static void BuildActionsList(void)
 {
 	int active = active_pane->dir->type;
 	int other = other_pane->dir->type;
-	int idx = 0;
-
-	assert(active < NUM_DIR_FILE_TYPES);
-	assert(other < NUM_DIR_FILE_TYPES);
+	int idx = 0, i;
 
 	memset(actions, 0, sizeof(struct action *) * MAX_KEY_BINDINGS);
 
 	AddActionList(type_actions[active], &idx);
-	AddActionList(action_lists[active][other], &idx);
+	for (i = 0; i < arrlen(action_type_mappings); ++i) {
+		if (active == action_type_mappings[i].from
+		 && other == action_type_mappings[i].to) {
+			AddActionList(action_type_mappings[i].actions, &idx);
+			break;
+		}
+	}
+
 	AddActionList(common_actions, &idx);
 	actions[idx] = NULL;
 }
