@@ -3,15 +3,15 @@
 [This page shows help about browsing TEXTURE lumps. For help on the browser
 interface in general, [see here](browser.md).]
 
-The TEXTURE lump defines all of the wall textures that are used within the
-game.  These are the textures that are specified on sidedefs when editing a
-level. A texture has a width and height, and is composed of one or more
-patches; they are layered on top of each other as a kind of collage.
-Any patches must be listed in the PNAMES lump; see the [PNAMES editor](pnames_editor.md)
-for more details.
+The TEXTURE lumps define all the wall textures that are used within the game.
+In level editors, these are the names that you see when editing sidedefs.
 
-The first entry in the window saves all changes and returns to the WAD file
-containing the texture lump.
+Each texture has a width and height, and is composed of one or more patches;
+they are layered on top of each other as a kind of collage. Any patches must
+be listed in the PNAMES lump; see the [PNAMES editor](pnames_editor.md) for more details.
+
+The first entry in the textures list saves all changes and returns to the WAD
+file containing the texture lump.
 
 ## Keys
 

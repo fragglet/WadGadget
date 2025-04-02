@@ -79,12 +79,10 @@ There are the following corner cases:
    will not risk potentially overwriting the wrong lump. You can resolve this
    either by removing the duplicate lumps or by importing manually (use the
    regular **Import** function and delete the old lump).
-
  * If some of the lumps to update cannot be found, the update function will
    prompt you as to whether to add those as new lumps (the behavior in this
    case is identical to the **Import** function). If you say no, nothing gets
    updated.
-
  * Level lumps are handled correctly if you are updating a WAD with the
    contents of another WAD. For example, if you select the **LINEDEFS** lump that
    belongs to **MAP08**, it is smart enough to find the matching lump in the WAD
