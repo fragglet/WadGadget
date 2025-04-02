@@ -18,9 +18,7 @@
 
 #include "browser/actions.h"
 #include "browser/browser.h"
-#include "palette/palfs.h"
 #include "stringlib.h"
-#include "textures/textures.h"
 #include "ui/actions_bar.h"
 #include "ui/colors.h"
 #include "ui/pane.h"
@@ -71,9 +69,7 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 
 		// Show insert point for where we'll import into the WAD:
 		if (!dp->pane.active && idx == dp->pane.selected &&
-		    dp->dir->type != &file_type_dir &&
-		    dp->dir->type != &file_type_palettes &&
-		    dp->dir->type != &file_type_pnames_list) {
+		    dp->dir->directory_funcs->ordered) {
 			if ((termattrs() & A_UNDERLINE) != 0) {
 				wattron(win, A_UNDERLINE);
 			} else {

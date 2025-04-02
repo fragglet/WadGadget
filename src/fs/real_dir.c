@@ -177,14 +177,20 @@ static bool RealDirRename(void *_dir, struct directory_entry *entry,
 }
 
 static const struct directory_funcs realdir_funcs = {
-    "file",         "files",       RealDirRefresh, RealDirOpen,
-    RealDirOpenDir, RealDirRemove, RealDirRename,
-    NULL, // need_commit
-    NULL, // commit
-    NULL, // swap_entries
-    NULL, // save_snapshot
-    NULL, // restore_snapshot
-    NULL, // free
+    "file",         // singular
+    "files",        // plural
+    false,          // ordered
+    RealDirRefresh, // refresh
+    RealDirOpen,    // open
+    RealDirOpenDir, // open_dir
+    RealDirRemove,  // remove
+    RealDirRename,  // rename
+    NULL,           // need_commit
+    NULL,           // commit
+    NULL,           // swap_entries
+    NULL,           // save_snapshot
+    NULL,           // restore_snapshot
+    NULL,           // free
 };
 
 struct directory *VFS_OpenRealDir(const char *path)

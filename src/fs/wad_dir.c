@@ -136,6 +136,7 @@ static void WadDirRestoreSnapshot(void *_dir, VFILE *in)
 static const struct directory_funcs waddir_funcs = {
     "lump",
     "lumps",
+    true,
     WadDirectoryRefresh,
     WadDirOpen,
     WadDirOpenDir,

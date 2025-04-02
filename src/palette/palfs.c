@@ -167,6 +167,7 @@ static void PaletteFSFree(void *dir)
 static const struct directory_funcs palette_fs_functions = {
     "palette",
     "palettes",
+    false,
     PaletteFSRefresh,
     PaletteFSOpen,
     PaletteFSOpenDir,

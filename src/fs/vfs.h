@@ -40,6 +40,7 @@ struct directory_entry {
 
 struct directory_funcs {
 	const char *singular, *plural;
+	bool ordered;
 	void (*refresh)(void *dir, struct directory_entry **entries,
 	                size_t *num_entries);
 	VFILE *(*open)(void *dir, struct directory_entry *entry);

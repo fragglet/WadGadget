@@ -157,6 +157,7 @@ static void TextureDirFree(void *dir)
 struct directory_funcs texture_dir_funcs = {
     "texture",
     "textures",
+    true,
     TextureDirRefresh,
     TextureDirOpen,
     TX_LumpDirOpenDir,

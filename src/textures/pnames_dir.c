@@ -149,6 +149,7 @@ static void PnamesDirFree(void *dir)
 static const struct directory_funcs pnames_dir_funcs = {
     "pname",
     "pnames",
+    true,
     PnamesDirRefresh,
     NULL, // open
     TX_LumpDirOpenDir,
