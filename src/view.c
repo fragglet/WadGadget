@@ -297,7 +297,7 @@ static bool EditFile(const char *filename, const struct directory_entry *ent)
 	printf("Opening %s '%s'...\n"
 	       "Waiting until program terminates.\n"
 	       "(^Z = stop waiting, continue in background)\n",
-	       ent->type == FILE_TYPE_LUMP ? "lump" : "file", ent->name);
+	       ent->type == &file_type_lump ? "lump" : "file", ent->name);
 
 	return _spawnv(_P_WAIT, argv[0], argv) == 0;
 }
@@ -534,7 +534,7 @@ void OpenDirent(struct directory *dir, struct directory_entry *ent,
 {
 	bool success;
 
-	if (ent->type == FILE_TYPE_LUMP) {
+	if (ent->type == &file_type_lump) {
 		success = OpenLump(dir, ent, force_edit);
 	} else {
 		success = OpenFile(VFS_EntryPath(dir, ent), ent, force_edit);

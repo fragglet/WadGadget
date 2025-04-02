@@ -133,7 +133,7 @@ static const struct lump_type *IdentifyLumpType(struct directory *dir,
 	struct wad_file *wf;
 	unsigned int idx;
 
-	if (ent->type != FILE_TYPE_LUMP) {
+	if (ent->type != &file_type_lump) {
 		return &lump_type_unknown;
 	}
 
@@ -148,7 +148,7 @@ static char *FileNameForEntry(const struct lump_type *lt,
 {
 	const char *extn;
 
-	if (ent->type != FILE_TYPE_LUMP) {
+	if (ent->type != &file_type_lump) {
 		extn = "";
 	} else {
 		extn = LI_GetExtension(lt, convert);
@@ -175,7 +175,7 @@ static bool ConfirmOverwrite(struct directory *from, struct file_set *from_set,
 		if (ent == NULL) {
 			continue;
 		}
-		if (ent->type == FILE_TYPE_DIR) {
+		if (ent->type == &file_type_dir) {
 			UI_MessageBox("You can't copy directories.");
 			return false;
 		}
@@ -308,7 +308,7 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 	}
 
 	UI_InitProgressWindow(&progress, from_set->num_entries,
-	                      from->type == FILE_TYPE_DIR ? "Copying"
+	                      from->type == &file_type_dir ? "Copying"
 	                                                  : "Exporting");
 
 	idx = 0;

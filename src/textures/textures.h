@@ -139,4 +139,9 @@ void TX_BundleMerge(struct texture_bundle *into, unsigned int position,
                     struct texture_bundle *from,
                     struct texture_bundle_merge_result *result);
 
+extern const struct file_type file_type_texture_list;
+extern const struct file_type file_type_texture;
+extern const struct file_type file_type_pnames_list;
+extern const struct file_type file_type_pname;
+
 #endif /* #ifndef TEXTURES__TEXTURES_H_INCLUDED */

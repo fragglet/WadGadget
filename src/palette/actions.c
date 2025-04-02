@@ -36,7 +36,7 @@ static void PerformViewPalette(void)
 {
 	struct directory_entry *ent = B_DirectoryPaneEntry(active_pane);
 
-	if (ent->type == FILE_TYPE_PALETTE) {
+	if (ent->type == &file_type_palette) {
 		OpenDirent(PAL_InnerDir(active_pane->dir),
 		           PAL_InnerEntry(active_pane->dir, ent), false);
 		return;
@@ -54,7 +54,7 @@ static void PerformSetDefault(void)
 {
 	struct directory_entry *ent = B_DirectoryPaneEntry(active_pane);
 
-	if (ent->type != FILE_TYPE_PALETTE) {
+	if (ent->type != &file_type_palette) {
 		return;
 	}
 
@@ -78,11 +78,9 @@ static struct palette_set *LoadPalette(struct directory *dir,
 		return NULL;
 	}
 
-	switch (ent->type) {
-	case FILE_TYPE_FILE:
+	if (ent->type == &file_type_file) {
 		return PAL_FromImageFile(input);
-
-	case FILE_TYPE_LUMP:
+	} else if (ent->type == &file_type_lump) {
 		lt = LI_IdentifyLump(VFS_WadFile(dir), ent - dir->entries);
 		if (lt != &lump_type_palette) {
 			ConversionError("%s lump is not a palette", ent->name);
@@ -90,15 +88,14 @@ static struct palette_set *LoadPalette(struct directory *dir,
 			return NULL;
 		}
 		return PAL_UnmarshalPaletteSet(input);
-
-	default:
+	} else {
 		return NULL;
 	}
 }
 
 static struct directory *ActualDir(struct directory *dir)
 {
-	if (dir->type == FILE_TYPE_PALETTES) {
+	if (dir->type == &file_type_palettes) {
 		return PAL_InnerDir(dir);
 	}
 
@@ -204,7 +201,7 @@ static bool CopyPaletteToDir(struct directory *from,
 		return false;
 	}
 
-	if (from->type == FILE_TYPE_WAD) {
+	if (from->type == &file_type_wad) {
 		filename = StringJoin("", PathBaseName(from->path),
 		                      " palette.png", NULL);
 	} else {

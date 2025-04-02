@@ -30,6 +30,9 @@ struct pnames_dir {
 
 #define PNAMES(d) ((d)->dir.b.pn)
 
+const struct file_type file_type_pnames_list = {"PNAMES"};
+const struct file_type file_type_pname = {"patch name"};
+
 static void PnamesDirRefresh(void *_dir, struct directory_entry **entries,
                              size_t *num_entries)
 {
@@ -45,7 +48,7 @@ static void PnamesDirRefresh(void *_dir, struct directory_entry **entries,
 		memcpy(new_entries[i].name, PNAMES(dir)->pnames[i], 8);
 		new_entries[i].name[8] = '\0';
 
-		new_entries[i].type = FILE_TYPE_PNAME;
+		new_entries[i].type = &file_type_pname;
 		new_entries[i].size = 0;
 		new_entries[i].serial_no =
 		    TX_PnameSerialNo(PNAMES(dir)->pnames[i]);
@@ -252,7 +255,7 @@ struct directory *TX_OpenPnamesDir(struct directory *parent,
 {
 	struct pnames_dir *dir = checked_calloc(1, sizeof(struct pnames_dir));
 
-	dir->dir.dir.type = FILE_TYPE_PNAMES_LIST;
+	dir->dir.dir.type = &file_type_pnames_list;
 	dir->dir.dir.directory_funcs = &pnames_dir_funcs;
 	if (!TX_InitLumpDir(&dir->dir, &pnames_lump_dir_funcs, parent, ent)) {
 		return NULL;

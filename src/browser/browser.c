@@ -23,6 +23,7 @@
 #include "fs/vfs.h"
 #include "lump_info.h"
 #include "palette/actions.h"
+#include "palette/palfs.h"
 #include "termfuncs.h"
 #include "textures/textures.h"
 #include "ui/actions_bar.h"
@@ -320,33 +321,34 @@ static const struct action *common_actions[] = {
     &quit_action,         NULL,
 };
 
-static const struct action **type_actions[NUM_DIR_FILE_TYPES] = {
-    dir_actions, wad_actions, txt_actions, pnm_actions, pal_actions,
-};
-
 static const struct {
-	enum file_type from, to;
+	const struct file_type *from, *to;
 	const struct action **actions;
 } action_type_mappings[] = {
-	{FILE_TYPE_DIR, FILE_TYPE_DIR, dir_to_dir},
-	{FILE_TYPE_DIR, FILE_TYPE_WAD, dir_to_wad},
-	{FILE_TYPE_DIR, FILE_TYPE_TEXTURE_LIST, dir_to_txt},
-	{FILE_TYPE_DIR, FILE_TYPE_PNAMES_LIST, dir_to_pnm},
-	{FILE_TYPE_DIR, FILE_TYPE_PALETTES, dir_to_pal},
+	{&file_type_dir, NULL, dir_actions},
+	{&file_type_dir, &file_type_dir, dir_to_dir},
+	{&file_type_dir, &file_type_wad, dir_to_wad},
+	{&file_type_dir, &file_type_texture_list, dir_to_txt},
+	{&file_type_dir, &file_type_pnames_list, dir_to_pnm},
+	{&file_type_dir, &file_type_palettes, dir_to_pal},
 
-	{FILE_TYPE_WAD, FILE_TYPE_DIR, wad_to_dir},
-	{FILE_TYPE_WAD, FILE_TYPE_WAD, wad_to_wad},
-	{FILE_TYPE_WAD, FILE_TYPE_PNAMES_LIST, wad_to_pnm},
-	{FILE_TYPE_WAD, FILE_TYPE_PALETTES, wad_to_pal},
+	{&file_type_wad, NULL, wad_actions},
+	{&file_type_wad, &file_type_dir, wad_to_dir},
+	{&file_type_wad, &file_type_wad, wad_to_wad},
+	{&file_type_wad, &file_type_pnames_list, wad_to_pnm},
+	{&file_type_wad, &file_type_palettes, wad_to_pal},
 
-	{FILE_TYPE_TEXTURE_LIST, FILE_TYPE_DIR, txt_to_dir},
-	{FILE_TYPE_TEXTURE_LIST, FILE_TYPE_TEXTURE_LIST, txt_to_txt},
+	{&file_type_texture_list, NULL, txt_actions},
+	{&file_type_texture_list, &file_type_dir, txt_to_dir},
+	{&file_type_texture_list, &file_type_texture_list, txt_to_txt},
 
-	{FILE_TYPE_PNAMES_LIST, FILE_TYPE_DIR, pnm_to_dir},
-	{FILE_TYPE_PNAMES_LIST, FILE_TYPE_PNAMES_LIST, pnm_to_pnm},
+	{&file_type_pnames_list, NULL, pnm_actions},
+	{&file_type_pnames_list, &file_type_dir, pnm_to_dir},
+	{&file_type_pnames_list, &file_type_pnames_list, pnm_to_pnm},
 
-	{FILE_TYPE_PALETTES, FILE_TYPE_DIR, pal_to_dir},
-	{FILE_TYPE_PALETTES, FILE_TYPE_WAD, pal_to_wad},
+	{&file_type_palettes, NULL, pal_actions},
+	{&file_type_palettes, &file_type_dir, pal_to_dir},
+	{&file_type_palettes, &file_type_wad, pal_to_wad},
 };
 
 static void AddActionList(const struct action **list, int *idx)
@@ -361,18 +363,19 @@ static void AddActionList(const struct action **list, int *idx)
 
 static void BuildActionsList(void)
 {
-	int active = active_pane->dir->type;
-	int other = other_pane->dir->type;
+	const struct file_type *active = active_pane->dir->type;
+	const struct file_type *other = other_pane->dir->type;
 	int idx = 0, i;
 
 	memset(actions, 0, sizeof(struct action *) * MAX_KEY_BINDINGS);
 
-	AddActionList(type_actions[active], &idx);
 	for (i = 0; i < arrlen(action_type_mappings); ++i) {
-		if (active == action_type_mappings[i].from
-		 && other == action_type_mappings[i].to) {
+		if (active != action_type_mappings[i].from) {
+			continue;
+		}
+		if (action_type_mappings[i].to == NULL
+		 || action_type_mappings[i].to == other) {
 			AddActionList(action_type_mappings[i].actions, &idx);
-			break;
 		}
 	}
 
@@ -492,53 +495,37 @@ static bool DrawInfoPane(void *p)
 	}
 	dir = active_pane->dir;
 	ent = &dir->entries[idx];
-	switch (ent->type) {
-	case FILE_TYPE_LUMP:
+
+	if (ent->type == &file_type_lump) {
 		wf = VFS_WadFile(dir);
 		lt = LI_IdentifyLump(wf, idx);
 		UI_PrintMultilineString(pane->window, 1, 2,
 		                        LI_DescribeLump(lt, wf, idx));
-		break;
-
-	case FILE_TYPE_FILE:
-	case FILE_TYPE_WAD:
+	} else if (ent->type == &file_type_file
+	        || ent->type == &file_type_wad) {
 		UI_PrintMultilineString(pane->window, 1, 2, "File\n");
 		VFS_DescribeSize(ent, buf);
 		if (strlen(buf) > 0) {
 			snprintf(buf2, sizeof(buf2), "Size: %sB", buf);
 			UI_PrintMultilineString(pane->window, 2, 2, buf2);
 		}
-		break;
-
-	case FILE_TYPE_DIR:
+	} else if (ent->type == &file_type_dir) {
 		UI_PrintMultilineString(pane->window, 1, 2, "Directory");
-		break;
-
-	case FILE_TYPE_PALETTE:
+	} else if (ent->type == &file_type_palette) {
 		UI_PrintMultilineString(pane->window, 1, 2, "Palette");
-		break;
-
-	case FILE_TYPE_TEXTURE_LIST:
-	case FILE_TYPE_PNAMES_LIST:
-	case FILE_TYPE_PALETTES:
+	} else if (ent->type == &file_type_texture_list ||
+	           ent->type == &file_type_pnames_list ||
+	           ent->type == &file_type_palettes) {
 		UI_PrintMultilineString(pane->window, 1, 2, "List");
-		break;
-
-	case FILE_TYPE_TEXTURE:
+	} else if (ent->type == &file_type_texture) {
 		txs = TX_TextureList(dir);
 		t = txs->textures[idx];
 		snprintf(buf2, sizeof(buf2),
 		         "Texture\nDimensions: %dx%d\nPatches: %d", t->width,
 		         t->height, t->patchcount);
 		UI_PrintMultilineString(pane->window, 1, 2, buf2);
-		break;
-
-	case FILE_TYPE_PNAME:
+	} else if (ent->type == &file_type_pname) {
 		UI_PrintMultilineString(pane->window, 1, 2, "Patch name");
-		break;
-
-	case NUM_DIR_FILE_TYPES:
-		assert(0);
 	}
 
 	return true;

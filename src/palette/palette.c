@@ -316,7 +316,7 @@ const struct palette *PAL_PaletteForWAD(struct directory *dir)
 	static struct directory *last_dir;
 	static struct directory_revision *last_rev;
 
-	if (dir->type != FILE_TYPE_WAD) {
+	if (dir->type != &file_type_wad) {
 		return PAL_DefaultPalette();
 	}
 

@@ -31,6 +31,9 @@ struct palette_dir {
 	struct directory *previous;
 };
 
+const struct file_type file_type_palettes = {"palettes"};
+const struct file_type file_type_palette = {"palette"};
+
 static char *InnerName(const char *name)
 {
 	return StringJoin("", name, ".png", NULL);
@@ -79,12 +82,12 @@ static void PaletteFSRefresh(void *dir, struct directory_entry **entries,
 		struct directory_entry *inner_ent = &pd->inner->entries[i];
 		struct directory_entry *ent = &(*entries)[*num_entries];
 
-		if (inner_ent->type != FILE_TYPE_FILE ||
+		if (inner_ent->type != &file_type_file ||
 		    !StringHasSuffix(inner_ent->name, ".png")) {
 			continue;
 		}
 
-		ent->type = FILE_TYPE_PALETTE;
+		ent->type = &file_type_palette;
 		ent->name = checked_strdup(inner_ent->name);
 		*strstr(ent->name, ".png") = '\0';
 		if (!strcmp(inner_ent->name, def_pal)) {
@@ -190,7 +193,7 @@ struct directory *PAL_OpenDirectory(struct directory *previous)
 
 	pd->dir.directory_funcs = &palette_fs_functions;
 	VFS_InitDirectory(&pd->dir, path);
-	pd->dir.type = FILE_TYPE_PALETTES;
+	pd->dir.type = &file_type_palettes;
 	free(pd->dir.parent_name);
 	pd->dir.parent_name =
 	    StringJoin("", "Back to ", PathBaseName(previous->path), NULL);

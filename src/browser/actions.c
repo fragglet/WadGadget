@@ -49,13 +49,13 @@ bool B_CheckReadOnly(struct directory *dir)
 
 	// If this is a directory list, it's the enclosing WAD we actually
 	// want to check.
-	if (dir->type == FILE_TYPE_TEXTURE_LIST ||
-	    dir->type == FILE_TYPE_PNAMES_LIST) {
+	if (dir->type == &file_type_texture_list ||
+	    dir->type == &file_type_pnames_list) {
 		dir = TX_DirGetParent(dir, NULL);
 	}
 
 	// We req
-	if (dir->type == FILE_TYPE_WAD && dir->readonly &&
+	if (dir->type == &file_type_wad && dir->readonly &&
 	    !W_IsReadOnly(VFS_WadFile(dir))) {
 		if (!UI_ConfirmDialogBox("Edit IWAD?", "Edit IWAD", "Cancel",
 		                         "'%s' is an IWAD file. Are you\n"
@@ -156,7 +156,7 @@ static void PerformCopy(bool convert)
 {
 	struct directory_entry *ent = B_DirectoryPaneEntry(active_pane);
 
-	if (ent != NULL && ent->type == FILE_TYPE_DIR) {
+	if (ent != NULL && ent->type == &file_type_dir) {
 		UI_MessageBox("Copying directories is not supported.");
 		return;
 	}
@@ -167,16 +167,12 @@ static void PerformCopy(bool convert)
 
 	ClearConversionErrors();
 
-	switch (other_pane->dir->type) {
-	case FILE_TYPE_DIR:
+	if (other_pane->dir->type == &file_type_dir) {
 		CopyToDir(convert);
-		break;
-	case FILE_TYPE_WAD:
+	} else if (other_pane->dir->type == &file_type_wad) {
 		CopyToWAD(convert);
-		break;
-	default:
+	} else {
 		UI_MessageBox("Sorry, this isn't implemented yet.");
-		break;
 	}
 }
 
@@ -227,7 +223,7 @@ static void PerformFileMove(void)
 	while ((ent = VFS_IterateSet(active_pane->dir, tagged, &idx)) != NULL) {
 		ent2 = VFS_EntryByName(other_pane->dir, ent->name);
 		if (ent2 != NULL) {
-			if (ent2->type == FILE_TYPE_DIR) {
+			if (ent2->type == &file_type_dir) {
 				UI_MessageBox(
 				    "Can't overwrite existing directory\n"
 				    "named '%s'.",
@@ -448,8 +444,8 @@ static void CreateWad(bool convert)
 	struct file_set *import_set;
 	char *filename;
 
-	if (active_pane->dir->type == FILE_TYPE_WAD &&
-	    other_pane->dir->type == FILE_TYPE_DIR) {
+	if (active_pane->dir->type == &file_type_wad &&
+	    other_pane->dir->type == &file_type_dir) {
 		// Export from existing WAD to new WAD
 		from_pane = active_pane;
 		to_pane = other_pane;
@@ -458,7 +454,7 @@ static void CreateWad(bool convert)
 			              "lumps to export.");
 			return;
 		}
-	} else if (active_pane->dir->type == FILE_TYPE_DIR) {
+	} else if (active_pane->dir->type == &file_type_dir) {
 		// Create new WAD and import tagged files.
 		from_pane = active_pane;
 		to_pane = active_pane;
@@ -619,7 +615,7 @@ static bool NullTextureCheck(struct directory *dir, struct file_set *tagged,
 {
 	if (dir->num_entries == 0 ||
 	    !VFS_SetHas(tagged, dir->entries[0].serial_no) ||
-	    dir->entries[0].type != FILE_TYPE_TEXTURE ||
+	    dir->entries[0].type != &file_type_texture ||
 	    !StringHasPrefix(dir->entries[0].name, "AA") ||
 	    !StringHasSuffix(dir->path, "/TEXTURE1")) {
 		return true;
@@ -1000,7 +996,7 @@ static void PerformMark(void)
 	ent = &active_pane->dir->entries[selected];
 	if (VFS_SetHas(&active_pane->tagged, ent->serial_no)) {
 		VFS_RemoveFromSet(&active_pane->tagged, ent->serial_no);
-	} else if (ent->type == FILE_TYPE_DIR) {
+	} else if (ent->type == &file_type_dir) {
 		UI_ShowNotice("Directories cannot be marked.");
 	} else {
 		VFS_AddToSet(&active_pane->tagged, ent->serial_no);
@@ -1131,9 +1127,7 @@ static void PerformView(void)
 	dir = active_pane->dir;
 	ent = B_DirectoryPaneEntry(active_pane);
 
-	switch (ent->type) {
-	case FILE_TYPE_DIR:
-	case FILE_TYPE_WAD:
+	if (ent->type == &file_type_dir || ent->type == &file_type_wad) {
 		// Change directory?
 		new_dir = VFS_OpenDirByEntry(dir, ent);
 		if (new_dir == NULL) {
@@ -1141,18 +1135,10 @@ static void PerformView(void)
 			return;
 		}
 		NavigateNew(active_pane, new_dir);
-		break;
-
-	case FILE_TYPE_FILE:
+	} else if (ent->type == &file_type_file) {
 		OpenDirent(dir, ent, false);
-		break;
-
-	case FILE_TYPE_LUMP:
+	} else if (ent->type == &file_type_lump) {
 		ViewLump(dir, ent);
-		break;
-
-	default:
-		break;
 	}
 }
 
@@ -1176,7 +1162,7 @@ static void PerformCompact(void)
 	ent = B_DirectoryPaneEntry(active_pane);
 
 	// Change directory?
-	if (ent->type != FILE_TYPE_WAD) {
+	if (ent->type != &file_type_wad) {
 		UI_MessageBox("Can't compact; '%s' is not a WAD file.",
 		              ent->name);
 		return;
@@ -1338,14 +1324,14 @@ static void ShowHelp(void)
 {
 	int i;
 	const struct {
-		enum file_type ft;
+		const struct file_type *ft;
 		const char *fn;
 	} help_files_per_type[] = {
-	    {FILE_TYPE_DIR,          "dir_view.md"      },
-	    {FILE_TYPE_WAD,          "wad_view.md"      },
-	    {FILE_TYPE_TEXTURE_LIST, "texture_editor.md"},
-	    {FILE_TYPE_PNAMES_LIST,  "pnames_editor.md" },
-	    {FILE_TYPE_PALETTES,     "palette.md"       },
+	    {&file_type_dir,          "dir_view.md"      },
+	    {&file_type_wad,          "wad_view.md"      },
+	    {&file_type_texture_list, "texture_editor.md"},
+	    {&file_type_pnames_list,  "pnames_editor.md" },
+	    {&file_type_palettes,     "palette.md"       },
 	};
 
 	for (i = 0; i < arrlen(help_files_per_type); i++) {
