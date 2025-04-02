@@ -78,9 +78,8 @@ The following table gives a brief summary of the current state:
 
 **Can I use this under Microsoft Windows?**
 
-There is not yet a native Windows version. You can probably make it
-work by using [Windows Subsystem for Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux);
-I have not yet heard from anyone who has tried this.
+Yes, run the batch file `make.bat` in `src\help` (Python 3 is required) to generate the source file `help_text.c`.
+Now the project can be built under Windows using the VS2022 project file `WadGadget.sln` in `msvc`.
 
 **Will you add {my favorite feature here}?**
 
