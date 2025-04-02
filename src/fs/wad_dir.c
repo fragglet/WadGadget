@@ -25,7 +25,7 @@ struct wad_directory {
 };
 
 const struct file_type file_type_wad = {"WAD"};
-const struct file_type file_type_lump = {"lump"};
+const struct file_type file_type_lump = {"Lump"};
 
 static void WadDirectoryRefresh(void *_dir, struct directory_entry **entries,
                                 size_t *num_entries)

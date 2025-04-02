@@ -509,14 +509,6 @@ static bool DrawInfoPane(void *p)
 			snprintf(buf2, sizeof(buf2), "Size: %sB", buf);
 			UI_PrintMultilineString(pane->window, 2, 2, buf2);
 		}
-	} else if (ent->type == &file_type_dir) {
-		UI_PrintMultilineString(pane->window, 1, 2, "Directory");
-	} else if (ent->type == &file_type_palette) {
-		UI_PrintMultilineString(pane->window, 1, 2, "Palette");
-	} else if (ent->type == &file_type_texture_list ||
-	           ent->type == &file_type_pnames_list ||
-	           ent->type == &file_type_palettes) {
-		UI_PrintMultilineString(pane->window, 1, 2, "List");
 	} else if (ent->type == &file_type_texture) {
 		txs = TX_TextureList(dir);
 		t = txs->textures[idx];
@@ -524,8 +516,8 @@ static bool DrawInfoPane(void *p)
 		         "Texture\nDimensions: %dx%d\nPatches: %d", t->width,
 		         t->height, t->patchcount);
 		UI_PrintMultilineString(pane->window, 1, 2, buf2);
-	} else if (ent->type == &file_type_pname) {
-		UI_PrintMultilineString(pane->window, 1, 2, "Patch name");
+	} else {
+		UI_PrintMultilineString(pane->window, 1, 2, ent->type->name);
 	}
 
 	return true;

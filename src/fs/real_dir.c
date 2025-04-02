@@ -22,8 +22,8 @@
 #include "fs/vfs.h"
 #include "stringlib.h"
 
-const struct file_type file_type_dir = {"directory"};
-const struct file_type file_type_file = {"file"};
+const struct file_type file_type_dir = {"Directory"};
+const struct file_type file_type_file = {"File"};
 
 static int HasWadExtension(const char *name)
 {

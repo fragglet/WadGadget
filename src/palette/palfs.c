@@ -31,8 +31,8 @@ struct palette_dir {
 	struct directory *previous;
 };
 
-const struct file_type file_type_palettes = {"palettes"};
-const struct file_type file_type_palette = {"palette"};
+const struct file_type file_type_palettes = {"Palettes"};
+const struct file_type file_type_palette = {"Palette"};
 
 static char *InnerName(const char *name)
 {

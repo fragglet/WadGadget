@@ -30,8 +30,8 @@ struct pnames_dir {
 
 #define PNAMES(d) ((d)->dir.b.pn)
 
-const struct file_type file_type_pnames_list = {"PNAMES"};
-const struct file_type file_type_pname = {"patch name"};
+const struct file_type file_type_pnames_list = {"Patch names list"};
+const struct file_type file_type_pname = {"Patch name"};
 
 static void PnamesDirRefresh(void *_dir, struct directory_entry **entries,
                              size_t *num_entries)
