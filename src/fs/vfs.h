@@ -20,7 +20,7 @@
 
 #define VFS_REVISION_DESCR_LEN 40
 #define VFS_PARENT_DIRECTORY   (&_vfs_parent_directory)
-#define EMPTY_FILE_SET {NULL, 0}
+#define EMPTY_FILE_SET         {NULL, 0}
 
 struct file_type {
 	const char *name;

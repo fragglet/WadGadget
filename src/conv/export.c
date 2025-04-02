@@ -309,7 +309,7 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 
 	UI_InitProgressWindow(&progress, from_set->num_entries,
 	                      from->type == &file_type_dir ? "Copying"
-	                                                  : "Exporting");
+	                                                   : "Exporting");
 
 	idx = 0;
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {

@@ -325,30 +325,30 @@ static const struct {
 	const struct file_type *from, *to;
 	const struct action **actions;
 } action_type_mappings[] = {
-	{&file_type_dir, NULL, dir_actions},
-	{&file_type_dir, &file_type_dir, dir_to_dir},
-	{&file_type_dir, &file_type_wad, dir_to_wad},
-	{&file_type_dir, &file_type_texture_list, dir_to_txt},
-	{&file_type_dir, &file_type_pnames_list, dir_to_pnm},
-	{&file_type_dir, &file_type_palettes, dir_to_pal},
+    {&file_type_dir,          NULL,                    dir_actions},
+    {&file_type_dir,          &file_type_dir,          dir_to_dir },
+    {&file_type_dir,          &file_type_wad,          dir_to_wad },
+    {&file_type_dir,          &file_type_texture_list, dir_to_txt },
+    {&file_type_dir,          &file_type_pnames_list,  dir_to_pnm },
+    {&file_type_dir,          &file_type_palettes,     dir_to_pal },
 
-	{&file_type_wad, NULL, wad_actions},
-	{&file_type_wad, &file_type_dir, wad_to_dir},
-	{&file_type_wad, &file_type_wad, wad_to_wad},
-	{&file_type_wad, &file_type_pnames_list, wad_to_pnm},
-	{&file_type_wad, &file_type_palettes, wad_to_pal},
+    {&file_type_wad,          NULL,                    wad_actions},
+    {&file_type_wad,          &file_type_dir,          wad_to_dir },
+    {&file_type_wad,          &file_type_wad,          wad_to_wad },
+    {&file_type_wad,          &file_type_pnames_list,  wad_to_pnm },
+    {&file_type_wad,          &file_type_palettes,     wad_to_pal },
 
-	{&file_type_texture_list, NULL, txt_actions},
-	{&file_type_texture_list, &file_type_dir, txt_to_dir},
-	{&file_type_texture_list, &file_type_texture_list, txt_to_txt},
+    {&file_type_texture_list, NULL,                    txt_actions},
+    {&file_type_texture_list, &file_type_dir,          txt_to_dir },
+    {&file_type_texture_list, &file_type_texture_list, txt_to_txt },
 
-	{&file_type_pnames_list, NULL, pnm_actions},
-	{&file_type_pnames_list, &file_type_dir, pnm_to_dir},
-	{&file_type_pnames_list, &file_type_pnames_list, pnm_to_pnm},
+    {&file_type_pnames_list,  NULL,                    pnm_actions},
+    {&file_type_pnames_list,  &file_type_dir,          pnm_to_dir },
+    {&file_type_pnames_list,  &file_type_pnames_list,  pnm_to_pnm },
 
-	{&file_type_palettes, NULL, pal_actions},
-	{&file_type_palettes, &file_type_dir, pal_to_dir},
-	{&file_type_palettes, &file_type_wad, pal_to_wad},
+    {&file_type_palettes,     NULL,                    pal_actions},
+    {&file_type_palettes,     &file_type_dir,          pal_to_dir },
+    {&file_type_palettes,     &file_type_wad,          pal_to_wad },
 };
 
 static void AddActionList(const struct action **list, int *idx)
@@ -373,8 +373,8 @@ static void BuildActionsList(void)
 		if (active != action_type_mappings[i].from) {
 			continue;
 		}
-		if (action_type_mappings[i].to == NULL
-		 || action_type_mappings[i].to == other) {
+		if (action_type_mappings[i].to == NULL ||
+		    action_type_mappings[i].to == other) {
 			AddActionList(action_type_mappings[i].actions, &idx);
 		}
 	}
@@ -501,8 +501,8 @@ static bool DrawInfoPane(void *p)
 		lt = LI_IdentifyLump(wf, idx);
 		UI_PrintMultilineString(pane->window, 1, 2,
 		                        LI_DescribeLump(lt, wf, idx));
-	} else if (ent->type == &file_type_file
-	        || ent->type == &file_type_wad) {
+	} else if (ent->type == &file_type_file ||
+	           ent->type == &file_type_wad) {
 		UI_PrintMultilineString(pane->window, 1, 2, "File\n");
 		VFS_DescribeSize(ent, buf);
 		if (strlen(buf) > 0) {

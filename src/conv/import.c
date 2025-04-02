@@ -260,7 +260,7 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 
 	UI_InitProgressWindow(&progress, from_set->num_entries,
 	                      from->type == &file_type_dir ? "Importing"
-	                                                  : "Copying");
+	                                                   : "Copying");
 
 	um = AddLumpsMapping(from, from_set, to, to_index);
 	if (um == NULL) {
@@ -383,7 +383,8 @@ static struct update_mapping *BuildUpdateMapping(struct directory *from,
 			LumpNameForEntry(namebuf, ent);
 			UI_MessageBox("Refusing to proceed with update:\n"
 			              "more than one existing lump exists\n"
-			              "named '%s'.", namebuf);
+			              "named '%s'.",
+			              namebuf);
 			free(result);
 			return NULL;
 		case -1:

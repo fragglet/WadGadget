@@ -18,8 +18,8 @@
 
 #include "browser/actions.h"
 #include "browser/browser.h"
-#include "stringlib.h"
 #include "palette/palfs.h"
+#include "stringlib.h"
 #include "textures/textures.h"
 #include "ui/actions_bar.h"
 #include "ui/colors.h"
