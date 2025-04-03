@@ -165,20 +165,20 @@ static void PaletteFSFree(void *dir)
 }
 
 static const struct directory_funcs palette_fs_functions = {
-    "palette",
-    "palettes",
-    false,
-    PaletteFSRefresh,
-    PaletteFSOpen,
-    PaletteFSOpenDir,
-    PaletteFSRemove,
-    PaletteFSRename,
-    NULL, // need_commit
-    NULL, // commit
-    NULL, // swap_entries
-    NULL, // save_snapshot
-    NULL, // restore_snapshot
-    PaletteFSFree,
+    "palette",        // singular
+    "palettes",       // plural
+    false,            // ordered
+    PaletteFSRefresh, // refresh
+    PaletteFSOpen,    // open
+    PaletteFSOpenDir, // open_dir
+    PaletteFSRemove,  // remove
+    PaletteFSRename,  // rename
+    NULL,             // need_commit
+    NULL,             // commit
+    NULL,             // swap_entries
+    NULL,             // save_snapshot
+    NULL,             // restore_snapshot
+    PaletteFSFree,    // free
 };
 
 struct directory *PAL_OpenDirectory(struct directory *previous)

@@ -27,6 +27,8 @@
 #include "textures/textures.h"
 #include "ui/dialog.h"
 
+struct wad_file;
+
 static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 {
 	char *p;
