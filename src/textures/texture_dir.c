@@ -36,6 +36,9 @@ struct texture_dir {
 #define TEXTURES(dir) ((dir)->dir.b.txs)
 #define PNAMES(dir)   ((dir)->dir.b.pn)
 
+const struct file_type file_type_texture_list = {"Textures"};
+const struct file_type file_type_texture = {"Texture"};
+
 static void TextureDirRefresh(void *_dir, struct directory_entry **entries,
                               size_t *num_entries)
 {
@@ -48,7 +51,7 @@ static void TextureDirRefresh(void *_dir, struct directory_entry **entries,
 
 	for (i = 0; i < TEXTURES(dir)->num_textures; i++) {
 		struct directory_entry *ent = *entries + i;
-		ent->type = FILE_TYPE_TEXTURE;
+		ent->type = &file_type_texture;
 		ent->name = checked_calloc(9, 1);
 		memcpy(ent->name, TEXTURES(dir)->textures[i]->name, 8);
 		ent->name[8] = '\0';
@@ -154,6 +157,7 @@ static void TextureDirFree(void *dir)
 struct directory_funcs texture_dir_funcs = {
     "texture",
     "textures",
+    true,
     TextureDirRefresh,
     TextureDirOpen,
     TX_LumpDirOpenDir,
@@ -324,7 +328,7 @@ struct directory *TX_OpenTextureDir(struct directory *parent,
 {
 	struct texture_dir *dir = checked_calloc(1, sizeof(struct texture_dir));
 
-	dir->dir.dir.type = FILE_TYPE_TEXTURE_LIST;
+	dir->dir.dir.type = &file_type_texture_list;
 	dir->dir.dir.directory_funcs = &texture_dir_funcs;
 	if (!TX_InitLumpDir(&dir->dir, &texture_lump_dir_funcs, parent, ent)) {
 		return NULL;

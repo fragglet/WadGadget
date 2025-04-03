@@ -37,25 +37,16 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 
 	StringCopy(namebuf, ent->name, 9);
 
-	switch (ent->type) {
-	case FILE_TYPE_LUMP:
-		// WAD to WAD copy.
-		break;
-	case FILE_TYPE_WAD:
-		// It's weird to import a WAD into a WAD, but there's no
-		// reason to forbid it.
-		/* fallthrough */
-	case FILE_TYPE_FILE:
+	// Note: It's weird to import a WAD into a WAD, but we don't forbid it.
+	if (ent->type == &file_type_wad || ent->type == &file_type_file) {
 		// Lump name was set from filename, but we strip extension.
 		p = strrchr(namebuf, '.');
 		if (p != NULL) {
 			*p = '\0';
 		}
 		StringUpper(namebuf);
-		break;
-	default:
+	} else if (ent->type != &file_type_lump) {
 		ConversionError("File type %d cannot be imported", ent->type);
-		return;
 	}
 }
 
@@ -238,7 +229,7 @@ static bool ApplyUpdateMapping(struct progress_window *progress,
 	int i, lumpnum;
 
 	// We only ever do conversions when importing from files.
-	convert = convert && from->type == FILE_TYPE_DIR;
+	convert = convert && from->type == &file_type_dir;
 	waddir = W_GetDirectory(to_wad);
 
 	for (i = 0; um[i].from_ent != NULL; ++i) {
@@ -272,8 +263,8 @@ bool PerformImport(struct directory *from, struct file_set *from_set,
 	struct progress_window progress;
 
 	UI_InitProgressWindow(&progress, from_set->num_entries,
-	                      from->type == FILE_TYPE_DIR ? "Importing"
-	                                                  : "Copying");
+	                      from->type == &file_type_dir ? "Importing"
+	                                                   : "Copying");
 
 	um = AddLumpsMapping(from, from_set, to, to_index);
 	if (um == NULL) {
@@ -315,7 +306,7 @@ static struct directory_entry *KeyEntry(struct directory *from,
 	struct wad_file *wf = VFS_WadFile(from);
 	unsigned int lumpnum;
 
-	if (ent->type != FILE_TYPE_LUMP) {
+	if (ent->type != &file_type_lump) {
 		return ent;
 	}
 
@@ -396,7 +387,8 @@ static struct update_mapping *BuildUpdateMapping(struct directory *from,
 			LumpNameForEntry(namebuf, ent);
 			UI_MessageBox("Refusing to proceed with update:\n"
 			              "more than one existing lump exists\n"
-			              "named '%s'.", namebuf);
+			              "named '%s'.",
+			              namebuf);
 			free(result);
 			return NULL;
 		case -1:

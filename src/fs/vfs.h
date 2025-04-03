@@ -20,22 +20,11 @@
 
 #define VFS_REVISION_DESCR_LEN 40
 #define VFS_PARENT_DIRECTORY   (&_vfs_parent_directory)
+#define EMPTY_FILE_SET         {NULL, 0}
 
-enum file_type {
-	FILE_TYPE_DIR,
-	FILE_TYPE_WAD,
-	FILE_TYPE_TEXTURE_LIST,
-	FILE_TYPE_PNAMES_LIST,
-	FILE_TYPE_PALETTES,
-	NUM_DIR_FILE_TYPES,
-	FILE_TYPE_FILE,
-	FILE_TYPE_LUMP,
-	FILE_TYPE_TEXTURE,
-	FILE_TYPE_PNAME,
-	FILE_TYPE_PALETTE,
+struct file_type {
+	const char *name;
 };
-
-#define EMPTY_FILE_SET {NULL, 0}
 
 struct file_set {
 	uint64_t *entries;
@@ -43,7 +32,7 @@ struct file_set {
 };
 
 struct directory_entry {
-	enum file_type type;
+	const struct file_type *type;
 	char *name;
 	int64_t size;
 	uint64_t serial_no;
@@ -51,6 +40,7 @@ struct directory_entry {
 
 struct directory_funcs {
 	const char *singular, *plural;
+	bool ordered;
 	void (*refresh)(void *dir, struct directory_entry **entries,
 	                size_t *num_entries);
 	VFILE *(*open)(void *dir, struct directory_entry *entry);
@@ -75,7 +65,7 @@ struct directory_revision {
 };
 
 struct directory {
-	enum file_type type;
+	const struct file_type *type;
 	const struct directory_funcs *directory_funcs;
 	char *parent_name;
 	bool readonly;
@@ -142,5 +132,10 @@ void VFS_StoreError(const char *fmt, ...);
 const char *VFS_LastError(void);
 
 extern struct directory_entry _vfs_parent_directory;
+
+extern const struct file_type file_type_dir;
+extern const struct file_type file_type_wad;
+extern const struct file_type file_type_file;
+extern const struct file_type file_type_lump;
 
 #endif /* #ifndef FS__VFS_H_INCLUDED */

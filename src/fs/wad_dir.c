@@ -24,6 +24,9 @@ struct wad_directory {
 	struct wad_file *wad_file;
 };
 
+const struct file_type file_type_wad = {"WAD"};
+const struct file_type file_type_lump = {"Lump"};
+
 static void WadDirectoryRefresh(void *_dir, struct directory_entry **entries,
                                 size_t *num_entries)
 {
@@ -35,7 +38,7 @@ static void WadDirectoryRefresh(void *_dir, struct directory_entry **entries,
 
 	for (i = 0; i < num_lumps; i++) {
 		struct directory_entry *ent = *entries + i;
-		ent->type = FILE_TYPE_LUMP;
+		ent->type = &file_type_lump;
 		ent->name = checked_calloc(9, 1);
 		memcpy(ent->name, waddir[i].name, 8);
 		ent->name[8] = '\0';
@@ -133,6 +136,7 @@ static void WadDirRestoreSnapshot(void *_dir, VFILE *in)
 static const struct directory_funcs waddir_funcs = {
     "lump",
     "lumps",
+    true,
     WadDirectoryRefresh,
     WadDirOpen,
     WadDirOpenDir,
@@ -154,7 +158,7 @@ struct directory *VFS_OpenWadAsDirectory(const char *path)
 
 	d->dir.directory_funcs = &waddir_funcs;
 	VFS_InitDirectory(&d->dir, path);
-	d->dir.type = FILE_TYPE_WAD;
+	d->dir.type = &file_type_wad;
 	d->wad_file = W_OpenFile(path);
 	if (d->wad_file == NULL) {
 		VFS_CloseDir(&d->dir);
@@ -174,7 +178,7 @@ struct wad_file *VFS_WadFile(struct directory *dir)
 {
 	struct wad_directory *wdir;
 
-	if (dir->type != FILE_TYPE_WAD) {
+	if (dir->type != &file_type_wad) {
 		return NULL;
 	}
 

@@ -4,14 +4,14 @@
 on the browser interface in general, [see here](browser.md).]
 
 The directory view shows a particular directory (folder) on the filesystem.
-Selecting a directory and pressing enter will navigate into that directory;
-doing this for the first entry in the list will navigate to the parent
-directory. Selecting a WAD file and pressing enter will open that WAD file for
-editing (the [WAD view](wad_view.md)).
+Selecting a subdirectory and pressing enter will navigate into that
+subdirectory; doing this for the first entry in the list will navigate up to
+the parent directory. Selecting a WAD file and pressing enter will open that
+WAD file for editing (the [WAD view](wad_view.md)).
 
-Selecting a normal file will either view the contents of the file (for text
-files or for .png graphic files), or open the file in the system's default
-editor for that file type.
+Selecting a normal file and pressing enter will either view the contents of
+the file (for text files or for .png graphic files), or open the file in the
+system's default editor for that file type.
 
 ## Keys
 

@@ -26,6 +26,9 @@
 #include "fs/vfs.h"
 #include "stringlib.h"
 
+const struct file_type file_type_dir = {"Directory"};
+const struct file_type file_type_file = {"File"};
+
 static int HasWadExtension(const char *name)
 {
 	const char *extn;
@@ -40,7 +43,7 @@ static int OrderByName(const void *x, const void *y)
 {
 	const struct directory_entry *dx = x, *dy = y;
 	// Directories get listed before files.
-	int cmp = (dy->type == FILE_TYPE_DIR) - (dx->type == FILE_TYPE_DIR);
+	int cmp = (dy->type == &file_type_dir) - (dx->type == &file_type_dir);
 	if (cmp != 0) {
 		return cmp;
 	}
@@ -122,11 +125,11 @@ static bool _RealDirRefresh(struct directory *d,
 		                                  (*num_entries + 1));
 		ent = *entries + *num_entries;
 		ent->name = path;
-		ent->type = stat_ok && S_ISDIR(s.st_mode) ? FILE_TYPE_DIR
-		          : HasWadExtension(ent->name)    ? FILE_TYPE_WAD
-		                                          : FILE_TYPE_FILE;
+		ent->type = stat_ok && S_ISDIR(s.st_mode) ? &file_type_dir
+		          : HasWadExtension(ent->name)    ? &file_type_wad
+		                                          : &file_type_file;
 		ent->size =
-		    stat_ok && ent->type != FILE_TYPE_DIR ? s.st_size : -1;
+		    stat_ok && ent->type != &file_type_dir ? s.st_size : -1;
 #ifdef _WIN32
 		ent->serial_no =
 		    GetSerial(StringJoin("/", d->path, dirent->d_name, NULL));
@@ -183,7 +186,7 @@ struct directory *RealDirOpenDir(void *_dir, struct directory_entry *entry)
 		return result;
 	}
 
-	if (entry->type != FILE_TYPE_DIR && entry->type != FILE_TYPE_WAD) {
+	if (entry->type != &file_type_dir && entry->type != &file_type_wad) {
 		VFS_StoreError("%s: not a directory", entry->name);
 		return NULL;
 	}
@@ -231,14 +234,20 @@ static bool RealDirRename(void *_dir, struct directory_entry *entry,
 }
 
 static const struct directory_funcs realdir_funcs = {
-    "file",         "files",       RealDirRefresh, RealDirOpen,
-    RealDirOpenDir, RealDirRemove, RealDirRename,
-    NULL, // need_commit
-    NULL, // commit
-    NULL, // swap_entries
-    NULL, // save_snapshot
-    NULL, // restore_snapshot
-    NULL, // free
+    "file",         // singular
+    "files",        // plural
+    false,          // ordered
+    RealDirRefresh, // refresh
+    RealDirOpen,    // open
+    RealDirOpenDir, // open_dir
+    RealDirRemove,  // remove
+    RealDirRename,  // rename
+    NULL,           // need_commit
+    NULL,           // commit
+    NULL,           // swap_entries
+    NULL,           // save_snapshot
+    NULL,           // restore_snapshot
+    NULL,           // free
 };
 
 struct directory *VFS_OpenRealDir(const char *path)
@@ -247,7 +256,7 @@ struct directory *VFS_OpenRealDir(const char *path)
 
 	d->directory_funcs = &realdir_funcs;
 	VFS_InitDirectory(d, path);
-	d->type = FILE_TYPE_DIR;
+	d->type = &file_type_dir;
 #ifdef _WIN32
 	if (strlen(path) == 3) {
 #else

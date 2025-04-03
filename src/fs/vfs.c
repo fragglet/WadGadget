@@ -35,7 +35,7 @@ struct directory *VFS_OpenWadAsDirectory(const char *path); // wad_dir.c
 #define TB(x) (GB(x) * 1000ULL)
 
 struct directory_entry _vfs_parent_directory = {
-    FILE_TYPE_DIR,
+    &file_type_dir,
     "..",
     0,
     UINT64_MAX,

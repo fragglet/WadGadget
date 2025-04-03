@@ -4,13 +4,17 @@
 interface in general, [see here](browser.md).]
 
 The PNAMES lump lists all patch names to be used within TEXTURE lumps. If a
-patch is not listed in PNAMES, it cannot be used in a texture. The TEXTURE
-and PNAMES lumps are therefore closely related. Conceptually the PNAMES lump
-is simply a list of lump names, and the PNAMES editor allows this list to
-be changed.
+patch is not listed in PNAMES, it cannot be used in a texture. Conceptually
+the PNAMES lump is simply a list of lump names, and the PNAMES editor allows
+this list to be changed.
 
-The first entry in the window saves all changes and returns to the WAD file
-containing the PNAMES lump.
+The TEXTURE and PNAMES lumps are closely related. In particular it's best to
+avoid changing the order of entries in the PNAMES list or deleting entries
+unless you know what you are doing. WadGadget always adds new patch names to
+the end of the list for the same reason.
+
+The first entry in the PNAMES list saves all changes and returns to the WAD
+file containing the PNAMES lump.
 
 ## Keys
 
@@ -35,7 +39,11 @@ All [standard controls](browser.md#keys) are also supported.
  * Patch names corresponding to lumps can be added to the list by opening the
    same WAD in the opposite pane, selecting the lumps and using
    **Copy names (F5)**.
- * New patch names are always added to the end of the directory.
+ * The ordering of entries in the PNAMES list is important and you should
+   avoid rearranging, renaming or deleting them unless you're certain that
+   you know what you're doing.
+ * New patch names are always added to the end of the directory for the same
+   reason.
  * If a directory is in the opposite pane, **Export config (F5**) will create a
    plain text file in that directory that contains the tagged names, one per
    line. If none are tagged, the file will contain the entire list.

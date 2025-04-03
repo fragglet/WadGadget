@@ -62,24 +62,18 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 		wattron(win, COLOR_PAIR(PAIR_DIRECTORY));
 	} else {
 		ent = &dp->dir->entries[ent_idx];
-		switch (ent->type) {
-		case FILE_TYPE_DIR:
+		if (ent->type == &file_type_dir) {
 			wattron(win, A_BOLD);
 			prefix = "/";
-			break;
-		case FILE_TYPE_WAD:
+		} else if (ent->type == &file_type_wad) {
 			wattron(win, COLOR_PAIR(PAIR_WAD_FILE));
-			break;
-		default:
+		} else {
 			wattron(win, COLOR_PAIR(PAIR_WHITE_BLACK));
-			break;
 		}
 
 		// Show insert point for where we'll import into the WAD:
 		if (!dp->pane.active && idx == dp->pane.selected &&
-		    dp->dir->type != FILE_TYPE_DIR &&
-		    dp->dir->type != FILE_TYPE_PALETTES &&
-		    dp->dir->type != FILE_TYPE_PNAMES_LIST) {
+		    dp->dir->directory_funcs->ordered) {
 			if ((termattrs() & A_UNDERLINE) != 0) {
 				wattron(win, A_UNDERLINE);
 			} else {
@@ -89,7 +83,7 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 
 		// We only show size for lumps (like NWT); for files it
 		// is too cluttered (plus filenames can be much longer)
-		if (ent->type == FILE_TYPE_LUMP) {
+		if (ent->type == &file_type_lump) {
 			VFS_DescribeSize(ent, size);
 		}
 		s = ent->name;

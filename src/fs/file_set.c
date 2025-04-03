@@ -87,7 +87,7 @@ struct directory_entry *VFS_AddGlobToSet(struct directory *dir,
 
 	for (i = 0; i < dir->num_entries; ++i) {
 		ent = &dir->entries[i];
-		if (ent->type != FILE_TYPE_DIR && GlobMatch(glob, ent->name)) {
+		if (ent->type != &file_type_dir && GlobMatch(glob, ent->name)) {
 			VFS_AddToSet(l, ent->serial_no);
 			if (result == NULL) {
 				result = ent;

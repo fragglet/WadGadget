@@ -19,4 +19,7 @@ struct directory *PAL_InnerDir(struct directory *dir);
 struct directory_entry *PAL_InnerEntry(struct directory *dir,
                                        struct directory_entry *ent);
 
+extern const struct file_type file_type_palettes;
+extern const struct file_type file_type_palette;
+
 #endif /* #ifndef PALETTE__PALFS_H_INCLUDED */

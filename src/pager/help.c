@@ -443,6 +443,14 @@ static bool IsHorizRule(const char *s)
 	return true;
 }
 
+static bool IsBulletPoint(const char *s)
+{
+	while (*s != '\0' && isspace(*s)) {
+		++s;
+	}
+	return s[0] == '*' && isspace(s[1]);
+}
+
 static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 {
 	struct help_pager_config *cfg = user_data;
@@ -474,7 +482,16 @@ static void DrawHelpLine(WINDOW *win, unsigned int lineno, void *user_data)
 		curr_link = &cfg->links[cfg->pc.current_link];
 	}
 
-	for (p = line; *p != '\0'; ++p) {
+	p = line;
+
+	if (IsBulletPoint(line)) {
+		while (isspace(*p) || (p[0] == '*' && isspace(p[1]))) {
+			waddch(win, *p == '*' ? ACS_BULLET : ' ');
+			++p;
+		}
+	}
+
+	for (; *p != '\0'; ++p) {
 		if (IsLinkStart(p)) {
 			bool is_curr_link = curr_link != NULL &&
 			                    lineno == curr_link->lineno &&

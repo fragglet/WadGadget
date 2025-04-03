@@ -74,7 +74,7 @@ in the configuration settings. For XTerm-based terminals, you might need to
 set the "allowMouseOps" X resource. to do this, add a line like the following
 to your `.Xresources` file (and then re-run xrdb):
 
-   *VT100*allowMouseOps: true
+    *VT100*allowMouseOps: true
 
 ## Searching
 
