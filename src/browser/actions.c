@@ -1089,6 +1089,18 @@ static void NavigateNew(struct directory_pane *curr_pane,
 	}
 }
 
+static void PerformParentDir(void)
+{
+	struct directory *d =
+	    VFS_OpenDirByEntry(active_pane->dir, VFS_PARENT_DIRECTORY);
+	assert(d != NULL);
+	NavigateNew(active_pane, d);
+}
+
+const struct action parent_dir_action = {
+    27, 'Q', "Parent", "Parent", PerformParentDir,
+};
+
 static void ViewLump(struct directory *dir, struct directory_entry *ent)
 {
 	if (StringHasPrefix(ent->name, "TEXTURE")) {

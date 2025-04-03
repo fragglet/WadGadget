@@ -199,33 +199,39 @@ static const struct action swap_panes_action = {
 };
 
 static const struct action *wad_actions[] = {
-    &rearrange_action,     &new_lump_action,     &undo_action,
-    &redo_action,          &sort_entries_action, &hexdump_action,
-    &open_palettes_action, &view_action,         NULL,
+    &rearrange_action,     &new_lump_action,
+    &undo_action,          &redo_action,
+    &sort_entries_action,  &hexdump_action,
+    &open_palettes_action, &view_action,
+    &parent_dir_action,    NULL,
 };
 
 static const struct action *dir_actions[] = {
-    &compact_action,         &open_shell_action, &make_wad_action,
-    &make_wad_noconv_action, &mkdir_action,      &hexdump_action,
-    &open_palettes_action,   &view_action,       NULL,
+    &compact_action,       &open_shell_action,
+    &make_wad_action,      &make_wad_noconv_action,
+    &mkdir_action,         &hexdump_action,
+    &open_palettes_action, &view_action,
+    &quit_action,          NULL,
 };
 
 static const struct action *txt_actions[] = {
-    &edit_textures_action, &rearrange_action,   &sort_entries_action,
-    &new_texture_action,   &dup_texture_action, &undo_action,
-    &redo_action,          &view_action,        NULL,
+    &edit_textures_action, &rearrange_action,
+    &sort_entries_action,  &new_texture_action,
+    &dup_texture_action,   &undo_action,
+    &redo_action,          &view_action,
+    &parent_dir_action,    NULL,
 };
 
 static const struct action *pnm_actions[] = {
-    &edit_pnames_action,  &rearrange_action,
-    &sort_entries_action, &new_pname_action,
-    &undo_action,         &redo_action,
-    &view_action,         NULL,
+    &edit_pnames_action, &rearrange_action,  &sort_entries_action,
+    &new_pname_action,   &undo_action,       &redo_action,
+    &view_action,        &parent_dir_action, NULL,
 };
 
 static const struct action *pal_actions[] = {
     &set_default_palette_action,
     &view_palette_action,
+    &parent_dir_action,
     NULL,
 };
 
@@ -312,13 +318,19 @@ static const struct action *pal_to_wad[] = {
 };
 
 static const struct action *common_actions[] = {
-    &rename_action,       &delete_action,
-    &mark_pattern_action, &unmark_all_action,
-    &cmdr_mode_action,    &swap_panes_action,
-    &search_again_action, &reload_action,
-    &mark_action,         &delete_no_confirm_action,
-    &other_pane_action,   &help_action,
-    &quit_action,         NULL,
+    &rename_action,
+    &delete_action,
+    &mark_pattern_action,
+    &unmark_all_action,
+    &cmdr_mode_action,
+    &swap_panes_action,
+    &search_again_action,
+    &reload_action,
+    &mark_action,
+    &delete_no_confirm_action,
+    &other_pane_action,
+    &help_action,
+    NULL,
 };
 
 static const struct {

@@ -37,6 +37,7 @@ extern const struct action unmark_all_action;
 extern const struct action mark_action;
 
 extern const struct action quit_action;
+extern const struct action parent_dir_action;
 extern const struct action redraw_screen_action;
 extern const struct action reload_action;
 
