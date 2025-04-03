@@ -204,7 +204,7 @@ static bool RealDirRemove(void *_dir, struct directory_entry *entry)
 	
 #ifdef _WIN32
 	bool result;
-	if (entry->type == FILE_TYPE_DIR)
+	if (entry->type == &file_type_dir)
 		result = _rmdir(filename) == 0;
 	else
 		result = remove(filename) == 0;
