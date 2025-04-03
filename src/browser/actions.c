@@ -212,7 +212,7 @@ static void PerformFileMove(void)
 	struct directory_entry *ent, *ent2;
 	struct file_set to_overwrite = EMPTY_FILE_SET;
 	struct file_set moved = EMPTY_FILE_SET;
-	int last_fail_errno;
+	int last_fail_errno = 0;
 	char buf[64];
 	int idx = 0;
 
