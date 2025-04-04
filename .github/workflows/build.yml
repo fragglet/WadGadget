@@ -67,7 +67,8 @@ jobs:
       if: runner.os == 'Linux' && matrix.config.sixel
       run: sudo apt -q install libsixel-dev
 
-    - uses: actions/checkout@v4
+    - name: Check out code
+      uses: actions/checkout@v4
 
     - name: Build pdcurses
       if: matrix.config.build_pdcurses
@@ -113,6 +114,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
     - name: Check for banned functions (should use checked_*)
       run: |
         ! grep -w malloc **/*.c
