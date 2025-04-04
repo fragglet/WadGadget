@@ -14,7 +14,6 @@
 #include <curses.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <termios.h>
 #include <unistd.h>
 
 struct timeval;
@@ -35,10 +34,7 @@ struct palette {
 	} colors[16];
 };
 
-struct saved_flags {
-	int fcntl_opts;
-	struct termios termios;
-};
+struct saved_flags;
 
 void TF_SetCursesModes(void);
 void TF_SuspendCursesMode(void);
@@ -49,7 +45,7 @@ void TF_SetColorPairs(void);
 void TF_SetNewPalette(void);
 void TF_RestoreOldPalette(void);
 
-void TF_SetRawMode(struct saved_flags *f, bool blocking);
+struct saved_flags *TF_SetRawMode(bool blocking);
 void TF_RestoreNormalMode(struct saved_flags *f);
 int TF_PollingReadChar(struct timeval *start);
 

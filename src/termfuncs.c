@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <termios.h>
 #include <unistd.h>
 
 #include "common.h"
@@ -32,6 +33,11 @@ struct timeval;
 // that matches the palette from NWT; these values are from the ScreenPal[]
 // array in wadview.c.
 #define V(x) ((x * 1000) / 63)
+
+struct saved_flags {
+	int fcntl_opts;
+	struct termios termios;
+};
 
 static struct palette nwt_palette = {
     16,
@@ -158,8 +164,9 @@ void TF_RestoreOldPalette(void)
 	TF_SetPalette(&old_palette);
 }
 
-void TF_SetRawMode(struct saved_flags *f, bool blocking)
+struct saved_flags *TF_SetRawMode(bool blocking)
 {
+	struct saved_flags *f = checked_calloc(1, sizeof(struct saved_flags));
 	struct termios raw;
 
 	// Don't block reads from stdin; we want to time out.
@@ -173,12 +180,15 @@ void TF_SetRawMode(struct saved_flags *f, bool blocking)
 	raw = f->termios;
 	raw.c_lflag &= ~(ECHO | ICANON);
 	tcsetattr(0, TCSAFLUSH, &raw);
+
+	return f;
 }
 
 void TF_RestoreNormalMode(struct saved_flags *f)
 {
 	fcntl(0, F_SETFL, f->fcntl_opts);
 	tcsetattr(0, TCSAFLUSH, &f->termios);
+	free(f);
 }
 
 static int TimeDiffMs(struct timeval *a, struct timeval *b)

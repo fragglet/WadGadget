@@ -30,7 +30,7 @@ static bool sixels_available = false;
 bool SIXEL_CheckSupported(void)
 {
 	struct timeval start;
-	struct saved_flags saved;
+	struct saved_flags *saved;
 	bool result = false;
 	char response[64];
 	char *opt;
@@ -42,7 +42,7 @@ bool SIXEL_CheckSupported(void)
 	// The terminal will write the response to stdin. We need to read
 	// it back, but we have to set some special options to be able to
 	// read as intended.
-	TF_SetRawMode(&saved, false);
+	saved = TF_SetRawMode(false);
 
 	gettimeofday(&start, NULL);
 
@@ -90,7 +90,7 @@ bool SIXEL_CheckSupported(void)
 	}
 
 done:
-	TF_RestoreNormalMode(&saved);
+	TF_RestoreNormalMode(saved);
 	sixels_available = result;
 	return result;
 }
@@ -108,18 +108,18 @@ void SIXEL_ClearAndPrint(const char *msg, ...)
 
 static int PromptUser(void)
 {
-	struct saved_flags saved;
+	struct saved_flags *saved;
 	int result;
 
 	printf("Press enter to continue, or 'E' to edit: ");
 	fflush(stdout);
 
-	TF_SetRawMode(&saved, true);
+	saved = TF_SetRawMode(true);
 	for (result = 0; result != '\n' && result != 'e';) {
 		result = getchar();
 		result = tolower(result);
 	}
-	TF_RestoreNormalMode(&saved);
+	TF_RestoreNormalMode(saved);
 
 	return result;
 }
