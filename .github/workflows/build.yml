@@ -74,8 +74,8 @@ jobs:
       if: matrix.config.build_pdcurses
       run: |
         sudo apt -q install libxt-dev libxaw7-dev
-        git submodule update --init pdcurses
-        cd pdcurses/x11
+        git submodule update --init deps/pdcurses
+        cd deps/pdcurses/x11
         sed -i.bak "s/-lc//" Makefile.in
         ./configure --prefix=/tmp/pdcinst
         make
