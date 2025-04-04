@@ -19,6 +19,9 @@ make CC=$HOST-gcc \
      STRIP=$HOST-strip \
      LINK=$HOST-gcc \
      WINDRES=$HOST-windres
+mkdir -p $INST/include $INST/lib
+cp ../curses.h $INST/include
+cp pdcurses.a $INST/lib
 popd
 
 pushd zlib
