@@ -65,7 +65,7 @@ static VFILE *RGBABufferToPatch(uint8_t *buffer, size_t rowstep,
 
 	// Write fake column directory; we'll go back later
 	// and overwrite it with the actual data.
-	column_offsets = checked_calloc(hdr->width, sizeof(uint32_t));
+	column_offsets = calloc(hdr->width, sizeof(uint32_t));
 	vfwrite(column_offsets, sizeof(uint32_t), hdr->width, result);
 
 	post = checked_calloc(MAX_POST_LEN + 4, 1);
