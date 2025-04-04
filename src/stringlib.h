@@ -14,7 +14,6 @@
 #include <stdarg.h>
 #include <stddef.h>
 
-char *StringDuplicate(const char *orig);
 int StringCopy(char *dest, const char *src, size_t dest_size);
 int StringConcat(char *dest, const char *src, size_t dest_size);
 int StringHasPrefix(const char *s, const char *prefix);

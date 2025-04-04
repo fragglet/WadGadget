@@ -28,20 +28,6 @@
 #define DIR_SEPARATOR "/"
 #endif
 
-static void *CheckAllocation(void *x)
-{
-	if (x == NULL) {
-		fprintf(stderr, "Memory allocation failed.\n");
-		abort();
-	}
-	return x;
-}
-
-char *StringDuplicate(const char *orig)
-{
-	return CheckAllocation(strdup(orig));
-}
-
 // Safe string copy function that works like OpenBSD's strlcpy().
 // Returns non-zero if the string was not truncated.
 int StringCopy(char *dest, const char *src, size_t dest_size)
@@ -135,7 +121,7 @@ char *StringReplace(const char *haystack, const char *needle,
 	}
 
 	// Construct new string.
-	result = CheckAllocation(malloc(result_len));
+	result = checked_malloc(result_len);
 	dst = result;
 	dst_len = result_len;
 	p = haystack;
@@ -179,7 +165,7 @@ char *StringJoin(const char *sep, const char *s, ...)
 	}
 	va_end(args);
 
-	result = CheckAllocation(malloc(result_len));
+	result = checked_malloc(result_len);
 	StringCopy(result, s, result_len);
 
 	va_start(args, s);
@@ -266,14 +252,14 @@ char *PathDirName(const char *path)
 
 	p = strrchr(path, DIR_SEPARATOR[0]);
 	if (p == NULL) {
-		return StringDuplicate(".");
+		return checked_strdup(".");
 	}
 	// Root dir is a special case.
 	if (p == path) {
-		return StringDuplicate("/");
+		return checked_strdup("/");
 	}
 
-	result = StringDuplicate(path);
+	result = checked_strdup(path);
 	result[p - path] = '\0';
 	return result;
 }
