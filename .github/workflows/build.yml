@@ -119,7 +119,11 @@ jobs:
 
     - name: Check for banned functions (should use checked_*)
       run: |
+        success=true
         for func in malloc realloc calloc strdup \
                     sprintf vsprintf strcat strcpy; do
-            ! grep -w $func **/*.c
+          if grep -w $func src/*.c src/*/*.[ch]; then
+            success=false
+          fi
         done
+        $success
