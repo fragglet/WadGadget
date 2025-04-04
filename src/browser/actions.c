@@ -876,12 +876,6 @@ static void PerformDeleteNoConfirm(void)
 	// we delete the files.
 	VFS_DescribeSet(dir, tagged, buf, sizeof(buf));
 
-	// Note that there's a corner-case gotcha here. VFS serial
-	// numbers for files are inode numbers, and through hardlinks
-	// multiple files can have the same inode number. However,
-	// the way things are implemented here, we only ever delete one
-	// of each serial number. So the wrong file can end up being
-	// deleted, but we'll never delete both.
 	for (i = 0; success && i < tagged->num_entries; i++) {
 		struct directory_entry *ent;
 		ent = VFS_EntryBySerial(dir, tagged->entries[i]);
