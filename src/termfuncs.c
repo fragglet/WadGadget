@@ -39,7 +39,7 @@ static struct palette nwt_palette = {
       {COLOR_BLACK, V(0), V(0), V(0)},
       {COLOR_BLUE, V(0), V(0), V(25)},
       {COLOR_GREEN, V(0), V(42), V(0)},
-      {COLOR_CYAN, V(0), V(42), V(42)},
+{COLOR_CYAN, V(0), V(42), V(42)},
       {COLOR_RED, V(42), V(0), V(0)},
       {COLOR_MAGENTA, V(42), V(0), V(42)},
       {COLOR_YELLOW, V(42), V(42), V(0)},
