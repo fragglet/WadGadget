@@ -22,12 +22,6 @@
 
 #include "common.h"
 
-#ifdef _WIN32
-#define DIR_SEPARATOR "\\"
-#else
-#define DIR_SEPARATOR "/"
-#endif
-
 // Safe string copy function that works like OpenBSD's strlcpy().
 // Returns non-zero if the string was not truncated.
 int StringCopy(char *dest, const char *src, size_t dest_size)
@@ -250,7 +244,7 @@ char *PathDirName(const char *path)
 {
 	char *p, *result;
 
-	p = strrchr(path, DIR_SEPARATOR[0]);
+	p = strrchr(path, DIR_SEPARATOR);
 	if (p == NULL) {
 		return checked_strdup(".");
 	}
@@ -276,7 +270,7 @@ const char *PathBaseName(const char *path)
 		return "/";
 	}
 
-	p = strrchr(path, DIR_SEPARATOR[0]);
+	p = strrchr(path, DIR_SEPARATOR);
 	if (p == NULL) {
 		return path;
 	}
@@ -290,8 +284,8 @@ char *PathSanitize(const char *filename)
 	char *result, *dst;
 	const char *src_filename, *src;
 
-	if (filename[0] == '/') {
-		result = StringJoin("/", filename, "", NULL);
+	if (filename[0] == DIR_SEPARATOR) {
+		result = StringJoin(DIR_SEPARATOR_S, filename, "", NULL);
 		src_filename = filename;
 	} else {
 		char cwd[128];
@@ -302,7 +296,7 @@ char *PathSanitize(const char *filename)
 		// We allocate a buffer to join CWD to filename but reuse
 		// the buffer as our result buffer; since the next stage can
 		// only ever make the result smaller, this is fine.
-		result = StringJoin("/", cwd, filename, "", NULL);
+		result = StringJoin(DIR_SEPARATOR_S, cwd, filename, "", NULL);
 		src_filename = result;
 	}
 
@@ -311,20 +305,21 @@ char *PathSanitize(const char *filename)
 
 	while (*src != '\0') {
 		// "foo////bar" -> "foo/bar"
-		if (StringHasPrefix(src, "//")) {
+		if (StringHasPrefix(src, DIR_SEPARATOR_S DIR_SEPARATOR_S)) {
 			++src;
 			continue;
 		}
 		// "foo/./bar" -> "foo/bar"
-		if (StringHasPrefix(src, "/./")) {
+		if (StringHasPrefix(src, DIR_SEPARATOR_S "." DIR_SEPARATOR_S)) {
 			src += 2;
 			continue;
 		}
 		// "foo/../bar" -> "bar"
-		if (StringHasPrefix(src, "/../")) {
+		if (StringHasPrefix(src,
+		                    DIR_SEPARATOR_S ".." DIR_SEPARATOR_S)) {
 			do {
 				--dst;
-			} while (dst > result && *dst != '/');
+			} while (dst > result && *dst != DIR_SEPARATOR);
 			src += 3;
 			continue;
 		}
@@ -337,7 +332,7 @@ char *PathSanitize(const char *filename)
 	}
 
 	// No trailing '/', except in the case of root dir.
-	while (dst > result + 1 && *(dst - 1) == '/') {
+	while (dst > result + 1 && *(dst - 1) == DIR_SEPARATOR) {
 		--dst;
 	}
 
@@ -369,7 +364,7 @@ char *MakeDirectories(const char *first, ...)
 		if (name == NULL) {
 			break;
 		}
-		new_result = StringJoin("/", result, name, NULL);
+		new_result = StringJoin(DIR_SEPARATOR_S, result, name, NULL);
 		free(result);
 		result = new_result;
 	}

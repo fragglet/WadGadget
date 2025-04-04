@@ -450,7 +450,7 @@ bool B_CheckPathPaste(void)
 	struct directory *dir;
 	struct directory_pane *new_pane;
 
-	if (strlen(input) == 0 || input[0] != '/') {
+	if (strlen(input) == 0 || input[0] != DIR_SEPARATOR) {
 		return false;
 	}
 

@@ -60,7 +60,7 @@ static void DrawEntry(WINDOW *win, int idx, void *data)
 		ent = &dp->dir->entries[ent_idx];
 		if (ent->type == &file_type_dir) {
 			wattron(win, A_BOLD);
-			prefix = "/";
+			prefix = DIR_SEPARATOR_S;
 		} else if (ent->type == &file_type_wad) {
 			wattron(win, COLOR_PAIR(PAIR_WAD_FILE));
 		} else {

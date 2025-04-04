@@ -14,6 +14,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "common.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "stringlib.h"
@@ -128,7 +129,8 @@ bool TX_InitLumpDir(struct lump_dir *dir, const struct lump_dir_funcs *funcs,
 {
 	struct directory_revision *rev;
 
-	dir->dir.path = StringJoin("/", parent->path, ent->name, NULL);
+	dir->dir.path =
+	    StringJoin(DIR_SEPARATOR_S, parent->path, ent->name, NULL);
 	dir->dir.refcount = 1;
 	dir->dir.entries = NULL;
 	dir->dir.num_entries = 0;

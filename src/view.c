@@ -369,7 +369,8 @@ static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
 	if (temp_dir == NULL) {
 		temp_dir = "/tmp";
 	}
-	ctx->temp_dir = StringJoin("/", temp_dir, "wadgadget-XXXXXX", NULL);
+	ctx->temp_dir =
+	    StringJoin(DIR_SEPARATOR_S, temp_dir, "wadgadget-XXXXXX", NULL);
 	ctx->temp_dir = mkdtemp(ctx->temp_dir);
 
 	ctx->lumpnum = ent - from->entries;
@@ -377,8 +378,9 @@ static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
 	// TODO: If lt == &lump_type_level, export the whole level to a
 	// temp file so we can edit it in a level editor.
 
-	ctx->filename = StringJoin("", ctx->temp_dir, "/", ent->name,
-	                           LI_GetExtension(ctx->lt, true), NULL);
+	ctx->filename =
+	    StringJoin("", ctx->temp_dir, DIR_SEPARATOR_S, ent->name,
+	               LI_GetExtension(ctx->lt, true), NULL);
 
 	if (!ExportToFile(ctx->from, ctx->ent, ctx->lt, ctx->filename, true)) {
 		UI_MessageBox("Failed to export to temp file:\n%s",

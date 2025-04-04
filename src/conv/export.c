@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "common.h"
 #include "conv/audio.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
@@ -271,7 +272,7 @@ static bool DuplicateFile(struct directory *dir, struct file_set *from_set,
 		return false;
 	}
 
-	filename2 = StringJoin("/", dir->path, filename, NULL);
+	filename2 = StringJoin(DIR_SEPARATOR_S, dir->path, filename, NULL);
 	success = ExportToFile(dir, ent, &lump_type_unknown, filename2, false);
 
 	VFS_Refresh(dir);
@@ -315,7 +316,8 @@ bool PerformExport(struct directory *from, struct file_set *from_set,
 	while ((ent = VFS_IterateSet(from, from_set, &idx)) != NULL) {
 		const struct lump_type *lt = IdentifyLumpType(from, ent);
 		filename = FileNameForEntry(lt, ent, convert);
-		filename2 = StringJoin("", to->path, "/", filename, NULL);
+		filename2 =
+		    StringJoin("", to->path, DIR_SEPARATOR_S, filename, NULL);
 		free(filename);
 		success = ExportToFile(from, ent, lt, filename2, convert);
 		free(filename2);

@@ -249,8 +249,8 @@ static void PerformFileMove(void)
 	while ((ent = VFS_IterateSet(active_pane->dir, tagged, &idx)) != NULL) {
 		bool success;
 		char *from = VFS_EntryPath(active_pane->dir, ent);
-		char *to =
-		    StringJoin("/", other_pane->dir->path, ent->name, NULL);
+		char *to = StringJoin(DIR_SEPARATOR_S, other_pane->dir->path,
+		                      ent->name, NULL);
 		success = rename(from, to) == 0;
 		free(from);
 		free(to);
@@ -355,8 +355,8 @@ static void PerformMkdir(void)
 	if (input_filename == NULL) {
 		return;
 	}
-	filename =
-	    StringJoin("/", active_pane->dir->path, input_filename, NULL);
+	filename = StringJoin(DIR_SEPARATOR_S, active_pane->dir->path,
+	                      input_filename, NULL);
 	if (mkdir(filename, 0777) == 0) {
 		VFS_Refresh(active_pane->dir);
 		B_DirectoryPaneSelectByName(active_pane, input_filename);
@@ -401,7 +401,7 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 		return NULL;
 	}
 
-	filename2 = StringJoin("", to->path, "/", filename, NULL);
+	filename2 = StringJoin("", to->path, DIR_SEPARATOR_S, filename, NULL);
 
 	if (!W_CreateFile(filename2)) {
 		UI_MessageBox("%s\nFailed to create new WAD file.", filename);
@@ -618,7 +618,7 @@ static bool NullTextureCheck(struct directory *dir, struct file_set *tagged,
 	    !VFS_SetHas(tagged, dir->entries[0].serial_no) ||
 	    dir->entries[0].type != &file_type_texture ||
 	    !StringHasPrefix(dir->entries[0].name, "AA") ||
-	    !StringHasSuffix(dir->path, "/TEXTURE1")) {
+	    !StringHasSuffix(dir->path, DIR_SEPARATOR_S "TEXTURE1")) {
 		return true;
 	}
 

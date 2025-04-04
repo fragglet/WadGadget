@@ -67,7 +67,7 @@ static void FreeRevisionChainForward(struct directory_revision *r)
 
 char *VFS_EntryPath(struct directory *dir, struct directory_entry *entry)
 {
-	return StringJoin("/", dir->path, entry->name, NULL);
+	return StringJoin(DIR_SEPARATOR_S, dir->path, entry->name, NULL);
 }
 
 void VFS_FreeEntries(struct directory *d)

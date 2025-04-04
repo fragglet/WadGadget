@@ -69,4 +69,18 @@ static inline void SwapBE16(void *i)
 	*i16 = (b[0] << 8) | b[1];
 }
 
+#ifdef _WIN32
+
+#define DIR_SEPARATOR_S "\\"
+#define PATH_SEPARATOR  ';'
+
+#else
+
+#define DIR_SEPARATOR_S "/"
+#define PATH_SEPARATOR  ':'
+
+#endif
+
+#define DIR_SEPARATOR (DIR_SEPARATOR_S[0])
+
 #endif /* #ifndef COMMON_H_INCLUDED */

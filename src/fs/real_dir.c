@@ -134,7 +134,8 @@ static bool _RealDirRefresh(struct real_directory *d,
 		if (dirent->d_name[0] == '.') {
 			continue;
 		}
-		path = StringJoin("/", d->d.path, dirent->d_name, NULL);
+		path = StringJoin(DIR_SEPARATOR_S, d->d.path, dirent->d_name,
+		                  NULL);
 		// We stat() the file, which resolves symlinks and gives
 		// additional information such as file size and type
 		// (in a portable way)
@@ -228,7 +229,8 @@ static bool RealDirRename(void *_dir, struct directory_entry *entry,
 {
 	struct directory *dir = _dir;
 	char *filename = VFS_EntryPath(dir, entry);
-	char *full_new_name = StringJoin("/", dir->path, new_name, NULL);
+	char *full_new_name =
+	    StringJoin(DIR_SEPARATOR_S, dir->path, new_name, NULL);
 	bool result = rename(filename, full_new_name) == 0;
 	if (!result) {
 		VFS_StoreError("%s: %s", filename, strerror(errno));
@@ -274,7 +276,7 @@ struct directory *VFS_OpenRealDir(const char *path)
 	d->d.directory_funcs = &realdir_funcs;
 	VFS_InitDirectory(&d->d, path);
 	d->d.type = &file_type_dir;
-	if (!strcmp(path, "/")) {
+	if (!strcmp(path, "/")) { // unix root
 		free(d->d.parent_name);
 		d->d.parent_name = NULL;
 	}

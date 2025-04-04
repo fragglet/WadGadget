@@ -18,6 +18,7 @@
 #include "browser/actions.h"
 #include "browser/browser.h"
 #include "browser/directory_pane.h"
+#include "common.h"
 #include "conv/error.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
@@ -54,7 +55,8 @@ static void PerformNewTexture(void)
 
 	if (pos < 1 && txs->num_textures > 0 &&
 	    StringHasPrefix(txs->textures[0]->name, "AA") &&
-	    StringHasSuffix(active_pane->dir->path, "/TEXTURE1") &&
+	    StringHasSuffix(active_pane->dir->path,
+	                    DIR_SEPARATOR_S "TEXTURE1") &&
 	    !UI_ConfirmDialogBox("New texture", "Create here", "Cancel",
 	                         "You are trying to insert a new texture\n"
 	                         "before the '%.8s' dummy texture. This\n"
@@ -222,7 +224,8 @@ static void PerformExportConfig(void)
 		goto cancel;
 	}
 
-	filename2 = StringJoin("/", other_pane->dir->path, filename, NULL);
+	filename2 =
+	    StringJoin(DIR_SEPARATOR_S, other_pane->dir->path, filename, NULL);
 
 	// TODO: This should be written through VFS.
 	out = vfwrapfile(fopen(filename2, "w"));

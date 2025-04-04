@@ -213,7 +213,7 @@ void PAL_FreePaletteSet(struct palette_set *set)
 
 static char *DefaultPointerPath(const char *dir)
 {
-	return StringJoin("/", dir, "default", NULL);
+	return StringJoin(DIR_SEPARATOR_S, dir, "default", NULL);
 }
 
 char *PAL_ReadDefaultPointer(void)
@@ -368,7 +368,7 @@ static void AddDefaultPalette(const char *path)
 
 	// Pointer not good. We want to point it to the Doom palette file.
 	// Is it there?
-	doom_pal = StringJoin("/", path, "Doom.png", NULL);
+	doom_pal = StringJoin(DIR_SEPARATOR_S, path, "Doom.png", NULL);
 	if (!FileExists(doom_pal)) {
 		WriteDoomPalette(doom_pal);
 	}

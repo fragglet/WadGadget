@@ -209,7 +209,7 @@ static bool CopyPaletteToDir(struct directory *from,
 	}
 
 	converted = PAL_ToImageFile(set);
-	full_path = StringJoin("/", to->path, filename, NULL);
+	full_path = StringJoin(DIR_SEPARATOR_S, to->path, filename, NULL);
 	out = vfwrapfile(fopen(full_path, "wb"));
 	assert(out != NULL); // TODO
 	free(full_path);
