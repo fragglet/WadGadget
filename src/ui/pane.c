@@ -278,7 +278,8 @@ static void HandleMouseEvent(void)
 	struct pane_stack *s = UI_ActiveStack();
 	MEVENT ev;
 
-	if (getmouse(&ev) != OK || !UpdateMousePosition(&ev)) {
+	if (getmouse(&ev) != OK || !UpdateMousePosition(&ev) ||
+	    mouse_cur_stack != UI_ActiveStack()) {
 		return;
 	}
 	if (s->exclusive_focus != NULL &&
