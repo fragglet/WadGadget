@@ -87,7 +87,7 @@ bool W_CreateFile(const char *filename)
 	bool result;
 	FILE *fs;
 
-	fs = fopen(filename, "w+");
+	fs = fopen(filename, "wb+");
 	if (fs == NULL) {
 		return false;
 	}
@@ -169,9 +169,9 @@ struct wad_file *W_OpenFile(const char *filename)
 	bool readonly = false;
 	VFILE *vfs;
 
-	vfs = vfwrapfile(fopen(filename, "r+"));
+	vfs = vfwrapfile(fopen(filename, "rb+"));
 	if (vfs == NULL) {
-		vfs = vfwrapfile(fopen(filename, "r"));
+		vfs = vfwrapfile(fopen(filename, "rb"));
 		if (vfs == NULL) {
 			return NULL;
 		}
