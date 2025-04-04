@@ -377,7 +377,7 @@ static struct pnames *ParsePnamesConfig(uint8_t *buf, size_t buf_len)
 	struct pnames *result;
 	unsigned int offset = 0, lineno = 0;
 
-	result = calloc(1, sizeof(struct pnames));
+	result = checked_calloc(1, sizeof(struct pnames));
 	result->pnames = NULL;
 	result->num_pnames = 0;
 

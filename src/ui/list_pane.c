@@ -229,7 +229,7 @@ int UI_ListPaneSelected(struct list_pane *p)
 
 void UI_ListPaneSetTitle(struct list_pane *lp, const char *title)
 {
-	lp->title = strdup(title);
+	lp->title = checked_strdup(title);
 }
 
 void UI_ListPaneFree(struct list_pane *lp)

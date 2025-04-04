@@ -18,6 +18,7 @@
 
 #include "browser/actions.h"
 #include "browser/browser.h"
+#include "common.h"
 #include "stringlib.h"
 #include "ui/actions_bar.h"
 #include "ui/colors.h"
@@ -358,7 +359,7 @@ struct directory_pane *UI_NewDirectoryPane(WINDOW *w, struct directory *dir)
 {
 	struct directory_pane *p;
 
-	p = calloc(1, sizeof(struct directory_pane));
+	p = checked_calloc(1, sizeof(struct directory_pane));
 	UI_ListPaneInit(&p->pane, w, &directory_pane_funcs, p);
 	p->pane.pane.draw = DrawPane;
 	p->pane.pane.mouse_click = B_DirectoryPaneMouseClick;

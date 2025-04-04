@@ -15,6 +15,7 @@
 #include <string.h>
 #include <strings.h>
 
+#include "common.h"
 #include "conv/audio.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
@@ -191,8 +192,8 @@ static struct update_mapping *AddLumpsMapping(struct directory *from,
 	int lumpnum, idx, m;
 	char namebuf[9];
 
-	result =
-	    calloc(from_set->num_entries + 1, sizeof(struct update_mapping));
+	result = checked_calloc(from_set->num_entries + 1,
+	                        sizeof(struct update_mapping));
 
 	lumpnum = insert_index;
 	wf = VFS_WadFile(to);
@@ -373,8 +374,8 @@ static struct update_mapping *BuildUpdateMapping(struct directory *from,
 	int idx, lumpnum, m;
 	char namebuf[9];
 
-	result =
-	    calloc(from_set->num_entries + 1, sizeof(struct update_mapping));
+	result = checked_calloc(from_set->num_entries + 1,
+	                        sizeof(struct update_mapping));
 
 	idx = 0;
 	m = 0;

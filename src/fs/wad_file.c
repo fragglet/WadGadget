@@ -272,8 +272,9 @@ void W_AddEntries(struct wad_file *f, unsigned int before_index,
 
 	// We need to rearrange both the WAD directory and the lump headers
 	// array to make room for the new entries.
-	f->directory = realloc(f->directory, (f->num_lumps + count) *
-	                                         sizeof(struct wad_file_entry));
+	f->directory =
+	    checked_realloc(f->directory, (f->num_lumps + count) *
+	                                      sizeof(struct wad_file_entry));
 	memmove(&f->directory[before_index + count],
 	        &f->directory[before_index],
 	        (f->num_lumps - before_index) * sizeof(struct wad_file_entry));
