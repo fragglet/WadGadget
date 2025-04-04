@@ -107,3 +107,15 @@ jobs:
       with:
         path: "pkg/macos/wadgadget.dmg"
         name: wadgadget-${{steps.version.outputs.VERSION}}
+
+  style_checks:
+    name: Style checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check for banned functions (should use checked_*)
+      run: |
+        ! grep -w malloc **/*.c
+        ! grep -w realloc **/*.c
+        ! grep -w calloc **/*.c
+        ! grep -w strdup **/*.c
