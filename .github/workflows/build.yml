@@ -119,7 +119,7 @@ jobs:
 
     - name: Check for banned functions (should use checked_*)
       run: |
-        ! grep -w malloc **/*.c
-        ! grep -w realloc **/*.c
-        ! grep -w calloc **/*.c
-        ! grep -w strdup **/*.c
+        for func in malloc realloc calloc strdup \
+                    sprintf vsprintf strcat strcpy; do
+            ! grep -w $func **/*.c
+        done
