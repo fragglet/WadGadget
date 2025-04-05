@@ -21,9 +21,11 @@ int unsetenv(const char *name);
 char *mkdtemp(char *name);
 
 // The win32 version of mkdir() only takes a single argument:
+#undef mkdir
 #define mkdir(path, perms) ((_mkdir)(path))
 
 // win32 has no fsync() but _commit() appears to do the same thing:
+#undef fsync
 #define fsync _commit
 
 #endif  /* #ifdef _WIN32 */
