@@ -31,5 +31,13 @@ char *mkdtemp(char *name);
 #undef fsync
 #define fsync _commit
 
-#endif  /* #ifdef _WIN32 */
+#else  /*  #ifndef _WIN32 */
+
+#include <stdint.h>
+
+#define _P_WAIT 1
+intptr_t _spawnv(int mode, const char *cmdname, const char **argv);
+
+#endif  /* #ifndef _WIN32 */
+
 #endif  /* #ifndef COMPAT_H_INCLUDED */
