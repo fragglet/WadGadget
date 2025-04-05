@@ -16,5 +16,8 @@ ssize_t readlink(const char *restrict pathname, char *restrict buf,
                  size_t bufsiz);
 int symlink(const char *target, const char *linkpath);
 
+// The win32 version of mkdir() only takes a single argument:
+#define mkdir(path, perms) ((mkdir)(path))
+
 #endif  /* #ifdef _WIN32 */
 
