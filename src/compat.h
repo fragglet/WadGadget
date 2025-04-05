@@ -19,5 +19,8 @@ int symlink(const char *target, const char *linkpath);
 // The win32 version of mkdir() only takes a single argument:
 #define mkdir(path, perms) ((mkdir)(path))
 
+// win32 has no fsync() but _commit() appears to do the same thing:
+#define fsync _commit
+
 #endif  /* #ifdef _WIN32 */
 

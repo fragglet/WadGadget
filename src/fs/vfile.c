@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "compat.h"
 #include "fs/vfile.h"
 
 struct _VFILE {
