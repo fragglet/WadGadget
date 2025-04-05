@@ -13,11 +13,13 @@
 #include <curses.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 #include <termios.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "common.h"
@@ -74,6 +76,8 @@ static const struct {
     {PAIR_TAGGED,      COLORX_BRIGHTWHITE, COLOR_RED        },
     {PAIR_NOTICE,      COLOR_BLACK,        COLOR_YELLOW     },
 };
+
+static struct sigaction old_sigint_action;
 
 // Old palette we saved and restore on quit.
 static struct palette old_palette;
@@ -230,4 +234,57 @@ void TF_ClearScreen(void)
 void TF_SendRaiseWindowOp(void)
 {
 	write(1, XTERM_RAISE_ESCAPE, strlen(XTERM_RAISE_ESCAPE));
+}
+
+#ifndef PDCURSES
+// We set a custom handler for SIGTSTP. This is the signal that is sent when
+// the user types a Ctrl-Z. This allows us to use this key combo (for Undo).
+static void TermStopHandler(int unused)
+{
+	ungetch(CTRL_('Z'));
+}
+
+// Handler for SIGINT. We set this to catch ^C keypress, but just in case,
+// we detect if ^C is pressed three times and if so, trigger an abort.
+static void SigintHandler(int unused)
+{
+	static time_t last_sigint;
+	static int count;
+	time_t now = time(NULL);
+
+	if (now - last_sigint > 1) {
+		count = 0;
+	}
+
+	++count;
+	last_sigint = now;
+	if (count == 3) {
+		old_sigint_action.sa_handler(unused);
+	}
+
+	ungetch(CTRL_('C'));
+}
+#endif
+
+void TF_SetTermStopHandler(void)
+{
+#ifndef PDCURSES
+	struct sigaction sa;
+	sigaction(SIGTSTP, NULL, &sa);
+	sa.sa_handler = TermStopHandler;
+	sa.sa_flags = sa.sa_flags & ~SA_RESTART;
+	sigaction(SIGTSTP, &sa, NULL);
+#endif
+}
+
+void TF_SetSigintHandler(void)
+{
+#ifndef PDCURSES
+	struct sigaction sa;
+	sigaction(SIGINT, NULL, &old_sigint_action);
+	memcpy(&sa, &old_sigint_action, sizeof(struct sigaction));
+	sa.sa_handler = SigintHandler;
+	sa.sa_flags = sa.sa_flags & ~SA_RESTART;
+	sigaction(SIGINT, &sa, NULL);
+#endif
 }
