@@ -14,6 +14,7 @@
 
 #ifdef _WIN32
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -82,6 +83,36 @@ int unsetenv(const char *name)
 	free(envstring);
 
 	return result;
+}
+
+char *mkdtemp(char *name)
+{
+	static const char *random_chars =
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	size_t name_len = strlen(name);
+	char *xx_part;
+	int i;
+
+	if (name_len < 6 || strcmp(name + name_len - 6, "XXXXXX") != 0) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	xx_part = name + name_len - 6;
+
+	// Generate a random directory name and try to create it. It is always
+	// possible that the random name already exists.
+	do {
+		for (i = 0; i < 6; ++i) {
+			xx_part[i] = random_chars[rand() % 36];
+		}
+		if (_mkdir(name) == 0) {
+			return name;
+		}
+	} while (errno == EEXIST);
+
+	// Some other kind of error.
+	return NULL;
 }
 
 #endif

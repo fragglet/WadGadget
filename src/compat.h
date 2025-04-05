@@ -10,6 +10,7 @@
 
 #ifdef _WIN32
 
+#include <direct.h>
 #include <stdlib.h>
 
 ssize_t readlink(const char *restrict pathname, char *restrict buf,
@@ -17,9 +18,10 @@ ssize_t readlink(const char *restrict pathname, char *restrict buf,
 int symlink(const char *target, const char *linkpath);
 int setenv(const char *name, const char *value, int overwrite);
 int unsetenv(const char *name);
+char *mkdtemp(char *name);
 
 // The win32 version of mkdir() only takes a single argument:
-#define mkdir(path, perms) ((mkdir)(path))
+#define mkdir(path, perms) ((_mkdir)(path))
 
 // win32 has no fsync() but _commit() appears to do the same thing:
 #define fsync _commit

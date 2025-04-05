@@ -24,6 +24,7 @@
 
 #include "browser/actions.h"
 #include "common.h"
+#include "compat.h"
 #include "conv/endoom.h"
 #include "conv/error.h"
 #include "conv/export.h"
@@ -366,6 +367,7 @@ static char *TempExport(struct temp_edit_context *ctx, struct directory *from,
 	ctx->from = from;
 	ctx->ent = ent;
 
+	// WIN32-TODO: We should have a function to get path to tempdir:
 	temp_dir = getenv("TEMP");
 	if (temp_dir == NULL) {
 		temp_dir = "/tmp";
