@@ -23,6 +23,7 @@ mkdir -p $INST/include $INST/lib
 cp ../curses.h $INST/include
 cp pdcurses.a $INST/lib
 popd
+cp xcurses-config $INST/bin
 
 pushd zlib
 ./configure --prefix=$INST --static

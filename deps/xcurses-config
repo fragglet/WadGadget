@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+prefix=$(dirname "$0")/..
+
+for x in "$@"; do
+    case "$x" in
+    --cflags)
+       echo -I$prefix/include
+       ;;
+
+    --libs)
+       echo -L$prefix/lib -lpdcurses
+       ;;
+
+    *)
+       echo "Invalid arg $x" >&2
+       exit 1
+       ;;
+    esac
+done
