@@ -8,6 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#ifndef COMPAT_H_INCLUDED
+#define COMPAT_H_INCLUDED
+
 #ifdef _WIN32
 
 #include <direct.h>
@@ -29,3 +32,4 @@ char *mkdtemp(char *name);
 #define fsync _commit
 
 #endif  /* #ifdef _WIN32 */
+#endif  /* #ifndef COMPAT_H_INCLUDED */
