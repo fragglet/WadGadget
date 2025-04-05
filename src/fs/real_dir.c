@@ -100,7 +100,7 @@ static void AssignSerials(struct real_directory *d,
 			d->serials[s] = checked_strdup(entries[i].name);
 			++new_num_serials;
 		}
-		entries[i].serial_no = (long) d->serials[s];
+		entries[i].serial_no = (uint64_t) d->serials[s];
 	}
 
 	qsort(d->serials, new_num_serials, sizeof(char *), SerialCompare);

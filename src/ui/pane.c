@@ -109,7 +109,7 @@ void UI_DrawPane(struct pane *p)
 void UI_DrawAllPanes(void)
 {
 	struct pane_stack *s;
-	int cur_x, cur_y;
+	int cur_x = 0, cur_y = 0;
 
 	UI_RecalculateStacks();
 
