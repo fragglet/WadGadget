@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "compat.h"
 #include "conv/error.h"
 #include "conv/vpng.h"
 #include "fs/vfile.h"

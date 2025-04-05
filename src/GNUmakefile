@@ -95,6 +95,7 @@ OBJS =                      \
     ui/text_input.o         \
     ui/title_bar.o          \
     ui/ui.o                 \
+    compat.o                \
     help_text.o             \
     lump_info.o             \
     sixel_display.o         \
