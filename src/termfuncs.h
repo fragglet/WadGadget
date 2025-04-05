@@ -52,4 +52,7 @@ int TF_PollingReadChar(struct timeval *start);
 void TF_ClearScreen(void);
 void TF_SendRaiseWindowOp(void);
 
+void TF_SetTermStopHandler(void);
+void TF_SetSigintHandler(void);
+
 #endif /* #ifndef TERMFUNCS_H_INCLUDED */
