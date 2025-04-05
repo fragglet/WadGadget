@@ -17,6 +17,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "common.h"
+#include "stringlib.h"
+
 ssize_t readlink(const char *restrict pathname, char *restrict buf,
                  size_t bufsiz)
 {
@@ -53,6 +56,32 @@ int symlink(const char *target, const char *linkpath)
 	fclose(fs);
 
 	return cnt == strlen(target) ? 0 : -1;
+}
+
+int setenv(const char *name, const char *value, int overwrite)
+{
+	size_t len = strlen(name) + strlen(value) + 2;
+	char *envstring = checked_calloc(len, 1);
+	int result;
+
+	snprintf(envstring, len, "%s=%s", name, value);
+	result = _putenv(envstring);
+	free(envstring);
+
+	return result;
+}
+
+int unsetenv(const char *name)
+{
+	size_t len = strlen(name) + 2;
+	char *envstring = checked_calloc(len, 1);
+	int result;
+
+	snprintf(envstring, len, "%s=", name);
+	result = _putenv(envstring);
+	free(envstring);
+
+	return result;
 }
 
 #endif
