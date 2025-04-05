@@ -20,7 +20,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 #include "browser/actions.h"
@@ -49,6 +48,8 @@
 #endif
 
 #ifndef _WIN32
+
+#include <sys/wait.h>
 
 static bool got_tstp;
 
