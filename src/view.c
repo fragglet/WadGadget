@@ -54,13 +54,6 @@
 
 static bool got_tstp;
 
-static void RedrawScreen(void)
-{
-	clearok(stdscr, TRUE);
-	wrefresh(stdscr);
-	UI_DrawAllPanes();
-}
-
 // Handler function invoked when SIGTSTP (^Z) is received.
 static void TstpHandler(int unused)
 {
@@ -316,6 +309,13 @@ static bool DisplayFile(const char *filename, const struct directory_entry *ent)
 	}
 
 	return false;
+}
+
+static void RedrawScreen(void)
+{
+	clearok(stdscr, TRUE);
+	wrefresh(stdscr);
+	UI_DrawAllPanes();
 }
 
 enum open_result OpenFile(const char *filename,
