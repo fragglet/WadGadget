@@ -25,19 +25,19 @@ char *mkdtemp(char *name);
 
 // The win32 version of mkdir() only takes a single argument:
 #undef mkdir
-#define mkdir(path, perms) ((_mkdir)(path))
+#define mkdir(path, perms) ((_mkdir) (path))
 
 // win32 has no fsync() but _commit() appears to do the same thing:
 #undef fsync
 #define fsync _commit
 
-#else  /*  #ifndef _WIN32 */
+#else /*  #ifndef _WIN32 */
 
 #include <stdint.h>
 
 #define _P_WAIT 1
 intptr_t _spawnv(int mode, const char *cmdname, const char **argv);
 
-#endif  /* #ifndef _WIN32 */
+#endif /* #ifndef _WIN32 */
 
-#endif  /* #ifndef COMPAT_H_INCLUDED */
+#endif /* #ifndef COMPAT_H_INCLUDED */

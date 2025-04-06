@@ -88,7 +88,7 @@ int unsetenv(const char *name)
 char *mkdtemp(char *name)
 {
 	static const char *random_chars =
-		"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	    "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	size_t name_len = strlen(name);
 	char *xx_part;
 	int i;
@@ -115,16 +115,16 @@ char *mkdtemp(char *name)
 	return NULL;
 }
 
-#else  /* #ifndef _WIN32 */
+#else /* #ifndef _WIN32 */
 
+#include <assert.h>
+#include <errno.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <errno.h>
 
 static bool got_tstp;
 
