@@ -8,6 +8,8 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+#include "fs/vfile.h"
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -15,8 +17,7 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "compat.h"
-#include "fs/vfile.h"
+#include "compat.h" // IWYU pragma: keep
 
 struct _VFILE {
 	const struct vfile_functions *functions;

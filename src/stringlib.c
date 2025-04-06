@@ -21,7 +21,7 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "compat.h"
+#include "compat.h" // IWYU pragma: keep
 
 // Safe string copy function that works like OpenBSD's strlcpy().
 // Returns non-zero if the string was not truncated.

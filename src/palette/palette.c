@@ -12,7 +12,7 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "compat.h"
+#include "compat.h" // IWYU pragma: keep
 #include "conv/error.h"
 #include "conv/vpng.h"
 #include "fs/vfile.h"

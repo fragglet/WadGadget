@@ -12,6 +12,8 @@
 
 #include "compat.h"
 
+#include <sys/types.h>
+
 #ifdef _WIN32
 
 #include <errno.h>

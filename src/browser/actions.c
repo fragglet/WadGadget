@@ -24,7 +24,7 @@
 #include "browser/browser.h"
 #include "browser/directory_pane.h"
 #include "common.h"
-#include "compat.h"
+#include "compat.h" // IWYU pragma: keep
 #include "conv/error.h"
 #include "conv/export.h"
 #include "conv/import.h"
