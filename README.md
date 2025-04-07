@@ -74,6 +74,17 @@ The following table gives a brief summary of the current state:
 | Scripting                      |                      |                                             | ✓ (via Lua)                          |
 | A zillion other features       |                      |                                             | ✓                                    |
 
+## Build instructions
+
+On Debian-based systems (including Ubuntu, Mint etc.):
+
+```shell
+sudo apt install pkg-config make gcc libncurses-dev libsndfile1-dev \
+                 libsixel-dev libpng-dev
+make -C src
+./src/wadgadget
+```
+
 ## FAQ
 
 **Can I use this under Microsoft Windows?**
