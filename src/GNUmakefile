@@ -64,6 +64,7 @@ OBJS =                      \
     conv/import.o           \
     conv/mus2mid.o          \
     conv/palette.o          \
+    conv/process.o          \
     conv/vpng.o             \
     fs/file_set.o           \
     fs/real_dir.o           \
