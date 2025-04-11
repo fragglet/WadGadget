@@ -26,19 +26,21 @@
 
 #define or_if_null(x, y) ((x) != NULL ? (x) : (y))
 
-static inline void *check_allocation_result(void *x)
+static inline void *check_allocation_result(void *x, size_t len)
 {
-	assert(x != NULL);
+	assert(x != NULL || len == 0);
 	return x;
 }
 
-#define checked_malloc(size) check_allocation_result(malloc(size))
+#define checked_malloc(size) check_allocation_result(malloc(size), size)
 
-#define checked_calloc(nmemb, size) check_allocation_result(calloc(nmemb, size))
+#define checked_calloc(nmemb, size)                                            \
+	check_allocation_result(calloc(nmemb, size), nmemb)
 
-#define checked_realloc(ptr, size) check_allocation_result(realloc(ptr, size))
+#define checked_realloc(ptr, size)                                             \
+	check_allocation_result(realloc(ptr, size), size)
 
-#define checked_strdup(s) check_allocation_result(strdup(s))
+#define checked_strdup(s) check_allocation_result(strdup(s), 1)
 
 // Endianness conversions.
 static inline void SwapLE32(void *i)
