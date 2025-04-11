@@ -26,7 +26,7 @@ struct _VFILE {
 	VFILE_CONTEXT *current_ctx, *last_ctx;
 };
 
-VFILE *vfopen(void *handle, struct vfile_functions *funcs)
+VFILE *vfopen(void *handle, const struct vfile_functions *funcs)
 {
 	VFILE *result;
 	result = checked_calloc(1, sizeof(VFILE));
@@ -144,7 +144,7 @@ static void wrapped_fclose(void *handle)
 	fclose(handle);
 }
 
-static struct vfile_functions wrapped_io_functions = {
+static const struct vfile_functions wrapped_io_functions = {
     wrapped_fread,     wrapped_fwrite, wrapped_fseek, wrapped_ftell,
     wrapped_ftruncate, wrapped_fclose, wrapped_fsync,
 };
@@ -286,7 +286,7 @@ static void restricted_vfclose(void *handle)
 	free(restricted);
 }
 
-static struct vfile_functions restricted_io_functions = {
+static const struct vfile_functions restricted_io_functions = {
     restricted_vfread, restricted_fwrite,     restricted_vfseek,
     restricted_vftell, restricted_vftruncate, restricted_vfclose,
     restricted_vfsync,
@@ -399,7 +399,7 @@ static void memory_vfclose(void *handle)
 	free(f);
 }
 
-static struct vfile_functions memory_io_functions = {
+static const struct vfile_functions memory_io_functions = {
     memory_vfread,     memory_vfwrite, memory_vfseek, memory_vftell,
     memory_vftruncate, memory_vfclose, memory_vfsync,
 };

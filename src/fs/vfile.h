@@ -33,7 +33,7 @@ struct vfile_functions {
 	void (*sync)(void *handle);
 };
 
-VFILE *vfopen(void *handle, struct vfile_functions *funcs);
+VFILE *vfopen(void *handle, const struct vfile_functions *funcs);
 VFILE *vfrestrict(VFILE *inner, long start, long end, int ro);
 VFILE *vfwrapfile(FILE *stream);
 
