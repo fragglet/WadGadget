@@ -52,7 +52,7 @@ The following table gives a brief summary of the current state:
 | Hexdump view                   | ✓                    | ✓                                           | ✓                                    |
 | View ENDOOM                    | ✓                    | ✓                                           | ✓                                    |
 | Viewing graphics/flats         | ✓                    | ✓ (for terminals that support Sixels)       | ✓                                    |
-| Graphics import                | ✓ (GIF, PCX)         | ✓ (PNG)                                     | ✓ (many formats)                     |
+| Graphics import                | ✓ (GIF, PCX)         | ✓ (PNG, BMP, PCX, GIF, LBM, XPM, TIFF)      | ✓ (many formats)                     |
 | Graphics export                | ✓ (GIF, PCX)         | ✓ (PNG)                                     | ✓ (many formats)                     |
 | Edit graphic offsets           | ✓                    | fragglet/WadGadget#11                       | ✓                                    |
 | PNG grAb chunk support         |                      | ✓                                           | ✓                                    |
