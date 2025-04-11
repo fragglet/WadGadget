@@ -23,6 +23,19 @@ struct subprocess {
 	pid_t pid;
 };
 
+// CloseFileHandles is called before exec() to ensure no open file handles
+// (besides the stdin/out/err we have configured) are passed to the child
+// process.
+static void CloseFileHandles(void)
+{
+	long max = sysconf(_SC_OPEN_MAX);
+	int i;
+
+	for (i = 3; i < max; ++i) {
+		close(i);
+	}
+}
+
 static bool SpawnSubprocess(struct subprocess *p, const char **cmd)
 {
 	int in[2], out[2];
@@ -39,10 +52,9 @@ static bool SpawnSubprocess(struct subprocess *p, const char **cmd)
 		goto fail2;
 	}
 	if (pid == 0) {
-		close(in[1]);
 		dup2(in[0], 0);
-		close(out[0]);
 		dup2(out[1], 1);
+		CloseFileHandles();
 		assert(execvp(cmd[0], (char *const *) cmd) == 0);
 	}
 
