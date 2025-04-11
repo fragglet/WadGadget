@@ -14,6 +14,8 @@
 #include "conv/process.h"
 #include "stringlib.h"
 
+#define TRANSPARENT  "rgb:00/ff/ff"  /* cyan */
+
 static const struct {
 	const char *extension;
 	const char *converter;
@@ -49,7 +51,7 @@ bool NetpbmFileTypeSupported(const char *filename)
 VFILE *NetpbmConvertToPNG(VFILE *input, const char *filename)
 {
 	const char *to_pnm[] = {"-", NULL};
-	const char *to_png[] = {"pnmtopng", NULL};
+	const char *to_png[] = {"pnmtopng", "-transparent=" TRANSPARENT, NULL};
 	int i;
 
 	for (i = 0; i < arrlen(file_types); i++) {
