@@ -63,6 +63,7 @@ OBJS =                      \
     conv/graphic.o          \
     conv/import.o           \
     conv/mus2mid.o          \
+    conv/netpbm.o           \
     conv/palette.o          \
     conv/process.o          \
     conv/vpng.o             \

@@ -8,11 +8,14 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#ifndef CONV__PROCESS_H_IMPORTED
-#define CONV__PROCESS_H_IMPORTED
+#ifndef CONV__NETPBM_H_IMPORTED
+#define CONV__NETPBM_H_IMPORTED
+
+#include <stdbool.h>
 
 #include "fs/vfile.h"
 
-VFILE *SpawnSubprocessFilter(VFILE *input, const char **cmd);
+bool NetpbmFileTypeSupported(const char *filename);
+VFILE *NetpbmConvertToPNG(VFILE *input, const char *filename);
 
-#endif /* #ifndef CONV__PROCESS_H_IMPORTED */
+#endif /* #ifndef CONV__NETPBM_H_IMPORTED */
