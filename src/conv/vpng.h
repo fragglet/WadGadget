@@ -12,6 +12,7 @@
 #define CONV__VPNG_H_INCLUDED
 
 #include <png.h>
+#include <setjmp.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -25,6 +26,7 @@ struct png_context {
 	png_structp ppng;
 	png_infop pinfo;
 	bool write;
+	jmp_buf abort_jump;
 };
 
 uint8_t *V_PalettizeRGBABuffer(const struct palette *palette, uint8_t *buf,
