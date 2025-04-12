@@ -16,10 +16,11 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "conv/error.h"
 #include "fs/vfile.h"
 
 struct subprocess {
-	int in, out;
+	int in, out, err;
 	pid_t pid;
 };
 
@@ -38,7 +39,7 @@ static void CloseFileHandles(void)
 
 static bool SpawnSubprocess(struct subprocess *p, const char **cmd)
 {
-	int in[2], out[2];
+	int in[2], out[2], err[2];
 	pid_t pid;
 
 	if (pipe(in) != 0) {
@@ -47,25 +48,34 @@ static bool SpawnSubprocess(struct subprocess *p, const char **cmd)
 	if (pipe(out) != 0) {
 		goto fail1;
 	}
+	if (pipe(err) != 0) {
+		goto fail2;
+	}
 	pid = fork();
 	if (pid < 0) {
-		goto fail2;
+		goto fail3;
 	}
 	if (pid == 0) {
 		dup2(in[0], 0);
 		dup2(out[1], 1);
+		dup2(err[1], 2);
 		CloseFileHandles();
 		assert(execvp(cmd[0], (char *const *) cmd) == 0);
 	}
 
 	close(in[0]);
 	close(out[1]);
+	close(err[1]);
 	p->in = in[1];
 	p->out = out[0];
+	p->err = err[0];
 	p->pid = pid;
 
 	return true;
 
+fail3:
+	close(err[0]);
+	close(err[1]);
 fail2:
 	close(out[0]);
 	close(out[1]);
@@ -80,6 +90,8 @@ struct filter {
 	VFILE *in;
 	uint8_t buf[256];
 	size_t buf_len;
+	char error_output[256];
+	size_t error_output_len;
 };
 
 static void FeedSubprocess(struct filter *f)
@@ -106,29 +118,48 @@ static void FeedSubprocess(struct filter *f)
 	memmove(f->buf, f->buf + cnt, f->buf_len);
 }
 
+static void AppendErrorOutput(struct filter *f)
+{
+	char buf[64];
+	ssize_t nbytes = read(f->p.err, buf, sizeof(buf));
+
+	// printf("subprocess %d: %d err bytes\r\n", f->p.pid, nbytes);
+	assert(nbytes >= 0);
+
+	nbytes = min(nbytes, sizeof(f->error_output) - f->error_output_len);
+	memcpy(f->error_output + f->error_output_len, buf, nbytes);
+	f->error_output_len += nbytes;
+}
+
 static size_t FilterRead(void *ptr, size_t size, size_t nitems, void *handle)
 {
 	struct filter *f = handle;
-	struct pollfd fds[2];
-	int nfds = 1;
+	struct pollfd fds[3];
+	int nfds;
 
 	assert(size == 1);
 
 	for (;;) {
 		fds[0].fd = f->p.out;
 		fds[0].events = POLLIN | POLLHUP;
-		fds[0].revents = 0;
-		fds[1].revents = 0;
-		nfds = 1;
+
+		fds[1].fd = f->p.err;
+		fds[1].events = POLLIN | POLLHUP;
+		fds[2].revents = 0;
+
+		nfds = 2;
 
 		if (f->in != NULL) {
-			fds[1].fd = f->p.in;
-			fds[1].events = POLLOUT;
+			fds[2].fd = f->p.in;
+			fds[2].events = POLLOUT;
 			++nfds;
 		}
 
 		assert(poll(fds, nfds, -1) >= 0);
 
+		if ((fds[1].revents & POLLIN) != 0) {
+			AppendErrorOutput(f);
+		}
 		if ((fds[0].revents & POLLIN) != 0) {
 			ssize_t result = read(f->p.out, ptr, nitems);
 			assert(result >= 0);
@@ -137,7 +168,7 @@ static size_t FilterRead(void *ptr, size_t size, size_t nitems, void *handle)
 		if ((fds[0].revents & POLLHUP) != 0) {
 			return 0;
 		}
-		if ((fds[1].revents & POLLOUT) != 0) {
+		if ((fds[2].revents & POLLOUT) != 0) {
 			FeedSubprocess(f);
 		}
 	}
@@ -146,14 +177,24 @@ static size_t FilterRead(void *ptr, size_t size, size_t nitems, void *handle)
 static void FilterClose(void *handle)
 {
 	struct filter *f = handle;
+	int status;
 
 	if (f->in != NULL) {
 		vfclose(f->in);
 		close(f->p.in);
 	}
 	close(f->p.out);
+	close(f->p.err);
 
-	waitpid(f->p.pid, NULL, 0);
+	if (waitpid(f->p.pid, &status, 0) == f->p.pid &&
+	    (!WIFEXITED(status) || WEXITSTATUS(status) != 0)) {
+		f->error_output_len =
+		    min(f->error_output_len, sizeof(f->error_output) - 1);
+		f->error_output[f->error_output_len] = '\0';
+		ConversionError("Subprocess %d exited with status %d\n"
+		                "%s\n",
+		                f->p.pid, WEXITSTATUS(status), f->error_output);
+	}
 	free(f);
 }
 
@@ -166,6 +207,7 @@ VFILE *SpawnSubprocessFilter(VFILE *input, const char **cmd)
 	struct filter *f = checked_calloc(1, sizeof(struct filter));
 	f->in = input;
 	f->buf_len = 0;
+	f->error_output_len = 0;
 
 	if (!SpawnSubprocess(&f->p, cmd)) {
 		free(f);
