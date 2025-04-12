@@ -130,13 +130,13 @@ static void CopyToWAD(bool convert)
 	}
 
 	if (!PerformImport(from, import_set, to, to_point, &result, convert)) {
+		VFS_FreeSet(&result);
+		VFS_Rollback(to);
+		VFS_Refresh(to);
 		if (strlen(GetConversionError()) > 0) {
 			UI_MessageBox("Error during import:\n%s",
 			              GetConversionError());
 		}
-		VFS_FreeSet(&result);
-		VFS_Rollback(to);
-		VFS_Refresh(to);
 		return;
 	}
 
@@ -306,13 +306,13 @@ static void PerformUpdate(bool convert)
 
 	if (!PerformUpdateWAD(from, import_set, to, to_point, &result,
 	                      convert)) {
+		VFS_FreeSet(&result);
+		VFS_Rollback(to);
+		VFS_Refresh(to);
 		if (strlen(GetConversionError()) > 0) {
 			UI_MessageBox("Error during import:\n%s",
 			              GetConversionError());
 		}
-		VFS_FreeSet(&result);
-		VFS_Rollback(to);
-		VFS_Refresh(to);
 		return;
 	}
 
