@@ -13,6 +13,7 @@
 
 #include "fs/vfile.h"
 
-VFILE *SpawnSubprocessFilter(VFILE *input, const char **cmd);
+VFILE *SpawnSubprocessFilter(VFILE *input, const char **cmd,
+                             bool report_errors);
 
 #endif /* #ifndef CONV__PROCESS_H_IMPORTED */

@@ -92,6 +92,7 @@ struct filter {
 	size_t buf_len;
 	char error_output[256];
 	size_t error_output_len;
+	bool report_errors;
 };
 
 static void FeedSubprocess(struct filter *f)
@@ -187,7 +188,8 @@ static void FilterClose(void *handle)
 	close(f->p.err);
 
 	if (waitpid(f->p.pid, &status, 0) == f->p.pid &&
-	    (!WIFEXITED(status) || WEXITSTATUS(status) != 0)) {
+	    (!WIFEXITED(status) || WEXITSTATUS(status) != 0) &&
+	    f->report_errors) {
 		f->error_output_len =
 		    min(f->error_output_len, sizeof(f->error_output) - 1);
 		f->error_output[f->error_output_len] = '\0';
@@ -202,12 +204,13 @@ static const struct vfile_functions filter_funcs = {
     FilterRead, NULL, NULL, NULL, NULL, FilterClose, NULL,
 };
 
-VFILE *SpawnSubprocessFilter(VFILE *input, const char **cmd)
+VFILE *SpawnSubprocessFilter(VFILE *input, const char **cmd, bool report_errors)
 {
 	struct filter *f = checked_calloc(1, sizeof(struct filter));
 	f->in = input;
 	f->buf_len = 0;
 	f->error_output_len = 0;
+	f->report_errors = report_errors;
 
 	if (!SpawnSubprocess(&f->p, cmd)) {
 		free(f);

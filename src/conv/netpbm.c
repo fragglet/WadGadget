@@ -64,8 +64,13 @@ VFILE *NetpbmConvertToPNG(VFILE *input, const char *filename)
 
 	if (file_types[i].converter != NULL) {
 		to_pnm[0] = file_types[i].converter;
-		input = SpawnSubprocessFilter(input, to_pnm);
+		input = SpawnSubprocessFilter(input, to_pnm, true);
 	}
 
-	return SpawnSubprocessFilter(input, to_png);
+	// We usually discard any errors from pnmtopng as we can assume the
+	// output from the first converter will always be valid; we only report
+	// its error output if we're converting from .ppm and there is no first
+	// converter:
+	return SpawnSubprocessFilter(input, to_png,
+	                             file_types[i].converter == NULL);
 }
