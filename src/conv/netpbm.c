@@ -14,7 +14,7 @@
 #include "conv/process.h"
 #include "stringlib.h"
 
-#define TRANSPARENT  "rgb:00/ff/ff"  /* cyan */
+#define TRANSPARENT "rgb:00/ff/ff" /* cyan */
 
 static const struct {
 	const char *extension;
