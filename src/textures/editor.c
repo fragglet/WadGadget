@@ -11,6 +11,7 @@
 #include "textures/editor.h"
 
 #include <assert.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -20,71 +21,99 @@
 #include "ui/pane.h"
 #include "ui/stack.h"
 
+enum {
+	LINE_SPACE1,
+	LINE_TX_NAME,
+	LINE_TX_WIDTH,
+	LINE_TX_HEIGHT,
+	LINE_SPACE2,
+	LINE_PATCH_HEADING,
+	LINE_PATCH_START,
+};
+
 static void EditorGetLink(struct pager_config *cfg, int idx,
                           struct pager_link *link)
 {
-	link->lineno = idx / 3;
+	switch (idx) {
+	case 0:
+		link->lineno = LINE_TX_NAME;
+		return;
+	case 1:
+		link->lineno = LINE_TX_WIDTH;
+		return;
+	case 2:
+		link->lineno = LINE_TX_HEIGHT;
+		return;
+	}
+	link->lineno = LINE_PATCH_START + ((idx - 3) / 3);
 	link->offset = idx % 3;
+}
+
+static void DrawField(WINDOW *win, int field_num, const char *fmt, ...)
+{
+	int curr_link = current_pager->cfg->current_link;
+	va_list args;
+	char buf[40];
+
+	if (field_num == curr_link) {
+		wattron(win, A_REVERSE);
+	}
+
+	va_start(args, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, args);
+	va_end(args);
+	waddstr(win, buf);
+
+	wattroff(win, A_REVERSE);
 }
 
 static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 {
 	struct texture_editor *e = user_data;
-	int curr_link = current_pager->cfg->current_link;
 	struct patch *patch;
-	int field_num;
+	int patch_idx;
 	char buf[40];
 
-	if ((curr_link / 3) == line) {
-		field_num = curr_link % 3;
-	} else {
-		field_num = -1;
-	}
-
-	waddstr(win, "    ");
-
-	// Name (texture or patch name):
-	if (line == 0) {
-		snprintf(buf, sizeof(buf), "%-8.8s", (*e->tx)->name);
+	switch (line) {
+	case LINE_TX_NAME:
 		wattron(win, A_BOLD);
-	} else {
-		patch = &(*e->tx)->patches[line - 1];
-		// TODO: Patch name, not number:
-		snprintf(buf, sizeof(buf), "%8d", patch->patch);
+		waddstr(win, "   Texture name: ");
 		wattroff(win, A_BOLD);
+		DrawField(win, 0, "%-8.8s", (*e->tx)->name);
+		return;
+	case LINE_TX_WIDTH:
+		wattron(win, A_BOLD);
+		waddstr(win, "          Width: ");
+		wattroff(win, A_BOLD);
+		DrawField(win, 1, "%-8d", (*e->tx)->width);
+		return;
+	case LINE_TX_HEIGHT:
+		wattron(win, A_BOLD);
+		waddstr(win, "         Height: ");
+		wattroff(win, A_BOLD);
+		DrawField(win, 2, "%-8d", (*e->tx)->width);
+		return;
+	case LINE_PATCH_HEADING:
+		wattron(win, A_BOLD);
+		snprintf(buf, sizeof(buf), "%16s%8s%8s",
+		         "Patch name", "X", "Y");
+		waddstr(win, buf);
+		wattroff(win, A_BOLD);
+		return;
 	}
 
-	if (field_num == 0) {
-		wattron(win, A_REVERSE);
-	}
-	waddstr(win, buf);
-	wattroff(win, A_REVERSE);
-
-	// X offset / width:
-	if (line == 0) {
-		snprintf(buf, sizeof(buf), "%8d", (*e->tx)->width);
-	} else {
-		snprintf(buf, sizeof(buf), "%8d", patch->originx);
+	if (line <= LINE_PATCH_HEADING) {
+		return;
 	}
 
-	if (field_num == 1) {
-		wattron(win, A_REVERSE);
-	}
-	waddstr(win, buf);
-	wattroff(win, A_REVERSE);
+	patch_idx = line - LINE_PATCH_START;
+	patch = &(*e->tx)->patches[patch_idx];
 
-	// Y offset / width:
-	if (line == 0) {
-		snprintf(buf, sizeof(buf), "%8d", (*e->tx)->width);
-	} else {
-		snprintf(buf, sizeof(buf), "%8d", patch->originx);
-	}
-
-	if (field_num == 2) {
-		wattron(win, A_REVERSE);
-	}
-	waddstr(win, buf);
-	wattroff(win, A_REVERSE);
+	waddstr(win, "        ");
+	// TODO: Real patch name
+	DrawField(win, 3 + patch_idx * 3, "%8d", patch->patch);
+	DrawField(win, 3 + patch_idx * 3 + 1, "%8d", patch->originx);
+	DrawField(win, 3 + patch_idx * 3 + 2, "%8d", patch->originy);
 }
 
 static void EditorActivateLink(struct pager *p, int idx)
@@ -110,11 +139,11 @@ void TX_EditTexture(struct texture **tx, struct pnames *pnames)
 	cfg.title = "Texture Editor (WIP)";
 	cfg.draw_line = EditorDrawLine;
 	cfg.user_data = &e;
-	cfg.num_lines = (*tx)->patchcount + 1;
+	cfg.num_lines = LINE_PATCH_START + (*tx)->patchcount;
 	cfg.actions = texture_editor_actions;
 	cfg.get_link = EditorGetLink;
 	cfg.activate_link = EditorActivateLink;
-	cfg.num_links = cfg.num_lines * 3;
+	cfg.num_links = (*tx)->patchcount * 3 + 3;
 
 	P_InitPager(&p, &cfg);
 	P_RunPager(&p, true);
