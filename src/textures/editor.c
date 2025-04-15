@@ -20,6 +20,7 @@
 
 #include "pager/pager.h"
 #include "ui/dialog.h"
+#include "ui/list_pane.h"
 #include "ui/pane.h"
 #include "ui/stack.h"
 #include "ui/title_bar.h"
@@ -41,6 +42,78 @@ enum {
 	FIELD_TX_WIDTH,
 	FIELD_TX_HEIGHT,
 };
+
+struct pname_selector {
+	struct list_pane lp;
+	struct texture_bundle *b;
+	bool selected;
+};
+
+static void PnameSelectorDrawElement(WINDOW *win, int index, void *data)
+{
+	struct pname_selector *s = data;
+	char buf[10];
+	if (s->lp.active && index == s->lp.selected) {
+		wattron(win, A_REVERSE);
+	}
+	snprintf(buf, sizeof(buf), "%-8.8s", s->b->pn->pnames[index]);
+	mvwaddstr(win, 0, 0, buf);
+	wattroff(win, A_REVERSE);
+}
+
+static unsigned int PnameSelectorNumEntries(void *data)
+{
+	struct pname_selector *s = data;
+	return s->b->pn->num_pnames;
+}
+
+static const struct list_pane_funcs pname_select_funcs = {
+	PnameSelectorDrawElement,
+	PnameSelectorNumEntries,
+};
+
+static void PnameSelectorKeypress(void *p, int key)
+{
+	struct pname_selector *s = p;
+
+	switch (key) {
+	case '\r':
+		s->selected = true;
+		UI_ExitMainLoop();
+		return;
+	case 27:
+		UI_ExitMainLoop();
+		return;
+	default:
+		UI_ListPaneKeypress(p, key);
+		return;
+	}
+}
+
+static int SelectPname(struct texture_bundle *b)
+{
+	const struct action **saved_actions;
+	struct pname_selector s;
+	WINDOW *win = newwin(LINES - 3, 40, 1, 40);
+
+	s.b = b;
+	s.selected = false;
+	UI_ListPaneInit(&s.lp, win, &pname_select_funcs, &s);
+	s.lp.pane.keypress = PnameSelectorKeypress;
+	saved_actions = UI_ActionsBarSetActions(NULL);
+	UI_PaneShow(&s);
+	UI_RunMainLoop();
+	UI_PaneHide(&s);
+	UI_ActionsBarSetActions(saved_actions);
+	UI_ListPaneFree(&s.lp);
+	delwin(win);
+
+	if (s.selected) {
+		return s.lp.selected;
+	} else {
+		return -1;
+	}
+}
 
 static void EditorGetLink(struct pager_config *cfg, int idx,
                           struct pager_link *link)
@@ -155,6 +228,7 @@ static void EditorActivateLink(struct pager *p, int idx)
 {
 	struct texture_editor *e = current_pager->cfg->user_data;
 	struct patch *patch;
+	int pname_idx;
 	char *new_name;
 
 	switch (idx) {
@@ -183,7 +257,11 @@ static void EditorActivateLink(struct pager *p, int idx)
 	patch = &TX(e)->patches[(idx - 3) / 3];
 	switch (idx % 3) {
 	case 0:
-		// TODO: Select patch
+		pname_idx = SelectPname(e->b);
+		if (pname_idx >= 0) {
+			patch->patch = pname_idx;
+			++e->b->txs->modified_count;
+		}
 		return;
 	case 1:
 		EditField(e, "Enter new X offset:", &patch->originx, -16384);
