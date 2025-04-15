@@ -15,11 +15,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "pager/pager.h"
+#include "ui/dialog.h"
 #include "ui/pane.h"
 #include "ui/stack.h"
+#include "ui/title_bar.h"
 
 enum {
 	LINE_SPACE1,
@@ -123,9 +126,45 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 	DrawField(win, 3 + patch_idx * 3 + 2, "%8d", patch->originy);
 }
 
+static void EditField(const char *prompt, int16_t *field, int min)
+{
+	char *answer;
+	int val;
+
+	answer = UI_TextInputDialogBox("Edit field", "Edit", 6, prompt);
+	if (answer == NULL) {
+		return;
+	}
+
+	val = atoi(answer);
+	free(answer);
+	if (val < min || val > 16384) {
+		UI_ShowNotice("Value not in range.");
+		return;
+	}
+
+	*field = (int16_t) val;
+}
+
 static void EditorActivateLink(struct pager *p, int idx)
 {
-	// TODO: Change texture / patch properties
+	struct texture_editor *e = current_pager->cfg->user_data;
+
+	switch (idx) {
+	case FIELD_TX_NAME:
+		// TODO
+		return;
+	case FIELD_TX_WIDTH:
+		EditField("Enter new texture width:",
+		          (int16_t *) &(*e->tx)->width, 1);
+		return;
+	case FIELD_TX_HEIGHT:
+		EditField("Enter new texture height:",
+		          (int16_t *) &(*e->tx)->height, 1);
+		return;
+	}
+
+	// TODO: Edit patches
 }
 
 static const struct action *texture_editor_actions[] = {
