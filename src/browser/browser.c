@@ -218,7 +218,7 @@ static const struct action *txt_actions[] = {
     &edit_textures_action, &rearrange_action,
     &sort_entries_action,  &new_texture_action,
     &dup_texture_action,   &undo_action,
-    &redo_action,          &view_action,
+    &redo_action,          &edit_texture_action,
     &parent_dir_action,    NULL,
 };
 

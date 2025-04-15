@@ -103,6 +103,7 @@ VFILE *TX_DirFormatConfig(struct directory *_dir, struct file_set *subset);
 
 extern const struct action new_texture_action;
 extern const struct action edit_textures_action;
+extern const struct action edit_texture_action;
 extern const struct action edit_pnames_action;
 extern const struct action dup_texture_action;
 extern const struct action import_texture_config;

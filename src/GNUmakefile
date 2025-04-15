@@ -84,6 +84,7 @@ OBJS =                      \
     textures/actions.o      \
     textures/bundle.o       \
     textures/config.o       \
+    textures/editor.o       \
     textures/lump_dir.o     \
     textures/pnames.o       \
     textures/pnames_dir.o   \

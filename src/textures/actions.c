@@ -23,6 +23,7 @@
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "stringlib.h"
+#include "textures/editor.h"
 #include "textures/internal.h"
 #include "textures/textures.h"
 #include "ui/actions_bar.h"
@@ -139,6 +140,26 @@ const struct action edit_textures_action = {
 
 const struct action edit_pnames_action = {
     KEY_F(4), 'F', "EditCfg", "Edit PNAMES config", PerformEditConfig,
+};
+
+static void PerformEditTexture(void)
+{
+	struct textures *txs = TX_TextureList(active_pane->dir);
+	int tx_num;
+
+	if (!B_CheckReadOnly(active_pane->dir)) {
+		return;
+	}
+
+	tx_num = B_DirectoryPaneSelected(active_pane);
+	TX_EditTexture(&txs->textures[tx_num], NULL);
+
+	// TODO: Refresh to handle potential change in texture name,
+	// commit changes.
+}
+
+const struct action edit_texture_action = {
+    '\r', 0, "Edit", "Edit texture", PerformEditTexture,
 };
 
 static void PerformDuplicateTexture(void)
