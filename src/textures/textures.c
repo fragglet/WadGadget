@@ -222,17 +222,23 @@ VFILE *TX_MarshalTextures(struct textures *txs)
 	return result;
 }
 
-struct texture *TX_AddPatch(struct texture *t, struct patch *p)
+struct texture *TX_InsertPatch(struct texture *t, int insert_index,
+                               struct patch *p)
 {
 	struct patch *newp;
+
+	assert(insert_index >= 0 && insert_index <= t->patchcount);
 
 	// As long as we have the name, we can append the patch
 	// (X/Y offsets are assumed to be zero)
 	t = checked_realloc(t, TX_TextureLen(t->patchcount + 1));
-	newp = &t->patches[t->patchcount];
-	++t->patchcount;
 
-	*newp = *p;
+	memmove(t->patches + insert_index + 1,
+	        t->patches + insert_index,
+	        sizeof(struct patch) * (t->patchcount - insert_index));
+	t->patches[insert_index] = *p;
+
+	++t->patchcount;
 
 	return t;
 }
