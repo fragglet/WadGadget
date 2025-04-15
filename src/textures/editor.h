@@ -15,9 +15,9 @@
 
 struct texture_editor {
 	struct texture **tx;
-	struct pnames *pnames;
+	struct texture_bundle *b;
 };
 
-void TX_EditTexture(struct texture **tx, struct pnames *pnames);
+void TX_EditTexture(struct texture **tx, struct texture_bundle *b);
 
 #endif /* #ifndef TEXTURES__EDITOR_H_INCLUDED */

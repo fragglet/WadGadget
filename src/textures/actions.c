@@ -144,7 +144,7 @@ const struct action edit_pnames_action = {
 
 static void PerformEditTexture(void)
 {
-	struct textures *txs = TX_TextureList(active_pane->dir);
+	struct texture_bundle *b = TX_DirGetBundle(active_pane->dir);
 	int tx_num;
 
 	if (!B_CheckReadOnly(active_pane->dir)) {
@@ -152,7 +152,7 @@ static void PerformEditTexture(void)
 	}
 
 	tx_num = B_DirectoryPaneSelected(active_pane);
-	TX_EditTexture(&txs->textures[tx_num], NULL);
+	TX_EditTexture(&b->txs->textures[tx_num], b);
 
 	// TODO: Refresh to handle potential change in texture name,
 	// commit changes.

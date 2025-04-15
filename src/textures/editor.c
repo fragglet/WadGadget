@@ -111,7 +111,8 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 
 	waddstr(win, "        ");
 	// TODO: Real patch name
-	DrawField(win, 3 + patch_idx * 3, "%8d", patch->patch);
+	DrawField(win, 3 + patch_idx * 3, "%-8.8s",
+	          e->b->pn->pnames[patch_idx]);
 	DrawField(win, 3 + patch_idx * 3 + 1, "%8d", patch->originx);
 	DrawField(win, 3 + patch_idx * 3 + 2, "%8d", patch->originy);
 }
@@ -126,14 +127,14 @@ static const struct action *texture_editor_actions[] = {
     NULL,
 };
 
-void TX_EditTexture(struct texture **tx, struct pnames *pnames)
+void TX_EditTexture(struct texture **tx, struct texture_bundle *b)
 {
 	struct pager p;
 	struct texture_editor e;
 	struct pager_config cfg;
 
 	e.tx = tx;
-	e.pnames = pnames;
+	e.b = b;
 
 	memset(&cfg, 0, sizeof(struct pager_config));
 	cfg.title = "Texture Editor (WIP)";
