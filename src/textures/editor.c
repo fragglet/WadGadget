@@ -410,6 +410,7 @@ const struct action lower_patch_action = {
 
 static const struct action *texture_editor_actions[] = {
     &exit_pager_action,
+    &pager_help_action,
     &edit_field_action,
     &add_patch_action,
     &delete_patch_action,
@@ -430,6 +431,7 @@ bool TX_EditTexture(struct texture_bundle *b, int texture_index)
 	memset(&cfg, 0, sizeof(struct pager_config));
 	cfg.title = "Texture Editor (WIP)";
 	cfg.draw_line = EditorDrawLine;
+	cfg.help_file = "texture_editor.md";
 	cfg.user_data = &e;
 	cfg.actions = texture_editor_actions;
 	cfg.get_link = EditorGetLink;

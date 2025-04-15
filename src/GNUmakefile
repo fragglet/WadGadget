@@ -42,6 +42,7 @@ HELP_FILES =                \
     help/dir_view.md        \
     help/pnames_editor.md   \
     help/texture_dir.md     \
+    help/texture_editor.md  \
     help/wad_view.md        \
     help/hexen_specs.md     \
     help/help.md            \

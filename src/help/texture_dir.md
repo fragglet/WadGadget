@@ -15,6 +15,7 @@ file containing the texture lump.
 
 ## Keys
 
+    **        Enter   **  Edit selected texture (see [texture editor](texture_editor.md))
     **Ctrl-V  F2      **  Mo**v**e (rearrange) marked textures
     **Ctrl-]  Shift-F2**  Sort marked textures into alphabetical order
     **Ctrl-U  F3      **  D**u**plicate selected texture
