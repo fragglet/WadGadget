@@ -151,10 +151,20 @@ static void EditField(const char *prompt, int16_t *field, int min)
 static void EditorActivateLink(struct pager *p, int idx)
 {
 	struct texture_editor *e = current_pager->cfg->user_data;
+	char *new_name;
 
 	switch (idx) {
 	case FIELD_TX_NAME:
-		// TODO
+		new_name = UI_TextInputDialogBox("Edit field", "Edit", 8,
+		                                 "Enter new texture name:");
+		if (new_name == NULL || strlen(new_name) == 0) {
+			free(new_name);
+			return;
+		}
+		if (!TX_RenameTexture(e->b->txs, e->texture_index, new_name)) {
+			UI_ShowNotice("There is already a texture with that name.");
+		}
+		free(new_name);
 		return;
 	case FIELD_TX_WIDTH:
 		EditField("Enter new texture width:",
