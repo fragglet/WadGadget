@@ -44,6 +44,12 @@ enum {
 	FIELD_TX_HEIGHT,
 };
 
+struct texture_editor {
+	struct texture_bundle *b;
+	int texture_index;
+	bool edited;
+};
+
 struct pname_selector {
 	struct list_pane lp;
 	struct texture_bundle *b;
