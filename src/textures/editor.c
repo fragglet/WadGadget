@@ -31,17 +31,23 @@ enum {
 	LINE_PATCH_START,
 };
 
+enum {
+	FIELD_TX_NAME,
+	FIELD_TX_WIDTH,
+	FIELD_TX_HEIGHT,
+};
+
 static void EditorGetLink(struct pager_config *cfg, int idx,
                           struct pager_link *link)
 {
 	switch (idx) {
-	case 0:
+	case FIELD_TX_NAME:
 		link->lineno = LINE_TX_NAME;
 		return;
-	case 1:
+	case FIELD_TX_WIDTH:
 		link->lineno = LINE_TX_WIDTH;
 		return;
-	case 2:
+	case FIELD_TX_HEIGHT:
 		link->lineno = LINE_TX_HEIGHT;
 		return;
 	}
@@ -79,19 +85,19 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 		wattron(win, A_BOLD);
 		waddstr(win, "   Texture name: ");
 		wattroff(win, A_BOLD);
-		DrawField(win, 0, "%-8.8s", (*e->tx)->name);
+		DrawField(win, FIELD_TX_NAME, "%-8.8s", (*e->tx)->name);
 		return;
 	case LINE_TX_WIDTH:
 		wattron(win, A_BOLD);
 		waddstr(win, "          Width: ");
 		wattroff(win, A_BOLD);
-		DrawField(win, 1, "%-8d", (*e->tx)->width);
+		DrawField(win, FIELD_TX_WIDTH, "%-8d", (*e->tx)->width);
 		return;
 	case LINE_TX_HEIGHT:
 		wattron(win, A_BOLD);
 		waddstr(win, "         Height: ");
 		wattroff(win, A_BOLD);
-		DrawField(win, 2, "%-8d", (*e->tx)->width);
+		DrawField(win, FIELD_TX_HEIGHT, "%-8d", (*e->tx)->height);
 		return;
 	case LINE_PATCH_HEADING:
 		wattron(win, A_BOLD);
