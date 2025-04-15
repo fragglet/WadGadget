@@ -65,7 +65,7 @@ The following table gives a brief summary of the current state:
 | Alternate palette support      | Doom/Heretic         | ✓ (arbitrary/custom)                        | ✓ (arbitrary/custom)                 |
 | Palette/colormap import        |                      | ✓ (PNG)                                     | ✓                                    |
 | Palette/colormap export        |                      | ✓ (PNG)                                     | ✓                                    |
-| Texture editor                 | ✓                    | WIP (fragglet/WadGadget#9); can be edited as text as a stopgap | ✓                 |
+| Texture editor                 | ✓                    | ✓                                           | ✓                                    |
 | PNAMES editor                  | ✓                    | ✓                                           | ✓                                    |
 | Online help                    |                      | ✓ (Hypertext-based contextual help)         | ✓ (browser tabs to access help/wiki) |
 | View/edit levels               |                      |                                             | ✓                                    |
