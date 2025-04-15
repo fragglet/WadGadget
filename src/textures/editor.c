@@ -25,7 +25,7 @@
 #include "ui/stack.h"
 #include "ui/title_bar.h"
 
-#define TX(e)  ((e)->b->txs->textures[(e)->texture_index])
+#define TX(e) ((e)->b->txs->textures[(e)->texture_index])
 
 enum {
 	LINE_SPACE1,
@@ -68,8 +68,8 @@ static unsigned int PnameSelectorNumEntries(void *data)
 }
 
 static const struct list_pane_funcs pname_select_funcs = {
-	PnameSelectorDrawElement,
-	PnameSelectorNumEntries,
+    PnameSelectorDrawElement,
+    PnameSelectorNumEntries,
 };
 
 static void PnameSelectorKeypress(void *p, int key)
@@ -180,8 +180,8 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 		return;
 	case LINE_PATCH_HEADING:
 		wattron(win, A_BOLD);
-		snprintf(buf, sizeof(buf), "%17s%8s%8s",
-		         "Patch name", "X", "Y");
+		snprintf(buf, sizeof(buf), "%17s%8s%8s", "Patch name", "X",
+		         "Y");
 		waddstr(win, buf);
 		wattroff(win, A_BOLD);
 		return;
@@ -240,13 +240,15 @@ static void EditorActivateLink(struct pager *p, int idx)
 			return;
 		}
 		if (!TX_RenameTexture(e->b->txs, e->texture_index, new_name)) {
-			UI_ShowNotice("There is already a texture with that name.");
+			UI_ShowNotice(
+			    "There is already a texture with that name.");
 		}
 		free(new_name);
 		return;
 	case FIELD_TX_WIDTH:
-		EditField(e, "Enter new texture width:",
-		          (int16_t *) &TX(e)->width, 1);
+		EditField(e,
+		          "Enter new texture width:", (int16_t *) &TX(e)->width,
+		          1);
 		return;
 	case FIELD_TX_HEIGHT:
 		EditField(e, "Enter new texture height:",
