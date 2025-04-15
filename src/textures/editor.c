@@ -278,9 +278,41 @@ const struct action edit_field_action = {
     '\r', 0, "Edit", "Edit", P_PerformOpenLink,
 };
 
+static void PerformAddPatch(void)
+{
+	struct texture_editor *e = current_pager->cfg->user_data;
+	struct patch p;
+	int curr_link = current_pager->cfg->current_link;
+	int insert_index, patch_num;
+
+	patch_num = SelectPname(e->b);
+	if (patch_num < 0) {
+		return;
+	}
+
+	if (curr_link < 3) {
+		insert_index = 0;
+	} else {
+		insert_index = curr_link / 3;
+	}
+
+	p.patch = patch_num;
+	p.originx = 0;
+	p.originy = 0;
+	TX(e) = TX_InsertPatch(TX(e), insert_index, &p);
+
+	current_pager->cfg->num_lines = LINE_PATCH_START + TX(e)->patchcount;
+	current_pager->cfg->num_links = TX(e)->patchcount * 3 + 3;
+}
+
+const struct action add_patch_action = {
+    KEY_F(7), 'K', "Add Patch", "Add Patch", PerformAddPatch,
+};
+
 static const struct action *texture_editor_actions[] = {
     &exit_pager_action,
     &edit_field_action,
+    &add_patch_action,
     NULL,
 };
 
