@@ -7,7 +7,7 @@ pages provide more specific information:
 
  * [Directory view](dir_view.md)
  * [PNAMES editor](pnames_editor.md)
- * [Texture editor](texture_editor.md)
+ * [Texture editor](texture_dir.md)
  * [WAD view](wad_view.md)
  * [Palette database](palette.md)
 

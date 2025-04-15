@@ -1334,11 +1334,11 @@ static void ShowHelp(void)
 		const struct file_type *ft;
 		const char *fn;
 	} help_files_per_type[] = {
-	    {&file_type_dir,          "dir_view.md"      },
-	    {&file_type_wad,          "wad_view.md"      },
-	    {&file_type_texture_list, "texture_editor.md"},
-	    {&file_type_pnames_list,  "pnames_editor.md" },
-	    {&file_type_palettes,     "palette.md"       },
+	    {&file_type_dir,          "dir_view.md"     },
+	    {&file_type_wad,          "wad_view.md"     },
+	    {&file_type_texture_list, "texture_dir.md"  },
+	    {&file_type_pnames_list,  "pnames_editor.md"},
+	    {&file_type_palettes,     "palette.md"      },
 	};
 
 	for (i = 0; i < arrlen(help_files_per_type); i++) {

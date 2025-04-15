@@ -1,4 +1,4 @@
-# Texture editor
+# Texture directory
 
 [This page shows help about browsing TEXTURE lumps. For help on the browser
 interface in general, [see here](browser.md).]
