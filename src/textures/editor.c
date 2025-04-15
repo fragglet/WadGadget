@@ -104,7 +104,7 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 		return;
 	case LINE_PATCH_HEADING:
 		wattron(win, A_BOLD);
-		snprintf(buf, sizeof(buf), "%16s%8s%8s",
+		snprintf(buf, sizeof(buf), "%17s%8s%8s",
 		         "Patch name", "X", "Y");
 		waddstr(win, buf);
 		wattroff(win, A_BOLD);
@@ -118,7 +118,7 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 	patch_idx = line - LINE_PATCH_START;
 	patch = &(*e->tx)->patches[patch_idx];
 
-	waddstr(win, "        ");
+	waddstr(win, "         ");
 	// TODO: Real patch name
 	DrawField(win, 3 + patch_idx * 3, "%-8.8s",
 	          e->b->pn->pnames[patch_idx]);
