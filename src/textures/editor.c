@@ -312,6 +312,7 @@ static void PerformAddPatch(void)
 	p.originx = 0;
 	p.originy = 0;
 	TX(e) = TX_InsertPatch(TX(e), insert_index, &p);
+	++e->b->txs->modified_count;
 
 	UpdatePagerConfig(current_pager->cfg, e);
 
@@ -339,6 +340,8 @@ static void PerformDeletePatch(void)
 	memmove(&tx->patches[patch_index], &tx->patches[patch_index + 1],
 	        sizeof(struct patch) * (tx->patchcount - patch_index - 1));
 	--tx->patchcount;
+	++e->b->txs->modified_count;
+
 	UpdatePagerConfig(current_pager->cfg, e);
 
 	current_pager->cfg->current_link =
