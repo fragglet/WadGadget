@@ -14,10 +14,10 @@
 #include "textures/textures.h"
 
 struct texture_editor {
-	struct texture **tx;
 	struct texture_bundle *b;
+	int texture_index;
 };
 
-void TX_EditTexture(struct texture **tx, struct texture_bundle *b);
+void TX_EditTexture(struct texture_bundle *b, int texture_index);
 
 #endif /* #ifndef TEXTURES__EDITOR_H_INCLUDED */

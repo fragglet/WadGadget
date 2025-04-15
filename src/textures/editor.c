@@ -24,6 +24,8 @@
 #include "ui/stack.h"
 #include "ui/title_bar.h"
 
+#define TX(e)  ((e)->b->txs->textures[(e)->texture_index])
+
 enum {
 	LINE_SPACE1,
 	LINE_TX_NAME,
@@ -88,19 +90,19 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 		wattron(win, A_BOLD);
 		waddstr(win, "   Texture name: ");
 		wattroff(win, A_BOLD);
-		DrawField(win, FIELD_TX_NAME, "%-8.8s", (*e->tx)->name);
+		DrawField(win, FIELD_TX_NAME, "%-8.8s", TX(e)->name);
 		return;
 	case LINE_TX_WIDTH:
 		wattron(win, A_BOLD);
 		waddstr(win, "          Width: ");
 		wattroff(win, A_BOLD);
-		DrawField(win, FIELD_TX_WIDTH, "%-8d", (*e->tx)->width);
+		DrawField(win, FIELD_TX_WIDTH, "%-8d", TX(e)->width);
 		return;
 	case LINE_TX_HEIGHT:
 		wattron(win, A_BOLD);
 		waddstr(win, "         Height: ");
 		wattroff(win, A_BOLD);
-		DrawField(win, FIELD_TX_HEIGHT, "%-8d", (*e->tx)->height);
+		DrawField(win, FIELD_TX_HEIGHT, "%-8d", TX(e)->height);
 		return;
 	case LINE_PATCH_HEADING:
 		wattron(win, A_BOLD);
@@ -116,7 +118,7 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 	}
 
 	patch_idx = line - LINE_PATCH_START;
-	patch = &(*e->tx)->patches[patch_idx];
+	patch = &TX(e)->patches[patch_idx];
 
 	waddstr(win, "         ");
 	// TODO: Real patch name
@@ -156,11 +158,11 @@ static void EditorActivateLink(struct pager *p, int idx)
 		return;
 	case FIELD_TX_WIDTH:
 		EditField("Enter new texture width:",
-		          (int16_t *) &(*e->tx)->width, 1);
+		          (int16_t *) &TX(e)->width, 1);
 		return;
 	case FIELD_TX_HEIGHT:
 		EditField("Enter new texture height:",
-		          (int16_t *) &(*e->tx)->height, 1);
+		          (int16_t *) &TX(e)->height, 1);
 		return;
 	}
 
@@ -177,24 +179,24 @@ static const struct action *texture_editor_actions[] = {
     NULL,
 };
 
-void TX_EditTexture(struct texture **tx, struct texture_bundle *b)
+void TX_EditTexture(struct texture_bundle *b, int texture_index)
 {
 	struct pager p;
 	struct texture_editor e;
 	struct pager_config cfg;
 
-	e.tx = tx;
 	e.b = b;
+	e.texture_index = texture_index;
 
 	memset(&cfg, 0, sizeof(struct pager_config));
 	cfg.title = "Texture Editor (WIP)";
 	cfg.draw_line = EditorDrawLine;
 	cfg.user_data = &e;
-	cfg.num_lines = LINE_PATCH_START + (*tx)->patchcount;
+	cfg.num_lines = LINE_PATCH_START + TX(&e)->patchcount;
 	cfg.actions = texture_editor_actions;
 	cfg.get_link = EditorGetLink;
 	cfg.activate_link = EditorActivateLink;
-	cfg.num_links = (*tx)->patchcount * 3 + 3;
+	cfg.num_links = TX(&e)->patchcount * 3 + 3;
 
 	P_InitPager(&p, &cfg);
 	P_RunPager(&p, true);

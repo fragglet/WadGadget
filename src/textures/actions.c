@@ -152,7 +152,7 @@ static void PerformEditTexture(void)
 	}
 
 	tx_num = B_DirectoryPaneSelected(active_pane);
-	TX_EditTexture(&b->txs->textures[tx_num], b);
+	TX_EditTexture(b, tx_num);
 
 	// TODO: Refresh to handle potential change in texture name,
 	// commit changes.
