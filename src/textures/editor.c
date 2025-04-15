@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
 #include "pager/pager.h"
 #include "ui/dialog.h"
 #include "ui/list_pane.h"
@@ -282,6 +283,13 @@ const struct action edit_field_action = {
     '\r', 0, "Edit", "Edit", P_PerformOpenLink,
 };
 
+static void UpdatePagerConfig(struct pager_config *cfg,
+                              struct texture_editor *e)
+{
+	cfg->num_lines = LINE_PATCH_START + TX(e)->patchcount;
+	cfg->num_links = TX(e)->patchcount * 3 + 3;
+}
+
 static void PerformAddPatch(void)
 {
 	struct texture_editor *e = current_pager->cfg->user_data;
@@ -305,21 +313,48 @@ static void PerformAddPatch(void)
 	p.originy = 0;
 	TX(e) = TX_InsertPatch(TX(e), insert_index, &p);
 
-	current_pager->cfg->num_lines = LINE_PATCH_START + TX(e)->patchcount;
-	current_pager->cfg->num_links = TX(e)->patchcount * 3 + 3;
+	UpdatePagerConfig(current_pager->cfg, e);
 
 	// Select X offset on newly-added patch, so user can edit it:
 	current_pager->cfg->current_link = insert_index * 3 + 4;
 }
 
 const struct action add_patch_action = {
-    KEY_F(7), 'K', "Add Patch", "Add Patch", PerformAddPatch,
+    KEY_F(7), 'K', "AddPatch", "Add Patch", PerformAddPatch,
+};
+
+static void PerformDeletePatch(void)
+{
+	struct texture_editor *e = current_pager->cfg->user_data;
+	struct texture *tx;
+	int patch_index, curr_link = current_pager->cfg->current_link;
+
+	if (curr_link < 3) {
+		return;
+	}
+
+	patch_index = (curr_link - 3) / 3;
+	tx = TX(e);
+
+	memmove(&tx->patches[patch_index], &tx->patches[patch_index + 1],
+	        sizeof(struct patch) * (tx->patchcount - patch_index - 1));
+	--tx->patchcount;
+	UpdatePagerConfig(current_pager->cfg, e);
+
+	current_pager->cfg->current_link =
+	    min(current_pager->cfg->current_link,
+	        current_pager->cfg->num_links - 1);
+}
+
+const struct action delete_patch_action = {
+    KEY_F(8), 'X', "DelPatch", "Delete Patch", PerformDeletePatch,
 };
 
 static const struct action *texture_editor_actions[] = {
     &exit_pager_action,
     &edit_field_action,
     &add_patch_action,
+    &delete_patch_action,
     NULL,
 };
 
@@ -336,11 +371,10 @@ bool TX_EditTexture(struct texture_bundle *b, int texture_index)
 	cfg.title = "Texture Editor (WIP)";
 	cfg.draw_line = EditorDrawLine;
 	cfg.user_data = &e;
-	cfg.num_lines = LINE_PATCH_START + TX(&e)->patchcount;
 	cfg.actions = texture_editor_actions;
 	cfg.get_link = EditorGetLink;
 	cfg.activate_link = EditorActivateLink;
-	cfg.num_links = TX(&e)->patchcount * 3 + 3;
+	UpdatePagerConfig(&cfg, &e);
 
 	P_InitPager(&p, &cfg);
 	P_RunPager(&p, true);
