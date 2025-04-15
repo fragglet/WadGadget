@@ -123,7 +123,7 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 	waddstr(win, "         ");
 	// TODO: Real patch name
 	DrawField(win, 3 + patch_idx * 3, "%-8.8s",
-	          e->b->pn->pnames[patch_idx]);
+	          e->b->pn->pnames[patch->patch]);
 	DrawField(win, 3 + patch_idx * 3 + 1, "%8d", patch->originx);
 	DrawField(win, 3 + patch_idx * 3 + 2, "%8d", patch->originy);
 }
