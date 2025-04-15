@@ -100,6 +100,7 @@ static int SelectPname(struct texture_bundle *b)
 	s.selected = false;
 	UI_ListPaneInit(&s.lp, win, &pname_select_funcs, &s);
 	s.lp.pane.keypress = PnameSelectorKeypress;
+	UI_ListPaneSetTitle(&s.lp, "Select a patch:");
 	saved_actions = UI_ActionsBarSetActions(NULL);
 	UI_PaneShow(&s);
 	UI_RunMainLoop();
