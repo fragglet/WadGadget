@@ -31,7 +31,6 @@ struct list_pane {
 	char *title;
 	unsigned int window_offset, selected;
 	int active;
-	unsigned int num_entries;
 	WINDOW *subwin;
 };
 
