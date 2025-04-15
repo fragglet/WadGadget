@@ -201,7 +201,7 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 	DrawField(win, 3 + patch_idx * 3 + 2, "%8d", patch->originy);
 }
 
-static void EditField(struct texture_editor *e, const char *prompt,
+static bool EditField(struct texture_editor *e, const char *prompt,
                       int16_t *field, int min)
 {
 	char *answer;
@@ -209,19 +209,20 @@ static void EditField(struct texture_editor *e, const char *prompt,
 
 	answer = UI_TextInputDialogBox("Edit field", "Edit", 6, prompt);
 	if (answer == NULL) {
-		return;
+		return false;
 	}
 
 	val = atoi(answer);
 	free(answer);
 	if (val < min || val > 16384) {
 		UI_ShowNotice("Value not in range.");
-		return;
+		return false;
 	}
 
 	*field = (int16_t) val;
 	e->edited = true;
 	++e->b->txs->modified_count;
+	return true;
 }
 
 static void EditorActivateLink(struct pager *p, int idx)
@@ -266,7 +267,10 @@ static void EditorActivateLink(struct pager *p, int idx)
 		}
 		return;
 	case 1:
-		EditField(e, "Enter new X offset:", &patch->originx, -16384);
+		if (EditField(e, "Enter new X offset:", &patch->originx,
+		              -16384)) {
+			++current_pager->cfg->current_link;
+		}
 		return;
 	case 2:
 		EditField(e, "Enter new Y offset:", &patch->originy, -16384);
@@ -303,6 +307,9 @@ static void PerformAddPatch(void)
 
 	current_pager->cfg->num_lines = LINE_PATCH_START + TX(e)->patchcount;
 	current_pager->cfg->num_links = TX(e)->patchcount * 3 + 3;
+
+	// Select X offset on newly-added patch, so user can edit it:
+	current_pager->cfg->current_link = insert_index * 3 + 4;
 }
 
 const struct action add_patch_action = {
