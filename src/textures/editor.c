@@ -151,6 +151,7 @@ static void EditField(const char *prompt, int16_t *field, int min)
 static void EditorActivateLink(struct pager *p, int idx)
 {
 	struct texture_editor *e = current_pager->cfg->user_data;
+	struct patch *patch;
 	char *new_name;
 
 	switch (idx) {
@@ -176,7 +177,18 @@ static void EditorActivateLink(struct pager *p, int idx)
 		return;
 	}
 
-	// TODO: Edit patches
+	patch = &TX(e)->patches[(idx - 3) / 3];
+	switch (idx % 3) {
+	case 0:
+		// TODO: Select patch
+		return;
+	case 1:
+		EditField("Enter new X offset:", &patch->originx, -16384);
+		return;
+	case 2:
+		EditField("Enter new Y offset:", &patch->originy, -16384);
+		return;
+	}
 }
 
 const struct action edit_field_action = {
