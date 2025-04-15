@@ -327,7 +327,7 @@ const struct action add_patch_action = {
 static void PerformDeletePatch(void)
 {
 	struct texture_editor *e = current_pager->cfg->user_data;
-	struct texture *tx;
+	struct texture *tx = TX(e);
 	int patch_index, curr_link = current_pager->cfg->current_link;
 
 	if (curr_link < 3) {
@@ -335,7 +335,6 @@ static void PerformDeletePatch(void)
 	}
 
 	patch_index = (curr_link - 3) / 3;
-	tx = TX(e);
 
 	memmove(&tx->patches[patch_index], &tx->patches[patch_index + 1],
 	        sizeof(struct patch) * (tx->patchcount - patch_index - 1));
@@ -353,11 +352,63 @@ const struct action delete_patch_action = {
     KEY_F(8), 'X', "DelPatch", "Delete Patch", PerformDeletePatch,
 };
 
+static void PerformRaisePatch(void)
+{
+	struct texture_editor *e = current_pager->cfg->user_data;
+	struct texture *tx = TX(e);
+	struct patch p;
+	int patch_index, curr_link = current_pager->cfg->current_link;
+
+	if (curr_link < 3) {
+		return;
+	}
+
+	patch_index = (curr_link - 3) / 3;
+	if (patch_index < tx->patchcount - 1) {
+		p = tx->patches[patch_index + 1];
+		tx->patches[patch_index + 1] = tx->patches[patch_index];
+		tx->patches[patch_index] = p;
+		current_pager->cfg->current_link += 3;
+		++e->b->txs->modified_count;
+	}
+}
+
+const struct action raise_patch_action = {
+    KEY_F(3), 'U', "RaisePatch", "Raise Patch", PerformRaisePatch,
+};
+
+static void PerformLowerPatch(void)
+{
+	struct texture_editor *e = current_pager->cfg->user_data;
+	struct texture *tx = TX(e);
+	struct patch p;
+	int patch_index, curr_link = current_pager->cfg->current_link;
+
+	if (curr_link < 3) {
+		return;
+	}
+
+	patch_index = (curr_link - 3) / 3;
+	if (patch_index > 0) {
+		p = tx->patches[patch_index - 1];
+		tx->patches[patch_index - 1] = tx->patches[patch_index];
+		tx->patches[patch_index] = p;
+		current_pager->cfg->current_link -= 3;
+		++e->b->txs->modified_count;
+	}
+}
+
+const struct action lower_patch_action = {
+    KEY_F(2), 'T', "LowerPatch", "Lower Patch", PerformLowerPatch,
+};
+
 static const struct action *texture_editor_actions[] = {
     &exit_pager_action,
     &edit_field_action,
     &add_patch_action,
     &delete_patch_action,
+    &raise_patch_action,
+    &lower_patch_action,
     NULL,
 };
 
