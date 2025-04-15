@@ -167,8 +167,13 @@ static void EditorActivateLink(struct pager *p, int idx)
 	// TODO: Edit patches
 }
 
+const struct action edit_field_action = {
+    '\r', 0, "Edit", "Edit", P_PerformOpenLink,
+};
+
 static const struct action *texture_editor_actions[] = {
     &exit_pager_action,
+    &edit_field_action,
     NULL,
 };
 
