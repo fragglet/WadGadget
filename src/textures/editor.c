@@ -128,7 +128,8 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 	DrawField(win, 3 + patch_idx * 3 + 2, "%8d", patch->originy);
 }
 
-static void EditField(const char *prompt, int16_t *field, int min)
+static void EditField(struct texture_editor *e, const char *prompt,
+                      int16_t *field, int min)
 {
 	char *answer;
 	int val;
@@ -146,6 +147,8 @@ static void EditField(const char *prompt, int16_t *field, int min)
 	}
 
 	*field = (int16_t) val;
+	e->edited = true;
+	++e->b->txs->modified_count;
 }
 
 static void EditorActivateLink(struct pager *p, int idx)
@@ -168,11 +171,11 @@ static void EditorActivateLink(struct pager *p, int idx)
 		free(new_name);
 		return;
 	case FIELD_TX_WIDTH:
-		EditField("Enter new texture width:",
+		EditField(e, "Enter new texture width:",
 		          (int16_t *) &TX(e)->width, 1);
 		return;
 	case FIELD_TX_HEIGHT:
-		EditField("Enter new texture height:",
+		EditField(e, "Enter new texture height:",
 		          (int16_t *) &TX(e)->height, 1);
 		return;
 	}
@@ -183,10 +186,10 @@ static void EditorActivateLink(struct pager *p, int idx)
 		// TODO: Select patch
 		return;
 	case 1:
-		EditField("Enter new X offset:", &patch->originx, -16384);
+		EditField(e, "Enter new X offset:", &patch->originx, -16384);
 		return;
 	case 2:
-		EditField("Enter new Y offset:", &patch->originy, -16384);
+		EditField(e, "Enter new Y offset:", &patch->originy, -16384);
 		return;
 	}
 }
@@ -201,7 +204,7 @@ static const struct action *texture_editor_actions[] = {
     NULL,
 };
 
-void TX_EditTexture(struct texture_bundle *b, int texture_index)
+bool TX_EditTexture(struct texture_bundle *b, int texture_index)
 {
 	struct pager p;
 	struct texture_editor e;
@@ -222,4 +225,6 @@ void TX_EditTexture(struct texture_bundle *b, int texture_index)
 
 	P_InitPager(&p, &cfg);
 	P_RunPager(&p, true);
+
+	return e.edited;
 }

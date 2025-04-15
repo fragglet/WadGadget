@@ -16,8 +16,9 @@
 struct texture_editor {
 	struct texture_bundle *b;
 	int texture_index;
+	bool edited;
 };
 
-void TX_EditTexture(struct texture_bundle *b, int texture_index);
+bool TX_EditTexture(struct texture_bundle *b, int texture_index);
 
 #endif /* #ifndef TEXTURES__EDITOR_H_INCLUDED */

@@ -156,10 +156,14 @@ static void PerformEditTexture(void)
 		return;
 	}
 
-	TX_EditTexture(b, tx_num);
+	if (TX_EditTexture(b, tx_num)) {
+		VFS_CommitChanges(active_pane->dir, "edit to '%s'",
+		                  b->txs->textures[tx_num]->name);
+	} else {
+		VFS_Rollback(active_pane->dir);
+	}
 
-	// TODO: Refresh to handle potential change in texture name,
-	// commit changes.
+	VFS_Refresh(active_pane->dir);
 }
 
 const struct action edit_texture_action = {
