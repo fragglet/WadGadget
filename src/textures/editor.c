@@ -426,7 +426,7 @@ bool TX_EditTexture(struct texture_bundle *b, int texture_index)
 	e.texture_index = texture_index;
 
 	memset(&e.cfg, 0, sizeof(struct pager_config));
-	e.cfg.title = "Texture Editor (WIP)";
+	e.cfg.title = "Texture Editor";
 	e.cfg.draw_line = EditorDrawLine;
 	e.cfg.help_file = "texture_editor.md";
 	e.cfg.user_data = &e;
