@@ -130,13 +130,13 @@ static void SetWindowSizes(void)
 	UI_RaisePaneToTop(&search_pane);
 }
 
-static void PerformSwitchPane(void)
+static void ActionSwitchPane(void)
 {
 	B_SwitchToPane(other_pane);
 }
 
 static const struct action other_pane_action = {
-    '\t', 0, "Other", "> Other pane", PerformSwitchPane,
+    '\t', 0, "Other", "> Other pane", ActionSwitchPane,
 };
 
 static void ToggleCmdrMode(void)
@@ -180,7 +180,7 @@ static const struct action search_again_action = {
     0, 'N', "Next", "Search again", SearchAgain,
 };
 
-static void PerformSwapPanes(void)
+static void ActionSwapPanes(void)
 {
 	struct directory_pane *active = active_pane;
 	struct directory_pane *tmp = browser_panes[0];
@@ -195,7 +195,7 @@ static void PerformSwapPanes(void)
 }
 
 static const struct action swap_panes_action = {
-    KEY_BTAB, 0, NULL, "Swap panes", PerformSwapPanes,
+    KEY_BTAB, 0, NULL, "Swap panes", ActionSwapPanes,
 };
 
 static const struct action *wad_actions[] = {

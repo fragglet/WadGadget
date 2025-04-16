@@ -286,7 +286,7 @@ static void EditorActivateLink(struct pager *p, int idx)
 }
 
 const struct action edit_field_action = {
-    '\r', 0, "Edit", "Edit", P_PerformOpenLink,
+    '\r', 0, "Edit", "Edit", P_ActionOpenLink,
 };
 
 static void UpdatePagerConfig(struct pager_config *cfg,
@@ -296,7 +296,7 @@ static void UpdatePagerConfig(struct pager_config *cfg,
 	cfg->num_links = TX(e)->patchcount * 3 + 3;
 }
 
-static void PerformAddPatch(void)
+static void ActionAddPatch(void)
 {
 	struct texture_editor *e = current_pager->cfg->user_data;
 	struct patch p;
@@ -327,10 +327,10 @@ static void PerformAddPatch(void)
 }
 
 const struct action add_patch_action = {
-    KEY_F(7), 'K', "AddPatch", "Add Patch", PerformAddPatch,
+    KEY_F(7), 'K', "AddPatch", "Add Patch", ActionAddPatch,
 };
 
-static void PerformDeletePatch(void)
+static void ActionDeletePatch(void)
 {
 	struct texture_editor *e = current_pager->cfg->user_data;
 	struct texture *tx = TX(e);
@@ -355,10 +355,10 @@ static void PerformDeletePatch(void)
 }
 
 const struct action delete_patch_action = {
-    KEY_F(8), 'X', "DelPatch", "Delete Patch", PerformDeletePatch,
+    KEY_F(8), 'X', "DelPatch", "Delete Patch", ActionDeletePatch,
 };
 
-static void PerformRaisePatch(void)
+static void ActionRaisePatch(void)
 {
 	struct texture_editor *e = current_pager->cfg->user_data;
 	struct texture *tx = TX(e);
@@ -380,10 +380,10 @@ static void PerformRaisePatch(void)
 }
 
 const struct action raise_patch_action = {
-    KEY_F(3), 'U', "RaisePatch", "Raise Patch", PerformRaisePatch,
+    KEY_F(3), 'U', "RaisePatch", "Raise Patch", ActionRaisePatch,
 };
 
-static void PerformLowerPatch(void)
+static void ActionLowerPatch(void)
 {
 	struct texture_editor *e = current_pager->cfg->user_data;
 	struct texture *tx = TX(e);
@@ -405,7 +405,7 @@ static void PerformLowerPatch(void)
 }
 
 const struct action lower_patch_action = {
-    KEY_F(2), 'T', "LowerPatch", "Lower Patch", PerformLowerPatch,
+    KEY_F(2), 'T', "LowerPatch", "Lower Patch", ActionLowerPatch,
 };
 
 static const struct action *texture_editor_actions[] = {

@@ -71,7 +71,7 @@ void P_JumpWithinWindow(struct pager *p, int lineno);
 void P_ClearSearch(struct pager *p);
 void P_OpenPager(struct pager *p);
 void P_ClosePager(struct pager *p);
-void P_PerformOpenLink(void);
+void P_ActionOpenLink(void);
 
 extern struct pager *current_pager;
 extern const struct action exit_pager_action;

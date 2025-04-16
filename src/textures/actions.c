@@ -43,7 +43,7 @@ static bool CheckExistingTexture(struct textures *txs, const char *name)
 	return !existing;
 }
 
-static void PerformNewTexture(void)
+static void ActionNewTexture(void)
 {
 	int pos = B_DirectoryPaneSelected(active_pane) + 1;
 	struct textures *txs = TX_TextureList(active_pane->dir);
@@ -91,10 +91,10 @@ static void PerformNewTexture(void)
 }
 
 const struct action new_texture_action = {
-    KEY_F(7), 'K', "NewTxt", ". New texture", PerformNewTexture,
+    KEY_F(7), 'K', "NewTxt", ". New texture", ActionNewTexture,
 };
 
-static void PerformEditConfig(void)
+static void ActionEditConfig(void)
 {
 	struct directory_revision *old_rev, *orig_rev;
 	struct directory *parent;
@@ -135,14 +135,14 @@ static void PerformEditConfig(void)
 }
 
 const struct action edit_textures_action = {
-    KEY_F(4), 'F', "EditCfg", "Edit texture config", PerformEditConfig,
+    KEY_F(4), 'F', "EditCfg", "Edit texture config", ActionEditConfig,
 };
 
 const struct action edit_pnames_action = {
-    KEY_F(4), 'F', "EditCfg", "Edit PNAMES config", PerformEditConfig,
+    KEY_F(4), 'F', "EditCfg", "Edit PNAMES config", ActionEditConfig,
 };
 
-static void PerformEditTexture(void)
+static void ActionEditTexture(void)
 {
 	struct texture_bundle *b = TX_DirGetBundle(active_pane->dir);
 	int tx_num = B_DirectoryPaneSelected(active_pane);
@@ -167,10 +167,10 @@ static void PerformEditTexture(void)
 }
 
 const struct action edit_texture_action = {
-    '\r', 0, "Edit", "Edit texture", PerformEditTexture,
+    '\r', 0, "Edit", "Edit texture", ActionEditTexture,
 };
 
-static void PerformDuplicateTexture(void)
+static void ActionDuplicateTexture(void)
 {
 	struct textures *txs = TX_TextureList(active_pane->dir);
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
@@ -215,10 +215,10 @@ static void PerformDuplicateTexture(void)
 }
 
 const struct action dup_texture_action = {
-    KEY_F(3), 'U', "DupTxt", ". Duplicate texture", PerformDuplicateTexture,
+    KEY_F(3), 'U', "DupTxt", ". Duplicate texture", ActionDuplicateTexture,
 };
 
-static void PerformExportConfig(void)
+static void ActionExportConfig(void)
 {
 	struct file_set *selected;
 	char *filename = NULL, *filename2 = NULL;
@@ -279,7 +279,7 @@ cancel:
 }
 
 const struct action export_texture_config = {
-    KEY_F(5), 'C', "ExpCfg", "> Export config", PerformExportConfig,
+    KEY_F(5), 'C', "ExpCfg", "> Export config", ActionExportConfig,
 };
 
 static void MergeTexturesResultNotice(struct texture_bundle_merge_result *r)
@@ -335,7 +335,7 @@ static void MergePnamesResultNotice(struct texture_bundle_merge_result *r)
 	UI_ShowNotice("%s", buf);
 }
 
-static void PerformImportConfig(void)
+static void ActionImportConfig(void)
 {
 	struct texture_bundle_merge_result merge_stats;
 	struct texture_bundle b;
@@ -383,10 +383,10 @@ static void PerformImportConfig(void)
 }
 
 const struct action import_texture_config = {
-    KEY_F(5), 'C', "ImpCfg", "> Import config", PerformImportConfig,
+    KEY_F(5), 'C', "ImpCfg", "> Import config", ActionImportConfig,
 };
 
-static void PerformNewPname(void)
+static void ActionNewPname(void)
 {
 	struct texture_bundle *b = TX_DirGetBundle(active_pane->dir);
 	int idx;
@@ -423,10 +423,10 @@ static void PerformNewPname(void)
 }
 
 const struct action new_pname_action = {
-    KEY_F(7), 'K', "NewPname", ". New pname", PerformNewPname,
+    KEY_F(7), 'K', "NewPname", ". New pname", ActionNewPname,
 };
 
-static void PerformCopyPnames(void)
+static void ActionCopyPnames(void)
 {
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
 	struct file_set copied = EMPTY_FILE_SET;
@@ -475,10 +475,10 @@ static void PerformCopyPnames(void)
 }
 
 const struct action copy_pnames_action = {
-    KEY_F(5), 'C', "Copy", "> Copy names", PerformCopyPnames,
+    KEY_F(5), 'C', "Copy", "> Copy names", ActionCopyPnames,
 };
 
-static void PerformCopyTextures(void)
+static void ActionCopyTextures(void)
 {
 	struct texture_bundle_merge_result merge_stats;
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
@@ -518,5 +518,5 @@ static void PerformCopyTextures(void)
 }
 
 const struct action copy_textures_action = {
-    KEY_F(5), 'C', "Copy", "> Copy textures", PerformCopyTextures,
+    KEY_F(5), 'C', "Copy", "> Copy textures", ActionCopyTextures,
 };

@@ -177,36 +177,36 @@ static void PerformCopy(bool convert)
 	}
 }
 
-static void PerformCopyConvert(void)
+static void ActionCopyConvert(void)
 {
 	PerformCopy(true);
 }
 
-static void PerformCopyNoConvert(void)
+static void ActionCopyNoConvert(void)
 {
 	PerformCopy(false);
 }
 
 const struct action copy_action = {
-    KEY_F(5), 'C', "Copy", "> Copy", PerformCopyConvert,
+    KEY_F(5), 'C', "Copy", "> Copy", ActionCopyConvert,
 };
 const struct action copy_noconv_action = {
-    SHIFT_KEY_F(5), 0, NULL, "> Copy (no convert)", PerformCopyNoConvert,
+    SHIFT_KEY_F(5), 0, NULL, "> Copy (no convert)", ActionCopyNoConvert,
 };
 const struct action export_action = {
-    KEY_F(5), 'C', "Export", "> Export", PerformCopyConvert,
+    KEY_F(5), 'C', "Export", "> Export", ActionCopyConvert,
 };
 const struct action export_noconv_action = {
-    SHIFT_KEY_F(5), 0, NULL, "> Export (no convert)", PerformCopyNoConvert,
+    SHIFT_KEY_F(5), 0, NULL, "> Export (no convert)", ActionCopyNoConvert,
 };
 const struct action import_action = {
-    KEY_F(5), 'C', "Import", "> Import", PerformCopyConvert,
+    KEY_F(5), 'C', "Import", "> Import", ActionCopyConvert,
 };
 const struct action import_noconv_action = {
-    SHIFT_KEY_F(5), 0, NULL, "> Import (no convert)", PerformCopyNoConvert,
+    SHIFT_KEY_F(5), 0, NULL, "> Import (no convert)", ActionCopyNoConvert,
 };
 
-static void PerformFileMove(void)
+static void ActionFileMove(void)
 {
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
 	struct directory_entry *ent, *ent2;
@@ -281,7 +281,7 @@ static void PerformFileMove(void)
 }
 
 const struct action file_move_action = {
-    KEY_F(3), 'V', "Move", "> Move", PerformFileMove,
+    KEY_F(3), 'V', "Move", "> Move", ActionFileMove,
 };
 
 static void PerformUpdate(bool convert)
@@ -325,24 +325,24 @@ static void PerformUpdate(bool convert)
 	VFS_FreeSet(&result);
 }
 
-static void PerformUpdateConvert(void)
+static void ActionUpdateConvert(void)
 {
 	PerformUpdate(true);
 }
 
-static void PerformUpdateNoConvert(void)
+static void ActionUpdateNoConvert(void)
 {
 	PerformUpdate(false);
 }
 
 const struct action update_action = {
-    KEY_F(3), 'U', "Upd", "> Update", PerformUpdateConvert,
+    KEY_F(3), 'U', "Upd", "> Update", ActionUpdateConvert,
 };
 const struct action update_noconv_action = {
-    SHIFT_KEY_F(3), 0, NULL, "> Update (no convert)", PerformUpdateNoConvert,
+    SHIFT_KEY_F(3), 0, NULL, "> Update (no convert)", ActionUpdateNoConvert,
 };
 
-static void PerformMkdir(void)
+static void ActionMkdir(void)
 {
 	char *input_filename, *filename;
 
@@ -369,7 +369,7 @@ static void PerformMkdir(void)
 }
 
 const struct action mkdir_action = {
-    KEY_F(7), 'K', "Mkdir", ". Make directory", PerformMkdir,
+    KEY_F(7), 'K', "Mkdir", ". Make directory", ActionMkdir,
 };
 
 static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
@@ -473,24 +473,25 @@ static void CreateWad(bool convert)
 	}
 }
 
-static void CreateWadConvert(void)
+static void ActionCreateWadConvert(void)
 {
 	CreateWad(true);
 }
 
-static void CreateWadNoConvert(void)
+static void ActionCreateWadNoConvert(void)
 {
 	CreateWad(false);
 }
 
 const struct action make_wad_action = {
-    KEY_F(9), 'F', "MkWAD", ". Make WAD", CreateWadConvert,
+    KEY_F(9), 'F', "MkWAD", ". Make WAD", ActionCreateWadConvert,
 };
 const struct action make_wad_noconv_action = {
-    SHIFT_KEY_F(9), 0, NULL, ". Make WAD (no convert)", CreateWadNoConvert,
+    SHIFT_KEY_F(9),           0, NULL, ". Make WAD (no convert)",
+    ActionCreateWadNoConvert,
 };
 const struct action export_wad_action = {
-    KEY_F(9), 'F', "ExpWAD", ".> Export as WAD", CreateWadConvert,
+    KEY_F(9), 'F', "ExpWAD", ".> Export as WAD", ActionCreateWadConvert,
 };
 
 static unsigned int *IndexesForTagged(struct directory *dir,
@@ -631,7 +632,7 @@ static bool NullTextureCheck(struct directory *dir, struct file_set *tagged,
 	                           dir->entries[0].name, operation, operation);
 }
 
-static void PerformRearrange(void)
+static void ActionRearrange(void)
 {
 	struct directory *dir = active_pane->dir;
 	char descr[16];
@@ -671,7 +672,7 @@ static void PerformRearrange(void)
 }
 
 const struct action rearrange_action = {
-    KEY_F(2), 'V', "Rearr", "Move (rearrange)", PerformRearrange,
+    KEY_F(2), 'V', "Rearr", "Move (rearrange)", ActionRearrange,
 };
 
 static int CompareEntries(struct directory *dir, unsigned int i1,
@@ -717,7 +718,7 @@ static void SortEntries(struct directory *dir, unsigned int *indexes,
 	SortEntries(dir, indexes + pivot + 1, count - pivot - 1);
 }
 
-static void PerformSortEntries(void)
+static void ActionSortEntries(void)
 {
 	struct directory *dir = active_pane->dir;
 	unsigned int *indexes;
@@ -779,10 +780,10 @@ static void PerformSortEntries(void)
 }
 
 const struct action sort_entries_action = {
-    SHIFT_KEY_F(2), ']', "Sort", "Sort", PerformSortEntries,
+    SHIFT_KEY_F(2), ']', "Sort", "Sort", ActionSortEntries,
 };
 
-static void PerformNewLump(void)
+static void ActionNewLump(void)
 {
 	int selected = B_DirectoryPaneSelected(active_pane);
 	struct wad_file *f = VFS_WadFile(active_pane->dir);
@@ -806,10 +807,10 @@ static void PerformNewLump(void)
 }
 
 const struct action new_lump_action = {
-    KEY_F(7), 'K', "NewLump", ". New lump", PerformNewLump,
+    KEY_F(7), 'K', "NewLump", ". New lump", ActionNewLump,
 };
 
-static void PerformRename(void)
+static void ActionRename(void)
 {
 	char *input_filename;
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
@@ -852,10 +853,10 @@ static void PerformRename(void)
 }
 
 const struct action rename_action = {
-    KEY_F(6), 'E', "Ren", ". Rename", PerformRename,
+    KEY_F(6), 'E', "Ren", ". Rename", ActionRename,
 };
 
-static void PerformDeleteNoConfirm(void)
+static void ActionDeleteNoConfirm(void)
 {
 	struct directory *dir = active_pane->dir;
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
@@ -900,10 +901,10 @@ static void PerformDeleteNoConfirm(void)
 }
 
 const struct action delete_no_confirm_action = {
-    SHIFT_KEY_F(8), 0, NULL, "Delete (no confirm)", PerformDeleteNoConfirm,
+    SHIFT_KEY_F(8), 0, NULL, "Delete (no confirm)", ActionDeleteNoConfirm,
 };
 
-static void PerformDelete(void)
+static void ActionDelete(void)
 {
 	struct directory *dir = active_pane->dir;
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
@@ -927,14 +928,14 @@ static void PerformDelete(void)
 		return;
 	}
 
-	PerformDeleteNoConfirm();
+	ActionDeleteNoConfirm();
 }
 
 const struct action delete_action = {
-    KEY_F(8), 'X', "Del", "Delete", PerformDelete,
+    KEY_F(8), 'X', "Del", "Delete", ActionDelete,
 };
 
-static void PerformMarkPattern(void)
+static void ActionMarkPattern(void)
 {
 	struct directory_entry *first_match;
 	size_t old_cnt;
@@ -959,10 +960,10 @@ static void PerformMarkPattern(void)
 }
 
 const struct action mark_pattern_action = {
-    0, 'G', "MarkPat", ". Mark pattern", PerformMarkPattern,
+    0, 'G', "MarkPat", ". Mark pattern", ActionMarkPattern,
 };
 
-static void PerformUnmarkAll(void)
+static void ActionUnmarkAll(void)
 {
 	if (active_pane->tagged.num_entries == 0) {
 		UI_ShowNotice("Nothing is marked.");
@@ -973,10 +974,10 @@ static void PerformUnmarkAll(void)
 }
 
 const struct action unmark_all_action = {
-    KEY_F(10), 'A', "UnmrkAll", "Unmark all", PerformUnmarkAll,
+    KEY_F(10), 'A', "UnmrkAll", "Unmark all", ActionUnmarkAll,
 };
 
-static void PerformMark(void)
+static void ActionMark(void)
 {
 	int selected = B_DirectoryPaneSelected(active_pane);
 	struct directory_entry *ent;
@@ -1000,7 +1001,7 @@ static void PerformMark(void)
 }
 
 const struct action mark_action = {
-    ' ', 0, "Un/mark", "Mark/unmark", PerformMark,
+    ' ', 0, "Un/mark", "Mark/unmark", ActionMark,
 };
 
 // Called when closing a file to check if it needs cleaning out.
@@ -1037,7 +1038,7 @@ static void CheckCompactWad(struct directory_pane *pane)
 	}
 }
 
-static void PerformQuit(void)
+static void ActionQuit(void)
 {
 	// Editing may have left some junk data. Prompt to see if
 	// the user wants to clean it out.
@@ -1047,16 +1048,16 @@ static void PerformQuit(void)
 }
 
 const struct action quit_action = {
-    27, 'Q', "Quit", "Quit", PerformQuit,
+    27, 'Q', "Quit", "Quit", ActionQuit,
 };
 
-static void PerformReload(void)
+static void ActionReload(void)
 {
 	VFS_Refresh(active_pane->dir);
 }
 
 const struct action reload_action = {
-    0, 'R', "Reload", "Reload", PerformReload,
+    0, 'R', "Reload", "Reload", ActionReload,
 };
 
 static void NavigateNew(struct directory_pane *curr_pane,
@@ -1083,7 +1084,7 @@ static void NavigateNew(struct directory_pane *curr_pane,
 	}
 }
 
-static void PerformParentDir(void)
+static void ActionParentDir(void)
 {
 	struct directory *d =
 	    VFS_OpenDirByEntry(active_pane->dir, VFS_PARENT_DIRECTORY);
@@ -1092,7 +1093,7 @@ static void PerformParentDir(void)
 }
 
 const struct action parent_dir_action = {
-    27, 'Q', "Parent", "Parent", PerformParentDir,
+    27, 'Q', "Parent", "Parent", ActionParentDir,
 };
 
 static void ViewLump(struct directory *dir, struct directory_entry *ent)
@@ -1126,7 +1127,7 @@ static void ViewLump(struct directory *dir, struct directory_entry *ent)
 	OpenDirent(dir, ent, false);
 }
 
-static void PerformView(void)
+static void ActionView(void)
 {
 	struct directory *dir, *new_dir;
 	struct directory_entry *ent;
@@ -1150,10 +1151,10 @@ static void PerformView(void)
 }
 
 const struct action view_action = {
-    '\r', 0, "View", "View", PerformView,
+    '\r', 0, "View", "View", ActionView,
 };
 
-static void PerformCompact(void)
+static void ActionCompact(void)
 {
 	struct directory_entry *ent;
 	struct directory *wad_dir;
@@ -1223,10 +1224,10 @@ fail:
 }
 
 const struct action compact_action = {
-    KEY_F(2), 'T', "Compact", "Compact WAD file", PerformCompact,
+    KEY_F(2), 'T', "Compact", "Compact WAD file", ActionCompact,
 };
 
-static void PerformHexdump(void)
+static void ActionHexdump(void)
 {
 	int selected = B_DirectoryPaneSelected(active_pane);
 	struct directory_entry *ent;
@@ -1246,9 +1247,9 @@ static void PerformHexdump(void)
 }
 
 const struct action hexdump_action = {0, 'D', "Hexdump", "Hexdump",
-                                      PerformHexdump};
+                                      ActionHexdump};
 
-static void PerformUndo(void)
+static void ActionUndo(void)
 {
 	struct directory *dir = active_pane->dir;
 	const char *msg;
@@ -1290,10 +1291,10 @@ static void PerformUndo(void)
 }
 
 const struct action undo_action = {
-    0, 'Z', "Undo", "Undo", PerformUndo,
+    0, 'Z', "Undo", "Undo", ActionUndo,
 };
 
-static void PerformRedo(void)
+static void ActionRedo(void)
 {
 	struct directory *dir = active_pane->dir;
 	int first_change;
@@ -1324,10 +1325,10 @@ static void PerformRedo(void)
 }
 
 const struct action redo_action = {
-    0, 'Y', "Redo", "| Redo", PerformRedo,
+    0, 'Y', "Redo", "| Redo", ActionRedo,
 };
 
-static void ShowHelp(void)
+static void ActionShowHelp(void)
 {
 	int i;
 	const struct {
@@ -1354,10 +1355,10 @@ static void ShowHelp(void)
 }
 
 const struct action help_action = {
-    KEY_F(1), 'H', "Help", "Help", ShowHelp,
+    KEY_F(1), 'H', "Help", "Help", ActionShowHelp,
 };
 
-static void PerformShell(void)
+static void ActionShell(void)
 {
 	struct directory_entry *ent;
 	char *marked_env = NULL;
@@ -1397,14 +1398,14 @@ static void PerformShell(void)
 }
 
 const struct action open_shell_action = {
-    KEY_F(4), 'O', "Shell", "Command Prompt here", PerformShell,
+    KEY_F(4), 'O', "Shell", "Command Prompt here", ActionShell,
 };
 
-static void OpenPalettes(void)
+static void ActionOpenPalettes(void)
 {
 	NavigateNew(active_pane, PAL_OpenDirectory(active_pane->dir));
 }
 
 const struct action open_palettes_action = {
-    0, 'P', "Palettes", "| Palettes", OpenPalettes,
+    0, 'P', "Palettes", "| Palettes", ActionOpenPalettes,
 };

@@ -127,7 +127,7 @@ static void DrawHexdumpLine(WINDOW *win, unsigned int line, void *user_data)
 	PrintRecordNumber(cfg, win, line);
 }
 
-static void SwitchToASCII(void)
+static void ActionSwitchToASCII(void)
 {
 	struct hexdump_pager_config *cfg = current_pager->cfg->user_data;
 	struct plaintext_pager_config *ptc = cfg->plaintext_config;
@@ -144,7 +144,7 @@ static void SwitchToASCII(void)
 }
 
 const struct action switch_ascii_action = {
-    0, 'D', "ASCII", "View as ASCII", SwitchToASCII,
+    0, 'D', "ASCII", "View as ASCII", ActionSwitchToASCII,
 };
 
 static int PagerWidth(struct hexdump_pager_config *cfg)
@@ -198,7 +198,7 @@ static void SetColumns(struct hexdump_pager_config *cfg)
 	}
 }
 
-static void ChangeRecordLength(void)
+static void ActionChangeRecordLength(void)
 {
 	struct hexdump_pager_config *cfg = current_pager->cfg->user_data;
 	char *answer, curr_buf[32] = "";
@@ -232,10 +232,10 @@ static void ChangeRecordLength(void)
 }
 
 const struct action change_record_length_action = {
-    0, 'R', "RecordLen", "Record Length", ChangeRecordLength,
+    0, 'R', "RecordLen", "Record Length", ActionChangeRecordLength,
 };
 
-static void ChangeColumns(void)
+static void ActionChangeColumns(void)
 {
 	struct hexdump_pager_config *cfg = current_pager->cfg->user_data;
 	char *answer;
@@ -262,10 +262,10 @@ static void ChangeColumns(void)
 }
 
 const struct action change_columns_action = {
-    0, 'O', "Columns", "Columns", ChangeColumns,
+    0, 'O', "Columns", "Columns", ActionChangeColumns,
 };
 
-static void OpenDoomSpecs(void)
+static void ActionOpenDoomSpecs(void)
 {
 	struct hexdump_pager_config *cfg = current_pager->cfg->user_data;
 
@@ -291,10 +291,10 @@ static void OpenDoomSpecs(void)
 }
 
 const struct action open_specs_action = {
-    0, 'U', "Specs", "Open Doom Specs", OpenDoomSpecs,
+    0, 'U', "Specs", "Open Doom Specs", ActionOpenDoomSpecs,
 };
 
-static void CloseHexdumpPager(void)
+static void ActionCloseHexdumpPager(void)
 {
 	struct hexdump_pager_config *cfg = current_pager->cfg->user_data;
 
@@ -310,7 +310,7 @@ static void CloseHexdumpPager(void)
 }
 
 static const struct action exit_hexdump_pager_action = {
-    27, 0, "Close", "Close", CloseHexdumpPager,
+    27, 0, "Close", "Close", ActionCloseHexdumpPager,
 };
 
 static const struct action *hexdump_pager_actions[] = {

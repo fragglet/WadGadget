@@ -32,7 +32,7 @@
 
 struct wad_file;
 
-static void PerformViewPalette(void)
+static void ActionViewPalette(void)
 {
 	struct directory_entry *ent = B_DirectoryPaneEntry(active_pane);
 
@@ -47,10 +47,10 @@ static void PerformViewPalette(void)
 }
 
 const struct action view_palette_action = {
-    '\r', 0, "View", "View", PerformViewPalette,
+    '\r', 0, "View", "View", ActionViewPalette,
 };
 
-static void PerformSetDefault(void)
+static void ActionSetDefault(void)
 {
 	struct directory_entry *ent = B_DirectoryPaneEntry(active_pane);
 
@@ -65,7 +65,7 @@ static void PerformSetDefault(void)
 }
 
 const struct action set_default_palette_action = {
-    KEY_F(4), 'D', "SetDef", "Set default", PerformSetDefault,
+    KEY_F(4), 'D', "SetDef", "Set default", ActionSetDefault,
 };
 
 static struct palette_set *LoadPalette(struct directory *dir,
@@ -138,7 +138,7 @@ static bool CopyPaletteToWAD(struct directory *from,
 	return true;
 }
 
-static void PerformPaletteCopyToWAD(void)
+static void ActionPaletteCopyToWAD(void)
 {
 	struct directory *from = ActualDir(active_pane->dir);
 	struct file_set *set = B_DirectoryPaneTagged(active_pane);
@@ -184,7 +184,7 @@ static void PerformPaletteCopyToWAD(void)
 }
 
 const struct action copy_palette_to_wad_action = {
-    KEY_F(5), 'C', "Copy", "> Copy", PerformPaletteCopyToWAD,
+    KEY_F(5), 'C', "Copy", "> Copy", ActionPaletteCopyToWAD,
 };
 
 static bool CopyPaletteToDir(struct directory *from,
@@ -229,7 +229,7 @@ static bool CopyPaletteToDir(struct directory *from,
 	return true;
 }
 
-static void PerformPaletteCopyToDir(void)
+static void ActionPaletteCopyToDir(void)
 {
 	struct directory *from = ActualDir(active_pane->dir),
 	                 *to = ActualDir(other_pane->dir);
@@ -257,10 +257,10 @@ static void PerformPaletteCopyToDir(void)
 }
 
 const struct action copy_palette_to_dir_action = {
-    KEY_F(5), 'C', "Copy", "> Copy", PerformPaletteCopyToDir,
+    KEY_F(5), 'C', "Copy", "> Copy", ActionPaletteCopyToDir,
 };
 
-static void PerformSetPalettePref(void)
+static void ActionSetPalettePref(void)
 {
 	struct file_set *set = B_DirectoryPaneTagged(active_pane);
 	struct wad_file *wf = VFS_WadFile(other_pane->dir);
@@ -320,5 +320,5 @@ static void PerformSetPalettePref(void)
 }
 
 const struct action set_palette_pref_action = {
-    KEY_F(3), 'U', "SetPref", "> Use for WAD", PerformSetPalettePref,
+    KEY_F(3), 'U', "SetPref", "> Use for WAD", ActionSetPalettePref,
 };
