@@ -48,6 +48,7 @@ struct texture_editor {
 	struct texture_bundle *b;
 	int texture_index;
 	bool edited;
+	struct pager_config cfg;
 };
 
 struct pname_selector {
@@ -141,9 +142,10 @@ static void EditorGetLink(struct pager_config *cfg, int idx,
 	link->offset = idx % 3;
 }
 
-static void DrawField(WINDOW *win, int field_num, const char *fmt, ...)
+static void DrawField(struct texture_editor *e, WINDOW *win, int field_num,
+                      const char *fmt, ...)
 {
-	int curr_link = current_pager->cfg->current_link;
+	int curr_link = e->cfg.current_link;
 	va_list args;
 	char buf[40];
 
@@ -171,19 +173,19 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 		wattron(win, A_BOLD);
 		waddstr(win, "   Texture name: ");
 		wattroff(win, A_BOLD);
-		DrawField(win, FIELD_TX_NAME, "%-8.8s", TX(e)->name);
+		DrawField(e, win, FIELD_TX_NAME, "%-8.8s", TX(e)->name);
 		return;
 	case LINE_TX_WIDTH:
 		wattron(win, A_BOLD);
 		waddstr(win, "          Width: ");
 		wattroff(win, A_BOLD);
-		DrawField(win, FIELD_TX_WIDTH, "%-8d", TX(e)->width);
+		DrawField(e, win, FIELD_TX_WIDTH, "%-8d", TX(e)->width);
 		return;
 	case LINE_TX_HEIGHT:
 		wattron(win, A_BOLD);
 		waddstr(win, "         Height: ");
 		wattroff(win, A_BOLD);
-		DrawField(win, FIELD_TX_HEIGHT, "%-8d", TX(e)->height);
+		DrawField(e, win, FIELD_TX_HEIGHT, "%-8d", TX(e)->height);
 		return;
 	case LINE_PATCH_HEADING:
 		wattron(win, A_BOLD);
@@ -202,10 +204,10 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 	patch = &TX(e)->patches[patch_idx];
 
 	waddstr(win, "         ");
-	DrawField(win, 3 + patch_idx * 3, "%-8.8s",
+	DrawField(e, win, 3 + patch_idx * 3, "%-8.8s",
 	          e->b->pn->pnames[patch->patch]);
-	DrawField(win, 3 + patch_idx * 3 + 1, "%8d", patch->originx);
-	DrawField(win, 3 + patch_idx * 3 + 2, "%8d", patch->originy);
+	DrawField(e, win, 3 + patch_idx * 3 + 1, "%8d", patch->originx);
+	DrawField(e, win, 3 + patch_idx * 3 + 2, "%8d", patch->originy);
 }
 
 static bool EditField(struct texture_editor *e, const char *prompt,
@@ -419,22 +421,21 @@ bool TX_EditTexture(struct texture_bundle *b, int texture_index)
 {
 	struct pager p;
 	struct texture_editor e;
-	struct pager_config cfg;
 
 	e.b = b;
 	e.texture_index = texture_index;
 
-	memset(&cfg, 0, sizeof(struct pager_config));
-	cfg.title = "Texture Editor (WIP)";
-	cfg.draw_line = EditorDrawLine;
-	cfg.help_file = "texture_editor.md";
-	cfg.user_data = &e;
-	cfg.actions = texture_editor_actions;
-	cfg.get_link = EditorGetLink;
-	cfg.activate_link = EditorActivateLink;
-	UpdatePagerConfig(&cfg, &e);
+	memset(&e.cfg, 0, sizeof(struct pager_config));
+	e.cfg.title = "Texture Editor (WIP)";
+	e.cfg.draw_line = EditorDrawLine;
+	e.cfg.help_file = "texture_editor.md";
+	e.cfg.user_data = &e;
+	e.cfg.actions = texture_editor_actions;
+	e.cfg.get_link = EditorGetLink;
+	e.cfg.activate_link = EditorActivateLink;
+	UpdatePagerConfig(&e.cfg, &e);
 
-	P_InitPager(&p, &cfg);
+	P_InitPager(&p, &e.cfg);
 	P_RunPager(&p, true);
 
 	return e.edited;
