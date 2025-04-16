@@ -43,7 +43,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleTypeExtensions</key>
-			<array><string>wad</string></array>
+			<array>
+				<string>rts</string>
+				<string>wad</string>
+			</array>
 		</dict>
 	</array>
 </dict>
