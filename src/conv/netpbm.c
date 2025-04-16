@@ -10,6 +10,9 @@
 
 #include "conv/netpbm.h"
 
+#include <assert.h>
+#include <stdlib.h>
+
 #include "common.h"
 #include "conv/process.h"
 #include "stringlib.h"

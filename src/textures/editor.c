@@ -10,7 +10,7 @@
 
 #include "textures/editor.h"
 
-#include <assert.h>
+#include <curses.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -20,11 +20,15 @@
 
 #include "common.h"
 #include "pager/pager.h"
+#include "textures/textures.h"
+#include "ui/actions_bar.h"
 #include "ui/dialog.h"
 #include "ui/list_pane.h"
 #include "ui/pane.h"
 #include "ui/stack.h"
 #include "ui/title_bar.h"
+
+struct texture_editor;
 
 #define TX(e) ((e)->b->txs->textures[(e)->texture_index])
 

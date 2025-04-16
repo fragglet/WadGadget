@@ -11,7 +11,11 @@
 #ifndef TEXTURES__EDITOR_H_INCLUDED
 #define TEXTURES__EDITOR_H_INCLUDED
 
+#include <stdbool.h>
+
 #include "textures/textures.h"
+
+struct texture_bundle;
 
 bool TX_EditTexture(struct texture_bundle *b, int texture_index);
 
