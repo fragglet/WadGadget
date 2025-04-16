@@ -20,10 +20,12 @@
 
 #define VFS_REVISION_DESCR_LEN 40
 #define VFS_PARENT_DIRECTORY   (&_vfs_parent_directory)
-#define EMPTY_FILE_SET                                                         \
-	{                                                                      \
-		NULL, 0                                                        \
-	}
+
+// TODO: Remove clang-format overrides once Github Actions updates to a newer
+// version:
+// clang-format off
+#define EMPTY_FILE_SET         {NULL, 0}
+// clang-format on
 
 struct file_type {
 	const char *name;
