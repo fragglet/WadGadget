@@ -19,6 +19,7 @@
 #include "conv/audio.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
+#include "conv/netpbm.h"
 #include "conv/palette.h"
 #include "fs/vfs.h"
 #include "fs/wad_file.h"
@@ -142,6 +143,11 @@ static VFILE *PerformConversion(VFILE *input, struct directory *to_wad,
 		return V_FlatFromImageFile(input, pal);
 	} else if (StringHasSuffix(src_name, ".fullscreen.png")) {
 		return V_FullscreenFromImageFile(input, pal);
+	} else if (NetpbmFileTypeSupported(src_name)) {
+		// TODO: Support for conversion to flats, colormaps, etc.
+		// from other (non-PNG) formats
+		input = NetpbmConvertToPNG(input, src_name);
+		return V_FromImageFile(input, pal);
 	} else if (StringHasSuffix(src_name, ".png")) {
 		return V_FromImageFile(input, pal);
 	} else if (!strcasecmp(src_name, "PNAMES.txt")) {

@@ -60,7 +60,7 @@ struct texture_bundle {
 struct textures *TX_NewTextureList(int num_textures);
 struct texture *TX_AllocTexture(size_t patchcount);
 struct texture *TX_DupTexture(struct texture *t);
-struct texture *TX_AddPatch(struct texture *t, struct patch *p);
+struct texture *TX_InsertPatch(struct texture *t, int idx, struct patch *p);
 int TX_TextureForName(struct textures *txs, const char *name);
 bool TX_AddTexture(struct textures *txs, unsigned int pos, struct texture *t);
 void TX_RemoveTexture(struct textures *txs, unsigned int idx);
@@ -103,6 +103,7 @@ VFILE *TX_DirFormatConfig(struct directory *_dir, struct file_set *subset);
 
 extern const struct action new_texture_action;
 extern const struct action edit_textures_action;
+extern const struct action edit_texture_action;
 extern const struct action edit_pnames_action;
 extern const struct action dup_texture_action;
 extern const struct action import_texture_config;

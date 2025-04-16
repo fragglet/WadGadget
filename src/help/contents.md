@@ -16,10 +16,10 @@ Particular views of the browser interface:
  * [PNAMES editor](pnames_editor.md)
    * [Keys](pnames_editor.md#keys)
    * [Copying](pnames_editor.md#copying)
- * [Texture editor](texture_editor.md)
-   * [Keys](texture_editor.md#keys)
-   * [Copying](texture_editor.md#copying)
-   * [deutex texture configuration format](texture_editor.md#deutex-texture-configuration-format)
+ * [Texture editor](texture_dir.md)
+   * [Keys](texture_dir.md#keys)
+   * [Copying](texture_dir.md#copying)
+   * [deutex texture configuration format](texture_dir.md#deutex-texture-configuration-format)
  * [WAD view](wad_view.md)
    * [Keys](wad_view.md#keys)
    * [Copying](wad_view.md#copying)
@@ -34,6 +34,7 @@ Particular views of the browser interface:
 
  * [Help system](help.md)
    * [Using the Mouse](help.md#using-the-mouse)
+ * [Texture Editor](texture_editor.md)
  * [Hexdump view](hexdump.md)
  * Plaintext view (TODO)
 

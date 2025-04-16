@@ -14,7 +14,6 @@
 #include "conv/vpng.h"
 
 #include <limits.h>
-#include <setjmp.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,8 +32,6 @@
 struct offsets_chunk {
 	int32_t leftoffset, topoffset;
 };
-
-static jmp_buf libpng_abort_jump;
 
 static void SwapOffsetsChunk(struct offsets_chunk *chunk)
 {
@@ -83,8 +80,9 @@ uint8_t *V_PalettizeRGBABuffer(const struct palette *pal, uint8_t *buf,
 
 static void ErrorCallback(png_structp p, png_const_charp s)
 {
+	struct png_context *ctx = png_get_error_ptr(p);
 	ConversionError("%s", s);
-	longjmp(libpng_abort_jump, 1);
+	longjmp(ctx->abort_jump, 1);
 }
 
 static void WarningCallback(png_structp p, png_const_charp s)
@@ -132,13 +130,7 @@ bool V_OpenPNGRead(struct png_context *ctx, VFILE *input)
 	ctx->pinfo = NULL;
 	ctx->write = false;
 
-	if (setjmp(libpng_abort_jump) != 0) {
-		ConversionError("Error when parsing PNG file");
-		V_ClosePNG(ctx);
-		return NULL;
-	}
-
-	ctx->ppng = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
+	ctx->ppng = png_create_read_struct(PNG_LIBPNG_VER_STRING, ctx,
 	                                   ErrorCallback, WarningCallback);
 	if (ctx->ppng == NULL) {
 		ConversionError("Failed to open PNG file");
@@ -164,13 +156,7 @@ VFILE *V_OpenPNGWrite(struct png_context *ctx)
 	ctx->pinfo = NULL;
 	ctx->write = true;
 
-	if (setjmp(libpng_abort_jump) != 0) {
-		ConversionError("Error when writing PNG file");
-		V_ClosePNG(ctx);
-		return NULL;
-	}
-
-	ctx->ppng = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
+	ctx->ppng = png_create_write_struct(PNG_LIBPNG_VER_STRING, ctx,
 	                                    ErrorCallback, WarningCallback);
 	if (!ctx->ppng) {
 		ConversionError("Failed to create PNG write struct");
@@ -220,6 +206,13 @@ uint8_t *V_ReadRGBAPNG(VFILE *input, struct patch_header *hdr, int *rowstep)
 
 	hdr->leftoffset = 0;
 	hdr->topoffset = 0;
+
+	if (setjmp(ctx.abort_jump) != 0) {
+		ConversionError("Error when parsing PNG file");
+		V_ClosePNG(&ctx);
+		free(imgbuf);
+		return NULL;
+	}
 
 	if (!V_OpenPNGRead(&ctx, input)) {
 		goto fail1;
@@ -315,6 +308,17 @@ VFILE *V_WritePalettizedPNG(struct patch_header *hdr, uint8_t *imgbuf,
 	uint8_t *alphabuf = NULL;
 	struct png_context ctx;
 	int y;
+
+	if (setjmp(ctx.abort_jump) != 0) {
+		ConversionError("Error when writing PNG file");
+		V_ClosePNG(&ctx);
+		free(alphabuf);
+		free(png_pal);
+		if (result != NULL) {
+			vfclose(result);
+		}
+		return NULL;
+	}
 
 	result = V_OpenPNGWrite(&ctx);
 	if (result == NULL) {

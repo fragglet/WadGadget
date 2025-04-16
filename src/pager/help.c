@@ -308,7 +308,7 @@ static void HelpPagerActivateLink(struct pager *p, int link_num)
 	free(filename);
 }
 
-static void PerformGoBack(void)
+static void ActionGoBack(void)
 {
 	struct help_pager_config *cfg = current_pager->cfg->user_data;
 	struct help_pager_history *h;
@@ -331,7 +331,7 @@ static void PerformGoBack(void)
 }
 
 static const struct action back_action = {
-    0, 'B', "Back", "Back", PerformGoBack,
+    0, 'B', "Back", "Back", ActionGoBack,
 };
 
 static void OpenTableOfContents(void)

@@ -219,6 +219,9 @@ void UI_ListPaneInit(struct list_pane *p, WINDOW *w,
 	p->subwin = NULL;
 	p->funcs = funcs;
 	p->data = data;
+	p->title = NULL;
+	p->selected = 0;
+	p->window_offset = 0;
 }
 
 int UI_ListPaneSelected(struct list_pane *p)

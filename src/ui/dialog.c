@@ -342,7 +342,7 @@ static doubleclick_continuation TextInputDialogMouseClick(void *dialog, int x,
 }
 
 char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
-                            char *msg, ...)
+                            const char *msg, ...)
 {
 	const struct action **saved_actions = UI_ActionsBarSetActions(NULL);
 	struct text_input_dialog_box dialog;

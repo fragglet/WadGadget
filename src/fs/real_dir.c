@@ -39,7 +39,7 @@ static int HasWadExtension(const char *name)
 		return 0;
 	}
 	extn = name + strlen(name) - 4;
-	return !strcasecmp(extn, ".wad");
+	return !strcasecmp(extn, ".wad") || !strcasecmp(extn, ".rts");
 }
 
 static int OrderByName(const void *x, const void *y)

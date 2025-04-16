@@ -220,6 +220,29 @@ const struct lump_type lump_type_sound = {
     ".wav",
 };
 
+// Creative Labs .voc sound effects, used in Duke3D/ROTT .rts files (rather
+// than Doom's native sound effect format).
+
+static bool VocSoundCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	// Note that this does mean if there's a plain text lump that starts
+	// with the word "Creative" then it will be misidentified, but it
+	// seems pretty unlikely.
+	return ent->size > 16 && !memcmp(buf, "Creative", 8);
+}
+
+static void VocSoundFormat(struct wad_file_entry *ent, uint8_t *buf,
+                           char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "Creative VOC sound effect");
+}
+
+const struct lump_type lump_type_sound_voc = {
+    VocSoundCheck,
+    VocSoundFormat,
+    ".voc",
+};
+
 // Graphic lump (sprite, texture, etc.)
 
 static bool GraphicLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
@@ -663,6 +686,7 @@ static const struct lump_type *lump_types[] = {
     &lump_type_level,
     &lump_type_special,
     &lump_type_sound,
+    &lump_type_sound_voc,
     &lump_type_textures,
     &lump_type_pnames,
     &lump_type_graphic,

@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <setjmp.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -32,10 +33,18 @@ struct palette_set *PAL_FromImageFile(VFILE *input)
 	int bit_depth, color_type, ilace_type, comp_type, filter_method;
 	int rowstep, x, y, num_palettes;
 	png_uint_32 width, height;
-	uint8_t *rowbuf;
+	uint8_t *rowbuf = NULL;
 	struct palette_set *result = NULL;
 
+	if (setjmp(ctx.abort_jump) != 0) {
+		ConversionError("Error reading PNG file");
+		free(result);
+		result = NULL;
+		goto fail;
+	}
+
 	if (!V_OpenPNGRead(&ctx, input)) {
+		vfclose(input);
 		return NULL;
 	}
 
@@ -89,10 +98,10 @@ struct palette_set *PAL_FromImageFile(VFILE *input)
 		}
 	}
 
-	free(rowbuf);
 	png_read_end(ctx.ppng, NULL);
 
 fail:
+	free(rowbuf);
 	V_ClosePNG(&ctx);
 	vfclose(input);
 	return result;
@@ -113,6 +122,15 @@ VFILE *PAL_ToImageFile(struct palette_set *set)
 	} else {
 		w = 16;
 		h = 16;
+	}
+
+	if (setjmp(ctx.abort_jump) != 0) {
+		ConversionError("Error writing PNG file");
+		if (result != NULL) {
+			vfclose(result);
+			result = NULL;
+		}
+		goto fail;
 	}
 
 	result = V_OpenPNGWrite(&ctx);

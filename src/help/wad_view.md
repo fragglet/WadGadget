@@ -14,9 +14,9 @@ allows new resources to be [imported](#copying) into the WAD from files, or to b
 from other WAD files. Each WAD file consists of a number of named "lumps";
 they contain different kinds of data depending on their purpose.
 
-It is possible to navigate inside of certain lump types (the [texture editor](texture_editor.md)
-and [PNAMES editor](pnames_editor.md)). Selecting the first entry in the WAD
-list returns to the directory containing the WAD.
+It is possible to navigate inside of certain lump types (the [texture directory](texture_dir.md)
+and [PNAMES editor](pnames_editor.md)). Selecting the first entry in the WAD list returns to the
+directory containing the WAD.
 
 ## Keys
 

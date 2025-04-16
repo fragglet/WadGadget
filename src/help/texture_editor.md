@@ -1,59 +1,24 @@
 # Texture editor
 
-[This page shows help about browsing TEXTURE lumps. For help on the browser
-interface in general, [see here](browser.md).]
-
-The TEXTURE lumps define all the wall textures that are used within the game.
-In level editors, these are the names that you see when editing sidedefs.
+The texture editor screen allows an individual texture to be edited and
+changed. It is accessed via the [texture directory](texture_dir.md) (open a TEXTURE1 or
+TEXTURE2 lump inside of a WAD file): select a texture to edit and press enter.
 
 Each texture has a width and height, and is composed of one or more patches;
 they are layered on top of each other as a kind of collage. Any patches must
 be listed in the PNAMES lump; see the [PNAMES editor](pnames_editor.md) for more details.
 
-The first entry in the textures list saves all changes and returns to the WAD
-file containing the texture lump.
-
 ## Keys
 
-    **Ctrl-V  F2      **  Mo**v**e (rearrange) marked textures
-    **Ctrl-]  Shift-F2**  Sort marked textures into alphabetical order
-    **Ctrl-U  F3      **  D**u**plicate selected texture
-    **Ctrl-F  F4      **  Edit texture config **f**ile
-    **Ctrl-C  F5      **  **C**opy or export; [see below](#copying)
-    **Ctrl-E  F6      **  R**e**name selected texture
-    **Ctrl-K  F7      **  Ma**k**e new texture
-    **Ctrl-X  F8      **  Delete texture(s)
-    **        Shift-F8**  Delete texture(s) (no confirmation)
-    **Ctrl-A  F10     **  Unmark **a**ll marked textures
-    **Ctrl-Z          **  Undo last change
-    **Ctrl-Y          **  Redo change
+Use the cursor keys to highlight fields and press enter to edit them.
 
-All [standard controls](browser.md#keys) are also supported.
+    **        Esc**  Save and exit texture editor
+    **Ctrl-T  F2 **  Lower patch in stack
+    **Ctrl-U  F3 **  Raise patch in stack
+    **Ctrl-K  F7 **  Add new patch
+    **Ctrl-X  F8 **  Delete patch
 
-## Copying
-
- * If another texture directory is in the opposite pane, **Copy (F5)** copies the
-   selected texture (or marked textures) to the other directory. This can be
-   used to copy texture definitions between WADs. If textures with the same
-   names already exist, they will be overwritten; any new textures will be
-   inserted into the other directory at the position indicated by a horizontal
-   line in the opposite pane.
- * If a directory is in the opposite pane, **Export config (F5)** will create a
-   plain text file in that directory, containing the tagged textures in the
-   deutex plain text format. If no textures are tagged, the entire directory
-   is exported.
- * To import such a text file back into the texture directory, switch to the
-   [opposite pane](dir_view.md) and use **Import config (F5)**.
- * Texture directories go hand-in-hand with PNAMES lumps. If you add textures
-   into a directory that use new PNAMES, it is important that you update the
-   PNAMES lump when prompted.
-
-## deutex texture configuration format
-
-TODO
-
-## Creating a new texture directory
-
-To create a new texture directory, simply create an empty lump named TEXTURE1
-or TEXTURE2 and open it. A pop-up notice will confirm that a new texture
-directory has been created. You may need to create a PNAMES directory first.
+The "lower" and "raise" actions may somewhat unintuitively appear to work
+backwards ("raise" moves the patch down in the list, and "lower" moves it up).
+It makes more sense when you consider that patches in the list are drawn in
+order; those at the end of the list are really the ones on "top" of the stack.

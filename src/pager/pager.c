@@ -139,9 +139,9 @@ static bool Search(struct pager *p, const char *needle, int start_line)
 	return false;
 }
 
-static void PerformSearchAgain(void);
+static void ActionSearchAgain(void);
 
-static void PerformSearch(void)
+static void ActionSearch(void)
 {
 	char *needle;
 
@@ -157,7 +157,7 @@ static void PerformSearch(void)
 	if (strlen(needle) == 0) {
 		free(needle);
 		if (current_pager->last_search != NULL) {
-			PerformSearchAgain();
+			ActionSearchAgain();
 		}
 		return;
 	}
@@ -172,15 +172,15 @@ static void PerformSearch(void)
 }
 
 const struct action pager_search_action = {
-    '/', 'F', "Search", "Search", PerformSearch,
+    '/', 'F', "Search", "Search", ActionSearch,
 };
 
-static void PerformSearchAgain(void)
+static void ActionSearchAgain(void)
 {
 	int last_search_line;
 
 	if (current_pager->last_search == NULL) {
-		PerformSearch();
+		ActionSearch();
 		return;
 	}
 
@@ -194,10 +194,10 @@ static void PerformSearchAgain(void)
 }
 
 const struct action pager_search_again_action = {
-    'n', 'N', "Next", "Search Again", PerformSearchAgain,
+    'n', 'N', "Next", "Search Again", ActionSearchAgain,
 };
 
-static void PerformNextLink(void)
+static void ActionNextLink(void)
 {
 	struct pager_config *cfg = current_pager->cfg;
 
@@ -214,10 +214,10 @@ static void PerformNextLink(void)
 }
 
 const struct action pager_next_link_action = {
-    '\t', 0, "NextLink", "Next Link", PerformNextLink,
+    '\t', 0, "NextLink", "Next Link", ActionNextLink,
 };
 
-static void PerformPrevLink(void)
+static void ActionPrevLink(void)
 {
 	struct pager_config *cfg = current_pager->cfg;
 
@@ -233,10 +233,10 @@ static void PerformPrevLink(void)
 }
 
 const struct action pager_prev_link_action = {
-    KEY_BTAB, 0, NULL, NULL, PerformPrevLink,
+    KEY_BTAB, 0, NULL, NULL, ActionPrevLink,
 };
 
-static void PerformOpenLink(void)
+void P_ActionOpenLink(void)
 {
 	struct pager_config *cfg = current_pager->cfg;
 
@@ -250,10 +250,10 @@ static void PerformOpenLink(void)
 }
 
 const struct action open_link_action = {
-    '\r', 0, "Open", "Open Link", PerformOpenLink,
+    '\r', 0, "Open", "Open Link", P_ActionOpenLink,
 };
 
-static void PerformPagerHelpAction(void)
+static void ActionPagerHelp(void)
 {
 	struct pager_config *cfg = current_pager->cfg;
 
@@ -261,7 +261,7 @@ static void PerformPagerHelpAction(void)
 }
 
 const struct action pager_help_action = {
-    KEY_F(1), 0, "Help", "Help", PerformPagerHelpAction,
+    KEY_F(1), 0, "Help", "Help", ActionPagerHelp,
 };
 
 static bool LinkWithinWindow(struct pager *p, int link)

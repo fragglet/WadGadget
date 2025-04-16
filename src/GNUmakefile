@@ -41,6 +41,7 @@ HELP_FILES =                \
     help/contents.md        \
     help/dir_view.md        \
     help/pnames_editor.md   \
+    help/texture_dir.md     \
     help/texture_editor.md  \
     help/wad_view.md        \
     help/hexen_specs.md     \
@@ -63,7 +64,9 @@ OBJS =                      \
     conv/graphic.o          \
     conv/import.o           \
     conv/mus2mid.o          \
+    conv/netpbm.o           \
     conv/palette.o          \
+    conv/process.o          \
     conv/vpng.o             \
     fs/file_set.o           \
     fs/real_dir.o           \
@@ -82,6 +85,7 @@ OBJS =                      \
     textures/actions.o      \
     textures/bundle.o       \
     textures/config.o       \
+    textures/editor.o       \
     textures/lump_dir.o     \
     textures/pnames.o       \
     textures/pnames_dir.o   \

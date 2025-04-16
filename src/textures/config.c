@@ -286,7 +286,7 @@ static enum parse_result MaybeAddPatch(struct textures *txs, char *line,
 	p.colormap = 0;
 
 	t = &txs->textures[txs->num_textures - 1];
-	*t = TX_AddPatch(*t, &p);
+	*t = TX_InsertPatch(*t, (*t)->patchcount, &p);
 
 	return MATCH;
 }
