@@ -10,6 +10,8 @@
 
 #include "conv/process.h"
 
+#ifndef _WIN32
+
 #include <assert.h>
 #include <poll.h>
 #include <stdbool.h>
@@ -225,3 +227,13 @@ VFILE *SpawnSubprocessFilter(VFILE *input, const char **cmd, bool report_errors)
 
 	return vfopen(f, &filter_funcs);
 }
+
+#else  /* #ifdef _WIN32 */
+
+VFILE *SpawnSubprocessFilter(VFILE *input, const char **cmd, bool report_errors)
+{
+	// TODO: Not yet supported
+	return input;
+}
+
+#endif

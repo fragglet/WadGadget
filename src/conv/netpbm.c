@@ -35,7 +35,11 @@ static const struct {
 
 static bool NetpbmInstalled(void)
 {
+#ifdef _WIN32
+	return false;
+#else
 	return system("pnmtopng --version >/dev/null 2>&1") == 0;
+#endif
 }
 
 bool NetpbmFileTypeSupported(const char *filename)
