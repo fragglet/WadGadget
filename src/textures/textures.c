@@ -233,8 +233,7 @@ struct texture *TX_InsertPatch(struct texture *t, int insert_index,
 	// (X/Y offsets are assumed to be zero)
 	t = checked_realloc(t, TX_TextureLen(t->patchcount + 1));
 
-	memmove(t->patches + insert_index + 1,
-	        t->patches + insert_index,
+	memmove(t->patches + insert_index + 1, t->patches + insert_index,
 	        sizeof(struct patch) * (t->patchcount - insert_index));
 	t->patches[insert_index] = *p;
 

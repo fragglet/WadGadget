@@ -409,14 +409,10 @@ const struct action lower_patch_action = {
 };
 
 static const struct action *texture_editor_actions[] = {
-    &exit_pager_action,
-    &pager_help_action,
-    &edit_field_action,
-    &add_patch_action,
-    &delete_patch_action,
-    &raise_patch_action,
-    &lower_patch_action,
-    NULL,
+    &exit_pager_action,   &pager_help_action,
+    &edit_field_action,   &add_patch_action,
+    &delete_patch_action, &raise_patch_action,
+    &lower_patch_action,  NULL,
 };
 
 bool TX_EditTexture(struct texture_bundle *b, int texture_index)
