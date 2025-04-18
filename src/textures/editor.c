@@ -102,7 +102,7 @@ static void PnameSelectorKeypress(void *p, int key)
 	}
 }
 
-static int SelectPname(struct texture_bundle *b)
+static int SelectPname(struct texture_bundle *b, int initial_index)
 {
 	const struct action **saved_actions;
 	struct pname_selector s;
@@ -113,6 +113,7 @@ static int SelectPname(struct texture_bundle *b)
 	UI_ListPaneInit(&s.lp, win, &pname_select_funcs, &s);
 	s.lp.pane.keypress = PnameSelectorKeypress;
 	UI_ListPaneSetTitle(&s.lp, "Select a patch:");
+	UI_ListPaneSelect(&s.lp, initial_index);
 	saved_actions = UI_ActionsBarSetActions(NULL);
 	UI_PaneShow(&s);
 	UI_RunMainLoop();
@@ -273,7 +274,7 @@ static void EditorActivateLink(struct pager *p, int idx)
 	patch = &TX(e)->patches[(idx - 3) / 3];
 	switch (idx % 3) {
 	case 0:
-		pname_idx = SelectPname(e->b);
+		pname_idx = SelectPname(e->b, patch->patch);
 		if (pname_idx >= 0) {
 			patch->patch = pname_idx;
 			++e->b->txs->modified_count;
@@ -309,7 +310,7 @@ static void ActionAddPatch(void)
 	int curr_link = current_pager->cfg->current_link;
 	int insert_index, patch_num;
 
-	patch_num = SelectPname(e->b);
+	patch_num = SelectPname(e->b, 0);
 	if (patch_num < 0) {
 		return;
 	}
