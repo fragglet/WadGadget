@@ -54,31 +54,31 @@ void UI_TextInputDraw(struct text_input_box *input)
 	          getcurx(input->win) + getparx(input->win), "");
 }
 
-int UI_TextInputKeypress(struct text_input_box *input, int keypress)
+bool UI_TextInputKeypress(struct text_input_box *input, int keypress)
 {
 	size_t pos;
 
 	if ((keypress == KEY_BACKSPACE || keypress == 0x7f) &&
 	    strlen(input->input) > 0) {
 		input->input[strlen(input->input) - 1] = '\0';
-		return 1;
+		return true;
 	}
 	if (keypress == CTRL_('W')) {
 		UI_TextInputClear(input);
-		return 1;
+		return true;
 	}
 
 	if (keypress >= 128 || !isprint(keypress)) {
-		return 0;
+		return false;
 	}
 
 	pos = strlen(input->input);
 	if (pos + 1 >= input->input_sz) {
-		return 0;
+		return false;
 	}
 	input->input[pos] = keypress;
 	input->input[pos + 1] = '\0';
-	return 1;
+	return true;
 }
 
 void UI_TextInputClear(struct text_input_box *input)

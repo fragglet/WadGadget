@@ -150,7 +150,7 @@ doubleclick_continuation UI_ListPaneMouseClick(void *_lp, int x, int y)
 	return NULL;
 }
 
-void UI_ListPaneKeypress(void *p, int key)
+bool UI_ListPaneKeypress(void *p, int key)
 {
 	struct list_pane *lp = p;
 	unsigned int i, lines;
@@ -160,7 +160,7 @@ void UI_ListPaneKeypress(void *p, int key)
 		if (lp->window_offset > 0) {
 			--lp->window_offset;
 		}
-		return;
+		break;
 	case KEY_UP:
 		if (lp->selected > 0) {
 			--lp->selected;
@@ -168,21 +168,21 @@ void UI_ListPaneKeypress(void *p, int key)
 		if (lp->selected < lp->window_offset) {
 			lp->window_offset = lp->selected;
 		}
-		return;
+		break;
 	case KEY_PPAGE:
 		for (i = 0; i < UI_ListPaneLines(lp); i++) {
 			UI_ListPaneKeypress(p, KEY_UP);
 		}
-		return;
+		break;
 	case KEY_HOME:
 		lp->selected = 0;
 		lp->window_offset = 0;
-		return;
+		break;
 	case KEY_SF:
 		if (lp->window_offset + 1 < NumEntries(lp)) {
 			++lp->window_offset;
 		}
-		return;
+		break;
 	case KEY_DOWN:
 		if (lp->selected + 1 < NumEntries(lp)) {
 			++lp->selected;
@@ -191,12 +191,12 @@ void UI_ListPaneKeypress(void *p, int key)
 		    lp->window_offset + UI_ListPaneLines(lp) - 1) {
 			++lp->window_offset;
 		}
-		return;
+		break;
 	case KEY_NPAGE:
 		for (i = 0; i < UI_ListPaneLines(lp); i++) {
 			UI_ListPaneKeypress(p, KEY_DOWN);
 		}
-		return;
+		break;
 	case KEY_END:
 		lp->selected = NumEntries(lp) - 1;
 		lines = UI_ListPaneLines(lp);
@@ -205,8 +205,10 @@ void UI_ListPaneKeypress(void *p, int key)
 		} else {
 			lp->window_offset = 0;
 		}
-		return;
+		break;
 	}
+
+	return true;
 }
 
 void UI_ListPaneInit(struct list_pane *p, WINDOW *w,

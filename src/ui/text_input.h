@@ -12,6 +12,7 @@
 #define UI__TEXT_INPUT_H_INCLUDED
 
 #include <curses.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 struct text_input_box {
@@ -23,7 +24,7 @@ struct text_input_box {
 void UI_TextInputInit(struct text_input_box *input, WINDOW *win,
                       size_t max_chars);
 void UI_TextInputDraw(struct text_input_box *input);
-int UI_TextInputKeypress(struct text_input_box *input, int keypress);
+bool UI_TextInputKeypress(struct text_input_box *input, int keypress);
 void UI_TextInputClear(struct text_input_box *input);
 
 #endif /* #ifndef UI__TEXT_INPUT_H_INCLUDED */

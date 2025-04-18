@@ -40,7 +40,7 @@ static bool DrawSearchPane(void *pane)
 	return true;
 }
 
-static void SearchPaneKeypress(void *pane, int key)
+static bool SearchPaneKeypress(void *pane, int key)
 {
 	struct search_pane *p = pane;
 
@@ -52,6 +52,8 @@ static void SearchPaneKeypress(void *pane, int key)
 	} else {
 		// TODO HandleKeypress(NULL, key);
 	}
+
+	return true;
 }
 
 void UI_InitSearchPane(struct search_pane *sp, WINDOW *win)

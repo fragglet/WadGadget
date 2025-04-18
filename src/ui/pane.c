@@ -33,13 +33,15 @@ static doubleclick_continuation mouse_click_continuation;
 static struct pane *actions_bar, *title_bar;
 static bool main_loop_exited = false;
 
-void UI_PaneKeypress(void *pane, int key)
+bool UI_PaneKeypress(void *pane, int key)
 {
 	struct pane *p = pane;
 
-	if (p->keypress != NULL) {
-		p->keypress(p, key);
+	if (p->keypress == NULL) {
+		return false;
 	}
+
+	return p->keypress(p, key);
 }
 
 doubleclick_continuation UI_PaneMouseClick(void *pane, int x, int y)
@@ -166,39 +168,42 @@ static struct pane *GetPrevPane(struct pane_stack *stack, struct pane *pane)
 	return NULL;
 }
 
-void UI_StackKeypress(struct pane_stack *s, int key)
+bool UI_StackKeypress(struct pane_stack *s, int key)
 {
 	struct pane *p;
 
 	UI_SetCurrentStack(s);
-	UI_PaneKeypress(actions_bar, key);
+	if (UI_PaneKeypress(actions_bar, key)) {
+		return true;
+	}
 
 	// Keypress goes to the top pane that has a keypress handler.
 
 	p = GetPrevPane(s, NULL);
 	while (p != NULL) {
 		UI_SetCurrentStack(s);
-		if (p->keypress != NULL) {
-			UI_PaneKeypress(p, key);
-			break;
+		if (p->keypress != NULL && UI_PaneKeypress(p, key)) {
+			return true;
 		}
 		p = GetPrevPane(s, p);
 	}
+
+	return false;
 }
 
-void UI_InputKeypress(int key)
+bool UI_InputKeypress(int key)
 {
 	if (key == CTRL_('L')) {
 		clearok(stdscr, TRUE);
 		wrefresh(stdscr);
-		return;
+		return true;
 	}
 	if (key == KEY_RESIZE) {
 		UI_TriggerRecalculate();
-		return;
+		return true;
 	}
 
-	UI_StackKeypress(UI_ActiveStack(), key);
+	return UI_StackKeypress(UI_ActiveStack(), key);
 }
 
 static bool CheckMouseInPane(MEVENT *ev, struct pane *p)

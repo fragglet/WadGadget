@@ -611,7 +611,7 @@ static doubleclick_continuation HandleMouseClick(void *_p, int x, int y)
 	return NULL;
 }
 
-static void HandleKeypress(void *_p, int c)
+static bool HandleKeypress(void *_p, int c)
 {
 	struct pager *p = _p;
 	int win_h = getmaxy(p->pane.window);
@@ -658,6 +658,8 @@ static void HandleKeypress(void *_p, int c)
 		refresh();
 		break;
 	}
+
+	return true;
 }
 
 void P_InitPager(struct pager *p, struct pager_config *cfg)

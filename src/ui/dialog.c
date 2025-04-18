@@ -185,11 +185,13 @@ static bool DrawConfirmDialog(void *pane)
 	return true;
 }
 
-static void ConfirmDialogKeypress(void *dialog, int key)
+static bool ConfirmDialogKeypress(void *dialog, int key)
 {
 	struct confirm_dialog_box *d = dialog;
 	CheckButtonPress(&d->left, key, &d->result);
 	CheckButtonPress(&d->right, key, &d->result);
+
+	return true;
 }
 
 static doubleclick_continuation ConfirmDialogMouseClick(void *dialog, int x,
@@ -321,7 +323,7 @@ static bool DrawTextInputDialog(void *pane)
 	return true;
 }
 
-static void TextInputDialogKeypress(void *dialog, int key)
+static bool TextInputDialogKeypress(void *dialog, int key)
 {
 	struct text_input_dialog_box *d = dialog;
 
@@ -329,6 +331,8 @@ static void TextInputDialogKeypress(void *dialog, int key)
 	    !CheckButtonPress(&d->right, key, &d->result)) {
 		UI_TextInputKeypress(&d->input, key);
 	}
+
+	return true;
 }
 
 static doubleclick_continuation TextInputDialogMouseClick(void *dialog, int x,

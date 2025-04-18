@@ -316,13 +316,13 @@ static int TranslateSpecialKey(int key)
 	}
 }
 
-static void HandleKeypress(void *p, int key)
+static bool HandleKeypress(void *p, int key)
 {
 	const struct action **actions = UI_CurrentStack()->actions;
 	int i;
 
 	if (actions == NULL) {
-		return;
+		return false;
 	}
 
 	key = TranslateSpecialKey(key);
@@ -332,9 +332,11 @@ static void HandleKeypress(void *p, int key)
 		    (key == actions[i]->key ||
 		     key == CTRL_(actions[i]->ctrl_key))) {
 			actions[i]->callback();
-			return;
+			return true;
 		}
 	}
+
+	return false;
 }
 
 struct pane *UI_ActionsBarInit(void)

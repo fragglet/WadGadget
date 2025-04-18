@@ -84,7 +84,7 @@ static const struct list_pane_funcs pname_select_funcs = {
     PnameSelectorNumEntries,
 };
 
-static void PnameSelectorKeypress(void *p, int key)
+static bool PnameSelectorKeypress(void *p, int key)
 {
 	struct pname_selector *s = p;
 
@@ -92,13 +92,12 @@ static void PnameSelectorKeypress(void *p, int key)
 	case '\r':
 		s->selected = true;
 		UI_ExitMainLoop();
-		return;
+		return true;
 	case 27:
 		UI_ExitMainLoop();
-		return;
+		return true;
 	default:
-		UI_ListPaneKeypress(p, key);
-		return;
+		return UI_ListPaneKeypress(p, key);
 	}
 }
 
