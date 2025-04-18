@@ -58,9 +58,13 @@ struct texture_editor {
 
 struct pname_selector {
 	struct list_pane lp;
+	struct search_pane sp;
 	struct texture_bundle *b;
 	bool selected;
 };
+
+// TODO: This global shouldn't exist.
+static struct pname_selector *curr_pname_selector;
 
 static void PnameSelectorDrawElement(WINDOW *win, int index, void *data)
 {
@@ -121,15 +125,29 @@ static void PnameSearchFound(unsigned int index, void *user_data)
 	UI_ListPaneSelect(&s->lp, index);
 }
 
+static void ActionPnameSearchAgain(void)
+{
+	UI_SearchAgain(&curr_pname_selector->sp,
+	               UI_ListPaneSelected(&curr_pname_selector->lp));
+}
+
+static const struct action pname_search_again_action = {
+    0, 'N', "Next", "Search again", ActionPnameSearchAgain,
+};
+
+static const struct action *pname_selector_actions[] = {
+    &pname_search_again_action,
+    NULL,
+};
+
 static int SelectPname(struct texture_bundle *b, int initial_index)
 {
 	const struct action **saved_actions;
-	struct search_pane sp;
 	struct pname_selector s;
 	WINDOW *win = newwin(LINES - 4, 40, 1, 40);
 	WINDOW *search_win = newwin(3, 40, LINES - 4, 40);
 
-	UI_InitSearchPane(&sp, search_win, PnameSearchText, PnameSearchFound,
+	UI_InitSearchPane(&s.sp, search_win, PnameSearchText, PnameSearchFound,
 	                  &s);
 	s.b = b;
 	s.selected = false;
@@ -137,11 +155,12 @@ static int SelectPname(struct texture_bundle *b, int initial_index)
 	s.lp.pane.keypress = PnameSelectorKeypress;
 	UI_ListPaneSetTitle(&s.lp, "Select a patch:");
 	UI_ListPaneSelect(&s.lp, initial_index);
-	saved_actions = UI_ActionsBarSetActions(NULL);
+	saved_actions = UI_ActionsBarSetActions(pname_selector_actions);
 	UI_PaneShow(&s);
-	UI_PaneShow(&sp);
+	UI_PaneShow(&s.sp);
+	curr_pname_selector = &s;
 	UI_RunMainLoop();
-	UI_PaneHide(&sp);
+	UI_PaneHide(&s.sp);
 	UI_PaneHide(&s);
 	UI_ActionsBarSetActions(saved_actions);
 	UI_ListPaneFree(&s.lp);
