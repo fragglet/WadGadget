@@ -25,6 +25,7 @@
 #include "ui/dialog.h"
 #include "ui/list_pane.h"
 #include "ui/pane.h"
+#include "ui/search_pane.h"
 #include "ui/stack.h"
 #include "ui/title_bar.h"
 
@@ -101,12 +102,35 @@ static bool PnameSelectorKeypress(void *p, int key)
 	}
 }
 
+static const char *PnameSearchText(unsigned int index, void *user_data)
+{
+	static char buf[10];
+	struct pname_selector *s = user_data;
+
+	if (index >= s->b->pn->num_pnames) {
+		return NULL;
+	}
+
+	snprintf(buf, sizeof(buf), "%-.8s", s->b->pn->pnames[index]);
+	return buf;
+}
+
+static void PnameSearchFound(unsigned int index, void *user_data)
+{
+	struct pname_selector *s = user_data;
+	UI_ListPaneSelect(&s->lp, index);
+}
+
 static int SelectPname(struct texture_bundle *b, int initial_index)
 {
 	const struct action **saved_actions;
+	struct search_pane sp;
 	struct pname_selector s;
-	WINDOW *win = newwin(LINES - 3, 40, 1, 40);
+	WINDOW *win = newwin(LINES - 4, 40, 1, 40);
+	WINDOW *search_win = newwin(3, 40, LINES - 4, 40);
 
+	UI_InitSearchPane(&sp, search_win, PnameSearchText, PnameSearchFound,
+	                  &s);
 	s.b = b;
 	s.selected = false;
 	UI_ListPaneInit(&s.lp, win, &pname_select_funcs, &s);
@@ -115,11 +139,14 @@ static int SelectPname(struct texture_bundle *b, int initial_index)
 	UI_ListPaneSelect(&s.lp, initial_index);
 	saved_actions = UI_ActionsBarSetActions(NULL);
 	UI_PaneShow(&s);
+	UI_PaneShow(&sp);
 	UI_RunMainLoop();
+	UI_PaneHide(&sp);
 	UI_PaneHide(&s);
 	UI_ActionsBarSetActions(saved_actions);
 	UI_ListPaneFree(&s.lp);
 	delwin(win);
+	delwin(search_win);
 
 	if (s.selected) {
 		return s.lp.selected;
