@@ -140,19 +140,19 @@ static bool SearchPaneKeypress(void *pane, int key)
 	struct search_pane *sp = pane;
 
 	if (!UI_TextInputKeypress(&sp->input, key)) {
-	       return false;
+		return false;
 	}
 
 	if (key != KEY_BACKSPACE) {
-		PerformSearch(sp,  sp->input.input);
+		PerformSearch(sp, sp->input.input);
 	}
 
 	return true;
 }
 
 void UI_InitSearchPane(struct search_pane *sp, WINDOW *win,
-                       element_text_func callback, search_found_func search_found,
-                       void *callback_data)
+                       element_text_func callback,
+                       search_found_func search_found, void *callback_data)
 {
 	assert(win != NULL);
 	sp->pane.window = win;

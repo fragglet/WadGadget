@@ -30,8 +30,7 @@ struct search_pane {
 
 void UI_InitSearchPane(struct search_pane *sp, WINDOW *win,
                        element_text_func callback,
-                       search_found_func search_found,
-                       void *callback_data);
+                       search_found_func search_found, void *callback_data);
 void UI_SearchAgain(struct search_pane *sp, unsigned int start_index);
 
 #endif /* #ifndef UI__SEARCH_PANE_H_INCLUDED */
