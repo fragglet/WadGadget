@@ -87,7 +87,7 @@ static bool DrawSearchPane(void *pane)
 	return true;
 }
 
-void UI_Search(struct search_pane *sp, const char *needle)
+static void PerformSearch(struct search_pane *sp, const char *needle)
 {
 	int idx;
 
@@ -144,7 +144,7 @@ static bool SearchPaneKeypress(void *pane, int key)
 	}
 
 	if (key != KEY_BACKSPACE) {
-		UI_Search(sp,  sp->input.input);
+		PerformSearch(sp,  sp->input.input);
 	}
 
 	return true;
