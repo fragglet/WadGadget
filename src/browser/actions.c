@@ -467,7 +467,7 @@ static void CreateWad(bool convert)
 	filename =
 	    CreateWadInDir(from_pane->dir, import_set, to_pane->dir, convert);
 	if (filename != NULL) {
-		B_DirectoryPaneSearch(to_pane, filename);
+		B_DirectoryPaneSelectByName(to_pane, filename);
 		free(filename);
 		B_SwitchToPane(to_pane);
 	}
@@ -1072,7 +1072,7 @@ static void NavigateNew(struct directory_pane *curr_pane,
 	// Select subfolder we just navigated out of?
 	if (ent == VFS_PARENT_DIRECTORY) {
 		const char *old_path = curr_pane->dir->path;
-		B_DirectoryPaneSearch(new_pane, PathBaseName(old_path));
+		B_DirectoryPaneSelectByName(new_pane, PathBaseName(old_path));
 	}
 
 	if (new_pane != NULL) {
