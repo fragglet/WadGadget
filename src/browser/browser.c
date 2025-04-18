@@ -517,6 +517,33 @@ static bool DrawInfoPane(void *p)
 	return true;
 }
 
+static bool InfoPaneKeypress(void *pane, int key)
+{
+	// We hang all this stuff off the info pane, kind of a hack.
+	switch (key) {
+	case KEY_LEFT:
+		B_SwitchToPane(browser_panes[0]);
+		return true;
+	case KEY_RIGHT:
+		B_SwitchToPane(browser_panes[1]);
+		return true;
+	case KEY_RESIZE:
+		SetWindowSizes();
+		return true;
+	default:
+		return false;
+	}
+}
+
+static void InitInfoPane(WINDOW *win)
+{
+	assert(win != NULL);
+	info_pane.window = win;
+	info_pane.draw = DrawInfoPane;
+	info_pane.keypress = InfoPaneKeypress;
+	info_pane.mouse_click = NULL;
+}
+
 static bool DrawSearchPane(void *pane)
 {
 	struct search_pane *p = pane;
@@ -552,18 +579,6 @@ static bool SearchPaneKeypress(void *pane, int key)
 {
 	struct search_pane *p = pane;
 
-	switch (key) {
-	case KEY_LEFT:
-		B_SwitchToPane(browser_panes[0]);
-		return true;
-	case KEY_RIGHT:
-		B_SwitchToPane(browser_panes[1]);
-		return true;
-	case KEY_RESIZE:
-		SetWindowSizes();
-		return true;
-	}
-
 	// Try search input.
 	if (!UI_TextInputKeypress(&p->input, key)) {
 		return false;
@@ -573,15 +588,6 @@ static bool SearchPaneKeypress(void *pane, int key)
 	}
 
 	return true;
-}
-
-static void InitInfoPane(WINDOW *win)
-{
-	assert(win != NULL);
-	info_pane.window = win;
-	info_pane.draw = DrawInfoPane;
-	info_pane.keypress = NULL;
-	info_pane.mouse_click = NULL;
 }
 
 static void InitSearchPane(WINDOW *win)
