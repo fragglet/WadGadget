@@ -7,10 +7,11 @@
 #include "ui/colors.h"
 #include "ui/pane.h"
 #include "ui/text_input.h"
+#include "ui/title_bar.h"
 #include "ui/ui.h"
 
-static bool PrefixSearch(struct search_pane *sp, const char *needle,
-                         int start_index)
+static int PrefixSearch(struct search_pane *sp, const char *needle,
+                        int start_index)
 {
 	size_t needle_len = strlen(needle);
 	const char *haystack;
@@ -22,16 +23,15 @@ static bool PrefixSearch(struct search_pane *sp, const char *needle,
 			break;
 		}
 		if (!strncasecmp(haystack, needle, needle_len)) {
-			sp->search_found(i, sp->callback_data);
-			return true;
+			return i;
 		}
 	}
 
-	return false;
+	return -1;
 }
 
-static bool SubstringSearch(struct search_pane *sp, const char *needle,
-                            int start_index)
+static int SubstringSearch(struct search_pane *sp, const char *needle,
+                           int start_index)
 {
 	size_t haystack_len, needle_len = strlen(needle);
 	const char *haystack;
@@ -48,13 +48,12 @@ static bool SubstringSearch(struct search_pane *sp, const char *needle,
 		}
 		for (j = 0; j < haystack_len - needle_len + 1; j++) {
 			if (!strncasecmp(haystack + j, needle, needle_len)) {
-				sp->search_found(i, sp->callback_data);
-				return true;
+				return i;
 			}
 		}
 	}
 
-	return false;
+	return -1;
 }
 
 static bool DrawSearchPane(void *pane)
@@ -90,14 +89,49 @@ static bool DrawSearchPane(void *pane)
 
 void UI_Search(struct search_pane *sp, const char *needle)
 {
+	int idx;
+
 	if (strlen(needle) == 0) {
 		return;
 	}
 
 	// Check for prefix first, so user can type entire lump name.
-	if (!PrefixSearch(sp, needle, 0)) {
-		// If nothing found, try a substring match.
-		(void) SubstringSearch(sp, needle, 0);
+	idx = PrefixSearch(sp, needle, 0);
+
+	// If nothing found, try a substring match.
+	if (idx < 0) {
+		idx = SubstringSearch(sp, needle, 0);
+	}
+
+	if (idx >= 0) {
+		sp->search_found(idx, sp->callback_data);
+	}
+}
+
+void UI_SearchAgain(struct search_pane *sp, unsigned int start_index)
+{
+	const char *needle = sp->input.input;
+	int idx;
+
+	if (strlen(needle) == 0) {
+		return;
+	}
+
+	// When searching again, we only do substring matches.
+	idx = SubstringSearch(sp, needle, start_index + 1);
+	if (idx < 0) {
+		idx = SubstringSearch(sp, needle, 0);
+	}
+	if (idx >= 0) {
+		sp->search_found(idx, sp->callback_data);
+	}
+
+	if (idx < 0) {
+		UI_ShowNotice("No matches found.");
+	} else if (idx < start_index) {
+		UI_ShowNotice("Searched to the end; returning to the start.");
+	} else if (idx == start_index) {
+		UI_ShowNotice("No other matches found.");
 	}
 }
 

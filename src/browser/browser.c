@@ -155,21 +155,7 @@ static const struct action cmdr_mode_action = {
 
 static void SearchAgain(void)
 {
-	int old_selected = active_pane->pane.selected;
-	bool found;
-
-	found =
-	    B_DirectoryPaneSearchAgain(active_pane, search_pane.input.input);
-
-	if (active_pane->pane.selected < old_selected) {
-		UI_ShowNotice("Searched to the end; returning to the start.");
-	} else if (active_pane->pane.selected > old_selected) {
-		// We found another match. Great.
-	} else if (found) {
-		UI_ShowNotice("No other matches found.");
-	} else {
-		UI_ShowNotice("No matches found.");
-	}
+	UI_SearchAgain(&search_pane, UI_ListPaneSelected(&active_pane->pane));
 }
 
 static const struct action search_again_action = {
