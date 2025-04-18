@@ -28,8 +28,6 @@ struct directory_pane {
 struct directory_entry *B_DirectoryPaneEntry(struct directory_pane *p);
 void B_DirectoryPaneKeypress(void *p, int key);
 void B_DirectoryPaneFree(struct directory_pane *p);
-void B_DirectoryPaneSearch(void *p, const char *needle);
-bool B_DirectoryPaneSearchAgain(void *p, const char *needle);
 void B_DirectoryPaneReselect(struct directory_pane *p);
 void B_DirectoryPaneSelectEntry(struct directory_pane *p,
                                 struct directory_entry *ent);
