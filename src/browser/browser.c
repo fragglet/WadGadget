@@ -467,24 +467,6 @@ bool B_CheckPathPaste(void)
 	return true;
 }
 
-static void HandleKeypress(void *pane, int key)
-{
-	switch (key) {
-	case KEY_LEFT:
-		B_SwitchToPane(browser_panes[0]);
-		break;
-	case KEY_RIGHT:
-		B_SwitchToPane(browser_panes[1]);
-		break;
-	case KEY_RESIZE:
-		SetWindowSizes();
-		break;
-	default:
-		UI_PaneKeypress(active_pane, key);
-		break;
-	}
-}
-
 static bool DrawInfoPane(void *p)
 {
 	struct directory *dir;
@@ -570,13 +552,24 @@ static bool SearchPaneKeypress(void *pane, int key)
 {
 	struct search_pane *p = pane;
 
-	// Space key triggers mark, does not go to search input.
-	if (key != ' ' && UI_TextInputKeypress(&p->input, key)) {
-		if (key != KEY_BACKSPACE) {
-			B_DirectoryPaneSearch(active_pane, p->input.input);
-		}
-	} else {
-		HandleKeypress(NULL, key);
+	switch (key) {
+	case KEY_LEFT:
+		B_SwitchToPane(browser_panes[0]);
+		return true;
+	case KEY_RIGHT:
+		B_SwitchToPane(browser_panes[1]);
+		return true;
+	case KEY_RESIZE:
+		SetWindowSizes();
+		return true;
+	}
+
+	// Try search input.
+	if (!UI_TextInputKeypress(&p->input, key)) {
+		return false;
+	}
+	if (key != KEY_BACKSPACE) {
+		B_DirectoryPaneSearch(active_pane, p->input.input);
 	}
 
 	return true;
