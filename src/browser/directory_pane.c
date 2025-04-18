@@ -241,6 +241,18 @@ bool B_DirectoryPaneSearchAgain(void *p, const char *needle)
 	       SubstringSearch(dp, needle, 0);
 }
 
+const char *B_DirectoryPaneElementText(struct directory_pane *p,
+                                       unsigned int index)
+{
+	if (index >= NumEntries(p)) {
+		return NULL;
+	}
+	if (p->dir->parent_name != NULL && index == 0) {
+		return "..";
+	}
+	return p->dir->entries[index - HeaderEntries(p)].name;
+}
+
 int B_DirectoryPaneSelected(struct directory_pane *p)
 {
 	return UI_ListPaneSelected(&p->pane) - HeaderEntries(p);

@@ -36,6 +36,8 @@ void B_DirectoryPaneSelectEntry(struct directory_pane *p,
 void B_DirectoryPaneSelectBySerial(struct directory_pane *p,
                                    uint64_t serial_no);
 void B_DirectoryPaneSelectByName(struct directory_pane *p, const char *name);
+const char *B_DirectoryPaneElementText(struct directory_pane *p,
+                                       unsigned int index);
 int B_DirectoryPaneSelected(struct directory_pane *p);
 struct file_set *B_DirectoryPaneTagged(struct directory_pane *p);
 void B_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set);

@@ -30,17 +30,13 @@
 #include "ui/colors.h"
 #include "ui/list_pane.h"
 #include "ui/pane.h"
+#include "ui/search_pane.h"
 #include "ui/stack.h"
 #include "ui/text_input.h"
 #include "ui/title_bar.h"
 #include "ui/ui.h"
 
 #define INFO_PANE_WIDTH 30
-
-struct search_pane {
-	struct pane pane;
-	struct text_input_box input;
-};
 
 static const struct action *actions[MAX_KEY_BINDINGS + 1];
 static struct actions_pane actions_pane;
@@ -544,60 +540,14 @@ static void InitInfoPane(WINDOW *win)
 	info_pane.mouse_click = NULL;
 }
 
-static bool DrawSearchPane(void *pane)
+static const char *SearchTextCallback(unsigned int index, void *user_data)
 {
-	struct search_pane *p = pane;
-	WINDOW *win = p->pane.window;
-	int w = getmaxx(win);
-
-	if (getmaxy(win) > 1) {
-		wbkgdset(win, COLOR_PAIR(PAIR_PANE_COLOR));
-		werase(win);
-		UI_DrawWindowBox(win);
-		mvwaddstr(win, 0, 2, " Search ");
-		mvderwin(p->input.win, 1, 2);
-		wresize(p->input.win, 1, w - 4);
-		if (strlen(p->input.input) > 0) {
-			mvwaddstr(win, 0, w - 13, "[   - Next]");
-			wattron(win, A_BOLD);
-			mvwaddstr(win, 0, w - 12, "^N");
-			wattroff(win, A_BOLD);
-		}
-	} else {
-		wbkgdset(win, COLOR_PAIR(PAIR_WHITE_BLACK));
-		werase(win);
-		mvwaddstr(win, 0, 0, " Search: ");
-		mvderwin(p->input.win, 0, 9);
-		wresize(p->input.win, 1, w - 9);
-	}
-	UI_TextInputDraw(&p->input);
-
-	return true;
+	return B_DirectoryPaneElementText(active_pane, index);
 }
 
-static bool SearchPaneKeypress(void *pane, int key)
+static void SearchSelectCallback(unsigned int index, void *user_data)
 {
-	struct search_pane *p = pane;
-
-	// Try search input.
-	if (!UI_TextInputKeypress(&p->input, key)) {
-		return false;
-	}
-	if (key != KEY_BACKSPACE) {
-		B_DirectoryPaneSearch(active_pane, p->input.input);
-	}
-
-	return true;
-}
-
-static void InitSearchPane(WINDOW *win)
-{
-	assert(win != NULL);
-	search_pane.pane.window = win;
-	search_pane.pane.draw = DrawSearchPane;
-	search_pane.pane.keypress = SearchPaneKeypress;
-	search_pane.pane.mouse_click = NULL;
-	UI_TextInputInit(&search_pane.input, win, 256);
+	UI_ListPaneSelect(&active_pane->pane, index);
 }
 
 void B_Shutdown(void)
@@ -621,7 +571,8 @@ void B_Init(const char *path1, const char *path2)
 	InitInfoPane(newwin(5, 26, 1, 27));
 	UI_PaneShow(&info_pane);
 
-	InitSearchPane(newwin(4, 26, LINES - 5, 27));
+	UI_InitSearchPane(&search_pane, newwin(4, 26, LINES - 5, 27),
+	                  SearchTextCallback, SearchSelectCallback, NULL);
 	UI_PaneShow(&search_pane);
 
 	B_ActionsPaneInit(&actions_pane, newwin(15, 26, 6, 27));
