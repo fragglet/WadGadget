@@ -17,11 +17,20 @@
 #include "ui/pane.h"
 #include "ui/text_input.h"
 
+typedef const char *(*element_text_func)(unsigned int index, void *user_data);
+typedef void (*search_found_func)(unsigned int index, void *user_data);
+
 struct search_pane {
 	struct pane pane;
 	struct text_input_box input;
+	element_text_func element_text;
+	search_found_func search_found;
+	void *callback_data;
 };
 
-void UI_InitSearchPane(struct search_pane *sp, WINDOW *win);
+void UI_InitSearchPane(struct search_pane *sp, WINDOW *win,
+                       element_text_func callback,
+                       search_found_func search_found,
+                       void *callback_data);
 
 #endif /* #ifndef UI__SEARCH_PANE_H_INCLUDED */
