@@ -147,6 +147,9 @@ static VFILE *PerformConversion(VFILE *input, struct directory *to_wad,
 		// TODO: Support for conversion to flats, colormaps, etc.
 		// from other (non-PNG) formats
 		input = NetpbmConvertToPNG(input, src_name);
+		if (input == NULL) {
+			return NULL;
+		}
 		return V_FromImageFile(input, pal);
 	} else if (StringHasSuffix(src_name, ".png")) {
 		return V_FromImageFile(input, pal);

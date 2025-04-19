@@ -14,6 +14,7 @@
 #include <stdlib.h>
 
 #include "common.h"
+#include "conv/error.h"
 #include "conv/process.h"
 #include "stringlib.h"
 
@@ -44,7 +45,7 @@ bool NetpbmFileTypeSupported(const char *filename)
 
 	for (i = 0; i < arrlen(file_types); i++) {
 		if (StringHasSuffix(filename, file_types[i].extension)) {
-			return NetpbmInstalled();
+			return true;
 		}
 	}
 
@@ -56,6 +57,12 @@ VFILE *NetpbmConvertToPNG(VFILE *input, const char *filename)
 	const char *to_pnm[] = {"-", NULL};
 	const char *to_png[] = {"pnmtopng", "-transparent=" TRANSPARENT, NULL};
 	int i;
+
+	if (!NetpbmInstalled()) {
+		ConversionError("NetPBM not installed: can't convert file.");
+		vfclose(input);
+		return NULL;
+	}
 
 	for (i = 0; i < arrlen(file_types); i++) {
 		if (StringHasSuffix(filename, file_types[i].extension)) {
