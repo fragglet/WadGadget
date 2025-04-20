@@ -11,8 +11,8 @@
 #ifndef CONV__GFXEDIT_H_INCLUDED
 #define CONV__GFXEDIT_H_INCLUDED
 
-#include <stdint.h>
 #include "fs/wad_file.h"
+#include <stdint.h>
 
 bool V_EditGraphic(struct wad_file *wf, unsigned int lump_index);
 
