@@ -136,7 +136,7 @@ static bool EditField(struct gfx_editor *e, const char *prompt,
 
 	val = atoi(answer);
 	free(answer);
-	if (val < min || val > 16384) {
+	if (val < min || val > 32767) {
 		UI_ShowNotice("Value not in range.");
 		return false;
 	}
@@ -153,19 +153,19 @@ static void EditorActivateLink(struct pager *p, int idx)
 	switch (idx) {
 	case FIELD_GFX_WIDTH:
 		EditField(e, "Enter new graphic width:",
-		          (int16_t *) e->lump, 0);
+		          (int16_t *) &e->hdr.width, 0);
 		return;
 	case FIELD_GFX_HEIGHT:
 		EditField(e, "Enter new graphic height:",
-		          (int16_t *) e->lump, 0);
+		          (int16_t *) &e->hdr.height, 0);
 		return;
 	case FIELD_GFX_XOFF:
 		EditField(e, "Enter new X offset:",
-		          (int16_t *) e->lump, 0);
+		          (int16_t *) &e->hdr.leftoffset, -32768);
 		return;
 	case FIELD_GFX_YOFF:
 		EditField(e, "Enter new Y offset:",
-		          (int16_t *) e->lump, 0);
+		          (int16_t *) &e->hdr.topoffset, -32768);
 		return;
 	}
 }
