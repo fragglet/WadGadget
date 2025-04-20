@@ -92,12 +92,18 @@ static void DrawField(struct gfx_editor *e, WINDOW *win, int field_num,
 static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 {
 	struct gfx_editor *e = user_data;
+	struct wad_file_entry *dir;
+	char buf[10];
 
 	switch (line) {
 	case LINE_LUMP_NAME:
+		// TODO: Allow lump to be renamed?
 		wattron(win, A_BOLD);
-		waddstr(win, " Lump: ");
+		waddstr(win, "      Lump: ");
 		wattroff(win, A_BOLD);
+		dir = W_GetDirectory(e->wf);
+		snprintf(buf, sizeof(buf), "%-.8s", dir[e->lump_index].name);
+		waddstr(win, buf);
 		break;
 	case LINE_GFX_WIDTH:
 		wattron(win, A_BOLD);
