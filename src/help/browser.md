@@ -21,6 +21,7 @@ The following are standard keys that always work in the browser interface:
     **Ctrl-G     **   Mark pattern (**g**lob)
     **Ctrl-A  F10**   Unmark **a**ll
     **Ctrl-N     **   Search again (**n**ext search result)
+    **Ctrl-P     **   Open **P**alette database
     **Ctrl-W     **   Clear search
     **Ctrl-J     **   Toggle [Commander Mode](#commander-mode)
     **Ctrl-L     **   Redraw screen
