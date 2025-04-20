@@ -170,8 +170,12 @@ static void EditorActivateLink(struct pager *p, int idx)
 	}
 }
 
+static const struct action edit_field_action = {
+    '\r', 0, "Edit", "Edit", P_ActionOpenLink,
+};
+
 static const struct action *gfx_editor_actions[] = {
-    &exit_pager_action,  NULL,
+    &exit_pager_action, &edit_field_action,  NULL,
 };
 
 bool V_EditGraphic(uint8_t *lump, size_t lump_len)
