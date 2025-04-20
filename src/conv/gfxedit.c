@@ -145,7 +145,7 @@ static bool EditField(struct gfx_editor *e, const char *prompt, int16_t *field,
 
 	val = atoi(answer);
 	free(answer);
-	if (val < min || val > 32767) {
+	if (val < min || val > INT16_MAX) {
 		UI_ShowNotice("Value not in range.");
 		return false;
 	}
@@ -184,12 +184,12 @@ static void EditorActivateLink(struct pager *p, int idx)
 	case FIELD_GFX_XOFF:
 		EditField(e,
 		          "Enter new X offset:", (int16_t *) &e->hdr.leftoffset,
-		          -32768);
+		          INT16_MIN);
 		return;
 	case FIELD_GFX_YOFF:
 		EditField(e,
 		          "Enter new Y offset:", (int16_t *) &e->hdr.topoffset,
-		          -32768);
+		          INT16_MIN);
 		return;
 	}
 }

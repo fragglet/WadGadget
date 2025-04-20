@@ -273,7 +273,7 @@ static bool EditField(struct texture_editor *e, const char *prompt,
 
 	val = atoi(answer);
 	free(answer);
-	if (val < min || val > 16384) {
+	if (val < min || val > INT16_MAX) {
 		UI_ShowNotice("Value not in range.");
 		return false;
 	}
@@ -327,12 +327,12 @@ static void EditorActivateLink(struct pager *p, int idx)
 		return;
 	case 1:
 		if (EditField(e, "Enter new X offset:", &patch->originx,
-		              -16384)) {
+		              INT16_MIN)) {
 			++current_pager->cfg->current_link;
 		}
 		return;
 	case 2:
-		EditField(e, "Enter new Y offset:", &patch->originy, -16384);
+		EditField(e, "Enter new Y offset:", &patch->originy, INT16_MIN);
 		return;
 	}
 }
