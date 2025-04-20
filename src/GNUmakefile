@@ -61,6 +61,7 @@ OBJS =                      \
     conv/endoom.o           \
     conv/error.o            \
     conv/export.o           \
+    conv/gfxedit.o          \
     conv/graphic.o          \
     conv/import.o           \
     conv/mus2mid.o          \
