@@ -26,6 +26,7 @@
 #include "common.h"
 #include "conv/error.h"
 #include "conv/export.h"
+#include "conv/gfxedit.h"
 #include "conv/import.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
@@ -1094,6 +1095,42 @@ static void ActionParentDir(void)
 
 const struct action parent_dir_action = {
     27, 'Q', "Parent", "Parent", ActionParentDir,
+};
+
+static void ActionEdit(void)
+{
+	struct directory *dir = active_pane->dir;
+	struct directory_entry *ent;
+	struct wad_file *wf;
+	unsigned int lump_index;
+
+	ent = B_DirectoryPaneEntry(active_pane);
+	if (ent == NULL) {
+		return;
+	}
+
+	wf = VFS_WadFile(dir);
+	lump_index = ent - dir->entries;
+
+	if (LI_IdentifyLump(wf, lump_index) != &lump_type_graphic) {
+		UI_MessageBox("Editing is not supported for this lump type.");
+		return;
+	}
+	if (!B_CheckReadOnly(dir)) {
+		return;
+	}
+
+	if (V_EditGraphic(wf, lump_index)) {
+		VFS_CommitChanges(dir, "edit to '%s'", ent->name);
+		UI_ShowNotice("Graphic updated.");
+		VFS_Refresh(dir);
+	}
+}
+
+// TODO: We're currently using Ctrl-B for edit. Eventually this should just
+// be integrated with the enter key, which currently views a lump.
+const struct action edit_action = {
+    KEY_F(4), 'B', "Edit", "Edit", ActionEdit,
 };
 
 static void ViewLump(struct directory *dir, struct directory_entry *ent)

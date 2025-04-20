@@ -25,6 +25,7 @@ directory containing the WAD.
     **Ctrl-V  F2      **  Mo**v**e (rearrange) marked lumps
     **Ctrl-]  Shift-F2**  Sort marked lumps into alphabetical order
     **Ctrl-U  F3      **  **U**pdate WAD lumps; [see below](#updating)
+    **Ctrl-B  F4      **  Edit lump (only graphic lumps supported)
     **Ctrl-C  F5      **  **C**opy or export lumps; [see below](#copying)
     **        Shift-F5**  Export as raw, no file conversion
     **Ctrl-E  F6      **  R**e**name selected lump

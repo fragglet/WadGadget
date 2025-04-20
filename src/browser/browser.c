@@ -181,11 +181,17 @@ static const struct action swap_panes_action = {
 };
 
 static const struct action *wad_actions[] = {
-    &rearrange_action,     &new_lump_action,
-    &undo_action,          &redo_action,
-    &sort_entries_action,  &hexdump_action,
-    &open_palettes_action, &view_action,
-    &parent_dir_action,    NULL,
+    &rearrange_action,
+    &new_lump_action,
+    &undo_action,
+    &redo_action,
+    &sort_entries_action,
+    &hexdump_action,
+    &open_palettes_action,
+    &view_action,
+    &parent_dir_action,
+    &edit_action,
+    NULL,
 };
 
 static const struct action *dir_actions[] = {
