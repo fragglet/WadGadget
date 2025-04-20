@@ -48,6 +48,7 @@ enum {
 struct gfx_editor {
 	struct pager_config cfg;
 	struct patch_header hdr;
+	uint16_t orig_width;
 	uint8_t *lump;
 	size_t lump_len;
 	bool edited;
@@ -149,11 +150,24 @@ static bool EditField(struct gfx_editor *e, const char *prompt,
 static void EditorActivateLink(struct pager *p, int idx)
 {
 	struct gfx_editor *e = current_pager->cfg->user_data;
+	uint16_t prev_width;
 
 	switch (idx) {
 	case FIELD_GFX_WIDTH:
-		EditField(e, "Enter new graphic width:",
-		          (int16_t *) &e->hdr.width, 0);
+		prev_width = e->hdr.width;
+		// As with NewWadTool, we allow not only the offsets to be
+		// edited but the width and height as well. For the most
+		// part this is safe to do; the one exception is if we try
+		// to increase the width to be greater than the original.
+		if (EditField(e, "Enter new graphic width:",
+		              (int16_t *) &e->hdr.width, 0) &&
+		    e->hdr.width > e->orig_width &&
+		    !UI_ConfirmDialogBox(
+		        "Confirm new width", "Edit", "Cancel",
+		        "New width is wider than the original width.\n"
+		        "This may make the graphic corrupt. Proceed?")) {
+			e->hdr.width = prev_width;
+		}
 		return;
 	case FIELD_GFX_HEIGHT:
 		EditField(e, "Enter new graphic height:",
@@ -190,6 +204,7 @@ bool V_EditGraphic(uint8_t *lump, size_t lump_len)
 
 	memcpy(&e.hdr, lump, sizeof(struct patch_header));
 	V_SwapPatchHeader(&e.hdr);
+	e.orig_width = e.hdr.width;
 
 	memset(&e.cfg, 0, sizeof(struct pager_config));
 	e.cfg.title = "Graphic Editor";
