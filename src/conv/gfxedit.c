@@ -48,6 +48,8 @@ enum {
 struct gfx_editor {
 	struct pager_config cfg;
 	struct patch_header hdr;
+	struct wad_file *wf;
+	unsigned int lump_index;
 	uint16_t orig_width;
 	uint8_t *lump;
 	size_t lump_len;
@@ -196,19 +198,39 @@ static const struct action *gfx_editor_actions[] = {
     NULL,
 };
 
-bool V_EditGraphic(uint8_t *lump, size_t lump_len)
+static void LoadLump(struct gfx_editor *e)
+{
+	VFILE *in = W_OpenLump(e->wf, e->lump_index);
+	e->lump = vfreadall(in, &e->lump_len);
+	vfclose(in);
+	assert(e->lump_len >= sizeof(struct patch_header));
+
+	e->hdr = *((struct patch_header *) e->lump);
+	V_SwapPatchHeader(&e->hdr);
+	e->orig_width = e->hdr.width;
+}
+
+static void SaveLump(struct gfx_editor *e)
+{
+	VFILE *out;
+
+	*((struct patch_header *) e->lump) = e->hdr;
+	V_SwapPatchHeader((struct patch_header *) e->lump);
+
+	out = W_OpenLumpRewrite(e->wf, e->lump_index);
+	assert(vfwrite(e->lump, 1, e->lump_len, out) == e->lump_len);
+	vfclose(out);
+}
+
+bool V_EditGraphic(struct wad_file *wf, unsigned int lump_index)
 {
 	struct pager p;
 	struct gfx_editor e;
 
-	assert(lump_len >= 8);
-
-	e.lump = lump;
-	e.lump_len = lump_len;
-
-	memcpy(&e.hdr, lump, sizeof(struct patch_header));
-	V_SwapPatchHeader(&e.hdr);
-	e.orig_width = e.hdr.width;
+	e.wf = wf;
+	e.lump_index = lump_index;
+	e.edited = false;
+	LoadLump(&e);
 
 	memset(&e.cfg, 0, sizeof(struct pager_config));
 	e.cfg.title = "Graphic Editor";
@@ -223,6 +245,12 @@ bool V_EditGraphic(uint8_t *lump, size_t lump_len)
 
 	P_InitPager(&p, &e.cfg);
 	P_RunPager(&p, true);
+
+	if (e.edited) {
+		SaveLump(&e);
+	}
+
+	free(e.lump);
 
 	return e.edited;
 }
