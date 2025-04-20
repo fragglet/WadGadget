@@ -55,10 +55,10 @@ struct gfx_editor {
 };
 
 static int field_linenos[] = {
-	LINE_GFX_WIDTH,
-	LINE_GFX_HEIGHT,
-	LINE_GFX_XOFF,
-	LINE_GFX_YOFF,
+    LINE_GFX_WIDTH,
+    LINE_GFX_HEIGHT,
+    LINE_GFX_XOFF,
+    LINE_GFX_YOFF,
 };
 
 static void EditorGetLink(struct pager_config *cfg, int idx,
@@ -124,8 +124,8 @@ static void EditorDrawLine(WINDOW *win, unsigned int line, void *user_data)
 	}
 }
 
-static bool EditField(struct gfx_editor *e, const char *prompt,
-                      int16_t *field, int min)
+static bool EditField(struct gfx_editor *e, const char *prompt, int16_t *field,
+                      int min)
 {
 	char *answer;
 	int val;
@@ -174,12 +174,14 @@ static void EditorActivateLink(struct pager *p, int idx)
 		          (int16_t *) &e->hdr.height, 0);
 		return;
 	case FIELD_GFX_XOFF:
-		EditField(e, "Enter new X offset:",
-		          (int16_t *) &e->hdr.leftoffset, -32768);
+		EditField(e,
+		          "Enter new X offset:", (int16_t *) &e->hdr.leftoffset,
+		          -32768);
 		return;
 	case FIELD_GFX_YOFF:
-		EditField(e, "Enter new Y offset:",
-		          (int16_t *) &e->hdr.topoffset, -32768);
+		EditField(e,
+		          "Enter new Y offset:", (int16_t *) &e->hdr.topoffset,
+		          -32768);
 		return;
 	}
 }
@@ -189,7 +191,9 @@ static const struct action edit_field_action = {
 };
 
 static const struct action *gfx_editor_actions[] = {
-    &exit_pager_action, &edit_field_action,  NULL,
+    &exit_pager_action,
+    &edit_field_action,
+    NULL,
 };
 
 bool V_EditGraphic(uint8_t *lump, size_t lump_len)
