@@ -337,7 +337,7 @@ static void EditorActivateLink(struct pager *p, int idx)
 	}
 }
 
-const struct action edit_field_action = {
+static const struct action edit_field_action = {
     '\r', 0, "Edit", "Edit", P_ActionOpenLink,
 };
 
@@ -378,7 +378,7 @@ static void ActionAddPatch(void)
 	current_pager->cfg->current_link = insert_index * 3 + 4;
 }
 
-const struct action add_patch_action = {
+static const struct action add_patch_action = {
     KEY_F(7), 'K', "AddPatch", "Add Patch", ActionAddPatch,
 };
 
@@ -406,7 +406,7 @@ static void ActionDeletePatch(void)
 	        current_pager->cfg->num_links - 1);
 }
 
-const struct action delete_patch_action = {
+static const struct action delete_patch_action = {
     KEY_F(8), 'X', "DelPatch", "Delete Patch", ActionDeletePatch,
 };
 
@@ -431,7 +431,7 @@ static void ActionRaisePatch(void)
 	}
 }
 
-const struct action raise_patch_action = {
+static const struct action raise_patch_action = {
     KEY_F(3), 'U', "RaisePatch", "Raise Patch", ActionRaisePatch,
 };
 
@@ -456,7 +456,7 @@ static void ActionLowerPatch(void)
 	}
 }
 
-const struct action lower_patch_action = {
+static const struct action lower_patch_action = {
     KEY_F(2), 'T', "LowerPatch", "Lower Patch", ActionLowerPatch,
 };
 
