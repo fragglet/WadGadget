@@ -8,7 +8,7 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-// #include "conv/gfxedit.h"
+#include "conv/gfxedit.h"
 
 #include <curses.h>
 #include <stdarg.h>
