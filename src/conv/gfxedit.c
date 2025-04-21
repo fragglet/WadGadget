@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "browser/actions.h"
 #include "common.h"
 #include "conv/graphic.h"
 #include "pager/pager.h"
@@ -48,6 +49,7 @@ enum {
 struct gfx_editor {
 	struct pager_config cfg;
 	struct patch_header hdr;
+	struct directory *dir;
 	struct wad_file *wf;
 	unsigned int lump_index;
 	uint16_t orig_width;
@@ -160,6 +162,10 @@ static void EditorActivateLink(struct pager *p, int idx)
 	struct gfx_editor *e = current_pager->cfg->user_data;
 	uint16_t prev_width;
 
+	if (!B_CheckReadOnly(e->dir)) {
+		return;
+	}
+
 	switch (idx) {
 	case FIELD_GFX_WIDTH:
 		prev_width = e->hdr.width;
@@ -228,13 +234,14 @@ static void SaveLump(struct gfx_editor *e)
 	vfclose(out);
 }
 
-bool V_EditGraphic(struct wad_file *wf, unsigned int lump_index)
+bool V_EditGraphic(struct directory *dir, struct directory_entry *ent)
 {
 	struct pager p;
 	struct gfx_editor e;
 
-	e.wf = wf;
-	e.lump_index = lump_index;
+	e.dir = dir;
+	e.wf = VFS_WadFile(dir);
+	e.lump_index = ent - dir->entries;
 	e.edited = false;
 	LoadLump(&e);
 

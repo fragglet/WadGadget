@@ -1116,11 +1116,7 @@ static void ActionEdit(void)
 		UI_MessageBox("Editing is not supported for this lump type.");
 		return;
 	}
-	if (!B_CheckReadOnly(dir)) {
-		return;
-	}
-
-	if (V_EditGraphic(wf, lump_index)) {
+	if (V_EditGraphic(dir, ent)) {
 		VFS_CommitChanges(dir, "edit to '%s'", ent->name);
 		UI_ShowNotice("Graphic updated.");
 		VFS_Refresh(dir);
