@@ -243,11 +243,41 @@ static const struct action center_xoff_action = {
     KEY_F(5), 'C', "Center", "Auto-Center", ActionAutoCenter,
 };
 
+static void ActionFloat(void)
+{
+	if (!B_CheckReadOnly(curr_editor->dir)) {
+		return;
+	}
+
+	curr_editor->hdr.topoffset = curr_editor->hdr.height + 10;
+	curr_editor->edited = true;
+}
+
+static const struct action float_action = {
+    KEY_F(6), 'F', "Float", "Float", ActionFloat,
+};
+
+static void ActionGround(void)
+{
+	if (!B_CheckReadOnly(curr_editor->dir)) {
+		return;
+	}
+
+	curr_editor->hdr.topoffset = max(curr_editor->hdr.height, 3) - 3;
+	curr_editor->edited = true;
+}
+
+static const struct action on_ground_action = {
+    KEY_F(7), 'G', "Ground", "Ground", ActionGround,
+};
+
 static const struct action *gfx_editor_actions[] = {
     &exit_pager_action,
     &pager_help_action,
     &edit_field_action,
     &center_xoff_action,
+    &float_action,
+    &on_ground_action,
     NULL,
 };
 

@@ -23,6 +23,13 @@ The editor provides actions to automatically adjust the offsets:
  * **Auto-center** (**Ctrl-C** / **F5**): automatically adjusts the X offset to the
    horizontal center of the image, based on the distribution of pixels
    within the image. Note that this is only a heuristic.
+ * **Float** (**Ctrl-F** / **F6**): sets the Y offset to 10 + the height of the image,
+   which will give sprites the appearance of floating (as is usually the
+   case for certain powerups).
+ * **Ground** (**Ctrl-G** / **F7**): sets the Y offset to the height of the image
+   minus 3, which will give sprites the appearance of standing on the
+   ground. Note that this is only a rule of thumb and different sprites may
+   need manual adjustment.
 
 ## Changing graphic dimensions
 
