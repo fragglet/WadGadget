@@ -55,7 +55,16 @@ bool NetpbmFileTypeSupported(const char *filename)
 VFILE *NetpbmConvertToPNG(VFILE *input, const char *filename)
 {
 	const char *to_pnm[] = {"-", NULL};
-	const char *to_png[] = {"pnmtopng", "-transparent=" TRANSPARENT, NULL};
+
+	// We only want the exact transparency color to become transparent.
+	// From the pnmtopng manpage:
+	// > If the color you specify is not present in the image, pnmtopng
+	// > selects instead the color in the image that is closest to the
+	// > one you specify. [...] However, if you prefix your color
+	// > specification with "=", only the exact color you specify will
+	// > be transparent.
+	const char *to_png[] = {"pnmtopng", "-transparent", "=" TRANSPARENT,
+	                        NULL};
 	int i;
 
 	if (!NetpbmInstalled()) {
