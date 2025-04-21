@@ -65,6 +65,9 @@ static int field_linenos[] = {
     LINE_GFX_YOFF,
 };
 
+// TODO: This global shouldn't exist:
+static struct gfx_editor *curr_editor;
+
 static void EditorGetLink(struct pager_config *cfg, int idx,
                           struct pager_link *link)
 {
@@ -204,10 +207,47 @@ static const struct action edit_field_action = {
     '\r', 0, "Edit", "Edit", P_ActionOpenLink,
 };
 
+static void ActionAutoCenter(void)
+{
+	uint8_t *srcbuf = curr_editor->lump;
+	uint32_t *columnofs = (uint32_t *) (srcbuf + sizeof(struct patch_header));
+	uint32_t off;
+	unsigned int accum = 0, total_pixels = 0;
+	int x, post_len;
+
+	if (!B_CheckReadOnly(curr_editor->dir)) {
+		return;
+	}
+
+	for (x = 0; x < curr_editor->hdr.width; ++x) {
+		off = columnofs[x];
+		SwapLE32(&off);
+		while (srcbuf[off] != 0xff) {
+			post_len = srcbuf[off + 1];
+			off += 4 + post_len;
+			accum += (x + 1) * post_len;
+			total_pixels += post_len;
+		}
+	}
+
+	if (total_pixels == 0) {
+		curr_editor->hdr.leftoffset = curr_editor->hdr.width / 2;
+	} else {
+		curr_editor->hdr.leftoffset = accum / total_pixels;
+	}
+
+	curr_editor->edited = true;
+}
+
+static const struct action center_xoff_action = {
+    KEY_F(5), 'C', "Center", "Auto-Center", ActionAutoCenter,
+};
+
 static const struct action *gfx_editor_actions[] = {
     &exit_pager_action,
     &pager_help_action,
     &edit_field_action,
+    &center_xoff_action,
     NULL,
 };
 
@@ -258,6 +298,8 @@ bool V_EditGraphic(struct directory *dir, struct directory_entry *ent)
 	e.cfg.num_links = NUM_FIELDS;
 
 	P_InitPager(&p, &e.cfg);
+
+	curr_editor = &e;
 	P_RunPager(&p, true);
 
 	if (e.edited) {

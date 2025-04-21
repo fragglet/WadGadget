@@ -1,8 +1,12 @@
 # Graphics editor
 
 The graphics editor screen allows the header fields of graphic lumps to be
-changed. The primary purpose of this is to allow the X and Y offsets to be
-adjusted; these perform different functions depending on the type:
+changed.
+
+## Adjusting offsets
+
+The primary purpose of this is to allow the X and Y offsets to be adjusted;
+these perform different functions depending on the lump type:
 
 * For Doom's UI element graphics (eg. menu text lumps), the offsets adjust
   the position at which the graphic will be drawn on the screen.
@@ -11,6 +15,14 @@ adjusted; these perform different functions depending on the type:
 
 Note that the editor **only** allows the header fields to be changed; the
 pixel data itself can be edited with external tools.
+
+## Autoadjusting offsets
+
+The editor provides actions to automatically adjust the offsets:
+
+ * **Auto-center** (**Ctrl-C** / **F5**): automatically adjusts the X offset to the
+   horizontal center of the image, based on the distribution of pixels
+   within the image. Note that this is only a heuristic.
 
 ## Changing graphic dimensions
 
