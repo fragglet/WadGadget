@@ -40,6 +40,7 @@ HELP_FILES =                \
     help/browser.md         \
     help/contents.md        \
     help/dir_view.md        \
+    help/gfx_editor.md      \
     help/pnames_editor.md   \
     help/texture_dir.md     \
     help/texture_editor.md  \

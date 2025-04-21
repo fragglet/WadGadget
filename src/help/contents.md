@@ -34,6 +34,7 @@ Particular views of the browser interface:
 
  * [Help system](help.md)
    * [Using the Mouse](help.md#using-the-mouse)
+ * [Graphics Editor](gfx_editor.md)
  * [Texture Editor](texture_editor.md)
  * [Hexdump view](hexdump.md)
  * Plaintext view (TODO)

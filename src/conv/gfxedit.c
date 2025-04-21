@@ -206,6 +206,7 @@ static const struct action edit_field_action = {
 
 static const struct action *gfx_editor_actions[] = {
     &exit_pager_action,
+    &pager_help_action,
     &edit_field_action,
     NULL,
 };
@@ -248,7 +249,7 @@ bool V_EditGraphic(struct directory *dir, struct directory_entry *ent)
 	memset(&e.cfg, 0, sizeof(struct pager_config));
 	e.cfg.title = "Graphic Editor";
 	e.cfg.draw_line = EditorDrawLine;
-	e.cfg.help_file = NULL;
+	e.cfg.help_file = "gfx_editor.md";
 	e.cfg.user_data = &e;
 	e.cfg.actions = gfx_editor_actions;
 	e.cfg.get_link = EditorGetLink;
