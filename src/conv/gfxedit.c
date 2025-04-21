@@ -210,7 +210,8 @@ static const struct action edit_field_action = {
 static void ActionAutoCenter(void)
 {
 	uint8_t *srcbuf = curr_editor->lump;
-	uint32_t *columnofs = (uint32_t *) (srcbuf + sizeof(struct patch_header));
+	uint32_t *columnofs =
+	    (uint32_t *) (srcbuf + sizeof(struct patch_header));
 	uint32_t off;
 	unsigned int accum = 0, total_pixels = 0;
 	int x, post_len;
