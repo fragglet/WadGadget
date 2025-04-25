@@ -58,7 +58,7 @@ static void SetNwtWindowSizes(void)
 
 	// Note minor adjustments here because the borders of the
 	// panes overlap one another.
-	left_width = (max(COLS, 80) - INFO_PANE_WIDTH + 1) / 2;
+	left_width = (max(COLS, 80) - INFO_PANE_WIDTH + 2) / 2;
 	right_width = max(COLS, 80) - left_width - INFO_PANE_WIDTH + 2;
 
 	wresize(info_pane.window, 5, INFO_PANE_WIDTH);
@@ -81,7 +81,7 @@ static void SetNwtWindowSizes(void)
 // now just used for small window sizes.
 static void SetCmdrWindowSizes(void)
 {
-	int left_width = COLS / 2;
+	int left_width = (COLS + 2) / 2;
 	int right_width = COLS - left_width + 1;
 	int top_line, lines;
 
