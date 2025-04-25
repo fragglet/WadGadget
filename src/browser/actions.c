@@ -1061,20 +1061,14 @@ const struct action reload_action = {
     0, 'R', "Reload", "Reload", ActionReload,
 };
 
+// TODO: This shouldn't need both the `new_dir` *and* `ent` parameters.
 static void NavigateNew(struct directory_pane *curr_pane,
-                        struct directory *new_dir)
+                        struct directory *new_dir, struct directory_entry *ent)
 {
 	struct directory_pane *new_pane;
-	struct directory_entry *ent;
+	char *old_path = checked_strdup(curr_pane->dir->path);
 
-	ent = B_DirectoryPaneEntry(curr_pane);
 	new_pane = UI_NewDirectoryPane(NULL, new_dir);
-
-	// Select subfolder we just navigated out of?
-	if (ent == VFS_PARENT_DIRECTORY) {
-		const char *old_path = curr_pane->dir->path;
-		B_DirectoryPaneSelectByName(new_pane, PathBaseName(old_path));
-	}
 
 	if (new_pane != NULL) {
 		// We're closing the current pane; if it is a WAD we might
@@ -1082,7 +1076,15 @@ static void NavigateNew(struct directory_pane *curr_pane,
 		CheckCompactWad(curr_pane);
 		B_ReplacePane(curr_pane, new_pane);
 		B_SwitchToPane(new_pane);
+
+		// Select subfolder we just navigated out of?
+		if (ent == VFS_PARENT_DIRECTORY) {
+			B_DirectoryPaneSelectByName(new_pane,
+			                            PathBaseName(old_path));
+		}
 	}
+
+	free(old_path);
 }
 
 static void ActionParentDir(void)
@@ -1090,7 +1092,7 @@ static void ActionParentDir(void)
 	struct directory *d =
 	    VFS_OpenDirByEntry(active_pane->dir, VFS_PARENT_DIRECTORY);
 	assert(d != NULL);
-	NavigateNew(active_pane, d);
+	NavigateNew(active_pane, d, VFS_PARENT_DIRECTORY);
 }
 
 const struct action parent_dir_action = {
@@ -1140,7 +1142,7 @@ static void ViewLump(struct directory *dir, struct directory_entry *ent)
 			              GetConversionError());
 			return;
 		}
-		NavigateNew(active_pane, new_dir);
+		NavigateNew(active_pane, new_dir, ent);
 		return;
 	}
 
@@ -1153,7 +1155,7 @@ static void ViewLump(struct directory *dir, struct directory_entry *ent)
 			              GetConversionError());
 			return;
 		}
-		NavigateNew(active_pane, new_dir);
+		NavigateNew(active_pane, new_dir, ent);
 		return;
 	}
 
@@ -1175,7 +1177,7 @@ static void ActionView(void)
 			UI_MessageBox("Error when opening '%s'.", ent->name);
 			return;
 		}
-		NavigateNew(active_pane, new_dir);
+		NavigateNew(active_pane, new_dir, ent);
 	} else if (ent->type == &file_type_file) {
 		OpenDirent(dir, ent, false);
 	} else if (ent->type == &file_type_lump) {
@@ -1436,7 +1438,7 @@ const struct action open_shell_action = {
 
 static void ActionOpenPalettes(void)
 {
-	NavigateNew(active_pane, PAL_OpenDirectory(active_pane->dir));
+	NavigateNew(active_pane, PAL_OpenDirectory(active_pane->dir), NULL);
 }
 
 const struct action open_palettes_action = {
