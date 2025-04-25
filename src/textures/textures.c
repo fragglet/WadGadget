@@ -225,8 +225,6 @@ VFILE *TX_MarshalTextures(struct textures *txs)
 struct texture *TX_InsertPatch(struct texture *t, int insert_index,
                                struct patch *p)
 {
-	struct patch *newp;
-
 	assert(insert_index >= 0 && insert_index <= t->patchcount);
 
 	// As long as we have the name, we can append the patch
