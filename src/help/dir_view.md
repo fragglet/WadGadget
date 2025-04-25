@@ -79,3 +79,25 @@ File formats when importing to a WAD (unless **Shift-F5** is used):
     PNAMES.txt       Plain text patch names
     TEXTURE*.txt     Plain text texture config  Must already have a PNAMES lump
     .fullscreen.png  Hexen full screen image    Must be 320x200 pixels
+
+## NetPBM image conversions
+
+By installing the NetPBM tools, support is added for conversion from the
+following file types:
+
+    **Extension       Format**
+    ------------------------------------------------------------------
+    .bmp            Microsoft Bitmap format
+    .gif            Compuserve Graphics Interchange Format (GIF)
+    .lbm            Interchange File Format (IFF)
+    .pcx            ZSoft PC Paintbrush
+    .ppm            Portable Pixmap
+    .tif, .tiff     Tagged Image File Format
+    .xpm            X11 Pixmap
+
+When importing from these formats, pure cyan (color #00ffff) is interpreted as
+the transparency color, and any pixels of this color will be made transparent
+in the imported graphic.
+
+There is no support for exporting to these formats; export is always to .png
+format, which is considered WadGadget's native graphic format.
