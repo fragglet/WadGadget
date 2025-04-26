@@ -24,7 +24,8 @@ bool GENMIDI_LoadBank(struct genmidi_bank *bank, VFILE *in)
 	uint8_t header_data[HEADER_LEN];
 	int i;
 
-	if (vfread(header_data, HEADER_LEN, 1, in) != 1) {
+	if (vfread(header_data, HEADER_LEN, 1, in) != 1 ||
+	    memcmp(header_data, HEADER_MAGIC, HEADER_LEN) != 0) {
 		return false;
 	}
 
