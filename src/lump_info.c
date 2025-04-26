@@ -32,11 +32,13 @@ struct lump_type {
 	bool (*check)(struct wad_file_entry *ent, uint8_t *buf);
 	void (*format)(struct wad_file_entry *ent, uint8_t *buf,
 	               char *descr_buf, size_t descr_buf_len);
+	const char *(*help_page)(struct wad_file_entry *ent);
 	const char *extension;
 };
 
 struct lump_description {
 	const char *name, *description;
+	const char *help_page;
 };
 
 struct sized_lump {
@@ -81,33 +83,35 @@ static const struct lump_description special_lumps[] = {
 };
 
 static const struct lump_description level_lumps[] = {
-    {"THINGS",   "Level things data"     },
-    {"LINEDEFS", "Level linedef data"    },
-    {"SIDEDEFS", "Level sidedef data"    },
-    {"VERTEXES", "Level vertex data"     },
-    {"SEGS",     "Level wall segments"   },
-    {"SSECTORS", "Level subsectors"      },
-    {"NODES",    "Level BSP nodes"       },
-    {"SECTORS",  "Level sector data"     },
-    {"REJECT",   "Level reject table"    },
-    {"BLOCKMAP", "Level blockmap data"   },
-    {"BEHAVIOR", "Hexen compiled scripts"},
-    {"SCRIPTS",  "Hexen script source"   },
-    {"LEAFS",    "PSX/D64 node leaves"   },
-    {"LIGHTS",   "PSX/D64 colored lights"},
-    {"MACROS",   "Doom 64 Macros"        },
-    {"GL_VERT",  "OpenGL extra vertices" },
-    {"GL_SEGS",  "OpenGL line segments"  },
-    {"GL_SSECT", "OpenGL subsectors"     },
-    {"GL_NODES", "OpenGL BSP nodes"      },
-    {"GL_PVS",   "Potential Vis. Set"    },
-    {"TEXTMAP",  "UDMF level data"       },
-    {"DIALOGUE", "Strife conversations"  },
-    {"ZNODES",   "UDMF BSP data"         },
-    {"ENDMAP",   "UDMF end of level"     },
-    {NULL,       NULL                    },
+    {"THINGS",   "Level things data",      "uds.md#4-2-things"   },
+    {"LINEDEFS", "Level linedef data",     "uds.md#4-3-linedefs" },
+    {"SIDEDEFS", "Level sidedef data",     "uds.md#4-4-sidedefs" },
+    {"VERTEXES", "Level vertex data",      "uds.md#4-5-vertexes" },
+    {"SEGS",     "Level wall segments",    "uds.md#4-6-segs"     },
+    {"SSECTORS", "Level subsectors",       "uds.md#4-7-ssectors" },
+    {"NODES",    "Level BSP nodes",        "uds.md#4-8-nodes"    },
+    {"SECTORS",  "Level sector data",      "uds.md#4-9-sectors"  },
+    {"REJECT",   "Level reject table",     "uds.md#4-10-reject"  },
+    {"BLOCKMAP", "Level blockmap data",    "uds.md#4-11-blockmap"},
+    {"BEHAVIOR", "Hexen compiled scripts",
+     "hexen_specs.md#4-hexen-script-language"                    },
+    {"SCRIPTS",  "Hexen script source",    NULL                  },
+    {"LEAFS",    "PSX/D64 node leaves",    NULL                  },
+    {"LIGHTS",   "PSX/D64 colored lights", NULL                  },
+    {"MACROS",   "Doom 64 Macros",         NULL                  },
+    {"GL_VERT",  "OpenGL extra vertices",  NULL                  },
+    {"GL_SEGS",  "OpenGL line segments",   NULL                  },
+    {"GL_SSECT", "OpenGL subsectors",      NULL                  },
+    {"GL_NODES", "OpenGL BSP nodes",       NULL                  },
+    {"GL_PVS",   "Potential Vis. Set",     NULL                  },
+    {"TEXTMAP",  "UDMF level data",        NULL                  },
+    {"DIALOGUE", "Strife conversations",   NULL                  },
+    {"ZNODES",   "UDMF BSP data",          NULL                  },
+    {"ENDMAP",   "UDMF end of level",      NULL                  },
+    {NULL,       NULL,                     NULL                  },
 };
 
+// TODO: Help pages for these:
 static const struct sized_lump lumps_by_size[] = {
     {4000, "Text mode screen"       },
     {256,  "Color translation table"},
@@ -153,7 +157,8 @@ LookupByName(const struct lump_description *table, const char *name)
 	return NULL;
 }
 
-// Lump with one of the standard "level" names, eg. "LINEDEFS", "SECTORS", etc.
+// Lump with one of the standard "level" names, eg. "LINEDEFS", "SECTORS",
+// etc.
 
 static bool LevelLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
@@ -168,9 +173,17 @@ static void LevelLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	snprintf(descr_buf, descr_buf_len, "%s", ld->description);
 }
 
+static const char *LevelLumpHelpPage(struct wad_file_entry *ent)
+{
+	const struct lump_description *ld =
+	    LookupByName(level_lumps, ent->name);
+	return ld->help_page;
+}
+
 const struct lump_type lump_type_level = {
     LevelLumpCheck,
     LevelLumpFormat,
+    LevelLumpHelpPage,
 };
 
 // "Special" one-of-a-kind lumps that are listed in the special_lumps array.
@@ -219,6 +232,7 @@ static void SoundLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_sound = {
     SoundLumpCheck,
     SoundLumpFormat,
+    NULL,
     ".wav",
 };
 
@@ -242,6 +256,7 @@ static void VocSoundFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_sound_voc = {
     VocSoundCheck,
     VocSoundFormat,
+    NULL,
     ".voc",
 };
 
@@ -272,6 +287,7 @@ static void GraphicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_graphic = {
     GraphicLumpCheck,
     GraphicLumpFormat,
+    NULL,
     ".png",
 };
 
@@ -293,6 +309,7 @@ static void FlatLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_flat = {
     FlatLumpCheck,
     FlatLumpFormat,
+    NULL,
     ".flat.png",
 };
 
@@ -312,6 +329,7 @@ static void MusLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_mus = {
     MusLumpCheck,
     MusLumpFormat,
+    NULL,
     ".mid",
 };
 
@@ -331,6 +349,7 @@ static void MidiLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_midi = {
     MidiLumpCheck,
     MidiLumpFormat,
+    NULL,
     ".mid",
 };
 
@@ -349,6 +368,7 @@ static void DmxGusFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_dmxgus = {
     DmxGusCheck,
     DmxGusFormat,
+    NULL,
     ".ini",
 };
 
@@ -468,6 +488,7 @@ static void DehackedLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_dehacked = {
     DehackedLumpCheck,
     DehackedLumpFormat,
+    NULL,
     ".deh",
 };
 
@@ -488,6 +509,7 @@ static void PaletteFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_palette = {
     PaletteCheck,
     PaletteFormat,
+    NULL,
     ".png",
 };
 
@@ -508,6 +530,7 @@ static void ColormapFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_colormap = {
     ColormapCheck,
     ColormapFormat,
+    NULL,
     ".cmap.png",
 };
 
@@ -578,6 +601,7 @@ static void PlainTextLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_plaintext = {
     PlainTextLumpCheck,
     PlainTextLumpFormat,
+    NULL,
     ".txt",
 };
 
@@ -600,6 +624,7 @@ static void TexturesFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_textures = {
     TexturesCheck,
     TexturesFormat,
+    NULL,
     ".txt",
 };
 
@@ -622,6 +647,7 @@ static void PnamesFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_pnames = {
     PnamesCheck,
     PnamesFormat,
+    NULL,
     ".txt",
 };
 
@@ -641,6 +667,7 @@ static void FullscreenImageFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_fullscreen_image = {
     FullscreenImageCheck,
     FullscreenImageFormat,
+    NULL,
     ".fullscreen.png",
 };
 
@@ -660,6 +687,7 @@ static void HexenHiresImageFormat(struct wad_file_entry *ent, uint8_t *buf,
 const struct lump_type lump_type_hexen_hires_image = {
     HexenHiresImageCheck,
     HexenHiresImageFormat,
+    NULL,
     ".hires.png",
 };
 
@@ -755,6 +783,19 @@ const char *LI_DescribeLump(const struct lump_type *t, struct wad_file *f,
 	t->format(ent, buf, description_buf, sizeof(description_buf));
 
 	return description_buf;
+}
+
+const char *LI_GetHelpPage(const struct lump_type *t, struct wad_file *f,
+                           unsigned int lump_index)
+{
+	struct wad_file_entry *ent;
+
+	if (t->help_page == NULL) {
+		return NULL;
+	}
+
+	ent = &W_GetDirectory(f)[lump_index];
+	return t->help_page(ent);
 }
 
 const char *LI_GetExtension(const struct lump_type *lt, bool convert)
