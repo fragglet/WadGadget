@@ -35,22 +35,23 @@ struct named_lump_type {
 // Record lengths for different lump types. TODO: This should probably be
 // done by lump type (lump_info.h), not by name.
 static const struct named_lump_type lump_types[] = {
-    {"PLAYPAL",  256 * 3, "8-1-playpal" },
-    {"COLORMAP", 256,     "8-2-colormap"},
-    {"ENDOOM",   80 * 2,  "8-3-endoom"  },
-    {"THINGS",   10,      "4-2-things"  },
-    {"LINEDEFS", 14,      "4-3-linedefs"},
-    {"LINEDEFS", 16,      NULL          }, // Hexen / Doom 64
-    {"SIDEDEFS", 30,      "4-4-sidedefs"},
-    {"SIDEDEFS", 12,      NULL          }, // Doom 64
-    {"SECTORS",  26,      "4-9-sectors" },
-    {"SECTORS",  28,      NULL          }, // PSX
-    {"SECTORS",  16,      NULL          }, // PSX Final Doom
-    {"SECTORS",  24,      NULL          }, // Doom 64
-    {"VERTEXES", 4,       "4-5-vertexes"},
-    {"SSECTORS", 4,       "4-7-ssectors"},
-    {"NODES",    28,      "4-8-nodes"   },
-    {"SEGS",     12,      "4-6-segs"    },
+    {"PLAYPAL",  256 * 3, "8-1-playpal"  },
+    {"COLORMAP", 256,     "8-2-colormap" },
+    {"ENDOOM",   80 * 2,  "8-3-endoom"   },
+    {"THINGS",   10,      "4-2-things"   },
+    {"LINEDEFS", 14,      "4-3-linedefs" },
+    {"LINEDEFS", 16,      NULL           }, // Hexen / Doom 64
+    {"SIDEDEFS", 30,      "4-4-sidedefs" },
+    {"SIDEDEFS", 12,      NULL           }, // Doom 64
+    {"SECTORS",  26,      "4-9-sectors"  },
+    {"SECTORS",  28,      NULL           }, // PSX
+    {"SECTORS",  16,      NULL           }, // PSX Final Doom
+    {"SECTORS",  24,      NULL           }, // Doom 64
+    {"VERTEXES", 4,       "4-5-vertexes" },
+    {"SSECTORS", 4,       "4-7-ssectors" },
+    {"NODES",    28,      "4-8-nodes"    },
+    {"SEGS",     12,      "4-6-segs"     },
+    {"BLOCKMAP", 2,       "4-11-blockmap"},
 };
 
 static const struct named_lump_type *LumpTypeForName(const char *name,
