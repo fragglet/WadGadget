@@ -286,6 +286,38 @@ const struct action change_columns_action = {
     0, 'O', "Columns", "Columns", ActionChangeColumns,
 };
 
+static bool OpenHelpPager(struct pager *pager, struct help_pager_config *cfg,
+                          const char *filename)
+{
+	char *filename2, *p, *anchor = NULL;
+
+	if (filename == NULL) {
+		filename = "uds.md";
+	}
+
+	filename2 = checked_strdup(filename);
+	p = strchr(filename2, '#');
+	if (p != NULL) {
+		*p = '\0';
+		anchor = p + 1;
+	}
+
+	if (!P_InitHelpConfig(cfg, filename2)) {
+		free(filename2);
+		return false;
+	}
+
+	P_InitPager(pager, &cfg->pc);
+
+	if (anchor != NULL) {
+		P_JumpHelpToAnchor(pager, anchor);
+	}
+
+	free(filename2);
+
+	return true;
+}
+
 static void ActionOpenDoomSpecs(void)
 {
 	struct hexdump_pager_config *cfg = current_pager->cfg->user_data;
@@ -295,18 +327,11 @@ static void ActionOpenDoomSpecs(void)
 		cfg->specs_pager_open = false;
 	}
 
-	if (cfg->specs_help.pc.title == NULL) {
-		const struct named_lump_type *lt;
-		if (!P_InitHelpConfig(&cfg->specs_help, "uds.md")) {
-			cfg->specs_help.pc.title = NULL;
-			return;
-		}
-		P_InitPager(&cfg->specs_pager, &cfg->specs_help.pc);
-
-		lt = LumpTypeForName(cfg->pc.title, cfg->data_len);
-		if (lt != NULL && lt->uds_anchor != NULL) {
-			P_JumpHelpToAnchor(&cfg->specs_pager, lt->uds_anchor);
-		}
+	if (cfg->specs_help.pc.title == NULL &&
+	    !OpenHelpPager(&cfg->specs_pager, &cfg->specs_help,
+	                   cfg->lump_help_page)) {
+		cfg->pc.title = NULL;
+		return;
 	}
 	cfg->specs_pager_open = true;
 	P_RunPager(&cfg->specs_pager, false);
