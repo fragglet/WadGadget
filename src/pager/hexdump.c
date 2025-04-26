@@ -51,6 +51,12 @@ static const struct named_lump_type lump_types[] = {
     {"NODES",    28     },
     {"SEGS",     12     },
     {"BLOCKMAP", 2      },
+    {"SWITCHES", 20     },
+    {"ANIMATED", 23     },
+    {"SINETABL", 4      },
+    {"TANGTABL", 4      },
+    {"TANTOANG", 4      },
+    {"GAMMATBL", 256    },
 };
 
 static const struct named_lump_type *LumpTypeForName(const char *name,
