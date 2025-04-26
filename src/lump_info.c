@@ -44,6 +44,7 @@ struct lump_description {
 struct sized_lump {
 	int size;
 	const char *description;
+	const char *help_page;
 };
 
 const struct lump_section lump_section_sprites = {
@@ -113,9 +114,9 @@ static const struct lump_description level_lumps[] = {
 
 // TODO: Help pages for these:
 static const struct sized_lump lumps_by_size[] = {
-    {4000, "Text mode screen"       },
-    {256,  "Color translation table"},
-    {0,    "Empty"                  },
+    {4000, "Text mode screen",        "uds.md#8-3-endoom"},
+    {256,  "Color translation table", NULL               },
+    {0,    "Empty",                   NULL               },
 };
 
 bool LI_LumpInSection(struct wad_file *wf, unsigned int lump_index,
@@ -599,9 +600,15 @@ static void SizedLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	snprintf(descr_buf, descr_buf_len, "%s", lt->description);
 }
 
+static const char *SizedLumpHelpPage(struct wad_file_entry *ent)
+{
+	return LumpTypeForSize(ent->size)->help_page;
+}
+
 const struct lump_type lump_type_sized = {
     SizedLumpCheck,
     SizedLumpFormat,
+    SizedLumpHelpPage,
 };
 
 // Plain text lumps, as found in Hexen IWAD and also used by source ports.
