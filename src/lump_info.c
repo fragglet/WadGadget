@@ -76,11 +76,15 @@ const struct lump_section lump_section_colormaps = {
 };
 
 static const struct lump_description special_lumps[] = {
-    {"TINTTAB",  "Translucency table"    },
-    {"XLATAB",   "Translucency table"    },
-    {"AUTOPAGE", "Map background texture"},
-    {"GENMIDI",  "OPL FM synth instrs."  },
-    {NULL,       NULL                    },
+    {"TINTTAB",  "Translucency table",     NULL                        },
+    {"XLATAB",   "Translucency table",     NULL                        },
+    {"AUTOPAGE", "Map background texture", NULL                        },
+    {"GENMIDI",  "OPL FM synth instrs.",   NULL                        },
+    {"DEHACKED", "Dehacked patch",         "mbfedit.md#6-dehacked-lump"},
+    {"OPTIONS",  "Boom config overrides",  "mbfedit.md#7-options-lump" },
+    {"ANIMATED", "Animated texture defs",  "boomref.md#animated-format"},
+    {"SWITCHES", "Switch texture defs",    "boomref.md#switches-format"},
+    {NULL,       NULL,                     NULL                        },
 };
 
 static const struct lump_description level_lumps[] = {
@@ -114,9 +118,9 @@ static const struct lump_description level_lumps[] = {
 
 // TODO: Help pages for these:
 static const struct sized_lump lumps_by_size[] = {
-    {4000, "Text mode screen",        "uds.md#8-3-endoom"},
-    {256,  "Color translation table", NULL               },
-    {0,    "Empty",                   NULL               },
+    {4000, "Text mode screen",        "uds.md#8-3-endoom"                  },
+    {256,  "Color translation table", "boomref.md#color-translation-tables"},
+    {0,    "Empty",                   NULL                                 },
 };
 
 bool LI_LumpInSection(struct wad_file *wf, unsigned int lump_index,
@@ -176,9 +180,7 @@ static void LevelLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 
 static const char *LevelLumpHelpPage(struct wad_file_entry *ent)
 {
-	const struct lump_description *ld =
-	    LookupByName(level_lumps, ent->name);
-	return ld->help_page;
+	return LookupByName(level_lumps, ent->name)->help_page;
 }
 
 const struct lump_type lump_type_level = {
@@ -202,9 +204,15 @@ static void SpecialLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	snprintf(descr_buf, descr_buf_len, "%s", ld->description);
 }
 
+static const char *SpecialLumpHelpPage(struct wad_file_entry *ent)
+{
+	return LookupByName(special_lumps, ent->name)->help_page;
+}
+
 const struct lump_type lump_type_special = {
     SpecialLumpCheck,
     SpecialLumpFormat,
+    SpecialLumpHelpPage,
 };
 
 // PCM sound effects.
