@@ -29,27 +29,28 @@
 struct named_lump_type {
 	const char *lump_name;
 	int record_length;
+	const char *uds_anchor;
 };
 
 // Record lengths for different lump types. TODO: This should probably be
 // done by lump type (lump_info.h), not by name.
 static const struct named_lump_type lump_types[] = {
-    {"PLAYPAL",  256 * 3},
-    {"COLORMAP", 256    },
-    {"ENDOOM",   80 * 2 },
-    {"THINGS",   10     },
-    {"LINEDEFS", 14     },
-    {"LINEDEFS", 16     }, // Hexen / Doom 64
-    {"SIDEDEFS", 30     },
-    {"SIDEDEFS", 12     }, // Doom 64
-    {"SECTORS",  26     },
-    {"SECTORS",  28     }, // PSX
-    {"SECTORS",  16     }, // PSX Final Doom
-    {"SECTORS",  24     }, // Doom 64
-    {"VERTEXES", 4      },
-    {"SSECTORS", 4      },
-    {"NODES",    28     },
-    {"SEGS",     12     },
+    {"PLAYPAL",  256 * 3, "8-1-playpal" },
+    {"COLORMAP", 256,     "8-2-colormap"},
+    {"ENDOOM",   80 * 2,  "8-3-endoom"  },
+    {"THINGS",   10,      "4-2-things"  },
+    {"LINEDEFS", 14,      "4-3-linedefs"},
+    {"LINEDEFS", 16,      NULL          }, // Hexen / Doom 64
+    {"SIDEDEFS", 30,      "4-4-sidedefs"},
+    {"SIDEDEFS", 12,      NULL          }, // Doom 64
+    {"SECTORS",  26,      "4-9-sectors" },
+    {"SECTORS",  28,      NULL          }, // PSX
+    {"SECTORS",  16,      NULL          }, // PSX Final Doom
+    {"SECTORS",  24,      NULL          }, // Doom 64
+    {"VERTEXES", 4,       "4-5-vertexes"},
+    {"SSECTORS", 4,       "4-7-ssectors"},
+    {"NODES",    28,      "4-8-nodes"   },
+    {"SEGS",     12,      "4-6-segs"    },
 };
 
 static const struct named_lump_type *LumpTypeForName(const char *name,
@@ -294,11 +295,17 @@ static void ActionOpenDoomSpecs(void)
 	}
 
 	if (cfg->specs_help.pc.title == NULL) {
+		const struct named_lump_type *lt;
 		if (!P_InitHelpConfig(&cfg->specs_help, "uds.md")) {
 			cfg->specs_help.pc.title = NULL;
 			return;
 		}
 		P_InitPager(&cfg->specs_pager, &cfg->specs_help.pc);
+
+		lt = LumpTypeForName(cfg->pc.title, cfg->data_len);
+		if (lt != NULL && lt->uds_anchor != NULL) {
+			P_JumpHelpToAnchor(&cfg->specs_pager, lt->uds_anchor);
+		}
 	}
 	cfg->specs_pager_open = true;
 	P_RunPager(&cfg->specs_pager, false);

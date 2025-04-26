@@ -149,7 +149,7 @@ static char *AnchorName(const char *line)
 	return result;
 }
 
-static int JumpToAnchor(struct pager *p, const char *anchor)
+int P_JumpHelpToAnchor(struct pager *p, const char *anchor)
 {
 	struct help_pager_config *cfg = p->cfg->user_data;
 	char *curr;
@@ -300,7 +300,7 @@ static void HelpPagerActivateLink(struct pager *p, int link_num)
 		P_ClearSearch(p);
 	}
 	if (anchor != NULL) {
-		int anchor_line = JumpToAnchor(p, anchor);
+		int anchor_line = P_JumpHelpToAnchor(p, anchor);
 		if (anchor_line >= 0) {
 			p->search_line = anchor_line;
 		}
