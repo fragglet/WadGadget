@@ -9,7 +9,7 @@
 //
 
 #include <assert.h>
-#include <ncurses.h>
+#include <curses.h>
 
 #include "browser/browser.h"
 #include "browser/directory_pane.h"

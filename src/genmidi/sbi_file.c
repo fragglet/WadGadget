@@ -9,7 +9,7 @@
 //
 
 #include <assert.h>
-#include <ncurses.h>
+#include <curses.h>
 
 #include "common.h"
 #include "fs/vfile.h"
