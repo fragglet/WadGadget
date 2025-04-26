@@ -26,12 +26,14 @@
 #include "ui/pane.h"
 #include "ui/title_bar.h"
 
-// Record lengths for different lump types. TODO: This should probably be
-// done by lump type (lump_info.h), not by name.
-static const struct {
+struct named_lump_type {
 	const char *lump_name;
 	int record_length;
-} lump_types[] = {
+};
+
+// Record lengths for different lump types. TODO: This should probably be
+// done by lump type (lump_info.h), not by name.
+static const struct named_lump_type lump_types[] = {
     {"PLAYPAL",  256 * 3},
     {"COLORMAP", 256    },
     {"ENDOOM",   80 * 2 },
@@ -49,6 +51,23 @@ static const struct {
     {"NODES",    28     },
     {"SEGS",     12     },
 };
+
+static const struct named_lump_type *LumpTypeForName(const char *name,
+                                                     size_t lump_len)
+{
+	const struct named_lump_type *lt;
+	int i;
+
+	for (i = 0; i < arrlen(lump_types); i++) {
+		lt = &lump_types[i];
+		if (!strcasecmp(name, lt->lump_name) &&
+		    lump_len % lt->record_length == 0) {
+			return lt;
+		}
+	}
+
+	return NULL;
+}
 
 static bool CanShowMarkers(struct hexdump_pager_config *cfg)
 {
@@ -328,18 +347,14 @@ static const struct action *hexdump_pager_actions[] = {
 static void SetBytesPerRecord(struct hexdump_pager_config *cfg,
                               const char *lump_name)
 {
-	int i;
+	const struct named_lump_type *lt =
+	    LumpTypeForName(lump_name, cfg->data_len);
 
-	for (i = 0; i < arrlen(lump_types); i++) {
-		int bpr = lump_types[i].record_length;
-		if (!strcasecmp(lump_name, lump_types[i].lump_name) &&
-		    cfg->data_len % bpr == 0) {
-			cfg->record_length = bpr;
-			return;
-		}
+	if (lt != NULL) {
+		cfg->record_length = lt->record_length;
+	} else {
+		cfg->record_length = 0;
 	}
-
-	cfg->record_length = 0;
 }
 
 bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
