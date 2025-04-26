@@ -35,8 +35,8 @@ static void ActionExportVoices(void)
 
 		instr = &bank->instrs[index / 2];
 
-		filename = StringJoin("", other_pane->dir->path, DIR_SEPARATOR_S,
-		                      ent->name, ".sbi", NULL);
+		filename = StringJoin("", other_pane->dir->path,
+		                      DIR_SEPARATOR_S, ent->name, ".sbi", NULL);
 		out = vfwrapfile(fopen(filename, "wb"));
 		GENMIDI_WriteSBI(instr, (index % 2) != 0, out);
 		vfclose(out);

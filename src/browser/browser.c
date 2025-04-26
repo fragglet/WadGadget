@@ -355,7 +355,7 @@ static const struct {
     {&file_type_palettes,     &file_type_wad,          pal_to_wad },
 
     {&file_type_genmidi_bank, NULL,                    opl_actions},
-    {&file_type_genmidi_bank, &file_type_dir,          opl_to_dir},
+    {&file_type_genmidi_bank, &file_type_dir,          opl_to_dir },
 };
 
 static void AddActionList(const struct action **list, int *idx)
