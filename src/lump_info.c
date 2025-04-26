@@ -76,15 +76,19 @@ const struct lump_section lump_section_colormaps = {
 };
 
 static const struct lump_description special_lumps[] = {
-    {"TINTTAB",  "Translucency table",     NULL                        },
-    {"XLATAB",   "Translucency table",     NULL                        },
-    {"AUTOPAGE", "Map background texture", NULL                        },
-    {"GENMIDI",  "OPL FM synth instrs.",   NULL                        },
-    {"DEHACKED", "Dehacked patch",         "mbfedit.md#6-dehacked-lump"},
-    {"OPTIONS",  "Boom config overrides",  "mbfedit.md#7-options-lump" },
-    {"ANIMATED", "Animated texture defs",  "boomref.md#animated-format"},
-    {"SWITCHES", "Switch texture defs",    "boomref.md#switches-format"},
-    {NULL,       NULL,                     NULL                        },
+    {"TINTTAB",  "Translucency table",      NULL                        },
+    {"XLATAB",   "Translucency table",      NULL                        },
+    {"AUTOPAGE", "Map background texture",  NULL                        },
+    {"GENMIDI",  "OPL FM synth instrs.",    NULL                        },
+    {"DEHACKED", "Dehacked patch",          "mbfedit.md#6-dehacked-lump"},
+    {"OPTIONS",  "Boom config overrides",   "mbfedit.md#7-options-lump" },
+    {"ANIMATED", "Animated texture defs",   "boomref.md#animated-format"},
+    {"SWITCHES", "Switch texture defs",     "boomref.md#switches-format"},
+    {"SINETABL", "sin() table",             NULL                        },
+    {"TANGTABL", "tan() table",             NULL                        },
+    {"TANTOANG", "arctan() table",          NULL                        },
+    {"GAMMATBL", "Gamma correction tables", NULL                        },
+    {NULL,       NULL,                      NULL                        },
 };
 
 static const struct lump_description level_lumps[] = {
