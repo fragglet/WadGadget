@@ -229,10 +229,15 @@ static void SoundLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	         (float) sound.num_samples / sound.sample_rate);
 }
 
+static const char *SoundLumpHelpPage(struct wad_file_entry *ent)
+{
+	return "uds.md#7-2-soundcard-sound-effects";
+}
+
 const struct lump_type lump_type_sound = {
     SoundLumpCheck,
     SoundLumpFormat,
-    NULL,
+    SoundLumpHelpPage,
     ".wav",
 };
 
@@ -284,10 +289,15 @@ static void GraphicLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	         patch.height, patch.leftoffset, patch.topoffset);
 }
 
+static const char *GraphicLumpHelpPage(struct wad_file_entry *ent)
+{
+	return "uds.md#5-1-picture-format";
+}
+
 const struct lump_type lump_type_graphic = {
     GraphicLumpCheck,
     GraphicLumpFormat,
-    NULL,
+    GraphicLumpHelpPage,
     ".png",
 };
 
@@ -306,10 +316,15 @@ static void FlatLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	snprintf(descr_buf, descr_buf_len, "Floor/ceiling texture");
 }
 
+static const char *FlatLumpHelpPage(struct wad_file_entry *ent)
+{
+	return "uds.md#chapter-6-flats-floor-and-ceiling-textures";
+}
+
 const struct lump_type lump_type_flat = {
     FlatLumpCheck,
     FlatLumpFormat,
-    NULL,
+    FlatLumpHelpPage,
     ".flat.png",
 };
 
@@ -365,10 +380,15 @@ static void DmxGusFormat(struct wad_file_entry *ent, uint8_t *buf,
 	snprintf(descr_buf, descr_buf_len, "GUS instrument mappings");
 }
 
+static const char *DmxGusHelpPage(struct wad_file_entry *ent)
+{
+	return "uds.md#7-5-dmxgus";
+}
+
 const struct lump_type lump_type_dmxgus = {
     DmxGusCheck,
     DmxGusFormat,
-    NULL,
+    DmxGusHelpPage,
     ".ini",
 };
 
@@ -443,9 +463,15 @@ static void DemoLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	         VersionCodeString(buf[0]), buf[1], modestr, level_buf);
 }
 
+static const char *DemoLumpHelpPage(struct wad_file_entry *ent)
+{
+	return "uds.md#8-6-demos";
+}
+
 const struct lump_type lump_type_demo = {
     DemoLumpCheck,
     DemoLumpFormat,
+    DemoLumpHelpPage,
 };
 
 static bool PcSpeakerLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
@@ -506,10 +532,15 @@ static void PaletteFormat(struct wad_file_entry *ent, uint8_t *buf,
 	         ent->size / (256 * 3));
 }
 
+static const char *PaletteHelpPage(struct wad_file_entry *ent)
+{
+	return "uds.md#8-1-playpal";
+}
+
 const struct lump_type lump_type_palette = {
     PaletteCheck,
     PaletteFormat,
-    NULL,
+    PaletteHelpPage,
     ".png",
 };
 
@@ -527,10 +558,15 @@ static void ColormapFormat(struct wad_file_entry *ent, uint8_t *buf,
 	         ent->size / 256);
 }
 
+static const char *ColormapHelpPage(struct wad_file_entry *ent)
+{
+	return "uds.md#8-2-colormap";
+}
+
 const struct lump_type lump_type_colormap = {
     ColormapCheck,
     ColormapFormat,
-    NULL,
+    ColormapHelpPage,
     ".cmap.png",
 };
 
@@ -621,10 +657,15 @@ static void TexturesFormat(struct wad_file_entry *ent, uint8_t *buf,
 	         !strncmp(ent->name, "TEXTURE2", 8) ? " (reg.)" : "", cnt);
 }
 
+static const char *TexturesHelpPage(struct wad_file_entry *ent)
+{
+	return "uds.md#8-4-texture1-and-texture2";
+}
+
 const struct lump_type lump_type_textures = {
     TexturesCheck,
     TexturesFormat,
-    NULL,
+    TexturesHelpPage,
     ".txt",
 };
 
@@ -644,10 +685,15 @@ static void PnamesFormat(struct wad_file_entry *ent, uint8_t *buf,
 	         cnt);
 }
 
+static const char *PnamesHelpPage(struct wad_file_entry *ent)
+{
+	return "uds.md#8-5-pnames";
+}
+
 const struct lump_type lump_type_pnames = {
     PnamesCheck,
     PnamesFormat,
-    NULL,
+    PnamesHelpPage,
     ".txt",
 };
 
