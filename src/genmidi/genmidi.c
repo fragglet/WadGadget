@@ -10,6 +10,7 @@
 
 #include <assert.h>
 
+#include "common.h"
 #include "fs/vfile.h"
 #include "genmidi/genmidi.h"
 
@@ -36,6 +37,7 @@ bool GENMIDI_LoadBank(struct genmidi_bank *bank, VFILE *in)
 		    vfread(&instr->voice2, NUM_INSTR_FIELDS, 1, in) != 1) {
 			return false;
 		}
+		SwapLE16(&instr->hdr.flags);
 	}
 
 	for (i = 0; i < NUM_GENMIDI_INSTRS; ++i) {

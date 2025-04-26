@@ -47,6 +47,7 @@ static void GenmidiDirRefresh(void *_dir, struct directory_entry **entries,
                               size_t *num_entries)
 {
 	struct genmidi_dir *dir = _dir;
+	const char *name;
 	char buf[64];
 	int i;
 
@@ -60,8 +61,12 @@ static void GenmidiDirRefresh(void *_dir, struct directory_entry **entries,
 
 		instr = &dir->bank.instrs[i / 2];
 		ent->type = &file_type_genmidi_voice;
-		snprintf(buf, sizeof(buf), "%s %s", InstrumentNumber(i),
-		         instr->name);
+		name = instr->name;
+		if ((i % 2) == 1 &&
+		    (instr->hdr.flags & GENMIDI_FLAG_2VOICE) == 0) {
+			name = "(unused)";
+		}
+		snprintf(buf, sizeof(buf), "%s %s", InstrumentNumber(i), name);
 		ent->name = checked_strdup(buf);
 		ent->size = 0;
 		ent->serial_no = i;

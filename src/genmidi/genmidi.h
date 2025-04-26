@@ -36,6 +36,9 @@ enum genmidi_instr_field {
 	NUM_INSTR_FIELDS,
 };
 
+#define GENMIDI_FLAG_FIXED  0x0001 /* fixed pitch */
+#define GENMIDI_FLAG_2VOICE 0x0004 /* double voice (OPL3) */
+
 struct genmidi_instrument_header {
 	uint16_t flags;
 	uint8_t fine_tune;
