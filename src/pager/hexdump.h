@@ -37,11 +37,12 @@ struct hexdump_pager_config {
 	struct pager specs_pager;
 	struct help_pager_config specs_help;
 	bool specs_pager_open;
+	const char *lump_help_page;
 };
 
 bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
-                         VFILE *input);
+                         VFILE *input, const char *help_page);
 void P_FreeHexdumpConfig(struct hexdump_pager_config *cfg);
-bool P_RunHexdumpPager(const char *title, VFILE *input);
+bool P_RunHexdumpPager(const char *title, VFILE *input, const char *help_page);
 
 #endif /* #ifndef PAGER__HEXDUMP_H_INCLUDED */

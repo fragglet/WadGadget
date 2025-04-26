@@ -30,7 +30,7 @@ static void SwitchToHexdump(void)
 	if (hdc == NULL) {
 		VFILE *in = vfopenmem(cfg->data, cfg->data_len);
 		hdc = checked_calloc(1, sizeof(struct hexdump_pager_config));
-		assert(P_InitHexdumpConfig(cfg->pc.title, hdc, in));
+		assert(P_InitHexdumpConfig(cfg->pc.title, hdc, in, NULL));
 		cfg->hexdump_config = hdc;
 		hdc->plaintext_config = cfg;
 	}

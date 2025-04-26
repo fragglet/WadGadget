@@ -366,7 +366,7 @@ static void SetBytesPerRecord(struct hexdump_pager_config *cfg,
 }
 
 bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
-                         VFILE *input)
+                         VFILE *input, const char *help_page)
 {
 	cfg->pc.title = title;
 	cfg->pc.help_file = "hexdump.md";
@@ -378,6 +378,7 @@ bool P_InitHexdumpConfig(const char *title, struct hexdump_pager_config *cfg,
 	cfg->plaintext_config = NULL;
 	cfg->specs_help.pc.title = NULL;
 	cfg->specs_pager_open = false;
+	cfg->lump_help_page = help_page;
 
 	cfg->data = vfreadall(input, &cfg->data_len);
 	vfclose(input);
@@ -401,12 +402,12 @@ void P_FreeHexdumpConfig(struct hexdump_pager_config *cfg)
 	}
 }
 
-bool P_RunHexdumpPager(const char *title, VFILE *input)
+bool P_RunHexdumpPager(const char *title, VFILE *input, const char *help_page)
 {
 	struct pager p;
 	struct hexdump_pager_config cfg;
 
-	if (!P_InitHexdumpConfig(title, &cfg, input)) {
+	if (!P_InitHexdumpConfig(title, &cfg, input, help_page)) {
 		return false;
 	}
 

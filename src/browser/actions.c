@@ -1262,6 +1262,22 @@ const struct action compact_action = {
     KEY_F(2), 'T', "Compact", "Compact WAD file", ActionCompact,
 };
 
+static const char *HelpPageForSelected(struct directory_pane *pane)
+{
+	struct wad_file *wf;
+	const struct lump_type *lt;
+	int selected = B_DirectoryPaneSelected(pane);
+
+	if (selected < 0 || pane->dir->type != &file_type_wad) {
+		return NULL;
+	}
+
+	wf = VFS_WadFile(pane->dir);
+
+	lt = LI_IdentifyLump(wf, selected);
+	return LI_GetHelpPage(lt, wf, selected);
+}
+
 static void ActionHexdump(void)
 {
 	int selected = B_DirectoryPaneSelected(active_pane);
@@ -1278,7 +1294,7 @@ static void ActionHexdump(void)
 		return;
 	}
 
-	P_RunHexdumpPager(ent->name, input);
+	P_RunHexdumpPager(ent->name, input, HelpPageForSelected(active_pane));
 }
 
 const struct action hexdump_action = {0, 'D', "Hexdump", "Hexdump",
