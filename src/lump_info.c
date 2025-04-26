@@ -139,14 +139,14 @@ bool LI_LumpInSection(struct wad_file *wf, unsigned int lump_index,
 	return false;
 }
 
-static const char *LookupDescription(const struct lump_description *table,
-                                     struct wad_file_entry *ent)
+static const struct lump_description *
+LookupByName(const struct lump_description *table, const char *name)
 {
 	int i;
 
 	for (i = 0; table[i].name != NULL; i++) {
-		if (!strncmp(ent->name, table[i].name, 8)) {
-			return table[i].description;
+		if (!strncmp(name, table[i].name, 8)) {
+			return &table[i];
 		}
 	}
 
@@ -157,14 +157,15 @@ static const char *LookupDescription(const struct lump_description *table,
 
 static bool LevelLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return LookupDescription(level_lumps, ent) != NULL;
+	return LookupByName(level_lumps, ent->name) != NULL;
 }
 
 static void LevelLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
                             char *descr_buf, size_t descr_buf_len)
 {
-	snprintf(descr_buf, descr_buf_len, "%s",
-	         LookupDescription(level_lumps, ent));
+	const struct lump_description *ld =
+	    LookupByName(level_lumps, ent->name);
+	snprintf(descr_buf, descr_buf_len, "%s", ld->description);
 }
 
 const struct lump_type lump_type_level = {
@@ -176,14 +177,15 @@ const struct lump_type lump_type_level = {
 
 static bool SpecialLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return LookupDescription(special_lumps, ent) != NULL;
+	return LookupByName(special_lumps, ent->name) != NULL;
 }
 
 static void SpecialLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
                               char *descr_buf, size_t descr_buf_len)
 {
-	snprintf(descr_buf, descr_buf_len, "%s",
-	         LookupDescription(special_lumps, ent));
+	const struct lump_description *ld =
+	    LookupByName(special_lumps, ent->name);
+	snprintf(descr_buf, descr_buf_len, "%s", ld->description);
 }
 
 const struct lump_type lump_type_special = {
