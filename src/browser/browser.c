@@ -219,7 +219,6 @@ static const struct action *pal_actions[] = {
 static const struct action *opl_actions[] = {
     &parent_dir_action,
     &view_action,
-    &genmidi_export_action,
     NULL,
 };
 
@@ -305,6 +304,11 @@ static const struct action *pal_to_wad[] = {
     NULL,
 };
 
+static const struct action *opl_to_dir[] = {
+    &genmidi_export_action,
+    NULL,
+};
+
 static const struct action *common_actions[] = {
     &rename_action,
     &delete_action,
@@ -351,6 +355,7 @@ static const struct {
     {&file_type_palettes,     &file_type_wad,          pal_to_wad },
 
     {&file_type_genmidi_bank, NULL,                    opl_actions},
+    {&file_type_genmidi_bank, &file_type_dir,          opl_to_dir},
 };
 
 static void AddActionList(const struct action **list, int *idx)

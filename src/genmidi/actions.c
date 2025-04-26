@@ -16,27 +16,34 @@
 #include "common.h"
 #include "fs/vfile.h"
 #include "genmidi/genmidi.h"
+#include "stringlib.h"
 #include "ui/actions_bar.h"
 
-static void ActionExportVoice(void)
+static void ActionExportVoices(void)
 {
 	struct genmidi_bank *bank = GENMIDI_DirGetBank(active_pane->dir);
 	struct genmidi_instrument *instr;
-	int selected = B_DirectoryPaneSelected(active_pane);
+	struct directory_entry *ent;
+	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
+	int it = 0;
 	VFILE *out;
 
-	if (selected < 0) {
-		return;
+	// TODO: Confirm overwrite?
+	while ((ent = VFS_IterateSet(active_pane->dir, tagged, &it)) != NULL) {
+		int index = ent - active_pane->dir->entries;
+		char *filename;
+
+		instr = &bank->instrs[index / 2];
+
+		filename = StringJoin("", other_pane->dir->path, DIR_SEPARATOR_S,
+		                      ent->name, ".sbi", NULL);
+		out = vfwrapfile(fopen(filename, "wb"));
+		GENMIDI_WriteSBI(instr, (index % 2) != 0, out);
+		vfclose(out);
 	}
-
-	instr = &bank->instrs[selected / 2];
-
-	// TODO: Write to the correct directory
-	out = vfwrapfile(fopen("foo.sbi", "wb"));
-	GENMIDI_WriteSBI(instr, (selected % 2) != 0, out);
-	vfclose(out);
+	VFS_Refresh(other_pane->dir);
 }
 
 const struct action genmidi_export_action = {
-    KEY_F(5), 'C', "Export", "> Export", ActionExportVoice,
+    KEY_F(5), 'C', "Export", "> Export", ActionExportVoices,
 };
