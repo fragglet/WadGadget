@@ -26,9 +26,28 @@ struct genmidi_dir {
 const struct file_type file_type_genmidi_bank = {"GENMIDI bank"};
 const struct file_type file_type_genmidi_voice = {"Voice"};
 
-static void GenmidiDirRefresh(void *dir, struct directory_entry **entries,
+static const char *InstrumentNumber(int index)
+{
+	static char buf[8];
+	const char *prefix = "";
+	int instr_num;
+
+	if (index >= 256) {
+		instr_num = (index / 2) - 128 + 35;
+		prefix = "p";
+	} else {
+		instr_num = (index / 2) + 1;
+	}
+	snprintf(buf, sizeof(buf), "%s%d%c", prefix, instr_num,
+	         "ab"[index % 2]);
+	return buf;
+}
+
+static void GenmidiDirRefresh(void *_dir, struct directory_entry **entries,
                               size_t *num_entries)
 {
+	struct genmidi_dir *dir = _dir;
+	char buf[64];
 	int i;
 
 	*entries = checked_calloc(NUM_GENMIDI_INSTRS * 2,
@@ -36,10 +55,14 @@ static void GenmidiDirRefresh(void *dir, struct directory_entry **entries,
 	*num_entries = NUM_GENMIDI_INSTRS * 2;
 
 	for (i = 0; i < NUM_GENMIDI_INSTRS * 2; ++i) {
+		struct genmidi_instrument *instr;
 		struct directory_entry *ent = *entries + i;
+
+		instr = &dir->bank.instrs[i / 2];
 		ent->type = &file_type_genmidi_voice;
-		ent->name = checked_calloc(9, 1);
-		snprintf(ent->name, 9, "%d%c", i / 2, "ab"[i % 2]);
+		snprintf(buf, sizeof(buf), "%s %s", InstrumentNumber(i),
+		         instr->name);
+		ent->name = checked_strdup(buf);
 		ent->size = 0;
 		ent->serial_no = i;
 	}
@@ -79,6 +102,16 @@ struct directory *GENMIDI_OpenDir(struct directory *parent,
                                   struct directory_entry *ent)
 {
 	struct genmidi_dir *dir = checked_calloc(1, sizeof(struct genmidi_dir));
+	VFILE *lump;
+	bool loaded;
+
+	lump = VFS_OpenByEntry(parent, ent);
+	loaded = GENMIDI_LoadBank(&dir->bank, lump);
+	vfclose(lump);
+	if (!loaded) {
+		free(dir);
+		return NULL;
+	}
 
 	dir->dir.directory_funcs = &genmidi_dir_funcs;
 	dir->dir.type = &file_type_genmidi_bank;
