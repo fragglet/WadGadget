@@ -21,6 +21,7 @@
 #include "browser/directory_pane.h"
 #include "common.h"
 #include "fs/vfs.h"
+#include "genmidi/genmidi.h"
 #include "lump_info.h"
 #include "palette/actions.h"
 #include "palette/palfs.h"
@@ -215,6 +216,12 @@ static const struct action *pal_actions[] = {
     NULL,
 };
 
+static const struct action *opl_actions[] = {
+    &parent_dir_action,
+    &view_action,
+    NULL,
+};
+
 static const struct action *wad_to_wad[] = {
     &update_action,
     &update_noconv_action,
@@ -341,6 +348,8 @@ static const struct {
     {&file_type_palettes,     NULL,                    pal_actions},
     {&file_type_palettes,     &file_type_dir,          pal_to_dir },
     {&file_type_palettes,     &file_type_wad,          pal_to_wad },
+
+    {&file_type_genmidi_bank, NULL,                    opl_actions},
 };
 
 static void AddActionList(const struct action **list, int *idx)

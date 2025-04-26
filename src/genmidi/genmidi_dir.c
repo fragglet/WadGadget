@@ -73,6 +73,19 @@ static void GenmidiDirRefresh(void *_dir, struct directory_entry **entries,
 	}
 }
 
+static struct directory *GenmidiOpenDir(void *_dir,
+                                        struct directory_entry *entry)
+{
+	struct genmidi_dir *dir = _dir;
+
+	if (entry == VFS_PARENT_DIRECTORY) {
+		VFS_DirectoryRef(dir->parent_dir);
+		return dir->parent_dir;
+	}
+
+	return NULL;
+}
+
 static bool GenmidiDirRename(void *dir, struct directory_entry *entry,
                              const char *new_name)
 {
@@ -92,7 +105,7 @@ static const struct directory_funcs genmidi_dir_funcs = {
     true,              // ordered
     GenmidiDirRefresh, // refresh
     NULL,              // open
-    NULL,              // open_dir
+    GenmidiOpenDir,    // open_dir
     NULL,              // remove
     GenmidiDirRename,  // rename
     NULL,              // need_commit

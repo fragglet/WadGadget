@@ -57,6 +57,10 @@ struct genmidi_bank {
 };
 
 struct directory_entry;
+struct file_type;
+
+extern const struct file_type file_type_genmidi_bank;
+extern const struct file_type file_type_genmidi_voice;
 
 bool GENMIDI_LoadBank(struct genmidi_bank *bank, VFILE *in);
 struct directory *GENMIDI_OpenDir(struct directory *parent,

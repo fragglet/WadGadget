@@ -31,6 +31,7 @@
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "fs/wad_file.h"
+#include "genmidi/genmidi.h"
 #include "pager/help.h"
 #include "pager/hexdump.h"
 #include "palette/palfs.h"
@@ -1133,6 +1134,20 @@ const struct action edit_action = {
 
 static void ViewLump(struct directory *dir, struct directory_entry *ent)
 {
+	// TODO: This function should use lump_type, not names
+	if (!strcasecmp(ent->name, "GENMIDI")) {
+		struct directory *new_dir;
+		ClearConversionErrors();
+		new_dir = GENMIDI_OpenDir(dir, ent);
+		if (new_dir == NULL) {
+			UI_MessageBox("Error opening GENMIDI lump:\n%s",
+			              GetConversionError());
+			return;
+		}
+		NavigateNew(active_pane, new_dir, ent);
+		return;
+	}
+
 	if (StringHasPrefix(ent->name, "TEXTURE")) {
 		struct directory *new_dir;
 		ClearConversionErrors();
