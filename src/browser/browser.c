@@ -219,6 +219,7 @@ static const struct action *pal_actions[] = {
 static const struct action *opl_actions[] = {
     &parent_dir_action,
     &view_action,
+    &genmidi_export_action,
     NULL,
 };
 

@@ -76,8 +76,10 @@ OBJS =                      \
     fs/vfs.o                \
     fs/wad_dir.o            \
     fs/wad_file.o           \
+    genmidi/actions.o       \
     genmidi/genmidi.o       \
     genmidi/genmidi_dir.o   \
+    genmidi/sbi_file.o      \
     pager/help.o            \
     pager/hexdump.o         \
     pager/pager.o           \

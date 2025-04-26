@@ -26,6 +26,12 @@ struct genmidi_dir {
 const struct file_type file_type_genmidi_bank = {"GENMIDI bank"};
 const struct file_type file_type_genmidi_voice = {"Voice"};
 
+struct genmidi_bank *GENMIDI_DirGetBank(struct directory *_dir)
+{
+	struct genmidi_dir *dir = (struct genmidi_dir *) _dir;
+	return &dir->bank;
+}
+
 static const char *InstrumentNumber(int index)
 {
 	static char buf[8];

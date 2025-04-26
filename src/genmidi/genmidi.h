@@ -56,14 +56,19 @@ struct genmidi_bank {
 	struct genmidi_instrument instrs[NUM_GENMIDI_INSTRS];
 };
 
+struct action;
 struct directory_entry;
 struct file_type;
 
 extern const struct file_type file_type_genmidi_bank;
 extern const struct file_type file_type_genmidi_voice;
+extern const struct action genmidi_export_action;
 
 bool GENMIDI_LoadBank(struct genmidi_bank *bank, VFILE *in);
 struct directory *GENMIDI_OpenDir(struct directory *parent,
                                   struct directory_entry *ent);
+struct genmidi_bank *GENMIDI_DirGetBank(struct directory *dir);
+bool GENMIDI_WriteSBI(struct genmidi_instrument *instr, bool voice2,
+                      VFILE *out);
 
 #endif /* #ifndef GENMIDI__GENMIDI_H_INCLUDED */
