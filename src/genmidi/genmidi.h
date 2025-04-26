@@ -53,6 +53,10 @@ struct genmidi_bank {
 	struct genmidi_instrument instrs[NUM_GENMIDI_INSTRS];
 };
 
+struct directory_entry;
+
 bool GENMIDI_LoadBank(struct genmidi_bank *bank, VFILE *in);
+struct directory *GENMIDI_OpenDir(struct directory *parent,
+                                  struct directory_entry *ent);
 
 #endif /* #ifndef GENMIDI__GENMIDI_H_INCLUDED */

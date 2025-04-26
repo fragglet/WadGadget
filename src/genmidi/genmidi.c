@@ -49,26 +49,3 @@ bool GENMIDI_LoadBank(struct genmidi_bank *bank, VFILE *in)
 
 	return true;
 }
-
-int main(int argc, char *argv[])
-{
-	struct genmidi_bank bank;
-	int i, j;
-	VFILE *in = vfwrapfile(fopen("genmidi.op2", "rb"));
-
-	assert(GENMIDI_LoadBank(&bank, in));
-	vfclose(in);
-
-	for (i = 0; i < NUM_GENMIDI_INSTRS; ++i) {
-		printf("%3d: %s\n", i, bank.instrs[i].name);
-		printf("\t");
-		for (j = 0; j < NUM_INSTR_FIELDS; ++j) {
-			printf("%02x ", bank.instrs[i].voice1[j]);
-		}
-		printf("\n\t");
-		for (j = 0; j < NUM_INSTR_FIELDS; ++j) {
-			printf("%02x ", bank.instrs[i].voice1[j]);
-		}
-		printf("\n");
-	}
-}
