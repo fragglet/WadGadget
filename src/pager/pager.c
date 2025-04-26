@@ -257,7 +257,7 @@ static void ActionPagerHelp(void)
 {
 	struct pager_config *cfg = current_pager->cfg;
 
-	P_RunHelpPager(cfg->help_file);
+	P_RunHelpPager(cfg->help_file, NULL);
 }
 
 const struct action pager_help_action = {

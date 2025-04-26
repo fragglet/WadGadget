@@ -546,7 +546,7 @@ bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename)
 	return OpenHelpFile(cfg, filename);
 }
 
-bool P_RunHelpPager(const char *filename)
+bool P_RunHelpPager(const char *filename, const char *anchor)
 {
 	struct help_pager_config cfg;
 	struct pager p;
@@ -556,6 +556,9 @@ bool P_RunHelpPager(const char *filename)
 	}
 
 	P_InitPager(&p, &cfg.pc);
+	if (anchor != NULL) {
+		P_JumpHelpToAnchor(&p, anchor);
+	}
 	P_RunPager(&p, false);
 	P_FreePager(&p);
 	P_FreeHelpConfig(&cfg);

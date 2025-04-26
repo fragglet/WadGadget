@@ -31,7 +31,7 @@ struct help_pager_config {
 
 void P_FreeHelpConfig(struct help_pager_config *cfg);
 bool P_InitHelpConfig(struct help_pager_config *cfg, const char *filename);
-bool P_RunHelpPager(const char *filename);
+bool P_RunHelpPager(const char *filename, const char *anchor);
 int P_JumpHelpToAnchor(struct pager *p, const char *anchor);
 
 #endif /* #ifndef PAGER__HELP_H_INCLUDED */

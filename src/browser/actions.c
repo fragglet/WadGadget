@@ -1396,7 +1396,7 @@ static void ActionShowHelp(void)
 	for (i = 0; i < arrlen(help_files_per_type); i++) {
 		if (help_files_per_type[i].ft == active_pane->dir->type) {
 			const char *filename = help_files_per_type[i].fn;
-			P_RunHelpPager(filename);
+			P_RunHelpPager(filename, NULL);
 			return;
 		}
 	}
@@ -1407,6 +1407,32 @@ static void ActionShowHelp(void)
 
 const struct action help_action = {
     KEY_F(1), 'H', "Help", "Help", ActionShowHelp,
+};
+
+static void ActionLumpHelp(void)
+{
+	const char *help_page = HelpPageForSelected(active_pane);
+	char *filename, *p, *anchor = NULL;
+
+	if (help_page == NULL) {
+		UI_MessageBox("Sorry, no documentation found for this lump.");
+		return;
+	}
+
+	filename = checked_strdup(help_page);
+	p = strchr(filename, '#');
+	if (p != NULL) {
+		*p = '\0';
+		anchor = p + 1;
+	}
+
+	P_RunHelpPager(filename, anchor);
+
+	free(filename);
+}
+
+const struct action lump_help_action = {
+    SHIFT_KEY_F(1), 0, "Specs", "Specs", ActionLumpHelp,
 };
 
 static void ActionShell(void)

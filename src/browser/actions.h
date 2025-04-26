@@ -49,6 +49,7 @@ extern const struct action update_action;
 extern const struct action update_noconv_action;
 
 extern const struct action help_action;
+extern const struct action lump_help_action;
 extern const struct action open_shell_action;
 extern const struct action view_action;
 extern const struct action edit_action;
