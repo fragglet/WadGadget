@@ -35,7 +35,7 @@ struct genmidi_bank *GENMIDI_DirGetBank(struct directory *_dir)
 
 static const char *InstrumentNumber(int index)
 {
-	static char buf[8];
+	static char buf[16];
 	const char *prefix = "";
 	int instr_num;
 
