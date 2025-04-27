@@ -96,6 +96,12 @@ static struct directory *GenmidiOpenDir(void *_dir,
 	return NULL;
 }
 
+static bool GenmidiDirRemove(void *dir, struct directory_entry *entry)
+{
+	VFS_StoreError("Voices cannot be deleted, only replaced.");
+	return false;
+}
+
 static bool GenmidiDirRename(void *_dir, struct directory_entry *entry,
                              const char *new_name)
 {
@@ -194,7 +200,7 @@ static const struct directory_funcs genmidi_dir_funcs = {
     GenmidiDirRefresh,         // refresh
     NULL,                      // open
     GenmidiOpenDir,            // open_dir
-    NULL,                      // remove
+    GenmidiDirRemove,          // remove
     GenmidiDirRename,          // rename
     GenmidiDirNeedCommit,      // need_commit
     GenmidiDirCommit,          // commit
