@@ -17,8 +17,6 @@
 #define HEADER_MAGIC "#OPL_II#"
 #define HEADER_LEN   8
 
-#define INSTR_NAME_LEN 32
-
 bool GENMIDI_LoadBank(struct genmidi_bank *bank, VFILE *in)
 {
 	uint8_t header_data[HEADER_LEN];
@@ -43,11 +41,11 @@ bool GENMIDI_LoadBank(struct genmidi_bank *bank, VFILE *in)
 
 	for (i = 0; i < NUM_GENMIDI_INSTRS; ++i) {
 		struct genmidi_instrument *instr = &bank->instrs[i];
-		if (vfread(&instr->name, INSTR_NAME_LEN, 1, in) != 1) {
+		if (vfread(&instr->name, GENMIDI_MAX_INSTR_LEN, 1, in) != 1) {
 			return false;
 		}
 		// Ensure names are always NUL terminated
-		instr->name[INSTR_NAME_LEN - 1] = '\0';
+		instr->name[GENMIDI_MAX_INSTR_LEN - 1] = '\0';
 	}
 
 	return true;

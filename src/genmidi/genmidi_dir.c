@@ -92,11 +92,29 @@ static struct directory *GenmidiOpenDir(void *_dir,
 	return NULL;
 }
 
-static bool GenmidiDirRename(void *dir, struct directory_entry *entry,
+static bool GenmidiDirRename(void *_dir, struct directory_entry *entry,
                              const char *new_name)
 {
-	// TODO
-	return false;
+	struct genmidi_dir *dir = _dir;
+	const char *prefix = InstrumentNumber(entry->serial_no);
+
+	if ((entry->serial_no % 2) == 1) {
+		VFS_StoreError("You can't rename the second voice.");
+		return false;
+	}
+
+	if (StringHasPrefix(new_name, prefix) &&
+	    new_name[strlen(prefix)] == ' ') {
+		new_name += strlen(prefix) + 1;
+	}
+
+	if (strlen(new_name) > GENMIDI_MAX_INSTR_LEN - 1) {
+		return false;
+	}
+
+	snprintf(dir->bank.instrs[entry->serial_no / 2].name,
+	         GENMIDI_MAX_INSTR_LEN, "%s", new_name);
+	return true;
 }
 
 static void GenmidiDirFree(void *_dir)

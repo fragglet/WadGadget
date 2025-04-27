@@ -45,8 +45,10 @@ struct genmidi_instrument_header {
 	uint8_t fixed_note;
 };
 
+#define GENMIDI_MAX_INSTR_LEN 32
+
 struct genmidi_instrument {
-	char name[32];
+	char name[GENMIDI_MAX_INSTR_LEN];
 	struct genmidi_instrument_header hdr;
 	uint8_t voice1[NUM_INSTR_FIELDS];
 	uint8_t voice2[NUM_INSTR_FIELDS];
