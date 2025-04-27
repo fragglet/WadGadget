@@ -68,6 +68,7 @@ extern const struct file_type file_type_genmidi_voice;
 extern const struct action genmidi_export_action;
 
 bool GENMIDI_LoadBank(struct genmidi_bank *bank, VFILE *in);
+bool GENMIDI_SaveBank(struct genmidi_bank *bank, VFILE *out);
 struct directory *GENMIDI_OpenDir(struct directory *parent,
                                   struct directory_entry *ent);
 struct genmidi_bank *GENMIDI_DirGetBank(struct directory *dir);

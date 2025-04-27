@@ -31,9 +31,7 @@ bool GENMIDI_LoadBank(struct genmidi_bank *bank, VFILE *in)
 
 	for (i = 0; i < NUM_GENMIDI_INSTRS; ++i) {
 		struct genmidi_instrument *instr = &bank->instrs[i];
-		if (vfread(&instr->hdr,
-		           sizeof(struct genmidi_instrument_header), 1,
-		           in) != 1 ||
+		if (vfread(&instr->hdr, sizeof(instr->hdr), 1, in) != 1 ||
 		    vfread(&instr->voice1, NUM_INSTR_FIELDS, 1, in) != 1 ||
 		    vfread(&instr->voice2, NUM_INSTR_FIELDS, 1, in) != 1) {
 			return false;
@@ -48,6 +46,34 @@ bool GENMIDI_LoadBank(struct genmidi_bank *bank, VFILE *in)
 		}
 		// Ensure names are always NUL terminated
 		instr->name[GENMIDI_MAX_INSTR_LEN - 1] = '\0';
+	}
+
+	return true;
+}
+
+bool GENMIDI_SaveBank(struct genmidi_bank *bank, VFILE *out)
+{
+	int i;
+
+	if (vfwrite(HEADER_MAGIC, HEADER_LEN, 1, out) != 1) {
+		return false;
+	}
+
+	for (i = 0; i < NUM_GENMIDI_INSTRS; ++i) {
+		struct genmidi_instrument instr = bank->instrs[i];
+		SwapLE16(&instr.hdr.flags);
+		if (vfwrite(&instr.hdr, sizeof(instr.hdr), 1, out) != 1 ||
+		    vfwrite(&instr.voice1, NUM_INSTR_FIELDS, 1, out) != 1 ||
+		    vfwrite(&instr.voice2, NUM_INSTR_FIELDS, 1, out) != 1) {
+			return false;
+		}
+	}
+
+	for (i = 0; i < NUM_GENMIDI_INSTRS; ++i) {
+		struct genmidi_instrument *instr = &bank->instrs[i];
+		if (vfwrite(&instr->name, GENMIDI_MAX_INSTR_LEN, 1, out) != 1) {
+			return false;
+		}
 	}
 
 	return true;

@@ -16,11 +16,14 @@
 #include "fs/vfs.h"
 #include "genmidi/genmidi.h"
 #include "stringlib.h"
+#include "ui/dialog.h"
+#include "ui/title_bar.h"
 
 struct genmidi_dir {
 	struct directory dir;
 	struct genmidi_bank bank;
 	struct directory *parent_dir;
+	uint64_t lump_serial;
 	int last_commit;
 };
 
@@ -119,9 +122,35 @@ static bool GenmidiDirRename(void *_dir, struct directory_entry *entry,
 	return true;
 }
 
+static void SaveBank(struct genmidi_dir *dir)
+{
+	struct wad_file *wf;
+	struct directory_entry *ent;
+	VFILE *out;
+
+	if (dir->last_commit == 0) {
+		return;
+	}
+
+	ent = VFS_EntryBySerial(dir->parent_dir, dir->lump_serial);
+	if (ent == NULL) {
+		return;
+	}
+
+	wf = VFS_WadFile(dir->parent_dir);
+	out = W_OpenLumpRewrite(wf, ent - dir->parent_dir->entries);
+	assert(GENMIDI_SaveBank(&dir->bank, out));
+	vfclose(out);
+
+	VFS_CommitChanges(dir->parent_dir, "update of GENMIDI bank");
+	UI_ShowNotice("%s lump updated.", ent->name);
+}
+
 static void GenmidiDirFree(void *_dir)
 {
 	struct genmidi_dir *dir = _dir;
+
+	SaveBank(dir);
 	VFS_DirectoryUnref(dir->parent_dir);
 }
 
@@ -204,6 +233,7 @@ struct directory *GENMIDI_OpenDir(struct directory *parent,
 
 	dir->last_commit = 0;
 	dir->parent_dir = parent;
+	dir->lump_serial = ent->serial_no;
 	VFS_DirectoryRef(dir->parent_dir);
 	VFS_Refresh(&dir->dir);
 
