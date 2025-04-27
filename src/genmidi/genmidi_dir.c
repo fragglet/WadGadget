@@ -21,6 +21,7 @@ struct genmidi_dir {
 	struct directory dir;
 	struct genmidi_bank bank;
 	struct directory *parent_dir;
+	int last_commit;
 };
 
 const struct file_type file_type_genmidi_bank = {"GENMIDI bank"};
@@ -114,6 +115,7 @@ static bool GenmidiDirRename(void *_dir, struct directory_entry *entry,
 
 	snprintf(dir->bank.instrs[entry->serial_no / 2].name,
 	         GENMIDI_MAX_INSTR_LEN, "%s", new_name);
+	++dir->bank.modified_count;
 	return true;
 }
 
@@ -123,27 +125,61 @@ static void GenmidiDirFree(void *_dir)
 	VFS_DirectoryUnref(dir->parent_dir);
 }
 
+static bool GenmidiDirNeedCommit(void *_dir)
+{
+	struct genmidi_dir *dir = _dir;
+
+	return dir->bank.modified_count > dir->last_commit;
+}
+
+static void GenmidiDirCommit(void *_dir)
+{
+	struct genmidi_dir *dir = _dir;
+
+	dir->last_commit = dir->bank.modified_count;
+}
+
+static VFILE *GenmidiDirSaveSnapshot(void *_dir)
+{
+	struct genmidi_dir *dir = _dir;
+	VFILE *result = vfopenmem(NULL, 0);
+
+	assert(vfwrite(&dir->bank, sizeof(struct genmidi_bank), 1, result) ==
+	       1);
+	vfseek(result, 0, SEEK_SET);
+	return result;
+}
+
+static void GenmidiDirRestoreSnapshot(void *_dir, VFILE *in)
+{
+	struct genmidi_dir *dir = _dir;
+	assert(vfread(&dir->bank, sizeof(struct genmidi_bank), 1, in) == 1);
+	vfclose(in);
+	dir->last_commit = dir->bank.modified_count;
+}
+
 static const struct directory_funcs genmidi_dir_funcs = {
-    "Voice",           // singular
-    "Voices",          // plural
-    true,              // ordered
-    GenmidiDirRefresh, // refresh
-    NULL,              // open
-    GenmidiOpenDir,    // open_dir
-    NULL,              // remove
-    GenmidiDirRename,  // rename
-    NULL,              // need_commit
-    NULL,              // commit
-    NULL,              // swap_entries
-    NULL,              // save_snapshot
-    NULL,              // restore_snapshot
-    GenmidiDirFree,    // free
+    "Voice",                   // singular
+    "Voices",                  // plural
+    true,                      // ordered
+    GenmidiDirRefresh,         // refresh
+    NULL,                      // open
+    GenmidiOpenDir,            // open_dir
+    NULL,                      // remove
+    GenmidiDirRename,          // rename
+    GenmidiDirNeedCommit,      // need_commit
+    GenmidiDirCommit,          // commit
+    NULL,                      // swap_entries
+    GenmidiDirSaveSnapshot,    // save_snapshot
+    GenmidiDirRestoreSnapshot, // restore_snapshot
+    GenmidiDirFree,            // free
 };
 
 struct directory *GENMIDI_OpenDir(struct directory *parent,
                                   struct directory_entry *ent)
 {
 	struct genmidi_dir *dir = checked_calloc(1, sizeof(struct genmidi_dir));
+	struct directory_revision *rev;
 	VFILE *lump;
 	bool loaded;
 
@@ -166,9 +202,13 @@ struct directory *GENMIDI_OpenDir(struct directory *parent,
 	dir->dir.parent_name =
 	    StringJoin("", "Back to ", PathBaseName(parent->path), NULL);
 
+	dir->last_commit = 0;
 	dir->parent_dir = parent;
 	VFS_DirectoryRef(dir->parent_dir);
 	VFS_Refresh(&dir->dir);
+
+	rev = VFS_SaveRevision(&dir->dir);
+	snprintf(rev->descr, VFS_REVISION_DESCR_LEN, "Initial version");
 
 	return &dir->dir;
 }

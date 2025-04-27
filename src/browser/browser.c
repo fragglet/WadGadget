@@ -217,9 +217,7 @@ static const struct action *pal_actions[] = {
 };
 
 static const struct action *opl_actions[] = {
-    &parent_dir_action,
-    &view_action,
-    NULL,
+    &parent_dir_action, &view_action, &undo_action, &redo_action, NULL,
 };
 
 static const struct action *wad_to_wad[] = {

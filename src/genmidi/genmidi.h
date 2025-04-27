@@ -56,6 +56,7 @@ struct genmidi_instrument {
 
 struct genmidi_bank {
 	struct genmidi_instrument instrs[NUM_GENMIDI_INSTRS];
+	int modified_count;
 };
 
 struct action;
