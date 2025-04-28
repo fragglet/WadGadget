@@ -289,11 +289,17 @@ struct directory_pane *UI_NewDirectoryPane(WINDOW *w, struct directory *dir)
 	UI_ListPaneInit(&p->pane, w, &directory_pane_funcs, p);
 	p->pane.pane.draw = DrawPane;
 	p->pane.pane.mouse_click = B_DirectoryPaneMouseClick;
-	// TODO: Free
 	UI_ListPaneSetTitle(&p->pane, PathBaseName(dir->path));
 	p->dir = dir;
 	// Select first item (assuming there is one):
 	UI_ListPaneKeypress(&p->pane, KEY_DOWN);
 
 	return p;
+}
+
+void B_FreeDirectoryPane(struct directory_pane *p)
+{
+	UI_ListPaneFree(&p->pane);
+	VFS_FreeSet(&p->tagged);
+	free(p);
 }

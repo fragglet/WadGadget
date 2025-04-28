@@ -423,7 +423,7 @@ void B_ReplacePane(struct directory_pane *old_pane,
 
 	VFS_CloseDir(old_pane->dir);
 	UI_PaneHide(old_pane);
-	// TODO B_DirectoryPaneFree(old_pane);
+	B_FreeDirectoryPane(old_pane);
 
 	browser_panes[pane_num] = new_pane;
 	UI_PaneShow(new_pane);
