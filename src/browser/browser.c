@@ -421,7 +421,6 @@ void B_ReplacePane(struct directory_pane *old_pane,
 	// New pane gets old pane's window.
 	new_pane->pane.pane.window = old_pane->pane.pane.window;
 
-	VFS_CloseDir(old_pane->dir);
 	UI_PaneHide(old_pane);
 	B_FreeDirectoryPane(old_pane);
 
@@ -559,10 +558,10 @@ void B_Shutdown(void)
 {
 	TF_RestoreOldPalette();
 	if (browser_panes[0] != NULL) {
-		VFS_CloseDir(browser_panes[0]->dir);
+		B_FreeDirectoryPane(browser_panes[0]);
 	}
 	if (browser_panes[1] != NULL) {
-		VFS_CloseDir(browser_panes[1]->dir);
+		B_FreeDirectoryPane(browser_panes[1]);
 	}
 	clear();
 	refresh();

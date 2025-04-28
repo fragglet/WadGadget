@@ -299,6 +299,7 @@ struct directory_pane *B_NewDirectoryPane(WINDOW *w, struct directory *dir)
 
 void B_FreeDirectoryPane(struct directory_pane *p)
 {
+	VFS_DirectoryUnref(p->dir);
 	UI_ListPaneFree(&p->pane);
 	VFS_FreeSet(&p->tagged);
 	free(p);
