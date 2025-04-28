@@ -45,6 +45,7 @@ static struct pane info_pane;
 static struct search_pane search_pane;
 static WINDOW *pane_windows[2];
 static bool cmdr_mode = false, use_function_keys = true;
+static bool debug_mode = false;
 
 struct directory_pane *browser_panes[2];
 unsigned int current_pane = 0;
@@ -507,6 +508,13 @@ static bool DrawInfoPane(void *p)
 		UI_PrintMultilineString(pane->window, 1, 2, ent->type->name);
 	}
 
+	if (debug_mode) {
+		char buf[16];
+		snprintf(buf, sizeof(buf), "[ f: %d d: %d ]",
+		         vfs_num_open_files, vfs_num_open_dirs);
+		mvwaddstr(pane->window, 0, 10, buf);
+	}
+
 	return true;
 }
 
@@ -564,6 +572,8 @@ void B_Shutdown(void)
 void B_Init(const char *path1, const char *path2)
 {
 	struct directory *dir;
+
+	debug_mode = getenv("WADGADGET_DEBUG") != NULL;
 
 	InitInfoPane(newwin(5, 26, 1, 27));
 	UI_PaneShow(&info_pane);

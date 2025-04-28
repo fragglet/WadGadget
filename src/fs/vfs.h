@@ -143,4 +143,6 @@ extern const struct file_type file_type_wad;
 extern const struct file_type file_type_file;
 extern const struct file_type file_type_lump;
 
+extern int vfs_num_open_dirs;
+
 #endif /* #ifndef FS__VFS_H_INCLUDED */

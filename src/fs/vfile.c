@@ -26,6 +26,8 @@ struct _VFILE {
 	VFILE_CONTEXT *current_ctx, *last_ctx;
 };
 
+int vfs_num_open_files = 0;
+
 VFILE *vfopen(void *handle, const struct vfile_functions *funcs)
 {
 	VFILE *result;
@@ -34,6 +36,7 @@ VFILE *vfopen(void *handle, const struct vfile_functions *funcs)
 	result->handle = handle;
 	result->current_ctx = &result->local_ctx;
 	result->last_ctx = &result->local_ctx;
+	++vfs_num_open_files;
 	return result;
 }
 
@@ -99,6 +102,7 @@ void vfclose(VFILE *stream)
 	}
 	stream->functions->close(stream->handle);
 	free(stream);
+	--vfs_num_open_files;
 }
 
 void vfonclose(VFILE *stream, void (*callback)(VFILE *, void *), void *data)

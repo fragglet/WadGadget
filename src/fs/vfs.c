@@ -40,6 +40,7 @@ struct directory_entry _vfs_parent_directory = {
 
 static char last_error[128];
 static struct directory *open_dirs = NULL;
+int vfs_num_open_dirs = 0;
 
 static void FreeRevisionChainBackward(struct directory_revision *r)
 {
@@ -122,6 +123,7 @@ static void HookOpenDir(struct directory *d)
 {
 	d->next = open_dirs;
 	open_dirs = d;
+	++vfs_num_open_dirs;
 }
 
 static void UnhookOpenDir(struct directory *d)
@@ -131,6 +133,7 @@ static void UnhookOpenDir(struct directory *d)
 	while (*nextptr != NULL) {
 		if (*nextptr == d) {
 			*nextptr = d->next;
+			--vfs_num_open_dirs;
 			break;
 		}
 		nextptr = &(*nextptr)->next;

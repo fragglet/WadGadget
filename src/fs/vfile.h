@@ -66,4 +66,6 @@ VFILE_CONTEXT *vfswitchcontext(VFILE *f, VFILE_CONTEXT *ctx);
 		vfswitchcontext(vf, saved_ctx);                                \
 	} while (0)
 
+extern int vfs_num_open_files;
+
 #endif /* #ifndef FS__VFILE_H_INCLUDED */
