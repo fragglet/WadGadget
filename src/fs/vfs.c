@@ -241,6 +241,7 @@ struct directory_revision *VFS_SaveRevision(struct directory *dir)
 
 	result = checked_calloc(1, sizeof(struct directory_revision));
 	result->snapshot = vfreadall(out, &result->snapshot_len);
+	vfclose(out);
 
 	result->prev = dir->curr_revision;
 	if (dir->curr_revision != NULL) {
