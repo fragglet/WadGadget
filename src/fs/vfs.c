@@ -100,7 +100,7 @@ void VFS_InitDirectory(struct directory *d, const char *path)
 	d->curr_revision = NULL;
 	d->path = PathSanitize(path);
 	d->parent_name = ParentName(d->path);
-	d->refcount = 1;
+	d->refcount = 0;
 	d->entries = NULL;
 	d->num_entries = 0;
 }
@@ -123,7 +123,6 @@ static void HookOpenDir(struct directory *d)
 {
 	d->next = open_dirs;
 	open_dirs = d;
-	++vfs_num_open_dirs;
 }
 
 static void UnhookOpenDir(struct directory *d)
@@ -133,7 +132,6 @@ static void UnhookOpenDir(struct directory *d)
 	while (*nextptr != NULL) {
 		if (*nextptr == d) {
 			*nextptr = d->next;
-			--vfs_num_open_dirs;
 			break;
 		}
 		nextptr = &(*nextptr)->next;
@@ -347,6 +345,11 @@ bool VFS_Rename(struct directory *dir, struct directory_entry *entry,
 
 void VFS_DirectoryRef(struct directory *dir)
 {
+	// First ref?
+	if (dir->refcount == 0) {
+		++vfs_num_open_dirs;
+	}
+
 	++dir->refcount;
 }
 
@@ -371,6 +374,7 @@ void VFS_DirectoryUnref(struct directory *dir)
 	free(dir->parent_name);
 	free(dir->path);
 	free(dir);
+	--vfs_num_open_dirs;
 }
 
 void VFS_DescribeSize(const struct directory_entry *ent, char buf[10])

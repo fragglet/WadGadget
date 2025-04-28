@@ -158,6 +158,7 @@ struct directory *VFS_OpenWadAsDirectory(const char *path)
 
 	d->dir.directory_funcs = &waddir_funcs;
 	VFS_InitDirectory(&d->dir, path);
+	VFS_DirectoryRef(&d->dir);
 	d->dir.type = &file_type_wad;
 	d->wad_file = W_OpenFile(path);
 	if (d->wad_file == NULL) {

@@ -131,7 +131,6 @@ bool TX_InitLumpDir(struct lump_dir *dir, const struct lump_dir_funcs *funcs,
 
 	dir->dir.path =
 	    StringJoin(DIR_SEPARATOR_S, parent->path, ent->name, NULL);
-	dir->dir.refcount = 1;
 	dir->dir.entries = NULL;
 	dir->dir.num_entries = 0;
 	dir->dir.readonly = parent->readonly;
@@ -141,6 +140,7 @@ bool TX_InitLumpDir(struct lump_dir *dir, const struct lump_dir_funcs *funcs,
 	dir->loaded = false;
 	dir->lump_dir_funcs = funcs;
 	dir->parent_dir = parent;
+	VFS_DirectoryRef(&dir->dir);
 	VFS_DirectoryRef(dir->parent_dir);
 	dir->lump_serial = ent->serial_no;
 

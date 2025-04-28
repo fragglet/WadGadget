@@ -275,6 +275,7 @@ struct directory *VFS_OpenRealDir(const char *path)
 
 	d->d.directory_funcs = &realdir_funcs;
 	VFS_InitDirectory(&d->d, path);
+	VFS_DirectoryRef(&d->d);
 	d->d.type = &file_type_dir;
 	if (!strcmp(path, "/")) { // unix root
 		free(d->d.parent_name);

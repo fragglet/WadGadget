@@ -230,7 +230,6 @@ struct directory *GENMIDI_OpenDir(struct directory *parent,
 	dir->dir.type = &file_type_genmidi_bank;
 	dir->dir.path =
 	    StringJoin(DIR_SEPARATOR_S, parent->path, ent->name, NULL);
-	dir->dir.refcount = 1;
 	dir->dir.entries = NULL;
 	dir->dir.num_entries = 0;
 	dir->dir.readonly = parent->readonly;
@@ -241,6 +240,7 @@ struct directory *GENMIDI_OpenDir(struct directory *parent,
 	dir->parent_dir = parent;
 	dir->lump_serial = ent->serial_no;
 	VFS_DirectoryRef(dir->parent_dir);
+	VFS_DirectoryRef(&dir->dir);
 	VFS_Refresh(&dir->dir);
 
 	rev = VFS_SaveRevision(&dir->dir);
