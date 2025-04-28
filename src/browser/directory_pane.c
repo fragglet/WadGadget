@@ -281,7 +281,7 @@ doubleclick_continuation B_DirectoryPaneMouseClick(void *_dp, int x, int y)
 	return NULL;
 }
 
-struct directory_pane *UI_NewDirectoryPane(WINDOW *w, struct directory *dir)
+struct directory_pane *B_NewDirectoryPane(WINDOW *w, struct directory *dir)
 {
 	struct directory_pane *p;
 

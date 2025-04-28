@@ -40,7 +40,7 @@ int B_DirectoryPaneSelected(struct directory_pane *p);
 struct file_set *B_DirectoryPaneTagged(struct directory_pane *p);
 void B_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set);
 
-struct directory_pane *UI_NewDirectoryPane(WINDOW *pane, struct directory *dir);
+struct directory_pane *B_NewDirectoryPane(WINDOW *pane, struct directory *dir);
 void B_FreeDirectoryPane(struct directory_pane *p);
 
 #endif /* #ifndef BROWSER__DIRECTORY_PANE_H_INCLUDED */

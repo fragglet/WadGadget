@@ -1069,7 +1069,7 @@ static void NavigateNew(struct directory_pane *curr_pane,
 	struct directory_pane *new_pane;
 	char *old_path = checked_strdup(curr_pane->dir->path);
 
-	new_pane = UI_NewDirectoryPane(NULL, new_dir);
+	new_pane = B_NewDirectoryPane(NULL, new_dir);
 
 	if (new_pane != NULL) {
 		// We're closing the current pane; if it is a WAD we might

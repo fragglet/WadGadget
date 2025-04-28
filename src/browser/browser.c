@@ -453,7 +453,7 @@ bool B_CheckPathPaste(void)
 		return false;
 	}
 
-	new_pane = UI_NewDirectoryPane(NULL, dir);
+	new_pane = B_NewDirectoryPane(NULL, dir);
 	B_ReplacePane(active_pane, new_pane);
 
 	UI_TextInputClear(&search_pane.input);
@@ -593,7 +593,7 @@ void B_Init(const char *path1, const char *path2)
 		fprintf(stderr, "Failed to open '%s'.\n", path1);
 		exit(-1);
 	}
-	browser_panes[0] = UI_NewDirectoryPane(pane_windows[0], dir);
+	browser_panes[0] = B_NewDirectoryPane(pane_windows[0], dir);
 	UI_PaneShow(browser_panes[0]);
 
 	pane_windows[1] = newwin(LINES - 1, 27, 1, COLS - 27);
@@ -604,7 +604,7 @@ void B_Init(const char *path1, const char *path2)
 		fprintf(stderr, "Failed to open '%s'.\n", path2);
 		exit(-1);
 	}
-	browser_panes[1] = UI_NewDirectoryPane(pane_windows[1], dir);
+	browser_panes[1] = B_NewDirectoryPane(pane_windows[1], dir);
 	UI_PaneShow(browser_panes[1]);
 
 	B_SwitchToPane(browser_panes[0]);
