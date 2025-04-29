@@ -78,3 +78,27 @@ bool GENMIDI_SaveBank(struct genmidi_bank *bank, VFILE *out)
 
 	return true;
 }
+
+void GENMIDI_ClearInstrument(struct genmidi_bank *bank, struct genmidi_instrument *instr, bool voice2)
+{
+	++bank->modified_count;
+
+	// We delete the second voice by clearing the two-voice flag:
+	if (voice2) {
+		instr->hdr.flags &= ~GENMIDI_FLAG_2VOICE;
+		return;
+	}
+
+	// We delete the first voice by overwriting it with the second:
+	if ((instr->hdr.flags & GENMIDI_FLAG_2VOICE) != 0) {
+		memcpy(instr->voice1, instr->voice2, NUM_INSTR_FIELDS);
+		instr->hdr.flags &= ~GENMIDI_FLAG_2VOICE;
+		return;
+	}
+
+	snprintf(instr->name, sizeof(instr->name), "(unused)");
+	instr->hdr.flags = 0;
+	memset(instr->voice1, 0, NUM_INSTR_FIELDS);
+	instr->voice1[INSTR_C_VOLUME] = 0x3f;
+	instr->voice1[INSTR_M_VOLUME] = 0x3f;
+}

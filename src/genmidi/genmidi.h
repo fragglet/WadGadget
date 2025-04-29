@@ -66,9 +66,12 @@ struct file_type;
 extern const struct file_type file_type_genmidi_bank;
 extern const struct file_type file_type_genmidi_voice;
 extern const struct action genmidi_export_action;
+extern const struct action genmidi_clear_action;
 
 bool GENMIDI_LoadBank(struct genmidi_bank *bank, VFILE *in);
 bool GENMIDI_SaveBank(struct genmidi_bank *bank, VFILE *out);
+void GENMIDI_ClearInstrument(struct genmidi_bank *bank, struct genmidi_instrument *instr, bool voice2);
+
 struct directory *GENMIDI_OpenDir(struct directory *parent,
                                   struct directory_entry *ent);
 struct genmidi_bank *GENMIDI_DirGetBank(struct directory *dir);

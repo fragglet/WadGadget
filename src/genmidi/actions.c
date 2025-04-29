@@ -18,6 +18,7 @@
 #include "genmidi/genmidi.h"
 #include "stringlib.h"
 #include "ui/actions_bar.h"
+#include "ui/title_bar.h"
 
 static void ActionExportVoices(void)
 {
@@ -46,4 +47,33 @@ static void ActionExportVoices(void)
 
 const struct action genmidi_export_action = {
     KEY_F(5), 'C', "Export", "> Export", ActionExportVoices,
+};
+
+static void ActionClearInstruments(void)
+{
+	struct genmidi_bank *bank = GENMIDI_DirGetBank(active_pane->dir);
+	struct genmidi_instrument *instr;
+	struct directory_entry *ent;
+	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
+	char buf[64];
+	int it = 0;
+
+	VFS_DescribeSet(active_pane->dir, tagged, buf, sizeof(buf));
+
+	while ((ent = VFS_IterateSet(active_pane->dir, tagged, &it)) != NULL) {
+		int index = ent - active_pane->dir->entries;
+
+		instr = &bank->instrs[index / 2];
+
+		GENMIDI_ClearInstrument(bank, instr, (index % 2) != 0);
+	}
+
+	VFS_Refresh(active_pane->dir);
+	VFS_CommitChanges(active_pane->dir, "clear of %s", buf);
+	UI_ShowNotice("%s cleared.", buf);
+	VFS_ClearSet(&active_pane->tagged);
+}
+
+const struct action genmidi_clear_action = {
+    KEY_F(8), 'X', "Clear", "Clear", ActionClearInstruments,
 };

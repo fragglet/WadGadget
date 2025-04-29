@@ -96,7 +96,7 @@ static struct directory *GenmidiOpenDir(void *_dir,
 	return NULL;
 }
 
-static bool GenmidiDirRemove(void *dir, struct directory_entry *entry)
+static bool GenmidiDirRemove(void *_dir, struct directory_entry *entry)
 {
 	VFS_StoreError("Voices cannot be deleted, only replaced.");
 	return false;
