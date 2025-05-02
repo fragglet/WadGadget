@@ -79,7 +79,8 @@ bool GENMIDI_SaveBank(struct genmidi_bank *bank, VFILE *out)
 	return true;
 }
 
-void GENMIDI_ClearInstrument(struct genmidi_bank *bank, struct genmidi_instrument *instr, bool voice2)
+void GENMIDI_ClearInstrument(struct genmidi_bank *bank,
+                             struct genmidi_instrument *instr, bool voice2)
 {
 	++bank->modified_count;
 
