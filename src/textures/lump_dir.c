@@ -9,6 +9,8 @@
 //
 //
 // Common code shared between texture and pnames directories.
+// TODO: This module is deprecated and being replaced with fs/lump_dir.c which
+// does the same thing in a more generic way.
 
 #include <assert.h>
 #include <stdbool.h>

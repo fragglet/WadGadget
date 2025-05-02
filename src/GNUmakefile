@@ -71,6 +71,7 @@ OBJS =                      \
     conv/process.o          \
     conv/vpng.o             \
     fs/file_set.o           \
+    fs/lump_dir.o           \
     fs/real_dir.o           \
     fs/vfile.o              \
     fs/vfs.o                \
