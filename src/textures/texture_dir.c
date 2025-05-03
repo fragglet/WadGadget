@@ -16,6 +16,7 @@
 
 #include "common.h"
 #include "conv/error.h"
+#include "fs/lump_dir.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "fs/wad_file.h"
@@ -25,16 +26,14 @@
 #include "ui/title_bar.h"
 
 // Implementation of a VFS directory that is backed by a textures list.
-// Currently incomplete.
 struct texture_dir {
-	struct lump_dir dir;
+	struct lump_based_dir dir;
 
-	// txs->modified_count at the last call to commit.
-	unsigned int last_commit;
+	struct texture_bundle b;
 };
 
-#define TEXTURES(dir) ((dir)->dir.b.txs)
-#define PNAMES(dir)   ((dir)->dir.b.pn)
+#define TEXTURES(dir) ((dir)->b.txs)
+#define PNAMES(dir)   ((dir)->b.pn)
 
 const struct file_type file_type_texture_list = {"Textures"};
 const struct file_type file_type_texture = {"Texture"};
@@ -84,20 +83,6 @@ static bool TextureDirRename(void *_dir, struct directory_entry *entry,
 	                        new_name);
 }
 
-static bool TextureDirNeedCommit(void *_dir)
-{
-	struct texture_dir *dir = _dir;
-
-	return TEXTURES(dir)->modified_count > dir->last_commit;
-}
-
-static void TextureDirCommit(void *_dir)
-{
-	struct texture_dir *dir = _dir;
-
-	dir->last_commit = TEXTURES(dir)->modified_count;
-}
-
 static void TextureDirSwap(void *_dir, unsigned int x, unsigned int y)
 {
 	struct texture_dir *dir = _dir;
@@ -118,40 +103,12 @@ static void TextureDirSwap(void *_dir, unsigned int x, unsigned int y)
 	++TEXTURES(dir)->modified_count;
 }
 
-static VFILE *TextureDirSaveSnapshot(void *_dir)
+static void TextureDirFree(void *_dir)
 {
 	struct texture_dir *dir = _dir;
-	VFILE *tmp, *result = vfopenmem(NULL, 0);
-
-	assert(vfwrite(&TEXTURES(dir)->modified_count, sizeof(int), 1,
-	               result) == 1);
-
-	tmp = TX_MarshalTextures(TEXTURES(dir));
-	vfcopy(tmp, result);
-	vfclose(tmp);
-	vfseek(result, 0, SEEK_SET);
-	return result;
-}
-
-static void TextureDirRestoreSnapshot(void *_dir, VFILE *in)
-{
-	struct texture_dir *dir = _dir;
-	struct textures *new_txs;
-	unsigned int mod_count;
-
-	assert(vfread(&mod_count, sizeof(int), 1, in) == 1);
-	new_txs = TX_UnmarshalTextures(in);
-	assert(new_txs != NULL);
-	new_txs->modified_count = mod_count;
-
-	TX_FreeTextures(TEXTURES(dir));
-	TEXTURES(dir) = new_txs;
-	dir->last_commit = mod_count;
-}
-
-static void TextureDirFree(void *dir)
-{
-	TX_LumpDirFree(dir);
+	TX_BundleSavePnamesTo(&dir->b, dir->dir.parent_dir);
+	TX_FreePnames(PNAMES(dir));
+	VFS_LumpDirFree(&dir->dir);
 }
 
 struct directory_funcs texture_dir_funcs = {
@@ -160,120 +117,53 @@ struct directory_funcs texture_dir_funcs = {
     true,
     TextureDirRefresh,
     TextureDirOpen,
-    TX_LumpDirOpenDir,
+    VFS_LumpDirOpenDir,
     TextureDirRemove,
     TextureDirRename,
-    TextureDirNeedCommit,
-    TextureDirCommit,
+    VFS_LumpDirNeedCommit,
+    VFS_LumpDirCommit,
     TextureDirSwap,
-    TextureDirSaveSnapshot,
-    TextureDirRestoreSnapshot,
+    VFS_LumpDirSaveSnapshot,
+    VFS_LumpDirRestoreSnapshot,
     TextureDirFree,
 };
 
-static struct pnames *LoadPnames(struct texture_dir *dir)
-{
-	VFILE *input;
-	struct pnames *pn;
-	struct directory_entry *ent =
-	    VFS_EntryByName(dir->dir.parent_dir, "PNAMES");
-
-	if (ent == NULL) {
-		ConversionError("WAD does not contain a PNAMES lump.");
-		return NULL;
-	}
-
-	input = VFS_OpenByEntry(dir->dir.parent_dir, ent);
-	if (input == NULL) {
-		ConversionError("Failed to open PNAMES lump.");
-		return NULL;
-	}
-
-	pn = TX_UnmarshalPnames(input);
-	if (pn == NULL) {
-		ConversionError("Failed to unmarshal PNAMES");
-		return NULL;
-	}
-
-	return pn;
-}
-
-static bool TextureDirLoad(void *_dir, struct directory *wad_dir,
-                           struct directory_entry *ent)
-{
-	struct texture_dir *dir = (struct texture_dir *) _dir;
-	struct textures *new_txs;
-	struct pnames *new_pn;
-	VFILE *input;
-
-	new_pn = LoadPnames(dir);
-	if (new_pn == NULL) {
-		return false;
-	}
-
-	if (ent->size == 0) {
-		UI_ShowNotice("Creating a new, empty texture directory.");
-		PNAMES(dir) = new_pn;
-		TEXTURES(dir) = TX_NewTextureList(0);
-		// TODO: For TEXTURE1 we should probably create an
-		// AASTINKY-style dummy texture as the first entry.
-		++TEXTURES(dir)->modified_count;
-		return true;
-	}
-
-	input = VFS_OpenByEntry(wad_dir, ent);
-	if (input == NULL) {
-		TX_FreePnames(new_pn);
-		return false;
-	}
-
-	new_txs = TX_UnmarshalTextures(input);
-	if (new_txs == NULL) {
-		TX_FreePnames(new_pn);
-		return false;
-	}
-	PNAMES(dir) = new_pn;
-	TEXTURES(dir) = new_txs;
-	return true;
-}
-
-static bool TextureDirSave(void *_dir, struct directory *wad_dir,
-                           struct directory_entry *ent)
+static void TextureDirInitEmpty(void *_dir)
 {
 	struct texture_dir *dir = _dir;
-	struct wad_file *wf;
-	VFILE *out, *texture_out;
 
-	// Unchanged since it was opened?
-	if (TEXTURES(dir)->modified_count == 0) {
-		return true;
+	UI_ShowNotice("Creating a new, empty texture directory.");
+
+	dir->b.txs = TX_NewTextureList(0);
+	// TODO: For TEXTURE1 we should probably create an
+	// AASTINKY-style dummy texture as the first entry.
+	++dir->b.txs->modified_count;
+}
+
+static VFILE *TextureDirMarshal(void *_dir)
+{
+	struct texture_dir *dir = _dir;
+	return TX_MarshalTextures(TEXTURES(dir));
+}
+
+static bool TextureDirUnmarshal(void *_dir, VFILE *in, int mod_count)
+{
+	struct texture_dir *dir = _dir;
+	if (TEXTURES(dir) != NULL) {
+		TX_FreeTextures(TEXTURES(dir));
 	}
-
-	if (!TX_BundleSavePnamesTo(&dir->dir.b, wad_dir)) {
+	TEXTURES(dir) = TX_UnmarshalTextures(in);
+	if (TEXTURES(dir) == NULL) {
 		return false;
 	}
-
-	texture_out = TX_MarshalTextures(TEXTURES(dir));
-	if (texture_out == NULL) {
-		return false;
-	}
-
-	wf = VFS_WadFile(wad_dir);
-	assert(wf != NULL);
-	out = W_OpenLumpRewrite(wf, ent - wad_dir->entries);
-	if (out == NULL) {
-		vfclose(texture_out);
-		return false;
-	}
-
-	vfcopy(texture_out, out);
-	vfclose(texture_out);
-	vfclose(out);
-	VFS_CommitChanges(wad_dir, "update of '%s' texture directory",
-	                  ent->name);
-	UI_ShowNotice("%s lump updated.", ent->name);
-
+	TEXTURES(dir)->modified_count = mod_count;
 	return true;
+}
+
+static int TextureDirModCount(void *_dir)
+{
+	struct texture_dir *dir = _dir;
+	return TEXTURES(dir)->modified_count;
 }
 
 static struct textures *MakeTextureSubset(struct textures *txs,
@@ -292,35 +182,11 @@ static struct textures *MakeTextureSubset(struct textures *txs,
 	return result;
 }
 
-static VFILE *TextureDirFormatConfig(void *_dir, struct file_set *selected)
-{
-	struct texture_dir *dir = _dir;
-	struct textures *subset;
-	char comment_buf[32];
-	VFILE *result;
-
-	snprintf(comment_buf, sizeof(comment_buf), "Exported from %s",
-	         PathBaseName(TX_DirGetParent(_dir, NULL)->path));
-
-	if (selected != NULL) {
-		subset = MakeTextureSubset(TEXTURES(dir), selected);
-	} else {
-		subset = TEXTURES(dir);
-	}
-	result = TX_FormatTexturesConfig(subset, PNAMES(dir), comment_buf);
-
-	if (subset != TEXTURES(dir)) {
-		TX_FreeTextures(subset);
-	}
-
-	return result;
-}
-
-static const struct lump_dir_funcs texture_lump_dir_funcs = {
-    TextureDirLoad,
-    TextureDirSave,
-    TextureDirFormatConfig,
-    TX_BundleParseTextures,
+static const struct lump_based_dir_funcs texture_lump_dir_funcs = {
+    TextureDirInitEmpty,
+    TextureDirMarshal,
+    TextureDirUnmarshal,
+    TextureDirModCount,
 };
 
 struct directory *TX_OpenTextureDir(struct directory *parent,
@@ -328,20 +194,30 @@ struct directory *TX_OpenTextureDir(struct directory *parent,
 {
 	struct texture_dir *dir = checked_calloc(1, sizeof(struct texture_dir));
 
+	if (!TX_BundleLoadPnamesFrom(&dir->b, parent)) {
+		free(dir);
+		return NULL;
+	}
+
 	dir->dir.dir.type = &file_type_texture_list;
 	dir->dir.dir.directory_funcs = &texture_dir_funcs;
-	if (!TX_InitLumpDir(&dir->dir, &texture_lump_dir_funcs, parent, ent)) {
+	if (!VFS_LumpDirInit(&dir->dir, &texture_lump_dir_funcs, parent, ent)) {
+		TX_FreePnames(PNAMES(dir));
+		free(dir);
 		return NULL;
 	}
 
 	return &dir->dir.dir;
 }
 
-struct textures *TX_TextureList(struct directory *_dir)
+struct texture_bundle *TX_DirGetBundle(struct directory *_dir)
 {
 	struct texture_dir *dir = (struct texture_dir *) _dir;
-
 	assert(dir->dir.dir.directory_funcs == &texture_dir_funcs);
+	return &dir->b;
+}
 
-	return TEXTURES(dir);
+struct textures *TX_TextureList(struct directory *dir)
+{
+	return TX_DirGetBundle(dir)->txs;
 }

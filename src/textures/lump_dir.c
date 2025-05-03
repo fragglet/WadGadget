@@ -104,13 +104,6 @@ bool TX_DirSave(struct directory *_dir)
 	return result;
 }
 
-struct texture_bundle *TX_DirGetBundle(struct directory *_dir)
-{
-	struct lump_dir *dir = (struct lump_dir *) _dir;
-
-	return &dir->b;
-}
-
 VFILE *TX_DirFormatConfig(struct directory *_dir, struct file_set *subset)
 {
 	struct lump_dir *dir = (struct lump_dir *) _dir;

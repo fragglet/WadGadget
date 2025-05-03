@@ -53,11 +53,9 @@ bool B_CheckReadOnly(struct directory *dir)
 
 	// If this is a directory list, it's the enclosing WAD we actually
 	// want to check.
-	if (dir->type == &file_type_texture_list) {
-		dir = TX_DirGetParent(dir, NULL);
-	}
 	if (dir->type == &file_type_genmidi_bank ||
-	    dir->type == &file_type_pnames_list) {
+	    dir->type == &file_type_pnames_list ||
+	    dir->type == &file_type_texture_list) {
 		dir = VFS_LumpDirGetParent(dir, NULL);
 	}
 
