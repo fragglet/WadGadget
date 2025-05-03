@@ -166,22 +166,6 @@ static int TextureDirModCount(void *_dir)
 	return TEXTURES(dir)->modified_count;
 }
 
-static struct textures *MakeTextureSubset(struct textures *txs,
-                                          struct file_set *fs)
-{
-	struct textures *result = checked_calloc(1, sizeof(struct textures));
-	unsigned int i;
-
-	for (i = 0; i < txs->num_textures; i++) {
-		if (VFS_SetHas(fs, txs->serial_nos[i])) {
-			TX_AddTexture(result, result->num_textures,
-			              txs->textures[i]);
-		}
-	}
-
-	return result;
-}
-
 static const struct lump_based_dir_funcs texture_lump_dir_funcs = {
     TextureDirInitEmpty,
     TextureDirMarshal,

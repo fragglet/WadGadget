@@ -20,6 +20,7 @@
 #include "browser/directory_pane.h"
 #include "common.h"
 #include "conv/error.h"
+#include "fs/lump_dir.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "stringlib.h"
@@ -31,6 +32,62 @@
 #include "ui/list_pane.h"
 #include "ui/title_bar.h"
 #include "view.h"
+
+static struct textures *MakeTextureSubset(struct textures *txs,
+                                          struct file_set *files)
+{
+	struct textures *result = TX_NewTextureList(0);
+	unsigned int i;
+
+	for (i = 0; i < txs->num_textures; i++) {
+		if (files == NULL || VFS_SetHas(files, txs->serial_nos[i])) {
+			TX_AddTexture(result, result->num_textures,
+			              txs->textures[i]);
+		}
+	}
+
+	return result;
+}
+
+static struct pnames *MakePnamesSubset(struct pnames *pn,
+                                       struct file_set *files)
+{
+	struct pnames *result = TX_NewPnamesList(0);
+	int i;
+
+	for (i = 0; i < pn->num_pnames; i++) {
+		if (files == NULL ||
+		    VFS_SetHas(files, TX_PnameSerialNo(pn->pnames[i]))) {
+			TX_AppendPname(result, pn->pnames[i]);
+		}
+	}
+
+	return result;
+}
+
+static VFILE *FormatConfig(struct directory *dir, struct file_set *files)
+{
+	VFILE *result;
+
+	if (dir->type == &file_type_texture_list) {
+		struct texture_bundle *b = TX_DirGetBundle(dir);
+		struct textures *txs = MakeTextureSubset(b->txs, files);
+		char comment_buf[32];
+
+		snprintf(comment_buf, sizeof(comment_buf), "Exported from %s",
+		         PathBaseName(VFS_LumpDirGetParent(dir, NULL)->path));
+		result = TX_FormatTexturesConfig(txs, b->pn, comment_buf);
+		TX_FreeTextures(txs);
+		return result;
+	} else if (dir->type == &file_type_pnames_list) {
+		struct pnames *pn = TX_PnamesList(dir);
+		struct pnames *subset = MakePnamesSubset(pn, files);
+		result = TX_FormatPnamesConfig(subset);
+		TX_FreePnames(subset);
+		return result;
+	}
+	assert(0);
+}
 
 static bool CheckExistingTexture(struct textures *txs, const char *name)
 {
@@ -222,23 +279,22 @@ const struct action dup_texture_action = {
 
 static void ActionExportConfig(void)
 {
-#if 0
 	struct file_set *selected;
 	char *filename = NULL, *filename2 = NULL;
 	VFILE *formatted, *out;
 
 	if (active_pane->tagged.num_entries > 0) {
 		selected = &active_pane->tagged;
-	} else if (!UI_ConfirmDialogBox(
+	} else if (UI_ConfirmDialogBox(
 	               "Export config", "Export", "Cancel",
 	               "You have not selected any textures to\n"
 	               "export. Export the entire directory?")) {
-		return;
-	} else {
 		selected = NULL;
+	} else {
+		return;
 	}
 
-	formatted = TX_DirFormatConfig(active_pane->dir, selected);
+	formatted = FormatConfig(active_pane->dir, selected);
 	if (formatted == NULL) {
 		return;
 	}
@@ -272,14 +328,13 @@ static void ActionExportConfig(void)
 
 	VFS_Refresh(other_pane->dir);
 
-	B_SwitchToPane(other_pane);
 	B_DirectoryPaneSelectByName(other_pane, filename);
+	B_SwitchToPane(other_pane);
 
 cancel:
 	vfclose(formatted);
 	free(filename);
 	free(filename2);
-#endif
 }
 
 const struct action export_texture_config = {
