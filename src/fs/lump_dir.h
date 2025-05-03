@@ -35,6 +35,7 @@ struct lump_based_dir {
 
 struct directory *VFS_LumpDirGetParent(struct directory *_dir,
                                        struct directory_entry **ent);
+struct directory *VFS_LumpDirOpenDir(void *_dir, struct directory_entry *ent);
 void VFS_LumpDirFree(void *_dir);
 bool VFS_LumpDirNeedCommit(void *_dir);
 void VFS_LumpDirCommit(void *_dir);

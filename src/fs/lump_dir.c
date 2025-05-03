@@ -76,6 +76,18 @@ static void SaveToLump(struct lump_based_dir *dir)
 	UI_ShowNotice("%s lump updated.", ent->name);
 }
 
+struct directory *VFS_LumpDirOpenDir(void *_dir, struct directory_entry *ent)
+{
+	struct lump_based_dir *dir = _dir;
+
+	if (ent == VFS_PARENT_DIRECTORY) {
+		VFS_DirectoryRef(dir->parent_dir);
+		return dir->parent_dir;
+	}
+
+	return NULL;
+}
+
 void VFS_LumpDirFree(void *_dir)
 {
 	struct lump_based_dir *dir = (struct lump_based_dir *) _dir;

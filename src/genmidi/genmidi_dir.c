@@ -81,19 +81,6 @@ static void GenmidiDirRefresh(void *_dir, struct directory_entry **entries,
 	}
 }
 
-static struct directory *GenmidiOpenDir(void *_dir,
-                                        struct directory_entry *entry)
-{
-	struct genmidi_dir *dir = _dir;
-
-	if (entry == VFS_PARENT_DIRECTORY) {
-		VFS_DirectoryRef(dir->dir.parent_dir);
-		return dir->dir.parent_dir;
-	}
-
-	return NULL;
-}
-
 static bool GenmidiDirRemove(void *_dir, struct directory_entry *entry)
 {
 	VFS_StoreError("Voices cannot be deleted, only replaced.");
@@ -165,7 +152,7 @@ static const struct directory_funcs genmidi_dir_funcs = {
     true,                       // ordered
     GenmidiDirRefresh,          // refresh
     NULL,                       // open
-    GenmidiOpenDir,             // open_dir
+    VFS_LumpDirOpenDir,         // open_dir
     GenmidiDirRemove,           // remove
     GenmidiDirRename,           // rename
     VFS_LumpDirNeedCommit,      // need_commit
