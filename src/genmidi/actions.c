@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <curses.h>
 
+#include "browser/actions.h"
 #include "browser/browser.h"
 #include "browser/directory_pane.h"
 #include "common.h"
@@ -57,6 +58,10 @@ static void ActionClearInstruments(void)
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
 	char buf[64];
 	int it = 0;
+
+	if (!B_CheckReadOnly(active_pane->dir)) {
+		return;
+	}
 
 	VFS_DescribeSet(active_pane->dir, tagged, buf, sizeof(buf));
 

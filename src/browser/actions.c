@@ -28,6 +28,7 @@
 #include "conv/export.h"
 #include "conv/gfxedit.h"
 #include "conv/import.h"
+#include "fs/lump_dir.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "fs/wad_file.h"
@@ -55,6 +56,9 @@ bool B_CheckReadOnly(struct directory *dir)
 	if (dir->type == &file_type_texture_list ||
 	    dir->type == &file_type_pnames_list) {
 		dir = TX_DirGetParent(dir, NULL);
+	}
+	if (dir->type == &file_type_genmidi_bank) {
+		dir = VFS_LumpDirGetParent(dir, NULL);
 	}
 
 	// We req
