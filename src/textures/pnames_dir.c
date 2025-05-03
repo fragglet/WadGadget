@@ -95,8 +95,8 @@ static void PnamesDirFree(void *_dir)
 {
 	struct pnames_dir *dir = _dir;
 
-	TX_FreePnames(dir->pn);
 	VFS_LumpDirFree(&dir->dir);
+	TX_FreePnames(dir->pn);
 }
 
 static const struct directory_funcs pnames_dir_funcs = {

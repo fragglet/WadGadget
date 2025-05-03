@@ -107,8 +107,8 @@ static void TextureDirFree(void *_dir)
 {
 	struct texture_dir *dir = _dir;
 	TX_BundleSavePnamesTo(&dir->b, dir->dir.parent_dir);
-	TX_FreePnames(PNAMES(dir));
 	VFS_LumpDirFree(&dir->dir);
+	TX_FreePnames(PNAMES(dir));
 }
 
 struct directory_funcs texture_dir_funcs = {
