@@ -96,6 +96,7 @@ const struct action new_texture_action = {
 
 static void ActionEditConfig(void)
 {
+#if 0
 	struct directory_revision *old_rev, *orig_rev;
 	struct directory *parent;
 	struct directory_entry *ent;
@@ -132,6 +133,7 @@ static void ActionEditConfig(void)
 		VFS_Undo(parent, 1);
 	}
 	assert(parent->curr_revision == orig_rev);
+#endif
 }
 
 const struct action edit_textures_action = {
@@ -220,6 +222,7 @@ const struct action dup_texture_action = {
 
 static void ActionExportConfig(void)
 {
+#if 0
 	struct file_set *selected;
 	char *filename = NULL, *filename2 = NULL;
 	VFILE *formatted, *out;
@@ -276,6 +279,7 @@ cancel:
 	vfclose(formatted);
 	free(filename);
 	free(filename2);
+#endif
 }
 
 const struct action export_texture_config = {
@@ -337,6 +341,7 @@ static void MergePnamesResultNotice(struct texture_bundle_merge_result *r)
 
 static void ActionImportConfig(void)
 {
+#if 0
 	struct texture_bundle_merge_result merge_stats;
 	struct texture_bundle b;
 	struct texture_bundle *into = TX_DirGetBundle(other_pane->dir);
@@ -380,6 +385,7 @@ static void ActionImportConfig(void)
 	}
 
 	TX_FreeBundle(&b);
+#endif
 }
 
 const struct action import_texture_config = {
@@ -480,6 +486,7 @@ const struct action copy_pnames_action = {
 
 static void ActionCopyTextures(void)
 {
+#if 0
 	struct texture_bundle_merge_result merge_stats;
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
 	struct texture_bundle b;
@@ -515,6 +522,7 @@ static void ActionCopyTextures(void)
 	VFS_Refresh(to_dir);
 
 	MergeTexturesResultNotice(&merge_stats);
+#endif
 }
 
 const struct action copy_textures_action = {

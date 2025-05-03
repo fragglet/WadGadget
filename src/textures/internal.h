@@ -44,5 +44,6 @@ struct pnames *TX_GetDirPnames(struct directory *dir);
 bool TX_InitLumpDir(struct lump_dir *dir, const struct lump_dir_funcs *funcs,
                     struct directory *parent, struct directory_entry *ent);
 size_t TX_TextureLen(size_t patchcount);
+struct pnames *TX_PnamesList(struct directory *_dir);
 
 #endif /* #ifndef TEXTURES__INTERNAL_H_INCLUDED */
