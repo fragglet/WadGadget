@@ -113,6 +113,19 @@ static bool GenmidiDirRename(void *_dir, struct directory_entry *entry,
 	return true;
 }
 
+static void GenmidiDirInitEmpty(void *_dir)
+{
+	struct genmidi_dir *dir = _dir;
+	int i;
+
+	for (i = 0; i < NUM_GENMIDI_INSTRS; ++i) {
+		GENMIDI_ClearInstrument(&dir->bank, &dir->bank.instrs[i],
+		                        false);
+	}
+
+	UI_ShowNotice("Creating a new, empty GENMIDI directory.");
+}
+
 static VFILE *GenmidiDirMarshal(void *_dir)
 {
 	struct genmidi_dir *dir = _dir;
@@ -141,6 +154,7 @@ static int GenmidiDirModifiedCount(void *_dir)
 }
 
 static const struct lump_based_dir_funcs lump_dir_funcs = {
+    GenmidiDirInitEmpty,
     GenmidiDirMarshal,
     GenmidiDirUnmarshal,
     GenmidiDirModifiedCount,

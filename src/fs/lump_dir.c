@@ -36,10 +36,19 @@ struct directory *VFS_LumpDirGetParent(struct directory *_dir,
 static bool LoadFromLump(struct lump_based_dir *dir,
                          struct directory_entry *ent)
 {
-	VFILE *in = VFS_OpenByEntry(dir->parent_dir, ent);
+	VFILE *in;
 
-	dir->last_commit = 0;
-	dir->loaded = dir->funcs->unmarshal(dir, in, 0);
+	// We always allow the user to create a new directory by making an
+	// empty lump and opening it.
+	if (ent->size == 0) {
+		dir->funcs->init_empty(dir);
+		dir->loaded = true;
+	} else {
+		in = VFS_OpenByEntry(dir->parent_dir, ent);
+		dir->loaded = dir->funcs->unmarshal(dir, in, 0);
+	}
+
+	dir->last_commit = dir->funcs->modified_count(dir);
 
 	return dir->loaded;
 }

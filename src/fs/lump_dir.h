@@ -15,6 +15,7 @@
 #include "fs/vfs.h"
 
 struct lump_based_dir_funcs {
+	void (*init_empty)(void *_dir);
 	VFILE *(*marshal)(void *_dir);
 	bool (*unmarshal)(void *_dir, VFILE *in, int mod_count);
 	int (*modified_count)(void *_dir);
