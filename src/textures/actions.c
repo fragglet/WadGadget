@@ -89,6 +89,17 @@ static VFILE *FormatConfig(struct directory *dir, struct file_set *files)
 	assert(0);
 }
 
+static bool ParseConfig(struct directory *dir, struct texture_bundle *b,
+                        VFILE *in)
+{
+	if (dir->type == &file_type_texture_list) {
+		return TX_BundleParseTextures(b, in);
+	} else if (dir->type == &file_type_pnames_list) {
+		return TX_BundleParsePnames(b, in);
+	}
+	assert(0);
+}
+
 static bool CheckExistingTexture(struct textures *txs, const char *name)
 {
 	bool existing = TX_TextureForName(txs, name) >= 0;
@@ -396,7 +407,6 @@ static void MergePnamesResultNotice(struct texture_bundle_merge_result *r)
 
 static void ActionImportConfig(void)
 {
-#if 0
 	struct texture_bundle_merge_result merge_stats;
 	struct texture_bundle b;
 	struct texture_bundle *into = TX_DirGetBundle(other_pane->dir);
@@ -413,7 +423,7 @@ static void ActionImportConfig(void)
 	in = VFS_OpenByEntry(active_pane->dir, ent);
 
 	ClearConversionErrors();
-	if (!TX_DirParseConfig(other_pane->dir, &b, in)) {
+	if (!ParseConfig(other_pane->dir, &b, in)) {
 		UI_MessageBox("Failed to import config from '%s':\n%s",
 		              ent->name, GetConversionError());
 		return;
@@ -440,7 +450,6 @@ static void ActionImportConfig(void)
 	}
 
 	TX_FreeBundle(&b);
-#endif
 }
 
 const struct action import_texture_config = {
