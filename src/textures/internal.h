@@ -13,36 +13,6 @@
 
 #include "textures/textures.h"
 
-struct lump_dir_funcs {
-	bool (*load)(void *dir, struct directory *wad_dir,
-	             struct directory_entry *ent);
-	bool (*save)(void *dir, struct directory *wad_dir,
-	             struct directory_entry *ent);
-	VFILE *(*format_config)(void *dir, struct file_set *selected);
-	bool (*parse_config)(struct texture_bundle *b, VFILE *in);
-};
-
-struct lump_dir {
-	struct directory dir;
-	const struct lump_dir_funcs *lump_dir_funcs;
-
-	// Parent directory; always a WAD file.
-	struct directory *parent_dir;
-	uint64_t lump_serial;
-
-	bool loaded;
-	struct texture_bundle b;
-};
-
-struct directory *TX_LumpDirOpenDir(void *_dir, struct directory_entry *ent);
-struct directory *TX_DirGetParent(struct directory *_dir,
-                                  struct directory_entry **ent);
-bool TX_DirReload(struct directory *dir);
-bool TX_DirSave(struct directory *dir);
-void TX_LumpDirFree(struct lump_dir *dir);
-struct pnames *TX_GetDirPnames(struct directory *dir);
-bool TX_InitLumpDir(struct lump_dir *dir, const struct lump_dir_funcs *funcs,
-                    struct directory *parent, struct directory_entry *ent);
 size_t TX_TextureLen(size_t patchcount);
 struct pnames *TX_PnamesList(struct directory *_dir);
 
