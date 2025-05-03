@@ -458,7 +458,7 @@ const struct action import_texture_config = {
 
 static void ActionNewPname(void)
 {
-	struct texture_bundle *b = TX_DirGetBundle(active_pane->dir);
+	struct pnames *pn = TX_PnamesList(active_pane->dir);
 	int idx;
 	char *name;
 
@@ -472,7 +472,7 @@ static void ActionNewPname(void)
 		return;
 	}
 
-	if (TX_GetPnameIndex(b->pn, name) >= 0) {
+	if (TX_GetPnameIndex(pn, name) >= 0) {
 		B_DirectoryPaneSelectByName(active_pane, name);
 		UI_MessageBox("'%s' is already in the list.");
 		free(name);
@@ -484,7 +484,7 @@ static void ActionNewPname(void)
 	// That's not to say that we don't allow it to be subsequently moved
 	// into a different position, but just adding a pname always does
 	// something safe.
-	idx = TX_AppendPname(b->pn, name);
+	idx = TX_AppendPname(pn, name);
 	VFS_CommitChanges(active_pane->dir, "creation of pname '%s'", name);
 	VFS_Refresh(active_pane->dir);
 	B_DirectoryPaneSelectEntry(active_pane,
