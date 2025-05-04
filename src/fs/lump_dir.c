@@ -53,14 +53,6 @@ static bool LoadFromLump(struct lump_based_dir *dir,
 	return dir->loaded;
 }
 
-bool VFS_LumpDirReload(struct directory *_dir)
-{
-	struct lump_based_dir *dir = (struct lump_based_dir *) _dir;
-	struct directory_entry *ent;
-	VFS_LumpDirGetParent(_dir, &ent);
-	return LoadFromLump(dir, ent, dir->last_commit + 1);
-}
-
 static bool SaveToLump(struct lump_based_dir *dir)
 {
 	struct wad_file *wf = VFS_WadFile(dir->parent_dir);
@@ -94,12 +86,6 @@ static bool SaveToLump(struct lump_based_dir *dir)
 	dir->last_write = dir->last_commit;
 
 	return true;
-}
-
-bool VFS_LumpDirWrite(struct directory *_dir)
-{
-	struct lump_based_dir *dir = (struct lump_based_dir *) _dir;
-	return SaveToLump(dir);
 }
 
 struct directory *VFS_LumpDirOpenDir(void *_dir, struct directory_entry *ent)
