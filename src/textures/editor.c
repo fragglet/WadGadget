@@ -325,6 +325,7 @@ static void EditorActivateLink(struct pager *p, int idx)
 		pname_idx = SelectPname(e->b, patch->patch);
 		if (pname_idx >= 0) {
 			patch->patch = pname_idx;
+			e->edited = true;
 			++e->b->txs->modified_count;
 		}
 		return;
