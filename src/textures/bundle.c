@@ -101,40 +101,6 @@ bool TX_BundleSavePnamesTo(struct texture_bundle *b, struct directory *dir)
 	return true;
 }
 
-bool TX_BundleLoadTextures(struct texture_bundle *b, struct directory *wad_dir,
-                           VFILE *in)
-{
-	b->txs = NULL;
-	b->pn = NULL;
-
-	if (!TX_BundleLoadPnamesFrom(b, wad_dir)) {
-		vfclose(in);
-		return false;
-	}
-
-	b->txs = TX_UnmarshalTextures(in);
-	if (b->txs == NULL) {
-		ConversionError("Failed to unmarshal textures.");
-		TX_FreeBundle(b);
-		return false;
-	}
-
-	return true;
-}
-
-bool TX_BundleLoadTexturesFrom(struct texture_bundle *b,
-                               struct directory *wad_dir,
-                               struct directory_entry *ent)
-{
-	VFILE *in = VFS_OpenByEntry(wad_dir, ent);
-	if (in == NULL) {
-		ConversionError("Failed to open '%s' lump", ent->name);
-		return NULL;
-	}
-
-	return TX_BundleLoadTextures(b, wad_dir, in);
-}
-
 bool TX_BundleParsePnames(struct texture_bundle *b, VFILE *in)
 {
 	b->txs = TX_NewTextureList(0);
