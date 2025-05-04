@@ -70,6 +70,9 @@ static void PnameSelectorDrawElement(WINDOW *win, int index, void *data)
 {
 	struct pname_selector *s = data;
 	char buf[10];
+	if (index >= s->b->pn->num_pnames) {
+		return;
+	}
 	if (s->lp.active && index == s->lp.selected) {
 		wattron(win, A_REVERSE);
 	}
