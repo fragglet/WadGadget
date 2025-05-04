@@ -32,6 +32,7 @@ struct lump_based_dir {
 
 	bool loaded;
 	int last_commit; // modified count at last commit time
+	int last_write;  // modified count last time lump was written
 };
 
 struct directory *VFS_LumpDirGetParent(struct directory *_dir,
@@ -45,5 +46,7 @@ void VFS_LumpDirRestoreSnapshot(void *_dir, VFILE *in);
 bool VFS_LumpDirInit(struct lump_based_dir *dir,
                      const struct lump_based_dir_funcs *funcs,
                      struct directory *parent, struct directory_entry *ent);
+bool VFS_LumpDirWrite(struct directory *_dir);
+bool VFS_LumpDirReload(struct directory *_dir);
 
 #endif /* #ifndef FS__LUMP_DIR_H_INCLUDED */

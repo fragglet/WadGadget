@@ -34,7 +34,7 @@ struct directory *VFS_LumpDirGetParent(struct directory *_dir,
 }
 
 static bool LoadFromLump(struct lump_based_dir *dir,
-                         struct directory_entry *ent)
+                         struct directory_entry *ent, int mod_count)
 {
 	VFILE *in;
 
@@ -45,7 +45,7 @@ static bool LoadFromLump(struct lump_based_dir *dir,
 		dir->loaded = true;
 	} else {
 		in = VFS_OpenByEntry(dir->parent_dir, ent);
-		dir->loaded = dir->funcs->unmarshal(dir, in, 0);
+		dir->loaded = dir->funcs->unmarshal(dir, in, mod_count);
 	}
 
 	dir->last_commit = dir->funcs->modified_count(dir);
@@ -53,25 +53,33 @@ static bool LoadFromLump(struct lump_based_dir *dir,
 	return dir->loaded;
 }
 
-static void SaveToLump(struct lump_based_dir *dir)
+bool VFS_LumpDirReload(struct directory *_dir)
+{
+	struct lump_based_dir *dir = (struct lump_based_dir *) _dir;
+	struct directory_entry *ent;
+	VFS_LumpDirGetParent(_dir, &ent);
+	return LoadFromLump(dir, ent, dir->last_commit + 1);
+}
+
+static bool SaveToLump(struct lump_based_dir *dir)
 {
 	struct wad_file *wf = VFS_WadFile(dir->parent_dir);
 	struct directory_entry *ent;
 	VFILE *out, *marshaled;
 
 	// No changes to save?
-	if (dir->last_commit == 0) {
-		return;
+	if (dir->last_commit == dir->last_write) {
+		return true;
 	}
 
 	ent = VFS_EntryBySerial(dir->parent_dir, dir->lump_serial);
 	if (ent == NULL) {
-		return;
+		return false;
 	}
 
 	out = W_OpenLumpRewrite(wf, ent - dir->parent_dir->entries);
 	if (out == NULL) {
-		return;
+		return false;
 	}
 
 	marshaled = dir->funcs->marshal(dir);
@@ -83,6 +91,15 @@ static void SaveToLump(struct lump_based_dir *dir)
 
 	VFS_CommitChanges(dir->parent_dir, "update of '%s'", ent->name);
 	UI_ShowNotice("%s lump updated.", ent->name);
+	dir->last_write = dir->last_commit;
+
+	return true;
+}
+
+bool VFS_LumpDirWrite(struct directory *_dir)
+{
+	struct lump_based_dir *dir = (struct lump_based_dir *) _dir;
+	return SaveToLump(dir);
 }
 
 struct directory *VFS_LumpDirOpenDir(void *_dir, struct directory_entry *ent)
@@ -166,7 +183,7 @@ bool VFS_LumpDirInit(struct lump_based_dir *dir,
 	VFS_DirectoryRef(&dir->dir);
 	VFS_DirectoryRef(dir->parent_dir);
 
-	if (!LoadFromLump(dir, ent)) {
+	if (!LoadFromLump(dir, ent, 0)) {
 		VFS_CloseDir(&dir->dir);
 		return false;
 	}

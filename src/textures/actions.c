@@ -164,21 +164,20 @@ const struct action new_texture_action = {
 
 static void ActionEditConfig(void)
 {
-#if 0
 	struct directory_revision *old_rev, *orig_rev;
 	struct directory *parent;
 	struct directory_entry *ent;
 	int i;
 
-	parent = TX_DirGetParent(active_pane->dir, &ent);
+	parent = VFS_LumpDirGetParent(active_pane->dir, &ent);
 	orig_rev = parent->curr_revision;
 
-	if (!TX_DirSave(active_pane->dir)) {
+	if (!VFS_LumpDirWrite(active_pane->dir)) {
 		UI_MessageBox("Failed to save directory for editing.");
 		return;
 	}
 
-	parent = TX_DirGetParent(active_pane->dir, &ent);
+	parent = VFS_LumpDirGetParent(active_pane->dir, &ent);
 	old_rev = parent->curr_revision;
 	OpenDirent(parent, ent, true);
 
@@ -189,19 +188,20 @@ static void ActionEditConfig(void)
 	// `OpenDirent()`, we know it imported a new version of the lump.
 	// So detect this case and import it into the current directory.
 	if (!parent->readonly && parent->curr_revision != old_rev &&
-	    TX_DirReload(active_pane->dir)) {
+	    VFS_LumpDirReload(active_pane->dir)) {
 		VFS_CommitChanges(active_pane->dir, "edit via text editor");
 		VFS_ClearSet(&active_pane->tagged);
 	}
 
-	// Up to two WAD revisions may have occurred above (via `TX_DirSave`
-	// and `OpenDirent`). We can now undo the edit to the WAD; the
-	// changes will only takes effect once exiting the current directory.
+	// Up to two WAD revisions may have occurred (via `VFS_LumpDirWrite`
+	// and `OpenDirent`). We can now undo the edit to the WAD; the changes
+	// will only takes effect once exiting the current directory.
 	for (i = 0; i < 2 && parent->curr_revision != orig_rev; i++) {
 		VFS_Undo(parent, 1);
 	}
 	assert(parent->curr_revision == orig_rev);
-#endif
+
+	VFS_Refresh(active_pane->dir);
 }
 
 const struct action edit_textures_action = {
@@ -550,7 +550,6 @@ const struct action copy_pnames_action = {
 
 static void ActionCopyTextures(void)
 {
-#if 0
 	struct texture_bundle_merge_result merge_stats;
 	struct file_set *tagged = B_DirectoryPaneTagged(active_pane);
 	struct texture_bundle b;
@@ -565,10 +564,10 @@ static void ActionCopyTextures(void)
 		return;
 	}
 
-	marshaled = TX_DirFormatConfig(from_dir, tagged);
+	marshaled = FormatConfig(from_dir, tagged);
 	assert(marshaled != NULL);
 
-	assert(TX_DirParseConfig(to_dir, &b, marshaled));
+	assert(ParseConfig(to_dir, &b, marshaled));
 
 	if (!B_CheckReadOnly(to_dir)) {
 		return;
@@ -577,6 +576,7 @@ static void ActionCopyTextures(void)
 	if (TX_BundleConfirmAddPnames(into_bundle, &b) &&
 	    TX_BundleConfirmTextureOverwrite(into_bundle, &b)) {
 		TX_BundleMerge(into_bundle, insert_pos, &b, &merge_stats);
+		// TODO: Switch pane; highlight the new/modified textures
 	}
 
 	TX_FreeBundle(&b);
@@ -586,7 +586,6 @@ static void ActionCopyTextures(void)
 	VFS_Refresh(to_dir);
 
 	MergeTexturesResultNotice(&merge_stats);
-#endif
 }
 
 const struct action copy_textures_action = {
