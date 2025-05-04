@@ -88,18 +88,12 @@ struct pnames *TX_ParsePnamesConfig(VFILE *input);
 
 void TX_AddSerialNos(struct textures *txs);
 
+struct texture_bundle *TX_DirGetBundle(struct directory *_dir);
+struct textures *TX_TextureList(struct directory *_dir);
 struct directory *TX_OpenTextureDir(struct directory *parent,
                                     struct directory_entry *ent);
-bool TX_DirReload(struct directory *_dir);
-struct textures *TX_TextureList(struct directory *_dir);
-struct directory *TX_DirGetParent(struct directory *_dir,
-                                  struct directory_entry **ent);
-struct texture_bundle *TX_DirGetBundle(struct directory *_dir);
-bool TX_DirParseConfig(struct directory *_dir, struct texture_bundle *b,
-                       VFILE *in);
 struct directory *TX_OpenPnamesDir(struct directory *parent,
                                    struct directory_entry *ent);
-VFILE *TX_DirFormatConfig(struct directory *_dir, struct file_set *subset);
 
 extern const struct action new_texture_action;
 extern const struct action edit_textures_action;
