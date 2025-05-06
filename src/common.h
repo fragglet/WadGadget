@@ -34,11 +34,19 @@ static inline void *check_allocation_result(void *x, size_t len)
 
 #define checked_malloc(size) check_allocation_result(malloc(size), size)
 
-#define checked_calloc(nmemb, size)                                            \
-	check_allocation_result(calloc(nmemb, size), nmemb)
+static inline void *checked_calloc(size_t nmemb, size_t size)
+{
+	void *x = (calloc)(nmemb, size);
+	check_allocation_result(x, nmemb);
+	return x;
+}
 
-#define checked_realloc(ptr, size)                                             \
-	check_allocation_result(realloc(ptr, size), size)
+static inline void *checked_realloc(void *p, size_t size)
+{
+	void *x = (realloc)(p, size);
+	check_allocation_result(x, size);
+	return x;
+}
 
 #define checked_strdup(s) check_allocation_result(strdup(s), 1)
 
