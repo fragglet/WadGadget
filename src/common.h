@@ -36,14 +36,14 @@ static inline void *check_allocation_result(void *x, size_t len)
 
 static inline void *checked_calloc(size_t nmemb, size_t size)
 {
-	void *x = (calloc)(nmemb, size);
+	void *x = (calloc) (nmemb, size);
 	check_allocation_result(x, nmemb);
 	return x;
 }
 
 static inline void *checked_realloc(void *p, size_t size)
 {
-	void *x = (realloc)(p, size);
+	void *x = (realloc) (p, size);
 	check_allocation_result(x, size);
 	return x;
 }
