@@ -1,3 +1,10 @@
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/fragglet/WadGadget/build.yml)
+[![CodeFactor](https://www.codefactor.io/repository/github/fragglet/WadGadget/badge)](https://www.codefactor.io/repository/github/fragglet/WadGadget)
+![GitHub License](https://img.shields.io/github/license/fragglet/WadGadget)
+![GitHub Release](https://img.shields.io/github/v/release/fragglet/WadGadget)
+![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/fragglet/WadGadget/latest/total)
+![GitHub repo size](https://img.shields.io/github/repo-size/fragglet/WadGadget)
+
 ![WadGadget icon](wadgadget.svg)
 
 WadGadget is a console-based, interactive WAD file editor for Doom engine games
