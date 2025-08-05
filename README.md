@@ -4,6 +4,7 @@
 ![GitHub Release](https://img.shields.io/github/v/release/fragglet/WadGadget)
 ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/fragglet/WadGadget/latest/total)
 ![GitHub repo size](https://img.shields.io/github/repo-size/fragglet/WadGadget)
+[![GitHub Repo stars](https://img.shields.io/github/stars/fragglet/WadGadget)](https://github.com/fragglet/WadGadget/stargazers)
 
 ![WadGadget icon](wadgadget.svg)
 
