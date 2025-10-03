@@ -1,4 +1,7 @@
 
+DESTDIR =
+PREFIX = /usr/local
+
 LIBSIXEL_CFLAGS = \
     $(shell pkg-config --silence-errors --cflags libsixel \
    && echo -DHAVE_LIBSIXEL)
@@ -135,7 +138,11 @@ fixincludes:
 help_text.c: $(HELP_FILES) help/make_help.py
 	help/make_help.py $(HELP_FILES) > $@
 
-clean :
+install: wadgadget
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	install wadgadget $(DESTDIR)$(PREFIX)/bin/wadgadget
+
+clean:
 	rm -f wadgadget $(OBJS) $(DEPS) help_text.c
 
 -include $(DEPS)
