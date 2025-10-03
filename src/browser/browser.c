@@ -571,7 +571,6 @@ static void SearchSelectCallback(unsigned int index, void *user_data)
 
 void B_Shutdown(void)
 {
-	TF_RestoreOldPalette();
 	if (browser_panes[0] != NULL) {
 		B_FreeDirectoryPane(browser_panes[0]);
 	}
@@ -580,6 +579,7 @@ void B_Shutdown(void)
 	}
 	clear();
 	refresh();
+	TF_RestoreOldPalette();
 	endwin();
 }
 

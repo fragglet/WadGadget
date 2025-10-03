@@ -98,13 +98,13 @@ void TF_SetCursesModes(void)
 
 void TF_SuspendCursesMode(void)
 {
-	// Restore the normal palette.
-	TF_SetPalette(&old_palette);
-
 	// We clear the screen first to avoid a brief flash of palette
 	// switching during the endwin() call.
 	clear();
 	refresh();
+
+	// Restore the normal palette.
+	TF_SetPalette(&old_palette);
 
 	endwin();
 }
