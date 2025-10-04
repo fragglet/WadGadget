@@ -375,6 +375,7 @@ static void ActionAddPatch(void)
 	p.originy = 0;
 	TX(e) = TX_InsertPatch(TX(e), insert_index, &p);
 	++e->b->txs->modified_count;
+	e->edited = true;
 
 	UpdatePagerConfig(current_pager->cfg, e);
 
@@ -402,6 +403,7 @@ static void ActionDeletePatch(void)
 	        sizeof(struct patch) * (tx->patchcount - patch_index - 1));
 	--tx->patchcount;
 	++e->b->txs->modified_count;
+	e->edited = true;
 
 	UpdatePagerConfig(current_pager->cfg, e);
 
@@ -432,6 +434,7 @@ static void ActionRaisePatch(void)
 		tx->patches[patch_index] = p;
 		current_pager->cfg->current_link += 3;
 		++e->b->txs->modified_count;
+		e->edited = true;
 	}
 }
 
@@ -457,6 +460,7 @@ static void ActionLowerPatch(void)
 		tx->patches[patch_index] = p;
 		current_pager->cfg->current_link -= 3;
 		++e->b->txs->modified_count;
+		e->edited = true;
 	}
 }
 
