@@ -124,7 +124,6 @@ static const struct lump_description level_lumps[] = {
 static const struct sized_lump lumps_by_size[] = {
     {4000, "Text mode screen",        "uds.md#8-3-endoom"                  },
     {256,  "Color translation table", "boomref.md#color-translation-tables"},
-    {0,    "Empty",                   NULL                                 },
 };
 
 bool LI_LumpInSection(struct wad_file *wf, unsigned int lump_index,
@@ -165,6 +164,24 @@ LookupByName(const struct lump_description *table, const char *name)
 
 	return NULL;
 }
+
+static bool EmptyLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return ent->size == 0;
+}
+
+static void EmptyLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                            char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "Empty");
+}
+
+const struct lump_type lump_type_empty = {
+    EmptyLumpCheck,
+    EmptyLumpFormat,
+    NULL,
+    ".txt",
+};
 
 // Lump with one of the standard "level" names, eg. "LINEDEFS", "SECTORS",
 // etc.
@@ -777,6 +794,7 @@ const struct lump_type lump_type_unknown = {
 };
 
 static const struct lump_type *lump_types[] = {
+    &lump_type_empty,
     &lump_type_dehacked,
     &lump_type_level,
     &lump_type_special,

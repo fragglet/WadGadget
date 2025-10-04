@@ -321,7 +321,7 @@ enum open_result OpenFile(const char *filename,
 {
 	enum open_result result;
 
-	if (!force_edit && IsTextFile(filename)) {
+	if (!force_edit && ent->size != 0 && IsTextFile(filename)) {
 		VFILE *in;
 		in = vfwrapfile(fopen(filename, "r"));
 		assert(in != NULL);
