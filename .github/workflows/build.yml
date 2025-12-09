@@ -35,12 +35,6 @@ jobs:
             sixel: false
             build_pdcurses: true
 
-          - name: macOS arm64
-            os: macos-13
-            shell: bash
-            suffix: "-macos-x86_64"
-            sixel: true
-
           - name: macOS x86-64
             os: macos-latest
             shell: bash
