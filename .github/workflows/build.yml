@@ -98,17 +98,6 @@ jobs:
         PATH="/tmp/pdcinst/bin:$PATH" \
             make -C src -j8 ${{matrix.config.make_opts}}
 
-    - name: Build package (macOS)
-      if: runner.os == 'macOS'
-      run: make -C pkg/macos
-
-    - name: Upload build (macOS)
-      if: runner.os == 'macOS'
-      uses: actions/upload-artifact@v4
-      with:
-        path: "pkg/macos/wadgadget.dmg"
-        name: wadgadget-${{steps.version.outputs.VERSION}}
-
   style_checks:
     name: Style checks
     runs-on: ubuntu-latest
