@@ -15,7 +15,8 @@ keys    mnemonic    type  function
 ^L      -           std  Redraw screen
 ^M      -           trm  Newline
 ^N      Next        std  Search again
-^O  F4  cOmmand     res  Command Prompt
+^O  F4  cOmmand     res  Command Prompt (directory view only)
+^O S-F1 -           res  Lump help (WAD view only)
 ^P      Palette     res  Open Palette Manager
 ^Q      -           trm  XOFF
 ^R      Reload      std  Reload directory

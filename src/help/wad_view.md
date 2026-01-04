@@ -22,7 +22,7 @@ directory containing the WAD.
 
     **        Enter   **  View/edit lump
     **Ctrl-D          **  View hex**d**ump of selected lump
-    **        Shift-F1**  Show documentation for selected lump type
+    **Ctrl-O  Shift-F1**  Show documentation for selected lump type
     **Ctrl-V  F2      **  Mo**v**e (rearrange) marked lumps
     **Ctrl-]  Shift-F2**  Sort marked lumps into alphabetical order
     **Ctrl-U  F3      **  **U**pdate WAD lumps; [see below](#updating)

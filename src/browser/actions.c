@@ -1449,7 +1449,7 @@ static void ActionLumpHelp(void)
 }
 
 const struct action lump_help_action = {
-    SHIFT_KEY_F(1), 0, "Specs", "Specs", ActionLumpHelp,
+    SHIFT_KEY_F(1), 'O', "Specs", "Specs", ActionLumpHelp,
 };
 
 static void ActionShell(void)
