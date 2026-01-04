@@ -288,7 +288,7 @@ static void ActionChangeColumns(void)
 }
 
 const struct action change_columns_action = {
-    0, 'O', "Columns", "Columns", ActionChangeColumns,
+    0, 'B', "Bytes/Line", "Bytes per Line", ActionChangeColumns,
 };
 
 static bool OpenHelpPager(struct pager *pager, struct help_pager_config *cfg,
@@ -348,7 +348,7 @@ static void ActionOpenDoomSpecs(void)
 }
 
 const struct action open_specs_action = {
-    0, 'U', "Specs", "Open Doom Specs", ActionOpenDoomSpecs,
+    0, 'O', "Specs", "Open Doom Specs", ActionOpenDoomSpecs,
 };
 
 static void ActionCloseHexdumpPager(void)

@@ -9,9 +9,9 @@ This is usually only useful to advanced users.
     **Up/Down    **  Scroll up/down through file
     **PgUp/PgDn  **  Scroll up/down whole page
     **Home/End   **  Jump to beginning/end of file
-    **Ctrl-O     **  Change columns/bytes per line - ([see below](#columns))
+    **Ctrl-B     **  Change columns/bytes per line - ([see below](#columns))
     **Ctrl-R     **  Change record length ([see below](#record-grouping))
-    **Ctrl-U     **  Open Doom specs ([see below](#consulting-the-specs))
+    **Ctrl-O     **  Open Doom specs ([see below](#consulting-the-specs))
     **Ctrl-F    /**  Search for text
     **Ctrl-N    n**  Next search result
     **Ctrl-D     **  Switch to ASCII (plain text) view
@@ -20,7 +20,7 @@ This is usually only useful to advanced users.
 
 By default the hexdump viewer shows 16 bytes per line (it may be smaller if
 your screen width is too small to show this much). This can be changed by
-pressing **Ctrl-O**.
+pressing **Ctrl-B**.
 
 ## Record grouping
 
@@ -57,10 +57,10 @@ a factor of it if an entire record cannot fit on a single line.
 
 ## Consulting the specs
 
-Pressing **Ctrl-U** opens the help system to view the [Unofficial Doom Specs](uds.md).
+Pressing **Ctrl-O** opens the help system to view the [Unofficial Doom Specs](uds.md).
 These include a lot of information about the format of the lumps found in
 Doom WADs, and can help if you're interpreting lump data you're looking at.
-If the help pager is closed, pressing **Ctrl-U** again will re-open the specs
+If the help pager is closed, pressing **Ctrl-O** again will re-open the specs
 at the same location you were previously viewing.
 
 Other reference documents are also available, and can be accessed by going to
