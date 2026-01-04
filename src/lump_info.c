@@ -79,7 +79,7 @@ static const struct lump_description special_lumps[] = {
     {"TINTTAB",  "Translucency table",      NULL                        },
     {"XLATAB",   "Translucency table",      NULL                        },
     {"AUTOPAGE", "Map background texture",  NULL                        },
-    {"GENMIDI",  "OPL FM synth instrs.",    NULL                        },
+    {"GENMIDI",  "OPL FM synth instrs.",    "uds.md#7-4-genmidi"        },
     {"DEHACKED", "Dehacked patch",          "mbfedit.md#6-dehacked-lump"},
     {"OPTIONS",  "Boom config overrides",   "mbfedit.md#7-options-lump" },
     {"ANIMATED", "Animated texture defs",   "boomref.md#animated-format"},
@@ -371,10 +371,15 @@ static void MusLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	snprintf(descr_buf, descr_buf_len, "DMX MUS music track");
 }
 
+static const char *MusLumpHelpPage(struct wad_file_entry *ent)
+{
+	return "uds.md#7-3-music";
+}
+
 const struct lump_type lump_type_mus = {
     MusLumpCheck,
     MusLumpFormat,
-    NULL,
+    MusLumpHelpPage,
     ".mid",
 };
 
@@ -525,9 +530,16 @@ static void PcSpeakerLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
 	         (float) len / 140);
 }
 
+static const char *PcSpeakerHelpPage(struct wad_file_entry *ent)
+{
+	// TODO: It would be better if we had the PC speaker format spec:
+	return "uds.md#7-1-pc-speaker-sound-effects";
+}
+
 const struct lump_type lump_type_pcspeaker = {
     PcSpeakerLumpCheck,
     PcSpeakerLumpFormat,
+    PcSpeakerHelpPage,
 };
 
 static bool DehackedLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
