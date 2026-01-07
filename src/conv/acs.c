@@ -7,6 +7,15 @@
 
 #include "common.h"
 
+// If set, there is an opcode at this location:
+#define LOCATION_OPCODE        0x01
+
+// If set, this location is the target of a goto-type instruction:
+#define LOCATION_JUMP_TARGET   0x02
+
+// If set, at least one script starts at this location:
+#define LOCATION_SCRIPT_START  0x04
+
 // If set in opcode.flags, the last argument to this opcode is a reference to
 // a code location that the instruction can jump to (ie. it's a goto-type
 // instruction):
@@ -35,7 +44,7 @@ struct acs_opcode {
 	int flags;
 };
 
-const struct acs_opcode acs_opcodes[] = {
+static const struct acs_opcode acs_opcodes[] = {
 	{"NOP",                  0, 0},
 	{"Terminate",            0, OPCODE_TERMINAL},
 	{"Suspend",              0, 0},
@@ -211,4 +220,68 @@ fail:
 	free(l->scripts);
 	free(l->string_offsets);
 	return false;
+}
+
+static bool MarkOpcodeSequence(struct behavior_lump *l, uint8_t *data,
+                               size_t data_len, uint8_t *metadata,
+                               uint32_t offset)
+{
+	const struct acs_opcode *op;
+	uint32_t opcode;
+
+	for (;;) {
+		if (offset > data_len - 4) {
+			return false;
+		}
+		// Already processed this location?
+		if (metadata[offset] != 0) {
+			return true;
+		}
+		metadata[offset] |= LOCATION_OPCODE;
+
+		// Decode the opcode:
+		memcpy(&opcode, data + offset, sizeof(uint32_t));
+		SwapLE32(&opcode);
+		if (opcode >= arrlen(acs_opcodes)) {
+			return false;
+		}
+		op = &acs_opcodes[opcode];
+		// End of sequence?
+		if ((op->flags & OPCODE_TERMINAL) != 0) {
+			return true;
+		}
+		// If the last arg of this opcode is a location reference, we
+		// must recurse to process the sequence at that location too:
+		if ((op->flags & OPCODE_LOCATION_REF) != 0) {
+			uint32_t jump_offset;
+			memcpy(&jump_offset, data + offset + op->nargs * 4,
+			       sizeof(uint32_t));
+			SwapLE32(&jump_offset);
+			if (!MarkOpcodeSequence(l, data, data_len, metadata,
+			                        jump_offset)) {
+				return false;
+			}
+			metadata[offset] |= LOCATION_JUMP_TARGET;
+		}
+		offset += 4 * (op->nargs + 1);
+	}
+	return true;
+}
+
+static uint8_t *MarkLocations(struct behavior_lump *l, uint8_t *data,
+                              size_t data_len)
+{
+	uint8_t *result = checked_calloc(data_len, 1);
+	unsigned int i;
+
+	for (i = 0; i < l->num_scripts; ++i) {
+		if (!MarkOpcodeSequence(l, data, data_len, result,
+		                        l->scripts[i].offset)) {
+			free(result);
+			return NULL;
+		}
+		result[l->scripts[i].offset] |= LOCATION_SCRIPT_START;
+	}
+
+	return result;
 }
