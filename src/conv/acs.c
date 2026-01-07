@@ -1,4 +1,12 @@
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "common.h"
+
 // If set in opcode.flags, the last argument to this opcode is a reference to
 // a code location that the instruction can jump to (ie. it's a goto-type
 // instruction):
@@ -7,6 +15,19 @@
 // If set in opcode.flags, this is a "terminal" instruction and we should not
 // decode any subsequent ones.
 #define OPCODE_TERMINAL      0x02
+
+struct script {
+	uint32_t script_num;
+	uint32_t offset;
+	uint32_t arg_count;
+};
+
+struct behavior_lump {
+	struct script *scripts;
+	uint32_t num_scripts;
+	uint32_t *string_offsets;
+	uint32_t num_strings;
+};
 
 struct acs_opcode {
 	const char *name;
@@ -118,3 +139,76 @@ const struct acs_opcode acs_opcodes[] = {
 	{"ThingSound",           0, 0},
 	{"EndPrintBold",         0, 0},
 };
+
+static bool DecodeTables(struct behavior_lump *l, uint8_t *data,
+                         size_t data_len)
+{
+	uint32_t offset;
+	unsigned int i, j;
+
+	l->scripts = NULL;
+	l->string_offsets = NULL;
+
+	if (data_len < 8) {
+		goto fail;
+	}
+	memcpy(&offset, data + 4, sizeof(uint32_t));
+	SwapLE32(&offset);
+
+	// Decode the scripts table first:
+	if (offset >= data_len - 8) {
+		goto fail;
+	}
+	memcpy(&l->num_scripts, data + offset, sizeof(uint32_t));
+	SwapLE32(&l->num_scripts);
+	offset += 4;
+	if (l->num_scripts >= data_len
+	 || offset + l->num_scripts * sizeof(struct script) > data_len) {
+		goto fail;
+	}
+	l->scripts = checked_calloc(l->num_scripts, sizeof(struct script));
+	memcpy(l->scripts, data + offset,
+	       sizeof(struct script) * l->num_scripts);
+	for (i = 0; i < l->num_scripts; ++i) {
+		SwapLE32(&l->scripts[i].script_num);
+		SwapLE32(&l->scripts[i].offset);
+		SwapLE32(&l->scripts[i].arg_count);
+		if (l->scripts[i].offset > data_len - 4) {
+			goto fail;
+		}
+	}
+	offset += sizeof(struct script) * l->num_scripts;
+
+	// Decode the string offsets table.
+	if (offset > data_len - 4) {
+		goto fail;
+	}
+	memcpy(&l->num_strings, data + offset, sizeof(uint32_t));
+	SwapLE32(&l->num_strings);
+	offset += 4;
+	if (l->num_strings >= data_len
+	 || offset + l->num_strings * 4 > data_len) {
+		goto fail;
+	}
+	l->string_offsets = checked_calloc(l->num_strings, sizeof(uint32_t));
+	memcpy(l->string_offsets, data + offset,
+	       l->num_strings * sizeof(uint32_t));
+	for (i = 0; i < l->num_strings; ++i) {
+		SwapLE32(&l->string_offsets[i]);
+		// Check the string really is NUL-terminated:
+		for (j = l->string_offsets[i]; j < data_len; ++j) {
+			if (data[j] == '\0') {
+				break;
+			}
+		}
+		if (j >= data_len) {
+			goto fail;
+		}
+	}
+	return true;
+
+fail:
+	free(l->scripts);
+	free(l->string_offsets);
+	return false;
+}
