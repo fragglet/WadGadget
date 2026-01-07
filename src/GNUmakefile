@@ -61,6 +61,7 @@ OBJS =                      \
     browser/actions_pane.o  \
     browser/browser.o       \
     browser/directory_pane.o\
+    conv/acs.o              \
     conv/audio.o            \
     conv/endoom.o           \
     conv/error.o            \
