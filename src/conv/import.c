@@ -304,6 +304,12 @@ static int LumpByNameUnique(struct wad_file *wf, const char *name)
 	return result;
 }
 
+static bool IsLevelLump(struct wad_file *wf, int lumpnum)
+{
+	const struct lump_type *lt = LI_IdentifyLump(wf, lumpnum);
+	return lt == &lump_type_level || lt == &lump_type_behavior;
+}
+
 // Each directory entry has an equivalent "key" entry, the name of which
 // is used to look up the matching key entry in the other WAD file. For
 // most, the key entry is the entry itself; the exception is in the case
@@ -320,7 +326,7 @@ static struct directory_entry *KeyEntry(struct directory *from,
 
 	lumpnum = ent - from->entries;
 
-	while (LI_IdentifyLump(wf, lumpnum) == &lump_type_level) {
+	while (IsLevelLump(wf, lumpnum)) {
 		if (lumpnum == 0) {
 			return NULL;
 		}
@@ -336,7 +342,7 @@ static int SubLump(struct wad_file *wf, int key_lumpnum, const char *name)
 	int lumpnum;
 
 	for (lumpnum = key_lumpnum + 1; lumpnum < W_NumLumps(wf); ++lumpnum) {
-		if (LI_IdentifyLump(wf, lumpnum) != &lump_type_level) {
+		if (!IsLevelLump(wf, lumpnum)) {
 			break;
 		}
 		if (!strncasecmp(waddir[lumpnum].name, name, 8)) {

@@ -102,8 +102,6 @@ static const struct lump_description level_lumps[] = {
     {"SECTORS",  "Level sector data",      "uds.md#4-9-sectors"  },
     {"REJECT",   "Level reject table",     "uds.md#4-10-reject"  },
     {"BLOCKMAP", "Level blockmap data",    "uds.md#4-11-blockmap"},
-    {"BEHAVIOR", "Hexen compiled scripts",
-     "hexen_specs.md#4-hexen-script-language"                    },
     {"SCRIPTS",  "Hexen script source",    NULL                  },
     {"LEAFS",    "PSX/D64 node leaves",    NULL                  },
     {"LIGHTS",   "PSX/D64 colored lights", NULL                  },
@@ -208,6 +206,29 @@ const struct lump_type lump_type_level = {
     LevelLumpCheck,
     LevelLumpFormat,
     LevelLumpHelpPage,
+};
+
+static bool BehaviorLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
+{
+	return !strncasecmp(ent->name, "BEHAVIOR", 8);
+}
+
+static void BehaviorLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
+                            char *descr_buf, size_t descr_buf_len)
+{
+	snprintf(descr_buf, descr_buf_len, "Hexen compiled scripts");
+}
+
+static const char *BehaviorLumpHelpPage(struct wad_file_entry *ent)
+{
+	return "hexen_specs.md#4-hexen-script-language";
+}
+
+const struct lump_type lump_type_behavior = {
+    BehaviorLumpCheck,
+    BehaviorLumpFormat,
+    BehaviorLumpHelpPage,
+    ".asm",
 };
 
 // "Special" one-of-a-kind lumps that are listed in the special_lumps array.
@@ -809,6 +830,7 @@ static const struct lump_type *lump_types[] = {
     &lump_type_empty,
     &lump_type_dehacked,
     &lump_type_level,
+    &lump_type_behavior,
     &lump_type_special,
     &lump_type_sound,
     &lump_type_sound_voc,
