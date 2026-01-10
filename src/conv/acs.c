@@ -206,8 +206,8 @@ static bool DecodeTables(struct behavior_lump *l)
 		SwapLE32(&l->scripts[i].arg_count);
 		if (l->scripts[i].offset > l->data_len - 4) {
 			ConversionError(
-				"Script %d: invalid offset (%d; len=%d)",
-				i, l->scripts[i].offset, l->data_len);
+			    "Script %d: invalid offset (%d; len=%d)", i,
+			    l->scripts[i].offset, l->data_len);
 			return false;
 		}
 	}
@@ -215,8 +215,8 @@ static bool DecodeTables(struct behavior_lump *l)
 
 	// Decode the string offsets table.
 	if (offset > l->data_len - 4) {
-		ConversionError("Invalid string table offset (%d > %d)",
-		                offset, l->data_len - 4);
+		ConversionError("Invalid string table offset (%d > %d)", offset,
+		                l->data_len - 4);
 		return false;
 	}
 	memcpy(&l->num_strings, l->data + offset, sizeof(uint32_t));
@@ -241,7 +241,7 @@ static bool DecodeTables(struct behavior_lump *l)
 		}
 		if (j >= l->data_len) {
 			ConversionError(
-				"String %d overruns lump end without NUL", i);
+			    "String %d overruns lump end without NUL", i);
 			return false;
 		}
 	}
@@ -258,9 +258,9 @@ static bool MarkOpcodeSequence(struct behavior_lump *l, uint32_t offset)
 	for (;;) {
 		if (offset > l->data_len - 4) {
 			ConversionError(
-				"Opcode sequence starting at 0x%x overruns "
-				"lump end (len=%d)",
-				start_offset, l->data_len);
+			    "Opcode sequence starting at 0x%x overruns "
+			    "lump end (len=%d)",
+			    start_offset, l->data_len);
 			return false;
 		}
 		// Already processed this location?
@@ -273,9 +273,8 @@ static bool MarkOpcodeSequence(struct behavior_lump *l, uint32_t offset)
 		memcpy(&opcode, l->data + offset, sizeof(uint32_t));
 		SwapLE32(&opcode);
 		if (opcode >= arrlen(acs_opcodes)) {
-			ConversionError(
-				"At address 0x%x, unknown opcode %d",
-				offset, opcode);
+			ConversionError("At address 0x%x, unknown opcode %d",
+			                offset, opcode);
 			return false;
 		}
 		op = &acs_opcodes[opcode];
@@ -308,8 +307,8 @@ static bool MarkLocations(struct behavior_lump *l)
 
 	for (i = 0; i < l->num_scripts; ++i) {
 		if (!MarkOpcodeSequence(l, l->scripts[i].offset)) {
-			ConversionError(
-				"Error while disassembling script %d", i);
+			ConversionError("Error while disassembling script %d",
+			                i);
 			return false;
 		}
 		l->metadata[l->scripts[i].offset] |= LOCATION_SCRIPT_START;

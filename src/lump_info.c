@@ -214,7 +214,7 @@ static bool BehaviorLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 }
 
 static void BehaviorLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
-                            char *descr_buf, size_t descr_buf_len)
+                               char *descr_buf, size_t descr_buf_len)
 {
 	snprintf(descr_buf, descr_buf_len, "Hexen compiled scripts");
 }
