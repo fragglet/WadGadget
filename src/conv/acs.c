@@ -32,10 +32,17 @@ struct script {
 };
 
 struct behavior_lump {
+	uint8_t *data;
+	size_t data_len;
+
 	struct script *scripts;
 	uint32_t num_scripts;
 	uint32_t *string_offsets;
 	uint32_t num_strings;
+
+	// One byte per byte of the input lump, with bits set to indicate if
+	// that location is the start of an instruction, plus other.
+	uint8_t *metadata;
 };
 
 struct acs_opcode {
@@ -149,8 +156,14 @@ static const struct acs_opcode acs_opcodes[] = {
     {"EndPrintBold",        0, 0                                    },
 };
 
-static bool DecodeTables(struct behavior_lump *l, uint8_t *data,
-                         size_t data_len)
+static void FreeBehaviorLump(struct behavior_lump *l)
+{
+	free(l->scripts);
+	free(l->string_offsets);
+	free(l->metadata);
+}
+
+static bool DecodeTables(struct behavior_lump *l)
 {
 	uint32_t offset;
 	unsigned int i, j;
@@ -158,89 +171,83 @@ static bool DecodeTables(struct behavior_lump *l, uint8_t *data,
 	l->scripts = NULL;
 	l->string_offsets = NULL;
 
-	if (data_len < 8) {
-		goto fail;
+	if (l->data_len < 8) {
+		return false;
 	}
-	memcpy(&offset, data + 4, sizeof(uint32_t));
+	memcpy(&offset, l->data + 4, sizeof(uint32_t));
 	SwapLE32(&offset);
 
 	// Decode the scripts table first:
-	if (offset >= data_len - 8) {
-		goto fail;
+	if (offset >= l->data_len - 8) {
+		return false;
 	}
-	memcpy(&l->num_scripts, data + offset, sizeof(uint32_t));
+	memcpy(&l->num_scripts, l->data + offset, sizeof(uint32_t));
 	SwapLE32(&l->num_scripts);
 	offset += 4;
-	if (l->num_scripts >= data_len ||
-	    offset + l->num_scripts * sizeof(struct script) > data_len) {
-		goto fail;
+	if (l->num_scripts >= l->data_len ||
+	    offset + l->num_scripts * sizeof(struct script) > l->data_len) {
+		return false;
 	}
 	l->scripts = checked_calloc(l->num_scripts, sizeof(struct script));
-	memcpy(l->scripts, data + offset,
+	memcpy(l->scripts, l->data + offset,
 	       sizeof(struct script) * l->num_scripts);
 	for (i = 0; i < l->num_scripts; ++i) {
 		SwapLE32(&l->scripts[i].script_num);
 		SwapLE32(&l->scripts[i].offset);
 		SwapLE32(&l->scripts[i].arg_count);
-		if (l->scripts[i].offset > data_len - 4) {
-			goto fail;
+		if (l->scripts[i].offset > l->data_len - 4) {
+			return false;
 		}
 	}
 	offset += sizeof(struct script) * l->num_scripts;
 
 	// Decode the string offsets table.
-	if (offset > data_len - 4) {
-		goto fail;
+	if (offset > l->data_len - 4) {
+		return false;
 	}
-	memcpy(&l->num_strings, data + offset, sizeof(uint32_t));
+	memcpy(&l->num_strings, l->data + offset, sizeof(uint32_t));
 	SwapLE32(&l->num_strings);
 	offset += 4;
-	if (l->num_strings >= data_len ||
-	    offset + l->num_strings * 4 > data_len) {
-		goto fail;
+	if (l->num_strings >= l->data_len ||
+	    offset + l->num_strings * 4 > l->data_len) {
+		return false;
 	}
 	l->string_offsets = checked_calloc(l->num_strings, sizeof(uint32_t));
-	memcpy(l->string_offsets, data + offset,
+	memcpy(l->string_offsets, l->data + offset,
 	       l->num_strings * sizeof(uint32_t));
 	for (i = 0; i < l->num_strings; ++i) {
 		SwapLE32(&l->string_offsets[i]);
 		// Check the string really is NUL-terminated:
-		for (j = l->string_offsets[i]; j < data_len; ++j) {
-			if (data[j] == '\0') {
+		for (j = l->string_offsets[i]; j < l->data_len; ++j) {
+			if (l->data[j] == '\0') {
 				break;
 			}
 		}
-		if (j >= data_len) {
-			goto fail;
+		if (j >= l->data_len) {
+			return false;
 		}
 	}
-	return true;
 
-fail:
-	free(l->scripts);
-	free(l->string_offsets);
-	return false;
+	return true;
 }
 
-static bool MarkOpcodeSequence(struct behavior_lump *l, uint8_t *data,
-                               size_t data_len, uint8_t *metadata,
-                               uint32_t offset)
+static bool MarkOpcodeSequence(struct behavior_lump *l, uint32_t offset)
 {
 	const struct acs_opcode *op;
 	uint32_t opcode;
 
 	for (;;) {
-		if (offset > data_len - 4) {
+		if (offset > l->data_len - 4) {
 			return false;
 		}
 		// Already processed this location?
-		if (metadata[offset] != 0) {
+		if (l->metadata[offset] != 0) {
 			return true;
 		}
-		metadata[offset] |= LOCATION_OPCODE;
+		l->metadata[offset] |= LOCATION_OPCODE;
 
 		// Decode the opcode:
-		memcpy(&opcode, data + offset, sizeof(uint32_t));
+		memcpy(&opcode, l->data + offset, sizeof(uint32_t));
 		SwapLE32(&opcode);
 		if (opcode >= arrlen(acs_opcodes)) {
 			return false;
@@ -254,34 +261,43 @@ static bool MarkOpcodeSequence(struct behavior_lump *l, uint8_t *data,
 		// must recurse to process the sequence at that location too:
 		if ((op->flags & OPCODE_LOCATION_REF) != 0) {
 			uint32_t jump_offset;
-			memcpy(&jump_offset, data + offset + op->nargs * 4,
+			memcpy(&jump_offset, l->data + offset + op->nargs * 4,
 			       sizeof(uint32_t));
 			SwapLE32(&jump_offset);
-			if (!MarkOpcodeSequence(l, data, data_len, metadata,
-			                        jump_offset)) {
+			if (!MarkOpcodeSequence(l, jump_offset)) {
 				return false;
 			}
-			metadata[offset] |= LOCATION_JUMP_TARGET;
+			l->metadata[offset] |= LOCATION_JUMP_TARGET;
 		}
 		offset += 4 * (op->nargs + 1);
 	}
 	return true;
 }
 
-static uint8_t *MarkLocations(struct behavior_lump *l, uint8_t *data,
-                              size_t data_len)
+static bool MarkLocations(struct behavior_lump *l)
 {
-	uint8_t *result = checked_calloc(data_len, 1);
 	unsigned int i;
 
+	l->metadata = checked_calloc(l->data_len, 1);
+
 	for (i = 0; i < l->num_scripts; ++i) {
-		if (!MarkOpcodeSequence(l, data, data_len, result,
-		                        l->scripts[i].offset)) {
-			free(result);
-			return NULL;
+		if (!MarkOpcodeSequence(l, l->scripts[i].offset)) {
+			return false;
 		}
-		result[l->scripts[i].offset] |= LOCATION_SCRIPT_START;
+		l->metadata[l->scripts[i].offset] |= LOCATION_SCRIPT_START;
 	}
 
-	return result;
+	return true;
+}
+
+static bool DecodeLump(struct behavior_lump *l, uint8_t *data, size_t data_len)
+{
+	memset(l, 0, sizeof(*l));
+	l->data = data;
+	l->data_len = data_len;
+	if (!DecodeTables(l) || !MarkLocations(l)) {
+		FreeBehaviorLump(l);
+		return false;
+	}
+	return true;
 }
