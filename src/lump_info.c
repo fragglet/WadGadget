@@ -583,8 +583,8 @@ const struct lump_type lump_type_dehacked = {
 
 static bool PaletteCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return (!strcasecmp(ent->name, "PLAYPAL") ||
-	        !strcasecmp(ent->name, "PALPREF")) &&
+	return (!strncasecmp(ent->name, "PLAYPAL", 8) ||
+	        !strncasecmp(ent->name, "PALPREF", 8)) &&
 	       ent->size > 0 && (ent->size % (256 * 3)) == 0;
 }
 
@@ -789,7 +789,7 @@ const struct lump_type lump_type_fullscreen_image = {
 // Hexen hires loading screen
 static bool HexenHiresImageCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return !strcasecmp(ent->name, "STARTUP");
+	return !strncasecmp(ent->name, "STARTUP", 8);
 }
 
 static void HexenHiresImageFormat(struct wad_file_entry *ent, uint8_t *buf,
