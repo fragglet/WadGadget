@@ -1,4 +1,5 @@
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -6,6 +7,8 @@
 #include <string.h>
 
 #include "common.h"
+#include "fs/vfile.h"
+#include "stringlib.h"
 
 // If set, there is an opcode at this location:
 #define LOCATION_OPCODE 0x01
@@ -300,4 +303,139 @@ static bool DecodeLump(struct behavior_lump *l, uint8_t *data, size_t data_len)
 		return false;
 	}
 	return true;
+}
+
+static void Printf(VFILE *out, const char *s, ...)
+{
+	char buf[32];
+	va_list args;
+
+	va_start(args, s);
+	VStringPrintf(buf, sizeof(buf), s, args);
+	va_end(args);
+
+	vfwrite(buf, 1, strlen(buf), out);
+}
+
+static void DumpScriptsForAddress(VFILE *out, struct behavior_lump *l,
+                                  uint32_t addr)
+{
+	const struct script *s;
+	unsigned int i;
+
+	Printf(out, "\n");
+	for (i = 0; i < l->num_scripts; ++i) {
+		s = &l->scripts[i];
+		if (s->offset == addr) {
+			Printf(out, "Script %d", s->script_num);
+			if (s->arg_count > 0) {
+				Printf(out, " (%d)", s->arg_count);
+			}
+			Printf(out, "\n");
+		}
+	}
+}
+
+static void DumpInstruction(VFILE *out, uint8_t *data)
+{
+	uint32_t opcode, val;
+	const struct acs_opcode *op;
+	int i;
+
+	memcpy(&opcode, data, sizeof(uint32_t));
+	SwapLE32(&opcode);
+	data += 4;
+	op = &acs_opcodes[opcode];
+
+	Printf(out, "        %s", op->name);
+
+	if (op->nargs > 0) {
+		for (i = strlen(op->name); i < 15; ++i) {
+			Printf(out, " ");
+		}
+	}
+
+	for (i = 0; i < op->nargs; ++i) {
+		memcpy(&val, data, sizeof(uint32_t));
+		SwapLE32(&val);
+		data += 4;
+
+		if (i == op->nargs - 1 &&
+		    (op->flags & OPCODE_LOCATION_REF) != 0) {
+			Printf(out, " loc_%x", val);
+		} else {
+			Printf(out, " %d", val);
+		}
+	}
+	Printf(out, "\n");
+}
+
+static void DumpString(VFILE *out, char *s)
+{
+	Printf(out, "\"");
+	for (; *s != '\0'; ++s) {
+		switch (*s) {
+		case '\n':
+			Printf(out, "\\n");
+			break;
+		case '\\':
+		case '\"':
+			Printf(out, "\\%c", *s);
+			break;
+		default:
+			if (*s < 0x20 || *s >= 0x80) {
+				Printf(out, "\\x%02x", *s);
+			} else {
+				Printf(out, "%c", *s);
+			}
+		}
+	}
+	Printf(out, "\"");
+}
+
+static void Dump(VFILE *out, struct behavior_lump *l)
+{
+	int i;
+
+	for (i = 0; i < l->num_strings; ++i) {
+		Printf(out, "String %d = ", i);
+		DumpString(out, (char *) (l->data + l->string_offsets[i]));
+		Printf(out, "\n");
+	}
+	for (i = 0; i < l->data_len; ++i) {
+		if ((l->metadata[i] & LOCATION_SCRIPT_START) != 0) {
+			DumpScriptsForAddress(out, l, i);
+		}
+		if ((l->metadata[i] & LOCATION_JUMP_TARGET) != 0) {
+			Printf(out, "    loc_%x:\n", i);
+		}
+		if ((l->metadata[i] & LOCATION_OPCODE) != 0) {
+			DumpInstruction(out, l->data + i);
+		}
+	}
+}
+
+VFILE *ACS_Disassemble(VFILE *in)
+{
+	struct behavior_lump l;
+	VFILE *result;
+	uint8_t *data;
+	size_t data_len;
+
+	data = vfreadall(in, &data_len);
+	vfclose(in);
+
+	if (!DecodeLump(&l, data, data_len)) {
+		free(data);
+		return NULL;
+	}
+
+	result = vfopenmem(NULL, 0);
+	Dump(result, &l);
+
+	free(data);
+	FreeBehaviorLump(&l);
+
+	vfseek(result, 0, SEEK_SET);
+	return result;
 }
