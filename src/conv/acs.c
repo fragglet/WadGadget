@@ -161,6 +161,19 @@ static const struct acs_opcode acs_opcodes[] = {
     {"EndPrintBold",        0, 0                                    },
 };
 
+static const struct acs_opcode *OpcodeByName(const char *name)
+{
+	int i;
+
+	for (i = 0; i < arrlen(acs_opcodes); ++i) {
+		if (!strcasecmp(name, acs_opcodes[i].name)) {
+			return &acs_opcodes[i];
+		}
+	}
+
+	return NULL;
+}
+
 static void FreeBehaviorLump(struct behavior_lump *l)
 {
 	free(l->scripts);
@@ -661,4 +674,268 @@ static struct token NextToken(struct tokenizer *t)
 
 	++t->pos;
 	return result;
+}
+
+struct label {
+	char *name;
+	uint32_t location;
+	uint32_t *fixups;
+	size_t num_fixups;
+};
+
+struct assembler {
+	struct tokenizer t;
+
+	uint32_t *words;
+	size_t num_words;
+
+	struct script *scripts;
+	size_t num_scripts;
+
+	char **strings;
+	size_t num_strings;
+
+	struct label *labels;
+	size_t num_labels;
+};
+
+static uint32_t *AppendWord(uint32_t **words, size_t *num_words)
+{
+	++*num_words;
+	*words = checked_realloc(*words, *num_words * sizeof(uint32_t));
+	return &(*words)[*num_words - 1];
+}
+
+static struct label *LabelByName(struct assembler *a, const char *name)
+{
+	struct label *l;
+	int i;
+
+	for (i = 0; i < a->num_labels; ++i) {
+		if (!strcasecmp(a->labels[i].name, name)) {
+			return &a->labels[i];
+		}
+	}
+
+	// Create label on first reference:
+	++a->num_labels;
+	a->labels = checked_realloc(
+		a->labels, a->num_labels * sizeof(struct label));
+	l = &a->labels[a->num_labels - 1];
+
+	l->name = checked_strdup(name);
+	l->location = 0;
+	l->fixups = NULL;
+	l->num_fixups = 0;
+	return l;
+}
+
+static void InitAssembler(struct assembler *a)
+{
+	memset(a, 0, sizeof(struct assembler));
+
+	// Leave two words at the start of the lump for the lump header:
+	AppendWord(&a->words, &a->num_words);
+	AppendWord(&a->words, &a->num_words);
+}
+
+static void FreeAssembler(struct assembler *a)
+{
+	int i;
+
+	free(a->words);
+	free(a->scripts);
+
+	for (i = 0; i < a->num_strings; ++i) {
+		free(a->strings[i]);
+	}
+	free(a->strings);
+
+	for (i = 0; i < a->num_labels; ++i) {
+		free(a->labels[i].fixups);
+	}
+	free(a->labels);
+}
+
+static bool ExpectToken(struct assembler *a, enum token_type t)
+{
+	struct token t2 = NextToken(&a->t);
+	if (t2.type != t) {
+		// ERROR
+		return false;
+	}
+	return true;
+}
+
+static bool AssembleLabel(struct assembler *a, struct token t)
+{
+	struct label *l;
+
+	if (!ExpectToken(a, TOKEN_COLON)) {
+		return false;
+	}
+
+	l = LabelByName(a, t.x.s);
+
+	// We are defining a new label. This should be the first time we have
+	// done this.
+	if (l->location != 0) {
+		// ERROR
+		return false;
+	}
+
+	l->location = a->num_words;
+	return true;
+}
+
+static bool AssembleScriptStatement(struct assembler *a)
+{
+	struct token t = NextToken(&a->t);
+	struct script *s;
+
+	if (t.type != TOKEN_INT) {
+		// ERROR
+		return false;
+	}
+
+	++a->num_scripts;
+	a->scripts = checked_realloc(
+		a->scripts, sizeof(struct script) * a->num_scripts);
+	s = &a->scripts[a->num_scripts - 1];
+
+	s->script_num = t.x.i;
+
+	t = NextToken(&a->t);
+	switch (t.type) {
+	case TOKEN_OPEN_PAREN:
+		t = NextToken(&a->t);
+		if (t.type != TOKEN_INT) {
+			// ERROR
+			return false;
+		}
+		s->arg_count = t.x.i;
+		if (s->arg_count > 3) {
+			// ERROR
+			return false;
+		}
+		return ExpectToken(a, TOKEN_CLOSE_PAREN)
+		    && ExpectToken(a, TOKEN_NEWLINE);
+	case TOKEN_NEWLINE:
+		s->arg_count = 0;
+		return true;
+	default:
+		// ERROR
+		return false;
+	}
+}
+
+static bool AssembleStringStatement(struct assembler *a)
+{
+	struct token t = NextToken(&a->t);
+	int string_id, new_num_strings;
+
+	if (t.type != TOKEN_INT) {
+		// ERROR
+		return false;
+	}
+
+	string_id = t.x.i;
+	new_num_strings = max(string_id + 1, a->num_strings);
+
+	a->strings = checked_realloc(
+		a->strings, new_num_strings * sizeof(char *));
+	while (a->num_strings < new_num_strings) {
+		a->strings[a->num_strings] = NULL;
+		++a->num_strings;
+	}
+
+	if (!ExpectToken(a, TOKEN_EQUALS)) {
+		return false;
+	}
+
+	t = NextToken(&a->t);
+	if (t.type != TOKEN_STRING) {
+		// ERROR
+		return false;
+	}
+
+	a->strings[string_id] = checked_strdup(t.x.s);
+	return ExpectToken(a, TOKEN_NEWLINE);
+}
+
+static bool AssembleInstruction(struct assembler *a)
+{
+	const struct acs_opcode *opcode;
+	struct token t = NextToken(&a->t);
+	struct label *l;
+	uint32_t *w;
+	unsigned int i;
+
+	switch (t.type) {
+	case TOKEN_EOF:
+		return false;
+	case TOKEN_NEWLINE:
+		// Empty line
+		return true;
+	case TOKEN_NAME:
+		break;
+	default:
+		// ERROR
+		return false;
+	}
+
+	if (!strcasecmp(t.x.s, "Script")) {
+		return AssembleScriptStatement(a);
+	} else if (!strcasecmp(t.x.s, "String")) {
+		return AssembleStringStatement(a);
+	}
+
+	opcode = OpcodeByName(t.x.s);
+
+	// If we get a name and it is not the name of an opcode, the only
+	// explanation is that it must be a label definition.
+	if (opcode == NULL) {
+		return AssembleLabel(a, t);
+	}
+
+	w = AppendWord(&a->words, &a->num_words);
+	*w = opcode - acs_opcodes;
+
+	for (i = 0; i < opcode->nargs; ++i) {
+		t = NextToken(&a->t);
+		switch (t.type) {
+		case TOKEN_INT:
+			w = AppendWord(&a->words, &a->num_words);
+			*w = t.x.i;
+			break;
+		case TOKEN_NAME:
+			l = LabelByName(a, t.x.s);
+			w = AppendWord(&l->fixups, &l->num_fixups);
+			*w = a->num_words;
+			AppendWord(&a->words, &a->num_words);
+			break;
+		default:
+			// ERROR
+			return false;
+		}
+	}
+
+	return ExpectToken(a, TOKEN_NEWLINE);
+}
+
+VFILE *ACS_Assemble(VFILE *in)
+{
+	struct assembler a;
+
+	InitAssembler(&a);
+	a.t.data = vfreadall(in, &a.t.data_len);
+	a.t.pos = 0;
+	vfclose(in);
+
+	while (AssembleInstruction(&a)) {
+	}
+
+	FreeAssembler(&a);
+
+	return NULL;
 }
