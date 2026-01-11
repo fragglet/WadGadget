@@ -1,4 +1,5 @@
 
+#include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -461,5 +462,195 @@ VFILE *ACS_Disassemble(VFILE *in)
 	FreeBehaviorLump(&l);
 
 	vfseek(result, 0, SEEK_SET);
+	return result;
+}
+
+enum token_type {
+	TOKEN_NAME,
+	TOKEN_INT,
+	TOKEN_COLON,
+	TOKEN_STRING,
+	TOKEN_EQUALS,
+	TOKEN_NEWLINE,
+	TOKEN_EOF,
+	TOKEN_ERROR,
+};
+
+struct token {
+	enum token_type type;
+	union {
+		const char *s;
+		int i;
+	} x;
+};
+
+struct tokenizer {
+	uint8_t *data;
+	size_t data_len;
+	char namebuf[32];
+	unsigned int pos;
+};
+
+static bool ReadEscapedChar(struct tokenizer *t, char *out)
+{
+	char hexbuf[3];
+	char c;
+
+	if (t->pos >= t->data_len) {
+		return false;
+	}
+
+	c = t->data[t->pos];
+	++t->pos;
+	switch (c) {
+	case 'n':
+		*out = '\n';
+		break;
+	case '\\':
+		*out = '\\';
+		break;
+	case '\"':
+		*out = '\"';
+		break;
+	case 'x':
+		if (t->pos + 2 > t->data_len) {
+			return false;
+		}
+		hexbuf[0] = t->data[t->pos];
+		hexbuf[1] = t->data[t->pos + 1];
+		hexbuf[2] = '\0';
+		t->pos += 2;
+		*out = (char) strtol(hexbuf, NULL, 16);
+		break;
+	default:
+		return false;
+	}
+
+	return true;
+}
+
+static struct token ReadStringToken(struct tokenizer *t)
+{
+	struct token result = { TOKEN_INT };
+	char *p = (char *) t->data + t->pos;
+
+	// We store the unescaped string into the input buffer itself,
+	// overwriting the original string.
+	result.x.s = p;
+
+	// Skip initial ":
+	++t->pos;
+
+	for (;;) {
+		char c;
+		if (t->pos >= t->data_len) {
+			goto error;
+		}
+
+		c = t->data[t->pos];
+		if (!isprint(c)) {
+			goto error;
+		}
+		switch (c) {
+		case '"':
+			// End of string.
+			++t->pos;
+			*p = '\0';
+			return result;
+		case '\\':
+			if (!ReadEscapedChar(t, p)) {
+				goto error;
+			}
+			++p;
+			break;
+		default:
+			*p = c;
+			++p;
+			break;
+		}
+	}
+
+error:
+	result.type = TOKEN_ERROR;
+	return result;
+}
+
+static struct token ReadNumberToken(struct tokenizer *t)
+{
+	struct token result = { TOKEN_INT };
+	result.x.i = 0;
+
+	for (; t->pos < t->data_len; ++t->pos) {
+		char c = t->data[t->pos];
+		if (!isdigit(c)) {
+			break;
+		}
+		result.x.i *= 10;
+		result.x.i += c - '0';
+	}
+
+	return result;
+}
+
+static struct token ReadNameToken(struct tokenizer *t)
+{
+	struct token result = { TOKEN_NAME };
+	int i;
+
+	result.x.s = t->namebuf;
+
+	for (i = 0; t->pos < t->data_len; ++i, ++t->pos) {
+		char c = t->data[t->pos];
+		if (!isalnum(c) && c != '_') {
+			break;
+		}
+		if (i >= sizeof(t->namebuf) - 1) {
+			result.type = TOKEN_ERROR;
+			break;
+		}
+		t->namebuf[i] = c;
+	}
+
+	return result;
+}
+
+static struct token NextToken(struct tokenizer *t)
+{
+	struct token result;
+	char c;
+
+	do {
+		if (t->pos >= t->data_len) {
+			result.type = TOKEN_EOF;
+			return result;
+		}
+
+		c = t->data[t->pos];
+	} while (c != '\n' && isspace(c));
+
+	switch (c) {
+	case ':':
+		result.type = TOKEN_COLON;
+		break;
+	case '=':
+		result.type = TOKEN_EQUALS;
+		break;
+	case '\n':
+		result.type = TOKEN_NEWLINE;
+		break;
+	case '"':
+		return ReadStringToken(t);
+	default:
+		if (isalpha(c)) {
+			return ReadNameToken(t);
+		} else if (isdigit(c)) {
+			return ReadNumberToken(t);
+		} else {
+			result.type = TOKEN_ERROR;
+		}
+		break;
+	}
+
+	++t->pos;
 	return result;
 }
