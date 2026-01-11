@@ -746,9 +746,11 @@ static struct label *LabelByName(struct assembler *a, const char *name)
 	return l;
 }
 
-static void InitAssembler(struct assembler *a)
+static void InitAssembler(struct assembler *a, VFILE *in)
 {
 	memset(a, 0, sizeof(struct assembler));
+	a->t.data = vfreadall(in, &a->t.data_len);
+	a->t.pos = 0;
 
 	// Leave two words at the start of the lump for the lump header:
 	AppendWord(&a->words, &a->num_words);
@@ -759,6 +761,7 @@ static void FreeAssembler(struct assembler *a)
 {
 	int i;
 
+	free(a->t.data);
 	free(a->words);
 	free(a->scripts);
 
@@ -955,9 +958,7 @@ VFILE *ACS_Assemble(VFILE *in)
 {
 	struct assembler a;
 
-	InitAssembler(&a);
-	a.t.data = vfreadall(in, &a.t.data_len);
-	a.t.pos = 0;
+	InitAssembler(&a, in);
 	vfclose(in);
 
 	while (AssembleInstruction(&a)) {
