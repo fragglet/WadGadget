@@ -697,7 +697,23 @@ struct assembler {
 
 	struct label *labels;
 	size_t num_labels;
+
+	bool got_error;
 };
+
+static void AssembleError(struct assembler *a, const char *s, ...)
+{
+	char buf[80];
+	va_list args;
+
+	va_start(args, s);
+	VStringPrintf(buf, sizeof(buf), s, args);
+	va_end(args);
+
+	ConversionError("%s", buf);
+
+	a->got_error = true;
+}
 
 static uint32_t *AppendWord(uint32_t **words, size_t *num_words)
 {
@@ -757,11 +773,12 @@ static void FreeAssembler(struct assembler *a)
 	free(a->labels);
 }
 
-static bool ExpectToken(struct assembler *a, enum token_type t)
+static bool ExpectToken(struct assembler *a, enum token_type t,
+                        const char *s)
 {
 	struct token t2 = NextToken(&a->t);
 	if (t2.type != t) {
-		// ERROR
+		AssembleError(a, "Syntax error, expected %s", s);
 		return false;
 	}
 	return true;
@@ -771,7 +788,7 @@ static bool AssembleLabel(struct assembler *a, struct token t)
 {
 	struct label *l;
 
-	if (!ExpectToken(a, TOKEN_COLON)) {
+	if (!ExpectToken(a, TOKEN_COLON, "colon")) {
 		return false;
 	}
 
@@ -780,7 +797,7 @@ static bool AssembleLabel(struct assembler *a, struct token t)
 	// We are defining a new label. This should be the first time we have
 	// done this.
 	if (l->location != 0) {
-		// ERROR
+		AssembleError(a, "Label '%s' defined twice", t.x.s);
 		return false;
 	}
 
@@ -794,7 +811,7 @@ static bool AssembleScriptStatement(struct assembler *a)
 	struct script *s;
 
 	if (t.type != TOKEN_INT) {
-		// ERROR
+		AssembleError(a, "Expected script number following 'Script'");
 		return false;
 	}
 
@@ -810,21 +827,22 @@ static bool AssembleScriptStatement(struct assembler *a)
 	case TOKEN_OPEN_PAREN:
 		t = NextToken(&a->t);
 		if (t.type != TOKEN_INT) {
-			// ERROR
+			AssembleError(a, "Expected argument count");
 			return false;
 		}
 		s->arg_count = t.x.i;
 		if (s->arg_count > 3) {
-			// ERROR
+			AssembleError(a, "Script may have 3 arguments max");
 			return false;
 		}
-		return ExpectToken(a, TOKEN_CLOSE_PAREN)
-		    && ExpectToken(a, TOKEN_NEWLINE);
+		return ExpectToken(a, TOKEN_CLOSE_PAREN, "')'")
+		    && ExpectToken(a, TOKEN_NEWLINE, "end of line");
 	case TOKEN_NEWLINE:
 		s->arg_count = 0;
 		return true;
 	default:
-		// ERROR
+		AssembleError(a, "Expected end of line, or argument count "
+		                 "in parentheses");
 		return false;
 	}
 }
@@ -835,7 +853,7 @@ static bool AssembleStringStatement(struct assembler *a)
 	int string_id, new_num_strings;
 
 	if (t.type != TOKEN_INT) {
-		// ERROR
+		AssembleError(a, "Expected string number");
 		return false;
 	}
 
@@ -849,18 +867,18 @@ static bool AssembleStringStatement(struct assembler *a)
 		++a->num_strings;
 	}
 
-	if (!ExpectToken(a, TOKEN_EQUALS)) {
+	if (!ExpectToken(a, TOKEN_EQUALS, "'='")) {
 		return false;
 	}
 
 	t = NextToken(&a->t);
 	if (t.type != TOKEN_STRING) {
-		// ERROR
+		AssembleError(a, "Expected string following '='");
 		return false;
 	}
 
 	a->strings[string_id] = checked_strdup(t.x.s);
-	return ExpectToken(a, TOKEN_NEWLINE);
+	return ExpectToken(a, TOKEN_NEWLINE, "end of line");
 }
 
 static bool AssembleInstruction(struct assembler *a)
@@ -880,7 +898,8 @@ static bool AssembleInstruction(struct assembler *a)
 	case TOKEN_NAME:
 		break;
 	default:
-		// ERROR
+		AssembleError(
+			a, "Expected instruction, 'Script' or 'String'");
 		return false;
 	}
 
@@ -915,12 +934,20 @@ static bool AssembleInstruction(struct assembler *a)
 			AppendWord(&a->words, &a->num_words);
 			break;
 		default:
-			// ERROR
-			return false;
+			goto bad_args;
 		}
 	}
 
-	return ExpectToken(a, TOKEN_NEWLINE);
+	if (!ExpectToken(a, TOKEN_NEWLINE, "end of line")) {
+		goto bad_args;
+	}
+
+	return true;
+
+bad_args:
+	AssembleError(a, "Expecting %d arguments for %s instruction",
+	              opcode->nargs, opcode->name);
+	return false;
 }
 
 VFILE *ACS_Assemble(VFILE *in)
