@@ -547,7 +547,7 @@ static bool ReadEscapedChar(struct tokenizer *t, char *out)
 
 static struct token ReadStringToken(struct tokenizer *t)
 {
-	struct token result = { TOKEN_INT };
+	struct token result = { TOKEN_STRING };
 	char *p = (char *) t->data + t->pos;
 
 	// We store the unescaped string into the input buffer itself,
@@ -567,10 +567,10 @@ static struct token ReadStringToken(struct tokenizer *t)
 		if (!isprint(c)) {
 			goto error;
 		}
+		++t->pos;
 		switch (c) {
 		case '"':
 			// End of string.
-			++t->pos;
 			*p = '\0';
 			return result;
 		case '\\':
@@ -625,6 +625,7 @@ static struct token ReadNameToken(struct tokenizer *t)
 			break;
 		}
 		t->namebuf[i] = c;
+		t->namebuf[i + 1] = '\0';
 	}
 
 	return result;
@@ -635,14 +636,18 @@ static struct token NextToken(struct tokenizer *t)
 	struct token result;
 	char c;
 
-	do {
+	for (;;) {
 		if (t->pos >= t->data_len) {
 			result.type = TOKEN_EOF;
 			return result;
 		}
 
 		c = t->data[t->pos];
-	} while (c != '\n' && isspace(c));
+		if (c == '\n' || !isspace(c)) {
+			break;
+		}
+		++t->pos;
+	}
 
 	switch (c) {
 	case ':':
