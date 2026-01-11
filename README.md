@@ -83,6 +83,15 @@ The following table gives a brief summary of the current state:
 | Scripting                      |                      |                                             | ✓ (via Lua)                          |
 | A zillion other features       |                      |                                             | ✓                                    |
 
+## Demo videos
+
+ * [NWT vs WadGadget](https://www.youtube.com/watch?v=PEsZD3Kg_PQ) (comparison
+   of basic features)
+ * [WadGadget external editors](https://www.youtube.com/watch?v=tMA9COCpSkU)
+   (demonstrates editing WAD resources using GIMP, Vim and Ocenaudio)
+ * [WadGadget ACS assembler/disassembler](https://www.youtube.com/watch?v=Sxai63IgEnM)
+   (editing bytecode for Hexen ACS scripts)
+
 ## Build instructions
 
 On Debian-based systems (including Ubuntu, Mint etc.):
