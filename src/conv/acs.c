@@ -471,6 +471,8 @@ enum token_type {
 	TOKEN_COLON,
 	TOKEN_STRING,
 	TOKEN_EQUALS,
+	TOKEN_OPEN_PAREN,
+	TOKEN_CLOSE_PAREN,
 	TOKEN_NEWLINE,
 	TOKEN_EOF,
 	TOKEN_ERROR,
@@ -637,6 +639,12 @@ static struct token NextToken(struct tokenizer *t)
 		break;
 	case '\n':
 		result.type = TOKEN_NEWLINE;
+		break;
+	case '(':
+		result.type = TOKEN_OPEN_PAREN;
+		break;
+	case ')':
+		result.type = TOKEN_CLOSE_PAREN;
 		break;
 	case '"':
 		return ReadStringToken(t);
