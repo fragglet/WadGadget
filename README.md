@@ -77,8 +77,8 @@ The following table gives a brief summary of the current state:
 | PNAMES editor                  | ✓                    | ✓                                           | ✓                                    |
 | GENMIDI editor                 |                      | ✓                                           | ✓                                    |
 | Online help                    |                      | ✓ (Hypertext-based contextual help)         | ✓ (browser tabs to access help/wiki) |
+| Edit ACS scripts               |                      | ✓ (Bytecode disassembler/assembler)         | ✓                                    |
 | View/edit levels               |                      |                                             | ✓                                    |
-| Edit ACS scripts               |                      |                                             | ✓                                    |
 | Source port features           |                      |                                             | ✓                                    |
 | Scripting                      |                      |                                             | ✓ (via Lua)                          |
 | A zillion other features       |                      |                                             | ✓                                    |
