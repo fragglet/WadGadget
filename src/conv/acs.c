@@ -504,6 +504,7 @@ struct tokenizer {
 	size_t data_len;
 	char namebuf[32];
 	unsigned int pos;
+	unsigned int line_num;
 };
 
 static bool ReadEscapedChar(struct tokenizer *t, char *out)
@@ -652,6 +653,7 @@ static struct token NextToken(struct tokenizer *t)
 		break;
 	case '\n':
 		result.type = TOKEN_NEWLINE;
+		++t->line_num;
 		break;
 	case '(':
 		result.type = TOKEN_OPEN_PAREN;
@@ -710,7 +712,7 @@ static void AssembleError(struct assembler *a, const char *s, ...)
 	VStringPrintf(buf, sizeof(buf), s, args);
 	va_end(args);
 
-	ConversionError("%s", buf);
+	ConversionError("Line %d: %s", a->t.line_num, buf);
 
 	a->got_error = true;
 }
@@ -751,6 +753,7 @@ static void InitAssembler(struct assembler *a, VFILE *in)
 	memset(a, 0, sizeof(struct assembler));
 	a->t.data = vfreadall(in, &a->t.data_len);
 	a->t.pos = 0;
+	a->t.line_num = 1;
 
 	// Leave two words at the start of the lump for the lump header:
 	AppendWord(&a->words, &a->num_words);
