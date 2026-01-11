@@ -710,14 +710,18 @@ struct assembler {
 
 static void AssembleError(struct assembler *a, const char *s, ...)
 {
-	char buf[80];
+	char buf[80], lineno_buf[20];
 	va_list args;
 
 	va_start(args, s);
 	VStringPrintf(buf, sizeof(buf), s, args);
 	va_end(args);
 
-	ConversionError("Line %d: %s", a->t.line_num, buf);
+	// If line number is non-zero, we don't show line number in the error
+	// message. This is for errors that occur after the parsing stage (eg.
+	// during ApplyFixups).
+	snprintf(lineno_buf, sizeof(lineno_buf), "Line %d: ", a->t.line_num);
+	ConversionError("%s%s", a->t.line_num != 0 ? lineno_buf : "", buf);
 
 	a->got_error = true;
 }
@@ -1065,6 +1069,9 @@ VFILE *ACS_Assemble(VFILE *in)
 
 	while (AssembleInstruction(&a)) {
 	}
+
+	// Errors from this point onward should not have a line number.
+	a.t.line_num = 0;
 
 	if (a.got_error || !ApplyFixups(&a)) {
 		FreeAssembler(&a);
