@@ -422,7 +422,7 @@ static void DumpString(VFILE *out, char *s)
 			break;
 		default:
 			if (*s < 0x20 || *s >= 0x80) {
-				Printf(out, "\\x%02x", *s);
+				Printf(out, "\\x%02x", *s & 0xff);
 			} else {
 				Printf(out, "%c", *s);
 			}
