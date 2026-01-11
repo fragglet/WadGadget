@@ -954,6 +954,27 @@ bad_args:
 	return false;
 }
 
+static bool ApplyFixups(struct assembler *a)
+{
+	struct label *l;
+	unsigned int i, j;
+
+	for (i = 0; i < a->num_labels; ++i) {
+		l = &a->labels[i];
+		if (l->location == 0) {
+			AssembleError(
+				a, "Label '%s' referenced but not defined",
+				l->name);
+			return false;
+		}
+		for (j = 0; j < l->num_fixups; ++j) {
+			a->words[l->fixups[j]] = l->location * 4;
+		}
+	}
+
+	return true;
+}
+
 VFILE *ACS_Assemble(VFILE *in)
 {
 	struct assembler a;
@@ -962,6 +983,11 @@ VFILE *ACS_Assemble(VFILE *in)
 	vfclose(in);
 
 	while (AssembleInstruction(&a)) {
+	}
+
+	if (a.got_error || !ApplyFixups(&a)) {
+		FreeAssembler(&a);
+		return NULL;
 	}
 
 	FreeAssembler(&a);
