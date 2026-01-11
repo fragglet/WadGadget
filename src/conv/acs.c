@@ -975,8 +975,83 @@ static bool ApplyFixups(struct assembler *a)
 	return true;
 }
 
+static void WriteWords(VFILE *out, uint32_t *words, size_t num_words)
+{
+	unsigned int i;
+	uint32_t val;
+
+	for (i = 0; i < num_words; ++i) {
+		val = words[i];
+		SwapLE32(&val);
+		vfwrite(&val, sizeof(uint32_t), 1, out);
+	}
+}
+
+static void WriteWord(VFILE *out, uint32_t w)
+{
+	WriteWords(out, &w, 1);
+}
+
+static uint32_t *WriteStrings(struct assembler *a, VFILE *out)
+{
+	uint32_t *result = checked_calloc(a->num_strings, sizeof(uint32_t));
+	unsigned int i;
+
+	for (i = 0; i < a->num_strings; ++i) {
+		result[i] = (uint32_t) vftell(out);
+		vfwrite(a->strings[i], 1, strlen(a->strings[i]) + 1, out);
+	}
+
+	return result;
+}
+
+static void WriteScriptsTable(struct assembler *a, VFILE *out)
+{
+	struct script *s;
+	uint32_t vals[3];
+	unsigned int i;
+
+	WriteWord(out, a->num_scripts);
+
+	for (i = 0; i < a->num_scripts; ++i) {
+		s = &a->scripts[i];
+		vals[0] = s->script_num;
+		vals[1] = s->offset * 4;
+		vals[2] = s->arg_count;
+		WriteWords(out, vals, 3);
+	}
+}
+
+static VFILE *WriteAssembledLump(struct assembler *a)
+{
+	VFILE *result = vfopenmem(NULL, 0);
+	uint32_t *string_locs;
+	uint32_t script_dir_offset;
+	uint32_t val;
+
+	WriteWords(result, a->words, a->num_words);
+	string_locs = WriteStrings(a, result);
+
+	script_dir_offset = (uint32_t) vftell(result);
+	WriteScriptsTable(a, result);
+
+	val = a->num_strings;
+	WriteWord(result, val);
+	WriteWords(result, string_locs, a->num_strings);
+
+	// Go back to the start, and write the header.
+	vfseek(result, 0, SEEK_SET);
+	vfwrite("ACS", 1, 4, result);
+	WriteWord(result, script_dir_offset);
+
+	// Rewind once again and we're done.
+	vfseek(result, 0, SEEK_SET);
+	return result;
+}
+
 VFILE *ACS_Assemble(VFILE *in)
 {
+	VFILE *out;
 	struct assembler a;
 
 	InitAssembler(&a, in);
@@ -990,7 +1065,8 @@ VFILE *ACS_Assemble(VFILE *in)
 		return NULL;
 	}
 
+	out = WriteAssembledLump(&a);
 	FreeAssembler(&a);
 
-	return NULL;
+	return out;
 }
