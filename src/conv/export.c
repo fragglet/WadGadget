@@ -15,6 +15,7 @@
 #include <stdlib.h>
 
 #include "common.h"
+#include "conv/acs.h"
 #include "conv/audio.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
@@ -112,6 +113,8 @@ static VFILE *PerformConversion(struct directory *from, VFILE *input,
 		return V_PaletteToImageFile(input);
 	} else if (lt == &lump_type_colormap) {
 		return V_ColormapToImageFile(input, pal);
+	} else if (lt == &lump_type_behavior) {
+		return ACS_Disassemble(input);
 	} else if (lt == &lump_type_mus) {
 		VFILE *result = vfopenmem(NULL, 0);
 		if (mus2mid(input, result)) {

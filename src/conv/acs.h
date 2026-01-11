@@ -13,6 +13,7 @@
 
 #include "fs/vfile.h"
 
+VFILE *ACS_Assemble(VFILE *in);
 VFILE *ACS_Disassemble(VFILE *in);
 
 #endif /* #ifndef CONV__ACS_H_INCLUDED */

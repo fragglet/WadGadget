@@ -16,6 +16,7 @@
 #include <strings.h>
 
 #include "common.h"
+#include "conv/acs.h"
 #include "conv/audio.h"
 #include "conv/error.h"
 #include "conv/graphic.h"
@@ -143,6 +144,8 @@ static VFILE *PerformConversion(VFILE *input, struct directory *to_wad,
 		return V_FlatFromImageFile(input, pal);
 	} else if (StringHasSuffix(src_name, ".fullscreen.png")) {
 		return V_FullscreenFromImageFile(input, pal);
+	} else if (StringHasSuffix(src_name, ".asm")) {
+		return ACS_Assemble(input);
 	} else if (NetpbmFileTypeSupported(src_name)) {
 		// TODO: Support for conversion to flats, colormaps, etc.
 		// from other (non-PNG) formats
