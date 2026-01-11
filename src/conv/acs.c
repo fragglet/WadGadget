@@ -821,6 +821,7 @@ static bool AssembleScriptStatement(struct assembler *a)
 	s = &a->scripts[a->num_scripts - 1];
 
 	s->script_num = t.x.i;
+	s->offset = a->num_words;
 
 	t = NextToken(&a->t);
 	switch (t.type) {
