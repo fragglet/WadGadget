@@ -547,7 +547,7 @@ static bool ReadEscapedChar(struct tokenizer *t, char *out)
 
 static struct token ReadStringToken(struct tokenizer *t)
 {
-	struct token result = { TOKEN_STRING };
+	struct token result = {TOKEN_STRING};
 	char *p = (char *) t->data + t->pos;
 
 	// We store the unescaped string into the input buffer itself,
@@ -593,7 +593,7 @@ error:
 
 static struct token ReadNumberToken(struct tokenizer *t)
 {
-	struct token result = { TOKEN_INT };
+	struct token result = {TOKEN_INT};
 	result.x.i = 0;
 
 	for (; t->pos < t->data_len; ++t->pos) {
@@ -610,7 +610,7 @@ static struct token ReadNumberToken(struct tokenizer *t)
 
 static struct token ReadNameToken(struct tokenizer *t)
 {
-	struct token result = { TOKEN_NAME };
+	struct token result = {TOKEN_NAME};
 	int i;
 
 	result.x.s = t->namebuf;
@@ -742,8 +742,8 @@ static struct label *LabelByName(struct assembler *a, const char *name)
 
 	// Create label on first reference:
 	++a->num_labels;
-	a->labels = checked_realloc(
-		a->labels, a->num_labels * sizeof(struct label));
+	a->labels =
+	    checked_realloc(a->labels, a->num_labels * sizeof(struct label));
 	l = &a->labels[a->num_labels - 1];
 
 	l->name = checked_strdup(name);
@@ -784,8 +784,7 @@ static void FreeAssembler(struct assembler *a)
 	free(a->labels);
 }
 
-static bool ExpectToken(struct assembler *a, enum token_type t,
-                        const char *s)
+static bool ExpectToken(struct assembler *a, enum token_type t, const char *s)
 {
 	struct token t2 = NextToken(&a->t);
 	if (t2.type != t) {
@@ -827,8 +826,8 @@ static bool AssembleScriptStatement(struct assembler *a)
 	}
 
 	++a->num_scripts;
-	a->scripts = checked_realloc(
-		a->scripts, sizeof(struct script) * a->num_scripts);
+	a->scripts =
+	    checked_realloc(a->scripts, sizeof(struct script) * a->num_scripts);
 	s = &a->scripts[a->num_scripts - 1];
 
 	s->script_num = t.x.i;
@@ -847,8 +846,8 @@ static bool AssembleScriptStatement(struct assembler *a)
 			AssembleError(a, "Script may have 3 arguments max");
 			return false;
 		}
-		return ExpectToken(a, TOKEN_CLOSE_PAREN, "')'")
-		    && ExpectToken(a, TOKEN_NEWLINE, "end of line");
+		return ExpectToken(a, TOKEN_CLOSE_PAREN, "')'") &&
+		       ExpectToken(a, TOKEN_NEWLINE, "end of line");
 	case TOKEN_NEWLINE:
 		s->arg_count = 0;
 		return true;
@@ -872,8 +871,8 @@ static bool AssembleStringStatement(struct assembler *a)
 	string_id = t.x.i;
 	new_num_strings = max(string_id + 1, a->num_strings);
 
-	a->strings = checked_realloc(
-		a->strings, new_num_strings * sizeof(char *));
+	a->strings =
+	    checked_realloc(a->strings, new_num_strings * sizeof(char *));
 	while (a->num_strings < new_num_strings) {
 		a->strings[a->num_strings] = NULL;
 		++a->num_strings;
@@ -910,8 +909,7 @@ static bool AssembleInstruction(struct assembler *a)
 	case TOKEN_NAME:
 		break;
 	default:
-		AssembleError(
-			a, "Expected instruction, 'Script' or 'String'");
+		AssembleError(a, "Expected instruction, 'Script' or 'String'");
 		return false;
 	}
 
@@ -970,9 +968,9 @@ static bool ApplyFixups(struct assembler *a)
 	for (i = 0; i < a->num_labels; ++i) {
 		l = &a->labels[i];
 		if (l->location == 0) {
-			AssembleError(
-				a, "Label '%s' referenced but not defined",
-				l->name);
+			AssembleError(a,
+			              "Label '%s' referenced but not defined",
+			              l->name);
 			return false;
 		}
 		for (j = 0; j < l->num_fixups; ++j) {
