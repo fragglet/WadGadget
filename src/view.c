@@ -225,6 +225,7 @@ static void RaiseUsToTop(void)
 
 static const char *text_file_extensions[] = {
     ".txt",
+    ".asm",
     ".c",
     ".h",
     ".cfg",
@@ -520,6 +521,13 @@ static bool OpenLump(struct directory *dir, struct directory_entry *ent,
 	filename = TempExport(&temp_ctx, dir, ent);
 	if (filename == NULL) {
 		return false;
+	}
+
+	// Ugly hack: if we're viewing a BEHAVIOR lump that has been
+	// disassembled, don't view it in the text pager; that will look like
+	// we're viewing the unconverted contents of the lump, and we aren't.
+	if (temp_ctx.lt == &lump_type_behavior) {
+		force_edit = true;
 	}
 
 	do {
