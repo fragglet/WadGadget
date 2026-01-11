@@ -278,7 +278,7 @@ static bool MarkOpcodeSequence(struct behavior_lump *l, uint32_t offset)
 			return false;
 		}
 		// Already processed this location?
-		if (l->metadata[offset] != 0) {
+		if ((l->metadata[offset] & LOCATION_OPCODE) != 0) {
 			return true;
 		}
 		l->metadata[offset] |= LOCATION_OPCODE;
@@ -292,10 +292,6 @@ static bool MarkOpcodeSequence(struct behavior_lump *l, uint32_t offset)
 			return false;
 		}
 		op = &acs_opcodes[opcode];
-		// End of sequence?
-		if ((op->flags & OPCODE_TERMINAL) != 0) {
-			return true;
-		}
 		// If the last arg of this opcode is a location reference, we
 		// must recurse to process the sequence at that location too:
 		if ((op->flags & OPCODE_LOCATION_REF) != 0) {
@@ -303,10 +299,14 @@ static bool MarkOpcodeSequence(struct behavior_lump *l, uint32_t offset)
 			memcpy(&jump_offset, l->data + offset + op->nargs * 4,
 			       sizeof(uint32_t));
 			SwapLE32(&jump_offset);
+			l->metadata[jump_offset] |= LOCATION_JUMP_TARGET;
 			if (!MarkOpcodeSequence(l, jump_offset)) {
 				return false;
 			}
-			l->metadata[offset] |= LOCATION_JUMP_TARGET;
+		}
+		// End of sequence?
+		if ((op->flags & OPCODE_TERMINAL) != 0) {
+			return true;
 		}
 		offset += 4 * (op->nargs + 1);
 	}
