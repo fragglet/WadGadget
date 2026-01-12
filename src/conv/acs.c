@@ -354,7 +354,7 @@ static bool DecodeLump(struct behavior_lump *l, uint8_t *data, size_t data_len)
 
 static void Printf(VFILE *out, const char *s, ...)
 {
-	char buf[32];
+	char buf[80];
 	va_list args;
 
 	va_start(args, s);
@@ -443,6 +443,8 @@ static void DumpString(VFILE *out, char *s)
 static void Dump(VFILE *out, struct behavior_lump *l)
 {
 	int i;
+
+	Printf(out, "; This is disassembled ACS bytecode:\n\n");
 
 	for (i = 0; i < l->num_strings; ++i) {
 		Printf(out, "String %d = ", i);
@@ -640,23 +642,43 @@ static struct token ReadNameToken(struct tokenizer *t)
 	return result;
 }
 
+static bool SkipWhitespace(struct tokenizer *t)
+{
+	while (t->pos < t->data_len) {
+		char c = t->data[t->pos];
+
+		switch (c) {
+		case ';':
+			// Skip over comment until we reach an end-of-line.
+			while (t->pos < t->data_len && t->data[t->pos] != '\n') {
+				++t->pos;
+			}
+			break;
+		case '\n':
+			return true;
+		default:
+			if (!isspace(c)) {
+				return true;
+			}
+			++t->pos;
+			break;
+		}
+	}
+
+	return false;
+}
+
 static struct token NextToken(struct tokenizer *t)
 {
 	struct token result;
 	char c;
 
-	for (;;) {
-		if (t->pos >= t->data_len) {
-			result.type = TOKEN_EOF;
-			return result;
-		}
-
-		c = t->data[t->pos];
-		if (c == '\n' || !isspace(c)) {
-			break;
-		}
-		++t->pos;
+	if (!SkipWhitespace(t)) {
+		result.type = TOKEN_EOF;
+		return result;
 	}
+
+	c = t->data[t->pos];
 
 	switch (c) {
 	case ':':
