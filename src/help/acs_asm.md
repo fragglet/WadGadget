@@ -16,15 +16,16 @@ future.
 
 ## Brief description of the ACS VM
 
-The VM is a stack machine and most instructions perform some modification to
-the stack, by "popping" arguments from the stack and "pushing" a result. For
-example the following will add two to the value at the top of the stack:
+The ACS VM is a stack machine and most instructions perform some modification
+to the stack, by "popping" arguments from the stack and "pushing" a result
+back to it. For example, the following will add two to the value at the top of
+the stack:
 
   PushNumber 2
   Add
 
 Some instructions have "direct" equivalents that take direct arguments from
-bytecode instead of the stack. For example, this:
+bytecode instead of popping them from the stack. For example,
 
   DelayDirect 5
 
@@ -37,8 +38,8 @@ A full description of the VM is beyond the scope of this document.
 
 ## Comment syntax
 
-Comments start with a ';' character and continue until the end of line.
-Example:
+Comments start with a ';' character and continue until the end of line. For
+example:
 
   ; This is a comment
 
@@ -59,9 +60,9 @@ for a statement with two parameters.
 ## String statements
 
 ACS scripts sometimes use character strings. For example, the
-ChangeFloorDirect instruction can be used to change a floor texture of tagged
-sectors. In this case, you define a string by number and refer to it by that
-number. For example:
+ChangeFloorDirect instruction can be used to change the floor texture of
+sectors with a particular tag. In this case, you define a string containing
+the texture name and pass that string's ID to ChangeFloorDirect. For example:
 
   String 2 = "X_001"
   ; Change all sectors with tag 60 to have floor texture X_001:
@@ -69,7 +70,7 @@ number. For example:
 
 ## Labels
 
-Some instructions jump to other locations in the script. For example, the
+Some instructions jump to other locations in the code. For example, the
 following repeatedly decrements the value of script variable 0 until it is
 equal to zero:
 
@@ -78,12 +79,13 @@ equal to zero:
     PushScriptVar  0
     IfGoto         loop
 
-Instructions that take a jump location are: Goto; IfGoto; IfNotGoto; CaseGoto.
+Instructions that take a jump location are: Goto; IfGoto; IfNotGoto; and
+CaseGoto.
 
 ## Instructions
 
 The following is a list of instructions recognized by the assembler, along
-with a brief description.
+with a brief description of each in C-like syntax.
 
   Instruction         Args  Description / Pseudocode
   NOP                 0     Does nothing
