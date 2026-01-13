@@ -652,7 +652,8 @@ static bool SkipWhitespace(struct tokenizer *t)
 		switch (c) {
 		case ';':
 			// Skip over comment until we reach an end-of-line.
-			while (t->pos < t->data_len && t->data[t->pos] != '\n') {
+			while (t->pos < t->data_len &&
+			       t->data[t->pos] != '\n') {
 				++t->pos;
 			}
 			break;
