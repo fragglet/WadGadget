@@ -444,7 +444,9 @@ static void Dump(VFILE *out, struct behavior_lump *l)
 {
 	int i;
 
-	Printf(out, "; This is disassembled ACS bytecode:\n\n");
+	Printf(out, "; This is disassembled ACS bytecode. For details on "
+	            "the syntax,\n");
+	Printf(out, "; see the WadGadget documentation.\n\n");
 
 	for (i = 0; i < l->num_strings; ++i) {
 		Printf(out, "String %d = ", i);

@@ -41,6 +41,7 @@ IWYU_TRANSFORMED_FLAGS = $(patsubst %,-Xiwyu %,$(IWYU_FLAGS)) $(CFLAGS)
 HELP_FILES =                \
     ../COPYING.md           \
     help/browser.md         \
+    help/acs_asm.md         \
     help/contents.md        \
     help/dir_view.md        \
     help/gfx_editor.md      \
