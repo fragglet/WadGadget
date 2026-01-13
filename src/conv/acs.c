@@ -21,7 +21,11 @@
 #include "fs/vfile.h"
 #include "stringlib.h"
 
+// If a string has this value, it is ignored by the disassembler.
 #define UNDEFINED_STRING_MAGIC "__NO_STRING__"
+
+// Scripts with this value or higher are automatically started on level start.
+#define OPEN_SCRIPTS_BASE 1000
 
 // If set, there is an opcode at this location:
 #define LOCATION_OPCODE 0x01
@@ -376,7 +380,12 @@ static void DumpScriptsForAddress(VFILE *out, struct behavior_lump *l,
 	for (i = 0; i < l->num_scripts; ++i) {
 		s = &l->scripts[i];
 		if (s->offset == addr) {
-			Printf(out, "Script %d", s->script_num);
+			if (s->script_num >= OPEN_SCRIPTS_BASE) {
+				Printf(out, "Script %d OPEN",
+				       s->script_num - OPEN_SCRIPTS_BASE);
+			} else {
+				Printf(out, "Script %d", s->script_num);
+			}
 			if (s->arg_count > 0) {
 				Printf(out, " (%d)", s->arg_count);
 			}
@@ -878,6 +887,16 @@ static bool AssembleScriptStatement(struct assembler *a)
 	s->offset = a->num_words;
 
 	t = NextToken(&a->t);
+
+	if (t.type == TOKEN_NAME && !strcasecmp(t.x.s, "OPEN")) {
+		s->script_num += OPEN_SCRIPTS_BASE;
+		t = NextToken(&a->t);
+	} else if (s->script_num >= OPEN_SCRIPTS_BASE) {
+		AssembleError(a, "Invalid number %d for a non-open script",
+		              s->script_num);
+		return false;
+	}
+
 	switch (t.type) {
 	case TOKEN_OPEN_PAREN:
 		t = NextToken(&a->t);

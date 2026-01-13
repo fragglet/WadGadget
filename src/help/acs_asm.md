@@ -57,6 +57,16 @@ triggers them. If a script takes parameters then the statement looks like:
 
 for a statement with two parameters.
 
+So-called "open" scripts are automatically started when the level containing
+them begins. This is useful for generating background effects (eg. for playing
+regular random background noises). To define an open script, append the OPEN
+keyword. For example:
+
+    Script 1 OPEN
+
+Internally, open scripts just have a number that is over 1000. As a result,
+normal, non-open "trigger" scripts must be in the range 0-999.
+
 ## String statements
 
 ACS scripts sometimes use character strings. For example, the
