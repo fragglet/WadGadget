@@ -21,6 +21,8 @@
 #include "fs/vfile.h"
 #include "stringlib.h"
 
+#define UNDEFINED_STRING_MAGIC "__NO_STRING__"
+
 // If set, there is an opcode at this location:
 #define LOCATION_OPCODE 0x01
 
@@ -449,6 +451,10 @@ static void Dump(VFILE *out, struct behavior_lump *l)
 	Printf(out, "; see the WadGadget documentation.\n\n");
 
 	for (i = 0; i < l->num_strings; ++i) {
+		if (!strcmp((char *) l->data + l->string_offsets[i],
+		            UNDEFINED_STRING_MAGIC)) {
+			continue;
+		}
 		Printf(out, "String %d = ", i);
 		DumpString(out, (char *) (l->data + l->string_offsets[i]));
 		Printf(out, "\n");
@@ -1039,11 +1045,26 @@ static void WriteWord(VFILE *out, uint32_t w)
 static uint32_t *WriteStrings(struct assembler *a, VFILE *out)
 {
 	uint32_t *result = checked_calloc(a->num_strings, sizeof(uint32_t));
+	uint32_t undefined_string_offset = 0;
+	const char *s;
 	unsigned int i;
 
 	for (i = 0; i < a->num_strings; ++i) {
 		result[i] = (uint32_t) vftell(out);
-		vfwrite(a->strings[i], 1, strlen(a->strings[i]) + 1, out);
+		s = a->strings[i];
+		// If a string isn't defined, we don't consider it an error.
+		// Instead, we write out a special magic value that is also
+		// recognized by the disassembler and ignored.
+		if (s == NULL) {
+			if (undefined_string_offset != 0) {
+				result[i] = undefined_string_offset;
+				continue;
+			} else {
+				s = UNDEFINED_STRING_MAGIC;
+				undefined_string_offset = result[i];
+			}
+		}
+		vfwrite(s, 1, strlen(s) + 1, out);
 	}
 
 	return result;
