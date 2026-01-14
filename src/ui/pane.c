@@ -310,6 +310,8 @@ static void HandleMouseEvent(void)
 	}
 }
 
+// Handles at least one keypress, returning true if it should be called again
+// to handle another keypress.
 static bool HandleKeypress(void)
 {
 	int key;
@@ -325,13 +327,17 @@ static bool HandleKeypress(void)
 	// pane and skip the usual logic used for real keypresses.
 	if (key == KEY_MOUSE) {
 		HandleMouseEvent();
-		return true;
+
+		// We ought to be returning true here, but at the time of
+		// writing there appears to be a bug in ncurses where getch()
+		// will block in nodelay mode immediately after a mouse click
+		// occurs. Not sure why.
+		return false;
 	}
 
 	mouse_click_continuation = NULL;
 
 	UI_InputKeypress(key);
-
 	return true;
 }
 
@@ -339,15 +345,17 @@ static void HandleKeypresses(void)
 {
 	// Block on the first keypress.
 	nodelay(stdscr, 0);
-	HandleKeypress();
 
-	// We now need to do at least one screen update. But read any
-	// additional keypresses first.
 	for (;;) {
-		nodelay(stdscr, 1);
+		// After HandleKeypress() has returned at least once, we now
+		// need to do at least one screen update. But we may also want
+		// to check for additional keypresses first.
 		if (!HandleKeypress()) {
 			break;
 		}
+		// We check for additional keypresses with nodelay mode set,
+		// so that we do not block the screen update from happening.
+		nodelay(stdscr, 1);
 	}
 }
 
