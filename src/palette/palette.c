@@ -199,7 +199,7 @@ struct palette_set *PAL_UnmarshalPaletteSet(VFILE *input)
 	if (buf_len % PALETTE_SIZE != 0) {
 		ConversionError("Invalid length for palette lump: %d\n"
 		                "should be a multiple of %d",
-		                buf_len, PALETTE_SIZE);
+		                (int) buf_len, PALETTE_SIZE);
 		free(buf);
 		return NULL;
 	}

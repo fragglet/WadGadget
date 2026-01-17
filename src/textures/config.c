@@ -41,7 +41,7 @@ static bool CheckTextureConfig(struct textures *txs, struct pnames *pn)
 				    "Texture %.8s patch #%d has invalid "
 				    "PNAMES index %d >= %d",
 				    t->name, j, t->patches[j].patch,
-				    pn->num_pnames);
+				    (int) pn->num_pnames);
 				return false;
 			}
 		}

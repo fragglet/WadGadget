@@ -330,7 +330,7 @@ static bool ValidatePatch(const struct patch_header *hdr, const uint8_t *srcbuf,
 		if (off > srcbuf_len - 1) {
 			ConversionError("Corrupted patch: column %d has "
 			                "invalid offset %d > %d",
-			                x, off, srcbuf_len - 1);
+			                x, off, (int) srcbuf_len - 1);
 			return false;
 		}
 		while (srcbuf[off] != 0xff) {

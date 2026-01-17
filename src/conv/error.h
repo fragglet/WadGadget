@@ -11,8 +11,10 @@
 #ifndef CONV__ERROR_H_INCLUDED
 #define CONV__ERROR_H_INCLUDED
 
+#include "common.h"
+
 void ClearConversionErrors(void);
-void ConversionError(char *fmt, ...);
+void ConversionError(char *fmt, ...) PRINTF_ATTRIBUTE(1, 2);
 const char *GetConversionError(void);
 
 #endif /* #ifndef CONV__ERROR_H_INCLUDED */

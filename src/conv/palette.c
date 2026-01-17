@@ -63,7 +63,7 @@ VFILE *V_ColormapToImageFile(VFILE *input, const struct palette *pal)
 	if (buf_len % 256 != 0) {
 		ConversionError("Invalid colormap length: %d is not a "
 		                "multiple of 256",
-		                buf_len);
+		                (int) buf_len);
 		goto fail;
 	}
 

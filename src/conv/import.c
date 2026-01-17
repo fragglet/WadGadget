@@ -47,7 +47,8 @@ static void LumpNameForEntry(char *namebuf, struct directory_entry *ent)
 		}
 		StringUpper(namebuf);
 	} else if (ent->type != &file_type_lump) {
-		ConversionError("File type %d cannot be imported", ent->type);
+		ConversionError("File type %s cannot be imported",
+		                ent->type->name);
 	}
 }
 

@@ -205,7 +205,7 @@ static bool DecodeTables(struct behavior_lump *l)
 	l->string_offsets = NULL;
 
 	if (l->data_len < 8) {
-		ConversionError("Lump too short (%d < 8)", l->data_len);
+		ConversionError("Lump too short (%d < 8)", (int) l->data_len);
 		return false;
 	}
 	memcpy(&offset, l->data + 4, sizeof(uint32_t));
@@ -213,8 +213,8 @@ static bool DecodeTables(struct behavior_lump *l)
 
 	// Decode the scripts table first:
 	if (offset >= l->data_len - 8) {
-		ConversionError("Invalid script table offset (%d >= %s)",
-		                offset, l->data_len - 8);
+		ConversionError("Invalid script table offset (%d >= %d)",
+		                (int) offset, (int) l->data_len - 8);
 		return false;
 	}
 	memcpy(&l->num_scripts, l->data + offset, sizeof(uint32_t));
@@ -223,7 +223,7 @@ static bool DecodeTables(struct behavior_lump *l)
 	if (l->num_scripts >= l->data_len ||
 	    offset + l->num_scripts * sizeof(struct script) > l->data_len) {
 		ConversionError("Invalid number of scripts (%d; len=%d)",
-		                l->num_scripts, l->data_len);
+		                l->num_scripts, (int) l->data_len);
 		return false;
 	}
 	l->scripts = checked_calloc(l->num_scripts, sizeof(struct script));
@@ -236,7 +236,7 @@ static bool DecodeTables(struct behavior_lump *l)
 		if (l->scripts[i].offset > l->data_len - 4) {
 			ConversionError(
 			    "Script %d: invalid offset (%d; len=%d)", i,
-			    l->scripts[i].offset, l->data_len);
+			    l->scripts[i].offset, (int) l->data_len);
 			return false;
 		}
 	}
@@ -245,7 +245,7 @@ static bool DecodeTables(struct behavior_lump *l)
 	// Decode the string offsets table.
 	if (offset > l->data_len - 4) {
 		ConversionError("Invalid string table offset (%d > %d)", offset,
-		                l->data_len - 4);
+		                (int) l->data_len - 4);
 		return false;
 	}
 	memcpy(&l->num_strings, l->data + offset, sizeof(uint32_t));
@@ -254,7 +254,7 @@ static bool DecodeTables(struct behavior_lump *l)
 	if (l->num_strings >= l->data_len ||
 	    offset + l->num_strings * 4 > l->data_len) {
 		ConversionError("Invalid number of strings (%d; len=%d)",
-		                l->num_strings, l->data_len);
+		                l->num_strings, (int) l->data_len);
 		return false;
 	}
 	l->string_offsets = checked_calloc(l->num_strings, sizeof(uint32_t));
@@ -289,7 +289,7 @@ static bool MarkOpcodeSequence(struct behavior_lump *l, uint32_t offset)
 			ConversionError(
 			    "Opcode sequence starting at 0x%x overruns "
 			    "lump end (len=%d)",
-			    start_offset, l->data_len);
+			    start_offset, (int) l->data_len);
 			return false;
 		}
 		// Already processed this location?
