@@ -210,7 +210,7 @@ const struct lump_type lump_type_level = {
 
 static bool BehaviorLumpCheck(struct wad_file_entry *ent, uint8_t *buf)
 {
-	return !strncasecmp(ent->name, "BEHAVIOR", 8);
+	return ent->size >= 8 && !memcmp(buf, "ACS", 4);
 }
 
 static void BehaviorLumpFormat(struct wad_file_entry *ent, uint8_t *buf,
