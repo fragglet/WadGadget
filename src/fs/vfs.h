@@ -135,6 +135,7 @@ void VFS_InitDirectory(struct directory *d, const char *path);
 struct directory_revision *VFS_SaveRevision(struct directory *d);
 void VFS_FreeEntries(struct directory *d);
 
+void VFS_ClearError(void);
 void VFS_StoreError(const char *fmt, ...) PRINTF_ATTRIBUTE(1, 2);
 const char *VFS_LastError(void);
 

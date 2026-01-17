@@ -318,7 +318,7 @@ bool VFS_Remove(struct directory *dir, struct directory_entry *entry)
 		return false;
 	}
 
-	VFS_StoreError("");
+	VFS_ClearError();
 	if (!dir->directory_funcs->remove(dir, entry)) {
 		return false;
 	}
@@ -339,7 +339,7 @@ bool VFS_Rename(struct directory *dir, struct directory_entry *entry,
 		return false;
 	}
 
-	VFS_StoreError("");
+	VFS_ClearError();
 	return dir->directory_funcs->rename(dir, entry, new_name);
 }
 
@@ -502,6 +502,11 @@ void VFS_ClearHistory(struct directory *dir)
 	dir->curr_revision = VFS_SaveRevision(dir);
 	snprintf(dir->curr_revision->descr, VFS_REVISION_DESCR_LEN,
 	         "First revision");
+}
+
+void VFS_ClearError(void)
+{
+	StringCopy(last_error, "", sizeof(last_error));
 }
 
 void VFS_StoreError(const char *fmt, ...)
