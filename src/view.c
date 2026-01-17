@@ -353,6 +353,11 @@ enum open_result OpenFile(const char *filename,
 	TF_SetCursesModes();
 	RedrawScreen();
 
+	if (result == OPEN_FAILED) {
+		UI_MessageBox("Failed executing command to open file,\n"
+		              "or program exited with an error.");
+	}
+
 	return result;
 }
 
@@ -542,17 +547,10 @@ static bool OpenLump(struct directory *dir, struct directory_entry *ent,
 void OpenDirent(struct directory *dir, struct directory_entry *ent,
                 bool force_edit)
 {
-	bool success;
-
 	if (ent->type == &file_type_lump) {
-		success = OpenLump(dir, ent, force_edit);
+		OpenLump(dir, ent, force_edit);
 	} else {
-		success = OpenFile(VFS_EntryPath(dir, ent), ent, force_edit);
-	}
-
-	if (!success) {
-		UI_MessageBox("Failed executing command to open file,\n"
-		              "or program exited with an error.");
+		OpenFile(VFS_EntryPath(dir, ent), ent, force_edit);
 	}
 }
 
