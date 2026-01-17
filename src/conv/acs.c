@@ -196,6 +196,11 @@ static void FreeBehaviorLump(struct behavior_lump *l)
 	free(l->metadata);
 }
 
+static bool IsExtendedACS(uint8_t *p)
+{
+	return !memcmp(p, "ACSe", 4) || !memcmp(p, "ACSE", 4);
+}
+
 static bool DecodeTables(struct behavior_lump *l)
 {
 	uint32_t offset;
@@ -212,9 +217,19 @@ static bool DecodeTables(struct behavior_lump *l)
 	SwapLE32(&offset);
 
 	// Decode the scripts table first:
-	if (offset >= l->data_len - 8) {
-		ConversionError("Invalid script table offset (%d >= %d)",
+	if (offset > l->data_len - 8) {
+		ConversionError("Invalid script table offset (%d > %d)",
 		                (int) offset, (int) l->data_len - 8);
+		return false;
+	}
+	// Extended-format ACS lumps (created by ZDoom's extended version of
+	// ACC) deliberately look like original-format ACS lumps; however,
+	// decoding them as such doesn't give anything very interesting.
+	// It's best if we just give an error message and abort.
+	if (offset >= 4 && IsExtendedACS(l->data + offset - 4)) {
+		ConversionError("This is an extended-format ACS lump.\n"
+		                "Sorry, decoding this format is not yet\n"
+		                "supported.\n");
 		return false;
 	}
 	memcpy(&l->num_scripts, l->data + offset, sizeof(uint32_t));
