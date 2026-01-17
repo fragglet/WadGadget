@@ -760,7 +760,7 @@ struct assembler {
 };
 
 static void AssembleError(struct assembler *a, const char *s, ...)
-	PRINTF_ATTRIBUTE(2, 3);
+    PRINTF_ATTRIBUTE(2, 3);
 
 static void AssembleError(struct assembler *a, const char *s, ...)
 {

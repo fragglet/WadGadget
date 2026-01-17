@@ -11,8 +11,8 @@
 #ifndef UI__DIALOG_H_INCLUDED
 #define UI__DIALOG_H_INCLUDED
 
-#include <time.h>
 #include "common.h"
+#include <time.h>
 
 struct progress_window {
 	const char *operation;

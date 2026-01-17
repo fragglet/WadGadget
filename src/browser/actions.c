@@ -958,8 +958,9 @@ static void ActionMarkPattern(void)
 		UI_ShowNotice("No matches found.");
 	} else {
 		B_DirectoryPaneSelectEntry(active_pane, first_match);
-		UI_ShowNotice("%d marked.",
-		              (int) (active_pane->tagged.num_entries - old_cnt));
+		UI_ShowNotice(
+		    "%d marked.",
+		    (int) (active_pane->tagged.num_entries - old_cnt));
 	}
 	free(glob);
 }

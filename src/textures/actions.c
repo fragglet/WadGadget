@@ -451,8 +451,7 @@ static void ActionNewPname(void)
 
 	if (TX_GetPnameIndex(pn, name) >= 0) {
 		B_DirectoryPaneSelectByName(active_pane, name);
-		UI_MessageBox("'%s' is already in the list.",
-		              name);
+		UI_MessageBox("'%s' is already in the list.", name);
 		free(name);
 		return;
 	}

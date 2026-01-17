@@ -93,7 +93,7 @@ bool VFS_Remove(struct directory *dir, struct directory_entry *entry);
 bool VFS_Rename(struct directory *dir, struct directory_entry *entry,
                 const char *new_name);
 void VFS_CommitChanges(struct directory *dir, const char *msg, ...)
-	PRINTF_ATTRIBUTE(2, 3);
+    PRINTF_ATTRIBUTE(2, 3);
 int VFS_Refresh(struct directory *dir);
 void VFS_RefreshAll(void);
 struct wad_file *VFS_WadFile(struct directory *dir);
