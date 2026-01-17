@@ -427,7 +427,8 @@ static char *CreateWadInDir(struct directory *from, struct file_set *from_set,
 
 	if (PerformImport(from, from_set, newfile, 0, &result, convert)) {
 		VFS_CommitChanges(newfile, "new WAD");
-		UI_ShowNotice("New WAD contains %d lumps.", result.num_entries);
+		UI_ShowNotice("New WAD contains %d lumps.",
+		              (int) result.num_entries);
 	} else {
 		if (strlen(GetConversionError()) > 0) {
 			UI_MessageBox("Failed importing to new WAD:\n%s",
@@ -958,7 +959,7 @@ static void ActionMarkPattern(void)
 	} else {
 		B_DirectoryPaneSelectEntry(active_pane, first_match);
 		UI_ShowNotice("%d marked.",
-		              active_pane->tagged.num_entries - old_cnt);
+		              (int) (active_pane->tagged.num_entries - old_cnt));
 	}
 	free(glob);
 }
@@ -1418,8 +1419,8 @@ static void ActionShowHelp(void)
 		}
 	}
 
-	UI_MessageBox("Can't find a help page for file_type %d",
-	              active_pane->dir->type);
+	UI_MessageBox("Can't find a help page for file_type %s",
+	              active_pane->dir->type->name);
 }
 
 const struct action help_action = {

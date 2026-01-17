@@ -11,10 +11,11 @@
 #ifndef UI__TITLE_BAR_H_INCLUDED
 #define UI__TITLE_BAR_H_INCLUDED
 
+#include "common.h"
 #include "ui/pane.h"
 #include "ui/text_input.h"
 
 struct pane *UI_TitleBarInit(void);
-void UI_ShowNotice(const char *msg, ...);
+void UI_ShowNotice(const char *msg, ...) PRINTF_ATTRIBUTE(1, 2);
 
 #endif /* #ifndef UI__TITLE_BAR_H_INCLUDED */

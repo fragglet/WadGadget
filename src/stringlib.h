@@ -14,6 +14,8 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+#include "common.h"
+
 int StringCopy(char *dest, const char *src, size_t dest_size);
 int StringConcat(char *dest, const char *src, size_t dest_size);
 int StringHasPrefix(const char *s, const char *prefix);
@@ -23,7 +25,8 @@ char *StringReplace(const char *haystack, const char *needle,
                     const char *replacement);
 char *StringJoin(const char *sep, const char *s, ...);
 int VStringPrintf(char *buf, size_t buf_len, const char *s, va_list args);
-int StringPrintf(char *buf, size_t buf_len, const char *s, ...);
+int StringPrintf(char *buf, size_t buf_len, const char *s, ...)
+	PRINTF_ATTRIBUTE(3, 4);
 void StringUpper(char *s);
 
 char *PathDirName(const char *path);

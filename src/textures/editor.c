@@ -196,6 +196,9 @@ static void EditorGetLink(struct pager_config *cfg, int idx,
 }
 
 static void DrawField(struct texture_editor *e, WINDOW *win, int field_num,
+                      const char *fmt, ...) PRINTF_ATTRIBUTE(4, 5);
+
+static void DrawField(struct texture_editor *e, WINDOW *win, int field_num,
                       const char *fmt, ...)
 {
 	int curr_link = e->cfg.current_link;

@@ -13,8 +13,10 @@
 
 #include <stdbool.h>
 
+#include "common.h"
+
 bool SIXEL_CheckSupported(void);
-void SIXEL_ClearAndPrint(const char *msg, ...);
+void SIXEL_ClearAndPrint(const char *msg, ...) PRINTF_ATTRIBUTE(1, 2);
 bool SIXEL_DisplayImage(const char *filename);
 
 #endif /* #ifndef SIXEL_DISPLAY_H_INCLUDED */

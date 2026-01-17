@@ -358,6 +358,8 @@ static bool DecodeLump(struct behavior_lump *l, uint8_t *data, size_t data_len)
 	return true;
 }
 
+static void Printf(VFILE *out, const char *s, ...) PRINTF_ATTRIBUTE(2, 3);
+
 static void Printf(VFILE *out, const char *s, ...)
 {
 	char buf[80];
@@ -756,6 +758,9 @@ struct assembler {
 
 	bool got_error;
 };
+
+static void AssembleError(struct assembler *a, const char *s, ...)
+	PRINTF_ATTRIBUTE(2, 3);
 
 static void AssembleError(struct assembler *a, const char *s, ...)
 {

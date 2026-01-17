@@ -12,6 +12,7 @@
 #define UI__DIALOG_H_INCLUDED
 
 #include <time.h>
+#include "common.h"
 
 struct progress_window {
 	const char *operation;
@@ -23,14 +24,14 @@ void UI_InitProgressWindow(struct progress_window *win, int total,
                            const char *operation);
 void UI_UpdateProgressWindow(struct progress_window *win, const char *ctx);
 
-void UI_ShowNonblockingWindow(const char *msg, ...);
+void UI_ShowNonblockingWindow(const char *msg, ...) PRINTF_ATTRIBUTE(1, 2);
 int UI_ConfirmDialogBox(const char *title, const char *yes, const char *no,
-                        const char *msg, ...);
+                        const char *msg, ...) PRINTF_ATTRIBUTE(4, 5);
 
-void UI_MessageBox(const char *msg, ...);
+void UI_MessageBox(const char *msg, ...) PRINTF_ATTRIBUTE(1, 2);
 
 // Returns string that was entered or NULL if cancelled. Caller owns string.
 char *UI_TextInputDialogBox(char *title, const char *action, size_t max_chars,
-                            const char *msg, ...);
+                            const char *msg, ...) PRINTF_ATTRIBUTE(4, 5);
 
 #endif /* #ifndef UI__DIALOG_H_INCLUDED */
