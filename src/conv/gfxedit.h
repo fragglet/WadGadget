@@ -11,8 +11,10 @@
 #ifndef CONV__GFXEDIT_H_INCLUDED
 #define CONV__GFXEDIT_H_INCLUDED
 
-#include "fs/vfs.h"
-#include <stdint.h>
+#include <stdbool.h>
+
+struct directory;
+struct directory_entry;
 
 bool V_EditGraphic(struct directory *d, struct directory_entry *ent);
 

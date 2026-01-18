@@ -10,6 +10,7 @@
 
 #include "conv/gfxedit.h"
 
+#include <assert.h>
 #include <curses.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -21,10 +22,12 @@
 #include "browser/actions.h"
 #include "common.h"
 #include "conv/graphic.h"
+#include "fs/vfile.h"
+#include "fs/vfs.h"
+#include "fs/wad_file.h"
 #include "pager/pager.h"
 #include "ui/actions_bar.h"
 #include "ui/dialog.h"
-#include "ui/pane.h"
 #include "ui/title_bar.h"
 
 enum {

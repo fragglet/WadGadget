@@ -8,8 +8,9 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <assert.h>
-#include <curses.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "common.h"
 #include "fs/vfile.h"

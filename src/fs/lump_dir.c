@@ -11,12 +11,14 @@
 // Common code for filesystem implementations based on editing the contents
 // of WAD lumps.
 
+#include "fs/lump_dir.h"
+
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 
 #include "common.h"
-#include "fs/lump_dir.h"
+#include "fs/wad_file.h"
 #include "stringlib.h"
 #include "ui/title_bar.h"
 

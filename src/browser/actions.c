@@ -33,6 +33,7 @@
 #include "fs/vfs.h"
 #include "fs/wad_file.h"
 #include "genmidi/genmidi.h"
+#include "lump_info.h"
 #include "pager/help.h"
 #include "pager/hexdump.h"
 #include "palette/palfs.h"

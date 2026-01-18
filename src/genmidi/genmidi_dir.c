@@ -9,7 +9,10 @@
 //
 
 #include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "common.h"
 #include "fs/lump_dir.h"
@@ -17,7 +20,6 @@
 #include "fs/vfs.h"
 #include "genmidi/genmidi.h"
 #include "stringlib.h"
-#include "ui/dialog.h"
 #include "ui/title_bar.h"
 
 struct genmidi_dir {

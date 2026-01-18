@@ -11,13 +11,13 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "common.h"
 #include "fs/lump_dir.h"
 #include "fs/vfile.h"
 #include "fs/vfs.h"
-#include "fs/wad_file.h"
 #include "textures/internal.h"
 #include "textures/textures.h"
 #include "ui/title_bar.h"

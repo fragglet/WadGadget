@@ -8,14 +8,15 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <assert.h>
 #include <curses.h>
+#include <stdio.h>
 
 #include "browser/actions.h"
 #include "browser/browser.h"
 #include "browser/directory_pane.h"
 #include "common.h"
 #include "fs/vfile.h"
+#include "fs/vfs.h"
 #include "genmidi/genmidi.h"
 #include "stringlib.h"
 #include "ui/actions_bar.h"

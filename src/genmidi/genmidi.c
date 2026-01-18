@@ -8,11 +8,13 @@
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <assert.h>
+#include "genmidi/genmidi.h"
+
+#include <stdio.h>
+#include <string.h>
 
 #include "common.h"
 #include "fs/vfile.h"
-#include "genmidi/genmidi.h"
 
 #define HEADER_MAGIC "#OPL_II#"
 #define HEADER_LEN   8

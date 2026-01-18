@@ -11,6 +11,9 @@
 #ifndef FS__LUMP_DIR_H_INCLUDED
 #define FS__LUMP_DIR_H_INCLUDED
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "fs/vfile.h"
 #include "fs/vfs.h"
 

@@ -20,6 +20,7 @@
 #include "browser/actions_pane.h"
 #include "browser/directory_pane.h"
 #include "common.h"
+#include "fs/vfile.h"
 #include "fs/vfs.h"
 #include "genmidi/genmidi.h"
 #include "lump_info.h"
@@ -34,7 +35,6 @@
 #include "ui/search_pane.h"
 #include "ui/stack.h"
 #include "ui/text_input.h"
-#include "ui/title_bar.h"
 #include "ui/ui.h"
 
 #define INFO_PANE_WIDTH 30

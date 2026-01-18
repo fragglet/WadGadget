@@ -14,6 +14,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "fs/vfile.h"
+
 #define NUM_GENMIDI_INSTRS 175 /* 128 + 47 percussion */
 
 enum genmidi_instr_field {

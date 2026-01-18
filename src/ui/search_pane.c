@@ -1,9 +1,12 @@
 
 #include "ui/search_pane.h"
 
+#include <assert.h>
 #include <curses.h>
+#include <stdbool.h>
+#include <string.h>
+#include <strings.h>
 
-#include "common.h"
 #include "ui/colors.h"
 #include "ui/pane.h"
 #include "ui/text_input.h"

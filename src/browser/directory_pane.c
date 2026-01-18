@@ -11,9 +11,10 @@
 #include "browser/directory_pane.h"
 
 #include <curses.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 #include "browser/actions.h"
 #include "browser/browser.h"
