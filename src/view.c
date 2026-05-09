@@ -554,6 +554,17 @@ void OpenDirent(struct directory *dir, struct directory_entry *ent,
 	}
 }
 
+static const char *GetShell(void)
+{
+	const char *result = getenv("SHELL");
+
+	if (result == NULL) {
+		return "/bin/sh";
+	}
+
+	return result;
+}
+
 void RunShell(void)
 {
 	bool success;
@@ -572,7 +583,7 @@ void RunShell(void)
 
 	printf("\n");
 
-	argv[0] = getenv("SHELL");
+	argv[0] = GetShell();
 	argv[1] = NULL;
 
 	success = _spawnv(_P_WAIT, argv[0], argv) == 0;
