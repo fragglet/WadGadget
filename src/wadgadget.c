@@ -133,4 +133,6 @@ int main(int argc, char *argv[])
 	UI_RunMainLoop();
 
 	B_Shutdown();
+
+	return 0;
 }
