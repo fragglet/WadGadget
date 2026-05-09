@@ -116,7 +116,7 @@ static intptr_t WaitSubprocess(pid_t pid)
 	// Keep restarting waitpid unless we receive a SIGTSTP.
 	do {
 		err = waitpid(pid, &result, 0);
-	} while (err == EAGAIN && !got_tstp);
+	} while (err < 0 && errno == EAGAIN && !got_tstp);
 
 	RestoreSignal(SIGTSTP, &old_sigtstp);
 	RestoreSignal(SIGINT, &old_sigint);
