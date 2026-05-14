@@ -368,7 +368,7 @@ static int memory_vfseek(void *handle, long offset, int whence)
 		break;
 
 	case SEEK_END:
-		offset = f->pos - offset;
+		offset += f->buf_len;
 		break;
 	}
 
