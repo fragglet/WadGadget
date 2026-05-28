@@ -421,11 +421,10 @@ const struct action import_texture_config = {
 static void ActionImportPnames(void)
 {
 	struct texture_bundle_merge_result merge_stats;
-	struct texture_bundle b;
+	struct pnames *from;
 	struct pnames *into = TX_PnamesList(other_pane->dir);
 	struct directory_entry *ent;
 	int selected = B_DirectoryPaneSelected(active_pane);
-	int insert_pos = B_DirectoryPaneSelected(other_pane) + 1;
 	VFILE *in;
 
 	if (selected < 0) {
@@ -436,17 +435,19 @@ static void ActionImportPnames(void)
 	in = VFS_OpenByEntry(active_pane->dir, ent);
 
 	ClearConversionErrors();
-	if (!TX_BundleParsePnames(&b, in)) {
-		UI_MessageBox("Failed to import config from '%s':\n%s",
-		              ent->name, GetConversionError());
-		return;
-	}
 
 	if (!B_CheckReadOnly(other_pane->dir)) {
 		return;
 	}
 
-	TX_MergePnames(into, b.pn, &merge_stats);
+	from = TX_ParsePnamesConfig(in);
+	if (from == NULL) {
+		UI_MessageBox("Failed to import config from '%s':\n%s",
+		              ent->name, GetConversionError());
+		return;
+	}
+
+	TX_MergePnames(into, from, &merge_stats);
 	VFS_CommitChanges(other_pane->dir, "import from '%s'", ent->name);
 
 	MergePnamesResultNotice(&merge_stats);
@@ -454,7 +455,7 @@ static void ActionImportPnames(void)
 	B_SwitchToPane(other_pane);
 	// TODO: Highlight new/updated items
 
-	TX_FreeBundle(&b);
+	TX_FreePnames(from);
 }
 
 const struct action import_pnames_config = {

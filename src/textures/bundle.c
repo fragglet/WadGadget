@@ -101,18 +101,6 @@ bool TX_BundleSavePnamesTo(struct texture_bundle *b, struct directory *dir)
 	return true;
 }
 
-bool TX_BundleParsePnames(struct texture_bundle *b, VFILE *in)
-{
-	b->txs = TX_NewTextureList(0);
-	b->pn = TX_ParsePnamesConfig(in);
-	if (b->pn == NULL) {
-		ConversionError("Failed to parse PNAMES config");
-		return false;
-	}
-
-	return true;
-}
-
 bool TX_BundleParseTextures(struct texture_bundle *b, VFILE *in)
 {
 	// We start with an empty pnames list and the texture parser adds

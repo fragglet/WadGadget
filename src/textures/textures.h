@@ -111,7 +111,6 @@ void TX_FreeBundle(struct texture_bundle *b);
 bool TX_BundleLoadPnames(struct texture_bundle *b, VFILE *in);
 bool TX_BundleLoadPnamesFrom(struct texture_bundle *b, struct directory *dir);
 bool TX_BundleSavePnamesTo(struct texture_bundle *b, struct directory *dir);
-bool TX_BundleParsePnames(struct texture_bundle *b, VFILE *in);
 bool TX_BundleParseTextures(struct texture_bundle *b, VFILE *in);
 bool TX_BundleConfirmAddPnames(struct texture_bundle *into,
                                struct texture_bundle *from);
