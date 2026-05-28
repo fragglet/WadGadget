@@ -125,6 +125,8 @@ struct texture_bundle_merge_result {
 	int textures_present;     // Number of new textures present & identical
 };
 
+void TX_MergePnames(struct pnames *into, struct pnames *from,
+                    struct texture_bundle_merge_result *result);
 void TX_BundleMerge(struct texture_bundle *into, unsigned int position,
                     struct texture_bundle *from,
                     struct texture_bundle_merge_result *result);
