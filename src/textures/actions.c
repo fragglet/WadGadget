@@ -385,6 +385,10 @@ static void ActionImportTextures(void)
 		return;
 	}
 
+	if (!B_CheckReadOnly(other_pane->dir)) {
+		return;
+	}
+
 	ent = &active_pane->dir->entries[selected];
 	in = VFS_OpenByEntry(active_pane->dir, ent);
 
@@ -392,10 +396,6 @@ static void ActionImportTextures(void)
 	if (!TX_BundleParseTextures(&b, in)) {
 		UI_MessageBox("Failed to import config from '%s':\n%s",
 		              ent->name, GetConversionError());
-		return;
-	}
-
-	if (!B_CheckReadOnly(other_pane->dir)) {
 		return;
 	}
 
@@ -431,14 +431,14 @@ static void ActionImportPnames(void)
 		return;
 	}
 
+	if (!B_CheckReadOnly(other_pane->dir)) {
+		return;
+	}
+
 	ent = &active_pane->dir->entries[selected];
 	in = VFS_OpenByEntry(active_pane->dir, ent);
 
 	ClearConversionErrors();
-
-	if (!B_CheckReadOnly(other_pane->dir)) {
-		return;
-	}
 
 	from = TX_ParsePnamesConfig(in);
 	if (from == NULL) {
@@ -570,14 +570,14 @@ static void ActionCopyTextures(void)
 		return;
 	}
 
+	if (!B_CheckReadOnly(to_dir)) {
+		return;
+	}
+
 	marshaled = FormatConfig(from_dir, tagged);
 	assert(marshaled != NULL);
 
 	assert(TX_BundleParseTextures(&b, marshaled));
-
-	if (!B_CheckReadOnly(to_dir)) {
-		return;
-	}
 
 	if (TX_BundleConfirmAddPnames(into_bundle, &b) &&
 	    TX_BundleConfirmTextureOverwrite(into_bundle, &b)) {
