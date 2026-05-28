@@ -480,7 +480,7 @@ static void ActionCopyPnames(void)
 	struct texture_bundle_merge_result merge_stats;
 	struct directory *from_dir = active_pane->dir,
 	                 *to_dir = other_pane->dir;
-	struct texture_bundle *b = TX_DirGetBundle(to_dir);
+	struct pnames *into = TX_PnamesList(to_dir);
 	struct directory_entry *ent;
 	int idx;
 
@@ -496,11 +496,11 @@ static void ActionCopyPnames(void)
 	memset(&merge_stats, 0, sizeof(merge_stats));
 	idx = 0;
 	while ((ent = VFS_IterateSet(from_dir, tagged, &idx)) != NULL) {
-		if (TX_GetPnameIndex(b->pn, ent->name) >= 0) {
+		if (TX_GetPnameIndex(into, ent->name) >= 0) {
 			++merge_stats.pnames_present;
 			continue;
 		}
-		TX_AppendPname(b->pn, ent->name);
+		TX_AppendPname(into, ent->name);
 		VFS_AddToSet(&copied, TX_PnameSerialNo(ent->name));
 		++merge_stats.pnames_added;
 	}
