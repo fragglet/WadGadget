@@ -275,7 +275,7 @@ static const struct action *dir_to_dir[] = {
 };
 
 static const struct action *dir_to_pnm[] = {
-    &import_texture_config,
+    &import_pnames_config,
     NULL,
 };
 
