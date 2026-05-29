@@ -206,7 +206,8 @@ void TX_MergePnames(struct pnames *into, struct pnames *from,
 
 void TX_BundleMerge(struct texture_bundle *into, unsigned int position,
                     struct texture_bundle *from,
-                    struct texture_bundle_merge_result *result)
+                    struct texture_bundle_merge_result *result,
+                    struct file_set *added_set)
 {
 	int i, j;
 
@@ -228,6 +229,8 @@ void TX_BundleMerge(struct texture_bundle *into, unsigned int position,
 		if (existing_tnum < 0) {
 			TX_AddTexture(into->txs, position, tx);
 			free(tx);
+			VFS_AddToSet(added_set,
+			             into->txs->serial_nos[position]);
 			++position;
 			++result->textures_added;
 		} else if (TexturesIdentical(into->txs->textures[existing_tnum],
@@ -239,6 +242,8 @@ void TX_BundleMerge(struct texture_bundle *into, unsigned int position,
 			into->txs->textures[existing_tnum] = tx;
 			++into->txs->modified_count;
 			++result->textures_overwritten;
+			VFS_AddToSet(added_set,
+			             into->txs->serial_nos[existing_tnum]);
 		}
 	}
 }

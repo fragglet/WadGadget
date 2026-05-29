@@ -401,14 +401,16 @@ static void ActionImportTextures(void)
 
 	if (TX_BundleConfirmAddPnames(into, &b) &&
 	    TX_BundleConfirmTextureOverwrite(into, &b)) {
-		TX_BundleMerge(into, insert_pos, &b, &merge_stats);
+		struct file_set added = EMPTY_FILE_SET;
+		TX_BundleMerge(into, insert_pos, &b, &merge_stats, &added);
 		VFS_CommitChanges(other_pane->dir, "import from '%s'",
 		                  ent->name);
 
 		MergeTexturesResultNotice(&merge_stats);
 		VFS_Refresh(other_pane->dir);
+		B_DirectoryPaneSetTagged(other_pane, &added);
 		B_SwitchToPane(other_pane);
-		// TODO: Highlight new/updated items
+		VFS_FreeSet(&added);
 	}
 
 	TX_FreeBundle(&b);
@@ -584,17 +586,20 @@ static void ActionCopyTextures(void)
 
 	if (TX_BundleConfirmAddPnames(into_bundle, &b) &&
 	    TX_BundleConfirmTextureOverwrite(into_bundle, &b)) {
-		TX_BundleMerge(into_bundle, insert_pos, &b, &merge_stats);
-		// TODO: Switch pane; highlight the new/modified textures
+		struct file_set added = EMPTY_FILE_SET;
+		TX_BundleMerge(into_bundle, insert_pos, &b, &merge_stats,
+		               &added);
+		VFS_CommitChanges(to_dir, "copy of %d textures",
+		                  merge_stats.textures_added +
+		                      merge_stats.textures_overwritten);
+		VFS_Refresh(to_dir);
+		B_DirectoryPaneSetTagged(other_pane, &added);
+		B_SwitchToPane(other_pane);
+		VFS_FreeSet(&added);
+
+		MergeTexturesResultNotice(&merge_stats);
 	}
-
 	TX_FreeBundle(&b);
-	VFS_CommitChanges(to_dir, "copy of %d textures",
-	                  merge_stats.textures_added +
-	                      merge_stats.textures_overwritten);
-	VFS_Refresh(to_dir);
-
-	MergeTexturesResultNotice(&merge_stats);
 }
 
 const struct action copy_textures_action = {

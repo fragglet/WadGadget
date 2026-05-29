@@ -98,6 +98,7 @@ static VFILE *ImportTextures(VFILE *input, struct directory *to_wad)
 {
 	struct texture_bundle into, from;
 	struct texture_bundle_merge_result merge_stats;
+	struct file_set added = EMPTY_FILE_SET;
 	VFILE *result = NULL;
 
 	if (!TX_BundleLoadPnamesFrom(&into, to_wad)) {
@@ -113,7 +114,8 @@ static VFILE *ImportTextures(VFILE *input, struct directory *to_wad)
 		goto fail;
 	}
 
-	TX_BundleMerge(&into, 0, &from, &merge_stats);
+	TX_BundleMerge(&into, 0, &from, &merge_stats, &added);
+	VFS_FreeSet(&added);
 
 	if (!TX_BundleSavePnamesTo(&into, to_wad)) {
 		goto fail;
