@@ -207,6 +207,12 @@ void B_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set)
 	}
 }
 
+void B_DirectoryPaneClearTagged(struct directory_pane *p)
+{
+	struct file_set empty = EMPTY_FILE_SET;
+	B_DirectoryPaneSetTagged(p, &empty);
+}
+
 static const struct list_pane_funcs directory_pane_funcs = {
     DrawEntry,
     NumEntries,

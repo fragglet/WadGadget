@@ -39,6 +39,7 @@ const char *B_DirectoryPaneElementText(struct directory_pane *p,
 int B_DirectoryPaneSelected(struct directory_pane *p);
 struct file_set *B_DirectoryPaneTagged(struct directory_pane *p);
 void B_DirectoryPaneSetTagged(struct directory_pane *p, struct file_set *set);
+void B_DirectoryPaneClearTagged(struct directory_pane *p);
 
 struct directory_pane *B_NewDirectoryPane(WINDOW *pane, struct directory *dir);
 void B_FreeDirectoryPane(struct directory_pane *p);

@@ -306,6 +306,7 @@ static void ActionExportConfig(void)
 	VFS_Refresh(other_pane->dir);
 
 	B_DirectoryPaneSelectByName(other_pane, filename);
+	B_DirectoryPaneClearTagged(active_pane);
 	B_SwitchToPane(other_pane);
 
 cancel:
@@ -549,6 +550,7 @@ static void ActionCopyPnames(void)
 		VFS_DescribeSet(to_dir, &copied, buf, sizeof(buf));
 		VFS_CommitChanges(to_dir, "copy of %s", buf);
 		B_DirectoryPaneSetTagged(other_pane, &copied);
+		B_DirectoryPaneClearTagged(active_pane);
 		B_SwitchToPane(other_pane);
 	}
 
@@ -594,6 +596,7 @@ static void ActionCopyTextures(void)
 		                      merge_stats.textures_overwritten);
 		VFS_Refresh(to_dir);
 		B_DirectoryPaneSetTagged(other_pane, &added);
+		B_DirectoryPaneClearTagged(active_pane);
 		B_SwitchToPane(other_pane);
 		VFS_FreeSet(&added);
 
