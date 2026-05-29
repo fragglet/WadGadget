@@ -425,6 +425,7 @@ static void ActionImportPnames(void)
 	struct pnames *into = TX_PnamesList(other_pane->dir);
 	struct directory_entry *ent;
 	int selected = B_DirectoryPaneSelected(active_pane);
+	struct file_set added = EMPTY_FILE_SET;
 	VFILE *in;
 
 	if (selected < 0) {
@@ -447,12 +448,14 @@ static void ActionImportPnames(void)
 		return;
 	}
 
-	TX_MergePnames(into, from, &merge_stats);
+	TX_MergePnames(into, from, &merge_stats, &added);
 	VFS_CommitChanges(other_pane->dir, "import from '%s'", ent->name);
 
 	MergePnamesResultNotice(&merge_stats);
 	VFS_Refresh(other_pane->dir);
+	B_DirectoryPaneSetTagged(other_pane, &added);
 	B_SwitchToPane(other_pane);
+	VFS_FreeSet(&added);
 	// TODO: Highlight new/updated items
 
 	TX_FreePnames(from);

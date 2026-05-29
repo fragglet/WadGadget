@@ -183,7 +183,8 @@ bool TX_BundleConfirmTextureOverwrite(struct texture_bundle *into,
 }
 
 void TX_MergePnames(struct pnames *into, struct pnames *from,
-                    struct texture_bundle_merge_result *result)
+                    struct texture_bundle_merge_result *result,
+                    struct file_set *added_set)
 {
 	int i;
 
@@ -193,6 +194,10 @@ void TX_MergePnames(struct pnames *into, struct pnames *from,
 		if (TX_GetPnameIndex(into, from->pnames[i]) < 0) {
 			TX_AppendPname(into, from->pnames[i]);
 			++result->pnames_added;
+			if (added_set != NULL) {
+				VFS_AddToSet(added_set,
+				             TX_PnameSerialNo(from->pnames[i]));
+			}
 		} else {
 			++result->pnames_present;
 		}
@@ -205,7 +210,7 @@ void TX_BundleMerge(struct texture_bundle *into, unsigned int position,
 {
 	int i, j;
 
-	TX_MergePnames(into->pn, from->pn, result);
+	TX_MergePnames(into->pn, from->pn, result, NULL);
 
 	for (i = 0; i < from->txs->num_textures; i++) {
 		struct texture *tx = TX_DupTexture(from->txs->textures[i]);

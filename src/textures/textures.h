@@ -126,7 +126,8 @@ struct texture_bundle_merge_result {
 };
 
 void TX_MergePnames(struct pnames *into, struct pnames *from,
-                    struct texture_bundle_merge_result *result);
+                    struct texture_bundle_merge_result *result,
+                    struct file_set *added_set);
 void TX_BundleMerge(struct texture_bundle *into, unsigned int position,
                     struct texture_bundle *from,
                     struct texture_bundle_merge_result *result);
