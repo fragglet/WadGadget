@@ -72,7 +72,7 @@ static VFILE *FormatConfig(struct directory *dir, struct file_set *files)
 	if (dir->type == &file_type_texture_list) {
 		struct texture_bundle *b = TX_DirGetBundle(dir);
 		struct textures *txs = MakeTextureSubset(b->txs, files);
-		char comment_buf[32];
+		char comment_buf[128];
 
 		snprintf(comment_buf, sizeof(comment_buf), "Exported from %s",
 		         PathBaseName(VFS_LumpDirGetParent(dir, NULL)->path));

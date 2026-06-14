@@ -53,7 +53,7 @@ static VFILE *ConvertPnames(VFILE *input)
 static VFILE *ConvertTextures(struct directory *from, VFILE *input)
 {
 	struct directory_entry *ent = VFS_EntryByName(from, "PNAMES");
-	char comment_buf[32];
+	char comment_buf[128];
 	VFILE *pnames_input, *result;
 	struct pnames *pn;
 	struct textures *txs;
